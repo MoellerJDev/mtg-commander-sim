@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from .continuous_templates import (
+    attached_fixed_characteristics_handler,
     basic_land_type_addition_handler,
     fixed_power_toughness_anthem_handler,
 )
@@ -25,6 +26,18 @@ def static_runtime_template(
     source_damageable: bool | None = None,
 ) -> StaticRuntimeTemplate | None:
     """Select one closed static runtime production for an Oracle line."""
+
+    attached_characteristics = attached_fixed_characteristics_handler(text)
+    if attached_characteristics is not None:
+        return StaticRuntimeTemplate(
+            compiled=attached_characteristics,
+            kind="static_ability",
+            event="characteristics.evaluate",
+            dependency_reason=(
+                "generic attached characteristics depend on an untrusted "
+                "continuous-effect capability"
+            ),
+        )
 
     basic_land_type = basic_land_type_addition_handler(text)
     if basic_land_type is not None:

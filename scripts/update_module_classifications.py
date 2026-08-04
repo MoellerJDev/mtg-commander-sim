@@ -97,6 +97,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         )
     ) or relative in {
         "mtg_commander_sim/abilities.py",
+        "mtg_commander_sim/attachments.py",
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_constraints.py",
@@ -172,6 +173,8 @@ def _owner(relative: str, layer: str) -> str:
         return "damage"
     if relative == "mtg_commander_sim/counter_state.py":
         return "counter_state"
+    if relative == "mtg_commander_sim/attachments.py":
+        return "attachments"
     if relative in {
         "mtg_commander_sim/life_change.py",
         "mtg_commander_sim/life_state.py",
@@ -287,6 +290,7 @@ def build_classifications() -> dict[str, Any]:
                     if any(
                         marker in relative
                         for marker in (
+                            "attachments.py",
                             "engine.py",
                             "session.py",
                             "semantics.py",

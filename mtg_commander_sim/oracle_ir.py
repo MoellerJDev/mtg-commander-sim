@@ -20,6 +20,7 @@ from .compiler.activated_costs import activated_ability_cost
 from .compiler.dependency_gate import (
     dependency_gate as _dependency_gate,
     explicit_capability_gate as _explicit_capability_gate,
+    keyword_dependency_gate,
 )
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.prevention_templates import (
@@ -35,7 +36,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v23"
+ORACLE_COMPILER_VERSION = "oracle-ir-v24"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -860,10 +861,9 @@ def _keyword_node(
     mechanics = keyword_mechanics(material_line, keywords)
     if mechanics is None:
         return None
-    gate = _dependency_gate(
+    gate = keyword_dependency_gate(
+        material_line=material_line,
         mechanics=mechanics,
-        effects=(),
-        target_schema=None,
         trusted_mechanics=trusted_mechanics,
         capability_registry=capability_registry,
         capability_profile=capability_profile,
@@ -1749,6 +1749,7 @@ def register_generated_programs(
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
     promote_exact_trigger_programs: bool = False,
+    promote_exact_capability_declarations: bool = False,
 ) -> dict[str, Any]:
     """Compatibility API for extracted generated-program registration."""
 
@@ -1764,4 +1765,7 @@ def register_generated_programs(
         capability_profile=capability_profile,
         promote_exact_runtime_handlers=promote_exact_runtime_handlers,
         promote_exact_trigger_programs=promote_exact_trigger_programs,
+        promote_exact_capability_declarations=(
+            promote_exact_capability_declarations
+        ),
     )

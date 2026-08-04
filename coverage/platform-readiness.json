@@ -4,7 +4,7 @@
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
-    "represented continuous effects now distinguish locked resolution-created sets and live source-bound static membership, but player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy/phasing invalidation remain incomplete; the structural benchmark still records latency observationally",
+    "represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics, but Aura casting and entry, complete Enchant quality grammar, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
     "the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction",
@@ -16,14 +16,14 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "4d80fb1d009a45ad823d89ae9e21f1275e1728eb524ecf4beb94f26c1259c4a1",
+    "evaluated_source_tree_hash": "377c49a71a326259be1a7f5b3e685b121f8486242bcc678dab713c8c707bdebc",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "continuous_effect_duration_and_source_applicability",
+    "active_phase": "attached_static_characteristics_and_fixed_equip",
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -127,9 +127,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The active source tree adds strict immutable CR 611 effect, operation, duration, source, and affected-object values; an additive Game Record v3 resolution-effect journal; locked physical/logical object sets for represented resolution-created modifiers; cleanup expiration; and live source-bound ObjectQuerySpec membership for static effects. Engine legality and seat projection share one characteristic evaluator. Fixed temporary type, subtype, keyword, power/toughness, and mass controlled-creature producers use the journal, while Oracle IR v23 generically lowers closed fixed-query anthems and controlled-creature until-end-of-turn modifiers. Focused behavior, malformed-input, rollback, multiplayer, save/load, replay, privacy, compiler, architecture, and killed-mutation tests pass. The active Commander census improves exact and trusted programs from 458 to 528, capability-closed programs from 456 to 526, and material residuals from 60,587 to 60,307 without printed-name growth.",
+      "evidence": "Certified main through PR 83 adds strict immutable CR 611 effect, operation, duration, source, and affected-object values; an additive Game Record v3 resolution-effect journal; locked physical/logical object sets for represented resolution-created modifiers; cleanup expiration; and live source-bound ObjectQuerySpec membership for static effects. Engine legality and seat projection share one characteristic evaluator. Fixed temporary type, subtype, keyword, power/toughness, and mass controlled-creature producers use the journal, while Oracle IR v23 generically lowers closed fixed-query anthems and controlled-creature until-end-of-turn modifiers. Exact-head PR run 30876521847 and post-merge main-smoke run 30877157896 passed. The certified Commander census improved exact and trusted programs from 458 to 528, capability-closed programs from 456 to 526, and material residuals from 60,587 to 60,307 without printed-name growth.",
       "id": "continuous_effect_duration_and_source_applicability",
       "name": "Continuous-effect duration and source applicability",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The active source tree introduces one reciprocal timestamped attachment owner and exact physical/logical relation-bound continuous effects in layers 4, 6, and 7c. Oracle IR v24 generically lowers closed fixed characteristics granted to enchanted, equipped, or fortified objects, and printed fixed ordinary-mana Equip becomes a payable controller-scoped creature activation at sorcery speed through the ordinary stack. Detach, reattach, phasing, source or target departure, leave-and-return, control changes, four-player independent sources, malformed state, rollback, save/load, privacy, replay, and killed implementation mutants have focused coverage. The Commander census improves exact and trusted programs from 528 to 590, capability-closed programs from 526 to 587, and material Oracle residuals from 60,307 to 59,076. Aura casting and entry, complete Enchant quality grammar, exotic Equip costs, dynamic attached values, and full CR 613 dependencies remain fail-closed.",
+      "id": "attached_static_characteristics_and_fixed_equip",
+      "name": "Attached fixed characteristics and fixed ordinary-mana Equip",
       "status": "implemented_in_active_source_tree_pending_certification"
     },
     {
@@ -145,7 +151,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "After certifying the CR 611 duration/applicability boundary, rerank the Commander residual corpus and implement a high-frequency dependency-ready static, trigger, or ordinary spell-effect family that composes with the shared characteristic evaluator and unlocks a measurable exact-card cluster.",
+  "next_task": "After certifying attached fixed characteristics and fixed ordinary-mana Equip, implement the selected Aura targeting, casting, entry, legality, and state-based-action family for the closed Enchant object grammar, with a typed attachment boundary and measurable generic CardProgram closure.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -156,7 +162,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v19_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_normalized_zone_trigger_and_continuous_effect_capabilities",
+    "capability_evidence": "implemented_registry_v21_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_normalized_zone_trigger_continuous_effect_attached_characteristic_and_fixed_equip_capabilities",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -166,14 +172,14 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eleven_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_and_continuous_effect_owners",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_twelve_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_and_attachment_owners",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
-    "certified_head_sha": "2b2a05a07a77ad645682b294c19e28bb74438843",
-    "feature_head_sha": "2b2a05a07a77ad645682b294c19e28bb74438843",
-    "generation_timestamp": "2026-08-04T01:19:11Z"
+    "certified_head_sha": "20e70bf42368f86baebf3d08bcfe286771ef5394",
+    "feature_head_sha": "20e70bf42368f86baebf3d08bcfe286771ef5394",
+    "generation_timestamp": "2026-08-04T04:15:47Z"
   },
   "repository": {
     "default_branch": "main",
@@ -182,11 +188,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 60307,
+      "material_residuals": 59076,
       "status_counts": {
-        "exact": 528,
-        "partial": 14815,
-        "unresolved": 16280
+        "exact": 590,
+        "partial": 14769,
+        "unresolved": 16264
       },
       "total": 31623
     },
@@ -203,20 +209,20 @@
       "trusted": 0
     },
     "oracle": {
-      "material_residuals": 68892,
+      "material_residuals": 67559,
       "status_counts": {
-        "exact": 3176,
-        "partial": 16255,
-        "unresolved": 19054
+        "exact": 3247,
+        "partial": 16204,
+        "unresolved": 19034
       },
       "total": 38485
     },
     "rules": {
-      "blocked": 359,
+      "blocked": 363,
       "definition_only": 93,
       "passing": 162,
       "total": 3300,
-      "unreviewed": 2686
+      "unreviewed": 2682
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -241,19 +247,19 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4611,
+    "deterministic_cases_discovered": 4632,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 28
   },
   "validation": {
-    "card_program_census": "oracle_ir_v23_full_38485_trusted_936_capability_closed_934_residual_35300_failed_2249_material_residual_68880; full_oracle_exact_3176_partial_16255_unresolved_19054_material_residual_68892; commander_legal_31623_trusted_528_capability_closed_526_residual_31094_failed_1_material_residual_60304; commander_oracle_exact_528_partial_14815_unresolved_16280_material_residual_60307; delta_from_pr82_full_exact_trusted_and_capability_closed_plus_77_material_residual_minus_316_and_commander_exact_trusted_and_capability_closed_plus_70_material_residual_minus_280; representative_new_exact_cards_gaeas_anthem_glorious_anthem_crucible_of_fire_benalish_marshal_chief_of_the_foundry_collective_blessing_glorious_charge_and_inspired_charge; targeted_pump_remains_partial_on_cr115_target_closure_and_stateful_or_combat_qualified_modifiers_remain_residual",
+    "card_program_census": "oracle_ir_v24_full_38485_trusted_1007_capability_closed_1004_mixed_1_residual_35229_failed_2249_material_residual_67547; full_oracle_exact_3247_partial_16204_unresolved_19034_material_residual_67559; commander_legal_31623_trusted_590_capability_closed_587_mixed_1_residual_31032_failed_1_material_residual_59073; commander_oracle_exact_590_partial_14769_unresolved_16264_material_residual_59076; delta_from_pr83_full_exact_and_trusted_plus_71_capability_closed_plus_70_material_oracle_residual_minus_1333_and_commander_exact_and_trusted_plus_62_capability_closed_plus_61_material_oracle_residual_minus_1231; representative_new_exact_cards_include_closed_fixed_characteristics_granted_by_auras_equipment_and_fortifications_plus_fixed_ordinary_mana_equip; aura_enchant_casting_entry_exotic_equip_costs_dynamic_conditional_attached_values_and_full_layer_dependencies_remain_residual",
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30868127255,
+      "run_id": 30876521847,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30868127255"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30876521847"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -261,8 +267,8 @@
       "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr82_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_continuous_model_duration_applicability_compiler_replay_privacy_mutation_and_architecture_checks_pass",
-      "focused_rules_tests": "pass_immutable_continuous_effect_model_locked_resolution_sets_live_static_membership_source_departure_control_change_entry_reentry_cleanup_expiration_multiplayer_save_load_replay_privacy_rollback_and_implementation_mutations",
+      "deterministic_tests": "certified_main_through_pr83_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_attached_relation_characteristics_fixed_equip_compiler_replay_privacy_mutation_state_based_action_and_architecture_checks_pass",
+      "focused_rules_tests": "pass_immutable_continuous_effect_model_locked_resolution_sets_live_static_membership_exact_attached_relation_source_departure_control_change_entry_reentry_detach_reattach_phasing_cleanup_expiration_fixed_equip_multiplayer_save_load_replay_privacy_rollback_and_implementation_mutations",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

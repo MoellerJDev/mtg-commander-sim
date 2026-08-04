@@ -42,6 +42,19 @@ class ContinuousEffectDuration(str, Enum):
     ZONE_OBJECT = "zone_object"
 
 
+class ContinuousEffectRelation(str, Enum):
+    """Closed live relationships that may scope a static effect.
+
+    A relationship is authoritative identity data, not a characteristic
+    predicate.  Keeping it separate from ``ObjectQuerySpec`` prevents an
+    attachment effect from being approximated by controller, name, or another
+    mutable characteristic of the affected object.
+    """
+
+    NONE = "none"
+    SOURCE_ATTACHED_TO_OBJECT = "source_attached_to_object"
+
+
 _OPERATION_LAYERS = {
     "copy_values": Layer.COPY,
     "face_down": Layer.COPY,
@@ -56,6 +69,7 @@ _OPERATION_LAYERS = {
     "add_ability": Layer.ABILITY,
     "remove_ability": Layer.ABILITY,
     "remove_all_abilities": Layer.ABILITY,
+    "add_rules_text": Layer.ABILITY,
     "set_power_toughness": Layer.POWER_TOUGHNESS,
     "modify_power_toughness": Layer.POWER_TOUGHNESS,
     "switch_power_toughness": Layer.POWER_TOUGHNESS,
@@ -216,7 +230,7 @@ def _validate_operation_value(op: str, value: Any, field: str | None) -> None:
         colors = _nonempty_words(value, field_name=op)
         if any(color.upper() not in set("WUBRGC") for color in colors):
             raise ContinuousEffectError("Color operations require Magic color symbols")
-    elif op in {"add_ability", "remove_ability"}:
+    elif op in {"add_ability", "remove_ability", "add_rules_text"}:
         if field is not None or type(value) is not str or not value:
             raise ContinuousEffectError(f"{op} requires one nonempty ability string")
     elif op in {"remove_all_abilities", "switch_power_toughness"}:
@@ -352,6 +366,8 @@ class ContinuousEffect:
     source_present: bool = True
     applies: ObjectQuerySpec = field(default_factory=ObjectQuerySpec)
     locked_objects: tuple[ContinuousObjectIdentity, ...] = ()
+    relation: ContinuousEffectRelation = ContinuousEffectRelation.NONE
+    related_object: ContinuousObjectIdentity | None = None
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -383,9 +399,12 @@ class ContinuousEffect:
             object.__setattr__(
                 self, "duration", ContinuousEffectDuration(self.duration)
             )
+            object.__setattr__(
+                self, "relation", ContinuousEffectRelation(self.relation)
+            )
         except (TypeError, ValueError) as exc:
             raise ContinuousEffectError(
-                "Continuous effect layer, origin, or duration is invalid"
+                "Continuous effect layer, origin, duration, or relation is invalid"
             ) from exc
         if self.sublayer not in _LAYER_SUBLAYERS[self.layer]:
             raise ContinuousEffectError(
@@ -476,9 +495,32 @@ class ContinuousEffect:
             raise ContinuousEffectError(
                 "Static-ability continuous effects require source presence"
             )
+        if self.relation is ContinuousEffectRelation.NONE:
+            if self.related_object is not None:
+                raise ContinuousEffectError(
+                    "Unrelated continuous effects cannot name a related object"
+                )
+        else:
+            if not isinstance(
+                self.related_object, ContinuousObjectIdentity
+            ):
+                raise ContinuousEffectError(
+                    "Attached continuous effects require a typed related object"
+                )
+            if self.origin is not ContinuousEffectOrigin.STATIC_ABILITY:
+                raise ContinuousEffectError(
+                    "Live attachment relations require a static-ability effect"
+                )
+            if (
+                self.duration
+                is not ContinuousEffectDuration.WHILE_SOURCE_PRESENT
+            ):
+                raise ContinuousEffectError(
+                    "Live attachment relations require source presence"
+                )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "effect_id": self.effect_id,
             "source_id": self.source_id,
             "layer": int(self.layer),
@@ -495,10 +537,18 @@ class ContinuousEffect:
                 value.to_dict() for value in self.locked_objects
             ],
         }
+        if self.relation is not ContinuousEffectRelation.NONE:
+            payload.update(
+                {
+                    "relation": self.relation.value,
+                    "related_object": self.related_object.to_dict(),
+                }
+            )
+        return payload
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "ContinuousEffect":
-        fields = {
+        legacy_fields = {
             "effect_id",
             "source_id",
             "layer",
@@ -513,7 +563,16 @@ class ContinuousEffect:
             "applies",
             "locked_objects",
         }
-        if not isinstance(value, Mapping) or set(value) != fields:
+        relation_fields = legacy_fields | {"relation", "related_object"}
+        if not isinstance(value, Mapping):
+            raise ContinuousEffectError(
+                "Continuous effect fields are missing or unknown"
+            )
+        actual_fields = frozenset(value)
+        if actual_fields not in {
+            frozenset(legacy_fields),
+            frozenset(relation_fields),
+        }:
             raise ContinuousEffectError(
                 "Continuous effect fields are missing or unknown"
             )
@@ -567,6 +626,18 @@ class ContinuousEffect:
                     ContinuousObjectIdentity.from_dict(identity)
                     for identity in value["locked_objects"]
                 ),
+                relation=(
+                    ContinuousEffectRelation(value["relation"])
+                    if "relation" in value
+                    else ContinuousEffectRelation.NONE
+                ),
+                related_object=(
+                    ContinuousObjectIdentity.from_dict(
+                        value["related_object"]
+                    )
+                    if "related_object" in value
+                    else None
+                ),
             )
         except (TypeError, ValueError) as exc:
             if isinstance(exc, ContinuousEffectError):
@@ -583,6 +654,7 @@ __all__ = [
     "ContinuousEffectDuration",
     "ContinuousEffectError",
     "ContinuousEffectOrigin",
+    "ContinuousEffectRelation",
     "ContinuousObjectIdentity",
     "ContinuousOperation",
     "Layer",

@@ -9,6 +9,7 @@ _HISTORICAL_GAIN_LIFE_KEY = "builtin:food"
 _EXPLORE_KEYS = frozenset(
     {"builtin:explore-target", "builtin:map-explore"}
 )
+_EQUIP_KEY = "builtin:equip"
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,6 +50,20 @@ def builtin_activation_resolution(
                 ),
             ),
             note="Built-in target-explore ability resolved",
+        )
+    if semantic_key == _EQUIP_KEY:
+        return BuiltinActivationResolution(
+            effects=(
+                FrozenMap(
+                    {
+                        "op": "attach",
+                        "equipment": "$source",
+                        "creature": "$target.0",
+                        "rea" + "son": "Equip",
+                    }
+                ),
+            ),
+            note="Built-in Equip ability resolved",
         )
     return None
 

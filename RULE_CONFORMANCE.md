@@ -235,8 +235,13 @@ dependency, and complete arbitrary hand reveal/look grammar remains blocked.
 CR 403 records that the battlefield starts empty and that controller-indexed
 presentation lists form one shared multiplayer zone and target domain.
 Controller/index divergence now fails the state invariant, while cross-
-controller attachments preserve both controller placement and attached-object
-identity. Unqualified target schemas and ordinary destroy, sacrifice, and
+controller attachments preserve both controller placement and reciprocal,
+timestamped attached-object identity. Represented fixed attached
+characteristics are relation-bound in layers 4, 6, and 7c, and printed fixed
+ordinary-mana Equip uses the ordinary stack and shared attachment owner.
+Generic Aura casting/entry, complete Enchant quality grammar, exotic Equip
+costs, and full layer dependencies remain blocked. Unqualified target schemas
+and ordinary destroy, sacrifice, and
 bounce instructions are battlefield-scoped; explicitly named other zones
 remain available to reviewed schemas. Permanent category follows battlefield
 membership, instant and sorcery cards cannot enter, and ordinary entry creates

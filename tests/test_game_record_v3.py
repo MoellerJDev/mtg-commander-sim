@@ -116,7 +116,7 @@ class GameRecordV3Tests(unittest.TestCase):
                 ),
             )
             inventory = manifest["runtime_trust"]["runtime_component_inventory"]
-            self.assertEqual(11, len(inventory))
+            self.assertEqual(12, len(inventory))
             self.assertIn(
                 "continuous.basic_land_type.add_all_lands.v1",
                 {item["handler_id"] for item in inventory},

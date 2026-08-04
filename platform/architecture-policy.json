@@ -139,6 +139,7 @@
       "mtg_commander_sim/life_change.py": "replacement-capable typed life-event transaction owner behind represented rules transactions",
       "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
       "mtg_commander_sim/continuous_effect_state.py": "typed resolution-created continuous-effect journal and cleanup-expiration mutation owner",
+      "mtg_commander_sim/attachments.py": "typed reciprocal attachment relation and transition owner",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
       "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine",

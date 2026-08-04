@@ -17,6 +17,7 @@
       "test_zone_general_rules"
     ],
     "rules-events-replacements": [
+      "test_attached_static_characteristics",
       "test_continuous_effect_components",
       "test_continuous_effect_duration",
       "test_counter_placement_replacements",

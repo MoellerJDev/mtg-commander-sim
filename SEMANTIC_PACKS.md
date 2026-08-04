@@ -125,6 +125,21 @@ trigger-on-trigger placement remain explicit untrusted dependencies. Represented
 source keyword facts are snapshotted and use last-known information if the
 source leaves before the damage result commits.
 
+## Attached continuous characteristics
+
+The `continuous.attached.fixed-characteristics.v1` runtime component emits
+typed layer-4, layer-6, and layer-7c operations only while its source is
+attached to the exact current logical target. The shared attachment owner
+maintains reciprocal identities and relation timestamps, so detach, reattach,
+phasing, source or target departure, and leave-and-return cannot preserve a
+stale modifier. Oracle IR v24 lowers closed fixed enchanted/equipped/fortified
+type, supported keyword, separately reviewed rules-text, and power/toughness
+wording without card-name dispatch. Printed fixed ordinary-mana Equip is a
+separate trusted capability that targets a creature its controller controls and
+resolves through the ordinary stack. Aura casting/entry, general Enchant
+quality grammar, exotic Equip costs, dynamic or conditional attached values,
+and full CR 613 dependencies remain residual and fail closed.
+
 ## Typed tap-state execution
 
 Pack effects using `tap`, `untap`, or `untap_all_creatures` now lower through

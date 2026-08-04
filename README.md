@@ -709,9 +709,16 @@ not included, and an object that leaves and returns is new. A static
 CardProgram component instead keeps a live `ObjectQuerySpec`: membership is
 recomputed from current characteristics and the effect ends when its source is
 absent or phased out. The engine and seat projection call the same evaluator.
-Oracle IR v23 generically lowers closed fixed-query anthem wording and closed
-controlled-creature until-end-of-turn modifiers. Complete duration grammar,
-control-changing and player/rules-modifying continuous effects, all layer
+Oracle IR v24 generically lowers closed fixed-query anthem wording, closed
+controlled-creature until-end-of-turn modifiers, and fixed characteristics
+granted to an enchanted, equipped, or fortified object. Attached effects bind
+to the exact physical and logical relation, so detaching, phasing, departure,
+or leave-and-return ends the old effect without a printed-name branch. Fixed
+ordinary-mana Equip abilities are payable controller-scoped creature
+activations at sorcery speed and resolve through the ordinary stack and one
+reciprocal attachment owner. Aura casting/entry and complete Enchant quality
+grammar, exotic Equip costs, dynamic attached values, complete duration
+grammar, control-changing and player/rules-modifying effects, all layer
 dependencies, and arbitrary static text remain blocked.
 
 The generic zone kernel now distinguishes a stable physical card identifier

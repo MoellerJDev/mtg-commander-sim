@@ -270,6 +270,29 @@ def _builtin_effect_descriptor(
     return None, None
 
 
+def _equip_effect_descriptor() -> tuple[str, FrozenMap]:
+    """Return the closed CR 702.6 target/effect contract for Equip.
+
+    The keyword normalizer has already proved that this is a printed Equip
+    ability with an ordinary mana cost. Keeping the target contract on the
+    parsed ability lets proposal validation, projection, and replay use the
+    same generic activation path as other activated abilities.
+    """
+
+    return (
+        "builtin:equip",
+        FrozenMap(
+            {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "controller": "you",
+                "creature": True,
+                "count": 1,
+            }
+        ),
+    )
+
+
 def _crew_keyword_ability(
     line: str,
     line_index: int,
@@ -523,6 +546,8 @@ def _parse_activated_line(
         and (effect_lower.startswith("add ") or "add one mana" in effect_lower)
     )
     builtin_semantic_key, target_schema = _builtin_effect_descriptor(effect_text)
+    if (keyword_override or keyword_prefix or "").casefold() == "equip":
+        builtin_semantic_key, target_schema = _equip_effect_descriptor()
     return (
         ActivatedAbility(
             ability_id=f"ab{line_index + 1}",

@@ -12,6 +12,12 @@ from typing import Any, Iterable, Iterator, Mapping, Sequence
 from .abilities import (
     ActivatedAbility,
 )
+from .attachments import (
+    attach_objects,
+    clear_object_attachment_relations,
+    detach_object,
+    take_pending_attachment,
+)
 from .carddb import CardDatabase, CardRecord
 from .carddb_characteristics import base_card_characteristics
 from .card_programs.validation import (
@@ -908,86 +914,6 @@ class CommanderEngine(
                     base["keywords"] = unique_preserving_order(
                         [*base["keywords"], "Haste"]
                     )
-            for attachment_id in card.attachments:
-                equipment = self.state.cards.get(attachment_id)
-                if (
-                    equipment is None
-                    or equipment.zone != "battlefield"
-                    or equipment.attached_to != card.object_id
-                ):
-                    continue
-                equipment_record = self.card_record(equipment)
-                equipment_oracle = (
-                    str(equipment_record.oracle_text or "")
-                    if equipment_record is not None
-                    else ""
-                )
-                granted = re.search(
-                    r"equipped creature has (?P<keywords>[^.]+)",
-                    equipment_oracle,
-                    re.IGNORECASE,
-                )
-                if granted:
-                    keywords = [
-                        value.strip().title()
-                        for value in re.split(
-                            r"\s+and\s+|,\s*",
-                            granted.group("keywords"),
-                        )
-                        if value.strip()
-                    ]
-                    base["keywords"] = unique_preserving_order(
-                        [*base["keywords"], *keywords]
-                    )
-                modifier = re.search(
-                    r"equipped creature gets "
-                    r"(?P<power>[+-]\d+)/(?P<toughness>[+-]\d+)",
-                    equipment_oracle,
-                    re.IGNORECASE,
-                )
-                if modifier:
-                    for stat in ("power", "toughness"):
-                        try:
-                            base[stat] = str(
-                                int(str(base.get(stat)))
-                                + int(modifier.group(stat))
-                            )
-                        except (TypeError, ValueError):
-                            pass
-                if equipment.printed_name == "Animate Dead":
-                    try:
-                        base["power"] = str(
-                            int(str(base.get("power"))) - 1
-                        )
-                    except (TypeError, ValueError):
-                        pass
-                if (
-                    equipment.printed_name == "Springheart Nantuko"
-                    and equipment.annotations.get("bestowed")
-                ):
-                    for stat in ("power", "toughness"):
-                        try:
-                            base[stat] = str(
-                                int(str(base.get(stat))) + 1
-                            )
-                        except (TypeError, ValueError):
-                            pass
-                if "equipped creature has" in equipment_oracle.casefold():
-                    granted_lines = [
-                        value.strip()
-                        for value in re.findall(
-                            r'["“]([^"”]+)["”]',
-                            equipment_oracle,
-                        )
-                        if value.strip()
-                    ]
-                    if granted_lines:
-                        base["oracle_text"] = "\n".join(
-                            [
-                                str(base.get("oracle_text") or ""),
-                                *granted_lines,
-                            ]
-                        ).strip()
             oracle = str(base.get("oracle_text") or "").casefold()
             if (
                 "gets +1/+1 for each artifact you control" in oracle
@@ -1306,13 +1232,7 @@ class CommanderEngine(
         ):
             card.has_left_battlefield = True
 
-        if card.attached_to and card.attached_to in self.state.cards:
-            target = self.state.cards[card.attached_to]
-            if card.object_id in target.attachments:
-                target.attachments.remove(card.object_id)
-        for attachment_id in list(card.attachments):
-            if attachment_id in self.state.cards:
-                self.state.cards[attachment_id].attached_to = None
+        clear_object_attachment_relations(self.state.cards, card)
         card.tapped = False
         card.marked_damage = 0
         card.deathtouch_damage = False
@@ -1802,29 +1722,23 @@ class CommanderEngine(
                 object_id
             )
             self._initialize_intrinsic_entry_counters(card)
-            pending_aura_target = card.annotations.pop(
-                "pending_aura_target",
-                None,
-            )
-            if pending_aura_target:
-                pending_aura_zone = str(
-                    card.annotations.pop(
-                        "pending_aura_zone",
-                        "graveyard",
-                    )
-                )
+            pending_attachment = take_pending_attachment(card)
+            if pending_attachment is not None:
                 try:
-                    aura_target = self._resolve_object(
+                    attachment_target = self._resolve_object(
                         card.controller,
-                        str(pending_aura_target),
-                        zones={pending_aura_zone},
+                        pending_attachment.target_ref,
+                        zones={pending_attachment.target_zone},
                     )
                 except GameRuleError:
-                    aura_target = None
-                if aura_target is not None:
-                    card.attached_to = aura_target.object_id
-                    if card.object_id not in aura_target.attachments:
-                        aura_target.attachments.append(card.object_id)
+                    attachment_target = None
+                if attachment_target is not None:
+                    attach_objects(
+                        self.state.cards,
+                        card,
+                        attachment_target,
+                        source_timestamp=self._next_zone_timestamp(),
+                    )
             card.known_to = list(self.seats)
             card.revealed_to = list(self.seats)
             self._refresh_world_supertype_timestamp(
@@ -13593,10 +13507,7 @@ class CommanderEngine(
         ]
 
     def _detach_permanent(self, card: CardInstance) -> None:
-        target = self.state.cards.get(card.attached_to or "")
-        if target is not None and card.object_id in target.attachments:
-            target.attachments.remove(card.object_id)
-        card.attached_to = None
+        detach_object(self.state.cards, card)
 
     def _legend_groups(self) -> list[tuple[str, str, list[str]]]:
         groups: dict[tuple[str, str], list[str]] = {}

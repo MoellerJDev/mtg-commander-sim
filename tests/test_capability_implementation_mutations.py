@@ -10,12 +10,14 @@ from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
 from mtg_commander_sim import trigger_batches as trigger_batches_module
 from mtg_commander_sim import zone_trigger_events as zone_trigger_events_module
+from mtg_commander_sim.rules.activation import resolution as activation_resolution
 from mtg_commander_sim.effect_runtime import life_effects
 from mtg_commander_sim.effect_runtime import objects_stack_and_tokens
 from mtg_commander_sim.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
 )
+from mtg_commander_sim.continuous_effect_model import ContinuousObjectIdentity
 from mtg_commander_sim import damage as damage_module
 from mtg_commander_sim import damage_prevention as damage_prevention_module
 from mtg_commander_sim.damage import DamageEvent
@@ -54,7 +56,11 @@ from mtg_commander_sim.semantic_runtime.continuous_components import (
     FixedQueryPowerToughnessAnthemHandler,
 )
 from mtg_commander_sim.compiler.continuous_templates import (
+    attached_fixed_characteristics_handler,
     fixed_power_toughness_anthem_handler,
+)
+from mtg_commander_sim.semantic_runtime.attached_continuous import (
+    AttachedFixedCharacteristicsHandler,
 )
 from mtg_commander_sim.semantic_runtime.damage_replacements import (
     DamageQuantityReplacementHandler,
@@ -323,6 +329,80 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_anthem_applies()
+
+    def test_attached_characteristic_relation_mutant_is_killed(self):
+        compiled = attached_fixed_characteristics_handler(
+            "Equipped creature gets +1/-1 and has haste."
+        )
+        self.assertIsNotNone(compiled)
+        descriptor = compiled[1]
+        context = ContinuousEffectSourceContext(
+            source_object_id="equipment",
+            source_ref="E1",
+            source_controller="A",
+            source_timestamp=2,
+            component_id="mutation",
+            attached_object=ContinuousObjectIdentity(
+                object_id="target",
+                logical_object_id="target@0",
+            ),
+        )
+
+        def assert_attached_characteristics() -> None:
+            effects = AttachedFixedCharacteristicsHandler().lower(
+                descriptor, context
+            )
+            result = evaluate_continuous_effects(
+                CharacteristicState(
+                    name="Target",
+                    controller="B",
+                    card_types={"Creature"},
+                    power=1,
+                    toughness=2,
+                ),
+                effects,
+                context={
+                    "object_id": "target",
+                    "logical_object_id": "target@0",
+                    "zone": "battlefield",
+                    "owner": "B",
+                },
+            )
+            self.assertEqual(2, result.characteristics["power"])
+            self.assertEqual(1, result.characteristics["toughness"])
+            self.assertIn("Haste", result.characteristics["abilities"])
+
+        assert_attached_characteristics()
+        with patch.object(
+            AttachedFixedCharacteristicsHandler,
+            "lower",
+            lambda _handler, _descriptor, _context: (),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_attached_characteristics()
+
+    def test_generic_equip_resolution_mutant_is_killed(self):
+        def assert_equip_lowers() -> None:
+            resolution = activation_resolution.builtin_activation_resolution(
+                "builtin:equip", "A"
+            )
+            self.assertIsNotNone(resolution)
+            self.assertEqual(
+                [
+                    {
+                        "op": "attach",
+                        "equipment": "$source",
+                        "creature": "$target.0",
+                        "reason": "Equip",
+                    }
+                ],
+                resolution.effect_dicts(),
+            )
+
+        assert_equip_lowers()
+        with patch.object(activation_resolution, "_EQUIP_KEY", "mutant:equip"):
+            with self.assertRaises(AssertionError):
+                assert_equip_lowers()
 
     def test_resolution_continuous_effect_commit_mutant_is_killed(self):
         session = make_session(

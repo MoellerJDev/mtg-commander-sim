@@ -672,6 +672,43 @@
       }
     },
     {
+      "key": "dae4815e-9025-4993-ab46-52a3f1a7219e:static:attached-grants",
+      "label": "Thornbite Staff attached ability grants",
+      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
+      "ability_id": "static:attached-grants",
+      "active_zone": "battlefield",
+      "event": "characteristics.evaluate",
+      "effects": [],
+      "handlers": [
+        {
+          "handler_id": "continuous.attached.fixed-characteristics.v1",
+          "schema_version": 1,
+          "event": "characteristics.evaluate",
+          "condition": {"relation": "source_attached_object"},
+          "modifier": {
+            "type_operations": [],
+            "add_abilities": [],
+            "remove_abilities": [],
+            "add_rules_text": [
+              "{2}, {T}: This creature deals 1 damage to any target",
+              "Whenever a creature dies, untap this creature."
+            ],
+            "power": 0,
+            "toughness": 0
+          }
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["static_ability", "continuous_effect", "attached_object", "granted_activated_ability", "granted_triggered_ability"],
+      "tests": ["test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
+      "provenance": {
+        "source_oracle_hash": "00a18bf359265622865f3f1791dba43ba2a7967a4b9c77594cf3d9eca6290242",
+        "source_rulings_hash": "0716c69497a1e7fc602e27aa49294a102b40c0a720408817c6427c507812e0b1",
+        "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
       "key": "dae4815e-9025-4993-ab46-52a3f1a7219e:ability:ab3",
       "label": "Thornbite Staff equip",
       "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",

@@ -335,24 +335,25 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "attached-static-characteristic-effects",
-    "subsystem_id": "continuous-effects",
+    "batch_id": "aura-targeting-entry-and-legality",
+    "subsystem_id": "card-types",
     "rule_ids": [
-      "613.1d",
-      "613.1f",
-      "613.1g"
+      "303.4a",
+      "303.4c",
+      "303.4f",
+      "303.4g"
     ],
     "target_capability_ids": [
-      "continuous.attached.fixed_characteristics"
+      "attachment.aura.simple_object"
     ],
-    "rationale": "The CR 611 duration and live-source boundary now supports reusable static expansion. The pinned Commander corpus contains 933 cards matching fixed enchanted/equipped-creature power/toughness wording, including 347 combined modifier/keyword forms, so attached characteristic effects are a higher-yield next family than another prevention micro-slice. The attachment kernel and shared layer evaluator already provide the dependency direction needed to implement this without card-name dispatch.",
+    "rationale": "The attached-characteristic batch now provides an exact reciprocal object relation and live layer evaluation, but simple Aura cards remain residual because Enchant has no generic spell-target and entry contract. Closing ordinary object-target Auras next reuses that relation, unlocks the enchanted-creature compiler family, and removes the remaining Aura target-schema responsibility from CommanderEngine without claiming player Auras or arbitrary quality grammar.",
     "exit_criteria": [
-      "Represent the live attached-object relation as a strict source-bound continuous-effect predicate rather than a copied target annotation.",
-      "Apply closed fixed type, subtype, keyword add/remove, and power/toughness operations in their represented CR 613 layers through the shared evaluator.",
-      "Prove attach, detach, reattach, source departure, target departure/reentry, control change, phasing, simultaneous sources, replay, privacy, rollback, and multiplayer behavior.",
-      "Generically lower exact enchanted/equipped-creature fixed modifiers and keyword grants while rejecting stateful quantities, conditions, unsupported costs, and characteristic-defining lookalikes.",
-      "Remove the corresponding attachment-characteristic responsibility from CommanderEngine or legacy annotations and ratchet architecture/card-specificity guards.",
-      "Run the full Oracle and Commander censuses and require a measurable exact and capability-closed card cluster without witness inflation."
+      "Parse a closed Enchant grammar for ordinary battlefield object types and controller relations without accepting player, graveyard, quality, or compound restrictions.",
+      "Require the Aura spell target during casting, revalidate it on resolution, and enter attached through the canonical reciprocal relation and timestamp owner.",
+      "Handle illegal or departed targets, nonspell Aura entry choices, no-legal-object behavior, state-based detachment, control changes, phasing, protection, replay, privacy, rollback, and multiplayer targeting.",
+      "Move Aura target-schema and entry ownership out of CommanderEngine behind typed casting, entry, and state-based-action boundaries.",
+      "Generically close simple Aura CardPrograms only when both Enchant and every attached static line are capability-closed; leave other Aura grammar residual.",
+      "Run the full Oracle and Commander censuses and require a measurable exact and capability-closed Aura card cluster."
     ]
   }
 }
