@@ -15,6 +15,11 @@ from mtg_commander_sim.record import (
     migrate_v2_game,
     replay_record,
 )
+from mtg_commander_sim.semantic_runtime import (
+    DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID,
+    DRAW_MAXIMUM_HANDLER_ID,
+    runtime_component_inventory,
+)
 from mtg_commander_sim.session import CommanderSession
 
 
@@ -116,10 +121,14 @@ class GameRecordV3Tests(unittest.TestCase):
                 ),
             )
             inventory = manifest["runtime_trust"]["runtime_component_inventory"]
-            self.assertEqual(13, len(inventory))
-            self.assertIn(
-                "continuous.basic_land_type.add_all_lands.v1",
-                {item["handler_id"] for item in inventory},
+            self.assertEqual(runtime_component_inventory(), inventory)
+            inventory_ids = {item["handler_id"] for item in inventory}
+            self.assertTrue(
+                {
+                    "continuous.basic_land_type.add_all_lands.v1",
+                    DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID,
+                    DRAW_MAXIMUM_HANDLER_ID,
+                }.issubset(inventory_ids)
             )
             semantic_inventory = manifest["runtime_trust"][
                 "semantic_handler_inventory"
