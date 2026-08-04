@@ -109,16 +109,16 @@ class CombatDeclarationCostTests(unittest.TestCase):
             characteristics={
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": (
+                    "Enchant creature\n"
                     "Enchanted creature can't attack or block unless its "
                     f"controller pays {cost}."
                 ),
             },
+            aura_target_ref=creature.ref,
         )[0]
         aura = engine._resolve_object(
             seat, ref, zones={"battlefield"}
         )
-        aura.attached_to = creature.object_id
-        creature.attachments.append(aura.object_id)
         return aura
 
     def test_prison_tax_is_projected_paid_atomically_and_replays(self):
