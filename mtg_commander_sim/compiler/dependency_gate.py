@@ -5,6 +5,7 @@ import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from ..aura import parse_simple_enchant_line
+from ..ability_fragments import parse_protection_line
 from ..rules.capabilities import (
     CapabilityClosure,
     CapabilityRegistry,
@@ -116,6 +117,14 @@ def keyword_dependency_gate(
     ) is not None:
         return explicit_capability_gate(
             "attachment.aura.simple_object",
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+    if mechanics == ("protection",) and parse_protection_line(
+        material_line
+    ) is not None:
+        return explicit_capability_gate(
+            "protection.typed.debt",
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )

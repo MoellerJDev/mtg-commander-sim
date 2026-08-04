@@ -67,6 +67,8 @@ checks:
 - manifest CardProgram trust basis and closure fingerprints, when present
 - capability registry and generated evidence fingerprints, when present
 - semantic-handler and runtime-component inventories/fingerprints, when present
+- typed Enchant, protection, and granted-ability descriptor fingerprints through
+  their existing CardProgram/runtime-component serialization
 - command-scoped CardProgram V2 fingerprints for programs used, when present
 - command-scoped runtime binding and capability-closure fingerprints, when present
 - before-state hash for every command

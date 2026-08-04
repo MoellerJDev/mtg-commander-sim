@@ -16,9 +16,11 @@ from .aura import (
     aura_resolution_move_kwargs,
     commit_aura_zone_move,
     complete_aura_entry_choice,
+    EnchantSpec,
     preflight_aura_zone_move,
     simple_aura_attachment_is_legal,
 )
+from .ability_fragment_host import AbilityFragmentHostMixin
 from .attachments import (
     attach_objects,
     clear_object_attachment_relations,
@@ -26,7 +28,6 @@ from .attachments import (
     take_pending_attachment,
 )
 from .carddb import CardDatabase, CardRecord
-from .carddb_characteristics import base_card_characteristics
 from .card_programs.validation import (
     canonical_program_fingerprint,
     program_source_is_current,
@@ -128,7 +129,10 @@ from .trigger_discovery import (
     semantic_event_value,
 )
 from .zone_trigger_events import ZoneChangeOccurrence
-from .zone_trigger_processing import dispatch_zone_change_occurrence
+from .zone_trigger_processing import (
+    capture_departure_trigger_sources,
+    dispatch_zone_change_occurrence,
+)
 from .life_state import (
     pay_life_cost,
 )
@@ -171,6 +175,13 @@ from .model import (
     YieldPolicy,
 )
 from .permissions import AuthorizedCommand, CapabilityManager, PermissionDenied
+from .protection import (
+    ProtectionSource,
+    ProtectionVerdict,
+    protection_verdict,
+    protection_verdict_for_ref,
+    source_characteristics_for_ref,
+)
 from .replacement_decisions import (
     apply_effect_with_replacement_choice,
     complete_replacement_order_choice,
@@ -302,6 +313,7 @@ class ActionResult:
 
 
 class CommanderEngine(
+    AbilityFragmentHostMixin,
     SemanticChoiceCoordinationMixin,
     SemanticChoiceIntentHostMixin,
 ):
@@ -855,7 +867,7 @@ class CommanderEngine(
     ) -> dict[str, Any]:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         record = self.card_record(card)
-        base = base_card_characteristics(card, record)
+        base = self._compiled_base_characteristics(card, record, error_type=GameRuleError)
         runtime_effects = (
             (
                 *active_resolution_effects(self.state, card),
@@ -1123,6 +1135,9 @@ class CommanderEngine(
                 "colors": list(record.colors),
                 "produced_mana": list(record.produced_mana),
             }
+        base["ability_fragments"] = self._compiled_ability_fragment_dicts(
+            card
+        )
         base.update(
             copy.deepcopy(dict(card.annotations.get("copy_overrides") or {}))
         )
@@ -1536,7 +1551,9 @@ class CommanderEngine(
         tapped: bool | None = None,
         enter_face: str | None = None,
         battle_protector: str | None = None,
-        aura_target_ref: str | None = None, resolving_as_aura_spell: bool = False,
+        aura_target_ref: str | None = None,
+        resolving_as_aura_spell: bool = False,
+        aura_enchant_spec: EnchantSpec | None = None,
         zone_timestamp: int | None = None,
         position: str | int = "top",
         reveal_to: Iterable[str] | None = None,
@@ -1673,7 +1690,7 @@ class CommanderEngine(
         )
         destination = prepared_replacement.destination
         if (aura_move := preflight_aura_zone_move(
-            self, card, destination=destination, requested_destination=requested_destination, destination_type_line=destination_type_line, enter_face=enter_face, controller=controller, target_ref=aura_target_ref, resolving_as_spell=resolving_as_aura_spell, origin=origin, log=log, error_type=GameRuleError,
+            self, card, destination=destination, requested_destination=requested_destination, destination_type_line=destination_type_line, enter_face=enter_face, enchant_spec=aura_enchant_spec, controller=controller, target_ref=aura_target_ref, resolving_as_spell=resolving_as_aura_spell, origin=origin, log=log, error_type=GameRuleError,
         )).remain_in_origin: return card
         destination, aura_entry_plan = aura_move.destination, aura_move.entry_plan
         origin_controller = card.controller
@@ -1693,14 +1710,7 @@ class CommanderEngine(
             if semantic_events
             else {}
         )
-        departure_sources = (
-            self._semantic_event_sources()
-            if semantic_events and origin == "battlefield"
-            else []
-        )
-        departure_source_zones = {
-            source.object_id: source.zone for source in departure_sources
-        }
+        departure_snapshot = capture_departure_trigger_sources(self, semantic_events=semantic_events, origin=origin)
         if origin == "stack":
             # A resolving or countered spell has already had its StackItem
             # removed by that procedure.  A zone-changing effect can instead
@@ -1871,8 +1881,11 @@ class CommanderEngine(
                 origin_data=origin_data,
                 origin_attachments=origin_attachments,
                 origin_attached_to=origin_attached_to,
-                departure_sources=departure_sources,
-                departure_source_zones=departure_source_zones,
+                departure_sources=departure_snapshot.sources,
+                departure_source_zones=departure_snapshot.source_zones,
+                departure_source_characteristics=(
+                    departure_snapshot.source_characteristics
+                ),
                 reason=reason,
             )
         return card
@@ -1951,6 +1964,9 @@ class CommanderEngine(
         origin_attached_to: str | None = None,
         departure_sources: Sequence[CardInstance],
         departure_source_zones: Mapping[str, str],
+        departure_source_characteristics: Mapping[
+            str, Mapping[str, Any]
+        ],
         reason: str,
         trigger_batch: list[StackItem] | None = None,
     ) -> None:
@@ -1984,6 +2000,9 @@ class CommanderEngine(
             card,
             departure_sources=departure_sources,
             departure_source_zones=departure_source_zones,
+            departure_source_characteristics=(
+                departure_source_characteristics
+            ),
             trigger_batch=event_triggers,
         )
         # Historical source-pinned special cases remain isolated in this
@@ -2053,52 +2072,6 @@ class CommanderEngine(
                         )
                     )
         if owns_trigger_batch:
-            if (
-                event_destination == "graveyard"
-                and "creature" in origin_types
-            ):
-                for source in departure_sources:
-                    source_data = self._effective_card_data(source)
-                    source_types, _, _ = self._type_parts(
-                        str(source_data.get("type_line") or "")
-                    )
-                    if "creature" not in source_types:
-                        continue
-                    has_thornbite_staff = any(
-                        (
-                            equipment := self.state.cards.get(
-                                attachment_id
-                            )
-                        )
-                        is not None
-                        and equipment.printed_name == "Thornbite Staff"
-                        for attachment_id in source.attachments
-                    )
-                    if not has_thornbite_staff:
-                        continue
-                    ref = self._next_ref("S")
-                    event_triggers.append(
-                        StackItem(
-                            stack_id=self._stable_runtime_id(
-                                "stack",
-                                ref,
-                            ),
-                            ref=ref,
-                            kind="triggered_ability",
-                            controller=source.controller,
-                            label=(
-                                f"{self.display_name(source.object_id)} "
-                                "Thornbite Staff untap trigger"
-                            ),
-                            source_object_id=source.object_id,
-                            semantic_key="builtin:thornbite-untap",
-                            visibility=list(self.seats),
-                            context={
-                                "event": "creature.dies",
-                                "card": card.ref,
-                            },
-                        )
-                    )
             enqueue_trigger_batch(self, event_triggers)
 
     def _add_saga_lore(
@@ -2165,8 +2138,17 @@ class CommanderEngine(
     ) -> list[CardInstance]:
         """Move a set of objects before emitting any resulting trigger event."""
 
-        sources = self._semantic_event_sources()
+        sources = [
+            copy.deepcopy(source)
+            for source in self._semantic_event_sources()
+        ]
         source_zones = {source.object_id: source.zone for source in sources}
+        source_characteristics = {
+            source.object_id: copy.deepcopy(
+                self._effective_card_data(source)
+            )
+            for source in sources
+        }
         prepared_replacements = {
             object_id: prepare_zone_change_replacement(
                 self,
@@ -2250,6 +2232,7 @@ class CommanderEngine(
                 origin_attached_to=origin_attached_to,
                 departure_sources=sources,
                 departure_source_zones=source_zones,
+                departure_source_characteristics=source_characteristics,
                 reason=reason,
                 trigger_batch=trigger_batch,
             )
@@ -5256,14 +5239,6 @@ class CommanderEngine(
     ) -> str:
         if ability.builtin_semantic_key is not None:
             return ability.builtin_semantic_key
-        if (
-            ability.effect_text.casefold().strip(" .")
-            == "this creature deals 1 damage to any target"
-        ):
-            return (
-                "dae4815e-9025-4993-ab46-52a3f1a7219e:"
-                "granted:damage"
-            )
         return f"{source.oracle_id}:ability:{ability.ability_id}"
 
     def _legendary_creatures_controlled(self, seat: str) -> int:
@@ -6640,6 +6615,9 @@ class CommanderEngine(
         *,
         sources: Sequence[CardInstance] | None = None,
         source_zones: Mapping[str, str] | None = None,
+        source_characteristics: Mapping[
+            str, Mapping[str, Any]
+        ] | None = None,
         trigger_batch: list[StackItem] | None = None,
     ) -> list[str]:
         return dispatch_semantic_event(
@@ -6648,6 +6626,7 @@ class CommanderEngine(
             context,
             sources=sources,
             source_zones=source_zones,
+            source_characteristics=source_characteristics,
             trigger_batch=trigger_batch,
         )
 
@@ -6893,9 +6872,7 @@ class CommanderEngine(
                 and card.controller != controller
             ):
                 return False
-            if self._protection_colors(card).intersection(
-                source_colors
-            ):
+            if protection_verdict_for_ref(self, self._effective_card_data(card), source_ref) is not ProtectionVerdict.ALLOWED:
                 return False
         if group.categories and str(row["category"]) not in {
             value.casefold() for value in group.categories
@@ -7555,7 +7532,6 @@ class CommanderEngine(
             "builtin:optional-mill-one",
             "builtin:sacrifice-source",
             "builtin:storm",
-            "builtin:thornbite-untap",
         }:
             return True
         program = self.semantics.get(item.semantic_key)
@@ -8236,20 +8212,6 @@ class CommanderEngine(
                 ],
                 None,
                 note="Moloid attack trigger",
-            )
-            return
-        if item.semantic_key == "builtin:thornbite-untap":
-            source = self.state.cards.get(item.source_object_id or "")
-            self._begin_resolve_item(
-                item,
-                (
-                    [{"op": "untap", "card": "$source"}]
-                    if source is not None
-                    and source.zone == "battlefield"
-                    else []
-                ),
-                None,
-                note="Thornbite Staff granted trigger",
             )
             return
         if item.semantic_key == "builtin:daretti-emblem":
@@ -10315,58 +10277,11 @@ class CommanderEngine(
             ),
         )
 
-    def _protection_colors(self, card: CardInstance) -> set[str]:
-        oracle = str(
-            self._effective_card_data(card).get("oracle_text") or ""
-        ).casefold()
-        color_symbols = {
-            "white": "W",
-            "blue": "U",
-            "black": "B",
-            "red": "R",
-            "green": "G",
-        }
-        return {
-            symbol
-            for name, symbol in color_symbols.items()
-            if re.search(rf"protection from (?:[a-z ]+ and )?{name}", oracle)
-        }
-
     def _source_colors_for_ref(self, source_ref: str | None) -> set[str]:
-        if not source_ref:
-            return set()
-        card = next(
-            (
-                candidate
-                for candidate in self.state.cards.values()
-                if candidate.ref == source_ref
-            ),
-            None,
-        )
-        if card is None:
-            stack_item = next(
-                (
-                    candidate
-                    for candidate in self.state.stack
-                    if candidate.ref == source_ref
-                ),
-                None,
-            )
-            if stack_item is not None:
-                source_id = (
-                    stack_item.card_object_id
-                    or stack_item.source_object_id
-                )
-                card = (
-                    self.state.cards.get(source_id)
-                    if source_id
-                    else None
-                )
-        if card is None:
-            return set()
+        data = source_characteristics_for_ref(self, source_ref)
         return {
             str(color).upper()
-            for color in self._effective_card_data(card).get("colors", [])
+            for color in (data or {}).get("colors", ())
         }
 
     def _can_block(
@@ -10460,11 +10375,10 @@ class CommanderEngine(
             and not blocker_keywords.intersection({"flying", "reach"})
         ):
             return False, "attacker_has_flying"
-        blocker_colors = {
-            str(color).upper()
-            for color in blocker_data.get("colors", [])
-        }
-        if self._protection_colors(attacker).intersection(blocker_colors):
+        if protection_verdict(
+            attacker_data,
+            ProtectionSource.from_characteristics(blocker_data),
+        ) is not ProtectionVerdict.ALLOWED:
             return False, "attacker_has_protection"
         return True, None
 
@@ -12964,16 +12878,9 @@ class CommanderEngine(
             return False
 
         schema: dict[str, Any] | None
-        if "aura" in subtypes and not isinstance(
-            attachment.annotations.get("enchant_target_schema"),
-            Mapping,
-        ):
-            return simple_aura_attachment_is_legal(self, attachment)
         if "aura" in subtypes:
-            schema = copy.deepcopy(
-                dict(attachment.annotations["enchant_target_schema"])
-            )
-        elif "equipment" in subtypes:
+            return simple_aura_attachment_is_legal(self, attachment)
+        if "equipment" in subtypes:
             schema = {
                 "zones": ["battlefield"],
                 "categories": ["permanent"],
@@ -13015,14 +12922,11 @@ class CommanderEngine(
         ):
             return False
 
-        target_oracle = str(
-            self._effective_card_data(target).get("oracle_text") or ""
-        ).casefold()
-        if "protection from everything" in target_oracle:
-            return False
-        if self._protection_colors(target).intersection(
-            self._source_colors_for_ref(attachment.ref)
-        ):
+        if protection_verdict_for_ref(
+            self,
+            self._effective_card_data(target),
+            attachment.ref,
+        ) is not ProtectionVerdict.ALLOWED:
             return False
         return True
 

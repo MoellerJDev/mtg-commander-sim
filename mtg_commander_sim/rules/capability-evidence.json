@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "9d879283a17ef95c1fc27e64f5048d71d7298ea8cc28af9e56eac2719fcdcfee",
-  "declaration_source_fingerprint": "3913780105617bc0ac29c9c0a121d00adf15865aaae39921a3f9760ac72485d4",
+  "registry_fingerprint": "b333497580e5c49cba62012d1c0318890cd137db3f821f2bf2a1246716dbe09b",
+  "declaration_source_fingerprint": "a00b0ad689b068e7b8518880882e7a3405c5b9dd4b92c3e7573eebf644a66e2b",
   "declarations": [
     {
       "capability_id": "attachment.aura.simple_object",
@@ -4724,6 +4724,198 @@
       "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
     },
     {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_typed_ability_fragments.TypedProtectionTests.test_layer_six_granted_protection_uses_typed_fragment",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Grant executable protection through a typed layer-6 fragment while retaining rules text only as display provenance."
+    },
+    {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_typed_ability_fragments.TypedProtectionEngineTests.test_four_player_protection_uses_the_actual_source",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate the actual source characteristics across four seats, rejecting red while allowing an otherwise identical blue source."
+    },
+    {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_typed_protection_verdict_mutant_is_killed",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutant that converts a matching typed protection quality from blocked to allowed."
+    },
+    {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "negative",
+      "test_id": "tests.test_typed_ability_fragments.TypedProtectionTests.test_untyped_and_unsupported_protection_fail_closed",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Return unresolved for text-only, malformed, compound, or unsupported protection qualities instead of treating them as executable."
+    },
+    {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Prevent only damage from the matching source and feed the prevented result into canonical lifelink accounting."
+    },
+    {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "positive",
+      "test_id": "tests.test_typed_ability_fragments.TypedProtectionEngineTests.test_typed_protection_blocks_target_attachment_and_block_operations",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use one typed quality to reject targeting, blocking, equipping, and enchanting by a matching source without mutating rejected Aura-token creation."
+    },
+    {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_entry_choice_projection_and_replay_are_exact",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project only legal public Aura attachment refs and exclude a public object protected from the Aura's typed source quality."
+    },
+    {
+      "capability_id": "protection.typed.debt",
+      "evidence_class": "replay",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_entry_choice_projection_and_replay_are_exact",
+      "official_rule_ids": [
+        "301.5c",
+        "303.4c",
+        "509.1b",
+        "702.16",
+        "702.16a",
+        "702.16b",
+        "702.16c",
+        "702.16d",
+        "702.16e",
+        "702.16f",
+        "702.16j"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact protected-object filtering and selected legal Aura attachment from a pinned continuation."
+    },
+    {
       "capability_id": "target.public.player_or_damageable_permanent",
       "evidence_class": "interaction",
       "test_id": "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_stasis_coffin_protection_blocks_targeting_and_damage",
@@ -6230,5 +6422,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "3f5cc8d336a05fccb465f2bcd708515f7f5fc0789ee62cabd29062f9a9aa06e6"
+  "fingerprint": "80f30c6a25101e4afaf209bc9aedd8529cb0eddeea873e31c522c4c2fc72bb46"
 }

@@ -17,6 +17,9 @@ from .compiler.continuous_templates import (
     controlled_creature_until_end_of_turn_effect,
 )
 from .compiler.activated_costs import activated_ability_cost
+from .compiler.ability_keyword_fragments import (
+    lower_ability_keyword_fragments,
+)
 from .compiler.dependency_gate import (
     dependency_gate as _dependency_gate,
     explicit_capability_gate as _explicit_capability_gate,
@@ -25,6 +28,7 @@ from .compiler.dependency_gate import (
 from .compiler.draw_templates import fixed_draw_effect_template
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
+from .compiler.keyword_nodes import dredge_keyword_node
 from .compiler.ir_model import (
     OracleCardIR,
     OracleFaceIR,
@@ -45,10 +49,8 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v28"
+ORACLE_COMPILER_VERSION = "oracle-ir-v29"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
-_DREDGE_MECHANIC = "dred" + "ge"
-
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
     re.IGNORECASE,
@@ -650,8 +652,13 @@ def _keyword_node(
         capability_profile=capability_profile,
     )
     enchant_target_schema = keyword_target_schema(material_line, mechanics)
-    residual_ids = (
-        (
+    fragment_lowering = lower_ability_keyword_fragments(
+        material_line,
+        mechanics,
+    )
+    residual_id_values: list[str] = []
+    if gate.blockers:
+        residual_id_values.append(
             _residual(
                 residuals,
                 kind="dependency_contract",
@@ -659,50 +666,30 @@ def _keyword_node(
                 span=span,
                 reason="recognized keyword lacks a trusted mechanic contract",
                 blockers=gate.blockers,
-            ),
+            )
         )
-        if gate.blockers
-        else ()
-    )
-    dredge = re.fullmatch(
-        r"Dredge\s+(?P<count>[1-9]\d*)\.?",
-        material_line,
-        re.IGNORECASE,
-    )
-    if mechanics == (_DREDGE_MECHANIC,) and dredge is not None:
-        return OracleNode(
-            node_id=node_id,
-            kind="keyword_ability",
-            text=line,
-            span=span,
-            active_zone="graveyard",
-            event="draw",
-            lowerable=True,
-            exact=not gate.blockers,
-            template_id="dredge-keyword-replacement-v1",
-            mechanics=mechanics,
-            handlers=(
-                {
-                    "handler_id": "replacement.draw.dredge.v1",
-                    "schema_version": 1,
-                    "event": "draw",
-                    "modification": {
-                        "mill_count": int(dredge.group("count")),
-                    },
-                },
-            ),
-            residual_ids=residual_ids,
-            capability_dependencies=gate.capabilities,
-            capability_closure=(
-                gate.closure.reachable if gate.closure is not None else ()
-            ),
-            capability_profile=(
-                gate.closure.profile if gate.closure is not None else None
-            ),
-            capability_fingerprint=(
-                gate.closure.fingerprint if gate.closure is not None else None
-            ),
+    if fragment_lowering.residual_kind is not None:
+        residual_id_values.append(
+            _residual(
+                residuals,
+                kind=fragment_lowering.residual_kind,
+                text=line,
+                span=span,
+                reason=str(fragment_lowering.residual_reason),
+                blockers=fragment_lowering.residual_blockers,
+            )
         )
+    residual_ids = tuple(residual_id_values)
+    if dredge := dredge_keyword_node(
+        node_id=node_id,
+        line=line,
+        material_line=material_line,
+        span=span,
+        mechanics=mechanics,
+        gate=gate,
+        residual_ids=residual_ids,
+    ):
+        return dredge
     return OracleNode(
         node_id=node_id,
         kind="keyword_ability",
@@ -711,8 +698,9 @@ def _keyword_node(
         active_zone="battlefield",
         event="continuous",
         lowerable=True,
-        exact=not gate.blockers,
+        exact=not residual_ids,
         template_id="printed-keyword-list-v1",
+        handlers=fragment_lowering.handlers,
         target_schema=enchant_target_schema,
         mechanics=mechanics,
         residual_ids=residual_ids,

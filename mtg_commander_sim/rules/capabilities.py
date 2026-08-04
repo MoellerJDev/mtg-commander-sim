@@ -777,6 +777,8 @@ def capability_covered_mechanics(
         covered.add("cr-115-targets")
     if "attachment.aura.simple_object" in supplied:
         covered.add("enchant")
+    if "protection.typed.debt" in supplied:
+        covered.add("protection")
     if "damage.prevention.persistent_amount" in supplied:
         covered.add("cr-615-prevention-effects")
         # Capability v4 owns the ordered fixed life sibling emitted by the

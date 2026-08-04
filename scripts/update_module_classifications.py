@@ -49,9 +49,11 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
     if relative.startswith("server/") or relative == "simctl.py":
         return "transport"
     if relative in {
+        "mtg_commander_sim/ability_fragments.py",
         "mtg_commander_sim/damage_source.py",
         "mtg_commander_sim/damage_modifier_state.py",
         "mtg_commander_sim/continuous_effect_model.py",
+        "mtg_commander_sim/enchant_spec.py",
         "mtg_commander_sim/model.py",
         "mtg_commander_sim/object_predicate.py",
         "mtg_commander_sim/prevention_triggers.py",
@@ -79,6 +81,8 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/effect_contracts.py",
         "mtg_commander_sim/oracle_ir.py",
         "mtg_commander_sim/semantics.py",
+        "mtg_commander_sim/ability_fragment_host.py",
+        "mtg_commander_sim/compiled_ability_fragments.py",
     }:
         return "semantics"
     if relative in {
@@ -99,6 +103,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         )
     ) or relative in {
         "mtg_commander_sim/abilities.py",
+        "mtg_commander_sim/ability_fragments.py",
         "mtg_commander_sim/attachments.py",
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/combat.py",
@@ -117,6 +122,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/delayed_triggers.py",
         "mtg_commander_sim/engine.py",
         "mtg_commander_sim/errors.py",
+        "mtg_commander_sim/enchant_spec.py",
         "mtg_commander_sim/life_change.py",
         "mtg_commander_sim/life_state.py",
         "mtg_commander_sim/mana.py",
@@ -124,6 +130,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/mana_undo.py",
         "mtg_commander_sim/mechanic_contracts.py",
         "mtg_commander_sim/permissions.py",
+        "mtg_commander_sim/protection.py",
         "mtg_commander_sim/replacement_decisions.py",
         "mtg_commander_sim/replacement_effects.py",
         "mtg_commander_sim/rule_conformance.py",
@@ -164,6 +171,16 @@ def _owner(relative: str, layer: str) -> str:
         return "rules_capabilities"
     if relative.startswith("mtg_commander_sim/aura/"):
         return "aura_rules"
+    if relative in {
+        "mtg_commander_sim/ability_fragment_host.py",
+        "mtg_commander_sim/ability_fragments.py",
+        "mtg_commander_sim/compiled_ability_fragments.py",
+    }:
+        return "ability_fragments"
+    if relative == "mtg_commander_sim/enchant_spec.py":
+        return "aura_rules"
+    if relative == "mtg_commander_sim/protection.py":
+        return "protection"
     if relative.startswith("mtg_commander_sim/drawing/"):
         return "drawing"
     if relative.startswith("mtg_commander_sim/replacement/"):
@@ -297,8 +314,11 @@ def build_classifications() -> dict[str, Any]:
                         marker in relative
                         for marker in (
                             "attachments.py",
+                            "ability_fragment_host.py",
+                            "ability_fragments.py",
                             "aura/",
                             "engine.py",
+                            "enchant_spec.py",
                             "session.py",
                             "semantics.py",
                             "card_programs/",
@@ -331,6 +351,8 @@ def build_classifications() -> dict[str, Any]:
                             "token_creation.py",
                             "replacement_decisions.py",
                             "prevention_triggers.py",
+                            "protection.py",
+                            "compiled_ability_fragments.py",
                             "trigger_targeting.py",
                         )
                     )

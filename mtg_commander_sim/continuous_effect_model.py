@@ -5,6 +5,7 @@ from enum import Enum, IntEnum
 from typing import Any, Mapping
 
 from .object_predicate import ObjectQuerySpec
+from .ability_fragments import ability_fragment_from_dict
 from .replacement.immutable import (
     freeze_value,
     immutable_fingerprint,
@@ -70,6 +71,8 @@ _OPERATION_LAYERS = {
     "remove_ability": Layer.ABILITY,
     "remove_all_abilities": Layer.ABILITY,
     "add_rules_text": Layer.ABILITY,
+    "add_ability_fragment": Layer.ABILITY,
+    "remove_ability_fragment": Layer.ABILITY,
     "set_power_toughness": Layer.POWER_TOUGHNESS,
     "modify_power_toughness": Layer.POWER_TOUGHNESS,
     "switch_power_toughness": Layer.POWER_TOUGHNESS,
@@ -85,6 +88,7 @@ _COPY_FIELDS = {
     "subtypes",
     "colors",
     "abilities",
+    "ability_fragments",
     "power",
     "toughness",
     "loyalty",
@@ -143,6 +147,16 @@ def _validate_copy_values(value: Any) -> None:
                 field_name=f"copy_values.{field_name}",
                 unique=field_name != "abilities",
             )
+        elif field_name == "ability_fragments":
+            if not isinstance(field_value, (list, tuple)):
+                raise ContinuousEffectError(
+                    "copy_values.ability_fragments must be an array"
+                )
+            try:
+                for fragment in field_value:
+                    ability_fragment_from_dict(fragment)
+            except (TypeError, ValueError) as exc:
+                raise ContinuousEffectError(str(exc)) from exc
         elif field_name in {"name", "controller", "mana_cost", "text"}:
             if type(field_value) is not str:
                 raise ContinuousEffectError(
@@ -233,6 +247,15 @@ def _validate_operation_value(op: str, value: Any, field: str | None) -> None:
     elif op in {"add_ability", "remove_ability", "add_rules_text"}:
         if field is not None or type(value) is not str or not value:
             raise ContinuousEffectError(f"{op} requires one nonempty ability string")
+    elif op in {"add_ability_fragment", "remove_ability_fragment"}:
+        if field is not None or not isinstance(value, Mapping):
+            raise ContinuousEffectError(
+                f"{op} requires one typed ability-fragment object"
+            )
+        try:
+            ability_fragment_from_dict(value)
+        except (TypeError, ValueError) as exc:
+            raise ContinuousEffectError(str(exc)) from exc
     elif op in {"remove_all_abilities", "switch_power_toughness"}:
         if field is not None or value is not None:
             raise ContinuousEffectError(f"{op} accepts no value or field")

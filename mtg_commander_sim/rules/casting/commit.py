@@ -80,6 +80,7 @@ class _AdditionalCostCommit:
     deferred_events: list[tuple[Any, str, str, str, dict[str, Any], list[str]]]
     source_snapshots: list[Any]
     source_zones: dict[str, str]
+    source_characteristics: dict[str, dict[str, Any]]
     paid_refs: list[str]
 
 
@@ -181,7 +182,7 @@ def _commit_additional_costs(
     card: Any,
     selected_option: Mapping[str, Any],
 ) -> _AdditionalCostCommit:
-    result = _AdditionalCostCommit([], [], {}, [])
+    result = _AdditionalCostCommit([], [], {}, {}, [])
     selected_exile = selected_option.get("selected_exile_card")
     if selected_exile:
         exiled = host._resolve_object(
@@ -204,9 +205,18 @@ def _commit_additional_costs(
     selections = list(selected_option.get("selected_additional_costs", []))
     if not selections:
         return result
-    result.source_snapshots = host._semantic_event_sources()
+    result.source_snapshots = [
+        copy.deepcopy(source)
+        for source in host._semantic_event_sources()
+    ]
     result.source_zones = {
         source.object_id: source.zone for source in result.source_snapshots
+    }
+    result.source_characteristics = {
+        source.object_id: copy.deepcopy(
+            host._effective_card_data(source)
+        )
+        for source in result.source_snapshots
     }
     changes = []
     for selected in selections:
@@ -317,6 +327,15 @@ def _create_spell_item(
             "targets_revalidated": False,
             "targets_chosen_at_creation": True,
             "aura_spell": bool(details.get("aura_spell", False)),
+            **(
+                {
+                    "aura_enchant_spec": copy.deepcopy(
+                        details["aura_enchant_spec"]
+                    )
+                }
+                if details.get("aura_enchant_spec") is not None
+                else {}
+            ),
             "cant_be_countered": used_uncounterable,
             "granted_improvise": used_improvise,
             "cost_option": proposal.cost_option_id,
@@ -460,6 +479,9 @@ def _dispatch_cast_events(
             origin_attachments=attachments,
             departure_sources=costs.source_snapshots,
             departure_source_zones=costs.source_zones,
+            departure_source_characteristics=(
+                costs.source_characteristics
+            ),
             reason=f"{card.printed_name} additional cost",
             trigger_batch=trigger_batch,
         )

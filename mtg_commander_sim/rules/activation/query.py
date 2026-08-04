@@ -5,6 +5,10 @@ from dataclasses import replace
 from typing import Any, Protocol
 
 from ...abilities import ActivatedAbility, parse_activated_abilities
+from ...ability_fragments import (
+    canonical_ability_fragments,
+    granted_activated_specs,
+)
 from ...card_overrides.game_record_v3 import (
     historical_granted_activated_ability_descriptors,
 )
@@ -33,13 +37,54 @@ def activated_abilities(
     abilities = list(
         parse_activated_abilities(
             card_name=str(data.get("name") or card.printed_name),
-            oracle_text=str(data.get("oracle_text") or ""),
+            oracle_text=str(
+                data.get(
+                    "executable_oracle_text",
+                    data.get("oracle_text") or "",
+                )
+            ),
             keywords=tuple(data.get("keywords") or ()),
         )
     )
     _append_intrinsic_land_abilities(host, data, abilities)
+    abilities.extend(_typed_granted_abilities(data))
     abilities.extend(_granted_abilities(card, data))
     return tuple(abilities)
+
+
+def _typed_granted_abilities(
+    data: dict[str, Any],
+) -> tuple[ActivatedAbility, ...]:
+    specs = granted_activated_specs(
+        canonical_ability_fragments(data.get("ability_fragments", ()))
+    )
+    counts: dict[str, int] = {}
+    result: list[ActivatedAbility] = []
+    for index, spec in enumerate(specs):
+        ordinal = counts.get(spec.ability_id, 0) + 1
+        counts[spec.ability_id] = ordinal
+        result.append(
+            ActivatedAbility(
+                ability_id=(
+                    spec.ability_id
+                    if ordinal == 1
+                    else f"{spec.ability_id}#{ordinal}"
+                ),
+                line_index=25_000 + index,
+                oracle_line=f"{spec.cost_text}: {spec.effect_text}",
+                cost_text=spec.cost_text,
+                effect_text=spec.effect_text,
+                zones=("battlefield",),
+                mana={
+                    key: spec.mana_bundle.get(key, 0)
+                    for key in ("GENERIC", "W", "U", "B", "R", "G", "C")
+                },
+                tap_source=spec.tap_source,
+                sorcery_speed=spec.sorcery_speed,
+                builtin_semantic_key=spec.semantic_key,
+            )
+        )
+    return tuple(result)
 
 
 def _append_intrinsic_land_abilities(

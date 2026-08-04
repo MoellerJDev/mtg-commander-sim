@@ -47,6 +47,13 @@ class TokenCreationHost(Protocol):
 
     def _effective_card_data(self, card: Any) -> Mapping[str, Any]: ...
 
+    def _compiled_enchant_spec(
+        self,
+        card: CardInstance,
+        *,
+        face_name: str | None = None,
+    ) -> Any: ...
+
     def display_name(self, object_id: str) -> str: ...
 
     def semantic_program_is_current_trusted(self, program: Any) -> bool: ...
@@ -348,10 +355,16 @@ def _preflight_aura_token_specs(
             prepared.append(spec)
             continue
         try:
+            enchant_spec = host._compiled_enchant_spec(preview)
+            if enchant_spec is None:
+                raise AuraRuleError(
+                    "Aura token entry requires one trusted compiled "
+                    "Enchant descriptor"
+                )
             plan = prepare_aura_entry(
                 host,
                 preview,
-                oracle_text=str(data.get("oracle_text") or ""),
+                spec=enchant_spec,
                 controller=controller,
                 target_ref=(
                     str(spec["aura_target_ref"])
@@ -495,10 +508,16 @@ def _commit_token_specs(
                 token = host.state.cards[object_id]
                 data = host._effective_card_data(token)
                 try:
+                    enchant_spec = host._compiled_enchant_spec(token)
+                    if enchant_spec is None:
+                        raise AuraRuleError(
+                            "Aura token entry requires one trusted compiled "
+                            "Enchant descriptor"
+                        )
                     plan = prepare_aura_entry(
                         host,
                         token,
-                        oracle_text=str(data.get("oracle_text") or ""),
+                        spec=enchant_spec,
                         controller=controller,
                         target_ref=str(aura_target_ref),
                         resolving_as_spell=False,

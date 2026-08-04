@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from typing import Any, Protocol
 
-from ...aura import is_aura_type_line, simple_enchant_spec_from_oracle
+from ...aura import EnchantSpec, enchant_spec_to_dict, is_aura_type_line
 from ..action_proposals import (
     ActionOffer,
     CastCostOption,
@@ -63,6 +63,13 @@ class CastProposalHost(CastCostHost, Protocol):
     ) -> Mapping[str, Any] | None: ...
 
     def semantic_program_is_current_trusted(self, program: Any) -> bool: ...
+
+    def _compiled_enchant_spec(
+        self,
+        card: Any,
+        *,
+        face_name: str | None = None,
+    ) -> EnchantSpec | None: ...
 
     def _trusted_generic_spell(self, record: Any) -> bool: ...
 
@@ -364,25 +371,19 @@ def _cast_targets_and_tap_costs(
 def _aura_spell_target_schema(
     *,
     type_line: str,
-    oracle_text: str,
+    enchant_spec: EnchantSpec | None,
     reviewed_target_schema: Mapping[str, Any] | None = None,
 ) -> Mapping[str, Any] | None:
+    del reviewed_target_schema
     if not is_aura_type_line(type_line):
         return None
-    spec = simple_enchant_spec_from_oracle(oracle_text)
-    if spec is None:
-        if isinstance(reviewed_target_schema, Mapping):
-            # Complex Enchant restrictions remain source-pinned.  A reviewed
-            # semantic program may supply their exact target contract without
-            # teaching the universal casting path any card identity.
-            return copy.deepcopy(dict(reviewed_target_schema))
+    if enchant_spec is None:
         raise CastProposalError(
-            "This Aura's Enchant restriction is not in the supported "
-            "battlefield-object grammar",
+            "This Aura lacks one trusted compiled Enchant descriptor",
             status="unresolved",
-            reason="unresolved_aura_enchant_grammar",
+            reason="unresolved_aura_enchant_descriptor",
         )
-    return spec.target_schema()
+    return enchant_spec.target_schema()
 
 
 def build_cast_proposal(
@@ -413,14 +414,13 @@ def build_cast_proposal(
         program,
         selected,
     ) = _cast_program_and_cost(host, request, card, record, face)
-    oracle_text = (
-        str(face.get("oracle_text") or "")
-        if face
-        else record.oracle_text
+    enchant_spec = host._compiled_enchant_spec(
+        card,
+        face_name=(str(face.get("name") or "") if face else None),
     )
     aura_target_schema = _aura_spell_target_schema(
         type_line=type_line,
-        oracle_text=oracle_text,
+        enchant_spec=enchant_spec,
         reviewed_target_schema=(
             selected.to_dict().get("target_schema")
             if isinstance(
@@ -467,6 +467,11 @@ def build_cast_proposal(
                 "selected_modes": list(request.modes),
                 "target_schema_override": target_schema,
                 "aura_spell": aura_target_schema is not None,
+                "aura_enchant_spec": (
+                    enchant_spec_to_dict(enchant_spec)
+                    if enchant_spec is not None
+                    else None
+                ),
                 "commander_tax": commander_tax,
                 "mana_cost": mana_cost,
                 "during_resolution": request.during_resolution,
@@ -553,15 +558,14 @@ def build_cast_offer(
         return CastProposalResult("unavailable", "timing")
     semantic_key = f"{record.oracle_id}:spell:front"
     program = host.semantics.get(semantic_key)
-    oracle_text = (
-        str(front.get("oracle_text") or "")
-        if front
-        else record.oracle_text
+    enchant_spec = host._compiled_enchant_spec(
+        card,
+        face_name=(str(front.get("name") or "") if front else None),
     )
     try:
         aura_target_schema = _aura_spell_target_schema(
             type_line=type_line,
-            oracle_text=oracle_text,
+            enchant_spec=enchant_spec,
             reviewed_target_schema=getattr(
                 program, "target_schema", None
             ),

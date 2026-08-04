@@ -15,6 +15,12 @@ from .continuous_effect_model import (
 )
 from .object_predicate import ObjectQuerySpec
 from .object_query import ObjectQueryResult, object_matches_query
+from .ability_fragments import (
+    StaticAbilityFragment,
+    ability_fragment_from_dict,
+    ability_fragment_to_dict,
+    canonical_ability_fragments,
+)
 
 
 _SUBLAYER_ORDER = {
@@ -34,11 +40,15 @@ class CharacteristicState:
     mana_cost: str = ""
     mana_value: float = 0.0
     text: str = ""
+    executable_text: str = ""
     supertypes: set[str] = field(default_factory=set)
     card_types: set[str] = field(default_factory=set)
     subtypes: set[str] = field(default_factory=set)
     colors: set[str] = field(default_factory=set)
     abilities: list[str] = field(default_factory=list)
+    ability_fragments: list[StaticAbilityFragment] = field(
+        default_factory=list
+    )
     power: int | None = None
     toughness: int | None = None
     loyalty: int | None = None
@@ -52,11 +62,18 @@ class CharacteristicState:
             "mana_cost": self.mana_cost,
             "mana_value": self.mana_value,
             "text": self.text,
+            "executable_text": self.executable_text,
             "supertypes": sorted(self.supertypes),
             "card_types": sorted(self.card_types),
             "subtypes": sorted(self.subtypes),
             "colors": sorted(self.colors),
             "abilities": list(self.abilities),
+            "ability_fragments": [
+                ability_fragment_to_dict(value)
+                for value in canonical_ability_fragments(
+                    self.ability_fragments
+                )
+            ],
             "power": self.power,
             "toughness": self.toughness,
             "loyalty": self.loyalty,
@@ -187,6 +204,103 @@ def _as_words(value: Any) -> set[str]:
     return {str(item) for item in value}
 
 
+def _apply_copy_values(
+    state: CharacteristicState,
+    value: Any,
+) -> None:
+    if not isinstance(value, Mapping):
+        raise ContinuousEffectError("copy_values requires an object")
+    for key, replacement in value.items():
+        if key == "text":
+            state.text = str(replacement)
+            state.executable_text = state.text
+        elif key in {"supertypes", "card_types", "subtypes", "colors"}:
+            setattr(state, key, _as_words(replacement))
+        elif key == "abilities":
+            state.abilities = [str(item) for item in replacement]
+        elif key == "ability_fragments":
+            state.ability_fragments = list(
+                canonical_ability_fragments(replacement)
+            )
+        elif hasattr(state, key):
+            setattr(state, key, replacement)
+        else:
+            raise ContinuousEffectError(
+                f"Unknown copiable field {key!r}"
+            )
+
+
+def _apply_face_down(
+    state: CharacteristicState,
+    value: Any,
+) -> None:
+    values = dict(value or {})
+    state.name = str(values.get("name") or "")
+    state.mana_cost = str(values.get("mana_cost") or "")
+    state.mana_value = float(values.get("mana_value") or 0)
+    state.text = str(values.get("text") or "")
+    state.executable_text = state.text
+    state.supertypes = _as_words(values.get("supertypes"))
+    state.card_types = _as_words(
+        values.get("card_types", ["Creature"])
+    )
+    state.subtypes = _as_words(values.get("subtypes"))
+    state.colors = _as_words(values.get("colors"))
+    state.abilities = [
+        str(item) for item in values.get("abilities", [])
+    ]
+    state.ability_fragments = []
+    state.power = int(values.get("power", 2))
+    state.toughness = int(values.get("toughness", 2))
+
+
+def _apply_ability_operation(
+    state: CharacteristicState,
+    operation: ContinuousOperation,
+) -> bool:
+    op = operation.op
+    value = operation.value
+    if op == "add_ability":
+        ability = str(value)
+        if ability.casefold() not in {
+            item.casefold() for item in state.abilities
+        }:
+            state.abilities.append(ability)
+    elif op == "remove_ability":
+        state.abilities = [
+            ability
+            for ability in state.abilities
+            if ability.casefold() != str(value).casefold()
+        ]
+    elif op == "add_rules_text":
+        line = str(value).strip()
+        existing = [item.strip() for item in state.text.splitlines()]
+        if line not in existing:
+            state.text = "\n".join(
+                item for item in (state.text.strip(), line) if item
+            )
+    elif op == "add_ability_fragment":
+        fragment = ability_fragment_from_dict(value)
+        state.ability_fragments = list(
+            canonical_ability_fragments(
+                (*state.ability_fragments, fragment)
+            )
+        )
+    elif op == "remove_ability_fragment":
+        fragment = ability_fragment_from_dict(value)
+        state.ability_fragments = [
+            candidate
+            for candidate in state.ability_fragments
+            if candidate != fragment
+        ]
+    elif op == "remove_all_abilities":
+        state.abilities = []
+        state.ability_fragments = []
+    else:
+        return False
+    return True
+
+
 def _apply_operation(
     state: CharacteristicState,
     operation: ContinuousOperation,
@@ -194,41 +308,10 @@ def _apply_operation(
     op = operation.op
     value = operation.value
     if op == "copy_values":
-        if not isinstance(value, Mapping):
-            raise ContinuousEffectError(
-                "copy_values requires an object"
-            )
-        for key, replacement in value.items():
-            if key == "text":
-                state.text = str(replacement)
-            elif key in {"supertypes", "card_types", "subtypes", "colors"}:
-                setattr(state, key, _as_words(replacement))
-            elif key == "abilities":
-                state.abilities = [str(item) for item in replacement]
-            elif hasattr(state, key):
-                setattr(state, key, replacement)
-            else:
-                raise ContinuousEffectError(
-                    f"Unknown copiable field {key!r}"
-                )
+        _apply_copy_values(state, value)
         return
     if op == "face_down":
-        values = dict(value or {})
-        state.name = str(values.get("name") or "")
-        state.mana_cost = str(values.get("mana_cost") or "")
-        state.mana_value = float(values.get("mana_value") or 0)
-        state.text = str(values.get("text") or "")
-        state.supertypes = _as_words(values.get("supertypes"))
-        state.card_types = _as_words(
-            values.get("card_types", ["Creature"])
-        )
-        state.subtypes = _as_words(values.get("subtypes"))
-        state.colors = _as_words(values.get("colors"))
-        state.abilities = [
-            str(item) for item in values.get("abilities", [])
-        ]
-        state.power = int(values.get("power", 2))
-        state.toughness = int(values.get("toughness", 2))
+        _apply_face_down(state, value)
         return
     if op == "set_controller":
         state.controller = str(value)
@@ -239,6 +322,10 @@ def _apply_operation(
                 "replace_text requires from/to"
             )
         state.text = state.text.replace(
+            str(value.get("from") or ""),
+            str(value.get("to") or ""),
+        )
+        state.executable_text = state.executable_text.replace(
             str(value.get("from") or ""),
             str(value.get("to") or ""),
         )
@@ -271,32 +358,7 @@ def _apply_operation(
         else:
             state.colors.difference_update(values)
         return
-    if op == "add_ability":
-        ability = str(value)
-        if ability.casefold() not in {
-            item.casefold() for item in state.abilities
-        }:
-            state.abilities.append(ability)
-        return
-    if op == "remove_ability":
-        state.abilities = [
-            ability
-            for ability in state.abilities
-            if ability.casefold() != str(value).casefold()
-        ]
-        return
-    if op == "add_rules_text":
-        line = str(value).strip()
-        existing = [
-            value.strip() for value in state.text.splitlines()
-        ]
-        if line not in existing:
-            state.text = "\n".join(
-                value for value in (state.text.strip(), line) if value
-            )
-        return
-    if op == "remove_all_abilities":
-        state.abilities = []
+    if _apply_ability_operation(state, operation):
         return
     if op == "set_power_toughness":
         if not isinstance(value, Sequence) or len(value) != 2:

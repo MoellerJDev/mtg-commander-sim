@@ -26,6 +26,7 @@ class SetPermanentTappedIntent:
     actor: str
     tapped: bool
     reason: str
+    logical_object_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

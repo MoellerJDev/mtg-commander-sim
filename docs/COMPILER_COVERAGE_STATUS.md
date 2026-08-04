@@ -13,10 +13,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v28`
+- Compiler: `oracle-ir-v29`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,589 physical / 1,541 logical lines
+- Compiler module: 1,577 physical / 1,530 logical lines
 
 ## Canonical CardProgram
 
@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/25`
+- Registry schema/version: `1/26`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `9d879283a17ef95c1fc27e64f5048d71d7298ea8cc28af9e56eac2719fcdcfee`
-- Evidence fingerprint: `3f5cc8d336a05fccb465f2bcd708515f7f5fc0789ee62cabd29062f9a9aa06e6`
-- Explicit evidence declarations: 328
-- Capability records: 42
-- Trusted records: 32
+- Registry fingerprint: `b333497580e5c49cba62012d1c0318890cd137db3f821f2bf2a1246716dbe09b`
+- Evidence fingerprint: `80f30c6a25101e4afaf209bc9aedd8529cb0eddeea873e31c522c4c2fc72bb46`
+- Explicit evidence declarations: 336
+- Capability records: 43
+- Trusted records: 33
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 18, "not_run": 3, "passed": 21}`
-- Implementation mutation statuses: `{"killed": 35, "not_run": 7}`
+- Dependency fail-closed statuses: `{"not_applicable": 18, "not_run": 3, "passed": 22}`
+- Implementation mutation statuses: `{"killed": 36, "not_run": 7}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -74,28 +74,30 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,485 | 3,382 | 16,077 | 19,026 | 65,910 | false |
-| Commander legal | 31,623 | 722 | 14,645 | 16,256 | 57,497 | false |
+| Full Oracle | 38,485 | 3,409 | 16,050 | 19,026 | 65,993 | false |
+| Commander legal | 31,623 | 747 | 14,620 | 16,256 | 57,570 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 17,088 |
+| `dependency_contract` | 16,989 |
 | `trigger` | 15,230 |
-| `spell_effect` | 11,319 |
-| `static_ability` | 11,114 |
+| `spell_effect` | 11,318 |
+| `static_ability` | 11,113 |
 | `effect` | 7,212 |
 | `cost` | 2,009 |
 | `replacement_effect` | 1,757 |
 | `declaration_restriction` | 170 |
+| `unsupported_enchant_restriction` | 148 |
+| `unsupported_protection_quality` | 36 |
 | `declaration_cost` | 11 |
 
 ## Semantic packs and implicit overrides
 
 - Pack files: 15
-- Program entries: 265
-- Unique program keys: 253
+- Program entries: 266
+- Unique program keys: 254
 - Duplicate keys resolved by pack order: 12
 - Unique Oracle IDs represented: 142
 - Card-specific operation names: 5

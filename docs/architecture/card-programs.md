@@ -85,6 +85,11 @@ fail closed.
   a generated handler. Its closed CR 205.3m subtype grammar intentionally
   demotes prior false positives instead of preserving a misleading trust
   count.
+- Oracle IR v29 makes executable Enchant and protection meaning part of the
+  canonical runtime-handler descriptor. Display `add_rules_text` is not an
+  executable granted ability; grants use typed activated/triggered fragments
+  that participate in layer 6, discovery, source identity, trust binding, and
+  replay fingerprints.
 
 ## Execution ownership
 

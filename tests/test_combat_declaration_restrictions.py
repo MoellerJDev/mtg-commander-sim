@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.ability_fragments import ability_fragment_to_dict
+from mtg_commander_sim.aura import SimpleEnchantSpec
 from mtg_commander_sim.declaration_restrictions import (
     parse_declaration_restriction_line,
 )
@@ -99,11 +101,13 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         type_line: str,
         tapped: bool = False,
         oracle_text: str = "",
+        ability_fragments: list[dict] | None = None,
         aura_target_ref: str | None = None,
     ):
         characteristics = {
             "type_line": type_line,
             "oracle_text": oracle_text,
+            "ability_fragments": ability_fragments or [],
         }
         if "planeswalker" in type_line.casefold():
             characteristics["loyalty"] = "3"
@@ -855,6 +859,9 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             "Opponent Aura",
             type_line="Token Enchantment — Aura",
             oracle_text="Enchant creature",
+            ability_fragments=[
+                ability_fragment_to_dict(SimpleEnchantSpec("creature"))
+            ],
             aura_target_ref=enchanted.ref,
         )
 

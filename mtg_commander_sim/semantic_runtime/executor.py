@@ -214,6 +214,7 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
                 actor=intent.actor,
                 tapped=intent.tapped,
                 reason=intent.reason,
+                logical_object_id=intent.logical_object_id,
             )
             results.append((intent.object_ref, result))
             continue

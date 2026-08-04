@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 25,
+  "registry_version": 26,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -131,6 +131,33 @@
       "dependency_fail_closed_rationale": "This bounded intrinsic keyword ability owns its cost, timing, target, stack, and attachment commit without another optional capability.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_generic_equip_resolution_mutant_is_killed removes recognition of the typed built-in Equip resolution and the exact attach operation assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "protection.typed.debt",
+      "version": 1,
+      "official_rules": ["301.5c", "303.4c", "509.1b", "702.16", "702.16a", "702.16b", "702.16c", "702.16d", "702.16e", "702.16f", "702.16j"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply the damage, enchanting/equipping/fortifying, blocking, and targeting prohibitions of one compiled protection quality using live or last-known source characteristics.",
+        "inputs": ["trusted typed protection fragment", "protected permanent characteristics", "source colors, card types, and subtypes", "target, attachment, block, or damage event"],
+        "outputs": ["closed allowed, blocked, or unresolved verdict", "protection prevention effect", "target and declaration filtering", "illegal-attachment state action"],
+        "exclusions": ["protection quality conjunctions and comma lists", "qualities other than everything, colors, represented card types, and Aura", "effects that remove protection from damage", "effects that redefine a quality dynamically", "untrusted or text-only granted protection"]
+      },
+      "dependencies": ["attachment.aura.simple_object", "damage.prevention.static_fixed", "target.revalidate_resolution"],
+      "implementation_components": ["mtg_commander_sim.ability_fragments.ProtectionSpec", "mtg_commander_sim.semantic_runtime.ability_fragments.ProtectionAbilityFragmentHandler", "mtg_commander_sim.compiler.continuous_templates.attached_fixed_characteristics_handler", "mtg_commander_sim.protection.protection_verdict", "mtg_commander_sim.damage._protection_prevention_effects", "mtg_commander_sim.engine.CommanderEngine._target_row_matches", "mtg_commander_sim.engine.CommanderEngine._can_block", "mtg_commander_sim.engine.CommanderEngine._attachment_is_legal"],
+      "positive_tests": ["test_typed_protection_blocks_target_attachment_and_block_operations", "test_lifelink_counts_only_damage_not_prevented_by_protection"],
+      "negative_tests": ["test_untyped_and_unsupported_protection_fail_closed"],
+      "interaction_tests": ["test_layer_six_granted_protection_uses_typed_fragment"],
+      "multiplayer_tests": ["test_four_player_protection_uses_the_actual_source"],
+      "privacy_tests": ["test_aura_entry_choice_projection_and_replay_are_exact"],
+      "replay_tests": ["test_aura_entry_choice_projection_and_replay_are_exact"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Uncompiled or malformed protection yields an unresolved verdict; target, block, attachment, and damage consumers fail closed, while unsupported compiler grammar remains residual before runtime mutation.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_typed_protection_verdict_mutant_is_killed replaces the matching-quality verdict with allowed and the focused assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

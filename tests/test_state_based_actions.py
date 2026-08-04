@@ -9,7 +9,15 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.aura import simple_enchant_spec_from_oracle
+from mtg_commander_sim.aura import (
+    SimpleEnchantSpec,
+    simple_enchant_spec_from_oracle,
+)
+from mtg_commander_sim.ability_fragments import (
+    ProtectionQualityKind,
+    ProtectionSpec,
+    ability_fragment_to_dict,
+)
 from mtg_commander_sim.carddb import CardRecord
 from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import DecisionGroup, StackItem
@@ -2453,6 +2461,9 @@ class StateBasedActionEngineTests(unittest.TestCase):
             characteristics={
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
+                "ability_fragments": [
+                    ability_fragment_to_dict(SimpleEnchantSpec("creature"))
+                ],
             },
             aura_target_ref=creature_ref,
         )[0]
@@ -2466,6 +2477,9 @@ class StateBasedActionEngineTests(unittest.TestCase):
             characteristics={
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
+                "ability_fragments": [
+                    ability_fragment_to_dict(SimpleEnchantSpec("creature"))
+                ],
             },
             aura_target_ref=creature_ref,
         )[0]
@@ -2500,6 +2514,15 @@ class StateBasedActionEngineTests(unittest.TestCase):
             characteristics={
                 "type_line": "Token Creature — Bear",
                 "oracle_text": "Protection from red",
+                "keywords": ["Protection"],
+                "ability_fragments": [
+                    ability_fragment_to_dict(
+                        ProtectionSpec(
+                            ProtectionQualityKind.COLOR,
+                            "R",
+                        )
+                    )
+                ],
                 "power": "2",
                 "toughness": "2",
             },
@@ -2549,6 +2572,9 @@ class StateBasedActionEngineTests(unittest.TestCase):
             characteristics={
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
+                "ability_fragments": [
+                    ability_fragment_to_dict(SimpleEnchantSpec("creature"))
+                ],
             },
             aura_target_ref=creature_ref,
         )[0]
@@ -2638,7 +2664,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
         before = set(engine.state.cards)
         with self.assertRaisesRegex(
             GameRuleError,
-            "not in the supported battlefield-object grammar",
+            "trusted compiled Enchant descriptor",
         ):
             engine.create_token(
                 "A",

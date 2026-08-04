@@ -3,6 +3,12 @@ from __future__ import annotations
 from functools import lru_cache
 
 from ..rules.capabilities import load_default_capability_registry
+from .ability_fragments import (
+    ENCHANT_FRAGMENT_HANDLER_ID,
+    PROTECTION_FRAGMENT_HANDLER_ID,
+    default_ability_fragment_registry,
+    fragments_from_descriptors,
+)
 from .context import (
     ReadOnlyHandlerContext,
     ReadOnlyRulesQuery,
@@ -319,6 +325,7 @@ __all__ = [
     "ZoneDestinationReplacementNode",
     "default_token_creation_replacement_registry",
     "default_continuous_effect_component_registry",
+    "default_ability_fragment_registry",
     "default_counter_placement_replacement_registry",
     "default_damage_replacement_registry",
     "default_damage_result_replacement_registry",
@@ -351,4 +358,7 @@ __all__ = [
     "runtime_component_inventory",
     "runtime_component_registry_fingerprint",
     "validate_runtime_handler_descriptors",
+    "ENCHANT_FRAGMENT_HANDLER_ID",
+    "PROTECTION_FRAGMENT_HANDLER_ID",
+    "fragments_from_descriptors",
 ]

@@ -2,126 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-import hashlib
-from typing import Any, Mapping
-
-from ..util import stable_json
-
-
-class AuraRuleError(ValueError):
-    """A represented Aura rule value is malformed or unsupported."""
-
-
-class AuraControllerRelation(str, Enum):
-    ANY = "any"
-    YOU = "you"
-    OPPONENT = "opponent"
-
-
-_OBJECT_KINDS = frozenset(
-    {
-        "artifact",
-        "battle",
-        "creature",
-        "enchantment",
-        "land",
-        "planeswalker",
-        "permanent",
-        "nonland permanent",
-    }
+from ..enchant_spec import (
+    AuraControllerRelation,
+    AuraRuleError,
+    EnchantSpec,
+    LinkedGraveyardCreatureEnchantSpec,
+    SimpleEnchantSpec,
+    enchant_spec_from_dict,
+    enchant_spec_to_dict,
 )
-
-
-@dataclass(frozen=True, slots=True)
-class SimpleEnchantSpec:
-    """Closed CR 702.5 object grammar supported by the Aura subsystem."""
-
-    object_kind: str
-    controller_relation: AuraControllerRelation = AuraControllerRelation.ANY
-    schema_version: int = 1
-
-    def __post_init__(self) -> None:
-        if type(self.schema_version) is not int or self.schema_version != 1:
-            raise AuraRuleError("Unsupported simple Enchant schema version")
-        if not isinstance(self.object_kind, str) or not self.object_kind.strip():
-            raise AuraRuleError(
-                "Simple Enchant object kind must be a nonempty string"
-            )
-        normalized = " ".join(self.object_kind.casefold().split())
-        if normalized not in _OBJECT_KINDS:
-            raise AuraRuleError(
-                f"Unsupported simple Enchant object kind: {self.object_kind!r}"
-            )
-        object.__setattr__(self, "object_kind", normalized)
-        if not isinstance(self.controller_relation, AuraControllerRelation):
-            raise AuraRuleError("Unsupported Enchant controller relation")
-
-    def target_schema(self) -> dict[str, Any]:
-        schema: dict[str, Any] = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "controller": self.controller_relation.value,
-            "count": 1,
-            "source_exclusion": True,
-        }
-        if self.object_kind == "permanent":
-            schema["permanent"] = True
-        elif self.object_kind == "nonland permanent":
-            schema.update({"permanent": True, "land": False})
-        else:
-            schema["types_all"] = [self.object_kind]
-        return schema
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "schema_version": self.schema_version,
-            "object_kind": self.object_kind,
-            "controller_relation": self.controller_relation.value,
-        }
-
-    @classmethod
-    def from_dict(cls, value: Mapping[str, Any]) -> "SimpleEnchantSpec":
-        expected = {
-            "schema_version",
-            "object_kind",
-            "controller_relation",
-        }
-        if set(value) != expected:
-            missing = sorted(expected - set(value))
-            unknown = sorted(set(value) - expected)
-            details = []
-            if missing:
-                details.append("missing " + ", ".join(missing))
-            if unknown:
-                details.append("unknown " + ", ".join(unknown))
-            raise AuraRuleError(
-                "Malformed simple Enchant value: " + "; ".join(details)
-            )
-        if type(value["schema_version"]) is not int:
-            raise AuraRuleError("Simple Enchant schema version must be an integer")
-        if not isinstance(value["object_kind"], str):
-            raise AuraRuleError("Simple Enchant object kind must be a string")
-        if not isinstance(value["controller_relation"], str):
-            raise AuraRuleError(
-                "Simple Enchant controller relation must be a string"
-            )
-        try:
-            relation = AuraControllerRelation(value["controller_relation"])
-        except ValueError as exc:
-            raise AuraRuleError(
-                "Unsupported Enchant controller relation"
-            ) from exc
-        return cls(
-            schema_version=value["schema_version"],
-            object_kind=value["object_kind"],
-            controller_relation=relation,
-        )
-
-    @property
-    def fingerprint(self) -> str:
-        return hashlib.sha256(
-            stable_json(self.to_dict()).encode("utf-8")
-        ).hexdigest()
 
 
 class AuraEntryOutcome(str, Enum):
@@ -136,13 +25,16 @@ class AuraEntryPlan:
     source_logical_object_id: str
     source_zone: str
     controller: str
-    spec: SimpleEnchantSpec
+    spec: EnchantSpec
     outcome: AuraEntryOutcome
     target_ref: str | None = None
     legal_target_refs: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        if not isinstance(self.spec, SimpleEnchantSpec):
+        if not isinstance(
+            self.spec,
+            (SimpleEnchantSpec, LinkedGraveyardCreatureEnchantSpec),
+        ):
             raise AuraRuleError("Aura entry plan requires an Enchant spec")
         if not isinstance(self.outcome, AuraEntryOutcome):
             raise AuraRuleError("Aura entry plan requires a typed outcome")
@@ -213,5 +105,9 @@ __all__ = [
     "AuraEntryPlan",
     "AuraRuleError",
     "AuraZoneMovePreflight",
+    "EnchantSpec",
+    "LinkedGraveyardCreatureEnchantSpec",
     "SimpleEnchantSpec",
+    "enchant_spec_from_dict",
+    "enchant_spec_to_dict",
 ]

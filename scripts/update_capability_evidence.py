@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "protection.typed.debt": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_typed_protection_verdict_mutant_is_killed"
+    ),
     "attachment.aura.simple_object": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

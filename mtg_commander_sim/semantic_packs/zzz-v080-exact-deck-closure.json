@@ -700,9 +700,31 @@
             "type_operations": [],
             "add_abilities": [],
             "remove_abilities": [],
-            "add_rules_text": [
-              "{2}, {T}: This creature deals 1 damage to any target",
-              "Whenever a creature dies, untap this creature."
+            "add_rules_text": [],
+            "add_ability_fragments": [
+              {
+                "kind": "granted_activated",
+                "value": {
+                  "schema_version": 1,
+                  "ability_id": "granted:damage",
+                  "semantic_key": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage",
+                  "cost_text": "{2}, {T}",
+                  "effect_text": "This creature deals 1 damage to any target",
+                  "mana": {"GENERIC": 2},
+                  "tap_source": true,
+                  "sorcery_speed": false
+                }
+              },
+              {
+                "kind": "granted_triggered",
+                "value": {
+                  "schema_version": 1,
+                  "ability_id": "granted:untap-on-creature-death",
+                  "semantic_key": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:untap",
+                  "event": "creature.dies",
+                  "label": "Whenever a creature dies, untap this creature."
+                }
+              }
             ],
             "power": 0,
             "toughness": 0
@@ -826,6 +848,35 @@
         "source_oracle_hash": "00a18bf359265622865f3f1791dba43ba2a7967a4b9c77594cf3d9eca6290242",
         "source_rulings_hash": "0716c69497a1e7fc602e27aa49294a102b40c0a720408817c6427c507812e0b1",
         "authored_by": "v0.8-exact-deck-closure",
+        "review_status": "reviewed"
+      }
+    },
+    {
+      "key": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:untap",
+      "label": "Thornbite Staff granted untap ability",
+      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
+      "ability_id": "granted:untap",
+      "active_zone": "battlefield",
+      "event": "creature.dies",
+      "event_condition": {
+        "field": "types",
+        "op": "contains_any",
+        "value": ["creature"]
+      },
+      "effects": [
+        {
+          "op": "untap",
+          "card": "$source"
+        }
+      ],
+      "trust_level": "trusted",
+      "coverage": ["granted_triggered_ability", "creature_dies", "untap"],
+      "tests": ["test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
+      "provenance": {
+        "source_oracle_hash": "00a18bf359265622865f3f1791dba43ba2a7967a4b9c77594cf3d9eca6290242",
+        "source_rulings_hash": "0716c69497a1e7fc602e27aa49294a102b40c0a720408817c6427c507812e0b1",
+        "authored_by": "v0.8-exact-deck-closure",
+        "granted_only": true,
         "review_status": "reviewed"
       }
     },
@@ -1419,6 +1470,21 @@
         "creature": true,
         "count": 1
       },
+      "handlers": [
+        {
+          "handler_id": "ability.enchant.linked_graveyard_creature.v1",
+          "schema_version": 1,
+          "event": "resolve",
+          "fragment": {
+            "kind": "enchant_linked_graveyard_creature",
+            "value": {
+              "schema_version": 1,
+              "link_annotation": "animate_dead_creature",
+              "controller_relation": "any"
+            }
+          }
+        }
+      ],
       "effects": [
         {
           "op": "prepare_graveyard_creature_aura",

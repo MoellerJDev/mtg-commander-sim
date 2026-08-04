@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.ability_fragments import ability_fragment_to_dict
+from mtg_commander_sim.aura import SimpleEnchantSpec
 from mtg_commander_sim.engine import (
     GameRuleError,
     StateInvariantError,
@@ -137,6 +139,9 @@ class BattlefieldRuleTests(unittest.TestCase):
             characteristics={
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
+                "ability_fragments": [
+                    ability_fragment_to_dict(SimpleEnchantSpec("creature"))
+                ],
             },
             aura_target_ref=creature.ref,
         )[0]

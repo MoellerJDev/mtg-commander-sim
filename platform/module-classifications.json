@@ -49,6 +49,33 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/ability_fragment_host.py",
+      "layer": "semantics",
+      "owning_subsystem": "ability_fragments",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/ability_fragments.py",
+      "layer": "domain",
+      "owning_subsystem": "ability_fragments",
+      "allowed_dependency_layers": [
+        "domain"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/arena.py",
       "layer": "application",
       "owning_subsystem": "legacy_application",
@@ -479,7 +506,37 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/compiled_ability_fragments.py",
+      "layer": "semantics",
+      "owning_subsystem": "ability_fragments",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/compiler/__init__.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
       "allowed_dependency_layers": [
@@ -615,6 +672,21 @@
     },
     {
       "file": "mtg_commander_sim/compiler/ir_model.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/compiler/keyword_nodes.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
       "allowed_dependency_layers": [
@@ -1171,6 +1243,18 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/enchant_spec.py",
+      "layer": "domain",
+      "owning_subsystem": "aura_rules",
+      "allowed_dependency_layers": [
+        "domain"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/engine.py",
       "layer": "rules",
       "owning_subsystem": "legacy_rules",
@@ -1470,6 +1554,20 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "principal_scoped",
       "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/protection.py",
+      "layer": "rules",
+      "owning_subsystem": "protection",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/protocol.py",
@@ -2329,6 +2427,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/ability_fragments.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_runtime/attached_continuous.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_runtime",
@@ -2998,5 +3111,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "86d70df19358aca6559abe49615606696ac217386b09140abfeaf20cd6cf5a7a"
+  "fingerprint": "0fc89e90cb7af841a09b8cebef73a67f6d777a0a4d8fcdb3c0c77b172c47aaaa"
 }
