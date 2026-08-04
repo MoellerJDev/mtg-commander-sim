@@ -293,6 +293,16 @@ class CommanderDuelTurnStateTests(unittest.TestCase):
         )
         self.assertEqual(8, self.hand_count(session, "A"))
 
+    def test_multiplayer_draw_cannot_be_disabled_by_duel_profile_or_override(self):
+        config = GameConfig(
+            profile="commander_duel",
+            first_player_draws_on_turn_one=False,
+        )
+
+        self.assertFalse(config.effective_first_player_draws(2))
+        self.assertTrue(config.effective_first_player_draws(3))
+        self.assertTrue(config.effective_first_player_draws(4))
+
 
 class BrowserGameplayRegressionTests(unittest.TestCase):
     @classmethod
