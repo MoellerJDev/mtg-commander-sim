@@ -6265,27 +6265,27 @@
             "permanent.tap.effect"
           ],
           "family": "permanent.tap_state",
-          "handler_id": "generic.tap-permanent.v1",
+          "handler_id": "generic.tap-permanent.v2",
           "operation": "tap",
           "rule_references": [
             "701.26",
             "701.26a"
           ],
-          "schema_version": 1
+          "schema_version": 2
         },
         {
           "capability_dependencies": [
             "permanent.untap.effect"
           ],
           "family": "permanent.tap_state",
-          "handler_id": "generic.untap-permanent.v1",
+          "handler_id": "generic.untap-permanent.v2",
           "operation": "untap",
           "rule_references": [
             "122.1d",
             "701.26",
             "701.26b"
           ],
-          "schema_version": 1
+          "schema_version": 2
         },
         {
           "capability_dependencies": [
@@ -6405,9 +6405,48 @@
         "veil_of_summer"
       ],
       "registered_operations_still_in_legacy_dispatch": [],
-      "registered_runtime_handler_count": 15,
-      "registry_fingerprint": "5423991fb669507006203c5f2a6684414cc2f470d7e95128ed7b36d101f70965",
+      "registered_runtime_handler_count": 18,
+      "registry_fingerprint": "40c7ea3f443eb72710270dd919caab5d603aaa67c779b49c70a3095f58381c0b",
       "runtime_handlers": [
+        {
+          "capability_dependencies": [],
+          "event": "resolve",
+          "family": "ability.enchant.linked_graveyard_creature",
+          "handler_id": "ability.enchant.linked_graveyard_creature.v1",
+          "rule_references": [
+            "303.4",
+            "303.4a",
+            "303.4f",
+            "702.5a"
+          ],
+          "schema_version": 1
+        },
+        {
+          "capability_dependencies": [
+            "attachment.aura.simple_object"
+          ],
+          "event": "continuous",
+          "family": "ability.static.enchant",
+          "handler_id": "ability.static.enchant.v1",
+          "rule_references": [
+            "303.4",
+            "702.5a"
+          ],
+          "schema_version": 1
+        },
+        {
+          "capability_dependencies": [
+            "protection.typed.debt"
+          ],
+          "event": "continuous",
+          "family": "ability.static.protection",
+          "handler_id": "ability.static.protection.v1",
+          "rule_references": [
+            "702.16",
+            "702.16a"
+          ],
+          "schema_version": 1
+        },
         {
           "capability_dependencies": [
             "continuous.power_toughness.fixed_anthem"
@@ -6656,7 +6695,7 @@
           "schema_version": 1
         }
       ],
-      "runtime_registry_fingerprint": "ddd0e2054f6fb95372ec99fc1824719c5c5edbfbed90f48f543d5b89ea326953",
+      "runtime_registry_fingerprint": "eb8a7f5252f8d108e5d55e6b23ce64192384ce632974b9e96f3c30bedd4e16ba",
       "schema_version": 1,
       "typed_intent_executor": "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan"
     },
@@ -9198,7 +9237,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "a02aed1a35826de79e2deacd8b6bb7966f6cb908707f4b3d6b051c6fb319e892"
+          "verified": "72fa5307122b3fa7867693e4553821b4b83eea6ae5837216cf031b59268323e3"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9637,7 +9676,7 @@
     },
     "python": {
       "conventional_ast_cases": 1437,
-      "discovered_total": 4547,
+      "discovered_total": 4737,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 38,
@@ -9646,7 +9685,7 @@
         "replay_named": 85,
         "server_named": 18
       },
-      "reconciles": false,
+      "reconciles": true,
       "test_files": 152
     }
   }

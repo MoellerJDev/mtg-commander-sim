@@ -26,7 +26,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Direct GameState-write heuristic: 135 locations
 - Semantic-operation branches: 158
 - Registered typed semantic handlers: 84 across 84 operations
-- Registered typed runtime components: 15
+- Registered typed runtime components: 18
 - Remaining legacy `apply_effect` branches: 0
 - Registered operations still intercepted by engine string dispatch: 0
 - Exact printed-name literals in configured core files: 658 (97 conditional)
@@ -114,7 +114,7 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,547
+- Python discovered: 4,737
 - Conventional Python cases: 1,437
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7

@@ -160,7 +160,7 @@ class CardProgramV2Tests(unittest.TestCase):
             trust_level="trusted",
         )
 
-        self.assertEqual("oracle-ir-v28", current.compiler_version)
+        self.assertEqual("oracle-ir-v29", current.compiler_version)
         self.assertEqual(
             "capability_closed", current.trust_closure["trust_basis"]
         )
@@ -182,7 +182,7 @@ class CardProgramV2Tests(unittest.TestCase):
             capability_profile="commander_review",
             trust_level="trusted",
         )
-        self.assertEqual("oracle-ir-v28", current.compiler_version)
+        self.assertEqual("oracle-ir-v29", current.compiler_version)
         self.assertEqual("capability_closed", current.trust_closure["trust_basis"])
         self.assertEqual(
             ["choose_damage_source", "life"],
@@ -662,6 +662,7 @@ class CardProgramV2Tests(unittest.TestCase):
         ]
         self.assertEqual(
             {
+                "ability.enchant.linked_graveyard_creature.v1": [],
                 "continuous.anthem.power_toughness.v1": [
                     "continuous.power_toughness.fixed_anthem"
                 ],
