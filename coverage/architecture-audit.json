@@ -3270,7 +3270,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 91267,
+      "logical_lines": 91272,
       "methods": {
         "dunder": 200,
         "private": 626,
@@ -3492,8 +3492,8 @@
           "file": "mtg_commander_sim/semantics.py",
           "functions_and_methods": 21,
           "language": "python",
-          "logical_lines": 637,
-          "physical_lines": 680
+          "logical_lines": 642,
+          "physical_lines": 692
         },
         {
           "file": "mtg_commander_sim/continuous_effect_model.py",
@@ -5305,7 +5305,7 @@
           "physical_lines": 1577
         }
       ],
-      "physical_lines": 99458,
+      "physical_lines": 99470,
       "python_file_count": 213,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -9237,7 +9237,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "9d6146ab061fec63bec69baedc00c9bc3ad0455d7180ff78af281cc3b34e0884"
+          "verified": "4f48d04905672a1d00fd5fde713388cfce22eabe8bec8df039d58399e2746a5e"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9675,8 +9675,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1438,
-      "discovered_total": 4738,
+      "conventional_ast_cases": 1439,
+      "discovered_total": 4739,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 38,
