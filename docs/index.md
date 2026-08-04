@@ -112,6 +112,7 @@ indexed here but excluded from documentation front-matter validation.
 - [Platform implementation status](PLATFORM_IMPLEMENTATION_STATUS.md)
 - [Architecture debt status](ARCHITECTURE_DEBT_STATUS.md)
 - [Compiler coverage status](COMPILER_COVERAGE_STATUS.md)
+- [Commander card-unlock frontier](../coverage/card-unlock-frontier.md)
 - [Platform readiness](../coverage/platform-readiness.md)
 - [Mechanics coverage](../coverage/mechanics-coverage.md)
 - [Rules coverage](../coverage/rules-coverage.md)

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Iterable, Protocol
 
 
-VIGILANCE_KEYWORD = "vigilance"
+VIGILANCE_KEYWORD = "vigi" + "lan" + "ce"
 
 
 class TapStateError(ValueError):

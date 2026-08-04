@@ -12,10 +12,13 @@ maintenance: "hand-maintained"
 Every mechanic must receive a versioned contract before the generated registry
 may mark it trusted.
 
-The integrated CR 400–408 and CR 500–512 source tree contains 49
-partial/untrusted contracts and 376 unclassified mechanics. No mechanic is
-promoted to trusted, and the
-snapshot-complete gate remains false.
+The integrated source tree currently contains 62 partial contracts, one tested
+contract, one trusted contract, and 361 unclassified mechanics. Vigilance is
+the first trusted mechanic contract, bounded to CR 508.1f and CR 702.20's
+attack-declaration tap exception using the attacker's current effective
+keywords. Broader combat, continuous-effect, copying, and granted-keyword
+behavior remains governed by its own capabilities. The snapshot-complete gate
+remains false.
 
 A contract records its CR/glossary references, dependencies, zones, objects,
 events, state reads/writes, costs, timing, targets and choices, hidden

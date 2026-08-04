@@ -903,7 +903,7 @@ def render_card_unlock_frontier_markdown(value: Mapping[str, Any]) -> str:
         "---",
         'title: "Commander card-unlock frontier"',
         'status: "generated"',
-        'authoritative_source: "coverage/card-unlock-frontier.json"',
+        'authoritative_source: "coverage/card-unlock-frontier.json.gz"',
         f'verified: "{value["fingerprint"]}"',
         'audience: "compiler and rules contributors"',
         'maintenance: "generated"',

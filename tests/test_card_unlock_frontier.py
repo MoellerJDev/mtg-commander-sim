@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import gzip
 import json
 from pathlib import Path
 import unittest
@@ -19,6 +20,7 @@ from mtg_commander_sim.rules.capabilities import (
     load_default_capability_registry,
 )
 from mtg_commander_sim.semantics import SemanticRegistry
+from scripts.update_card_unlock_frontier import _canonical_gzip
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -182,6 +184,14 @@ class CardUnlockFrontierTests(unittest.TestCase):
             for row in evaluation["top_bundles"]
         ]
         self.assertEqual(sorted(gains, reverse=True), gains)
+
+    def test_tracked_gzip_is_deterministic_and_round_trips(self):
+        payload = b'{"frontier":"complete machine-readable rows"}\n'
+        encoded = _canonical_gzip(payload)
+
+        self.assertEqual(encoded, _canonical_gzip(payload))
+        self.assertEqual(b"\x00\x00\x00\x00", encoded[4:8])
+        self.assertEqual(payload, gzip.decompress(encoded))
 
 
 if __name__ == "__main__":

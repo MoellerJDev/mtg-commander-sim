@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 from pathlib import Path
+import struct
 import sys
+import zlib
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +28,7 @@ from mtg_commander_sim.util import stable_json
 from scripts.validate_python_runtime import require_supported_python
 
 
-JSON_OUTPUT = ROOT / "coverage" / "card-unlock-frontier.json"
+JSON_GZIP_OUTPUT = ROOT / "coverage" / "card-unlock-frontier.json.gz"
 MARKDOWN_OUTPUT = ROOT / "coverage" / "card-unlock-frontier.md"
 ORACLE_COVERAGE = ROOT / "coverage" / "oracle-coverage-commander.json"
 CARD_PROGRAM_COVERAGE = (
@@ -86,14 +89,41 @@ def _snapshot_freshness(report: dict) -> None:
         raise ValueError("Card-unlock frontier hard failures are stale")
 
 
-def _load_tracked() -> tuple[dict, str, str]:
-    if not JSON_OUTPUT.exists() or not MARKDOWN_OUTPUT.exists():
+def _canonical_gzip(payload: bytes) -> bytes:
+    """Return a platform-independent RFC 1952 stream with a zero timestamp."""
+
+    compressor = zlib.compressobj(
+        level=9,
+        method=zlib.DEFLATED,
+        wbits=-zlib.MAX_WBITS,
+    )
+    body = compressor.compress(payload) + compressor.flush()
+    header = b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\xff"
+    trailer = struct.pack(
+        "<II",
+        zlib.crc32(payload) & 0xFFFFFFFF,
+        len(payload) & 0xFFFFFFFF,
+    )
+    return header + body + trailer
+
+
+def _canonical_report_bytes(report: dict) -> bytes:
+    return (stable_json(report) + "\n").encode("utf-8")
+
+
+def _load_tracked() -> tuple[dict, bytes, str]:
+    if not JSON_GZIP_OUTPUT.exists() or not MARKDOWN_OUTPUT.exists():
         raise ValueError("Card-unlock frontier artifacts are missing")
-    report = json.loads(JSON_OUTPUT.read_text(encoding="utf-8"))
+    try:
+        report = json.loads(
+            gzip.decompress(JSON_GZIP_OUTPUT.read_bytes()).decode("utf-8")
+        )
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("Card-unlock frontier gzip JSON is invalid") from exc
     validate_card_unlock_frontier(report)
-    expected_json = stable_json(report) + "\n"
+    expected_gzip = _canonical_gzip(_canonical_report_bytes(report))
     expected_markdown = render_card_unlock_frontier_markdown(report)
-    return report, expected_json, expected_markdown
+    return report, expected_gzip, expected_markdown
 
 
 def main() -> int:
@@ -111,9 +141,9 @@ def main() -> int:
         if args.db is None:
             parser.error("--write requires --db")
         report = _build(args.db, limit=args.limit)
-        JSON_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-        JSON_OUTPUT.write_text(
-            stable_json(report) + "\n", encoding="utf-8", newline="\n"
+        JSON_GZIP_OUTPUT.parent.mkdir(parents=True, exist_ok=True)
+        JSON_GZIP_OUTPUT.write_bytes(
+            _canonical_gzip(_canonical_report_bytes(report))
         )
         MARKDOWN_OUTPUT.write_text(
             render_card_unlock_frontier_markdown(report),
@@ -121,10 +151,10 @@ def main() -> int:
             newline="\n",
         )
         return 0
-    report, expected_json, expected_markdown = _load_tracked()
+    report, expected_gzip, expected_markdown = _load_tracked()
     _snapshot_freshness(report)
-    if JSON_OUTPUT.read_text(encoding="utf-8") != expected_json:
-        raise ValueError("Card-unlock frontier JSON is not canonical")
+    if JSON_GZIP_OUTPUT.read_bytes() != expected_gzip:
+        raise ValueError("Card-unlock frontier gzip JSON is not canonical")
     if MARKDOWN_OUTPUT.read_text(encoding="utf-8") != expected_markdown:
         raise ValueError("Card-unlock frontier Markdown is stale")
     if args.db is not None:

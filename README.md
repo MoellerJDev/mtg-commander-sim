@@ -861,6 +861,11 @@ python simctl.py oracle explain "Rest in Peace" \
   --db data/scryfall-current.sqlite3
 python simctl.py oracle coverage \
   --db data/scryfall-current.sqlite3
+
+# Regenerate or verify the offline card-unlock frontier.
+python scripts/update_card_unlock_frontier.py --write \
+  --db data/scryfall-current.sqlite3
+python scripts/update_card_unlock_frontier.py --check
 ```
 
 CardProgram V2 is the canonical deterministic runtime artifact. It combines
@@ -871,6 +876,18 @@ fails closed on stale or inconsistent sources. Semantic pack v3 remains a
 compatibility input, not a second rules authority. New Game Record v3 files pin
 the complete card-program map and the subset used by every command while
 remaining replay-compatible with older v3 records.
+
+The generated card-unlock frontier in
+[`coverage/card-unlock-frontier.md`](coverage/card-unlock-frontier.md) classifies
+every card and ability in the pinned Commander-legal snapshot, records its
+minimum known compiler, capability, runtime, mechanic, and interaction blockers,
+and ranks bounded one-, two-, and three-family implementation bundles by exact
+card gain. Its compressed JSON companion is an offline development and CI
+artifact; the server and browser never load it. The frontier is conservative evidence for
+choosing reusable rules work, not a claim of Comprehensive Rules or Oracle
+completeness. The first measured harvest adds generic Vigilance declaration
+behavior and promotes 35 Commander-legal CardPrograms to exact; exact two-face
+positional binding also removes the former Tithing Blade construction failure.
 
 The typed semantic-handler migration moved its first executable effect
 families into `mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an
@@ -966,7 +983,7 @@ values, remaining result-replacement families, universal entry
 replacement participation, broad CR 614/615/616 closure, layer dependencies,
 and state-derived modifiers remain unsupported.
 
-Runtime trust and governance are now explicit. Capability registry v17 consumes
+Runtime trust and governance are now explicit. Capability registry v27 consumes
 a generated evidence index whose fully qualified tests, current rules,
 profiles, and evidence classes are validated in CI. Every trusted capability
 requires positive, negative, replay, and killed-mutation evidence regardless of

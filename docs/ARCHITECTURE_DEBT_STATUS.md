@@ -16,11 +16,11 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `b5e5caa77f0420759e4aad2088c14fe73e7bb1f9`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 230 files, 99,963 physical lines, 91,725 logical lines
+- Production scope: 231 files, 101,043 physical lines, 92,737 logical lines
 
 ## Central engine debt
 
-- `engine.py`: 13,982 physical / 13,213 logical lines
+- `engine.py`: 13,980 physical / 13,211 logical lines
 - Methods: 28 public, 283 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 135 locations
@@ -29,7 +29,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Registered typed runtime components: 18
 - Remaining legacy `apply_effect` branches: 0
 - Registered operations still intercepted by engine string dispatch: 0
-- Exact printed-name literals in configured core files: 658 (97 conditional)
+- Exact printed-name literals in configured core files: 657 (96 conditional)
 - Oracle-ID literals in Python production code: 5
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 6
@@ -42,9 +42,9 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 13,308 | 13,213 | -95 |
+| `engine_logical_lines` | 13,308 | 13,211 | -97 |
 | `direct_game_state_writes` | 135 | 135 | +0 |
-| `printed_name_literals` | 693 | 658 | -35 |
+| `printed_name_literals` | 693 | 657 | -36 |
 | `oracle_id_literals` | 6 | 5 | -1 |
 | `legacy_card_specific_operations` | 5 | 5 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
@@ -55,7 +55,7 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
-| `mtg_commander_sim/engine.py` | python | 13,982 | 13,213 |
+| `mtg_commander_sim/engine.py` | python | 13,980 | 13,211 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
 | `web/src/App.tsx` | web | 1,761 | 1,705 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
@@ -83,11 +83,11 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:123` | 459 | 460 |
 | `build_parser` | `mtg_commander_sim/cli.py:406` | 369 | 393 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:547` | 362 | 366 |
-| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:13224` | 342 | 354 |
-| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1545` | 341 | 347 |
+| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:13222` | 342 | 354 |
+| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1546` | 341 | 347 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:426` | 304 | 304 |
-| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:8103` | 301 | 304 |
-| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2937` | 285 | 319 |
+| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:8104` | 301 | 304 |
+| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2938` | 285 | 319 |
 | `_scripted_choice` | `mtg_commander_sim/cli.py:72` | 266 | 268 |
 | `parse_declaration_cost_line` | `mtg_commander_sim/declaration_costs.py:219` | 249 | 258 |
 
@@ -114,15 +114,15 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,757
-- Conventional Python cases: 1,457
+- Python discovered: 4,769
+- Conventional Python cases: 1,469
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 8
 - Browser unit cases: 22
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true
-- Capability mutation declarations: 39
+- Capability mutation declarations: 40
 - Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift

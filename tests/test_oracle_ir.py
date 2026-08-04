@@ -1494,7 +1494,14 @@ class OracleIRTests(unittest.TestCase):
         self.assertNotIn("flying", programs[0].coverage)
 
     def test_vigilance_keyword_uses_the_bounded_combat_capability(self):
-        record = self.db.lookup("Standing Troops")
+        # Keep this grammar unit independent of the full Scryfall database.
+        # Wight is present in the compact CI fixture; narrowing its text leaves
+        # a single keyword declaration while retaining a normal CardRecord.
+        record = replace(
+            self.db.lookup("Wight of the Reliquary"),
+            oracle_text="Vigilance",
+            keywords=("Vigilance",),
+        )
         capabilities = load_default_capability_registry()
 
         ir = compile_oracle_card(
