@@ -198,6 +198,17 @@ choices derived from them; they do not expose raw replacement descriptors or
 another seat's pending allocation. Historical v3 checkpoints that omit the
 fields load them as empty collections and retain their historical hash shape.
 
+`GameState.continuous_effects` is another additive v3 checkpoint field. New
+records store strict immutable resolution-created effects with their layer,
+operations, duration, source provenance, and exact affected physical/logical
+object identities. Those facts participate in the authoritative state hash;
+the raw journal and physical identities never enter a seat projection. Cleanup
+removes represented until-end-of-turn entries through the normal rules
+transition, so save/load and command replay reproduce the same expiration.
+Historical v3 checkpoints that omit the field retain their annotation-backed
+temporary effects and reserialize without inventing a journal. A present but
+malformed journal fails closed during deserialization.
+
 Fresh native records use `manifest.replay.mode = "command_replay"`. The
 separate `legacy_snapshot` mode is reserved for migrated records whose accepted
 commands cannot be reconstructed honestly.

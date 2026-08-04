@@ -64,6 +64,11 @@ fail closed.
   exact trigger programs for which every declared capability is trusted. A
   fixed life trigger can therefore execute without an arbiter, while an exact
   ETB draw trigger remains provisional on the blocked draw-event capability.
+- Oracle IR v23 adds closed fixed-query static anthem and controlled-creature
+  until-end-of-turn productions. CardPrograms declare the static or resolution
+  continuous capability actually required; syntactic matches remain partial
+  when targets, combat qualifications, stateful quantities, or other mechanic
+  dependencies are not trusted.
 
 ## Execution ownership
 
@@ -106,6 +111,7 @@ from the frozen runtime registry and is not a second serialized authority.
 
 See [ADR 0005](../adr/0005-card-program-v2.md), the
 [normalized zone-trigger decision](../adr/0019-normalized-zone-trigger-discovery.md),
+the [continuous-effect decision](../adr/0020-continuous-effect-duration-and-applicability.md),
 [semantic-node guide](../extension/semantic-node.md), the
 [typed-handler boundary](semantic-handlers.md), the
 [trust-closure boundary](trust-closure.md), the

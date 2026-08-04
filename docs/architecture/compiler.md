@@ -62,6 +62,14 @@ flowchart LR
   source snapshot, and damage-time characteristic recheck therefore share one
   serialized predicate meaning while retaining source-specific CR 609.7
   identity and provenance rules.
+- Oracle IR v21 lowers the closed CR 615.13 prevention-trigger result families
+  into ordinary stack triggers and keeps broader conditional forms residual.
+- Oracle IR v22 separates normalized zone-event detection, APNAP placement, and
+  result-operation closure for represented self enter/dies/leaves triggers.
+- Oracle IR v23 lowers closed fixed-query static power/toughness effects and
+  controlled-creature until-end-of-turn modifiers. Its templates are anchored
+  to complete represented text and reject stateful, combat-only, conditional,
+  or unresolved-target lookalikes.
 
 ## Extension points
 
@@ -72,3 +80,6 @@ and [compiler coverage report](../COMPILER_COVERAGE_STATUS.md).
 
 Corpus-wide completeness remains unclaimed until the generated gates say
 otherwise.
+
+See [ADR 0020](../adr/0020-continuous-effect-duration-and-applicability.md)
+for the runtime duration/applicability boundary consumed by Oracle IR v23.

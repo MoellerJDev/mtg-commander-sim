@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 18,
+  "registry_version": 19,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -270,30 +270,57 @@
     },
     {
       "id": "continuous.power_toughness.fixed_anthem",
-      "version": 1,
-      "official_rules": ["604.1", "611.3a", "613.1g", "613.4c"],
+      "version": 2,
+      "official_rules": ["604.1", "611.3a", "611.3b", "611.3c", "613.1g", "613.4c"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability": {
-        "summary": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c.",
-        "inputs": ["active source object", "source controller", "source timestamp", "target controller", "target subtypes after earlier layers", "fixed power/toughness modifier"],
-        "outputs": ["typed layer-7c continuous effect", "dynamic subtype applicability", "stacking modifiers from multiple sources"],
-        "exclusions": ["power/toughness setting effects", "characteristic-defining abilities", "layer dependencies within 7c", "ability-removal dependency interactions", "non-subtype predicates", "state-derived modifier amounts"]
+        "summary": "Apply a reviewed battlefield static ability that gives the source controller's live typed set of creatures a fixed power/toughness modifier in layer 7c while the source remains applicable.",
+        "inputs": ["active phased-in source object", "source controller", "source timestamp", "typed creature predicate after earlier layers", "optional source exclusion", "fixed power/toughness modifier"],
+        "outputs": ["typed layer-7c continuous effect", "live new-entry, type, color, subtype, supertype, and control applicability", "source-departure and phasing expiration", "stacking modifiers from multiple sources"],
+        "exclusions": ["power/toughness setting effects", "characteristic-defining abilities", "layer dependencies within 7c", "ability-removal dependency interactions", "conditional and state-derived modifiers", "combat-state, attached, token, color-exclusion, and multi-subtype-union predicates"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.continuous_components.FixedPowerToughnessAnthemHandler", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects"],
+      "implementation_components": ["mtg_commander_sim.semantic_runtime.continuous_components.FixedPowerToughnessAnthemHandler", "mtg_commander_sim.semantic_runtime.continuous_components.FixedQueryPowerToughnessAnthemHandler", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects"],
       "positive_tests": ["test_registered_anthem_component_replaces_name_dispatch"],
       "negative_tests": ["test_anthem_component_rejects_malformed_descriptors"],
       "interaction_tests": ["test_multiple_anthem_components_stack_and_respect_control", "test_layer_four_subtype_change_enables_layer_seven_anthem"],
-      "multiplayer_tests": [],
+      "multiplayer_tests": ["test_static_anthem_is_controller_scoped_in_four_player_evaluation"],
       "privacy_tests": [],
       "replay_tests": ["test_anthem_component_replays_exactly"],
-      "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
       "dependency_fail_closed_status": "not_applicable",
       "dependency_fail_closed_rationale": "This capability has no capability dependencies.",
-      "implementation_mutation_status": "not_run",
-      "implementation_mutation_rationale": "",
-      "blockers": ["General continuous-effect dependencies and dynamically computed modifiers remain outside this bounded component."],
-      "status": "tested"
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_fixed_anthem_applicability_mutant_is_killed removes the typed live-set lowering and the fixed modifier assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "version": 1,
+      "official_rules": ["611.2a", "611.2c", "613.1d", "613.1f", "613.1g", "613.4c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Create a fixed type, subtype, keyword, or power/toughness continuous effect during resolution, lock its affected battlefield logical objects at creation, and expire it in cleanup.",
+        "inputs": ["typed resolving stack/source identity", "current public battlefield predicate or resolved permanent", "locked physical and logical object identities", "fixed characteristic operations", "until-end-of-turn duration"],
+        "outputs": ["immutable replay-pinned continuous-effect journal entry", "layer 4, 6, or 7c characteristic result", "cleanup expiration", "no effect on later entrants or returned logical objects"],
+        "exclusions": ["control-changing effects", "copy effects", "text and color changes", "dynamic quantities", "effects without a represented duration", "dependency interactions among same-layer effects"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.continuous_effect_state.create_resolution_continuous_effect", "mtg_commander_sim.continuous_effect_state.active_resolution_effects", "mtg_commander_sim.continuous_effect_state.expire_end_of_turn_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects", "mtg_commander_sim.effect_runtime.objects_stack_and_tokens._commit_temporary_characteristic_effect", "mtg_commander_sim.effect_runtime.zones_and_attachments._apply_modify_all_matching_permanents_until_end_of_turn"],
+      "positive_tests": ["test_mass_resolution_locks_set_across_entry_control_and_zone_change"],
+      "negative_tests": ["test_malformed_models_fail_closed", "test_malformed_mass_predicate_rolls_back_without_effect"],
+      "interaction_tests": ["test_resolution_set_is_locked_to_logical_objects"],
+      "multiplayer_tests": ["test_mass_resolution_locks_set_across_entry_control_and_zone_change"],
+      "privacy_tests": ["test_targeted_effect_expires_and_round_trips_without_private_projection"],
+      "replay_tests": ["test_temporary_effect_command_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded resolution-created characteristic effect has no capability dependencies beyond the shared typed continuous-effect evaluator.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_resolution_continuous_effect_commit_mutant_is_killed removes the canonical journal commit and the characteristic result assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
     },
     {
       "id": "permanent.tap.effect",

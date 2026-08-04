@@ -41,6 +41,13 @@ class DomainEffectHandler:
         reason = str(effect.get("reason") or context.default_reason)
         if not reason:
             raise SemanticNodeError("A domain effect requires a reason")
+        if "_runtime_source" in effect:
+            raise SemanticNodeError(
+                "Semantic programs cannot supply authoritative runtime source context"
+            )
+        runtime_effect = dict(effect)
+        if context.source is not None:
+            runtime_effect["_runtime_source"] = context.source.to_dict()
         return IntentPlan(
             operation=self.operation,
             handler_id=self.handler_id,
@@ -48,7 +55,7 @@ class DomainEffectHandler:
                 DomainEffectIntent(
                     actor=context.actor,
                     operation=self.operation,
-                    effect=FrozenMap(effect),
+                    effect=FrozenMap(runtime_effect),
                     reason=reason,
                 ),
             ),

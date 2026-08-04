@@ -9,12 +9,49 @@ from ..counter_placement import (
     place_counters_on_controlled_subtype,
     place_counters_on_refs,
 )
+from ..continuous_effects import ContinuousOperation, Layer
+from ..continuous_effect_state import (
+    ContinuousEffectStateError,
+    create_resolution_continuous_effect,
+    resolution_effect_source,
+)
 from ..errors import GameRuleError
 from ..effect_contracts import effect_family_contract
 from ..util import unique_preserving_order
 
 
 OPERATIONS = effect_family_contract("objects-stack-and-tokens.v1").operations
+
+
+def _commit_temporary_characteristic_effect(
+    host: Any,
+    effect: Mapping[str, Any],
+    card: Any,
+    *,
+    layer: Layer,
+    sublayer: str,
+    operations: tuple[ContinuousOperation, ...],
+) -> bool:
+    """Return false only for historical annotation-backed checkpoints."""
+
+    if host.state.continuous_effects is None:
+        return False
+    if not operations:
+        return True
+    try:
+        create_resolution_continuous_effect(
+            host,
+            source=resolution_effect_source(
+                host, effect, fallback_card=card
+            ),
+            targets=(card,),
+            layer=layer,
+            sublayer=sublayer,
+            operations=operations,
+        )
+    except ContinuousEffectStateError as exc:
+        raise GameRuleError(str(exc)) from exc
+    return True
 
 
 def _apply_delayed_trigger(
@@ -136,13 +173,25 @@ def _apply_add_type_until_end_of_turn(
     card_type = str(effect.get("type") or "").strip().title()
     if not card_type:
         raise GameRuleError("Temporary type effect requires a type")
-    until_end = card.annotations.setdefault("until_end_of_turn", {})
-    until_end["add_types"] = unique_preserving_order(
-        [
-            *list(until_end.get("add_types") or []),
-            card_type,
-        ]
-    )
+    if not _commit_temporary_characteristic_effect(
+        host,
+        effect,
+        card,
+        layer=Layer.TYPE,
+        sublayer="4",
+        operations=(
+            ContinuousOperation(
+                "add_types", [card_type], field="card_types"
+            ),
+        ),
+    ):
+        until_end = card.annotations.setdefault("until_end_of_turn", {})
+        until_end["add_types"] = unique_preserving_order(
+            [
+                *list(until_end.get("add_types") or []),
+                card_type,
+            ]
+        )
     host._log(
         actor,
         "permanent.type",
@@ -178,16 +227,28 @@ def _apply_add_subtype_until_end_of_turn(
         raise GameRuleError(
             "Temporary subtype effect requires a subtype"
         )
-    until_end = card.annotations.setdefault(
-        "until_end_of_turn",
-        {},
-    )
-    until_end["add_subtypes"] = unique_preserving_order(
-        [
-            *list(until_end.get("add_subtypes") or []),
-            subtype,
-        ]
-    )
+    if not _commit_temporary_characteristic_effect(
+        host,
+        effect,
+        card,
+        layer=Layer.TYPE,
+        sublayer="4",
+        operations=(
+            ContinuousOperation(
+                "add_types", [subtype], field="subtypes"
+            ),
+        ),
+    ):
+        until_end = card.annotations.setdefault(
+            "until_end_of_turn",
+            {},
+        )
+        until_end["add_subtypes"] = unique_preserving_order(
+            [
+                *list(until_end.get("add_subtypes") or []),
+                subtype,
+            ]
+        )
     host._log(
         actor,
         "permanent.subtype",
@@ -408,9 +469,17 @@ def _apply_grant_keyword_until_end_of_turn(
         zones={"battlefield"},
     )
     keyword = str(effect["keyword"])
-    card.temporary_keywords = unique_preserving_order(
-        [*card.temporary_keywords, keyword]
-    )
+    if not _commit_temporary_characteristic_effect(
+        host,
+        effect,
+        card,
+        layer=Layer.ABILITY,
+        sublayer="6",
+        operations=(ContinuousOperation("add_ability", keyword),),
+    ):
+        card.temporary_keywords = unique_preserving_order(
+            [*card.temporary_keywords, keyword]
+        )
     host._log(
         actor,
         "permanent.keyword",
@@ -441,16 +510,32 @@ def _apply_modify_stats_until_end_of_turn(
         str(effect["card"]),
         zones={"battlefield"},
     )
-    until_end = card.annotations.setdefault(
-        "until_end_of_turn",
-        {},
-    )
     power = int(effect.get("power", 0))
     toughness = int(effect.get("toughness", 0))
-    until_end["power"] = int(until_end.get("power", 0)) + power
-    until_end["toughness"] = (
-        int(until_end.get("toughness", 0)) + toughness
-    )
+    if not _commit_temporary_characteristic_effect(
+        host,
+        effect,
+        card,
+        layer=Layer.POWER_TOUGHNESS,
+        sublayer="7c",
+        operations=(
+            (
+                ContinuousOperation(
+                    "modify_power_toughness", [power, toughness]
+                ),
+            )
+            if power or toughness
+            else ()
+        ),
+    ):
+        until_end = card.annotations.setdefault(
+            "until_end_of_turn",
+            {},
+        )
+        until_end["power"] = int(until_end.get("power", 0)) + power
+        until_end["toughness"] = (
+            int(until_end.get("toughness", 0)) + toughness
+        )
     host._log(
         actor,
         "permanent.stats",

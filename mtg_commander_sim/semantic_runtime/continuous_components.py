@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import lru_cache
 from typing import Any, Mapping, Protocol
 
 from ..continuous_effects import (
     ContinuousEffect,
+    ContinuousEffectOrigin,
     ContinuousOperation,
     Layer,
 )
 from ..mana import BASIC_LAND_MANA
+from ..object_predicate import ObjectQueryError, ObjectQuerySpec
 from ..rules.capabilities import load_default_capability_registry
 from .component_registry import (
     RuntimeComponentRegistry,
@@ -20,6 +22,9 @@ from .context import SemanticNodeError
 
 
 _FIXED_ANTHEM_HANDLER_ID = "continuous.anthem.power_toughness.v1"
+_FIXED_QUERY_ANTHEM_HANDLER_ID = (
+    "continuous.anthem.fixed-query.v2"
+)
 _BASIC_LAND_TYPE_HANDLER_ID = (
     "continuous.basic_land_type.add_all_lands.v1"
 )
@@ -29,6 +34,14 @@ _BASIC_LAND_TYPE_HANDLER_ID = (
 class FixedPowerToughnessAnthemNode:
     target_controller: str
     target_subtypes_all: tuple[str, ...]
+    power: int
+    toughness: int
+
+
+@dataclass(frozen=True, slots=True)
+class FixedQueryPowerToughnessAnthemNode:
+    predicate: ObjectQuerySpec
+    exclude_source: bool
     power: int
     toughness: int
 
@@ -200,12 +213,154 @@ class FixedPowerToughnessAnthemHandler:
                         [node.power, node.toughness],
                     ),
                 ),
-                applies={
-                    "controller": context.source_controller,
-                    "subtypes": {
-                        "contains_all": list(node.target_subtypes_all)
-                    },
-                },
+                origin=ContinuousEffectOrigin.STATIC_ABILITY,
+                applies=ObjectQuerySpec(
+                    controller=context.source_controller,
+                    subtypes_all=node.target_subtypes_all,
+                ),
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class FixedQueryPowerToughnessAnthemHandler:
+    """Closed CR 611.3 live-set anthem with a typed object predicate."""
+
+    handler_id: str = _FIXED_QUERY_ANTHEM_HANDLER_ID
+    schema_version: int = 2
+    family: str = "continuous.fixed_query_power_toughness_anthem"
+    event: str = "characteristics.evaluate"
+    rule_references: tuple[str, ...] = (
+        "604.1",
+        "611.3a",
+        "611.3b",
+        "611.3c",
+        "613.1g",
+        "613.4c",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "continuous.power_toughness.fixed_anthem",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> FixedQueryPowerToughnessAnthemNode:
+        exact_fields(
+            descriptor,
+            {
+                "handler_id",
+                "schema_version",
+                "event",
+                "condition",
+                "modifier",
+            },
+            field="runtime handler",
+        )
+        if descriptor["handler_id"] != self.handler_id:
+            raise SemanticNodeError("Runtime handler ID does not match registry")
+        if descriptor["schema_version"] != self.schema_version:
+            raise SemanticNodeError(
+                f"Unsupported {self.handler_id} schema version"
+            )
+        if descriptor["event"] != self.event:
+            raise SemanticNodeError(
+                f"{self.handler_id} must handle {self.event}"
+            )
+        condition = descriptor["condition"]
+        if not isinstance(condition, Mapping):
+            raise SemanticNodeError(
+                "runtime handler condition must be an object"
+            )
+        exact_fields(
+            condition,
+            {"target_controller", "predicate", "exclude_source"},
+            field="runtime handler condition",
+        )
+        if condition["target_controller"] != "source_controller":
+            raise SemanticNodeError(
+                "fixed query anthem requires source-controller targets"
+            )
+        if type(condition["exclude_source"]) is not bool:
+            raise SemanticNodeError(
+                "fixed query anthem exclude_source must be boolean"
+            )
+        try:
+            predicate = ObjectQuerySpec.from_dict(condition["predicate"])
+        except ObjectQueryError as exc:
+            raise SemanticNodeError(str(exc)) from exc
+        if (
+            predicate.owner is not None
+            or predicate.controller is not None
+            or predicate.exclude_ref is not None
+            or predicate.known_to_actor is not None
+        ):
+            raise SemanticNodeError(
+                "fixed query anthem reserves owner, controller, visibility, and source exclusion"
+            )
+        if predicate.zones not in {(), ("battlefield",)}:
+            raise SemanticNodeError(
+                "fixed query anthem applies only on the battlefield"
+            )
+        if "creature" not in predicate.types_all:
+            raise SemanticNodeError(
+                "fixed query anthem requires creature permanents"
+            )
+        modifier = descriptor["modifier"]
+        if not isinstance(modifier, Mapping):
+            raise SemanticNodeError(
+                "runtime handler modifier must be an object"
+            )
+        exact_fields(
+            modifier,
+            {"power", "toughness"},
+            field="runtime handler modifier",
+        )
+        power = modifier["power"]
+        toughness = modifier["toughness"]
+        if type(power) is not int or type(toughness) is not int:
+            raise SemanticNodeError(
+                "fixed query anthem modifiers must be integers"
+            )
+        if power == 0 and toughness == 0:
+            raise SemanticNodeError(
+                "fixed query anthem must modify power or toughness"
+            )
+        return FixedQueryPowerToughnessAnthemNode(
+            predicate=predicate,
+            exclude_source=condition["exclude_source"],
+            power=power,
+            toughness=toughness,
+        )
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: ContinuousEffectSourceContext,
+    ) -> tuple[ContinuousEffect, ...]:
+        node = self.validate(descriptor)
+        predicate = replace(
+            node.predicate,
+            zones=("battlefield",),
+            controller=context.source_controller,
+            exclude_ref=(context.source_ref if node.exclude_source else None),
+        )
+        return (
+            ContinuousEffect(
+                effect_id=(
+                    f"{context.source_object_id}:{context.component_id}"
+                ),
+                source_id=context.source_object_id,
+                layer=Layer.POWER_TOUGHNESS,
+                sublayer="7c",
+                timestamp=context.source_timestamp,
+                operations=(
+                    ContinuousOperation(
+                        "modify_power_toughness",
+                        [node.power, node.toughness],
+                    ),
+                ),
+                origin=ContinuousEffectOrigin.STATIC_ABILITY,
+                applies=predicate,
             ),
         )
 
@@ -312,11 +467,8 @@ class AddBasicLandTypeHandler:
                         field="subtypes",
                     ),
                 ),
-                applies={
-                    "card_types": {
-                        "contains_all": list(node.target_types_all)
-                    }
-                },
+                origin=ContinuousEffectOrigin.STATIC_ABILITY,
+                applies=ObjectQuerySpec(types_all=node.target_types_all),
             ),
         )
 
@@ -336,6 +488,7 @@ def default_continuous_effect_component_registry(
     registry = ContinuousEffectComponentRegistry(
         (
             FixedPowerToughnessAnthemHandler(),
+            FixedQueryPowerToughnessAnthemHandler(),
             AddBasicLandTypeHandler(),
         )
     )

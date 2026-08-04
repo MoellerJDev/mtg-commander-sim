@@ -219,7 +219,11 @@ class ChooseCreatureTypeHandler:
     schema_version: int = 1
     rule_references: tuple[str, ...] = ("CR 205.3m", "CR 608.2d")
     capability_dependencies: tuple[str, ...] = ()
-    continuation_fields: tuple[str, ...] = ("_choice_actor", "_source_ref")
+    continuation_fields: tuple[str, ...] = (
+        "apply_as_subtype",
+        "_choice_actor",
+        "_source_ref",
+    )
     private_data: tuple[str, ...] = ()
     projected_fields: tuple[str, ...] = (
         "prompt",
@@ -239,6 +243,10 @@ class ChooseCreatureTypeHandler:
         effect: Mapping[str, Any],
         context: SemanticChoiceContext,
     ) -> SemanticChoicePreparation:
+        if type(effect.get("apply_as_subtype", False)) is not bool:
+            raise SemanticChoiceError(
+                "Creature-type subtype application must be boolean"
+            )
         if context.source_ref is None:
             raise SemanticChoiceError(
                 "The creature-type choice has no source object"
@@ -285,6 +293,9 @@ class ChooseCreatureTypeHandler:
                     value=creature_type.title(),
                     actor=str(continuation.effect["_choice_actor"]),
                     reason="creature type chosen",
+                    apply_as_subtype=bool(
+                        continuation.effect.get("apply_as_subtype", False)
+                    ),
                 ),
             )
         )

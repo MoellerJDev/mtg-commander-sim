@@ -13,12 +13,65 @@ from ..util import stable_json
 def runtime_handler_footprint(
     program: SemanticProgram,
 ) -> tuple[str, str, tuple[str, ...]] | None:
-    handler_ids = tuple(
-        sorted(str(handler.get("handler_id") or "") for handler in program.handlers)
+    handler_descriptors = tuple(
+        sorted(
+            _runtime_handler_semantic_descriptor(handler)
+            for handler in program.handlers
+        )
     )
-    if not handler_ids or any(not value for value in handler_ids):
+    if not handler_descriptors or any(
+        not value for value in handler_descriptors
+    ):
         return None
-    return program.active_zone, program.event, handler_ids
+    return program.active_zone, program.event, handler_descriptors
+
+
+def _runtime_handler_semantic_descriptor(
+    handler: dict[str, Any],
+) -> str:
+    handler_id = str(handler.get("handler_id") or "")
+    if handler_id not in {
+        "continuous.anthem.power_toughness.v1",
+        "continuous.anthem.fixed-query.v2",
+    }:
+        return stable_json(handler) if handler_id else ""
+
+    condition = dict(handler.get("condition") or {})
+    modifier = dict(handler.get("modifier") or {})
+    if handler_id == "continuous.anthem.power_toughness.v1":
+        predicate = {
+            "zones": ["battlefield"],
+            "types_all": ["creature"],
+            "subtypes_all": condition.get("target_subtypes_all") or [],
+        }
+        exclude_source = False
+    else:
+        predicate = dict(condition.get("predicate") or {})
+        exclude_source = bool(condition.get("exclude_source", False))
+    return stable_json(
+        {
+            "family": "continuous.anthem.fixed-query",
+            "event": str(handler.get("event") or ""),
+            "target_controller": str(
+                condition.get("target_controller") or ""
+            ),
+            "zones": sorted(
+                str(value).casefold()
+                for value in predicate.get("zones") or []
+            ),
+            "types_all": sorted(
+                str(value).casefold()
+                for value in predicate.get("types_all") or []
+            ),
+            "subtypes_all": sorted(
+                str(value).casefold()
+                for value in predicate.get("subtypes_all") or []
+            ),
+            "exclude_source": exclude_source,
+            "power": modifier.get("power"),
+            "toughness": modifier.get("toughness"),
+        }
+    )
 
 
 def rulings_source_hash(db: CardDatabase, record: CardRecord) -> str:
@@ -66,6 +119,42 @@ def _copy_mapping(value: Any) -> dict[str, Any] | None:
     return dict(value) if value is not None else None
 
 
+def _validate_generated_program_trust(
+    ir: Any,
+    *,
+    trust_level: str,
+) -> None:
+    if trust_level != "trusted":
+        return
+    generated_nodes = tuple(
+        node
+        for face in ir.faces
+        for node in face.nodes
+        if node.lowerable
+        and (node.effects or node.handlers or node.capability_dependencies)
+        and _generated_ability_id(
+            kind=node.kind,
+            face_id=face.face_id,
+            line=node.span.line,
+            static_declaration=bool(
+                node.handlers
+                or (
+                    node.kind == "keyword_ability"
+                    and node.capability_dependencies
+                )
+            ),
+        )
+        is not None
+    )
+    if generated_nodes and all(node.exact for node in generated_nodes):
+        return
+    raise ValueError(
+        f"{ir.card_name} cannot be promoted to trusted generated "
+        "semantics while material Oracle residuals remain on "
+        "generated nodes"
+    )
+
+
 def generated_programs(
     db: CardDatabase,
     record: CardRecord,
@@ -87,11 +176,7 @@ def generated_programs(
         capability_registry=capability_registry,
         capability_profile=capability_profile,
     )
-    if trust_level == "trusted" and ir.status != "exact":
-        raise ValueError(
-            f"{record.name} cannot be promoted to trusted generated "
-            "semantics while material Oracle residuals remain"
-        )
+    _validate_generated_program_trust(ir, trust_level=trust_level)
     programs: list[SemanticProgram] = []
     rulings_hash = rulings_source_hash(db, record)
     for face in ir.faces:

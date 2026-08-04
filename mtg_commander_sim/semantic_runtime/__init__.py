@@ -7,6 +7,8 @@ from .context import (
     ReadOnlyHandlerContext,
     ReadOnlyRulesQuery,
     SemanticNodeError,
+    SemanticSourceContext,
+    semantic_source_context,
 )
 from .components import (
     describe_runtime_handler,
@@ -21,6 +23,8 @@ from .continuous_components import (
     ContinuousEffectSourceContext,
     FixedPowerToughnessAnthemHandler,
     FixedPowerToughnessAnthemNode,
+    FixedQueryPowerToughnessAnthemHandler,
+    FixedQueryPowerToughnessAnthemNode,
     default_continuous_effect_component_registry,
 )
 from .counter_replacements import (
@@ -215,6 +219,8 @@ __all__ = [
     "DamageResultReplacementSourceContext",
     "FixedPowerToughnessAnthemHandler",
     "FixedPowerToughnessAnthemNode",
+    "FixedQueryPowerToughnessAnthemHandler",
+    "FixedQueryPowerToughnessAnthemNode",
     "FixedDamagePreventionHandler",
     "FixedDamagePreventionNode",
     "StaticDamageRedirectionHandler",
@@ -249,6 +255,8 @@ __all__ = [
     "SemanticInterpreter",
     "SemanticNodeHandler",
     "SemanticNodeError",
+    "SemanticSourceContext",
+    "semantic_source_context",
     "TokenCreationReplacementContext",
     "TokenCreationReplacementRegistry",
     "TokenCreationReplacementResolution",

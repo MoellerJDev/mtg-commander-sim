@@ -6,13 +6,17 @@ import json
 import re
 from typing import Any, Iterable, Mapping, Sequence
 
-from .abilities import ActivatedAbility, parse_activated_abilities
+from .abilities import parse_activated_abilities
 from .carddb import CardDatabase, CardRecord
 from .compiler.corpus_reporting import (
     execute_oracle_operation,
     explain_oracle_ir,
     oracle_corpus_coverage,
 )
+from .compiler.continuous_templates import (
+    controlled_creature_until_end_of_turn_effect,
+)
+from .compiler.activated_costs import activated_ability_cost
 from .compiler.dependency_gate import (
     dependency_gate as _dependency_gate,
     explicit_capability_gate as _explicit_capability_gate,
@@ -31,7 +35,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v22"
+ORACLE_COMPILER_VERSION = "oracle-ir-v23"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -804,29 +808,17 @@ def _reviewed_effect_template(
     Mapping[str, Any] | None,
     tuple[str, ...],
 ]:
+    temporary_modifier = controlled_creature_until_end_of_turn_effect(
+        text.strip()
+    )
+    if temporary_modifier is not None:
+        template, effects, mechanics = temporary_modifier
+        return template, effects, None, mechanics
     prevention = fixed_prevention_effect_template(
         text.strip(),
         card_name=card_name,
     )
     return prevention or _effect_template(text, card_name=card_name)
-
-
-def _cost_dict(ability: ActivatedAbility) -> dict[str, Any]:
-    return {
-        "text": ability.cost_text,
-        "mana": dict(ability.mana),
-        "complex_symbols": list(ability.complex_symbols),
-        "tap_source": ability.tap_source,
-        "untap_source": ability.untap_source,
-        "discard_source": ability.discard_source,
-        "sacrifice_source": ability.sacrifice_source,
-        "exile_source": ability.exile_source,
-        "life_payment": ability.life_payment,
-        "energy_payment": ability.energy_payment,
-        "loyalty_delta": ability.loyalty_delta,
-        "choices": [choice.compact() for choice in ability.choices],
-        "uncompiled_costs": list(ability.uncompiled_costs),
-    }
 
 
 def _residual(
@@ -1241,7 +1233,7 @@ def _compile_face(
                         if ability.mana_ability and template is None
                         else template
                     ),
-                    cost=_cost_dict(ability),
+                cost=activated_ability_cost(ability),
                     effects=effects,
                     target_schema=target_schema,
                     mechanics=mechanics,

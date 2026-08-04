@@ -3,7 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from .continuous_templates import basic_land_type_addition_handler
+from .continuous_templates import (
+    basic_land_type_addition_handler,
+    fixed_power_toughness_anthem_handler,
+)
 from .damage_templates import static_damage_handler
 from .life_templates import static_life_handler
 
@@ -32,6 +35,16 @@ def static_runtime_template(
             dependency_reason=(
                 "generic basic-land-type addition depends on an untrusted "
                 "rules capability"
+            ),
+        )
+    fixed_anthem = fixed_power_toughness_anthem_handler(text)
+    if fixed_anthem is not None:
+        return StaticRuntimeTemplate(
+            compiled=fixed_anthem,
+            kind="static_ability",
+            event="characteristics.evaluate",
+            dependency_reason=(
+                "generic fixed anthem depends on an untrusted continuous-effect capability"
             ),
         )
     static_life = static_life_handler(text)

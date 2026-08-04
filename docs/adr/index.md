@@ -34,3 +34,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0017 — prevention continuations and aftermath ownership](0017-prevention-continuations-and-aftermath.md)
 - [ADR 0018 — unified triggered-ability batch ownership](0018-unified-trigger-batch-ownership.md)
 - [ADR 0019 — normalized zone-change trigger discovery](0019-normalized-zone-trigger-discovery.md)
+- [ADR 0020 — continuous-effect duration and applicability ownership](0020-continuous-effect-duration-and-applicability.md)

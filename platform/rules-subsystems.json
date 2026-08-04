@@ -335,24 +335,24 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "continuous-effect-duration-and-source-applicability",
+    "batch_id": "attached-static-characteristic-effects",
     "subsystem_id": "continuous-effects",
     "rule_ids": [
-      "611.2",
-      "611.3"
+      "613.1d",
+      "613.1f",
+      "613.1g"
     ],
     "target_capability_ids": [
-      "continuous.power_toughness.fixed_anthem",
-      "continuous.basic_land_type.add_all_lands"
+      "continuous.attached.fixed_characteristics"
     ],
-    "rationale": "The generic trigger foundation and normalized fixed-life zone-trigger slice are now represented, while effective-characteristic queries still depend on a partial continuous-effect owner. The next dependency-ready universal boundary is the CR 611 distinction between resolution-created locked sets and duration and static-ability live applicability. Closing it enables layer/static compiler expansion without adding card-shaped runtime branches.",
+    "rationale": "The CR 611 duration and live-source boundary now supports reusable static expansion. The pinned Commander corpus contains 933 cards matching fixed enchanted/equipped-creature power/toughness wording, including 347 combined modifier/keyword forms, so attached characteristic effects are a higher-yield next family than another prevention micro-slice. The attachment kernel and shared layer evaluator already provide the dependency direction needed to implement this without card-name dispatch.",
     "exit_criteria": [
-      "Represent resolution-created continuous effects with a strict duration and an immutable affected-object set when CR 611.2c locks that set.",
-      "Represent static-ability continuous effects with live source-zone applicability and dynamic object membership under CR 611.3a-b.",
-      "Route current fixed anthem and basic-land-type producers through the same effective-characteristic query without printed-name or Oracle-ID dispatch.",
-      "Prove source departure, control change, new-object entry, characteristic changes, expiration, simultaneous objects, replay, rollback, and multiplayer behavior.",
-      "Extract the corresponding applicability and duration responsibility from CommanderEngine and ratchet direct characteristic reads.",
-      "Add generic CardProgram/compiler lowering for the closed static and until-end-of-turn wording families, then measure the Commander-legal census."
+      "Represent the live attached-object relation as a strict source-bound continuous-effect predicate rather than a copied target annotation.",
+      "Apply closed fixed type, subtype, keyword add/remove, and power/toughness operations in their represented CR 613 layers through the shared evaluator.",
+      "Prove attach, detach, reattach, source departure, target departure/reentry, control change, phasing, simultaneous sources, replay, privacy, rollback, and multiplayer behavior.",
+      "Generically lower exact enchanted/equipped-creature fixed modifiers and keyword grants while rejecting stateful quantities, conditions, unsupported costs, and characteristic-defining lookalikes.",
+      "Remove the corresponding attachment-characteristic responsibility from CommanderEngine or legacy annotations and ratchet architecture/card-specificity guards.",
+      "Run the full Oracle and Commander censuses and require a measurable exact and capability-closed card cluster without witness inflation."
     ]
   }
 }

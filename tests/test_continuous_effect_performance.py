@@ -14,6 +14,7 @@ from mtg_commander_sim.continuous_effects import (
     Layer,
     evaluate_continuous_effects,
 )
+from mtg_commander_sim.object_predicate import ObjectQuerySpec
 
 
 def _descriptor() -> dict:
@@ -143,10 +144,9 @@ class ContinuousEffectPerformanceTests(unittest.TestCase):
             operations=(
                 ContinuousOperation("modify_power_toughness", [1, 1]),
             ),
-            applies={
-                "controller": "A",
-                "subtypes": {"contains_all": ["Thopter"]},
-            },
+            applies=ObjectQuerySpec(
+                controller="A", subtypes_all=("thopter",)
+            ),
         )
         result = evaluate_continuous_effects(
             CharacteristicState(

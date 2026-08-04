@@ -462,6 +462,114 @@ class OracleIRTests(unittest.TestCase):
                     node.effects[0],
                 )
 
+    def test_fixed_continuous_modifiers_compile_exactly_without_card_names(self):
+        base = self.db.lookup("Lightning Bolt")
+        registry = load_default_capability_registry()
+        fixtures = (
+            (
+                "Fixture Anthem",
+                "Enchantment",
+                "Creatures you control get +1/+1.",
+                "continuous-fixed-query-anthem-v2",
+                "exact",
+            ),
+            (
+                "Fixture Dragon Anthem",
+                "Enchantment",
+                "Dragon creatures you control get +3/+3.",
+                "continuous-fixed-query-anthem-v2",
+                "exact",
+            ),
+            (
+                "Fixture Charge",
+                "Instant",
+                "Creatures you control get +1/+1 until end of turn.",
+                "modify-controlled-creatures-fixed-stats-eot-v1",
+                "exact",
+            ),
+            (
+                "Fixture Target Pump",
+                "Instant",
+                "Target creature gets +2/+0 until end of turn.",
+                "modify-target-creature-stats-eot-v1",
+                "partial",
+            ),
+        )
+        for name, type_line, text, template, status in fixtures:
+            with self.subTest(name=name):
+                record = replace(
+                    base,
+                    oracle_id=f"fixture-{normalize_card_name(name)}",
+                    name=name,
+                    type_line=type_line,
+                    oracle_text=text,
+                )
+                ir = compile_oracle_card(
+                    record, capability_registry=registry
+                )
+                self.assertEqual(template, ir.faces[0].nodes[0].template_id)
+                self.assertEqual(status, ir.status)
+
+        stateful = replace(
+            base,
+            oracle_id="fixture-attacking-anthem",
+            name="Fixture Attacking Anthem",
+            type_line="Enchantment",
+            oracle_text="Attacking creatures you control get +1/+0.",
+        )
+        stateful_ir = compile_oracle_card(
+            stateful, capability_registry=registry
+        )
+        self.assertNotEqual("exact", stateful_ir.status)
+        self.assertNotEqual(
+            "continuous-fixed-query-anthem-v2",
+            stateful_ir.faces[0].nodes[0].template_id,
+        )
+
+    def test_exact_generated_node_can_be_trusted_with_separate_reviewed_residual(self):
+        record = self.db.lookup("Stridehangar Automaton")
+        capabilities = load_default_capability_registry()
+        ir = compile_oracle_card(
+            record,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual("partial", ir.status)
+        generated_node = ir.faces[0].nodes[0]
+        self.assertTrue(generated_node.exact)
+        self.assertEqual(
+            "continuous-fixed-query-anthem-v2",
+            generated_node.template_id,
+        )
+
+        programs = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual(1, len(programs))
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertFalse(programs[0].requires_arbiter)
+
+        reviewed_registry = SemanticRegistry()
+        generation = register_generated_programs(
+            self.db,
+            reviewed_registry,
+            (record,),
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+            promote_exact_runtime_handlers=True,
+        )
+        self.assertEqual(0, generation["programs_generated"])
+        self.assertEqual(1, generation["programs_skipped_existing"])
+        self.assertIsNone(
+            reviewed_registry.get(
+                f"{record.oracle_id}:static:front:n1"
+            )
+        )
+
     def test_dynamic_and_aftermath_prevention_compile_generically(self):
         base = self.db.lookup("Lightning Bolt")
         for template_id, oracle_text, expected in (

@@ -10,6 +10,7 @@ from .damage_modifier_state import (
     DamagePreventionShield,
     DamageRedirectionEffect,
 )
+from .continuous_effect_model import ContinuousEffect
 from .trigger_batches import PendingTriggerBatch, TriggerBatchError
 from .util import normalize_mana_bundle, stable_json
 
@@ -589,6 +590,11 @@ class GameState:
     damage_redirections: list[DamageRedirectionEffect] = field(
         default_factory=list
     )
+    # Additive Game Record v3 CR 611 journal. ``None`` preserves historical
+    # checkpoints whose temporary characteristic effects used annotations.
+    continuous_effects: list[ContinuousEffect] | None = field(
+        default_factory=list
+    )
     # Authoritative CR 608.2i look-back facts. ``None`` is reserved for legacy
     # Game Record v3 checkpoints created before this additive feature existed.
     turn_history: TurnHistory | None = field(default_factory=TurnHistory)
@@ -659,6 +665,15 @@ class GameState:
                 effect.to_dict() for effect in self.damage_redirections
             ],
             **(
+                {
+                    "continuous_effects": [
+                        effect.to_dict() for effect in self.continuous_effects
+                    ]
+                }
+                if self.continuous_effects is not None
+                else {}
+            ),
+            **(
                 {"turn_history": self.turn_history.to_dict()}
                 if self.turn_history is not None
                 else {}
@@ -723,6 +738,11 @@ class GameState:
                 DamageRedirectionEffect.from_dict(item)
                 for item in data.get("damage_redirections", [])
             ],
+            continuous_effects=(
+                cls._continuous_effects_from_dict(data["continuous_effects"])
+                if "continuous_effects" in data
+                else None
+            ),
             turn_history=(
                 TurnHistory.from_dict(data["turn_history"])
                 if isinstance(data.get("turn_history"), dict)
@@ -761,6 +781,14 @@ class GameState:
                 "pending_trigger_batches must be an array"
             )
         return [PendingTriggerBatch.from_dict(batch) for batch in data]
+
+    @staticmethod
+    def _continuous_effects_from_dict(
+        data: Any,
+    ) -> list[ContinuousEffect]:
+        if not isinstance(data, list):
+            raise ValueError("continuous_effects must be an array")
+        return [ContinuousEffect.from_dict(effect) for effect in data]
 
     def save(self, path: str | Path) -> None:
         path = Path(path)

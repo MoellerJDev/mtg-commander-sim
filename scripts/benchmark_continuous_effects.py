@@ -25,6 +25,7 @@ from mtg_commander_sim.continuous_effects import (
     Layer,
     evaluate_continuous_effects,
 )
+from mtg_commander_sim.object_predicate import ObjectQuerySpec
 
 
 BASELINE = ROOT / "platform" / "continuous-effect-performance-baseline.json"
@@ -154,10 +155,10 @@ def _layer_scenario() -> dict[str, Any]:
             operations=(
                 ContinuousOperation("modify_power_toughness", [1, 1]),
             ),
-            applies={
-                "controller": "A",
-                "subtypes": {"contains_all": ["Thopter"]},
-            },
+            applies=ObjectQuerySpec(
+                controller="A",
+                subtypes_all=("thopter",),
+            ),
         ),
     ]
     start = perf_counter()

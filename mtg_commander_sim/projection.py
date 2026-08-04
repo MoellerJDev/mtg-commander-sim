@@ -3,11 +3,13 @@ from __future__ import annotations
 import copy
 import json
 from dataclasses import dataclass, field
-from typing import Any, Iterable, Mapping
+from typing import Any, Callable, Iterable, Mapping
 
 from .carddb import CardDatabase
+from .characteristic_evaluation import evaluate_card_characteristics
 from .choice_forms import build_action_form
 from .commander import commander_damage_source
+from .continuous_effect_state import active_resolution_effects
 from .model import CardInstance, Event, GameState
 from .protocol import PROTOCOL_VERSION, json_patch, view_hash
 from .util import stable_json, truncate
@@ -59,9 +61,18 @@ class ProjectionCursor:
 class StateProjector:
     """Build small, permission-aware LLM/client views of authoritative state."""
 
-    def __init__(self, card_db: CardDatabase, state: GameState):
+    def __init__(
+        self,
+        card_db: CardDatabase,
+        state: GameState,
+        *,
+        characteristic_resolver: (
+            Callable[[CardInstance], Mapping[str, Any]] | None
+        ) = None,
+    ):
         self.card_db = card_db
         self.state = state
+        self.characteristic_resolver = characteristic_resolver
 
     @staticmethod
     def seat_for(principal: str) -> str | None:
@@ -196,6 +207,11 @@ class StateProjector:
                 "p": face_data.get("power") if face_data is not None else record.power,
                 "q": face_data.get("toughness") if face_data is not None else record.toughness,
                 "k": list(record.keywords),
+                "colors": list(
+                    face_data.get("colors") or record.colors
+                    if face_data is not None
+                    else record.colors
+                ),
             }
             if face is not None:
                 data["face"] = face[0]
@@ -214,19 +230,56 @@ class StateProjector:
                 "p": token.get("power"),
                 "q": token.get("toughness"),
                 "k": list(token.get("keywords") or []),
+                "colors": list(token.get("colors") or []),
             }
-        overrides = card.annotations.get("copy_overrides") or {}
-        if overrides:
-            key_map = {
-                "name": "n", "mana_cost": "m", "mana_value": "mv",
-                "type_line": "t", "oracle_text": "o", "power": "p",
-                "toughness": "q", "keywords": "k",
+        base = {
+            "name": data["n"],
+            "mana_cost": data["m"],
+            "mana_value": data["mv"],
+            "type_line": data["t"],
+            "oracle_text": data["o"],
+            "power": data["p"],
+            "toughness": data["q"],
+            "keywords": data["k"],
+            "colors": data.pop("colors", []),
+        }
+        evaluated = (
+            dict(self.characteristic_resolver(card))
+            if self.characteristic_resolver is not None
+            else evaluate_card_characteristics(
+                card,
+                base,
+                runtime_effects=active_resolution_effects(
+                    self.state, card
+                ),
+            )
+        )
+        characteristic_override = any(
+            evaluated.get(field) != base.get(field)
+            for field in (
+                "name",
+                "mana_cost",
+                "mana_value",
+                "type_line",
+                "oracle_text",
+                "power",
+                "toughness",
+                "keywords",
+            )
+        )
+        data.update(
+            {
+                "n": evaluated["name"],
+                "m": evaluated["mana_cost"],
+                "mv": evaluated["mana_value"],
+                "t": evaluated["type_line"],
+                "o": evaluated["oracle_text"],
+                "p": evaluated.get("power"),
+                "q": evaluated.get("toughness"),
+                "k": list(evaluated.get("keywords") or []),
+                "_characteristic_override": characteristic_override,
             }
-            for key, value in overrides.items():
-                if key in key_map:
-                    data[key_map[key]] = value
-        if card.temporary_keywords:
-            data["k"] = sorted(set(data.get("k") or []).union(card.temporary_keywords))
+        )
         return data
 
     def _obj(self, card: CardInstance, principal: str) -> dict[str, Any]:
@@ -241,13 +294,28 @@ class StateProjector:
             obj["cid"] = card.oracle_id[:8]
             effective = self._effective(card)
             obj["n"] = effective["n"]
-            if card.active_face:
+            characteristic_override = bool(
+                effective.get("_characteristic_override")
+                or active_resolution_effects(self.state, card)
+                or card.annotations.get("copy_overrides")
+                or card.annotations.get("continuous_add_types")
+                or card.annotations.get("continuous_add_subtypes")
+                or card.annotations.get("until_end_of_turn")
+                or card.temporary_keywords
+            )
+            if card.active_face or characteristic_override:
                 obj["m"] = effective.get("m", "")
                 obj["t"] = effective.get("t", "")
                 obj["o"] = truncate(
                     str(effective.get("o") or "").replace("\n", " / "),
                     520,
                 )
+                if effective.get("p") is not None:
+                    obj["p"] = effective["p"]
+                if effective.get("q") is not None:
+                    obj["q"] = effective["q"]
+                if effective.get("k"):
+                    obj["k"] = list(effective["k"])
                 if effective.get("face") is not None:
                     obj["face"] = effective["face"]
         else:

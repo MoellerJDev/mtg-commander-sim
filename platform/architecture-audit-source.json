@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "cda213c987cb8c5aef94af74bc74146f29bba0fb",
+    "baseline_main_commit": "797a7157bec6f7509ab68d946aee1c3efac2b32c",
     "baseline_worktree_clean": true,
-    "verified_at": "2026-08-03",
-    "phase": "prevention_source_continuity_and_life_aftermath",
-    "scope_note": "Certified main through PR 73 includes typed prevention creation, source choice, aftermath transactions, same-chooser event ordering, and resumable mana-payment choices. The current focused branch adds explicit referred-object provenance, incarnation-safe permanent-spell continuity, closed source-property rechecks, a replacement-capable life transaction, and generic Oracle lowering while reducing direct state writes and one source-pinned program without printed-name or Oracle-ID growth."
+    "verified_at": "2026-08-04",
+    "phase": "continuous_effect_duration_and_source_applicability",
+    "scope_note": "Certified main through PR 82 includes unified ordinary trigger batching and normalized zone-change trigger discovery with canonical fixed life results. The current focused branch adds immutable resolution-created continuous-effect state, locked affected-object identities and durations, live source-bound static applicability, one engine/projection characteristic evaluator, generic fixed-query anthem and controlled-creature end-of-turn lowering, and measurable corpus gains while reducing CommanderEngine and printed-name dispatch."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30811998248,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30811998248",
+    "run_id": 30868127255,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30868127255",
     "status": "pass",
     "python_versions": [
       "3.12"
@@ -41,6 +41,7 @@
       "mtg_commander_sim/damage_results.py",
       "mtg_commander_sim/life_change.py",
       "mtg_commander_sim/life_state.py",
+      "mtg_commander_sim/continuous_effect_state.py",
       "mtg_commander_sim/tap_state.py",
       "mtg_commander_sim/token_creation.py"
       ,"mtg_commander_sim/mana_activation.py"
@@ -66,6 +67,8 @@
       "mtg_commander_sim/replacement_decisions.py",
       "mtg_commander_sim/replacement_effects.py",
       "mtg_commander_sim/continuous_effects.py",
+      "mtg_commander_sim/continuous_effect_model.py",
+      "mtg_commander_sim/characteristic_evaluation.py",
       "mtg_commander_sim/state_based_actions.py",
       "mtg_commander_sim/token_creation.py"
     ],

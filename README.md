@@ -702,6 +702,18 @@ branch, but generated programs stay provisional and arbiter-gated while any
 mechanic dependency is untrusted. Unknown suffixes, costs, triggers,
 replacement effects, or static text remain material residuals.
 
+Represented CR 611 effects now use two explicit paths. A spell or ability that
+resolves into a fixed characteristic change records an immutable duration and
+the exact physical/logical objects affected at resolution; later entrants are
+not included, and an object that leaves and returns is new. A static
+CardProgram component instead keeps a live `ObjectQuerySpec`: membership is
+recomputed from current characteristics and the effect ends when its source is
+absent or phased out. The engine and seat projection call the same evaluator.
+Oracle IR v23 generically lowers closed fixed-query anthem wording and closed
+controlled-creature until-end-of-turn modifiers. Complete duration grammar,
+control-changing and player/rules-modifying continuous effects, all layer
+dependencies, and arbitrary static text remain blocked.
+
 The generic zone kernel now distinguishes a stable physical card identifier
 from its logical incarnation. Every ordinary zone change, including a draw or
 a cast, advances an authoritative incarnation counter; same-zone moves through

@@ -62,15 +62,15 @@ class RulesSchedulerTests(unittest.TestCase):
             for subsystem in self.queue["subsystems"]
             for rule in subsystem["rules"]
         ]
-        self.assertEqual(3049, len(queued))
+        self.assertEqual(3045, len(queued))
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
-            350,
+            359,
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
-            2699,
+            2686,
             self.queue["summary"]["behavioral_review_required"],
         )
 
@@ -125,14 +125,14 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "continuous-effect-duration-and-source-applicability",
+            "attached-static-characteristic-effects",
             selected["batch_id"],
         )
         self.assertEqual(
             "continuous-effects", selected["subsystem_id"]
         )
         self.assertEqual(
-            {"611.2", "611.3"},
+            {"613.1d", "613.1f", "613.1g"},
             set(selected["rule_ids"]),
         )
         self.assertTrue(

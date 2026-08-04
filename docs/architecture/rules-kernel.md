@@ -32,6 +32,13 @@ an immutable rules query and emit intents; they cannot import the engine or
 state model. The intent executor calls existing canonical engine methods or
 the focused tap-state port.
 
+Continuous characteristics are a shared rules responsibility rather than a
+client reconstruction. `continuous_effect_state.py` owns the authoritative
+resolution-effect journal and expiration; `characteristic_evaluation.py`
+combines that journal with live CardProgram static effects for both engine
+legality and principal-scoped projection. Raw journal entries and physical
+object identities never enter the projection.
+
 ## Inputs and outputs
 
 - Inputs: a pinned `GameState`, semantic registry, server-issued action ID,
@@ -78,6 +85,12 @@ before final mutation; state-based actions run to a fixed point. Universal
 counter, draw, damage, prevention, entry, and prohibition participation remains
 blocked. New rules work must identify event/replacement participation and use
 capability IDs from the versioned registry.
+
+For represented CR 611 object modifications, resolution-created effects lock
+the affected physical/logical object set after successful preparation. Static
+effects keep a live source-bound `ObjectQuerySpec` and recompute membership
+after earlier layers. Unsupported duration or operation families fail before
+the journal mutates.
 
 ## Visibility and replay
 

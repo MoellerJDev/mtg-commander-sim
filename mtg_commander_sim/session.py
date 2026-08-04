@@ -160,7 +160,11 @@ class CommanderSession:
         return cls(
             card_db=card_db,
             engine=engine,
-            projector=StateProjector(card_db, engine.state),
+            projector=StateProjector(
+                card_db,
+                engine.state,
+                characteristic_resolver=engine._effective_card_data,
+            ),
             initial_checkpoint=checkpoint_envelope(engine.state),
             pilot_profiles=pilot_profiles,
             deck_provenance=provenance,
@@ -1017,7 +1021,15 @@ class CommanderSession:
         semantics_path: str | Path | None = None,
     ) -> "CommanderSession":
         directory = Path(directory)
-        semantics = SemanticRegistry(semantics_path)
+        persisted_semantics = directory / "semantics.json"
+        semantics = SemanticRegistry(
+            semantics_path
+            or (
+                persisted_semantics
+                if persisted_semantics.exists()
+                else None
+            )
+        )
         if (directory / "manifest.json").exists():
             from .record import load_record_state, read_initial_checkpoint
 
@@ -1130,7 +1142,11 @@ class CommanderSession:
         return cls(
             card_db=card_db,
             engine=engine,
-            projector=StateProjector(card_db, engine.state),
+            projector=StateProjector(
+                card_db,
+                engine.state,
+                characteristic_resolver=engine._effective_card_data,
+            ),
             cursors=cursors,
             initial_checkpoint=initial_checkpoint,
             commands=commands,

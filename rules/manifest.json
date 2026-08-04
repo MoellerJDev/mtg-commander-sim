@@ -19,7 +19,7 @@
     }
   },
   "derived_hashes": {
-    "conformance-cases.json": "00a44d907a7c3a2ce42b1081d5ad3f8c33d570d3e193194de648dd62d569f9ec",
+    "conformance-cases.json": "8e91cf48fac78536476ff99f63ff4bb6ec075fb95f8f4eaa03e3f33270e8f950",
     "dependency-graph.json": "0c2c5095e0875c278e26d58d601246bcc597183ab96be167dec64bc0fe0ae956",
     "glossary-index.json": "576fad18aaf10a2f1c0f1f257837eae95057721b668fe38740d2182ce9aebb7d",
     "mechanic-index.json": "72998332705128357f9adc1ba7f20b73a6f5b97ccdda9fc46a95edc5f5ff7fcb",
@@ -27,7 +27,7 @@
     "rule-index.json": "ae20b6961f35621fe5f9cec5e784416ca14a7723a4f0ffb5d2326aa5555f4347"
   },
   "effective_date": "2026-06-19",
-  "generated_at": "2026-08-04T00:38:53.164073+00:00",
+  "generated_at": "2026-08-04T02:22:23.443170+00:00",
   "glossary_count": 733,
   "mechanic_count": 425,
   "parser_version": "cr-index-v1",

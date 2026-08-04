@@ -96,6 +96,21 @@ independent sources stack by timestamp and component identity. It does not
 claim CDAs, base-setting, state-derived modifiers, ability removal, same-layer
 dependencies, or complete CR 613.
 
+`continuous.anthem.fixed-query.v2` generalizes that source-pinned witness to a
+closed compiler-produced predicate. It binds relative controller constraints
+to the live source controller, excludes the source when the wording requires
+"other," and emits only fixed layer-7c power/toughness operations. The source
+must remain on the battlefield and phased in; target membership changes as
+earlier-layer characteristics, control, entry, and departure change. The
+runtime model is immutable and never receives `GameState`.
+
+Resolution-created fixed modifiers are not components that remain active at a
+source. Typed effect-runtime producers prepare an exact object set and commit
+an additive `ContinuousEffect` journal entry through
+`continuous_effect_state.py`. Cleanup expires the represented end-of-turn
+duration. Historical Game Record v3 checkpoints without this journal keep the
+annotation compatibility path explicitly.
+
 ## Participation and assurance
 
 Descriptors live inside the canonical CardProgram fingerprint. Strict preflight
@@ -145,7 +160,8 @@ Primary tests are `test_replacement_event_tree.py`,
 `test_mana_mode_effects.py`,
 `test_replacement_model_hardening.py`,
 `test_damage_result_events.py`,
-`test_continuous_effect_components.py`, `test_card_program_trust.py`, and
+`test_continuous_effect_components.py`, `test_continuous_effect_duration.py`,
+`test_card_program_trust.py`, and
 `test_continuous_effect_performance.py`. See the
 [extension guide](../extension/runtime-component.md) and
 [ADR 0007](../adr/0007-cardprogram-runtime-components.md) plus
@@ -155,3 +171,5 @@ Primary tests are `test_replacement_event_tree.py`,
 [ADR 0012](../adr/0012-damage-transaction-and-static-prevention.md) and the
 [damage transaction](damage-transactions.md), plus
 [ADR 0013](../adr/0013-damage-result-event-ownership.md).
+The continuous-effect state decision is
+[ADR 0020](../adr/0020-continuous-effect-duration-and-applicability.md).

@@ -6,10 +6,10 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "canonical_life_and_simple_zone_triggers",
-    "branch": "rules/canonical-life-and-zone-triggers",
+    "active_phase": "continuous_effect_duration_and_source_applicability",
+    "branch": "rules/continuous-effect-duration-and-source-applicability",
     "branch_ancestry": {
-      "focused_branch_base": "9ff74d9fb7ec0868a9095b09bf1f6244309f5f26",
+      "focused_branch_base": "797a7157bec6f7509ab68d946aee1c3efac2b32c",
       "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
@@ -579,6 +579,13 @@
         "number": 81,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/81"
+      },
+      {
+        "base": "main",
+        "head": "rules/canonical-life-and-zone-triggers",
+        "number": 82,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/82"
       }
     ],
     "tags": [
@@ -593,9 +600,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "9ff74d9fb7ec0868a9095b09bf1f6244309f5f26",
-    "certified_head_sha": "9ff74d9fb7ec0868a9095b09bf1f6244309f5f26",
-    "generation_timestamp": "2026-08-04T00:30:59Z"
+    "feature_head_sha": "2b2a05a07a77ad645682b294c19e28bb74438843",
+    "certified_head_sha": "2b2a05a07a77ad645682b294c19e28bb74438843",
+    "generation_timestamp": "2026-08-04T01:19:11Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -704,8 +711,14 @@
     {
       "id": "canonical_life_and_simple_zone_triggers",
       "name": "Canonical fixed life and normalized zone triggers",
+      "status": "integrated_on_certified_main",
+      "evidence": "Certified main through PR 82 captures immutable version-1 zone-change occurrences with old/new logical identity, controller, characteristics, attachments, and canonical fingerprints; derives represented enter, leave, dies, discard, and graveyard facts without mutable state access; and routes semantic discovery through the unified ordinary trigger batch. Oracle IR v22 separately declares normalized event, APNAP placement, and effect-result capabilities. Fixed self enter/dies life triggers use the canonical replacement-capable life transaction and promote only when exact and capability-closed; draw triggers remain provisional on the blocked draw capability. Simultaneous source departure, LKI controller, malformed input, rollback, replay, compiler closure, and killed implementation mutants are covered. Exact-head PR run 30868127255 and post-merge main-smoke run 30868379545 passed. The certified census improved Commander exact and trusted CardPrograms from 419 to 458 and material residuals from 60,742 to 60,587 without a printed-name runtime branch."
+    },
+    {
+      "id": "continuous_effect_duration_and_source_applicability",
+      "name": "Continuous-effect duration and source applicability",
       "status": "implemented_in_active_source_tree_pending_certification",
-      "evidence": "The active source tree captures immutable version-1 zone-change occurrences with old/new logical identity, controller, characteristics, attachments, and canonical fingerprints; derives represented enter, leave, dies, discard, and graveyard facts without mutable state access; and routes semantic discovery through the unified ordinary trigger batch. Oracle IR v22 separately declares normalized event, APNAP placement, and effect-result capabilities. Fixed self enter/dies life triggers use the canonical replacement-capable life transaction and can be promoted only when exact and capability-closed; draw triggers remain provisional on the blocked draw capability. Simultaneous source departure, LKI controller, malformed input, rollback, replay, compiler closure, and killed implementation mutants are covered. The August 2 Commander census improves exact and trusted CardPrograms from 419 to 458 and material residuals from 60,742 to 60,587 without a printed-name runtime branch."
+      "evidence": "The active source tree adds strict immutable CR 611 effect, operation, duration, source, and affected-object values; an additive Game Record v3 resolution-effect journal; locked physical/logical object sets for represented resolution-created modifiers; cleanup expiration; and live source-bound ObjectQuerySpec membership for static effects. Engine legality and seat projection share one characteristic evaluator. Fixed temporary type, subtype, keyword, power/toughness, and mass controlled-creature producers use the journal, while Oracle IR v23 generically lowers closed fixed-query anthems and controlled-creature until-end-of-turn modifiers. Focused behavior, malformed-input, rollback, multiplayer, save/load, replay, privacy, compiler, architecture, and killed-mutation tests pass. The active Commander census improves exact and trusted programs from 458 to 528, capability-closed programs from 456 to 526, and material residuals from 60,587 to 60,307 without printed-name growth."
     },
     {
       "id": "rules_snapshot",
@@ -731,8 +744,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_ten_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports",
-    "capability_evidence": "implemented_registry_v18_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_and_normalized_zone_trigger_capabilities",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eleven_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_and_continuous_effect_owners",
+    "capability_evidence": "implemented_registry_v19_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_normalized_zone_trigger_and_continuous_effect_capabilities",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -742,14 +755,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30862860578,
+      "run_id": 30868127255,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30862860578"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30868127255"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr81_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_normalized_zone_trigger_life_compiler_replay_mutation_and_architecture_checks_pass",
-      "focused_rules_tests": "pass_immutable_normalized_zone_occurrence_enter_leave_dies_lki_simultaneous_source_departure_fixed_life_trigger_exact_promotion_draw_fail_closed_apnap_replay_rollback_and_implementation_mutations",
+      "deterministic_tests": "certified_main_through_pr82_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_continuous_model_duration_applicability_compiler_replay_privacy_mutation_and_architecture_checks_pass",
+      "focused_rules_tests": "pass_immutable_continuous_effect_model_locked_resolution_sets_live_static_membership_source_departure_control_change_entry_reentry_cleanup_expiration_multiplayer_save_load_replay_privacy_rollback_and_implementation_mutations",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -765,14 +778,14 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-    "card_program_census": "oracle_ir_v22_full_38485_trusted_859_capability_closed_857_residual_35377_failed_2249_material_residual_69196; full_oracle_exact_3099_partial_16075_unresolved_19311_material_residual_69208; commander_legal_31623_trusted_458_capability_closed_456_residual_31164_failed_1_material_residual_60584; commander_oracle_exact_458_partial_14655_unresolved_16510_material_residual_60587; delta_from_pr81_full_exact_trusted_and_capability_closed_plus_40_material_residual_minus_157_and_commander_exact_trusted_and_capability_closed_plus_39_material_residual_minus_155; representative_new_exact_cards_lone_missionary_cathedral_sanctifier_centaur_healer_highland_game_peace_strider_bulwark_giant_healer_of_the_glade_and_honey_mammoth; exact_etb_draw_remains_partial_on_zone_draw_library_to_hand"
+    "card_program_census": "oracle_ir_v23_full_38485_trusted_936_capability_closed_934_residual_35300_failed_2249_material_residual_68880; full_oracle_exact_3176_partial_16255_unresolved_19054_material_residual_68892; commander_legal_31623_trusted_528_capability_closed_526_residual_31094_failed_1_material_residual_60304; commander_oracle_exact_528_partial_14815_unresolved_16280_material_residual_60307; delta_from_pr82_full_exact_trusted_and_capability_closed_plus_77_material_residual_minus_316_and_commander_exact_trusted_and_capability_closed_plus_70_material_residual_minus_280; representative_new_exact_cards_gaeas_anthem_glorious_anthem_crucible_of_fire_benalish_marshal_chief_of_the_foundry_collective_blessing_glorious_charge_and_inspired_charge; targeted_pump_remains_partial_on_cr115_target_closure_and_stateful_or_combat_qualified_modifiers_remain_residual"
   },
   "blockers": [
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
-    "the continuous-effect baseline gates structural scan counts but records latency observationally; broader action, combat, copy, control-change, phasing, and invalidation performance scenarios remain incomplete",
+    "represented continuous effects now distinguish locked resolution-created sets and live source-bound static membership, but player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy/phasing invalidation remain incomplete; the structural benchmark still records latency observationally",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
     "the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction",
@@ -780,5 +793,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "After certifying canonical fixed life and normalized zone triggers, implement the dependency-ready continuous-effect-duration-and-source-applicability batch for CR 611.2-611.3: immutable locked sets and durations for resolution-created effects, live source-zone applicability for static effects, canonical characteristic queries, generic compiler lowering, replay, and multiplayer closure."
+  "next_task": "After certifying the CR 611 duration/applicability boundary, rerank the Commander residual corpus and implement a high-frequency dependency-ready static, trigger, or ordinary spell-effect family that composes with the shared characteristic evaluator and unlocks a measurable exact-card cluster."
 }
