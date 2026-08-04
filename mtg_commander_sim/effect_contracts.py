@@ -27,6 +27,7 @@ EFFECT_FAMILY_CONTRACTS = (
                 "mana",
                 "next_spell_improvise",
                 "next_spell_uncounterable",
+                "grant_uncounterable_hexproof_from_colors_until_end",
                 "veil_of_summer",
             }
         ),

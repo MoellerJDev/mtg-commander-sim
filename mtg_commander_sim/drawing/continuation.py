@@ -5,7 +5,7 @@ from typing import Any, Mapping
 
 from ..replacement import FrozenMap, ReplacementEffect, ReplacementEffectError
 from ..replacement.immutable import thaw_value
-from .model import DrawError, DrawEventRequest
+from .model import DrawError, DrawEventRequest, QueuedDraw
 
 
 def _exact(value: Mapping[str, Any], fields: set[str], *, name: str) -> None:
@@ -36,9 +36,15 @@ class DrawResume:
     destination: str | None = None
     note: str = ""
     instruction_pointer: int = 0
+    draws: tuple[QueuedDraw, ...] = ()
 
     def __post_init__(self) -> None:
-        if self.kind not in {"none", "turn_draw", "semantic_resolution"}:
+        if self.kind not in {
+            "none",
+            "turn_draw",
+            "semantic_resolution",
+            "draw_batch",
+        }:
             raise DrawError(f"Unsupported post-draw continuation {self.kind!r}")
         if self.kind == "none":
             if (
@@ -48,6 +54,7 @@ class DrawResume:
                 or self.destination is not None
                 or self.note
                 or self.instruction_pointer
+                or self.draws
             ):
                 raise DrawError("Empty draw continuation carries extra state")
             return
@@ -59,8 +66,24 @@ class DrawResume:
                 or self.destination is not None
                 or self.note
                 or self.instruction_pointer
+                or self.draws
             ):
                 raise DrawError("Turn-draw continuation carries extra state")
+            return
+        if self.kind == "draw_batch":
+            if not self.draws or any(
+                not isinstance(draw, QueuedDraw) for draw in self.draws
+            ):
+                raise DrawError("Draw-batch continuation requires queued draws")
+            if (
+                self.seat
+                or self.stack_ref
+                or self.effects
+                or self.destination is not None
+                or self.note
+                or self.instruction_pointer
+            ):
+                raise DrawError("Draw-batch continuation carries extra state")
             return
         _string(self.stack_ref, name="Semantic draw stack reference")
         if self.destination is not None and type(self.destination) is not str:
@@ -70,6 +93,8 @@ class DrawResume:
             raise DrawError("Semantic draw instruction pointer must be nonnegative")
         if any(not isinstance(effect, FrozenMap) for effect in self.effects):
             raise DrawError("Semantic draw effects must be immutable objects")
+        if self.draws:
+            raise DrawError("Semantic draw continuation carries queued draws")
 
     @classmethod
     def none(cls) -> "DrawResume":
@@ -86,6 +111,17 @@ class DrawResume:
         if kind == "turn_draw":
             _exact(value, {"kind", "seat"}, name="Turn-draw continuation")
             return cls(kind="turn_draw", seat=_string(value["seat"], name="Turn-draw continuation seat"))
+        if kind == "draw_batch":
+            _exact(value, {"kind", "draws"}, name="Draw-batch continuation")
+            draws = value["draws"]
+            if not isinstance(draws, (list, tuple)) or any(
+                not isinstance(draw, Mapping) for draw in draws
+            ):
+                raise DrawError("Draw-batch continuation draws must be objects")
+            return cls(
+                kind="draw_batch",
+                draws=tuple(QueuedDraw.from_dict(draw) for draw in draws),
+            )
         if kind != "semantic_resolution":
             raise DrawError("Post-draw continuation kind is invalid")
         fields = {
@@ -116,6 +152,11 @@ class DrawResume:
             return {"kind": "none"}
         if self.kind == "turn_draw":
             return {"kind": "turn_draw", "seat": self.seat}
+        if self.kind == "draw_batch":
+            return {
+                "kind": "draw_batch",
+                "draws": [draw.to_dict() for draw in self.draws],
+            }
         return {
             "kind": "semantic_resolution",
             "stack_ref": self.stack_ref,

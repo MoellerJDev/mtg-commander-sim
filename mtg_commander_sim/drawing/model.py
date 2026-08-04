@@ -26,6 +26,46 @@ def _stable_string(value: Any, *, field: str) -> str:
 
 
 @dataclass(frozen=True, slots=True)
+class QueuedDraw:
+    """One immutable draw instruction waiting behind another instruction."""
+
+    player: str
+    count: int
+    reason: str
+    private: bool = False
+
+    def __post_init__(self) -> None:
+        _stable_string(self.player, field="Queued draw player")
+        _stable_string(self.reason, field="Queued draw reason")
+        if type(self.count) is not int or self.count < 0:
+            raise DrawError("Queued draw count must be a nonnegative integer")
+        if type(self.private) is not bool:
+            raise DrawError("Queued draw private flag must be a boolean")
+
+    @classmethod
+    def from_dict(cls, value: Mapping[str, Any]) -> "QueuedDraw":
+        if not isinstance(value, Mapping):
+            raise DrawError("Queued draw must be an object")
+        expected = {"player", "count", "reason", "private"}
+        if set(value) != expected:
+            raise DrawError("Queued draw fields are invalid")
+        return cls(
+            player=value["player"],
+            count=value["count"],
+            reason=value["reason"],
+            private=value["private"],
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "player": self.player,
+            "count": self.count,
+            "reason": self.reason,
+            "private": self.private,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class DrawInstructionRequest:
     event_id: str
     player: str

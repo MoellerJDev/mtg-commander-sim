@@ -2,6 +2,7 @@
 
 from .continuation import DrawDecisionContinuation, DrawResume
 from .coordinator import (
+    begin_draw_batch,
     begin_draw_sequence,
     commit_unreplaced_draws,
     complete_draw_replacement,
@@ -16,6 +17,7 @@ from .model import (
     DrawInstructionRequest,
     PreparedDrawEvent,
     PreparedDrawInstruction,
+    QueuedDraw,
     prepare_draw_event,
     prepare_draw_instruction,
     prepare_ordinary_draw,
@@ -32,12 +34,14 @@ __all__ = [
     "DrawInstructionRequest",
     "PreparedDrawEvent",
     "PreparedDrawInstruction",
+    "QueuedDraw",
     "prepare_draw_event",
     "prepare_draw_instruction",
     "prepare_ordinary_draw",
     "validate_prepared_draw",
     "DrawCommitHost",
     "commit_prepared_draw",
+    "begin_draw_batch",
     "begin_draw_sequence",
     "commit_unreplaced_draws",
     "complete_draw_replacement",

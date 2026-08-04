@@ -31,6 +31,14 @@ from mtg_commander_sim.semantic_runtime.generic import (
     DrawEachPlayerHandler,
     DrawHandler,
 )
+from mtg_commander_sim.semantic_choices import (
+    SemanticChoiceContext,
+    SemanticChoiceError,
+    SnapshotSemanticChoiceQuery,
+)
+from mtg_commander_sim.semantic_choices.conditional_draw import (
+    OpponentCastColorDrawHandler,
+)
 from mtg_commander_sim.semantic_runtime.tap_state_handlers import (
     TapPermanentHandler,
     UntapAllCreaturesHandler,
@@ -97,7 +105,7 @@ class TypedSemanticHandlerTests(unittest.TestCase):
             len({row["operation"] for row in inventory}),
         )
         self.assertEqual(
-            77,
+            78,
             len(
                 [
                     row
@@ -153,6 +161,56 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         )
         self.assertTrue(private_plan.intents[0].private)
 
+    def test_conditional_opponent_color_draw_is_strict_and_public_fact_based(self):
+        handler = OpponentCastColorDrawHandler()
+        query = SnapshotSemanticChoiceQuery(
+            seat_order=("A", "B"),
+            active_order=("A", "B"),
+            opponent_cast_colors_by_seat={"B": ("U",)},
+        )
+        context = SemanticChoiceContext(
+            actor="B",
+            stack_ref="S-conditional-draw",
+            stack_controller="B",
+            stack_label="Conditional draw test",
+            source_ref=None,
+            card_ref=None,
+            semantic_program_id="test:conditional-draw",
+            semantic_program_version=1,
+            query=query,
+        )
+
+        matched = handler.prepare(
+            {
+                "op": handler.operation,
+                "player": "B",
+                "colors": ["U", "B"],
+            },
+            context,
+        )
+        self.assertEqual(1, len(matched.preparation_intents))
+        self.assertIsInstance(matched.preparation_intents[0], DrawCardsIntent)
+
+        unmatched = handler.prepare(
+            {
+                "op": handler.operation,
+                "player": "B",
+                "colors": ["R", "G"],
+            },
+            context,
+        )
+        self.assertEqual((), unmatched.preparation_intents)
+
+        with self.assertRaisesRegex(SemanticChoiceError, "unique Magic colors"):
+            handler.prepare(
+                {
+                    "op": handler.operation,
+                    "player": "B",
+                    "colors": ["U", "U"],
+                },
+                context,
+            )
+
     def test_draw_each_player_uses_apnap_order_and_exact_engine_path(self):
         session = self.session(1210401)
         engine = session.engine
@@ -174,6 +232,61 @@ class TypedSemanticHandlerTests(unittest.TestCase):
                 before[seat] + 1,
                 len(engine.state.players[seat].zones["hand"]),
             )
+
+    def test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge(self):
+        session = self.session(12104011)
+        engine = session.engine
+        engine.state.active_player = "B"
+        loam = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B" and card.printed_name == "Life from the Loam"
+        )
+        engine.move_card(
+            loam.object_id,
+            "graveyard",
+            log=False,
+            semantic_events=False,
+        )
+        hand_before = {
+            seat: len(engine.state.players[seat].zones["hand"])
+            for seat in engine.active_seats
+        }
+
+        engine.apply_effect(
+            {"op": "draw_each_player", "count": 1},
+            actor="A",
+        )
+
+        self.assertEqual("draw.replacement", engine.state.pending_decision.kind)
+        self.assertEqual(["B"], engine.state.pending_decision.actors)
+        self.assertTrue(
+            all(
+                len(engine.state.players[seat].zones["hand"])
+                == hand_before[seat]
+                for seat in engine.active_seats
+            )
+        )
+
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": loam.ref,
+                "reason": "Use the available Dredge replacement.",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("hand", loam.zone)
+        self.assertEqual(
+            hand_before["C"] + 1,
+            len(engine.state.players["C"].zones["hand"]),
+        )
+        self.assertEqual(
+            hand_before["A"] + 1,
+            len(engine.state.players["A"].zones["hand"]),
+        )
 
     def test_monarch_handler_uses_canonical_engine_mutation_path(self):
         session = self.session(7250401)
@@ -659,6 +772,74 @@ class TypedSemanticHandlerTests(unittest.TestCase):
                 for seat in engine.active_seats
             },
         )
+
+    def test_semantic_choice_preparation_draw_uses_replacement_coordinator(self):
+        session = self.session(1210406, players=2)
+        engine = session.engine
+        loam = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B" and card.printed_name == "Life from the Loam"
+        )
+        land = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B" and card.printed_name == "Island"
+        )
+        engine.move_card(
+            loam.object_id,
+            "graveyard",
+            log=False,
+            semantic_events=False,
+        )
+        engine.move_card(
+            land.object_id,
+            "hand",
+            log=False,
+            semantic_events=False,
+        )
+        program = SemanticProgram(
+            key="test:replacement-aware-choice-draw",
+            label="Draw, then choose a land",
+            effects=[{"op": "draw_optional_land"}],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="replacement-aware-choice-draw",
+                ref="S-replacement-aware-choice-draw",
+                kind="triggered_ability",
+                controller="B",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "B"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("B")
+        engine._issue_priority("B")
+
+        for principal in ("pilot:B", "pilot:A"):
+            result = session.act(principal, {"action_id": "pass"})
+            self.assertTrue(result.ok, result.summary)
+
+        self.assertEqual("draw.replacement", engine.state.pending_decision.kind)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": loam.ref,
+                "reason": "Replace this effect draw with Dredge.",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("hand", loam.zone)
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        self.assertEqual(["B"], engine.state.pending_decision.actors)
 
 
 if __name__ == "__main__":

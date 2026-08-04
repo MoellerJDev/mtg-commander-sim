@@ -104,10 +104,12 @@ from .damage import (
 )
 from .damage_prevention import expire_end_of_turn_damage_modifiers
 from .drawing import (
+    begin_draw_batch,
     begin_draw_sequence,
     commit_unreplaced_draws,
     complete_draw_replacement,
     DrawError,
+    QueuedDraw,
     resume_after_draw,
 )
 from .delayed_triggers import materialize_delayed_trigger
@@ -226,6 +228,7 @@ from .semantic_runtime import (
     ProliferateIntent,
     default_semantic_interpreter,
     execute_intent_plan,
+    draw_resolution_batch,
     log_applied_zone_replacements,
     PreparedZoneChange,
     prepare_zone_change_replacement,
@@ -13884,6 +13887,45 @@ class CommanderEngine(
             raise GameRuleError(str(exc)) from exc
         if typed_plan is None:
             raise GameRuleError(f"Unsupported effect operation {op!r}")
+        draw_batch = draw_resolution_batch(typed_plan)
+        if draw_batch is not None:
+            before = {
+                seat: tuple(self.state.players[seat].zones["hand"])
+                for seat in {
+                    intent.player for intent in draw_batch.intents
+                }
+            }
+            try:
+                begin_draw_batch(
+                    self,
+                    tuple(
+                        QueuedDraw(
+                            player=intent.player,
+                            count=intent.count,
+                            reason=intent.reason,
+                            private=intent.private,
+                        )
+                        for intent in draw_batch.intents
+                    ),
+                )
+            except DrawError as exc:
+                raise GameRuleError(str(exc)) from exc
+            results = [
+                (
+                    intent.player,
+                    [
+                        object_id
+                        for object_id in self.state.players[
+                            intent.player
+                        ].zones["hand"]
+                        if object_id not in before[intent.player]
+                    ],
+                )
+                for intent in draw_batch.intents
+            ]
+            if typed_plan.result_shape == "by_player":
+                return dict(results)
+            return results[0][1] if results else []
         return execute_intent_plan(self, typed_plan)
 
     def create_emblem(

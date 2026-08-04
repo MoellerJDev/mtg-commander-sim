@@ -103,6 +103,8 @@ class SemanticChoiceQuery(
 
     def drawn_this_turn(self, seat: str) -> tuple[str, ...]: ...
 
+    def opponent_cast_colors_this_turn(self, seat: str) -> tuple[str, ...]: ...
+
     def choice_candidate_refs(self) -> tuple[str, ...]: ...
 
     def damage_source_candidate_refs(self) -> tuple[str, ...]: ...
@@ -131,6 +133,7 @@ class SnapshotSemanticChoiceQuery:
     target_schemas: FrozenMap = field(default_factory=FrozenMap)
     validated_targets: FrozenMap = field(default_factory=FrozenMap)
     drawn_this_turn_by_seat: FrozenMap = field(default_factory=FrozenMap)
+    opponent_cast_colors_by_seat: FrozenMap = field(default_factory=FrozenMap)
     materialized_choice_candidates: tuple[str, ...] = ()
     materialized_damage_source_candidates: tuple[str, ...] | None = None
     current_turn_sequence: int = 0
@@ -145,6 +148,7 @@ class SnapshotSemanticChoiceQuery:
             "target_schemas",
             "validated_targets",
             "drawn_this_turn_by_seat",
+            "opponent_cast_colors_by_seat",
         ):
             value = getattr(self, field_name)
             if not isinstance(value, FrozenMap):
@@ -273,6 +277,14 @@ class SnapshotSemanticChoiceQuery:
         return tuple(
             str(value)
             for value in self.drawn_this_turn_by_seat.get(seat, ())
+        )
+
+    def opponent_cast_colors_this_turn(self, seat: str) -> tuple[str, ...]:
+        if seat not in self.seat_order:
+            raise ValueError(f"Unknown seat {seat!r}")
+        return tuple(
+            str(value)
+            for value in self.opponent_cast_colors_by_seat.get(seat, ())
         )
 
     def choice_candidate_refs(self) -> tuple[str, ...]:

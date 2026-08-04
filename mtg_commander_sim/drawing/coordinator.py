@@ -17,6 +17,7 @@ from .model import (
     DrawEventRequest,
     DrawInstructionRequest,
     PreparedDrawEvent,
+    QueuedDraw,
     prepare_draw_event,
     prepare_draw_instruction,
     prepare_ordinary_draw,
@@ -120,6 +121,31 @@ def begin_draw_sequence(
         reason=reason,
         private=private,
         resume=resume,
+    )
+
+
+def begin_draw_batch(
+    host: DrawCoordinatorHost,
+    draws: tuple[QueuedDraw, ...],
+) -> None:
+    """Resolve queued instructions in order without bypassing replacements."""
+
+    if any(not isinstance(draw, QueuedDraw) for draw in draws):
+        raise DrawError("Draw batch requires typed queued draws")
+    if not draws:
+        return
+    current, remaining = draws[0], draws[1:]
+    begin_draw_sequence(
+        host,
+        current.player,
+        current.count,
+        reason=current.reason,
+        private=current.private,
+        continuation=(
+            DrawResume(kind="draw_batch", draws=remaining).to_dict()
+            if remaining
+            else DrawResume.none().to_dict()
+        ),
     )
 
 
@@ -469,10 +495,14 @@ def resume_after_draw(
             instruction_pointer=resume.instruction_pointer,
         )
         return
+    if resume.kind == "draw_batch":
+        begin_draw_batch(host, resume.draws)
+        return
     raise DrawError(f"Unsupported post-draw continuation {resume.kind!r}")
 
 
 __all__ = [
+    "begin_draw_batch",
     "begin_draw_sequence",
     "commit_unreplaced_draws",
     "complete_draw_replacement",

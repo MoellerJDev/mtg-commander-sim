@@ -7,7 +7,11 @@ from ..errors import GameRuleError
 from ..model import StackItem
 from ..object_query import object_query_result
 from ..replacement.immutable import thaw_value
-from ..semantic_runtime import IntentPlan, execute_intent_plan
+from ..semantic_runtime import (
+    IntentPlan,
+    execute_intent_plan,
+    prepare_draw_resolution,
+)
 from ..targets import TargetGroup, available_modes, target_plan
 from ..util import unique_preserving_order
 from .context import (
@@ -381,6 +385,23 @@ class SemanticChoiceCoordinationMixin:
                     if entry.get("turn_sequence") == self.state.turn_sequence
                 )
             },
+            opponent_cast_colors_by_seat={
+                seat: tuple(
+                    sorted(
+                        {
+                            str(color).upper()
+                            for event in self.state.events
+                            if event.turn_sequence == self.state.turn_sequence
+                            and event.code == "stack.cast"
+                            and event.actor in self.active_seats
+                            and event.actor != seat
+                            for color in event.details.get("colors", [])
+                            if str(color).upper() in {"W", "U", "B", "R", "G"}
+                        }
+                    )
+                )
+                for seat in self.seats
+            },
             materialized_choice_candidates=self._semantic_choice_candidates(
                 actor, choice_effect, source_ref
             ),
@@ -440,7 +461,50 @@ class SemanticChoiceCoordinationMixin:
             )
         except SemanticChoiceError as exc:
             raise GameRuleError(str(exc)) from exc
-        for intent in preparation.preparation_intents:
+        preparation_plan = (
+            IntentPlan(
+                operation=handler.operation,
+                handler_id=handler.handler_id,
+                intents=tuple(preparation.preparation_intents),
+            )
+            if preparation.preparation_intents
+            else None
+        )
+        draw_request = (
+            prepare_draw_resolution(preparation_plan, ())
+            if preparation_plan is not None
+            else None
+        )
+        if draw_request is not None and draw_request.current is not None:
+            if preparation.request is not None or preparation.auto_continue is None:
+                raise GameRuleError(
+                    "A semantic-choice draw must have one automatic resume path"
+                )
+            self._begin_draw_sequence(
+                draw_request.current.player,
+                draw_request.current.count,
+                reason=draw_request.current.reason,
+                private=draw_request.current.private,
+                continuation={
+                    "kind": "semantic_resolution",
+                    "stack_ref": item.ref,
+                    "effects": [
+                        *draw_request.remaining_effects,
+                        *(
+                            thaw_value(value)
+                            for value in preparation.auto_continue.prepend_effects
+                        ),
+                        *(thaw_value(value) for value in remaining),
+                    ],
+                    "destination": destination,
+                    "note": note,
+                    "instruction_pointer": instruction_pointer + 1,
+                },
+            )
+            return
+        for intent in (
+            preparation_plan.intents if preparation_plan is not None else ()
+        ):
             execute_intent_plan(
                 self,
                 IntentPlan(

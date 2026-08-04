@@ -5,6 +5,7 @@ from typing import Any, Mapping, Protocol
 
 from .. import tap_state
 from ..tap_state import TapStateHost
+from .context import SemanticNodeError
 from .intents import (
     AddManaIntent,
     AddSubtypeIntent,
@@ -193,17 +194,12 @@ def prepare_draw_resolution(
 
 
 def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
+    if any(isinstance(intent, DrawCardsIntent) for intent in plan.intents):
+        raise SemanticNodeError(
+            "Draw intents require the replacement-aware draw coordinator"
+        )
     results: list[tuple[str, object]] = []
     for intent in plan.intents:
-        if isinstance(intent, DrawCardsIntent):
-            result = sink.draw(
-                intent.player,
-                intent.count,
-                reason=intent.reason,
-                private=intent.private,
-            )
-            results.append((intent.player, result))
-            continue
         if isinstance(intent, BecomeMonarchIntent):
             result = sink.become_monarch(
                 intent.player,

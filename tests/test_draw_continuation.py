@@ -6,6 +6,7 @@ from mtg_commander_sim.drawing import (
     DrawDecisionContinuation,
     DrawError,
     DrawResume,
+    QueuedDraw,
 )
 from mtg_commander_sim.replacement import (
     DredgeDraw,
@@ -90,6 +91,29 @@ class DrawContinuationTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(DrawError, "unknown"):
             DrawResume.from_dict({"kind": "none", "seat": "A"})
+
+    def test_draw_batch_resume_is_typed_strict_and_round_trips(self):
+        resume = DrawResume(
+            kind="draw_batch",
+            draws=(
+                QueuedDraw("B", 1, "B draws", True),
+                QueuedDraw("C", 2, "C draws", False),
+            ),
+        )
+        self.assertEqual(
+            resume,
+            DrawResume.from_dict(resume.to_dict()),
+        )
+        malformed = resume.to_dict()
+        malformed["draws"][0]["count"] = "1"
+        with self.assertRaisesRegex(DrawError, "nonnegative integer"):
+            DrawResume.from_dict(malformed)
+        with self.assertRaisesRegex(DrawError, "extra state"):
+            DrawResume(
+                kind="draw_batch",
+                stack_ref="stack:wrong",
+                draws=(QueuedDraw("A", 1, "draw"),),
+            )
 
 
 if __name__ == "__main__":

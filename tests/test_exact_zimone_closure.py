@@ -1030,6 +1030,104 @@ class ExactZimoneClosureTests(unittest.TestCase):
         )
         self.assertFalse(engine._stack_item_can_be_countered(test_stack))
 
+    def test_veil_conditional_draw_pauses_for_dredge_before_permissions(self):
+        session = self.make_session(10141)
+        engine = session.engine
+        veil = self.card(engine, "B", "Veil of Summer")
+        loam = self.card(engine, "B", "Life from the Loam")
+        blue_source = self.card(engine, "A", "Emry, Lurker of the Loch")
+        engine.move_card(
+            loam.object_id,
+            "graveyard",
+            log=False,
+            semantic_events=False,
+        )
+        engine._log(
+            "A",
+            "stack.cast",
+            "A cast a blue spell.",
+            {"object": blue_source.ref, "colors": ["U"]},
+        )
+        engine._remove_from_zone(veil)
+        veil.zone = "stack"
+        engine.state.stack.append(
+            StackItem(
+                stack_id="veil-dredge-test",
+                ref="S-veil-dredge",
+                kind="spell",
+                controller="B",
+                label=veil.printed_name,
+                card_object_id=veil.object_id,
+                semantic_key=f"{veil.oracle_id}:spell:front",
+                default_destination="graveyard",
+                visibility=list(engine.seats),
+            )
+        )
+
+        self.resolve_top(engine)
+
+        self.assertEqual("draw.replacement", engine.state.pending_decision.kind)
+        self.assertFalse(
+            engine.state.players["B"].stats.get(
+                "spells_cant_be_countered_until_end", False
+            )
+        )
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": loam.ref,
+                "reason": "Use Dredge before the remaining spell instruction.",
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("hand", loam.zone)
+        self.assertTrue(
+            engine.state.players["B"].stats[
+                "spells_cant_be_countered_until_end"
+            ]
+        )
+        self.assertEqual(
+            ["U", "B"],
+            engine.state.players["B"].stats[
+                "hexproof_from_colors_until_end"
+            ],
+        )
+
+    def test_veil_without_matching_opponent_cast_skips_only_the_draw(self):
+        session = self.make_session(10142)
+        engine = session.engine
+        veil = self.card(engine, "B", "Veil of Summer")
+        before_hand = len(engine.state.players["B"].zones["hand"])
+        engine._remove_from_zone(veil)
+        veil.zone = "stack"
+        engine.state.stack.append(
+            StackItem(
+                stack_id="veil-no-draw-test",
+                ref="S-veil-no-draw",
+                kind="spell",
+                controller="B",
+                label=veil.printed_name,
+                card_object_id=veil.object_id,
+                semantic_key=f"{veil.oracle_id}:spell:front",
+                default_destination="graveyard",
+                visibility=list(engine.seats),
+            )
+        )
+
+        self.resolve_top(engine)
+
+        self.assertEqual(
+            before_hand,
+            len(engine.state.players["B"].zones["hand"]),
+        )
+        self.assertTrue(
+            engine.state.players["B"].stats[
+                "spells_cant_be_countered_until_end"
+            ]
+        )
+
     def test_shifting_woodland_requires_delirium_and_restores_copy(self):
         session = self.make_session(1015)
         engine = session.engine
