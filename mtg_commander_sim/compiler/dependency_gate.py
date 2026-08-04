@@ -120,13 +120,39 @@ def keyword_dependency_gate(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
-    if mechanics == ("protection",) and parse_protection_line(
-        material_line
-    ) is not None:
-        return explicit_capability_gate(
+    protection_parts = tuple(
+        part.strip()
+        for part in material_line.rstrip(".").split(",")
+        if part.strip().casefold().startswith("protection from ")
+    )
+    if (
+        "protection" in mechanics
+        and len(protection_parts) == mechanics.count("protection")
+        and all(parse_protection_line(part) for part in protection_parts)
+    ):
+        protection_gate = explicit_capability_gate(
             "protection.typed.debt",
             capability_registry=capability_registry,
             capability_profile=capability_profile,
+        )
+        other_gate = dependency_gate(
+            mechanics=(
+                mechanic for mechanic in mechanics if mechanic != "protection"
+            ),
+            effects=(),
+            target_schema=None,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+        return DependencyGate(
+            blockers=tuple(
+                dict.fromkeys(
+                    (*protection_gate.blockers, *other_gate.blockers)
+                )
+            ),
+            capabilities=protection_gate.capabilities,
+            closure=protection_gate.closure,
         )
     return dependency_gate(
         mechanics=mechanics,

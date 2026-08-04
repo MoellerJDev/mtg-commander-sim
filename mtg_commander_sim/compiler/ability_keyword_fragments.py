@@ -45,9 +45,19 @@ def lower_ability_keyword_fragments(
                 },
             )
         )
-    if mechanics == ("protection",):
-        specs = parse_protection_line(material_line)
-        if not specs:
+    if "protection" in mechanics:
+        protection_parts = tuple(
+            part.strip()
+            for part in material_line.rstrip(".").split(",")
+            if part.strip().casefold().startswith("protection from ")
+        )
+        parsed = tuple(
+            parse_protection_line(part) for part in protection_parts
+        )
+        if (
+            len(protection_parts) != mechanics.count("protection")
+            or any(not specs for specs in parsed)
+        ):
             return AbilityKeywordFragmentLowering(
                 residual_kind="unsupported_protection_quality",
                 residual_reason=(
@@ -56,6 +66,11 @@ def lower_ability_keyword_fragments(
                 ),
                 residual_blockers=("typed protection quality",),
             )
+        specs = tuple(
+            spec
+            for values in parsed
+            for spec in (values or ())
+        )
         return AbilityKeywordFragmentLowering(
             handlers=tuple(
                 {

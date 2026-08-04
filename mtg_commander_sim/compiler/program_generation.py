@@ -6,7 +6,10 @@ from typing import Any, Iterable, Mapping
 
 from ..carddb import CardDatabase, CardRecord
 from ..object_predicate import ObjectQuerySpec
-from ..rules.capabilities import CapabilityRegistry
+from ..rules.capabilities import (
+    CapabilityRegistry,
+    capability_covered_mechanics,
+)
 from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
 
@@ -163,12 +166,38 @@ def _validate_generated_program_trust(
         )
         is not None
     )
-    if generated_nodes and all(node.exact for node in generated_nodes):
+    if generated_nodes and all(
+        node.exact or _independently_exact_protection_handler(node)
+        for node in generated_nodes
+    ):
         return
     raise ValueError(
         f"{ir.card_name} cannot be promoted to trusted generated "
         "semantics while material Oracle residuals remain on "
         "generated nodes"
+    )
+
+
+def _independently_exact_protection_handler(node: Any) -> bool:
+    """Allow closed protection fragments on a partially known keyword line.
+
+    Printed comma-separated keyword lists are independent abilities.  A typed
+    protection fragment therefore remains exact even when a sibling keyword
+    on the same Oracle line lacks a capability contract.  No effect program or
+    arbitrary runtime-handler family receives this exception.
+    """
+
+    return bool(
+        node.kind == "keyword_ability"
+        and node.template_id == "printed-keyword-list-v1"
+        and not node.effects
+        and node.handlers
+        and all(
+            handler.get("handler_id") == "ability.static.protection.v1"
+            for handler in node.handlers
+        )
+        and tuple(node.capability_dependencies)
+        == ("protection.typed.debt",)
     )
 
 
@@ -227,6 +256,15 @@ def generated_programs(
                 if capability_registry is not None
                 and node.capability_dependencies
                 else None
+            )
+            represented_mechanics = (
+                capability_covered_mechanics(
+                    node.capability_dependencies
+                )
+                if trust_level == "trusted"
+                and not node.exact
+                and _independently_exact_protection_handler(node)
+                else node.mechanics
             )
             programs.append(
                 SemanticProgram(
@@ -302,7 +340,7 @@ def generated_programs(
                             kind=node.kind,
                             runtime_handler=runtime_handler_declaration,
                         ),
-                        *node.mechanics,
+                        *represented_mechanics,
                     ],
                     capability_dependencies=list(
                         node.capability_dependencies

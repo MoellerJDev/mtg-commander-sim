@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "72fa5307122b3fa7867693e4553821b4b83eea6ae5837216cf031b59268323e3"
+verified: "9d6146ab061fec63bec69baedc00c9bc3ad0455d7180ff78af281cc3b34e0884"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,7 +15,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `72fa5307122b3fa7867693e4553821b4b83eea6ae5837216cf031b59268323e3` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `9d6146ab061fec63bec69baedc00c9bc3ad0455d7180ff78af281cc3b34e0884` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `ad90746049669cc6943b83bbf4a2fc4e4ad0e0f1`
 - Certified exact head: `ad90746049669cc6943b83bbf4a2fc4e4ad0e0f1`
 - Generation timestamp: `2026-08-04T16:38:46Z`
@@ -36,8 +36,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=372, definition_only=95, passing=173, total=3300, unreviewed=2660
 - Mechanics: status_counts={'partial': 62, 'tested': 1, 'unclassified': 362}, total=425, trusted=0
-- Oracle coverage: material_residuals=65993, status_counts={'exact': 3409, 'partial': 16050, 'unresolved': 19026}, total=38485
-- Commander-legal Oracle coverage: material_residuals=57570, status_counts={'exact': 747, 'partial': 14620, 'unresolved': 16256}, total=31623
+- Oracle coverage: material_residuals=66160, status_counts={'exact': 3409, 'partial': 16069, 'unresolved': 19064}, total=38542
+- Commander-legal Oracle coverage: material_residuals=57592, status_counts={'exact': 747, 'partial': 14620, 'unresolved': 16256}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -91,7 +91,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4737
+- Tests discovered: 4738
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [30920252836](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30920252836) — `pass`
 - Compile: `pass`

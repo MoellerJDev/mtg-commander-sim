@@ -3270,7 +3270,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 91197,
+      "logical_lines": 91267,
       "methods": {
         "dunder": 200,
         "private": 626,
@@ -3720,6 +3720,13 @@
           "physical_lines": 485
         },
         {
+          "file": "mtg_commander_sim/compiler/program_generation.py",
+          "functions_and_methods": 11,
+          "language": "python",
+          "logical_lines": 449,
+          "physical_lines": 492
+        },
+        {
           "file": "mtg_commander_sim/life_change.py",
           "functions_and_methods": 19,
           "language": "python",
@@ -3760,13 +3767,6 @@
           "language": "python",
           "logical_lines": 422,
           "physical_lines": 456
-        },
-        {
-          "file": "mtg_commander_sim/compiler/program_generation.py",
-          "functions_and_methods": 10,
-          "language": "python",
-          "logical_lines": 420,
-          "physical_lines": 454
         },
         {
           "file": "mtg_commander_sim/semantic_choices/scalar.py",
@@ -4259,6 +4259,13 @@
           "physical_lines": 172
         },
         {
+          "file": "mtg_commander_sim/compiler/dependency_gate.py",
+          "functions_and_methods": 3,
+          "language": "python",
+          "logical_lines": 160,
+          "physical_lines": 174
+        },
+        {
           "file": "mtg_commander_sim/semantic_runtime/component_registry.py",
           "functions_and_methods": 14,
           "language": "python",
@@ -4348,13 +4355,6 @@
           "language": "python",
           "logical_lines": 137,
           "physical_lines": 251
-        },
-        {
-          "file": "mtg_commander_sim/compiler/dependency_gate.py",
-          "functions_and_methods": 3,
-          "language": "python",
-          "logical_lines": 134,
-          "physical_lines": 148
         },
         {
           "file": "mtg_commander_sim/shortcuts.py",
@@ -4518,6 +4518,13 @@
           "physical_lines": 100
         },
         {
+          "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
+          "functions_and_methods": 1,
+          "language": "python",
+          "logical_lines": 82,
+          "physical_lines": 91
+        },
+        {
           "file": "mtg_commander_sim/semantic_runtime/components.py",
           "functions_and_methods": 5,
           "language": "python",
@@ -4536,13 +4543,6 @@
           "functions_and_methods": null,
           "language": "web",
           "logical_lines": 68,
-          "physical_lines": 76
-        },
-        {
-          "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
-          "functions_and_methods": 1,
-          "language": "python",
-          "logical_lines": 67,
           "physical_lines": 76
         },
         {
@@ -5305,7 +5305,7 @@
           "physical_lines": 1577
         }
       ],
-      "physical_lines": 99379,
+      "physical_lines": 99458,
       "python_file_count": 213,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -5323,7 +5323,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1120,
+      "top_level_functions": 1121,
       "web_file_count": 13
     },
     "semantic_handlers": {
@@ -8433,7 +8433,7 @@
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
       "exact_fraction": 0.023622,
-      "material_residuals": 57570,
+      "material_residuals": 57592,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
@@ -8445,16 +8445,16 @@
         "static_ability": 9684,
         "trigger": 13009,
         "unsupported_enchant_restriction": 139,
-        "unsupported_protection_quality": 31
+        "unsupported_protection_quality": 53
       },
       "snapshot": {
-        "card_count": "38485",
-        "oracle_source_sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0",
+        "card_count": "38542",
+        "oracle_source_sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
         "ruling_count": "77998",
-        "rulings_source_sha256": "6e0f7b8e73981df2da7d91329c1904e68a33c0269ec655d29484379beb3b725e",
+        "rulings_source_sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
         "schema_version": "2",
-        "scryfall_oracle_updated_at": "2026-08-02T09:02:31.886+00:00",
-        "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
+        "scryfall_oracle_updated_at": "2026-08-04T09:02:45.219+00:00",
+        "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
         "exact": 747,
@@ -8468,42 +8468,42 @@
     "compiler_module": "mtg_commander_sim/oracle_ir.py",
     "compiler_module_logical_lines": 1530,
     "compiler_module_physical_lines": 1577,
-    "compiler_version": "oracle-ir-v29",
+    "compiler_version": "oracle-ir-v30",
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.08858,
-      "material_residuals": 65993,
+      "exact_fraction": 0.088449,
+      "material_residuals": 66160,
       "residual_kinds": {
-        "cost": 2009,
+        "cost": 2015,
         "declaration_cost": 11,
         "declaration_restriction": 170,
-        "dependency_contract": 16989,
-        "effect": 7212,
-        "replacement_effect": 1757,
-        "spell_effect": 11318,
-        "static_ability": 11113,
-        "trigger": 15230,
+        "dependency_contract": 17007,
+        "effect": 7240,
+        "replacement_effect": 1758,
+        "spell_effect": 11321,
+        "static_ability": 11148,
+        "trigger": 15274,
         "unsupported_enchant_restriction": 148,
-        "unsupported_protection_quality": 36
+        "unsupported_protection_quality": 68
       },
       "snapshot": {
-        "card_count": "38485",
-        "oracle_source_sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0",
+        "card_count": "38542",
+        "oracle_source_sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
         "ruling_count": "77998",
-        "rulings_source_sha256": "6e0f7b8e73981df2da7d91329c1904e68a33c0269ec655d29484379beb3b725e",
+        "rulings_source_sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
         "schema_version": "2",
-        "scryfall_oracle_updated_at": "2026-08-02T09:02:31.886+00:00",
-        "scryfall_rulings_updated_at": "2026-08-02T09:00:36.367+00:00"
+        "scryfall_oracle_updated_at": "2026-08-04T09:02:45.219+00:00",
+        "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
         "exact": 3409,
-        "partial": 16050,
-        "unresolved": 19026
+        "partial": 16069,
+        "unresolved": 19064
       },
       "template_count": 168,
-      "total_faces": 41702,
-      "total_oracle_ids": 38485
+      "total_faces": 41759,
+      "total_oracle_ids": 38542
     },
     "mechanic_contracts": {
       "current_snapshot_complete": false,
@@ -8734,7 +8734,7 @@
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:175",
+            "mtg_commander_sim/compiler/program_generation.py:204",
             "mtg_commander_sim/oracle_ir.py:1524"
           ]
         },
@@ -8764,7 +8764,7 @@
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:175",
+            "mtg_commander_sim/compiler/program_generation.py:204",
             "mtg_commander_sim/oracle_ir.py:1524"
           ]
         },
@@ -8811,7 +8811,7 @@
             "mtg_commander_sim/engine.py:31"
           ],
           "register_generated_programs": [
-            "mtg_commander_sim/compiler/program_generation.py:320",
+            "mtg_commander_sim/compiler/program_generation.py:358",
             "mtg_commander_sim/oracle_ir.py:1547",
             "mtg_commander_sim/preflight.py:16",
             "mtg_commander_sim/session.py:13"
@@ -9237,7 +9237,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "72fa5307122b3fa7867693e4553821b4b83eea6ae5837216cf031b59268323e3"
+          "verified": "9d6146ab061fec63bec69baedc00c9bc3ad0455d7180ff78af281cc3b34e0884"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9675,8 +9675,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1437,
-      "discovered_total": 4737,
+      "conventional_ast_cases": 1438,
+      "discovered_total": 4738,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 38,
