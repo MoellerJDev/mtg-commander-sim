@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "default_checks": [
+    "compile",
+    "python-runtime",
+    "repository"
+  ],
+  "path_rules": [
+    {
+      "id": "changed-python-test",
+      "patterns": ["tests/test_*.py"],
+      "collect_test_module": true
+    },
+    {
+      "id": "python-architecture-sources",
+      "patterns": ["mtg_commander_sim/**", "server/**", "scripts/**"],
+      "checks": ["architecture", "module-classifications"]
+    },
+    {
+      "id": "documentation-sources",
+      "patterns": ["docs/**", "README.md", "AGENTS.md"],
+      "checks": ["documentation"]
+    },
+    {
+      "id": "rules-sources",
+      "patterns": [
+        "rules/**",
+        "mechanics/**",
+        "mtg_commander_sim/rules_corpus.py",
+        "mtg_commander_sim/rule_conformance.py",
+        "mtg_commander_sim/rules_scheduler.py",
+        "scripts/update_rules_scheduler.py"
+      ],
+      "checks": ["rules", "rules-scheduler"]
+    },
+    {
+      "id": "generated-coverage-sources",
+      "patterns": ["coverage/**", "platform/readiness-source.json"],
+      "checks": ["architecture", "platform-status"]
+    },
+    {
+      "id": "capability-and-card-program-sources",
+      "patterns": [
+        "mtg_commander_sim/rules/capabilities.py",
+        "mtg_commander_sim/rules/capability-*.json",
+        "mtg_commander_sim/card_programs/**",
+        "mtg_commander_sim/oracle_ir.py",
+        "mtg_commander_sim/mechanic_contracts.py",
+        "mechanics/**",
+        "platform/capability-evidence-declarations.json",
+        "scripts/update_capability_evidence.py",
+        "schemas/card-program-v2.schema.json",
+        "schemas/rule-capability-registry.schema.json"
+      ],
+      "checks": ["capability-evidence"]
+    },
+    {
+      "id": "platform-and-workflow-sources",
+      "patterns": ["platform/**", ".github/**"],
+      "checks": [
+        "architecture",
+        "ci-escape-report",
+        "documentation",
+        "module-classifications",
+        "test-shards"
+      ]
+    },
+    {
+      "id": "compiler-cardprogram-suite",
+      "patterns": [
+        "mtg_commander_sim/compiler/**",
+        "mtg_commander_sim/oracle_ir.py",
+        "mtg_commander_sim/card_programs/**",
+        "mtg_commander_sim/preflight.py",
+        "mtg_commander_sim/mechanic_contracts.py"
+      ],
+      "test_suites": ["compiler-cardprogram"],
+      "checks": ["capability-evidence"]
+    },
+    {
+      "id": "rules-events-replacements-suite",
+      "patterns": [
+        "mtg_commander_sim/replacement/**",
+        "mtg_commander_sim/replacement_effects.py",
+        "mtg_commander_sim/replacement_decisions.py",
+        "mtg_commander_sim/damage_prevention*.py",
+        "mtg_commander_sim/damage_modifier*.py",
+        "mtg_commander_sim/counter_placement.py",
+        "mtg_commander_sim/counter_state.py",
+        "mtg_commander_sim/life_change.py",
+        "mtg_commander_sim/life_state.py",
+        "mtg_commander_sim/effect_runtime/life_effects.py",
+        "mtg_commander_sim/continuous_effect*.py",
+        "mtg_commander_sim/drawing/**",
+        "mtg_commander_sim/semantic_runtime/*replacement*.py",
+        "mtg_commander_sim/prevention_triggers.py"
+      ],
+      "test_suites": ["rules-events-replacements"]
+    },
+    {
+      "id": "protection-and-attachment-interactions",
+      "patterns": [
+        "mtg_commander_sim/protection.py",
+        "mtg_commander_sim/attachments.py",
+        "mtg_commander_sim/enchant_spec.py",
+        "mtg_commander_sim/aura/**",
+        "mtg_commander_sim/ability_fragments.py",
+        "mtg_commander_sim/compiled_ability_fragments.py"
+      ],
+      "test_suites": [
+        "compiler-cardprogram",
+        "rules-events-replacements",
+        "state-actions-damage",
+        "targets-choices-continuations"
+      ]
+    },
+    {
+      "id": "casting-costs-mana-suite",
+      "patterns": [
+        "mtg_commander_sim/rules/casting/**",
+        "mtg_commander_sim/rules/activation/**",
+        "mtg_commander_sim/rules/action_proposals.py",
+        "mtg_commander_sim/mana*.py",
+        "mtg_commander_sim/declaration_costs.py",
+        "mtg_commander_sim/abilities.py",
+        "mtg_commander_sim/permissions.py",
+        "mtg_commander_sim/stack*.py"
+      ],
+      "test_suites": ["casting-costs-mana"]
+    },
+    {
+      "id": "targets-choices-continuations-suite",
+      "patterns": [
+        "mtg_commander_sim/targets.py",
+        "mtg_commander_sim/choice_forms.py",
+        "mtg_commander_sim/semantic_choices/**",
+        "mtg_commander_sim/aura/decisions.py",
+        "mtg_commander_sim/linked_abilities.py",
+        "mtg_commander_sim/rules/action_catalog.py",
+        "mtg_commander_sim/rules/action_explanations.py"
+      ],
+      "test_suites": ["targets-choices-continuations"]
+    },
+    {
+      "id": "triggers-turns-suite",
+      "patterns": [
+        "mtg_commander_sim/trigger*.py",
+        "mtg_commander_sim/delayed_triggers.py",
+        "mtg_commander_sim/zone_trigger*.py",
+        "mtg_commander_sim/drawing/coordinator.py"
+      ],
+      "test_suites": ["triggers-turns-exact-decks"]
+    },
+    {
+      "id": "combat-declarations-suite",
+      "patterns": [
+        "mtg_commander_sim/declaration_*.py",
+        "mtg_commander_sim/combat_constraints.py"
+      ],
+      "test_suites": ["combat-declarations"]
+    },
+    {
+      "id": "state-actions-damage-suite",
+      "patterns": [
+        "mtg_commander_sim/combat.py",
+        "mtg_commander_sim/damage.py",
+        "mtg_commander_sim/damage_results.py",
+        "mtg_commander_sim/damage_source.py",
+        "mtg_commander_sim/damage_transaction.py",
+        "mtg_commander_sim/damage_values.py",
+        "mtg_commander_sim/state_based_actions.py",
+        "mtg_commander_sim/state_planner.py"
+      ],
+      "test_suites": ["state-actions-damage"]
+    },
+    {
+      "id": "multiplayer-commander-suite",
+      "patterns": [
+        "mtg_commander_sim/commander.py",
+        "mtg_commander_sim/record_commander_identity.py",
+        "mtg_commander_sim/arena.py",
+        "mtg_commander_sim/profiles.py"
+      ],
+      "test_suites": ["multiplayer-commander"]
+    },
+    {
+      "id": "server-replay-privacy-suite",
+      "patterns": [
+        "server/**",
+        "mtg_commander_sim/protocol.py",
+        "mtg_commander_sim/projection.py",
+        "mtg_commander_sim/record*.py",
+        "mtg_commander_sim/runtime.py",
+        "mtg_commander_sim/session.py",
+        "mtg_commander_sim/service.py",
+        "mtg_commander_sim/client.py",
+        "mtg_commander_sim/persistence.py"
+      ],
+      "test_suites": ["server-replay-privacy"]
+    },
+    {
+      "id": "generated-validation-suite",
+      "patterns": ["scripts/**", ".github/workflows/**", "platform/**"],
+      "test_suites": ["generated-validation"]
+    },
+    {
+      "id": "browser-build",
+      "patterns": ["web/**"],
+      "test_suites": ["server-replay-privacy"],
+      "checks": ["browser-build"],
+      "browser_full": true
+    },
+    {
+      "id": "browser-facing-server",
+      "patterns": ["server/**"],
+      "browser_full": true
+    },
+    {
+      "id": "browser-facing-protocol",
+      "patterns": [
+        "schemas/**",
+        "mtg_commander_sim/protocol.py",
+        "mtg_commander_sim/projection.py",
+        "mtg_commander_sim/choice_forms.py",
+        "mtg_commander_sim/rules/action_catalog.py",
+        "mtg_commander_sim/rules/action_explanations.py",
+        "mtg_commander_sim/session.py",
+        "mtg_commander_sim/service.py"
+      ],
+      "browser_full": true
+    },
+    {
+      "id": "browser-facing-priority-owner",
+      "patterns": ["mtg_commander_sim/engine.py"],
+      "browser_full": true
+    },
+    {
+      "id": "workflow-platform-gates",
+      "patterns": [".github/workflows/**"],
+      "browser_full": true,
+      "windows_full": true
+    },
+    {
+      "id": "windows-sensitive-runtime",
+      "patterns": [
+        "server/**",
+        "pyproject.toml",
+        "requirements-dev.txt",
+        "scripts/bootstrap_windows.ps1",
+        "mtg_commander_sim/persistence.py",
+        "mtg_commander_sim/record.py",
+        "mtg_commander_sim/carddb.py",
+        "mtg_commander_sim/bulk.py"
+      ],
+      "windows_full": true
+    }
+  ],
+  "fallback_test_suites": [
+    {
+      "id": "unclassified-python-core",
+      "patterns": ["mtg_commander_sim/**"],
+      "test_suite": "core-domain"
+    }
+  ],
+  "forced_labels": {
+    "browser-full": "browser_full",
+    "windows-full": "windows_full"
+  }
+}

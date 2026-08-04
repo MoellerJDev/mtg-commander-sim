@@ -118,6 +118,7 @@ indexed here but excluded from documentation front-matter validation.
 - [Rules conformance coverage](../coverage/rules-conformance.md)
 - [Rules dependency queue](RULES_DEPENDENCY_QUEUE.md)
 - [Rules delta](../coverage/rules-delta.md)
+- [CI escape report](../coverage/ci-escape-report.md)
 
 The older [Oracle coverage](../coverage/oracle-coverage.md) and
 [Commander Oracle coverage](../coverage/oracle-coverage-commander.md) Markdown

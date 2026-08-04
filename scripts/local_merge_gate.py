@@ -92,6 +92,14 @@ def build_steps(
             ),
         ),
         GateStep(
+            "generated_ci_escape_report_freshness",
+            (
+                python,
+                "scripts/update_ci_escape_report.py",
+                "--check",
+            ),
+        ),
+        GateStep(
             "generated_rules_scheduler_freshness",
             (
                 python,

@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from fnmatch import fnmatchcase
+import hashlib
 import json
 import os
 from pathlib import Path
 import subprocess
-from typing import Iterable, Sequence
+from typing import Iterable, Mapping, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
+POLICY_PATH = ROOT / "platform" / "change-impact-policy.json"
 
 
 @dataclass(frozen=True)
@@ -19,6 +22,11 @@ class ImpactPlan:
     checks: tuple[str, ...]
     browser_full: bool
     windows_full: bool
+    policy_schema_version: int
+    policy_fingerprint: str
+    matched_rule_ids: tuple[str, ...]
+    browser_full_reasons: tuple[str, ...]
+    windows_full_reasons: tuple[str, ...]
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -80,165 +88,164 @@ def changed_files(
     return _normalized(output)
 
 
-def _matches(path: str, *needles: str) -> bool:
-    return any(needle in path for needle in needles)
+def _string_tuple(value: object, *, field: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if not isinstance(value, list) or not all(
+        isinstance(item, str) and item for item in value
+    ):
+        raise ValueError(f"{field} must be a list of nonempty strings")
+    return tuple(value)
+
+
+def load_impact_policy(path: Path = POLICY_PATH) -> tuple[dict, str]:
+    raw = path.read_bytes()
+    value = json.loads(raw)
+    if not isinstance(value, dict):
+        raise ValueError("Change-impact policy must be an object")
+    if set(value) != {
+        "schema_version",
+        "default_checks",
+        "path_rules",
+        "fallback_test_suites",
+        "forced_labels",
+    }:
+        raise ValueError("Change-impact policy has unknown or missing fields")
+    if value["schema_version"] != 1:
+        raise ValueError("Unsupported change-impact policy schema")
+    _string_tuple(value["default_checks"], field="default_checks")
+    rules = value["path_rules"]
+    if not isinstance(rules, list) or not rules:
+        raise ValueError("path_rules must be a nonempty list")
+    allowed_rule_fields = {
+        "id",
+        "patterns",
+        "collect_test_module",
+        "test_suites",
+        "checks",
+        "browser_full",
+        "windows_full",
+    }
+    seen: set[str] = set()
+    for index, rule in enumerate(rules):
+        if not isinstance(rule, dict) or not set(rule).issubset(allowed_rule_fields):
+            raise ValueError(f"path_rules[{index}] has invalid fields")
+        rule_id = rule.get("id")
+        if not isinstance(rule_id, str) or not rule_id or rule_id in seen:
+            raise ValueError(f"path_rules[{index}].id must be unique and nonempty")
+        seen.add(rule_id)
+        _string_tuple(rule.get("patterns"), field=f"path_rules[{index}].patterns")
+        if not rule.get("patterns"):
+            raise ValueError(f"path_rules[{index}].patterns cannot be empty")
+        _string_tuple(rule.get("test_suites"), field=f"path_rules[{index}].test_suites")
+        _string_tuple(rule.get("checks"), field=f"path_rules[{index}].checks")
+        for field in ("collect_test_module", "browser_full", "windows_full"):
+            if field in rule and not isinstance(rule[field], bool):
+                raise ValueError(f"path_rules[{index}].{field} must be boolean")
+    fallbacks = value["fallback_test_suites"]
+    if not isinstance(fallbacks, list):
+        raise ValueError("fallback_test_suites must be a list")
+    for index, fallback in enumerate(fallbacks):
+        if not isinstance(fallback, dict) or set(fallback) != {
+            "id",
+            "patterns",
+            "test_suite",
+        }:
+            raise ValueError(f"fallback_test_suites[{index}] has invalid fields")
+        if not isinstance(fallback["id"], str) or not fallback["id"]:
+            raise ValueError(f"fallback_test_suites[{index}].id must be nonempty")
+        _string_tuple(
+            fallback["patterns"],
+            field=f"fallback_test_suites[{index}].patterns",
+        )
+        if not isinstance(fallback["test_suite"], str) or not fallback["test_suite"]:
+            raise ValueError(
+                f"fallback_test_suites[{index}].test_suite must be nonempty"
+            )
+    labels = value["forced_labels"]
+    if not isinstance(labels, dict) or not all(
+        isinstance(key, str)
+        and key
+        and target in {"browser_full", "windows_full"}
+        for key, target in labels.items()
+    ):
+        raise ValueError("forced_labels must map labels to supported platform gates")
+    fingerprint = hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return value, fingerprint
+
+
+def _matches_patterns(path: str, patterns: Sequence[str]) -> bool:
+    return any(fnmatchcase(path, pattern) for pattern in patterns)
 
 
 def classify_changes(
     paths: Sequence[str],
     *,
     labels: Sequence[str] = (),
+    policy_path: Path = POLICY_PATH,
 ) -> ImpactPlan:
     changed = _normalized(paths)
     normalized_labels = {label.casefold() for label in labels}
+    policy, policy_fingerprint = load_impact_policy(policy_path)
     suites: set[str] = set()
     modules: set[str] = set()
-    checks = {"compile", "python-runtime", "repository"}
+    checks = set(_string_tuple(policy["default_checks"], field="default_checks"))
+    matched_rule_ids: set[str] = set()
+    browser_reasons: set[str] = set()
+    windows_reasons: set[str] = set()
 
     for path in changed:
-        semantic_path = path.removeprefix("mtg_commander_sim/")
-        if path.startswith("tests/test_") and path.endswith(".py"):
-            modules.add(Path(path).stem)
-        if path.startswith(("mtg_commander_sim/", "server/", "scripts/")):
-            checks.update({"architecture", "module-classifications"})
-        if path.startswith(("docs/", "README.md", "AGENTS.md")):
-            checks.add("documentation")
-        if path.startswith(("rules/", "mechanics/")) or _matches(
-            path,
-            "rules_corpus",
-            "rule_conformance",
-            "rules_scheduler",
-        ):
-            checks.update({"rules", "rules-scheduler"})
-        if path.startswith("coverage/") or path == "platform/readiness-source.json":
-            checks.update({"architecture", "platform-status"})
-        if _matches(path, "capability", "card_program", "oracle_ir"):
-            checks.add("capability-evidence")
-        if path.startswith(("platform/", ".github/")):
-            checks.update(
-                {
-                    "architecture",
-                    "documentation",
-                    "module-classifications",
-                    "test-shards",
-                }
+        path_has_suite = False
+        for rule in policy["path_rules"]:
+            patterns = _string_tuple(rule["patterns"], field=f"{rule['id']}.patterns")
+            if not _matches_patterns(path, patterns):
+                continue
+            rule_id = str(rule["id"])
+            matched_rule_ids.add(rule_id)
+            selected_suites = _string_tuple(
+                rule.get("test_suites"), field=f"{rule_id}.test_suites"
             )
+            if selected_suites:
+                path_has_suite = True
+                suites.update(selected_suites)
+            checks.update(_string_tuple(rule.get("checks"), field=f"{rule_id}.checks"))
+            if rule.get("collect_test_module"):
+                modules.add(Path(path).stem)
+            if rule.get("browser_full"):
+                browser_reasons.add(f"path:{path}:{rule_id}")
+            if rule.get("windows_full"):
+                windows_reasons.add(f"path:{path}:{rule_id}")
+        if not path_has_suite:
+            for fallback in policy["fallback_test_suites"]:
+                patterns = _string_tuple(
+                    fallback["patterns"], field=f"{fallback['id']}.patterns"
+                )
+                if _matches_patterns(path, patterns):
+                    suites.add(str(fallback["test_suite"]))
+                    matched_rule_ids.add(str(fallback["id"]))
+                    break
 
-        if path.startswith("mtg_commander_sim/compiler/") or _matches(
-            semantic_path,
-            "oracle_ir.py",
-            "card_programs/",
-            "preflight.py",
-            "mechanic_contract",
-        ):
-            suites.add("compiler-cardprogram")
-            checks.add("capability-evidence")
-        elif _matches(
-            semantic_path,
-            "replacement",
-            "damage_prevention",
-            "damage_modifier",
-            "counter_placement",
-            "counter_state",
-            "life_change",
-            "life_state",
-            "effect_runtime/life",
-            "continuous_effect",
-        ):
-            suites.add("rules-events-replacements")
-        elif _matches(
-            semantic_path,
-            "casting",
-            "activation",
-            "activated",
-            "mana",
-            "cost",
-            "stack",
-        ):
-            suites.add("casting-costs-mana")
-        elif _matches(
-            semantic_path,
-            "target",
-            "choice",
-            "semantic_handler",
-            "semantic_search",
-            "decision_opportun",
-            "linked_abilit",
-        ):
-            suites.add("targets-choices-continuations")
-        elif _matches(semantic_path, "turn_", "trigger", "phase", "step"):
-            suites.add("triggers-turns-exact-decks")
-        elif _matches(
-            semantic_path, "declaration", "declare_attack", "declare_block"
-        ):
-            suites.add("combat-declarations")
-        elif _matches(
-            semantic_path,
-            "combat",
-            "state_based_action",
-            "damage_results",
-            "damage_result_",
-        ):
-            suites.add("state-actions-damage")
-        elif _matches(
-            semantic_path, "commander", "multiplayer", "monarch", "mulligan"
-        ):
-            suites.add("multiplayer-commander")
-        elif path.startswith("server/") or _matches(
-            semantic_path,
-            "protocol",
-            "projection",
-            "record",
-            "game_actor",
-            "session.py",
-            "service.py",
-        ):
-            suites.add("server-replay-privacy")
-        elif path.startswith("mtg_commander_sim/"):
-            suites.add("core-domain")
-
-        if path.startswith(("scripts/", ".github/workflows/")):
-            suites.add("generated-validation")
-        if path.startswith("web/"):
-            checks.add("browser-build")
-            suites.add("server-replay-privacy")
-
-    browser_full = "browser-full" in normalized_labels or any(
-        path.startswith(("web/", "server/", ".github/workflows/"))
-        or path.startswith("schemas/")
-        or _matches(
-            path,
-            "protocol.py",
-            "projection.py",
-            "action",
-            "choice",
-            "room",
-            "websocket",
-        )
-        for path in changed
-    )
-    windows_full = "windows-full" in normalized_labels or any(
-        path.startswith(("server/", ".github/workflows/"))
-        or path in {"pyproject.toml", "requirements-dev.txt"}
-        or _matches(
-            path,
-            "bootstrap_windows",
-            "subprocess",
-            "launcher",
-            "persistence",
-            "record.py",
-            "carddb.py",
-            "bulk.py",
-        )
-        for path in changed
-    )
+    for label, target in policy["forced_labels"].items():
+        if label.casefold() not in normalized_labels:
+            continue
+        if target == "browser_full":
+            browser_reasons.add(f"label:{label}")
+        elif target == "windows_full":
+            windows_reasons.add(f"label:{label}")
     return ImpactPlan(
         changed_files=changed,
         test_modules=tuple(sorted(modules)),
         test_suites=tuple(sorted(suites)),
         checks=tuple(sorted(checks)),
-        browser_full=browser_full,
-        windows_full=windows_full,
+        browser_full=bool(browser_reasons),
+        windows_full=bool(windows_reasons),
+        policy_schema_version=int(policy["schema_version"]),
+        policy_fingerprint=policy_fingerprint,
+        matched_rule_ids=tuple(sorted(matched_rule_ids)),
+        browser_full_reasons=tuple(sorted(browser_reasons)),
+        windows_full_reasons=tuple(sorted(windows_reasons)),
     )
 
 

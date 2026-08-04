@@ -137,6 +137,7 @@ jobs:
             --output data/test-ci.sqlite3
       - name: Run focused mutations, full game, persistence, and performance
         run: |
+          python scripts/update_ci_escape_report.py --check
           python scripts/test_shards.py run-modules \
             test_capability_implementation_mutations \
             test_deterministic_full_game \

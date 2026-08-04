@@ -19,11 +19,43 @@ from scripts.change_impact import (
 )
 
 
+def browser_matrix(browser_full: bool) -> dict:
+    shards = (
+        (
+            {
+                "shard": 1,
+                "total": 2,
+                "server_port": 18081,
+                "web_port": 15171,
+            },
+            {
+                "shard": 2,
+                "total": 2,
+                "server_port": 18082,
+                "web_port": 15172,
+            },
+        )
+        if browser_full
+        else (
+            {
+                "shard": 1,
+                "total": 1,
+                "server_port": 18081,
+                "web_port": 15171,
+            },
+        )
+    )
+    return {"include": list(shards)}
+
+
 def _write_github_output(path: Path, plan: dict) -> None:
     values = {
         "browser_full": str(plan["browser_full"]).lower(),
         "windows_full": str(plan["windows_full"]).lower(),
         "changed_files": json.dumps(plan["changed_files"], separators=(",", ":")),
+        "browser_matrix": json.dumps(
+            browser_matrix(bool(plan["browser_full"])), separators=(",", ":")
+        ),
     }
     with path.open("a", encoding="utf-8", newline="\n") as stream:
         for key, value in values.items():

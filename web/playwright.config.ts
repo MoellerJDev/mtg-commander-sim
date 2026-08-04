@@ -1,7 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 import path from "node:path";
 
-const serverData = path.resolve("..", "local", `playwright-${process.pid}`);
+const serverData = path.resolve(
+  process.env.MTG_E2E_RUNTIME_DIR ??
+    path.join("..", "local", `playwright-${process.pid}`),
+);
 // Do not borrow the documented manual-development ports. Browser cookies are
 // host scoped rather than port scoped, and an open manual table may otherwise
 // reconnect to Playwright's disposable server while the suite is running.

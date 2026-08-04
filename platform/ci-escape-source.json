@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-08-04T21:53:07Z",
+  "repository": "MoellerJDev/mtg-commander-sim",
+  "escapes": [
+    {
+      "id": "ci-20260804-01",
+      "run_id": 30916877307,
+      "head_sha": "7c0b09bd8c5ead149827513af1d4045ce38208c0",
+      "category": "missing_affected_test",
+      "deterministic": true,
+      "summary": "Compiler hardening tests used cards absent from the compact CI database.",
+      "failed_surfaces": ["compiler-cardprogram", "generated-validation"],
+      "regressions": ["test_continuous_compiler_hardening"],
+      "impact_edge_status": "added",
+      "resolution": "The fixture was made portable and the compiler family remains explicitly routed to compiler-cardprogram and generated validation."
+    },
+    {
+      "id": "ci-20260804-02",
+      "run_id": 30918937537,
+      "head_sha": "00ec31ec8ae402106a07f9bb95a2c6ac7c3ed959",
+      "category": "generated_artifact_drift",
+      "deterministic": true,
+      "summary": "Architecture and platform generated outputs did not match their authoritative sources.",
+      "failed_surfaces": ["generated-validation"],
+      "regressions": ["test_architecture_audit", "test_platform_status"],
+      "impact_edge_status": "added",
+      "resolution": "Platform and coverage sources now select their exact generated freshness checks through the path policy."
+    },
+    {
+      "id": "ci-20260804-03",
+      "run_id": 30930608139,
+      "head_sha": "331d0ebfe439be6f05a3dc4e4fe15642fc3aeb1b",
+      "category": "source_correctness",
+      "deterministic": true,
+      "summary": "The typed protection transition exposed stale compiler fingerprints and incorrect fail-closed behavior in damage and targeting consumers.",
+      "failed_surfaces": [
+        "compiler-cardprogram",
+        "rules-events-replacements",
+        "state-actions-damage",
+        "generated-validation"
+      ],
+      "regressions": [
+        "test_card_program_v2",
+        "test_damage_replacement_integration",
+        "test_damage_replacement_multiplayer",
+        "test_exact_combat_keywords"
+      ],
+      "impact_edge_status": "added",
+      "resolution": "Protection, compiler, damage, and continuous-effect paths now select every affected functional shard through explicit rules."
+    },
+    {
+      "id": "ci-20260804-04",
+      "run_id": 30931679921,
+      "head_sha": "f39ff658a1c0fb24e385594a279c36be158a0653",
+      "category": "source_correctness",
+      "deterministic": true,
+      "summary": "Protection runtime discovery still rejected represented colored-source interactions after the first correction.",
+      "failed_surfaces": ["rules-events-replacements", "state-actions-damage"],
+      "regressions": [
+        "test_damage_replacement_integration",
+        "test_damage_replacement_multiplayer",
+        "test_exact_combat_keywords"
+      ],
+      "impact_edge_status": "added",
+      "resolution": "The exact protection consumers are covered by both replacement and damage shards in the machine-readable policy."
+    },
+    {
+      "id": "ci-20260804-05",
+      "run_id": 30940720886,
+      "head_sha": "2682095ee1a4777c17447d3db7cca409d2b9bbb2",
+      "category": "browser_integration",
+      "deterministic": true,
+      "summary": "A selected-action modal raced auto-pass and two long browser journeys timed out.",
+      "failed_surfaces": ["browser-full"],
+      "regressions": ["four-player.spec.ts"],
+      "impact_edge_status": "not_applicable",
+      "resolution": "The production auto-pass race was fixed and the public full-browser gate remains authoritative for headless journeys."
+    },
+    {
+      "id": "ci-20260804-06",
+      "run_id": 30952062448,
+      "head_sha": "816a9be3a03aecc0183bc3a5c74287d2958ef9ab",
+      "category": "flaky_test",
+      "deterministic": false,
+      "summary": "The natural-winner browser journey assumed a late pass always opened a form even though the same legal pass can complete as an immediate priority action.",
+      "failed_surfaces": ["browser-full"],
+      "regressions": ["four-player.spec.ts: natural commander-damage winner"],
+      "impact_edge_status": "not_applicable",
+      "resolution": "The journey now accepts either a form-backed choice or an authoritative immediate-action revision while preserving forced form submission when needed."
+    }
+  ],
+  "recent_pull_requests": [
+    {
+      "number": 87,
+      "head_sha": "b5a59b8ab7a37866aaf3227f3e3bb3056035066d",
+      "final_run_id": 30913382652,
+      "final_run_conclusion": "success",
+      "workflow_runs_observed": 5,
+      "push_count": null,
+      "critical_path_seconds": 1488.0,
+      "slot_b_inactive_seconds": null
+    },
+    {
+      "number": 88,
+      "head_sha": "e9fd5ec666fdbef2cd4f5735dc734445572b7533",
+      "final_run_id": 30920252836,
+      "final_run_conclusion": "success",
+      "workflow_runs_observed": 3,
+      "push_count": null,
+      "critical_path_seconds": 300.0,
+      "slot_b_inactive_seconds": null
+    },
+    {
+      "number": 89,
+      "head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
+      "final_run_id": 30935545835,
+      "final_run_conclusion": "success",
+      "workflow_runs_observed": 5,
+      "push_count": null,
+      "critical_path_seconds": 850.0,
+      "slot_b_inactive_seconds": null
+    },
+    {
+      "number": 90,
+      "head_sha": "1776d5329d02e35d7dcff58f69a4aafb2cf484c9",
+      "final_run_id": 30945744299,
+      "final_run_conclusion": "success",
+      "workflow_runs_observed": 3,
+      "push_count": null,
+      "critical_path_seconds": 724.0,
+      "slot_b_inactive_seconds": null
+    }
+  ],
+  "known_flaky_tests": [],
+  "limitations": {
+    "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
+    "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
+  }
+}

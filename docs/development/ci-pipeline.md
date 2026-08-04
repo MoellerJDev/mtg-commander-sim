@@ -56,8 +56,16 @@ Run focused tests while implementing. Before commit, use:
 .\.venv\Scripts\python.exe scripts/quick_gate.py
 ```
 
-`scripts/change_impact.py` normalizes changed paths and maps production families
-to the manifest in `platform/test-shards.json`. `scripts/quick_gate.py` includes
+`platform/change-impact-policy.json` is the versioned many-to-many path/check
+policy consumed by `scripts/change_impact.py`, `scripts/quick_gate.py`, and
+`scripts/ci_plan.py`. It maps normalized paths to the manifest in
+`platform/test-shards.json`, generated checks, and platform gates. Internal
+rules modules are never classified by generic words such as `action` or
+`choice`; browser-facing protocol, projection, action-catalog, choice-form,
+server, and priority-owner paths are explicit. Cross-cutting protection and
+attachment sources deliberately select compiler, replacement, targeting, and
+state-action owners so a source-correctness regression cannot escape through a
+single narrow shard. `scripts/quick_gate.py` includes
 committed and working-tree changes, validates Python 3.12, compiles Python,
 builds the compact card database when necessary, runs directly changed tests
 and affected functional shards, and selects relevant generated, architecture,
@@ -82,8 +90,9 @@ not the default per-commit gate.
 - wheel build and clean-install verification;
 - a focused Windows compatibility overlay, widened to the complete suite for
   platform-sensitive changes or the `windows-full` label;
-- browser build plus one four-context smoke journey, widened to all journeys
-  for browser-sensitive changes or the `browser-full` label.
+- browser build plus one four-context smoke journey, widened to two isolated
+  Playwright shards for browser-sensitive changes or the `browser-full` label.
+  Full shards use distinct ports, runtime directories, and SQLite databases.
 
 The final `PR / Certification` job receives every required job through
 `needs` and fails unless all succeeded. Protect `main` with the exact required
@@ -98,6 +107,13 @@ The nonblocking metrics job records observed queue, job, and critical-path
 durations as an artifact and job summary. Cache-hit rate, agent idle time, and
 stale-run cancellation remain `null` when GitHub does not expose measured data;
 the reporting code never estimates them as observations.
+
+Deterministic failures that escape the quick gate are recorded in
+`platform/ci-escape-source.json`. The generated
+`coverage/ci-escape-report.json` and `.md` classify each failure, its direct
+regression, and the impact-edge disposition. Push counts and Slot B idle time
+remain null when they cannot be observed; workflow-run counts are not relabeled
+as pushes.
 
 ## Main and nightly assurance
 
