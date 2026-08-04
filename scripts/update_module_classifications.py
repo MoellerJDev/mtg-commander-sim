@@ -51,6 +51,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
     if relative in {
         "mtg_commander_sim/damage_source.py",
         "mtg_commander_sim/damage_modifier_state.py",
+        "mtg_commander_sim/continuous_effect_model.py",
         "mtg_commander_sim/model.py",
         "mtg_commander_sim/object_predicate.py",
         "mtg_commander_sim/prevention_triggers.py",
@@ -74,6 +75,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
             "mtg_commander_sim/card_overrides/",
         )
     ) or relative in {
+        "mtg_commander_sim/carddb_characteristics.py",
         "mtg_commander_sim/effect_contracts.py",
         "mtg_commander_sim/oracle_ir.py",
         "mtg_commander_sim/semantics.py",

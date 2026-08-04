@@ -248,11 +248,10 @@
     },
     {
       "file": "mtg_commander_sim/carddb_characteristics.py",
-      "layer": "application",
-      "owning_subsystem": "legacy_application",
+      "layer": "semantics",
+      "owning_subsystem": "legacy_semantics",
       "allowed_dependency_layers": [
         "adapter",
-        "application",
         "domain",
         "rules",
         "semantics"
@@ -548,12 +547,10 @@
     },
     {
       "file": "mtg_commander_sim/continuous_effect_model.py",
-      "layer": "rules",
-      "owning_subsystem": "legacy_rules",
+      "layer": "domain",
+      "owning_subsystem": "legacy_domain",
       "allowed_dependency_layers": [
-        "domain",
-        "rules",
-        "semantics"
+        "domain"
       ],
       "game_state_access": "none",
       "card_specificity_policy": "generic_no_growth",
@@ -2684,5 +2681,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "230ccd9fc877c1709bf47776e09dd764507292aa7de40f69a6d81b4fbd9292b3"
+  "fingerprint": "3b607f6882030fa36e6836f19f9e9979c281b52d6a790fcb2a1f7b5553e15b93"
 }
