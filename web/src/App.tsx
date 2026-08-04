@@ -1529,7 +1529,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
   return (
     <main className={`game-shell${isSpectator ? " spectator-table" : ""} density-${tablePreferences.boardDensity}`} data-view-revision={view.viewRevision} style={tableStyle}>
       {isSpectator && <div className="watch-mode-banner" data-testid="watch-mode"><strong>WATCH MODE</strong><span>Public table and game log · no player controls</span></div>}
-      <a className="skip-link" href="#decision-tray">Skip to current actions</a>
+      {lifecycle?.status !== "complete" && <a className="skip-link" href="#decision-tray">Skip to current actions</a>}
       <header className="game-topbar">
         <div className="connection-group">
           <span className={`connection ${connection.toLowerCase()}`} />
@@ -1553,7 +1553,7 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       )}
       <section className="operations-panel" aria-label="Match operations">
         <div className="operations-heading"><span className="eyebrow">{isSpectator ? "TABLE VIEW" : "TABLE CONTROLS"}</span><strong>{isSpectator ? "Spectator" : `Seat ${ownSeat}`}</strong></div>
-        {!isSpectator && (
+        {!isSpectator && lifecycle?.status !== "complete" && (
           <AutomationControls
             autoPass={tablePreferences.autoPass}
             autoMana={tablePreferences.autoMana}

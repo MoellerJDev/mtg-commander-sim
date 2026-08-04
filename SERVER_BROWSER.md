@@ -123,12 +123,29 @@ browser asks which server-issued action to execute.
 **Auto-pass** and **Auto-mana** are on by default and persist in local browser
 storage. Auto-pass submits only an ordinary pass-only capability; the presence
 of a playable land, cast, target, declaration, or other meaningful nonmana
-action stops it. Select **Full control** at any time to require **Pass priority**
-even when the legal action set is otherwise empty. Browser-created games do not
-enable kernel-side empty-window suppression, so changing this toggle takes
-effect without creating a replacement game and every automatic pass remains an
-auditable command. With an empty stack, the pass control is labeled **Continue
-to combat** during precombat main and **End turn** during postcombat main.
+action stops it. Select **Hold every priority** at any time to require **Pass
+priority** even when the legal action set is otherwise empty. Browser-created
+games do not enable kernel-side empty-window suppression, so changing this
+toggle takes effect without creating a replacement game and every automatic
+pass remains an auditable command. With an empty stack, the pass control is
+labeled **Continue to combat** during precombat main and **End turn** during
+postcombat main.
+
+The authoritative turn banner separately names the active player, current
+priority holder, and exact step. The Untap, Upkeep, Draw, Main 1, Combat, Main
+2, and End rail is a read-only navigator: expanding a phase explains its state
+but never submits a game command. In a duel, only the starting player skips the
+draw action on turn one; the second player draws on turn two and the starter
+draws on turn three. With three or more players, every player—including the
+starter—draws on their first turn.
+
+The default right rail orders stack, recent activity, then the card viewer so
+the stack remains visible at ordinary desktop size. **Table settings** stores a
+bounded v2 preference record for rail width/order, hand height, card scale,
+board density, viewer collapse, activity visibility, and compact phase display.
+The anchored hand and rail scroll internally instead of moving the decision
+tray. On completion, the phase rail, automation toggles, and decision tray are
+removed and replaced by the authoritative terminal result.
 
 Every battlefield card uses its projected tapped flag. Tapping rotates the card
 90 degrees in every player's view; a later untap projection returns it upright.
@@ -179,11 +196,12 @@ The generic layer-4 basic-land-type component implements the exact additive CR
 ability without removing its Artifact/Land types, indestructible text, or
 colorless ability; Yavimaya and equivalent exact wording use the same path.
 
-The private hand is a bottom-anchored fixed-height dock whose internal card and
-action rows scroll instead of moving the table when selection changes. Its
-lower edge uses the browser's vertical resize control. Public permanents rotate
-and show a **TAPPED** badge for every seat, and every board always shows its
-Commander-damage total, including zero.
+The private hand is a bottom-anchored bounded-height dock whose internal card
+and action rows scroll instead of moving the table when selection changes. Its
+lower edge uses the browser's vertical resize control, and the saved table
+setting provides the same adjustment without drag precision. Public permanents
+rotate and show a **TAPPED** badge for every seat, and every board always shows
+its Commander-damage total, including zero.
 
 Browser games use the strict `trusted_only` semantic policy. A material card
 interaction without a trusted program pauses the durable game and surfaces the

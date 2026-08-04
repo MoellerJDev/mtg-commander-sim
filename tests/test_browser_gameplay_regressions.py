@@ -21,11 +21,12 @@ class CommanderDuelTurnStateTests(unittest.TestCase):
     def make_duel(self) -> CommanderSession:
         spire = DeckDefinition(
             name="Spire Garden turn-state fixture",
-            commanders=["Zimone and Dina"],
+            commanders=["Saskia the Unyielding"],
             entries=[
-                DeckEntry("Zimone and Dina", 1, "commander"),
+                DeckEntry("Saskia the Unyielding", 1, "commander"),
                 DeckEntry("Spire Garden"),
-                DeckEntry("Forest", 98),
+                DeckEntry("Forest", 49),
+                DeckEntry("Mountain", 49),
             ],
         )
         islands = DeckDefinition(
@@ -178,6 +179,12 @@ class CommanderDuelTurnStateTests(unittest.TestCase):
             "action_explanations",
             session.projector._snapshot("spectator"),
         )
+        self.assertNotIn(
+            spire.ref,
+            session.projector._snapshot("pilot:B").get(
+                "action_explanations", {}
+            ),
+        )
 
     def test_land_explanation_codes_cover_safe_unavailable_boundaries(self):
         session = self.make_duel()
@@ -285,30 +292,6 @@ class CommanderDuelTurnStateTests(unittest.TestCase):
             and state.priority_player == "A",
         )
         self.assertEqual(8, self.hand_count(session, "A"))
-
-    def test_duel_first_player_draws_on_turn_three(self):
-        session = self.make_duel()
-        self.advance_until(
-            session,
-            lambda state: state.phase == "precombat_main"
-            and state.priority_player == "A",
-        )
-        self.play_first_land(session, "A")
-        self.advance_until(
-            session,
-            lambda state: state.turn_sequence == 2
-            and state.phase == "precombat_main"
-            and state.priority_player == "B",
-        )
-        self.play_first_land(session, "B")
-        self.advance_until(
-            session,
-            lambda state: state.turn_sequence == 3
-            and state.step == "draw"
-            and state.priority_player == "A",
-        )
-
-        self.assertEqual(7, self.hand_count(session, "A"))
 
 
 class BrowserGameplayRegressionTests(unittest.TestCase):

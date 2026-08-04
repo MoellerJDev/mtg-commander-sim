@@ -50,6 +50,62 @@
       "type_line": "Legendary Creature — Frog Spirit Elemental"
     },
     {
+      "cmc": 4.0,
+      "color_identity": [
+        "B",
+        "G",
+        "R",
+        "W"
+      ],
+      "colors": [
+        "B",
+        "G",
+        "R",
+        "W"
+      ],
+      "defense": null,
+      "keywords": [
+        "Vigilance",
+        "Haste"
+      ],
+      "layout": "normal",
+      "legalities": {
+        "alchemy": "not_legal",
+        "brawl": "not_legal",
+        "commander": "legal",
+        "competitivebrawl": "not_legal",
+        "duel": "legal",
+        "future": "not_legal",
+        "gladiator": "not_legal",
+        "historic": "not_legal",
+        "legacy": "legal",
+        "modern": "not_legal",
+        "oathbreaker": "legal",
+        "oldschool": "not_legal",
+        "pauper": "not_legal",
+        "paupercommander": "not_legal",
+        "penny": "not_legal",
+        "pioneer": "not_legal",
+        "predh": "not_legal",
+        "premodern": "not_legal",
+        "standard": "not_legal",
+        "standardbrawl": "not_legal",
+        "timeless": "not_legal",
+        "tlr": "not_legal",
+        "vintage": "legal"
+      },
+      "loyalty": null,
+      "mana_cost": "{B}{R}{G}{W}",
+      "name": "Saskia the Unyielding",
+      "oracle_id": "e54d207c-51b8-458e-86a1-2633ac064c8e",
+      "oracle_text": "Vigilance, haste\nAs Saskia enters, choose a player.\nWhenever a creature you control deals combat damage to a player, it deals that much damage to the chosen player.",
+      "power": "3",
+      "produced_mana": [],
+      "released_at": "2016-11-11",
+      "toughness": "4",
+      "type_line": "Legendary Creature — Human Soldier"
+    },
+    {
       "cmc": 0.0,
       "color_identity": [
         "G",
