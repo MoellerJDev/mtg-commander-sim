@@ -333,6 +333,52 @@ class CapResultLifeLoss:
         return {"op": "cap_result_life_loss", "minimum": self.minimum}
 
 
+@dataclass(frozen=True, slots=True)
+class PreventDraw:
+    """Replace one card-draw event with no draw result."""
+
+    schema_version: int = OPERATION_SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"op": "prevent_draw"}
+
+
+@dataclass(frozen=True, slots=True)
+class DredgeDraw:
+    """Replace one draw with the closed CR 702.52 Dredge result."""
+
+    source_ref: str
+    source_object_id: str
+    source_zone_change_counter: int
+    mill_count: int
+    schema_version: int = OPERATION_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        for field_name, value in (
+            ("source_ref", self.source_ref),
+            ("source_object_id", self.source_object_id),
+        ):
+            if type(value) is not str or not value:
+                raise ReplacementOperationError(
+                    f"Dredge {field_name} must be a nonempty string"
+                )
+        _integer(
+            self.source_zone_change_counter,
+            field="Dredge source zone-change counter",
+            minimum=0,
+        )
+        _integer(self.mill_count, field="Dredge mill count", minimum=1)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "op": "dredge_draw",
+            "source_ref": self.source_ref,
+            "source_object_id": self.source_object_id,
+            "source_zone_change_counter": self.source_zone_change_counter,
+            "mill_count": self.mill_count,
+        }
+
+
 ReplacementOperation: TypeAlias = (
     SetField
     | AddAmount
@@ -345,6 +391,8 @@ ReplacementOperation: TypeAlias = (
     | CreateNestedEvent
     | ReserveZoneChange
     | CapResultLifeLoss
+    | PreventDraw
+    | DredgeDraw
 )
 
 
@@ -360,6 +408,8 @@ _TYPED_OPERATION_TYPES = (
     CreateNestedEvent,
     ReserveZoneChange,
     CapResultLifeLoss,
+    PreventDraw,
+    DredgeDraw,
 )
 
 
@@ -494,6 +544,45 @@ def operation_from_dict(value: Mapping[str, Any]) -> ReplacementOperation:
         _exact_fields(value, {"op", "minimum"}, operation=op)
         return CapResultLifeLoss(
             _integer(value["minimum"], field="result life floor minimum")
+        )
+    if op == "prevent_draw":
+        _exact_fields(value, {"op"}, operation=op)
+        return PreventDraw()
+    if op == "dredge_draw":
+        _exact_fields(
+            value,
+            {
+                "op",
+                "source_ref",
+                "source_object_id",
+                "source_zone_change_counter",
+                "mill_count",
+            },
+            operation=op,
+        )
+        source_ref = value["source_ref"]
+        source_object_id = value["source_object_id"]
+        if type(source_ref) is not str or not source_ref:
+            raise ReplacementOperationError(
+                "Dredge source_ref must be a nonempty string"
+            )
+        if type(source_object_id) is not str or not source_object_id:
+            raise ReplacementOperationError(
+                "Dredge source_object_id must be a nonempty string"
+            )
+        return DredgeDraw(
+            source_ref=source_ref,
+            source_object_id=source_object_id,
+            source_zone_change_counter=_integer(
+                value["source_zone_change_counter"],
+                field="Dredge source zone-change counter",
+                minimum=0,
+            ),
+            mill_count=_integer(
+                value["mill_count"],
+                field="Dredge mill count",
+                minimum=1,
+            ),
         )
     raise ReplacementOperationError(
         f"Unsupported replacement operation {op!r}"
