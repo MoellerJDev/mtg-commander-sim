@@ -9,6 +9,7 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.aura import simple_enchant_spec_from_oracle
 from mtg_commander_sim.carddb import CardRecord
 from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import DecisionGroup, StackItem
@@ -2436,6 +2437,16 @@ class StateBasedActionEngineTests(unittest.TestCase):
             characteristics={"type_line": "Token Land"},
         )[0]
         land = self.card(engine, land_ref)
+        creature_ref = engine.create_token(
+            "A",
+            name="Legal Aura Target",
+            characteristics={
+                "type_line": "Token Creature",
+                "power": "1",
+                "toughness": "1",
+            },
+        )[0]
+        creature = self.card(engine, creature_ref)
         aura_ref = engine.create_token(
             "A",
             name="Creature Aura",
@@ -2443,8 +2454,11 @@ class StateBasedActionEngineTests(unittest.TestCase):
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
             },
+            aura_target_ref=creature_ref,
         )[0]
         aura = self.card(engine, aura_ref)
+        creature.attachments.remove(aura.object_id)
+        aura.attached_to = None
         self.attach(aura, land)
         unattached_ref = engine.create_token(
             "A",
@@ -2453,8 +2467,11 @@ class StateBasedActionEngineTests(unittest.TestCase):
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
             },
+            aura_target_ref=creature_ref,
         )[0]
         unattached = self.card(engine, unattached_ref)
+        creature.attachments.remove(unattached.object_id)
+        unattached.attached_to = None
 
         self.assertFalse(engine._stabilize())
 
@@ -2533,10 +2550,10 @@ class StateBasedActionEngineTests(unittest.TestCase):
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
             },
+            aura_target_ref=creature_ref,
         )[0]
         creature = self.card(engine, creature_ref)
         aura = self.card(engine, aura_ref)
-        self.attach(aura, creature)
         creature.marked_damage = 2
 
         self.assertFalse(engine._stabilize())
@@ -2616,20 +2633,29 @@ class StateBasedActionEngineTests(unittest.TestCase):
 
         self.assertEqual("9", captured[recipient_ref]["power"])
 
-    def test_unrecognized_enchant_suffix_is_not_prefix_matched(self):
+    def test_unrecognized_enchant_suffix_fails_before_token_mutation(self):
         engine = self.make_engine(7046)
-        aura_ref = engine.create_token(
-            "A",
-            name="Unsupported Aura",
-            characteristics={
-                "type_line": "Token Enchantment — Aura",
-                "oracle_text": (
-                    "Enchant creature with flying or a Vehicle you control"
-                ),
-            },
-        )[0]
-        aura = self.card(engine, aura_ref)
-        self.assertIsNone(engine._enchant_target_schema(aura))
+        before = set(engine.state.cards)
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "not in the supported battlefield-object grammar",
+        ):
+            engine.create_token(
+                "A",
+                name="Unsupported Aura",
+                characteristics={
+                    "type_line": "Token Enchantment — Aura",
+                    "oracle_text": (
+                        "Enchant creature with flying or a Vehicle you control"
+                    ),
+                },
+            )
+        self.assertEqual(before, set(engine.state.cards))
+        self.assertIsNone(
+            simple_enchant_spec_from_oracle(
+                "Enchant creature with flying or a Vehicle you control"
+            )
+        )
 
     @staticmethod
     def stage_as_world(engine, card):

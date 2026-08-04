@@ -16,12 +16,12 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `797a7157bec6f7509ab68d946aee1c3efac2b32c`
 - Package: `0.8.0`
 - CI run: [30868127255](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30868127255) — `pass`
-- Production scope: 198 files, 92,797 physical lines, 85,390 logical lines
+- Production scope: 204 files, 94,040 physical lines, 86,516 logical lines
 
 ## Central engine debt
 
-- `engine.py`: 14,370 physical / 13,596 logical lines
-- Methods: 28 public, 286 private, 1 dunder
+- `engine.py`: 14,290 physical / 13,525 logical lines
+- Methods: 28 public, 285 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 135 locations
 - Semantic-operation branches: 147
@@ -42,7 +42,7 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 14,761 | 13,596 | -1,165 |
+| `engine_logical_lines` | 14,761 | 13,525 | -1,236 |
 | `direct_game_state_writes` | 143 | 135 | -8 |
 | `printed_name_literals` | 693 | 678 | -15 |
 | `oracle_id_literals` | 6 | 6 | +0 |
@@ -55,10 +55,10 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
-| `mtg_commander_sim/engine.py` | python | 14,370 | 13,596 |
+| `mtg_commander_sim/engine.py` | python | 14,290 | 13,525 |
 | `web/src/App.tsx` | web | 1,886 | 1,825 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
-| `mtg_commander_sim/oracle_ir.py` | python | 1,771 | 1,708 |
+| `mtg_commander_sim/oracle_ir.py` | python | 1,774 | 1,711 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
@@ -69,7 +69,7 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 | `mtg_commander_sim/damage_modifier_state.py` | python | 1,241 | 1,160 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
 | `mtg_commander_sim/session.py` | python | 1,164 | 1,121 |
-| `mtg_commander_sim/effect_runtime/zones_and_attachments.py` | python | 1,113 | 1,050 |
+| `mtg_commander_sim/effect_runtime/zones_and_attachments.py` | python | 1,123 | 1,060 |
 
 ## Largest functions and methods
 
@@ -79,15 +79,15 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 | `parse_declaration_restriction_line` | `mtg_commander_sim/declaration_restrictions.py:892` | 881 | 942 |
 | `create_app` | `server/app.py:537` | 724 | 769 |
 | `main` | `mtg_commander_sim/cli.py:801` | 594 | 604 |
-| `_compile_face` | `mtg_commander_sim/oracle_ir.py:1104` | 527 | 536 |
-| `_effect_template` | `mtg_commander_sim/oracle_ir.py:273` | 526 | 527 |
+| `_compile_face` | `mtg_commander_sim/oracle_ir.py:1107` | 527 | 536 |
+| `_effect_template` | `mtg_commander_sim/oracle_ir.py:274` | 526 | 527 |
 | `build_parser` | `mtg_commander_sim/cli.py:406` | 369 | 393 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:543` | 362 | 366 |
-| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:13653` | 342 | 354 |
-| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1513` | 337 | 343 |
-| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:8359` | 315 | 318 |
+| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1520` | 343 | 349 |
+| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:13571` | 342 | 354 |
+| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:8378` | 315 | 318 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:426` | 304 | 304 |
-| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:3186` | 285 | 319 |
+| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:3205` | 285 | 319 |
 | `_scripted_choice` | `mtg_commander_sim/cli.py:72` | 266 | 268 |
 | `parse_declaration_cost_line` | `mtg_commander_sim/declaration_costs.py:219` | 249 | 258 |
 
@@ -97,7 +97,7 @@ Baseline: `cda213c987cb8c5aef94af74bc74146f29bba0fb`. Guard: `python scripts/val
 |---|---:|
 | `turn_priority_decisions` | 39 |
 | `casting_activation_and_costs` | 47 |
-| `semantics_resolution_and_choices` | 75 |
+| `semantics_resolution_and_choices` | 74 |
 | `combat_and_damage` | 31 |
 | `zones_objects_and_state` | 17 |
 | `commander_and_multiplayer` | 8 |
@@ -114,15 +114,15 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,632
-- Conventional Python cases: 1,332
+- Python discovered: 4,646
+- Conventional Python cases: 1,346
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 7
 - Browser unit cases: 18
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true
-- Capability mutation declarations: 35
+- Capability mutation declarations: 36
 - Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift

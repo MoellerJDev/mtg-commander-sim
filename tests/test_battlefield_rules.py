@@ -138,15 +138,13 @@ class BattlefieldRuleTests(unittest.TestCase):
                 "type_line": "Token Enchantment — Aura",
                 "oracle_text": "Enchant creature",
             },
+            aura_target_ref=creature.ref,
         )[0]
         aura = engine._resolve_object(
             "A",
             aura_ref,
             zones={"battlefield"},
         )
-        aura.attached_to = creature.object_id
-        creature.attachments.append(aura.object_id)
-
         engine._assert_invariants()
         packet = session.packet("pilot:C", full=True)
         aura_view = next(

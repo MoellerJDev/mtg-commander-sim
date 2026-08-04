@@ -58,6 +58,7 @@
   ],
   "protected_future_prefixes": [
     "mtg_commander_sim/domain/",
+    "mtg_commander_sim/aura/",
     "mtg_commander_sim/card_programs/",
     "mtg_commander_sim/compiler/",
     "mtg_commander_sim/semantic_runtime/",
@@ -158,6 +159,8 @@
       "mtg_commander_sim/projection.py": "principal-scoped projection",
       "mtg_commander_sim/__init__.py": "public type re-export",
       "mtg_commander_sim/replacement_decisions.py": "replacement continuation validation and stack lookup",
+      "mtg_commander_sim/aura/decisions.py": "seat-scoped Aura-entry continuation validation and resolution routing",
+      "mtg_commander_sim/aura/runtime.py": "read-only Aura legality and entry planner delegating attachment mutation to the canonical owner",
       "mtg_commander_sim/record_decks.py": "read-only exact deck-list provenance hashing",
       "mtg_commander_sim/state_based_actions.py": "pure state-based action detection over an authoritative snapshot",
       "mtg_commander_sim/semantic_runtime/zone_replacements.py": "read-only replacement-source discovery and event identity"

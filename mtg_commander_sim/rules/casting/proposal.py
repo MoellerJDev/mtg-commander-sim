@@ -5,6 +5,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from typing import Any, Protocol
 
+from ...aura import is_aura_type_line, simple_enchant_spec_from_oracle
 from ..action_proposals import (
     ActionOffer,
     CastCostOption,
@@ -309,11 +310,21 @@ def _cast_targets_and_tap_costs(
     card: Any,
     program: Any,
     selected: CastCostOption,
-) -> tuple[dict[str, Any], list[str], Any, dict[str, Any], list[str]]:
+    aura_target_schema: Mapping[str, Any] | None,
+) -> tuple[
+    dict[str, Any],
+    list[str],
+    Any,
+    dict[str, Any],
+    list[str],
+    Mapping[str, Any] | None,
+]:
     selected_dict = selected.to_dict()
     target_schema = (
         copy.deepcopy(dict(selected_dict["target_schema"]))
         if isinstance(selected_dict.get("target_schema"), Mapping)
+        else copy.deepcopy(dict(aura_target_schema))
+        if aura_target_schema is not None
         else None
     )
     targets, target_groups = host._validate_semantic_targets(
@@ -340,7 +351,38 @@ def _cast_targets_and_tap_costs(
                 reason="tap_cost_unpayable",
             )
         tap_refs.append(tap_card.ref)
-    return selected_dict, targets, target_groups, snapshots, tap_refs
+    return (
+        selected_dict,
+        targets,
+        target_groups,
+        snapshots,
+        tap_refs,
+        target_schema,
+    )
+
+
+def _aura_spell_target_schema(
+    *,
+    type_line: str,
+    oracle_text: str,
+    reviewed_target_schema: Mapping[str, Any] | None = None,
+) -> Mapping[str, Any] | None:
+    if not is_aura_type_line(type_line):
+        return None
+    spec = simple_enchant_spec_from_oracle(oracle_text)
+    if spec is None:
+        if isinstance(reviewed_target_schema, Mapping):
+            # Complex Enchant restrictions remain source-pinned.  A reviewed
+            # semantic program may supply their exact target contract without
+            # teaching the universal casting path any card identity.
+            return copy.deepcopy(dict(reviewed_target_schema))
+        raise CastProposalError(
+            "This Aura's Enchant restriction is not in the supported "
+            "battlefield-object grammar",
+            status="unresolved",
+            reason="unresolved_aura_enchant_grammar",
+        )
+    return spec.target_schema()
 
 
 def build_cast_proposal(
@@ -371,8 +413,36 @@ def build_cast_proposal(
         program,
         selected,
     ) = _cast_program_and_cost(host, request, card, record, face)
-    selected_dict, targets, target_groups, snapshots, tap_refs = (
-        _cast_targets_and_tap_costs(host, request, card, program, selected)
+    oracle_text = (
+        str(face.get("oracle_text") or "")
+        if face
+        else record.oracle_text
+    )
+    aura_target_schema = _aura_spell_target_schema(
+        type_line=type_line,
+        oracle_text=oracle_text,
+        reviewed_target_schema=(
+            selected.to_dict().get("target_schema")
+            if isinstance(
+                selected.to_dict().get("target_schema"), Mapping
+            )
+            else getattr(program, "target_schema", None)
+        ),
+    )
+    (
+        selected_dict,
+        targets,
+        target_groups,
+        snapshots,
+        tap_refs,
+        target_schema,
+    ) = _cast_targets_and_tap_costs(
+        host,
+        request,
+        card,
+        program,
+        selected,
+        aura_target_schema,
     )
     requirements = host._mana_vector(selected_dict["requirements"])
     if selected_dict.get("cast_type_line"):
@@ -395,7 +465,8 @@ def build_cast_proposal(
             {
                 "selected_cost_option": selected_dict,
                 "selected_modes": list(request.modes),
-                "target_schema_override": selected_dict.get("target_schema"),
+                "target_schema_override": target_schema,
+                "aura_spell": aura_target_schema is not None,
                 "commander_tax": commander_tax,
                 "mana_cost": mana_cost,
                 "during_resolution": request.during_resolution,
@@ -413,6 +484,7 @@ def _cast_offer_payload(
     face: Mapping[str, Any] | None,
     options: tuple[Any, ...],
     program: Any,
+    aura_target_schema: Mapping[str, Any] | None,
 ) -> tuple[dict[str, Any], tuple[Any, ...]]:
     public_options = []
     legal_options = []
@@ -421,6 +493,8 @@ def _cast_offer_payload(
         target_spec = (
             dict(raw["target_schema"])
             if isinstance(raw.get("target_schema"), Mapping)
+            else dict(aura_target_schema)
+            if aura_target_schema is not None
             else program.target_schema if program is not None else None
         )
         public_schema = None
@@ -479,6 +553,21 @@ def build_cast_offer(
         return CastProposalResult("unavailable", "timing")
     semantic_key = f"{record.oracle_id}:spell:front"
     program = host.semantics.get(semantic_key)
+    oracle_text = (
+        str(front.get("oracle_text") or "")
+        if front
+        else record.oracle_text
+    )
+    try:
+        aura_target_schema = _aura_spell_target_schema(
+            type_line=type_line,
+            oracle_text=oracle_text,
+            reviewed_target_schema=getattr(
+                program, "target_schema", None
+            ),
+        )
+    except CastProposalError as exc:
+        return CastProposalResult(exc.status, exc.reason)
     if host.state.config.semantic_policy == "trusted_only" and (
         (program is not None and not host.semantic_program_is_current_trusted(program))
         or (program is None and not host._trusted_generic_spell(record))
@@ -493,7 +582,14 @@ def build_cast_offer(
     if not options:
         return CastProposalResult("unpayable", "mandatory_cost_unpayable")
     payload, legal = _cast_offer_payload(
-        host, seat, card, record, front, options, program
+        host,
+        seat,
+        card,
+        record,
+        front,
+        options,
+        program,
+        aura_target_schema,
     )
     if not legal:
         return CastProposalResult("unavailable", "mandatory_target_unavailable")

@@ -98,10 +98,12 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
         *,
         type_line: str,
         tapped: bool = False,
+        oracle_text: str = "",
+        aura_target_ref: str | None = None,
     ):
         characteristics = {
             "type_line": type_line,
-            "oracle_text": "",
+            "oracle_text": oracle_text,
         }
         if "planeswalker" in type_line.casefold():
             characteristics["loyalty"] = "3"
@@ -110,6 +112,7 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             name=name,
             characteristics=characteristics,
             tapped=tapped,
+            aura_target_ref=aura_target_ref,
         )[0]
         return engine._resolve_object(seat, ref, zones={"battlefield"})
 
@@ -851,9 +854,9 @@ class CombatDeclarationRestrictionTests(unittest.TestCase):
             "A",
             "Opponent Aura",
             type_line="Token Enchantment — Aura",
+            oracle_text="Enchant creature",
+            aura_target_ref=enchanted.ref,
         )
-        aura.attached_to = enchanted.object_id
-        enchanted.attachments.append(aura.object_id)
 
         problem = engine._attack_declaration_problem("A")
         self.assertEqual(("B",), problem.domains[island_gate.ref])

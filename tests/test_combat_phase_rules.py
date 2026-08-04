@@ -300,15 +300,16 @@ class CombatPhaseRuleTests(unittest.TestCase):
             name="Late Restraint",
             characteristics={
                 "type_line": "Token Enchantment — Aura",
-                "oracle_text": "Enchanted creature can't attack.",
+                "oracle_text": (
+                    "Enchant creature\n"
+                    "Enchanted creature can't attack."
+                ),
             },
+            aura_target_ref=attacker.ref,
         )[0]
         aura = engine._resolve_object(
             "A", aura_ref, zones={"battlefield"}
         )
-        aura.attached_to = attacker.object_id
-        attacker.attachments.append(aura.object_id)
-
         self.assertFalse(engine._stabilize())
 
         self.assertEqual("B", attacker.attacking)

@@ -1,8 +1,250 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "416feae727b5366a139cd5d82e009b593ce2ff0b918ecb743d9b267337b8cda0",
-  "declaration_source_fingerprint": "42c433670dc9363e90df88fe8f7cd1726bfd93508cf665afecca9e8cc2f7bac5",
+  "registry_fingerprint": "8ccb5cffcdcbe85d7c14b582349f954f55dcdbc1a2162db8f46059d093b3786e",
+  "declaration_source_fingerprint": "76a99653c3ef9fe5fc759945392b6a607b1a8ce44acb4d23c1cec03dc2de6e16",
   "declarations": [
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_control_relation_and_protection_are_live_attachment_legality",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Recompute controller-relation and represented protection legality from the live attached objects."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_nonspell_entry_pauses_for_choice_and_resumes_exact_effect",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Suspend a nonspell Aura entry before mutation and resume the exact semantic frame after its controller chooses."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_four_player_aura_targets_and_relations_are_seat_correct",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Enumerate the public four-player battlefield while preserving you-control relations."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_aura_cast_targeting_mutant_is_killed",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill removal of mandatory Aura target-schema lowering."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "negative",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_nonspell_entry_with_no_legal_object_stays_in_origin_zone",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep a nonspell Aura in its current zone when no legal object exists."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "negative",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_unsupported_enchant_grammar_fails_before_mutation",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject quality and compound Enchant grammar before mutation."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "positive",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_offer_requires_and_projects_one_legal_spell_target",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Advertise and require exactly one legal public object target while casting."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "positive",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_tokens_preflight_attachment_and_no_legal_object_is_not_created",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Preflight Aura-token entry, attach an explicitly selected legal object before enter events, and create no token when no legal object exists."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "positive",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_spell_resolution_attaches_and_illegal_target_counters_by_rule",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate the exact target, attach on legal resolution, and counter the spell when its only target is illegal."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_entry_choice_projection_and_replay_are_exact",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project only public refs while retaining authoritative incarnation identities inside the continuation."
+    },
+    {
+      "capability_id": "attachment.aura.simple_object",
+      "evidence_class": "replay",
+      "test_id": "tests.test_aura_targeting_entry.AuraTargetingEntryEngineTests.test_aura_entry_choice_projection_and_replay_are_exact",
+      "official_rule_ids": [
+        "303.4",
+        "303.4a",
+        "303.4c",
+        "303.4f",
+        "303.4g",
+        "608.2b",
+        "701.3",
+        "702.5a",
+        "704.5m"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the seat-scoped entry selection and exact reciprocal attachment."
+    },
     {
       "capability_id": "attachment.equip.fixed_mana",
       "evidence_class": "interaction",
@@ -5589,5 +5831,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "3f8ea695be5eae344a6bdaa0276f5ed5f35361f06fad275e553a519a0af52d6b"
+  "fingerprint": "8376f148940c9b7cef9e87e90d2d7990be630e019c75c0703a47b197c02d97cc"
 }
