@@ -2446,7 +2446,6 @@ class CommanderEngine(
                         )
                     )
         if owns_trigger_batch:
-            enqueue_trigger_batch(self, event_triggers)
             if (
                 event_destination == "graveyard"
                 and "creature" in origin_types
@@ -2493,6 +2492,7 @@ class CommanderEngine(
                             },
                         )
                     )
+            enqueue_trigger_batch(self, event_triggers)
 
     def _add_saga_lore(
         self,

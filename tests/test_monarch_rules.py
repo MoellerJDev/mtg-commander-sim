@@ -373,6 +373,7 @@ class MonarchRuleTests(unittest.TestCase):
             trusted_mechanics={
                 "cr-603-handling-triggered-abilities",
                 "cr-725-the-monarch",
+                "trigger-event-normalized-zone-change",
             },
         )
         self.assertEqual("exact", ir.status)
