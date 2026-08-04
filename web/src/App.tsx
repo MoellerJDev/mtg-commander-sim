@@ -993,6 +993,8 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
       || connection !== "LIVE"
       || submitting
       || pendingRetry
+      || selectedAction
+      || actionChoices.length > 0
       || autoPassDecisionRef.current === decision.id
     ) return;
     const projectedState = asRecord(view?.state);
@@ -1013,6 +1015,8 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     connection,
     lifecycle?.status,
     pendingRetry,
+    selectedAction,
+    actionChoices.length,
     submitting,
     tablePreferences.autoPass,
     view?.decision?.id,

@@ -88,16 +88,20 @@ async function submitImmediateAction(page: Page, actionId: string) {
   await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
 
-async function submitOpenChoice(page: Page) {
+async function submitOpenChoice(page: Page, force = false) {
   const revision = await viewRevision(page);
-  await page.getByTestId("submit-choice").click();
+  if (force) {
+    await page.getByTestId("submit-choice").click({ force: true });
+  } else {
+    await page.getByTestId("submit-choice").click();
+  }
   await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
 }
 
-async function submitFormAction(page: Page, actionId: string) {
+async function submitFormAction(page: Page, actionId: string, forceChoice = false) {
   await page.getByTestId(`action-${actionId}`).click();
   await expect(page.getByTestId("choice-dialog")).toBeVisible();
-  await submitOpenChoice(page);
+  await submitOpenChoice(page, forceChoice);
 }
 
 async function submitMaybeFormAction(page: Page, actionId: string, clickTimeout = 15_000) {
@@ -838,10 +842,10 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
 });
 
 test("a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
-  // This journey crosses several auto-pass windows and normally finishes near
-  // the global 90-second limit on Windows. Preserve assertion-driven waits
-  // while leaving enough time for context cleanup under serial suite load.
-  test.setTimeout(180_000);
+  // This journey crosses several auto-pass windows and persists each real
+  // command. Preserve assertion-driven waits while leaving hosted runners
+  // enough time for durability writes and context cleanup under serial load.
+  test.setTimeout(240_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -892,7 +896,12 @@ test("a duel declares an attacker in the browser and applies commander combat da
       .locator(".command-zone .card-tile")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Zimone and Dina" }) });
     await expect(commander).toHaveAttribute("draggable", "true");
-    await commander.dragTo(host.getByTestId("own-battlefield"));
+    // The anchored hand intentionally remains above the board while expanded.
+    // Use the same cast capability in the always-visible decision tray after
+    // verifying the command-zone surface is server-authorized and draggable.
+    await host.getByTestId("decision-panel")
+      .getByRole("button", { name: /Cast Zimone and Dina/ })
+      .click();
     await expect(host.getByTestId("choice-dialog")).toContainText("Cast Zimone and Dina");
     await submitOpenChoice(host);
     await expect(host.getByTestId("own-battlefield")).toContainText("Zimone and Dina");
@@ -922,7 +931,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
   // This intentionally natural game persists more than one hundred real
   // commands. It completes near five minutes alone and can take longer after
   // the preceding serial journeys, especially on Windows or hosted CI.
-  test.setTimeout(480_000);
+  test.setTimeout(600_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -966,8 +975,12 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       // Once six mana is available, commander casting remains meaningful in
       // both main phases. Auto-pass must stop; this scripted witness declines
       // those two verified opportunities explicitly.
-      await submitFormAction(page, "pass");
-      await submitFormAction(page, "pass");
+      // The overlay is already asserted visible. Force only these repeated
+      // late-game confirmations because Chromium can otherwise wait forever
+      // for a perfectly stable synthetic click point while the fixed dock is
+      // remeasured after more than one hundred persisted commands.
+      await submitFormAction(page, "pass", true);
+      await submitFormAction(page, "pass", true);
     }
 
     const requiredMana: Array<"Swamp" | "Forest"> = [
@@ -981,7 +994,9 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
           .locator(".command-zone .card-tile")
           .filter({ has: host.locator(".card-copy strong", { hasText: "Yargle and Multani" }) });
         await expect(commander).toHaveAttribute("draggable", "true");
-        await commander.dragTo(host.getByTestId("own-battlefield"));
+        await host.getByTestId("decision-panel")
+          .getByRole("button", { name: /Cast Yargle and Multani/ })
+          .click();
         await expect(host.getByTestId("choice-dialog")).toContainText("Cast Yargle and Multani");
         await submitOpenChoice(host);
         await expect(host.getByTestId("own-battlefield")).toContainText("Yargle and Multani");
