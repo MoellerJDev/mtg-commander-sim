@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `4bec8eb29722a813d377d232b42c36e37640ed37`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 212 files, 96,128 physical lines, 88,383 logical lines
+- Production scope: 212 files, 96,132 physical lines, 88,382 logical lines
 
 ## Central engine debt
 

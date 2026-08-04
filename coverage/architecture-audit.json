@@ -3210,7 +3210,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 88383,
+      "logical_lines": 88382,
       "methods": {
         "dunder": 192,
         "private": 618,
@@ -3418,8 +3418,8 @@
           "file": "mtg_commander_sim/semantic_choices/engine_coordination.py",
           "functions_and_methods": 15,
           "language": "python",
-          "logical_lines": 651,
-          "physical_lines": 679
+          "logical_lines": 650,
+          "physical_lines": 683
         },
         {
           "file": "mtg_commander_sim/compiler/prevention_templates.py",
@@ -5158,7 +5158,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 96128,
+      "physical_lines": 96132,
       "python_file_count": 199,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -7658,14 +7658,14 @@
         {
           "condition": "operation not in default_semantic_choice_registry().operations",
           "file": "mtg_commander_sim/semantic_choices/engine_coordination.py",
-          "line": 654,
+          "line": 658,
           "string_literals": [],
           "symbol": "_begin_semantic_choice"
         },
         {
           "condition": "operation not in default_semantic_choice_registry().operations",
           "file": "mtg_commander_sim/semantic_choices/engine_coordination.py",
-          "line": 675,
+          "line": 679,
           "string_literals": [],
           "symbol": "_complete_semantic_choice"
         },
@@ -8957,7 +8957,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "714ea2a1749ff4cde1554fc8202e6a8443d33321988a003170204459af72ec3a"
+          "verified": "16342b7f01522046cf76f06802f60b845a031c4c57ad4692fa14b2e2ebaef473"
         },
         "metadata_complete": true,
         "missing_metadata": [],
