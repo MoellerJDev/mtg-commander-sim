@@ -685,6 +685,22 @@ def capability_dependencies_for_node(
         and bool(effects)
     ):
         dependencies.add("trigger.placement.apnap")
+    if (
+        "cr-611-continuous-effects" in mechanics
+        and all_operations.intersection(
+            {
+                "add_subtype_until_end_of_turn",
+                "add_type_until_end_of_turn",
+                "grant_keyword_until_end_of_turn",
+                "modify_all_matching_permanents_until_end_of_turn",
+                "modify_stats_until_end_of_turn",
+                "pump_controlled_creatures",
+            }
+        )
+    ):
+        dependencies.add(
+            "continuous.resolution.fixed_characteristics_until_end_of_turn"
+        )
     schema = dict(target_schema or {})
     reviewed_damage_shape = (
         mechanics == {"cr-120-damage", "cr-115-targets"}
@@ -768,6 +784,13 @@ def capability_covered_mechanics(
         covered.add("cr-119-life")
     if "trigger.placement.apnap" in supplied:
         covered.add("cr-603-handling-triggered-abilities")
+    if supplied.intersection(
+        {
+            "continuous.power_toughness.fixed_anthem",
+            "continuous.resolution.fixed_characteristics_until_end_of_turn",
+        }
+    ):
+        covered.add("cr-611-continuous-effects")
     if "damage.prevention.triggered_results" in supplied:
         covered.add("cr-615-prevention-effects")
     if "counter.placement.quantity_replacement" in supplied:

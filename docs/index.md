@@ -63,6 +63,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0017 — prevention continuations and aftermath ownership](adr/0017-prevention-continuations-and-aftermath.md)
 - [ADR 0018 — unified triggered-ability batch ownership](adr/0018-unified-trigger-batch-ownership.md)
 - [ADR 0019 — normalized zone-change trigger discovery](adr/0019-normalized-zone-trigger-discovery.md)
+- [ADR 0020 — continuous-effect duration and applicability ownership](adr/0020-continuous-effect-duration-and-applicability.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)

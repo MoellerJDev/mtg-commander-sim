@@ -160,7 +160,11 @@ class CommanderSession:
         return cls(
             card_db=card_db,
             engine=engine,
-            projector=StateProjector(card_db, engine.state),
+            projector=StateProjector(
+                card_db,
+                engine.state,
+                characteristic_resolver=engine._effective_card_data,
+            ),
             initial_checkpoint=checkpoint_envelope(engine.state),
             pilot_profiles=pilot_profiles,
             deck_provenance=provenance,
@@ -1130,7 +1134,11 @@ class CommanderSession:
         return cls(
             card_db=card_db,
             engine=engine,
-            projector=StateProjector(card_db, engine.state),
+            projector=StateProjector(
+                card_db,
+                engine.state,
+                characteristic_resolver=engine._effective_card_data,
+            ),
             cursors=cursors,
             initial_checkpoint=initial_checkpoint,
             commands=commands,

@@ -87,9 +87,18 @@ class SemanticChoiceIntentHostMixin:
         self,
         intent: SetCardDesignationIntent,
     ) -> str:
+        if (
+            intent.apply_as_subtype
+            and intent.designation != "chosen_creature_type"
+        ):
+            raise GameRuleError(
+                "Only a chosen creature type may become a subtype"
+            )
         card = self._resolve_object(intent.actor, intent.object_ref)
         annotation_key = intent.designation
         card.annotations[annotation_key] = intent.value
+        if intent.apply_as_subtype:
+            card.annotations["chosen_creature_type_adds_subtype"] = True
         event_code = (
             "card.name.chosen"
             if annotation_key == "chosen_name"
@@ -856,4 +865,3 @@ class SemanticChoiceIntentHostMixin:
             importance=2,
             changed_objects=[army.object_id],
         )
-

@@ -13,6 +13,7 @@ from mtg_commander_sim.continuous_effects import (
     evaluate_continuous_effects,
     order_continuous_effects,
 )
+from mtg_commander_sim.object_predicate import ObjectQuerySpec
 from mtg_commander_sim.replacement_effects import (
     ReplaceableEvent,
     ReplacementClass,
@@ -210,9 +211,7 @@ class ContinuousLayerTests(unittest.TestCase):
                             "add_ability", "Vigilance"
                         ),
                     ),
-                    applies={
-                        "card_types": {"contains": "Creature"}
-                    },
+                    applies=ObjectQuerySpec(types_all=("creature",)),
                 ),
             ],
         )

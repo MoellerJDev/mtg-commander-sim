@@ -11,6 +11,7 @@ from mtg_commander_sim import tap_state
 from mtg_commander_sim import trigger_batches as trigger_batches_module
 from mtg_commander_sim import zone_trigger_events as zone_trigger_events_module
 from mtg_commander_sim.effect_runtime import life_effects
+from mtg_commander_sim.effect_runtime import objects_stack_and_tokens
 from mtg_commander_sim.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
@@ -50,6 +51,10 @@ from mtg_commander_sim.semantic_runtime.counter_replacements import (
 from mtg_commander_sim.semantic_runtime.continuous_components import (
     AddBasicLandTypeHandler,
     ContinuousEffectSourceContext,
+    FixedQueryPowerToughnessAnthemHandler,
+)
+from mtg_commander_sim.compiler.continuous_templates import (
+    fixed_power_toughness_anthem_handler,
 )
 from mtg_commander_sim.semantic_runtime.damage_replacements import (
     DamageQuantityReplacementHandler,
@@ -280,6 +285,87 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_swamp_is_added()
+
+    def test_fixed_anthem_applicability_mutant_is_killed(self):
+        descriptor = fixed_power_toughness_anthem_handler(
+            "Creatures you control get +1/+1."
+        )[1]
+        context = ContinuousEffectSourceContext(
+            source_object_id="anthem",
+            source_ref="A01",
+            source_controller="A",
+            source_timestamp=1,
+            component_id="mutation",
+        )
+
+        def assert_anthem_applies() -> None:
+            effects = FixedQueryPowerToughnessAnthemHandler().lower(
+                descriptor, context
+            )
+            result = evaluate_continuous_effects(
+                CharacteristicState(
+                    name="Creature",
+                    controller="A",
+                    card_types={"Creature"},
+                    power=1,
+                    toughness=1,
+                ),
+                effects,
+                context={"ref": "A02", "owner": "A"},
+            )
+            self.assertEqual(2, result.characteristics["power"])
+
+        assert_anthem_applies()
+        with patch.object(
+            FixedQueryPowerToughnessAnthemHandler,
+            "lower",
+            lambda _handler, _descriptor, _context: (),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_anthem_applies()
+
+    def test_resolution_continuous_effect_commit_mutant_is_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=6112999,
+        )
+        keep_all(session)
+        engine = session.engine
+        ref = engine.create_token(
+            "A",
+            name="Mutation creature",
+            characteristics={
+                "type_line": "Token Creature",
+                "power": "1",
+                "toughness": "1",
+            },
+            reason="mutation witness",
+        )[0]
+        card = engine._resolve_object("A", ref, zones={"battlefield"})
+
+        def resolved_power() -> int:
+            engine.state.continuous_effects.clear()
+            engine.apply_effect(
+                {
+                    "op": "modify_stats_until_end_of_turn",
+                    "card": card.ref,
+                    "power": 1,
+                    "toughness": 1,
+                },
+                actor="A",
+            )
+            return engine._numeric_stat(card.object_id, "power")
+
+        self.assertEqual(2, resolved_power())
+        with patch.object(
+            objects_stack_and_tokens,
+            "create_resolution_continuous_effect",
+            lambda *_args, **_kwargs: None,
+        ):
+            self.assertEqual(1, resolved_power())
 
     def test_damage_amount_guard_mutant_is_killed(self):
         def assert_negative_assignment_rejected() -> None:

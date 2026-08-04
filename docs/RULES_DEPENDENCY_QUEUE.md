@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,049
-- Reviewed behavioral blockers: 350
-- Behavioral classification/review required: 2,699
-- Passing behavioral rules: 138
+- Queued rules: 3,045
+- Reviewed behavioral blockers: 359
+- Behavioral classification/review required: 2,686
+- Passing behavioral rules: 141
 - Subsystems: 21
-- Queue fingerprint: `64137107a52f6e4e84d4ad243c79c693ae4bd37be6ee24c14f10be24ff76934b`
+- Queue fingerprint: `758c6c88ffda3bf43deff114550f6bca6b47a2ddc55293b3668b7b3db6a876e5`
 
 ## Selected next batch
 
-- Batch: `continuous-effect-duration-and-source-applicability`
+- Batch: `attached-static-characteristic-effects`
 - Subsystem: `continuous-effects`
-- Rules: `611.2`, `611.3`
-- Target capabilities: `continuous.power_toughness.fixed_anthem`, `continuous.basic_land_type.add_all_lands`
-- Rationale: The generic trigger foundation and normalized fixed-life zone-trigger slice are now represented, while effective-characteristic queries still depend on a partial continuous-effect owner. The next dependency-ready universal boundary is the CR 611 distinction between resolution-created locked sets and duration and static-ability live applicability. Closing it enables layer/static compiler expansion without adding card-shaped runtime branches.
+- Rules: `613.1d`, `613.1f`, `613.1g`
+- Target capabilities: `continuous.attached.fixed_characteristics`
+- Rationale: The CR 611 duration and live-source boundary now supports reusable static expansion. The pinned Commander corpus contains 933 cards matching fixed enchanted/equipped-creature power/toughness wording, including 347 combined modifier/keyword forms, so attached characteristic effects are a higher-yield next family than another prevention micro-slice. The attachment kernel and shared layer evaluator already provide the dependency direction needed to implement this without card-name dispatch.
 
 Exit criteria:
 
-- Represent resolution-created continuous effects with a strict duration and an immutable affected-object set when CR 611.2c locks that set.
-- Represent static-ability continuous effects with live source-zone applicability and dynamic object membership under CR 611.3a-b.
-- Route current fixed anthem and basic-land-type producers through the same effective-characteristic query without printed-name or Oracle-ID dispatch.
-- Prove source departure, control change, new-object entry, characteristic changes, expiration, simultaneous objects, replay, rollback, and multiplayer behavior.
-- Extract the corresponding applicability and duration responsibility from CommanderEngine and ratchet direct characteristic reads.
-- Add generic CardProgram/compiler lowering for the closed static and until-end-of-turn wording families, then measure the Commander-legal census.
+- Represent the live attached-object relation as a strict source-bound continuous-effect predicate rather than a copied target annotation.
+- Apply closed fixed type, subtype, keyword add/remove, and power/toughness operations in their represented CR 613 layers through the shared evaluator.
+- Prove attach, detach, reattach, source departure, target departure/reentry, control change, phasing, simultaneous sources, replay, privacy, rollback, and multiplayer behavior.
+- Generically lower exact enchanted/equipped-creature fixed modifiers and keyword grants while rejecting stateful quantities, conditions, unsupported costs, and characteristic-defining lookalikes.
+- Remove the corresponding attachment-characteristic responsibility from CommanderEngine or legacy annotations and ratchet architecture/card-specificity guards.
+- Run the full Oracle and Commander censuses and require a measurable exact and capability-closed card cluster without witness inflation.
 
 ## Dependency schedule
 
@@ -54,7 +54,7 @@ Exit criteria:
 | 10 | `casting-activation` | `mana-costs-priority`, `zones`, `turn-structure` | 46 | 46 | 0 | `oracle_parser`, `card_program_costs`, `card_program_lowering`, `mechanic_contracts` |
 | 11 | `triggered-static-linked` | `objects-permanents-tokens`, `turn-structure`, `casting-activation` | 71 | 71 | 0 | `oracle_parser`, `event_binding`, `card_program_lowering`, `mechanic_contracts` |
 | 12 | `resolution-effects` | `zones`, `casting-activation`, `triggered-static-linked` | 42 | 28 | 14 | `oracle_parser`, `card_program_lowering`, `semantic_handlers` |
-| 13 | `continuous-effects` | `characteristics`, `objects-permanents-tokens`, `triggered-static-linked`, `resolution-effects` | 68 | 0 | 68 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 13 | `continuous-effects` | `characteristics`, `objects-permanents-tokens`, `triggered-static-linked`, `resolution-effects` | 64 | 9 | 55 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 33 | 33 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 4 | 512 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |

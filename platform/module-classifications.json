@@ -247,6 +247,33 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/carddb_characteristics.py",
+      "layer": "adapter",
+      "owning_subsystem": "card_database",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/characteristic_evaluation.py",
+      "layer": "rules",
+      "owning_subsystem": "continuous_effects",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/choice_forms.py",
       "layer": "rules",
       "owning_subsystem": "legacy_rules",
@@ -357,6 +384,20 @@
       "owning_subsystem": "oracle_compiler",
       "allowed_dependency_layers": [
         "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/compiler/activated_costs.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
         "domain",
         "rules",
         "semantics"
@@ -504,7 +545,7 @@
     {
       "file": "mtg_commander_sim/continuous_effects.py",
       "layer": "rules",
-      "owning_subsystem": "legacy_rules",
+      "owning_subsystem": "continuous_effects",
       "allowed_dependency_layers": [
         "domain",
         "rules",
@@ -514,6 +555,32 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/continuous_effect_model.py",
+      "layer": "domain",
+      "owning_subsystem": "continuous_effects",
+      "allowed_dependency_layers": [
+        "domain"
+      ],
+      "game_state_access": "model_definition",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/continuous_effect_state.py",
+      "layer": "rules",
+      "owning_subsystem": "continuous_effects",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/counter_placement.py",
@@ -2611,5 +2678,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "bfc7e37d95c848521a74b8b32ba5e9531c08e8ec362ffbf02e51124cf6ae5328"
+  "fingerprint": "28c51c9b85d83e9188e10c91fdb05452c494892cdebbd92855b125a464239160"
 }

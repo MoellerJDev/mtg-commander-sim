@@ -51,6 +51,32 @@ class SetCardDesignationIntent:
     value: str
     actor: str
     reason: str
+    apply_as_subtype: bool = False
+
+    def __post_init__(self) -> None:
+        if self.designation not in {
+            "chosen_name",
+            "chosen_creature_type",
+        }:
+            raise ValueError("Card designation kind is unsupported")
+        if any(
+            type(value) is not str or not value
+            for value in (
+                self.object_ref,
+                self.value,
+                self.actor,
+                self.reason,
+            )
+        ):
+            raise ValueError(
+                "Card designation identifiers and text must be nonempty strings"
+            )
+        if type(self.apply_as_subtype) is not bool:
+            raise ValueError("Designation subtype application must be boolean")
+        if self.apply_as_subtype and self.designation != "chosen_creature_type":
+            raise ValueError(
+                "Only a chosen creature type may become a subtype"
+            )
 
 
 @dataclass(frozen=True, slots=True)

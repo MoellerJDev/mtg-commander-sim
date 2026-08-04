@@ -13,12 +13,17 @@ from .abilities import (
     ActivatedAbility,
 )
 from .carddb import CardDatabase, CardRecord
+from .carddb_characteristics import base_card_characteristics
 from .card_programs.validation import (
     canonical_program_fingerprint,
     program_source_is_current,
 )
 from .card_programs.runtime import (
     collect_card_program_continuous_effects,
+)
+from .characteristic_evaluation import (
+    evaluate_card_characteristics,
+    type_parts,
 )
 from .combat import (
     DEFENDER,
@@ -35,11 +40,11 @@ from .combat import (
     trample_assignment_error,
 )
 from .continuous_effects import (
-    CharacteristicState,
     ContinuousEffect,
-    ContinuousOperation,
-    Layer,
-    evaluate_continuous_effects,
+)
+from .continuous_effect_state import (
+    active_resolution_effects,
+    expire_end_of_turn_continuous_effects,
 )
 from .counter_placement import (
     commit_counter_events_from_resolution,
@@ -194,6 +199,7 @@ from .semantic_runtime import (
     RetargetStackItemIntent,
     RevealLibraryCardsIntent,
     SemanticNodeError,
+    semantic_source_context,
     SetCardDesignationIntent,
     ShuffleLibraryIntent,
     ZoneMoveIntent,
@@ -810,297 +816,13 @@ class CommanderEngine(
         *,
         runtime_effects: Sequence[ContinuousEffect] = (),
     ) -> dict[str, Any]:
-        """Evaluate the engine's declarative characteristic annotations.
+        """Delegate CR 613 evaluation to its rules-owned subsystem."""
 
-        This is the runtime bridge into the CR 613 evaluator. Existing
-        card-specific continuous checks below remain explicit until they are
-        converted to contracts, but copy values, type additions, subtype
-        additions, and temporary keyword grants now share one canonical layer
-        order rather than relying on call-site order.
-        """
-
-        result = copy.deepcopy(dict(base))
-        overrides = dict(card.annotations.get("copy_overrides") or {})
-        added_types = [
-            str(value).strip()
-            for value in card.annotations.get(
-                "continuous_add_types", []
-            )
-            if str(value).strip()
-        ] + [
-            str(value).strip()
-            for value in dict(
-                card.annotations.get("until_end_of_turn") or {}
-            ).get("add_types", [])
-            if str(value).strip()
-        ]
-        added_subtypes = (
-            [
-                str(card.annotations["chosen_creature_type"])
-            ]
-            if card.printed_name == "Roaming Throne"
-            and card.annotations.get("chosen_creature_type")
-            else []
-        ) + [
-            str(value).strip()
-            for value in card.annotations.get(
-                "continuous_add_subtypes", []
-            )
-            if str(value).strip()
-        ] + [
-            str(value).strip()
-            for value in dict(
-                card.annotations.get("until_end_of_turn") or {}
-            ).get("add_subtypes", [])
-            if str(value).strip()
-        ]
-        layered = bool(
-            overrides
-            or added_types
-            or added_subtypes
-            or card.temporary_keywords
-            or card.annotations.get("bestowed")
-            or runtime_effects
+        return evaluate_card_characteristics(
+            card,
+            base,
+            runtime_effects=runtime_effects,
         )
-        if not layered:
-            result["keywords"] = unique_preserving_order(
-                list(result.get("keywords") or [])
-            )
-            return result
-
-        card_types, subtypes, supertypes = self._type_parts(
-            str(result.get("type_line") or "")
-        )
-
-        def numeric(value: Any) -> int | None:
-            try:
-                return int(str(value))
-            except (TypeError, ValueError):
-                return None
-
-        state = CharacteristicState(
-            name=str(result.get("name") or card.printed_name),
-            controller=card.controller,
-            mana_cost=str(result.get("mana_cost") or ""),
-            mana_value=float(result.get("mana_value") or 0),
-            text=str(result.get("oracle_text") or ""),
-            supertypes=set(supertypes),
-            card_types=set(card_types),
-            subtypes=set(subtypes),
-            colors={
-                str(value).upper()
-                for value in result.get("colors", [])
-            },
-            abilities=[
-                str(value)
-                for value in result.get("keywords", [])
-            ],
-            power=numeric(result.get("power")),
-            toughness=numeric(result.get("toughness")),
-            loyalty=numeric(result.get("loyalty")),
-            defense=numeric(result.get("defense")),
-        )
-        effects: list[ContinuousEffect] = []
-        timestamp = 0
-
-        if overrides:
-            copy_values: dict[str, Any] = {}
-            field_map = {
-                "name": "name",
-                "mana_cost": "mana_cost",
-                "mana_value": "mana_value",
-                "oracle_text": "text",
-                "power": "power",
-                "toughness": "toughness",
-                "loyalty": "loyalty",
-                "defense": "defense",
-                "colors": "colors",
-                "keywords": "abilities",
-            }
-            for source_field, target_field in field_map.items():
-                if source_field in overrides:
-                    value = copy.deepcopy(overrides[source_field])
-                    if target_field in {
-                        "power",
-                        "toughness",
-                        "loyalty",
-                        "defense",
-                    }:
-                        parsed = numeric(value)
-                        if parsed is None:
-                            continue
-                        value = parsed
-                    copy_values[target_field] = value
-            if overrides.get("type_line") is not None:
-                copied_types, copied_subtypes, copied_supertypes = (
-                    self._type_parts(str(overrides["type_line"]))
-                )
-                copy_values.update(
-                    {
-                        "card_types": sorted(copied_types),
-                        "subtypes": sorted(copied_subtypes),
-                        "supertypes": sorted(copied_supertypes),
-                    }
-                )
-            if copy_values:
-                effects.append(
-                    ContinuousEffect(
-                        effect_id=f"{card.object_id}:copy",
-                        source_id=card.object_id,
-                        layer=Layer.COPY,
-                        sublayer="1a",
-                        timestamp=timestamp,
-                        operations=(
-                            ContinuousOperation(
-                                "copy_values", copy_values
-                            ),
-                        ),
-                        duration="zone_object",
-                    )
-                )
-                timestamp += 1
-
-        type_operations: list[ContinuousOperation] = []
-        if card.annotations.get("bestowed") and card.attached_to:
-            type_operations.extend(
-                [
-                    ContinuousOperation(
-                        "set_types",
-                        ["Enchantment"],
-                        field="card_types",
-                    ),
-                    ContinuousOperation(
-                        "set_types",
-                        ["Aura"],
-                        field="subtypes",
-                    ),
-                ]
-            )
-        if added_types:
-            type_operations.append(
-                ContinuousOperation(
-                    "add_types",
-                    added_types,
-                    field="card_types",
-                )
-            )
-        if added_subtypes:
-            type_operations.append(
-                ContinuousOperation(
-                    "add_types",
-                    added_subtypes,
-                    field="subtypes",
-                )
-            )
-        if type_operations:
-            effects.append(
-                ContinuousEffect(
-                    effect_id=f"{card.object_id}:types",
-                    source_id=card.object_id,
-                    layer=Layer.TYPE,
-                    sublayer="4",
-                    timestamp=timestamp,
-                    operations=tuple(type_operations),
-                    duration="zone_object",
-                )
-            )
-            timestamp += 1
-
-        if card.temporary_keywords:
-            effects.append(
-                ContinuousEffect(
-                    effect_id=f"{card.object_id}:keywords",
-                    source_id=card.object_id,
-                    layer=Layer.ABILITY,
-                    sublayer="6",
-                    timestamp=timestamp,
-                    operations=tuple(
-                        ContinuousOperation("add_ability", keyword)
-                        for keyword in card.temporary_keywords
-                    ),
-                    duration="until_end_of_turn",
-                )
-            )
-
-        effects.extend(runtime_effects)
-
-        evaluated = evaluate_continuous_effects(state, effects)
-        values = evaluated.characteristics
-        result.update(
-            {
-                "name": values["name"],
-                "mana_cost": values["mana_cost"],
-                "mana_value": values["mana_value"],
-                "oracle_text": values["text"],
-                "colors": [
-                    color
-                    for color in "WUBRGC"
-                    if color in set(values["colors"])
-                ],
-                "keywords": unique_preserving_order(
-                    values["abilities"]
-                ),
-            }
-        )
-        if values["power"] is not None:
-            result["power"] = str(values["power"])
-        if values["toughness"] is not None:
-            result["toughness"] = str(values["toughness"])
-        if values["loyalty"] is not None:
-            result["loyalty"] = str(values["loyalty"])
-        if values["defense"] is not None:
-            result["defense"] = str(values["defense"])
-
-        supertype_order = ["Basic", "Legendary", "Snow", "World"]
-        type_order = [
-            "Artifact",
-            "Battle",
-            "Creature",
-            "Enchantment",
-            "Instant",
-            "Kindred",
-            "Land",
-            "Planeswalker",
-            "Sorcery",
-        ]
-
-        def ordered_words(
-            values_to_order: Sequence[str],
-            preferred: Sequence[str],
-        ) -> list[str]:
-            by_lower = {
-                str(value).casefold(): str(value).title()
-                for value in values_to_order
-            }
-            preferred_lower = {
-                value.casefold() for value in preferred
-            }
-            return [
-                value
-                for value in preferred
-                if value.casefold() in by_lower
-            ] + [
-                by_lower[key]
-                for key in sorted(by_lower)
-                if key not in preferred_lower
-            ]
-
-        left = [
-            *ordered_words(values["supertypes"], supertype_order),
-            *ordered_words(values["card_types"], type_order),
-        ]
-        right = [
-            str(value).title()
-            for value in values["subtypes"]
-        ]
-        result["type_line"] = " ".join(left) + (
-            f" — {' '.join(right)}" if right else ""
-        )
-        if card.annotations.get("bestowed") and card.attached_to:
-            result["oracle_text"] = (
-                "Enchant creature\nEnchanted creature gets +1/+1."
-            )
-        return result
 
     def _effective_card_data(
         self,
@@ -1110,68 +832,15 @@ class CommanderEngine(
     ) -> dict[str, Any]:
         card = value if isinstance(value, CardInstance) else self.state.cards[value]
         record = self.card_record(card)
-        if record is None:
-            object_characteristics = dict(
-                card.annotations.get("object_characteristics")
-                or card.annotations.get("token_characteristics")
-                or {}
-            )
-            base = {
-                "name": (
-                    ""
-                    if card.object_kind == "emblem"
-                    else card.printed_name
-                ),
-                "mana_cost": "",
-                "mana_value": object_characteristics.get(
-                    "mana_value", 0
-                ),
-                "type_line": str(
-                    object_characteristics.get("type_line", "Token")
-                ),
-                "oracle_text": str(
-                    object_characteristics.get("oracle_text", "")
-                ),
-                "power": object_characteristics.get("power"),
-                "toughness": object_characteristics.get("toughness"),
-                "loyalty": object_characteristics.get("loyalty"),
-                "defense": object_characteristics.get("defense"),
-                "keywords": list(
-                    object_characteristics.get("keywords", [])
-                ),
-                "colors": list(
-                    object_characteristics.get("colors", [])
-                ),
-                "produced_mana": list(
-                    object_characteristics.get("produced_mana", [])
-                ),
-            }
-        else:
-            face = None
-            if card.active_face:
-                face = next(
-                    (f for f in record.faces if str(f.get("name") or "") == card.active_face),
-                    None,
-                )
-            base = {
-                "name": str(face.get("name")) if face else record.name,
-                "mana_cost": str(face.get("mana_cost") or "") if face else record.mana_cost,
-                "mana_value": record.mana_value,
-                "type_line": str(face.get("type_line") or "") if face else record.type_line,
-                "oracle_text": str(face.get("oracle_text") or "") if face else record.oracle_text,
-                "power": face.get("power") if face else record.power,
-                "toughness": face.get("toughness") if face else record.toughness,
-                "loyalty": face.get("loyalty") if face else record.loyalty,
-                "defense": face.get("defense") if face else record.defense,
-                "keywords": list(record.keywords),
-                "colors": list(record.colors),
-                "produced_mana": list(record.produced_mana),
-            }
+        base = base_card_characteristics(card, record)
         runtime_effects = (
-            collect_card_program_continuous_effects(
-                self.state,
-                self.semantics,
-                self.semantic_program_is_current_trusted,
+            (
+                *active_resolution_effects(self.state, card),
+                *collect_card_program_continuous_effects(
+                    self.state,
+                    self.semantics,
+                    self.semantic_program_is_current_trusted,
+                ),
             )
             if card.zone == "battlefield"
             else ()
@@ -1676,6 +1345,7 @@ class CommanderEngine(
                 {
                     "bestowed",
                     "chosen_creature_type",
+                    "chosen_creature_type_adds_subtype",
                     "chosen_name",
                     "copy_overrides",
                     "evoked",
@@ -4199,6 +3869,7 @@ class CommanderEngine(
             )
             player.stats.pop("hexproof_from_colors_until_end", None)
         expire_end_of_turn_damage_modifiers(self.state)
+        expire_end_of_turn_continuous_effects(self.state)
         self._clear_mana(reason="cleanup")
         self._log(active, "turn.cleanup", f"{active} completed cleanup.", importance=0)
         if active in self.state.players:
@@ -7334,29 +7005,7 @@ class CommanderEngine(
 
     @staticmethod
     def _type_parts(type_line: str) -> tuple[set[str], set[str], set[str]]:
-        normalized = type_line.replace("—", "-")
-        left, _, right = normalized.partition("-")
-        words = {word.casefold() for word in re.findall(r"[A-Za-z]+", left)}
-        card_types = {
-            "artifact",
-            "battle",
-            "creature",
-            "enchantment",
-            "instant",
-            "kindred",
-            "land",
-            "planeswalker",
-            "sorcery",
-        }
-        supertypes = {"basic", "legendary", "ongoing", "snow", "world"}
-        return (
-            words.intersection(card_types),
-            {
-                word.casefold()
-                for word in re.findall(r"[A-Za-z]+", right)
-            },
-            words.intersection(supertypes),
-        )
+        return type_parts(type_line)
 
     @staticmethod
     def _relation_matches(
@@ -10008,7 +9657,7 @@ class CommanderEngine(
                     default_reason=item.label,
                     seats=self.seats,
                     active_seats=self.active_seats,
-                    apnap_order=self.apnap_order(),
+                    apnap_order=self.apnap_order(), source=semantic_source_context(item, self.state.cards),
                 )
             except SemanticNodeError as exc:
                 raise GameRuleError(str(exc)) from exc

@@ -1,11 +1,67 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Any, Iterable, Mapping
 
 
 class SemanticNodeError(ValueError):
     """A registered semantic node is malformed for the current rules view."""
+
+
+@dataclass(frozen=True, slots=True)
+class SemanticSourceContext:
+    """Public identity of the stack object and its represented source."""
+
+    stack_ref: str
+    object_id: str | None = None
+    logical_object_id: str | None = None
+    card_ref: str | None = None
+
+    def __post_init__(self) -> None:
+        if not self.stack_ref:
+            raise SemanticNodeError("Semantic source stack identity is required")
+        if (self.object_id is None) != (self.logical_object_id is None):
+            raise SemanticNodeError(
+                "Semantic source physical and logical identities are paired"
+            )
+        for value in (
+            self.object_id,
+            self.logical_object_id,
+            self.card_ref,
+        ):
+            if value is not None and (type(value) is not str or not value):
+                raise SemanticNodeError(
+                    "Semantic source identities must be nonempty strings or null"
+                )
+
+    def to_dict(self) -> dict[str, str | None]:
+        return {
+            "stack_ref": self.stack_ref,
+            "object_id": self.object_id,
+            "logical_object_id": self.logical_object_id,
+            "card_ref": self.card_ref,
+        }
+
+
+def semantic_source_context(
+    item: Any,
+    cards: Mapping[str, Any],
+) -> SemanticSourceContext:
+    """Bind one stack item to trusted physical/logical source identity."""
+
+    source_id = item.source_object_id or item.card_object_id or ""
+    source = cards.get(source_id)
+    logical_object_id = (
+        str(item.context.get("source_logical_object_id") or "")
+        if source is not None
+        else ""
+    ) or (source.logical_object_id if source is not None else None)
+    return SemanticSourceContext(
+        stack_ref=item.ref,
+        object_id=source.object_id if source is not None else None,
+        logical_object_id=logical_object_id,
+        card_ref=source.ref if source is not None else None,
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +107,7 @@ class ReadOnlyHandlerContext:
     actor: str
     default_reason: str
     query: ReadOnlyRulesQuery
+    source: SemanticSourceContext | None = None
 
     @classmethod
     def from_sequences(
@@ -61,6 +118,7 @@ class ReadOnlyHandlerContext:
         seats: Iterable[str],
         active_seats: Iterable[str],
         apnap_order: Iterable[str],
+        source: SemanticSourceContext | None = None,
     ) -> "ReadOnlyHandlerContext":
         return cls(
             actor=actor,
@@ -70,9 +128,16 @@ class ReadOnlyHandlerContext:
                 active_seats=tuple(active_seats),
                 apnap_order=tuple(apnap_order),
             ),
+            source=source,
         )
 
     def __post_init__(self) -> None:
         self.query.require_known_seat(self.actor)
         if not self.default_reason:
             raise SemanticNodeError("A semantic effect requires a reason")
+        if self.source is not None and not isinstance(
+            self.source, SemanticSourceContext
+        ):
+            raise SemanticNodeError(
+                "Semantic handler source context must be typed"
+            )

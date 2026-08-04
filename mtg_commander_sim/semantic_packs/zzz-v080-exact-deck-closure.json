@@ -2326,7 +2326,7 @@
       "active_zone": "stack",
       "event": "resolve",
       "effects": [
-        {"op": "choose_creature_type"}
+        {"op": "choose_creature_type", "apply_as_subtype": true}
       ],
       "destination": "battlefield",
       "trust_level": "trusted",

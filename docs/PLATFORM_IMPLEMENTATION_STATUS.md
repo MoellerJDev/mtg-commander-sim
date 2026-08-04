@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "8219666e5acf3201efcdae5950c509f0b024072d13eec2a60412ba583bd7c8ea"
+verified: "4eccd65cc11ef3e3606f367bd724b4276b728b95e4242e39cf736fb6597feace"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,13 +15,13 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `8219666e5acf3201efcdae5950c509f0b024072d13eec2a60412ba583bd7c8ea` (`tracked-git-clean-blobs-sha256-v3`)
-- Feature head: `9ff74d9fb7ec0868a9095b09bf1f6244309f5f26`
-- Certified exact head: `9ff74d9fb7ec0868a9095b09bf1f6244309f5f26`
-- Generation timestamp: `2026-08-04T00:30:59Z`
+- Evaluated source tree: `4eccd65cc11ef3e3606f367bd724b4276b728b95e4242e39cf736fb6597feace` (`tracked-git-clean-blobs-sha256-v3`)
+- Feature head: `2b2a05a07a77ad645682b294c19e28bb74438843`
+- Certified exact head: `2b2a05a07a77ad645682b294c19e28bb74438843`
+- Generation timestamp: `2026-08-04T01:19:11Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
-- Active future phase: `canonical_life_and_simple_zone_triggers`
+- Active future phase: `continuous_effect_duration_and_source_applicability`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -34,10 +34,10 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=350, definition_only=92, passing=159, total=3300, unreviewed=2699
+- Rules cases: blocked=359, definition_only=93, passing=162, total=3300, unreviewed=2686
 - Mechanics: status_counts={'partial': 61, 'tested': 1, 'unclassified': 363}, total=425, trusted=0
-- Oracle coverage: material_residuals=69208, status_counts={'exact': 3099, 'partial': 16075, 'unresolved': 19311}, total=38485
-- Commander-legal Oracle coverage: material_residuals=60587, status_counts={'exact': 458, 'partial': 14655, 'unresolved': 16510}, total=31623
+- Oracle coverage: material_residuals=68892, status_counts={'exact': 3176, 'partial': 16255, 'unresolved': 19054}, total=38485
+- Commander-legal Oracle coverage: material_residuals=60307, status_counts={'exact': 528, 'partial': 14815, 'unresolved': 16280}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -58,7 +58,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Damage-prevention continuations and aftermath | `integrated_on_certified_main` | Certified main through PR 79 includes typed source-controller CR 615.5 damage aftermath, immutable damage source/value boundaries, projected modifier preparation, cycle rejection, exact replay, and generic Deflecting Palm lowering. Oracle IR v20 moved ordinary life replacement discovery into one focused registry, kept life_state mutation-only, reported final replacement-adjusted life batches, and replaced parallel chosen-source filters with one strict ObjectQuerySpec shared by compiler, choice, snapshot, and damage-time recheck. Historical chosen-source snapshot versions 0 through 2 remain replay-compatible. The certified August 2 census remained Commander exact/trusted/capability-closed 417/417/415 by design. |
 | Prevention-trigger stack ownership | `integrated_on_certified_main` | Certified main through PR 80 implements CR 615.13 as immutable source-LKI trigger occurrences that aggregate exact simultaneous prevented amounts, join the ordinary APNAP/controller-order trigger batch, choose represented targets at stack placement, and resolve through ordinary typed effects. Nested triggered damage reenters the canonical damage transaction through a narrow typed port; no lazy damage/aftermath import cycle remains. Strict ObjectQuerySpec construction and one closed chosen-source validator protect compiler, live choice, persistence, and damage-time rechecks. Oracle IR v21 generically recognizes closed triggered prevention draw/damage/counter wording plus all-damage shields. Positive, negative, malformed-input, rollback, multiplayer, control-change, privacy, save/load, replay, and killed-mutation tests passed exact-head public CI. The certified census improves Commander exact 417 to 419, trusted CardPrograms 417 to 419, capability-closed CardPrograms 415 to 417, and material Oracle residuals 60748 to 60742. |
 | Unified ordinary trigger occurrence and placement foundation | `integrated_on_certified_main` | Certified main through PR 81 replaces separate semantic and delayed executors with one immutable, versioned ordinary-trigger occurrence, APNAP batch, controller-order placement, and stack sink. Static-source semantic, delayed, and already-typed dynamic prevention triggers converge before batching; a started batch is sealed and later occurrences form a new batch. Strict construction, checkpoint loading, continuation validation, rollback, inactive-controller handling, four-player APNAP placement, same-controller ordering, save/load, and explicit historical Game Record v3 semantic and delayed continuation compatibility are covered. Exact-head public CI and merge commit 9ff74d9 passed, including post-merge main smoke. Complete CR 603 grammar, intervening-if, state triggers, reflexive triggers, and all special placement rules remain unclaimed. |
-| Canonical fixed life and normalized zone triggers | `implemented_in_active_source_tree_pending_certification` | The active source tree captures immutable version-1 zone-change occurrences with old/new logical identity, controller, characteristics, attachments, and canonical fingerprints; derives represented enter, leave, dies, discard, and graveyard facts without mutable state access; and routes semantic discovery through the unified ordinary trigger batch. Oracle IR v22 separately declares normalized event, APNAP placement, and effect-result capabilities. Fixed self enter/dies life triggers use the canonical replacement-capable life transaction and can be promoted only when exact and capability-closed; draw triggers remain provisional on the blocked draw capability. Simultaneous source departure, LKI controller, malformed input, rollback, replay, compiler closure, and killed implementation mutants are covered. The August 2 Commander census improves exact and trusted CardPrograms from 419 to 458 and material residuals from 60,742 to 60,587 without a printed-name runtime branch. |
+| Canonical fixed life and normalized zone triggers | `integrated_on_certified_main` | Certified main through PR 82 captures immutable version-1 zone-change occurrences with old/new logical identity, controller, characteristics, attachments, and canonical fingerprints; derives represented enter, leave, dies, discard, and graveyard facts without mutable state access; and routes semantic discovery through the unified ordinary trigger batch. Oracle IR v22 separately declares normalized event, APNAP placement, and effect-result capabilities. Fixed self enter/dies life triggers use the canonical replacement-capable life transaction and promote only when exact and capability-closed; draw triggers remain provisional on the blocked draw capability. Simultaneous source departure, LKI controller, malformed input, rollback, replay, compiler closure, and killed implementation mutants are covered. Exact-head PR run 30868127255 and post-merge main-smoke run 30868379545 passed. The certified census improved Commander exact and trusted CardPrograms from 419 to 458 and material residuals from 60,742 to 60,587 without a printed-name runtime branch. |
+| Continuous-effect duration and source applicability | `implemented_in_active_source_tree_pending_certification` | The active source tree adds strict immutable CR 611 effect, operation, duration, source, and affected-object values; an additive Game Record v3 resolution-effect journal; locked physical/logical object sets for represented resolution-created modifiers; cleanup expiration; and live source-bound ObjectQuerySpec membership for static effects. Engine legality and seat projection share one characteristic evaluator. Fixed temporary type, subtype, keyword, power/toughness, and mass controlled-creature producers use the journal, while Oracle IR v23 generically lowers closed fixed-query anthems and controlled-creature until-end-of-turn modifiers. Focused behavior, malformed-input, rollback, multiplayer, save/load, replay, privacy, compiler, architecture, and killed-mutation tests pass. The active Commander census improves exact and trusted programs from 458 to 528, capability-closed programs from 456 to 526, and material residuals from 60,587 to 60,307 without printed-name growth. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus and reviewed CR 400-408, CR 500-514, focused CR 725, and focused CR 508-509/608 current-turn history slices are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -74,8 +75,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - `rooms_and_lobbies`: `implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch`
 - `replay`: `implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance`
 - `card_programs`: `implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning`
-- `semantic_handlers`: `implemented_six_registered_read_only_typed_intent_handlers_plus_ten_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_and_player_counter_mutation_ports`
-- `capability_evidence`: `implemented_registry_v18_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_and_normalized_zone_trigger_capabilities`
+- `semantic_handlers`: `implemented_six_registered_read_only_typed_intent_handlers_plus_eleven_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_and_continuous_effect_owners`
+- `capability_evidence`: `implemented_registry_v19_minimum_positive_negative_replay_and_mutation_evidence_with_resolvable_components_current_rules_profile_coverage_and_separate_dependency_status_plus_bounded_fixed_life_normalized_zone_trigger_and_continuous_effect_capabilities`
 - `architecture_governance`: `implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_and_adr_bound_exceptions`
 - `continuous_effect_performance`: `implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency`
 - `hidden_information`: `implemented_projected_protocol`
@@ -84,11 +85,11 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4589
+- Tests discovered: 4609
 - Python matrix: Python 3.12 on Ubuntu and Windows
-- Baseline CI: [30862860578](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30862860578) — `pass`
+- Baseline CI: [30868127255](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30868127255) — `pass`
 - Compile: `pass`
-- Deterministic tests: `certified_main_through_pr81_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_normalized_zone_trigger_life_compiler_replay_mutation_and_architecture_checks_pass`
+- Deterministic tests: `certified_main_through_pr82_exact_head_sharded_public_ubuntu_windows_package_generated_and_browser_pass_plus_post_merge_main_smoke; active_source_focused_continuous_model_duration_applicability_compiler_replay_privacy_mutation_and_architecture_checks_pass`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -105,7 +106,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 - typed tap-state capabilities remain tested and blocked on complete tap/untap prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure
 - traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed
 - most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted
-- the continuous-effect baseline gates structural scan counts but records latency observationally; broader action, combat, copy, control-change, phasing, and invalidation performance scenarios remain incomplete
+- represented continuous effects now distinguish locked resolution-created sets and live source-bound static membership, but player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy/phasing invalidation remain incomplete; the structural benchmark still records latency observationally
 - a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence
 - saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit
 - the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction
@@ -115,7 +116,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-After certifying canonical fixed life and normalized zone triggers, implement the dependency-ready continuous-effect-duration-and-source-applicability batch for CR 611.2-611.3: immutable locked sets and durations for resolution-created effects, live source-zone applicability for static effects, canonical characteristic queries, generic compiler lowering, replay, and multiplayer closure.
+After certifying the CR 611 duration/applicability boundary, rerank the Commander residual corpus and implement a high-frequency dependency-ready static, trigger, or ordinary spell-effect family that composes with the shared characteristic evaluator and unlocks a measurable exact-card cluster.
 
 ## Regeneration
 

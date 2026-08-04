@@ -53,6 +53,16 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_basic_land_type_intrinsic_mana_mutant_is_killed"
     ),
+    "continuous.power_toughness.fixed_anthem": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_fixed_anthem_applicability_mutant_is_killed"
+    ),
+    "continuous.resolution.fixed_characteristics_until_end_of_turn": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_resolution_continuous_effect_commit_mutant_is_killed"
+    ),
     "target.revalidate_resolution": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

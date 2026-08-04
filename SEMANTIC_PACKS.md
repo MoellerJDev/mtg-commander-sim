@@ -170,6 +170,18 @@ partial or attached redirection, prohibition, draw, entry, and remaining
 life/counter/result families remain blocked unless a separately trusted
 component covers their exact shape.
 
+Continuous runtime descriptors use the same trust and replay boundary. The
+fixed-query anthem component lowers a strict `ObjectQuerySpec` plus layer-7c
+power/toughness operations; it has no card-name knowledge and no mutable state
+access. Its source must remain a represented, phased-in battlefield object,
+and membership is recomputed from current characteristics. Resolution-created
+fixed type, subtype, keyword, and power/toughness modifiers instead commit to
+the additive continuous-effect journal with an explicit until-end-of-turn
+duration and a locked physical/logical object set. A semantic program cannot
+provide or spoof the authoritative resolution source context. These closed
+families do not imply support for arbitrary static abilities, state-derived
+quantities, control changes, permission changes, or every duration.
+
 ## Trust
 
 The pack-level `trusted` label means the declared compatibility behavior is

@@ -18,6 +18,7 @@
     ],
     "rules-events-replacements": [
       "test_continuous_effect_components",
+      "test_continuous_effect_duration",
       "test_counter_placement_replacements",
       "test_counter_state",
       "test_damage_prevention_aftermath",

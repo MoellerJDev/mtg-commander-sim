@@ -32,7 +32,7 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 
 - A pinned Comprehensive Rules corpus, Oracle snapshot, and rulings snapshot
   support deterministic inventories and reproducible source references.
-- Oracle IR v21 provides source-spanned partial compilation and material
+- Oracle IR v23 provides source-spanned partial compilation and material
   residuals. Generated and reviewed abilities aggregate into deterministic
   CardProgram V2 artifacts with source, capability, trust, and replay
   fingerprints. Compilation remains partial and interleaved.
@@ -55,6 +55,10 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   Closed CR 615.13 prevention-result triggers use immutable source-LKI
   occurrences, ordinary APNAP stack placement, represented target-at-placement,
   and the normal effect pipeline rather than immediate aftermath.
+  Resolution-created fixed characteristic effects now use an immutable
+  duration journal and locked physical/logical object sets; fixed-query static
+  power/toughness effects use live source and membership applicability through
+  the same evaluator consumed by seat projection.
   Most other orchestration and mutation remains centralized in
   `CommanderEngine`.
 - Reviewed semantic packs close selected card and interaction slices through
@@ -66,7 +70,8 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 The generated compiler report is authoritative for exact residual categories.
 The principal architectural and behavioral gaps include:
 
-- complete continuous-effect layers, dependencies, timestamps, and CDAs;
+- remaining continuous-effect duration grammar, player/rules/control-changing
+  effects, complete layer dependencies, timestamps, and CDAs;
 - universal replacement/prevention event production and affected-player
   ordering;
 - full alternate/additional costs, restricted mana, and cost-modification
@@ -91,8 +96,10 @@ identity, APNAP traversal, optional decline, containing-event-before-contained-
 event ordering, exact choice journals, and seat-scoped suspension/replay for
 the represented token-creation, zone-destination, counter-placement, and damage
 producers. Fixed token, zone, counter, damage, prevention, and anthem
-components remain bounded promises; neither universal CR 614/615/616
-participation nor complete CR 613 dependencies are implied.
+components remain bounded promises. The represented CR 611 boundary now
+distinguishes locked resolution-created sets from live static membership and
+persists until-end-of-turn fixed characteristic effects, but neither universal
+CR 614/615/616 participation nor complete CR 611/613 dependencies are implied.
 
 The measured Phase 2 migration routes `tap`, `untap`, and
 `untap_all_creatures` through strict typed nodes and intents and a focused
@@ -110,16 +117,14 @@ to remove or migrate one coherent reusable responsibility before broad corpus
 expansion resumes.
 
 The scheduler conservatively queues every reviewed blocked behavioral rule and
-every unclassified nonpassing rule. The integrated event-tree and counter-
-placement batches establish replayable replacement ordering and focused
-counter, life, and damage mutation owners. The active prevention batch adds
-closed CR 615.13 triggered draw, damage, and counter results with source LKI,
-exact simultaneous prevented-amount aggregation, ordinary APNAP/controller
-ordering, target-at-placement, recursive canonical damage, exact replay, and
-generic Oracle/CardProgram lowering. Broader conditional trigger results,
-explicit-target or mixed immediate aftermath, and broad CR 614/615/616 behavior
-remain blocked. The scheduler now selects the corpus-ranked targetless
-enter/death trigger family and canonical life result boundary next.
+every unclassified nonpassing rule. Normalized zone-change triggers, canonical
+fixed life results, and the shared CR 611 applicability/duration boundary now
+compose through typed replayable owners. The current compiler recognizes 226
+Commander-legal fixed-query anthem objects and 97 controlled-creature
+until-end-of-turn modifier objects, producing 70 new exact Commander-legal
+programs without a printed-name branch. The next batch must be reranked from
+high-frequency static, trigger, ordinary spell-effect, and dependency residuals
+rather than selected merely because it is adjacent to CR 611.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

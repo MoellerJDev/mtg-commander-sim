@@ -103,6 +103,9 @@ class ContinuousEffectComponentTests(unittest.TestCase):
         self.assertEqual(
             2, engine._numeric_stat(thopter.object_id, "toughness")
         )
+        projected = session.projector._obj(thopter, "pilot:A")
+        self.assertEqual("2", projected["p"])
+        self.assertEqual("2", projected["q"])
         descriptor = default_continuous_effect_component_registry().describe(
             "continuous.anthem.power_toughness.v1"
         )

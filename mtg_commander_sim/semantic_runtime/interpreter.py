@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping
 
-from .context import ReadOnlyHandlerContext
+from .context import ReadOnlyHandlerContext, SemanticSourceContext
 from .intents import IntentPlan
 from .registry import SemanticHandlerRegistry
 
@@ -29,6 +29,7 @@ class SemanticInterpreter:
         seats: Iterable[str],
         active_seats: Iterable[str],
         apnap_order: Iterable[str],
+        source: SemanticSourceContext | None = None,
     ) -> IntentPlan | None:
         return self.lower(
             effect,
@@ -38,5 +39,6 @@ class SemanticInterpreter:
                 seats=seats,
                 active_seats=active_seats,
                 apnap_order=apnap_order,
+                source=source,
             ),
         )

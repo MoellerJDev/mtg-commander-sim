@@ -947,13 +947,15 @@ trusted. Material residuals are never discarded.
 
 The new rules primitives sit below both generated and hand-authored semantics:
 
-- `continuous_effects.py` orders CR 613 layers, sublayers, CDAs, timestamps,
-  dependencies, and cycles. The engine already routes common copy/type/
-  subtype/temporary-keyword annotations through it. CardProgram runtime
-  components can contribute source-stamped effects through a read-only state
-  view; applicability is checked against the characteristics produced by
-  earlier layers. The first reviewed component is a fixed subtype anthem in
-  layer 7c, not a claim of general continuous-effect compilation.
+- `continuous_effect_model.py` owns strict immutable effect, duration, source,
+  object-identity, and operation values. `continuous_effect_state.py` owns the
+  additive resolution-effect journal, locked physical/logical object sets, and
+  cleanup expiration. `continuous_effects.py` orders represented CR 613 layers,
+  sublayers, timestamps, dependencies, and cycles, while
+  `characteristic_evaluation.py` supplies one evaluator to authoritative rules
+  and seat projection. Resolution-created effects lock their represented set;
+  static CardProgram effects retain a live `ObjectQuerySpec` and require their
+  source to remain present and phased in. Closed fixed-query ant…12897 chars truncated…tate.commits, direct writes...
 - `replacement/` owns deeply immutable nested replaceable-event trees, affected
   objects, a closed versioned typed-operation vocabulary, applicability,
   priority classes, APNAP traversal, canonical optional declines, repeated

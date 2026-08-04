@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "a4700cfa9cd1eb9303ecda95f02437c5cabbe06b3aa03eead9b8394f5a9ae8d0",
-  "declaration_source_fingerprint": "f6a7e45fd67f8aabe4faba7abdd9c5a43ad2307c8d50b74397930acbc847611f",
+  "registry_fingerprint": "bf5a6b16c6196a62145d752e90b5dba88db0b4bdfe3d2ccf0e45941fe933b6a0",
+  "declaration_source_fingerprint": "613ed1ccc8a79303d6fbc776a566a65173cb8c9c482b23a1ff9506896fa23fa4",
   "declarations": [
     {
       "capability_id": "continuous.basic_land_type.add_all_lands",
@@ -106,6 +106,8 @@
       "official_rule_ids": [
         "604.1",
         "611.3a",
+        "611.3b",
+        "611.3c",
         "613.1g",
         "613.4c"
       ],
@@ -123,6 +125,8 @@
       "official_rule_ids": [
         "604.1",
         "611.3a",
+        "611.3b",
+        "611.3c",
         "613.1g",
         "613.4c"
       ],
@@ -135,11 +139,51 @@
     },
     {
       "capability_id": "continuous.power_toughness.fixed_anthem",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectModelTests.test_static_anthem_is_controller_scoped_in_four_player_evaluation",
+      "official_rule_ids": [
+        "604.1",
+        "611.3a",
+        "611.3b",
+        "611.3c",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep a fixed static anthem scoped to its source controller across a four-player battlefield."
+    },
+    {
+      "capability_id": "continuous.power_toughness.fixed_anthem",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_fixed_anthem_applicability_mutant_is_killed",
+      "official_rule_ids": [
+        "604.1",
+        "611.3a",
+        "611.3b",
+        "611.3c",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject removal of the generic typed static-anthem lowering."
+    },
+    {
+      "capability_id": "continuous.power_toughness.fixed_anthem",
       "evidence_class": "negative",
       "test_id": "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_anthem_component_rejects_malformed_descriptors",
       "official_rule_ids": [
         "604.1",
         "611.3a",
+        "611.3b",
+        "611.3c",
         "613.1g",
         "613.4c"
       ],
@@ -157,6 +201,8 @@
       "official_rule_ids": [
         "604.1",
         "611.3a",
+        "611.3b",
+        "611.3c",
         "613.1g",
         "613.4c"
       ],
@@ -174,6 +220,8 @@
       "official_rule_ids": [
         "604.1",
         "611.3a",
+        "611.3b",
+        "611.3c",
         "613.1g",
         "613.4c"
       ],
@@ -183,6 +231,158 @@
         "commander_review"
       ],
       "applicability_note": "Apply a reviewed battlefield static ability that gives same-controller permanents with declared subtypes a fixed power/toughness modifier in layer 7c."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectModelTests.test_resolution_set_is_locked_to_logical_objects",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lock a resolution-created characteristic effect to the affected logical objects selected when it was created."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectEngineTests.test_mass_resolution_locks_set_across_entry_control_and_zone_change",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Select only matching permanents across a four-player battlefield and preserve that locked set."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_resolution_continuous_effect_commit_mutant_is_killed",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject removal of the canonical immutable continuous-effect journal commit."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "negative",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectEngineTests.test_malformed_mass_predicate_rolls_back_without_effect",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a malformed mass predicate without committing an authoritative effect."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "negative",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectModelTests.test_malformed_models_fail_closed",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed operation, duration, applicability, and locked-identity models before use."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "positive",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectEngineTests.test_mass_resolution_locks_set_across_entry_control_and_zone_change",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create and apply one fixed mass power/toughness effect to its resolution-time set."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectEngineTests.test_targeted_effect_expires_and_round_trips_without_private_projection",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep authoritative physical identities out of a seat projection while preserving the public result."
+    },
+    {
+      "capability_id": "continuous.resolution.fixed_characteristics_until_end_of_turn",
+      "evidence_class": "replay",
+      "test_id": "tests.test_continuous_effect_duration.ContinuousEffectEngineTests.test_temporary_effect_command_replays_exactly",
+      "official_rule_ids": [
+        "611.2a",
+        "611.2c",
+        "613.1d",
+        "613.1f",
+        "613.1g",
+        "613.4c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Serialize and replay a source-bound resolution-created effect from exact commands."
     },
     {
       "capability_id": "counter.placement.quantity_replacement",
@@ -4857,5 +5057,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "f9a02d9de03a8e5aa47f521f20f9892614a6f69ffd1ef1d9268679f9a3d93152"
+  "fingerprint": "6927067773d2e6123feb385d22a92727706b8cf1ea486391b855047518999e77"
 }

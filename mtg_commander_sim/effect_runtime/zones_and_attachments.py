@@ -3,12 +3,20 @@ from __future__ import annotations
 import random
 from typing import Any, Mapping, Sequence
 
+from ..continuous_effects import ContinuousOperation, Layer
+from ..continuous_effect_state import (
+    ContinuousEffectStateError,
+    create_resolution_continuous_effect,
+    matching_battlefield_objects,
+    resolution_effect_source,
+)
 from ..errors import GameRuleError
 from ..effect_contracts import (
     effect_family_contract,
     REANIMATE_OPERATION,
 )
 from ..model import CardInstance
+from ..object_predicate import ObjectQueryError, ObjectQuerySpec
 from ..targets import TargetGroup
 from ..util import unique_preserving_order
 
@@ -721,24 +729,54 @@ def _apply_modify_all_matching_permanents_until_end_of_turn(
     reason: str,
 ) -> Any:
     op = operation
-    amount = int(effect.get("amount", 0))
-    scale = int(effect.get("scale", 1))
-    required_type = str(effect.get("required_type") or "").casefold()
-    if amount < 0 or not required_type:
-        raise GameRuleError("Mass modification parameters are invalid")
-    power_delta = int(effect.get("power_delta", 0)) + amount * scale
-    toughness_delta = int(effect.get("toughness_delta", 0)) + amount * scale
-    affected_ids: list[str] = []
-    for seat in host.active_seats:
-        for object_id in list(
-            host.state.players[seat].zones["battlefield"]
-        ):
-            card = host.state.cards[object_id]
-            types, _, _ = host._type_parts(
-                str(host._effective_card_data(card).get("type_line") or "")
+    raw_predicate = effect.get("predicate")
+    if raw_predicate is not None:
+        try:
+            predicate = ObjectQuerySpec.from_dict(raw_predicate)
+        except ObjectQueryError as exc:
+            raise GameRuleError(str(exc)) from exc
+        power_delta = int(effect.get("power", 0))
+        toughness_delta = int(effect.get("toughness", 0))
+    else:
+        amount = int(effect.get("amount", 0))
+        scale = int(effect.get("scale", 1))
+        required_type = str(
+            effect.get("required_type") or ""
+        ).casefold()
+        if amount < 0 or not required_type:
+            raise GameRuleError("Mass modification parameters are invalid")
+        power_delta = int(effect.get("power_delta", 0)) + amount * scale
+        toughness_delta = (
+            int(effect.get("toughness_delta", 0)) + amount * scale
+        )
+        predicate = ObjectQuerySpec(
+            zones=("battlefield",),
+            types_all=(required_type,),
+        )
+    try:
+        affected = matching_battlefield_objects(host, predicate)
+    except ContinuousEffectStateError as exc:
+        raise GameRuleError(str(exc)) from exc
+    affected_ids = [card.object_id for card in affected]
+    if host.state.continuous_effects is not None:
+        try:
+            create_resolution_continuous_effect(
+                host,
+                source=resolution_effect_source(host, effect),
+                targets=affected,
+                layer=Layer.POWER_TOUGHNESS,
+                sublayer="7c",
+                operations=(
+                    ContinuousOperation(
+                        "modify_power_toughness",
+                        [power_delta, toughness_delta],
+                    ),
+                ),
             )
-            if required_type not in types:
-                continue
+        except ContinuousEffectStateError as exc:
+            raise GameRuleError(str(exc)) from exc
+    else:
+        for card in affected:
             until_end = card.annotations.setdefault(
                 "until_end_of_turn", {}
             )
@@ -748,7 +786,6 @@ def _apply_modify_all_matching_permanents_until_end_of_turn(
             until_end["toughness"] = (
                 int(until_end.get("toughness", 0)) + toughness_delta
             )
-            affected_ids.append(card.object_id)
     host._log(
         actor,
         str(effect.get("event_code") or "effect.mass_modify"),
@@ -757,7 +794,7 @@ def _apply_modify_all_matching_permanents_until_end_of_turn(
             "until end of turn."
         ),
         {
-            "amount": amount,
+            "amount": effect.get("amount"),
             "power_delta": power_delta,
             "toughness_delta": toughness_delta,
             "objects": [
@@ -792,32 +829,56 @@ def _apply_pump_controlled_creatures(
         str(value)
         for value in effect.get("keywords", [])
     ]
-    changed: list[str] = []
-    for object_id in host.state.players[actor].zones["battlefield"]:
-        card = host.state.cards[object_id]
-        if card.controller != actor:
-            continue
-        types, _, _ = host._type_parts(
-            str(
-                host._effective_card_data(card).get("type_line")
-                or ""
+    predicate = ObjectQuerySpec(
+        zones=("battlefield",),
+        controller=actor,
+        types_all=("creature",),
+    )
+    affected = matching_battlefield_objects(host, predicate)
+    changed = [card.object_id for card in affected]
+    if host.state.continuous_effects is not None:
+        try:
+            if amount:
+                create_resolution_continuous_effect(
+                    host,
+                    source=resolution_effect_source(host, effect),
+                    targets=affected,
+                    layer=Layer.POWER_TOUGHNESS,
+                    sublayer="7c",
+                    operations=(
+                        ContinuousOperation(
+                            "modify_power_toughness", [amount, amount]
+                        ),
+                    ),
+                )
+            if keywords:
+                create_resolution_continuous_effect(
+                    host,
+                    source=resolution_effect_source(host, effect),
+                    targets=affected,
+                    layer=Layer.ABILITY,
+                    sublayer="6",
+                    operations=tuple(
+                        ContinuousOperation("add_ability", keyword)
+                        for keyword in keywords
+                    ),
+                )
+        except ContinuousEffectStateError as exc:
+            raise GameRuleError(str(exc)) from exc
+    else:
+        for card in affected:
+            until_end = card.annotations.setdefault(
+                "until_end_of_turn", {}
             )
-        )
-        if "creature" not in types:
-            continue
-        until_end = card.annotations.setdefault(
-            "until_end_of_turn", {}
-        )
-        until_end["power"] = int(
-            until_end.get("power", 0)
-        ) + amount
-        until_end["toughness"] = int(
-            until_end.get("toughness", 0)
-        ) + amount
-        card.temporary_keywords = unique_preserving_order(
-            [*card.temporary_keywords, *keywords]
-        )
-        changed.append(card.object_id)
+            until_end["power"] = int(
+                until_end.get("power", 0)
+            ) + amount
+            until_end["toughness"] = int(
+                until_end.get("toughness", 0)
+            ) + amount
+            card.temporary_keywords = unique_preserving_order(
+                [*card.temporary_keywords, *keywords]
+            )
     host._log(
         actor,
         "effect.creature_pump",
