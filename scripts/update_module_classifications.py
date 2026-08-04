@@ -303,6 +303,7 @@ def build_classifications() -> dict[str, Any]:
                             "projection",
                             "pilot",
                             "session",
+                            "action_explanations",
                             "server/",
                         )
                     )

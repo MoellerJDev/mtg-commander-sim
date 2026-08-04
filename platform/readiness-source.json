@@ -10,7 +10,7 @@
     "branch": "fix/duel-turn-state-and-table-clarity",
     "branch_ancestry": {
       "focused_branch_base": "561dc6462f99f81e3413145f8d8755e338ae54ec",
-      "focused_branch_unique_commits_over_main": 9
+      "focused_branch_unique_commits_over_main": 11
     },
     "pull_requests": [
       {
