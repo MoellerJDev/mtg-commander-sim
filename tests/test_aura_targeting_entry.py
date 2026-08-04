@@ -290,8 +290,8 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             engine, "card_record", side_effect=record_for
         )
 
-    def add_real_card(self, engine, seat: str, name: str, zone: str):
-        record = self.db.lookup(name, fuzzy=False)
+    def add_fixture_aura(self, engine, seat: str, zone: str):
+        record = aura_record("fixture:simple-aura")
         card = CardInstance(
             object_id=uuid.uuid4().hex,
             ref=f"AURA-{len(engine.state.cards) + 1}",
@@ -314,6 +314,23 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
         engine.state.cards[card.object_id] = card
         engine.state.players[seat].zones[zone].append(card.object_id)
         return card
+
+    @staticmethod
+    def fixture_aura_records(engine):
+        engine_type = type(engine)
+        original = engine_type.card_record
+
+        def record_for(host, value):
+            instance = (
+                value
+                if hasattr(value, "object_id")
+                else host.state.cards[value]
+            )
+            if instance.oracle_id == "fixture:simple-aura":
+                return aura_record(instance.oracle_id)
+            return original(host, value)
+
+        return patch.object(engine_type, "card_record", new=record_for)
 
     def test_aura_offer_requires_and_projects_one_legal_spell_target(self):
         session, aura, target, records = self.fixture()
@@ -575,28 +592,28 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
                 log=False,
             )
             targets.append(creature)
-        aura = self.add_real_card(
-            engine, "A", "Sensory Deprivation", "hand"
-        )
-        any_targets = legal_aura_target_refs(
-            engine,
-            aura,
-            SimpleEnchantSpec("creature"),
-            controller="A",
-            as_target=True,
-        )
+        aura = self.add_fixture_aura(engine, "A", "hand")
+        with self.fixture_aura_records(engine):
+            any_targets = legal_aura_target_refs(
+                engine,
+                aura,
+                SimpleEnchantSpec("creature"),
+                controller="A",
+                as_target=True,
+            )
         self.assertEqual(
             {card.ref for card in targets}, set(any_targets)
         )
-        own_targets = legal_aura_target_refs(
-            engine,
-            aura,
-            SimpleEnchantSpec(
-                "creature", AuraControllerRelation.YOU
-            ),
-            controller="A",
-            as_target=True,
-        )
+        with self.fixture_aura_records(engine):
+            own_targets = legal_aura_target_refs(
+                engine,
+                aura,
+                SimpleEnchantSpec(
+                    "creature", AuraControllerRelation.YOU
+                ),
+                controller="A",
+                as_target=True,
+            )
         self.assertEqual(
             {card.ref for card in targets if card.controller == "A"},
             set(own_targets),
@@ -619,9 +636,7 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             controller="B",
             log=False,
         )
-        aura = self.add_real_card(
-            engine, "A", "Sensory Deprivation", "graveyard"
-        )
+        aura = self.add_fixture_aura(engine, "A", "graveyard")
         engine.semantics.put(
             SemanticProgram(
                 key="test:aura-replay",
@@ -647,39 +662,44 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             visibility=list(engine.seats),
         )
         engine.state.stack.append(item)
-        engine._continue_resolution(
-            stack_ref=item.ref,
-            effects=[
-                {
-                    "op": "move",
-                    "card": aura.ref,
-                    "destination": "battlefield",
-                    "controller": "A",
-                }
-            ],
-            destination=None,
-            note="Aura replay witness",
-        )
-        self.assertEqual("aura.entry", engine.state.pending_decision.kind)
-        packet = session.packet("pilot:A", full=True)
-        rendered = json.dumps(packet, sort_keys=True)
-        self.assertIn(target.ref, rendered)
-        self.assertNotIn(target.object_id, rendered)
-        self.assertNotIn(aura.object_id, rendered)
+        with self.fixture_aura_records(engine):
+            engine._continue_resolution(
+                stack_ref=item.ref,
+                effects=[
+                    {
+                        "op": "move",
+                        "card": aura.ref,
+                        "destination": "battlefield",
+                        "controller": "A",
+                    }
+                ],
+                destination=None,
+                note="Aura replay witness",
+            )
+            self.assertEqual(
+                "aura.entry", engine.state.pending_decision.kind
+            )
+            packet = session.packet("pilot:A", full=True)
+            rendered = json.dumps(packet, sort_keys=True)
+            self.assertIn(target.ref, rendered)
+            self.assertNotIn(target.object_id, rendered)
+            self.assertNotIn(aura.object_id, rendered)
 
-        session.initial_checkpoint = checkpoint_envelope(engine.state)
-        session.commands.clear()
-        session.decisions.clear()
-        result = session.act(
-            "pilot:A",
-            {"action_id": "choose", "aura_target": target.ref},
-        )
-        self.assertTrue(result.ok, result.summary)
-        self.assertEqual(target.object_id, aura.attached_to)
-        with tempfile.TemporaryDirectory() as temporary:
-            record_dir = Path(temporary) / "aura-replay"
-            session.save(record_dir)
-            replay = replay_record(record_dir, self.db, verify=True)
+            session.initial_checkpoint = checkpoint_envelope(engine.state)
+            session.commands.clear()
+            session.decisions.clear()
+            result = session.act(
+                "pilot:A",
+                {"action_id": "choose", "aura_target": target.ref},
+            )
+            self.assertTrue(result.ok, result.summary)
+            self.assertEqual(target.object_id, aura.attached_to)
+            with tempfile.TemporaryDirectory() as temporary:
+                record_dir = Path(temporary) / "aura-replay"
+                session.save(record_dir)
+                replay = replay_record(
+                    record_dir, self.db, verify=True
+                )
         self.assertTrue(replay["ok"], replay)
         self.assertEqual(1, replay["commands"])
 
