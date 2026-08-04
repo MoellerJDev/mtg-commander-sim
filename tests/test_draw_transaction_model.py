@@ -9,6 +9,7 @@ from mtg_commander_sim.drawing import (
     DrawInstructionRequest,
     prepare_draw_event,
     prepare_draw_instruction,
+    prepare_ordinary_draw,
     validate_prepared_draw,
 )
 from mtg_commander_sim.replacement import (
@@ -156,6 +157,28 @@ class DrawTransactionModelTests(unittest.TestCase):
         self.assertEqual("draw", prepared.resolution.kind)
         self.assertEqual(
             f"decline:{effect.effect_id}", prepared.journal[0].effect_id
+        )
+        validate_prepared_draw(prepared, apnap_order=ORDER)
+
+    def test_ordinary_draw_declines_each_available_dredge_canonically(self):
+        request = DrawEventRequest("draw:event:decline-all", "A", 8)
+        first = dredge_effect(effect_id="dredge:first", source_ref="A17")
+        second = dredge_effect(
+            effect_id="dredge:second",
+            source_ref="A18",
+            object_id="object:A18",
+        )
+
+        prepared = prepare_ordinary_draw(
+            request,
+            apnap_order=ORDER,
+            effects=(first, second),
+        )
+
+        self.assertEqual("draw", prepared.resolution.kind)
+        self.assertEqual(
+            {"decline:dredge:first", "decline:dredge:second"},
+            {selection.effect_id for selection in prepared.journal},
         )
         validate_prepared_draw(prepared, apnap_order=ORDER)
 

@@ -36,7 +36,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v24"
+ORACLE_COMPILER_VERSION = "oracle-ir-v25"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 
 _NUMBER_WORDS = {
@@ -882,6 +882,45 @@ def _keyword_node(
         if gate.blockers
         else ()
     )
+    dredge = re.fullmatch(
+        r"Dredge\s+(?P<count>[1-9]\d*)\.?",
+        material_line,
+        re.IGNORECASE,
+    )
+    if mechanics == ("dredge",) and dredge is not None:
+        return OracleNode(
+            node_id=node_id,
+            kind="keyword_ability",
+            text=line,
+            span=span,
+            active_zone="graveyard",
+            event="draw",
+            lowerable=True,
+            exact=not gate.blockers,
+            template_id="dredge-keyword-replacement-v1",
+            mechanics=mechanics,
+            handlers=(
+                {
+                    "handler_id": "replacement.draw.dredge.v1",
+                    "schema_version": 1,
+                    "event": "draw",
+                    "modification": {
+                        "mill_count": int(dredge.group("count")),
+                    },
+                },
+            ),
+            residual_ids=residual_ids,
+            capability_dependencies=gate.capabilities,
+            capability_closure=(
+                gate.closure.reachable if gate.closure is not None else ()
+            ),
+            capability_profile=(
+                gate.closure.profile if gate.closure is not None else None
+            ),
+            capability_fingerprint=(
+                gate.closure.fingerprint if gate.closure is not None else None
+            ),
+        )
     return OracleNode(
         node_id=node_id,
         kind="keyword_ability",

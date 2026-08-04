@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "416feae727b5366a139cd5d82e009b593ce2ff0b918ecb743d9b267337b8cda0",
-  "declaration_source_fingerprint": "42c433670dc9363e90df88fe8f7cd1726bfd93508cf665afecca9e8cc2f7bac5",
+  "registry_fingerprint": "962a6dfc606909c03c4ca04cb4ee1cd1a360212c2bc84e5580d607535d2973ee",
+  "declaration_source_fingerprint": "6ec6940e176633c265b963a1369674b43783cfa2921efa45ca3b9c67a1ea41e0",
   "declarations": [
     {
       "capability_id": "attachment.equip.fixed_mana",
@@ -5530,11 +5530,44 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_draw_step_rules.DrawStepRuleTests.test_trusted_draw_replacement_finishes_before_priority",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve each represented draw through the immutable replacement pipeline before committing ordinary draw or Dredge results."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_uses_apnap_order_and_exact_engine_path",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",
@@ -5545,11 +5578,44 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_draw_commit_mutant_is_killed",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill an ordinary-draw commit omission with authoritative zone and draw-history assertions."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "negative",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_registered_node_validation_fails_before_mutation",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",
@@ -5564,7 +5630,16 @@
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_handler_lowers_typed_intent_through_read_only_context",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",
@@ -5575,11 +5650,44 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_draw_step_rules.DrawStepRuleTests.test_draw_replacement_choice_is_visible_only_to_affected_seat",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Deliver the affected player's draw-replacement choice without revealing graveyard replacement choices or drawn-card identity to another seat."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "replay",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_migrated_semantic_effect_replays_exactly",
       "official_rule_ids": [
         "121.1",
-        "121.2"
+        "121.2",
+        "121.2a",
+        "121.2c",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
       ],
       "supported_profiles": [
         "traditional",
@@ -5589,5 +5697,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "3f8ea695be5eae344a6bdaa0276f5ed5f35361f06fad275e553a519a0af52d6b"
+  "fingerprint": "b21074c9098311509be0ea76ba20d6fb3c13afdec72dad4df67750eec15f50f6"
 }

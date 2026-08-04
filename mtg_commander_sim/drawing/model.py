@@ -365,6 +365,40 @@ def validate_prepared_draw(
         raise DrawError("Draw result changed before commit")
 
 
+def prepare_ordinary_draw(
+    request: DrawEventRequest,
+    *,
+    apnap_order: Sequence[str],
+    effects: Sequence[ReplacementEffect],
+    selections: Sequence[str] = (),
+) -> PreparedDrawEvent:
+    """Canonically decline every optional replacement for one draw.
+
+    The ordinary-draw UI choice is intentionally not an executable shortcut.
+    It lowers to the same explicit ``decline:<effect-id>`` journal entries as
+    any other replacement decision and fails if a mandatory choice appears.
+    """
+
+    supplied = list(selections)
+    while True:
+        prepared = prepare_draw_event(
+            request,
+            apnap_order=apnap_order,
+            effects=effects,
+            selections=supplied,
+            require_all_selections=False,
+        )
+        pending = prepared.pending
+        if pending is None:
+            return prepared
+        optional = pending.choice.optional_options
+        if not optional or set(optional) != set(pending.choice.options):
+            raise DrawError(
+                "Ordinary draw cannot decline a mandatory replacement choice"
+            )
+        supplied.append(f"decline:{optional[0]}")
+
+
 __all__ = [
     "DrawError",
     "DrawEventRequest",
@@ -374,5 +408,6 @@ __all__ = [
     "PreparedDrawInstruction",
     "prepare_draw_event",
     "prepare_draw_instruction",
+    "prepare_ordinary_draw",
     "validate_prepared_draw",
 ]

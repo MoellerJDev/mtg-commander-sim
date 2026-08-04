@@ -239,6 +239,39 @@ class DrawStepRuleTests(unittest.TestCase):
         self.assertEqual("B", engine.state.priority_player)
         self.assertEqual("priority", engine.state.pending_decision.kind)
 
+    def test_draw_replacement_choice_is_visible_only_to_affected_seat(self):
+        session = self.make_session(504031, players=4)
+        engine = session.engine
+        loam = self.card(engine, "B", "Life from the Loam")
+        engine.move_card(
+            loam.object_id,
+            "graveyard",
+            log=False,
+            semantic_events=False,
+        )
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+
+        engine._begin_draw_sequence(
+            "B",
+            1,
+            reason="private replacement fixture",
+        )
+
+        affected = session.packet("pilot:B", full=True)
+        opponent = session.packet("pilot:A", full=True)
+        self.assertEqual("draw.replacement", affected["decision"]["kind"])
+        self.assertIn(
+            f"Dredge 3 — {loam.ref}",
+            [
+                option["label"]
+                for option in affected["decision"]["ctx"]["options"]
+            ],
+        )
+        self.assertIsNone(opponent["decision"])
+        self.assertNotIn("hand", opponent["state"]["players"]["B"])
+
     def test_empty_library_loss_is_checked_before_draw_step_priority(self):
         session = self.make_session(50404, players=4)
         engine = session.engine

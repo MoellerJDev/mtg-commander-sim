@@ -1058,6 +1058,50 @@ class OracleIRTests(unittest.TestCase):
                 )
                 self.assertIsNotNone(node.capability_fingerprint)
 
+    def test_dredge_keyword_lowers_to_a_graveyard_draw_replacement(self):
+        record = self.db.lookup("Life from the Loam")
+        ir = compile_oracle_card(
+            record,
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        node = next(
+            node
+            for node in ir.faces[0].nodes
+            if node.template_id == "dredge-keyword-replacement-v1"
+        )
+
+        self.assertEqual(("dredge",), node.mechanics)
+        self.assertEqual("graveyard", node.active_zone)
+        self.assertEqual("draw", node.event)
+        self.assertEqual(
+            ("zone.draw.library_to_hand",), node.capability_dependencies
+        )
+        self.assertEqual(
+            {
+                "handler_id": "replacement.draw.dredge.v1",
+                "schema_version": 1,
+                "event": "draw",
+                "modification": {"mill_count": 3},
+            },
+            dict(node.handlers[0]),
+        )
+        programs = generated_programs(
+            self.db,
+            record,
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        program = next(
+            value
+            for value in programs
+            if value.handlers
+            and value.handlers[0]["handler_id"]
+            == "replacement.draw.dredge.v1"
+        )
+        self.assertEqual("graveyard", program.active_zone)
+        self.assertEqual("draw", program.event)
+
     def test_static_damage_replacement_wording_lowers_to_generic_handlers(self):
         capabilities = load_default_capability_registry()
         expectations = {

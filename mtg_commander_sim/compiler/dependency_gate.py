@@ -100,6 +100,16 @@ def keyword_dependency_gate(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
+    if mechanics == ("dredge",) and re.fullmatch(
+        r"Dredge\s+[1-9]\d*\.?",
+        material_line,
+        re.IGNORECASE,
+    ):
+        return explicit_capability_gate(
+            "zone.draw.library_to_hand",
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
     return dependency_gate(
         mechanics=mechanics,
         effects=(),
