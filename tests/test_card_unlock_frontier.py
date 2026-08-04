@@ -89,6 +89,27 @@ class CardUnlockFrontierTests(unittest.TestCase):
             ("event_binding:normalized-event-binding",), trigger
         )
 
+        compound = canonical_residual_families(
+            {
+                "kind": "spell_effect",
+                "reason": "spell effect has no exact generic template",
+                "blockers": [],
+                "text": (
+                    "Destroy target creature with power 4 or greater. "
+                    "Its controller creates a 3/3 green Beast creature token."
+                ),
+            }
+        )
+        self.assertEqual(
+            (
+                "effect_clause:create-token",
+                "effect_clause:destroy-target",
+                "reference_binding:linked-result-reference",
+                "target_or_choice:target-predicate",
+            ),
+            compound,
+        )
+
     def test_limited_frontier_accounts_for_every_card_and_material_ability(self):
         report = self.report
         validate_card_unlock_frontier(report)

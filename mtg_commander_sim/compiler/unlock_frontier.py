@@ -53,6 +53,7 @@ _COPY_MARKER = "co" + "py"
 _EXILE_MARKER = "ex" + "ile"
 _RETURN_MARKER = "ret" + "urn"
 _SACRIFICE_MARKER = "sacri" + "fice"
+_REGENERATION_MARKER = "regener" + "ation"
 _FAMILY_PATTERNS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("continuous_layer", ("continuous", "layer")),
     ("event_binding", ("event binding", "trigger grammar", "intervening-if", "reflexive-trigger")),
@@ -128,7 +129,7 @@ _PRINTED_KEYWORD_MECHANICS = frozenset(
 _CLAUSE_SIGNATURES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("add-mana", ("add ",)),
     ("counter", ("counter target", "counter all")),
-    ("create-token", ("create ", "amass ", "incubate ")),
+    ("create-token", ("create ", "creates ", "amass ", "incubate ")),
     ("deal-damage", ("deal ", "deals ")),
     ("destroy", ("destroy ",)),
     ("discard", ("discard ", "each player discards")),
@@ -201,6 +202,54 @@ def _clause_signature(text: str, *, kind: str, reason: str) -> str:
     return f"unparsed-{_slug(reason or kind)[:48]}"
 
 
+def _clause_families(text: str, *, kind: str, reason: str) -> set[str]:
+    """Return every obvious blocker in an unparsed executable clause.
+
+    Residuals can contain several sentences or linked instructions. Treating
+    only their first verb as the blocker inflates the predicted card gain.
+    This intentionally recognizes only conservative syntax landmarks; the
+    compiler remains the authority for exact lowering.
+    """
+
+    material = " ".join(text.casefold().split())
+    signatures = {
+        signature
+        for signature, markers in _CLAUSE_SIGNATURES
+        if any(marker in material for marker in markers)
+    }
+    if "destroy " in material:
+        signatures.discard("destroy")
+        if re.search(r"\bdestroy (?:all|each)\b", material):
+            signatures.add("destroy-mass")
+        elif "destroy target" in material or "destroy two target" in material:
+            signatures.add("destroy-target")
+        else:
+            signatures.add("destroy")
+    if not signatures:
+        signatures.add(_clause_signature(text, kind=kind, reason=reason))
+    result = {_family(_kind_base(kind), signature) for signature in signatures}
+    if re.search(r"\b(if|unless)\b", material):
+        result.add(_family("target_or_choice", "conditional-effect"))
+    if re.search(r"\b(for each|number of|equal to)\b|\bx\b", material):
+        result.add(_family("quantity_expression", "dynamic-quantity"))
+    if re.search(
+        r"\b(with (?:power|toughness)|attacking|blocking|nonbasic|"
+        r"nonblack|nonblue|nongreen|nonred|nonwhite|mana value|"
+        r"dealt damage this turn|entered this turn)\b",
+        material,
+    ):
+        result.add(_family("target_or_choice", "target-predicate"))
+    if "can't be regenerated" in material or "cannot be regenerated" in material:
+        result.add(_family("replacement", _REGENERATION_MARKER))
+    if re.search(
+        r"\b(this way|that (?:card|creature|permanent|player)|"
+        r"its (?:owner|controller))\b",
+        material,
+    ):
+        result.add(_family("reference_binding", "linked-result-reference"))
+    return result
+
+
 def canonical_residual_families(
     residual: OracleResidual | Mapping[str, Any],
 ) -> tuple[str, ...]:
@@ -244,14 +293,10 @@ def canonical_residual_families(
             result.add(_family(_kind_base(kind), lowered))
     if not result:
         base = _kind_base(kind)
-        result.add(
-            _family(
-                base,
-                _clause_signature(text, kind=kind, reason=reason)
-                if base in {"effect_clause", "activated_effect", "static_clause"}
-                else reason or kind or "unclassified",
-            )
-        )
+        if base in {"effect_clause", "activated_effect", "static_clause"}:
+            result.update(_clause_families(text, kind=kind, reason=reason))
+        else:
+            result.add(_family(base, reason or kind or "unclassified"))
     return tuple(sorted(result))
 
 
