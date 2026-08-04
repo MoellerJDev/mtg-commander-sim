@@ -11,6 +11,26 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Continuous compiler and trust hardening
+
+- Oracle IR v28 validates every creature-subtype anthem candidate against the
+  pinned CR 205.3m registry. Colors, legendary, artifact, and actual creature
+  subtypes retain explicit predicates; token, nontoken, snow, commander,
+  combat-state, negative, and unsupported compound qualities remain material
+  residuals instead of being guessed from capitalization.
+- Runtime-handler equivalence now fingerprints the complete normalized
+  `ObjectQuerySpec` and full modifier descriptor. Reviewed and generated
+  handlers therefore deduplicate only when their color, type, subtype,
+  supertype, keyword, token, tap, phasing, relation, and source-exclusion
+  semantics are actually identical.
+- Added `types_any` to the immutable object-query vocabulary while preserving
+  the exact serialized shape of historical Game Record v3 predicates. The
+  shared type-line parser now preserves `Time Lord` as one creature subtype.
+- The corrected Commander census honestly demotes three false exact/trusted
+  CardPrograms and adds nine material residuals. Battle Frenzy, Broodwarden,
+  and Glass of the Guildpact are no longer advertised as exact; five other
+  Commander-legal cards lose only their unjustified anthem node.
+
 ### Drawing-card rules family
 
 - Added an immutable CR 121 draw instruction/event transaction, private

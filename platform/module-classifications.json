@@ -539,6 +539,21 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/creature_subtypes.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/compiler/damage_templates.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -2983,5 +2998,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "fe91ae06aef1498277ea5fd86a71213bf9bbf137ee1c7d78166ffc10d390e668"
+  "fingerprint": "86d70df19358aca6559abe49615606696ac217386b09140abfeaf20cd6cf5a7a"
 }

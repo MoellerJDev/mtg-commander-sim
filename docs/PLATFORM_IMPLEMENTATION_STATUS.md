@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "39e1b43582d0f33a0f3926dd7b8877174605299470794f8af5ee02ca89321ae3"
+verified: "a02aed1a35826de79e2deacd8b6bb7966f6cb908707f4b3d6b051c6fb319e892"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,13 +15,13 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `39e1b43582d0f33a0f3926dd7b8877174605299470794f8af5ee02ca89321ae3` (`tracked-git-clean-blobs-sha256-v3`)
-- Feature head: `f45bfa8096371aa3498243f6916291b5cd7c4462`
-- Certified exact head: `f45bfa8096371aa3498243f6916291b5cd7c4462`
-- Generation timestamp: `2026-08-04T09:30:12Z`
+- Evaluated source tree: `a02aed1a35826de79e2deacd8b6bb7966f6cb908707f4b3d6b051c6fb319e892` (`tracked-git-clean-blobs-sha256-v3`)
+- Feature head: `1c7550233c5d2f74166f9fc0b67ed49d3d8705da`
+- Certified exact head: `1c7550233c5d2f74166f9fc0b67ed49d3d8705da`
+- Generation timestamp: `2026-08-04T14:25:38Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
-- Active future phase: `canonical_draw_transaction_replacement_and_trigger_closure`
+- Active future phase: `continuous_handler_identity_and_closed_grammar`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -36,8 +36,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=372, definition_only=95, passing=173, total=3300, unreviewed=2660
 - Mechanics: status_counts={'partial': 62, 'tested': 1, 'unclassified': 362}, total=425, trusted=0
-- Oracle coverage: material_residuals=65898, status_counts={'exact': 3385, 'partial': 16082, 'unresolved': 19018}, total=38485
-- Commander-legal Oracle coverage: material_residuals=57488, status_counts={'exact': 725, 'partial': 14648, 'unresolved': 16250}, total=31623
+- Oracle coverage: material_residuals=65910, status_counts={'exact': 3382, 'partial': 16077, 'unresolved': 19026}, total=38485
+- Commander-legal Oracle coverage: material_residuals=57497, status_counts={'exact': 722, 'partial': 14645, 'unresolved': 16256}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -63,7 +63,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Attached fixed characteristics and fixed ordinary-mana Equip | `integrated_on_certified_main` | Certified main through PR 84 introduces one reciprocal timestamped attachment owner and exact physical/logical relation-bound continuous effects in layers 4, 6, and 7c. Oracle IR v24 generically lowers closed fixed characteristics granted to enchanted, equipped, or fortified objects, and printed fixed ordinary-mana Equip becomes a payable controller-scoped creature activation at sorcery speed through the ordinary stack. Detach, reattach, phasing, source or target departure, leave-and-return, control changes, four-player independent sources, malformed state, rollback, save/load, privacy, replay, and killed implementation mutants passed exact-head run 30882797307; merge commit f2c67f1 and main-smoke run 30883120301 are green. The Commander census improved exact and trusted programs from 528 to 590, capability-closed programs from 526 to 587, and material Oracle residuals from 60,307 to 59,076. Complete Enchant quality grammar, exotic Equip costs, dynamic attached values, and full CR 613 dependencies remain fail-closed. |
 | Simple-object Aura targeting, entry, and legality | `integrated_on_certified_main` | Certified main through PR 85 adds immutable closed Enchant grammar for ordinary battlefield object types and you-control or opponent-controls relations; mandatory cast targets; resolution revalidation; reciprocal attachment on spell and nonspell entry; seat-scoped immutable entry continuations; live controller/protection legality; state-based graveyard movement; and CR 303.4g Aura-token preflight before authoritative identity allocation. Oracle IR v25 declares attachment.aura.simple_object and promotes only cards whose other nodes are capability-closed. Exact-head run 30892105590, merge commit 4bec8eb, and main-smoke run 30893570287 are green. The Commander census improved exact and trusted CardPrograms from 590 to 661, capability-closed from 587 to 658, and material Oracle residuals from 59,076 to 57,982; representative newly exact cards include Sensory Deprivation, Unholy Strength, Holy Strength, Flight, and Weakness. Player, graveyard-card, compound, quality, subtype, Aura-creature, and complete phasing grammar remain fail-closed. |
 | Canonical draw transaction, replacement, and fixed-program closure | `integrated_on_certified_main` | Certified main through PR 86 adds immutable draw instruction, event, result, continuation, and APNAP batch values; one narrow draw coordinator and mutation owner; strict typed prevention and Dredge replacement operations; private affected-player choices; empty-library result handling; and exact resumption of later draws or spell effects. Represented turn, resolving-effect, conditional, optional-follow-up, and table-wide producers use the same path, while ordinary intent execution fails closed on an unrouted draw. Oracle IR v26 lowers closed controller, target-player, target-opponent, each-player, and Dredge templates. Exact-head run 30901390381, merge commit b5e5caa, and main-smoke run 30902723662 are green. The Commander census improved exact/trusted CardPrograms from 661 to 722, capability-closed from 658 to 719, partial from 14,698 to 14,644, unresolved from 16,264 to 16,257, and material Oracle residuals from 57,982 to 57,497. CommanderEngine fell from 13,525 to 13,308 logical lines and the printed-name heuristic from 678 to 660. |
-| Draw limits, optional-choice legality, and instruction replacement | `implemented_in_active_source_tree_pending_certification` | The active source tree adds immutable live draw permissions, generic no-draw and maximum-one-per-turn runtime restrictions, canonical prohibited draw results, fixed instruction-count doubling, and a seat-scoped optional-draw handler that distinguishes chooser from prospective drawer. Permission is recomputed before every individual event, so mandatory multi-draws occur partially while optional draws and draw costs require their complete count to be legal; Dredge does not consume a draw allowance, and an empty library is not treated as a prohibition. Per-card events and queued instructions now run through an iterative trampoline; replacement-free and prevented counts of 2,000, midpoint suspension with 1,500 draws remaining, over-library attempts, private resume, and exact replay have focused evidence. Oracle IR v27 generically lowers fixed prohibitions, unconditional controller doubling, and fixed optional draws. The full census improves exact Oracle programs from 3,381 to 3,385, trusted CardPrograms from 1,141 to 1,145, and material Oracle residuals from 65,909 to 65,898. The Commander census improves exact/trusted programs from 722 to 725, capability-closed programs from 719 to 722, and material Oracle residuals from 57,497 to 57,488; Spirit of the Labyrinth, Thought Reflection, and Oculus are newly exact. Shared-team turns, conditional or dynamic limits, complete draw-as-cost producers, CR 121.6c/121.7 result actions and nested ordering, casting-process face-down draws, reveal-as-drawn choices, and broader replacement grammar remain fail-closed. |
+| Draw limits, optional-choice legality, and instruction replacement | `integrated_on_certified_main` | Certified main through PR 87 adds immutable live draw permissions, generic no-draw and maximum-one-per-turn runtime restrictions, canonical prohibited draw results, fixed instruction-count doubling, and a seat-scoped optional-draw handler that distinguishes chooser from prospective drawer. Permission is recomputed before every individual event, so mandatory multi-draws occur partially while optional draws and draw costs require their complete count to be legal; Dredge does not consume a draw allowance, and an empty library is not treated as a prohibition. Per-card events and queued instructions run through an iterative trampoline; replacement-free and prevented counts of 2,000, midpoint suspension with 1,500 draws remaining, over-library attempts, private resume, and exact replay have focused evidence. Oracle IR v27 generically lowers fixed prohibitions, unconditional controller doubling, and fixed optional draws. Exact-head run 30913382652, merge commit a5609bc, and main-smoke run 30915475098 are green. The Commander census improved exact/trusted programs from 722 to 725, capability-closed programs from 719 to 722, and material Oracle residuals from 57,497 to 57,488; Spirit of the Labyrinth, Thought Reflection, and Oculus are newly exact. Shared-team turns, conditional or dynamic limits, complete draw-as-cost producers, CR 121.6c/121.7 result actions and nested ordering, casting-process face-down draws, reveal-as-drawn choices, and broader replacement grammar remain fail-closed. |
+| Continuous-handler identity and closed grammar | `implemented_at_feature_head` | The active feature head makes runtime-handler equivalence consume the complete normalized ObjectQuerySpec and full modifier descriptor, adds any-of card types with exact historical schema-v1 Game Record v3 round-trip compatibility, and validates controlled-creature subtype candidates against the pinned CR 205.3m registry. Time Lord remains one creature subtype. Oracle IR v28 keeps explicit color, legendary, artifact, and valid creature-type predicates while unsupported token, nontoken, snow, commander, combat-state, negative, and compound qualities remain source-spanned material residuals. The honest Commander census demotes exact/trusted and capability-closed CardPrograms from 725/722 to 722/719 and raises material residuals from 57,488 to 57,497; Battle Frenzy, Broodwarden, and Glass of the Guildpact were false exact promotions. Focused compiler, object-query, continuous-effect, CardProgram, and corpus tests pass. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -89,7 +90,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4712
+- Tests discovered: 4724
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
 - Compile: `pass`

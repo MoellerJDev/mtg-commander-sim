@@ -92,6 +92,14 @@ effects keep a live source-bound `ObjectQuerySpec` and recompute membership
 after earlier layers. Unsupported duration or operation families fail before
 the journal mutates.
 
+`ObjectQuerySpec` is a strict immutable predicate shared by those live effects
+and other represented rules families. Its current schema distinguishes
+all-required from any-required card types and preserves colors, subtypes,
+supertypes, keywords, token/tap/phasing state, public relations, visibility,
+and source exclusion. Historical schema-v1 payloads round-trip without the
+additive `types_any` field so Game Record v3 replay does not silently rewrite
+old descriptors.
+
 ## Visibility and replay
 
 The kernel holds authoritative information but never builds network responses.

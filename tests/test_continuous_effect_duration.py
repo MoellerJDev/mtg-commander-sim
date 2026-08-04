@@ -75,6 +75,14 @@ class ContinuousEffectModelTests(unittest.TestCase):
         self.assertEqual({"assembly-worker"}, subtypes)
         self.assertEqual(set(), supertypes)
 
+    def test_type_parser_preserves_time_lord_as_one_creature_subtype(self):
+        card_types, subtypes, supertypes = type_parts(
+            "Legendary Creature — Time Lord Doctor"
+        )
+        self.assertEqual({"creature"}, card_types)
+        self.assertEqual({"time lord", "doctor"}, subtypes)
+        self.assertEqual({"legendary"}, supertypes)
+
     def test_power_toughness_layer_preserves_printed_type_line(self):
         card = CardInstance(
             object_id="object",

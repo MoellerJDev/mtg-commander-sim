@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Iterable, Mapping
 
 from .damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
@@ -10,11 +10,12 @@ class ObjectQueryError(ValueError):
     """A generic object predicate is malformed or noncanonical."""
 
 
-_QUERY_FIELDS = {
+_QUERY_FIELDS = frozenset({
     "zones",
     "owner",
     "controller",
     "types_all",
+    "types_any",
     "excluded_types",
     "subtypes_all",
     "supertypes_all",
@@ -26,7 +27,8 @@ _QUERY_FIELDS = {
     "include_phased_out",
     "known_to_actor",
     "exclude_ref",
-}
+})
+_LEGACY_QUERY_FIELDS = _QUERY_FIELDS - {"types_any"}
 
 
 def _normalized_terms(
@@ -56,6 +58,7 @@ class ObjectQuerySpec:
     owner: str | None = None
     controller: str | None = None
     types_all: tuple[str, ...] = ()
+    types_any: tuple[str, ...] = ()
     excluded_types: tuple[str, ...] = ()
     subtypes_all: tuple[str, ...] = ()
     supertypes_all: tuple[str, ...] = ()
@@ -67,11 +70,18 @@ class ObjectQuerySpec:
     include_phased_out: bool = False
     known_to_actor: bool | None = None
     exclude_ref: str | None = None
+    _serialization_version: int = field(
+        default=2,
+        repr=False,
+        compare=False,
+        hash=False,
+    )
 
     def __post_init__(self) -> None:
         for field_name in (
             "zones",
             "types_all",
+            "types_any",
             "excluded_types",
             "subtypes_all",
             "supertypes_all",
@@ -111,13 +121,20 @@ class ObjectQuerySpec:
             raise ObjectQueryError(
                 "Object query include_phased_out must be boolean"
             )
+        if self._serialization_version not in {1, 2}:
+            raise ObjectQueryError(
+                "Object query serialization version is unsupported"
+            )
 
-    def to_dict(self) -> dict[str, Any]:
+    def canonical_dict(self) -> dict[str, Any]:
+        """Return the complete current semantic descriptor."""
+
         return {
             "zones": list(self.zones),
             "owner": self.owner,
             "controller": self.controller,
             "types_all": list(self.types_all),
+            "types_any": list(self.types_any),
             "excluded_types": list(self.excluded_types),
             "subtypes_all": list(self.subtypes_all),
             "supertypes_all": list(self.supertypes_all),
@@ -131,12 +148,20 @@ class ObjectQuerySpec:
             "exclude_ref": self.exclude_ref,
         }
 
+    def to_dict(self) -> dict[str, Any]:
+        value = self.canonical_dict()
+        if self._serialization_version == 1:
+            # Historical Game Record v3 payloads predate the additive
+            # types-any predicate.  Preserve their exact serialized shape.
+            value.pop("types_any")
+        return value
+
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "ObjectQuerySpec":
         if not isinstance(value, Mapping):
             raise ObjectQueryError("Object query must be an object")
-        actual = set(value)
-        if actual != _QUERY_FIELDS:
+        actual = frozenset(value)
+        if actual not in {_QUERY_FIELDS, _LEGACY_QUERY_FIELDS}:
             missing = sorted(_QUERY_FIELDS - actual)
             unknown = sorted(actual - _QUERY_FIELDS)
             details = []
@@ -152,6 +177,7 @@ class ObjectQuerySpec:
             owner=value["owner"],
             controller=value["controller"],
             types_all=value["types_all"],
+            types_any=value.get("types_any", ()),
             excluded_types=value["excluded_types"],
             subtypes_all=value["subtypes_all"],
             supertypes_all=value["supertypes_all"],
@@ -163,6 +189,9 @@ class ObjectQuerySpec:
             include_phased_out=value["include_phased_out"],
             known_to_actor=value["known_to_actor"],
             exclude_ref=value["exclude_ref"],
+            _serialization_version=(
+                2 if "types_any" in value else 1
+            ),
         )
 
 

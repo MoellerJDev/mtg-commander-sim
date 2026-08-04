@@ -116,6 +116,15 @@ must remain on the battlefield and phased in; target membership changes as
 earlier-layer characteristics, control, entry, and departure change. The
 runtime model is immutable and never receives `GameState`.
 
+The predicate is one complete canonical `ObjectQuerySpec`, including all/any
+type and color terms, subtypes, supertypes, keywords, token and tap state,
+phasing policy, owner/controller relations, visibility, and source exclusion.
+The CardProgram handler footprint fingerprints that full value plus every
+modifier field. Schema-v1 query payloads omit the additive `types_any` member
+when replayed so historical Game Record v3 bytes remain stable; new values use
+the complete schema. The compiler's creature-subtype branch is additionally
+closed over the pinned CR 205.3m registry rather than capitalization.
+
 Resolution-created fixed modifiers are not components that remain active at a
 source. Typed effect-runtime producers prepare an exact object set and commit
 an additive `ContinuousEffect` journal entry through

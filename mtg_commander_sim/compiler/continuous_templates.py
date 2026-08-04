@@ -4,6 +4,7 @@ import re
 from typing import Any, Mapping
 
 from ..object_predicate import ObjectQuerySpec
+from .creature_subtypes import canonical_creature_subtype
 
 
 _BASIC_LAND_TYPE_ADDITION = re.compile(
@@ -93,9 +94,10 @@ _CARD_TYPE_WORDS = frozenset(
 def _singular_creature_subtype(plural: str) -> str | None:
     value = plural.casefold()
     if value in _IRREGULAR_CREATURE_PLURALS:
-        return _IRREGULAR_CREATURE_PLURALS[value]
+        candidate = _IRREGULAR_CREATURE_PLURALS[value]
+        return canonical_creature_subtype(candidate)
     if value.endswith("s") and not value.endswith("ss") and len(value) > 2:
-        return value[:-1]
+        return canonical_creature_subtype(value[:-1])
     return None
 
 
@@ -125,8 +127,6 @@ def controlled_creature_fixed_modifier(
     )
     if subtype_plural and qualifier is None:
         return None
-    if _STATEFUL_CREATURE_QUALIFIER.fullmatch(qualifier):
-        return None
     fields: dict[str, Any] = {
         "zones": ("battlefield",),
         "types_all": ("creature",),
@@ -146,7 +146,16 @@ def controlled_creature_fixed_modifier(
             }[qualifier],
         )
     elif qualifier:
-        fields["subtypes_all"] = tuple(qualifier.split())
+        # Capitalization is not semantic.  Only the pinned CR 205.3m
+        # creature-type vocabulary may enter the subtype predicate.  The
+        # grammar deliberately leaves state, token, snow, commander,
+        # negative, compound, and other unsupported qualities residual.
+        subtype = canonical_creature_subtype(qualifier)
+        if subtype is None or _STATEFUL_CREATURE_QUALIFIER.fullmatch(
+            qualifier
+        ):
+            return None
+        fields["subtypes_all"] = (subtype,)
     return (
         ObjectQuerySpec(**fields),
         int(match.group("power")),

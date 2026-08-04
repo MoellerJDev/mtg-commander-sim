@@ -83,6 +83,14 @@ flowchart LR
   controller doubling. Those programs require the trusted bounded draw
   capability and runtime components; dynamic counts, conditional limits, and
   unrelated residual text still prevent exact promotion.
+- Oracle IR v28 closes fixed controlled-creature modifiers over a pinned CR
+  205.3m creature-subtype vocabulary. Capitalization is never subtype
+  evidence. Color, legendary, artifact, and validated creature-subtype
+  predicates lower; token, nontoken, snow, commander, combat-state, negative,
+  and unsupported compound qualities remain exact source-spanned residuals.
+  Runtime-handler deduplication consumes the entire canonical typed query and
+  modifier, so a reviewed handler cannot shadow a generated handler with
+  different semantics.
 
 ## Extension points
 

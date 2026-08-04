@@ -132,6 +132,7 @@
       "test_capability_implementation_mutations",
       "test_card_program_trust",
       "test_card_program_v2",
+      "test_continuous_compiler_hardening",
       "test_exact_keyword_families",
       "test_oracle_ir",
       "test_preflight_v080",

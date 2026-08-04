@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from dataclasses import asdict
 import hashlib
-from typing import Any, Iterable
+from typing import Any, Iterable, Mapping
 
 from ..carddb import CardDatabase, CardRecord
+from ..object_predicate import ObjectQuerySpec
 from ..rules.capabilities import CapabilityRegistry
 from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
@@ -34,19 +35,25 @@ def _runtime_handler_semantic_descriptor(
         "continuous.anthem.power_toughness.v1",
         "continuous.anthem.fixed-query.v2",
     }:
-        return stable_json(handler) if handler_id else ""
+        return (
+            stable_json(_canonical_semantic_value(handler))
+            if handler_id
+            else ""
+        )
 
     condition = dict(handler.get("condition") or {})
     modifier = dict(handler.get("modifier") or {})
     if handler_id == "continuous.anthem.power_toughness.v1":
-        predicate = {
-            "zones": ["battlefield"],
-            "types_all": ["creature"],
-            "subtypes_all": condition.get("target_subtypes_all") or [],
-        }
+        predicate = ObjectQuerySpec(
+            zones=("battlefield",),
+            types_all=("creature",),
+            subtypes_all=tuple(
+                condition.get("target_subtypes_all") or ()
+            ),
+        )
         exclude_source = False
     else:
-        predicate = dict(condition.get("predicate") or {})
+        predicate = ObjectQuerySpec.from_dict(condition.get("predicate"))
         exclude_source = bool(condition.get("exclude_source", False))
     return stable_json(
         {
@@ -55,23 +62,33 @@ def _runtime_handler_semantic_descriptor(
             "target_controller": str(
                 condition.get("target_controller") or ""
             ),
-            "zones": sorted(
-                str(value).casefold()
-                for value in predicate.get("zones") or []
-            ),
-            "types_all": sorted(
-                str(value).casefold()
-                for value in predicate.get("types_all") or []
-            ),
-            "subtypes_all": sorted(
-                str(value).casefold()
-                for value in predicate.get("subtypes_all") or []
-            ),
+            "predicate": predicate.canonical_dict(),
             "exclude_source": exclude_source,
-            "power": modifier.get("power"),
-            "toughness": modifier.get("toughness"),
+            "modifier": modifier,
         }
     )
+
+
+_CANONICAL_QUERY_FIELDS = frozenset(
+    ObjectQuerySpec().canonical_dict()
+)
+_LEGACY_QUERY_FIELDS = _CANONICAL_QUERY_FIELDS - {"types_any"}
+
+
+def _canonical_semantic_value(value: Any) -> Any:
+    """Normalize typed query values inside a complete handler descriptor."""
+
+    if isinstance(value, Mapping):
+        fields = frozenset(value)
+        if fields in {_CANONICAL_QUERY_FIELDS, _LEGACY_QUERY_FIELDS}:
+            return ObjectQuerySpec.from_dict(value).canonical_dict()
+        return {
+            str(key): _canonical_semantic_value(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_canonical_semantic_value(item) for item in value]
+    return value
 
 
 def rulings_source_hash(db: CardDatabase, record: CardRecord) -> str:

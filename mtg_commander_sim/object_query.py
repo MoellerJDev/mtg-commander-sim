@@ -84,6 +84,7 @@ def object_matches_query(
         and (spec.owner is None or row.owner == spec.owner)
         and (spec.controller is None or row.controller == spec.controller)
         and set(spec.types_all).issubset(types)
+        and (not spec.types_any or not types.isdisjoint(spec.types_any))
         and types.isdisjoint(spec.excluded_types)
         and set(spec.subtypes_all).issubset(row.subtypes)
         and set(spec.supertypes_all).issubset(row.supertypes)
