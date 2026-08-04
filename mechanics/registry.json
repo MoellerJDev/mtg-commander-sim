@@ -208,8 +208,8 @@
     {
       "mechanic_id": "cr-603-handling-triggered-abilities",
       "path": "mechanics/contracts/handling-triggered-abilities.json",
-      "sha256": "3653f08b9223552561ba07e6a70e4c9726bf967a8b81fab3f1131db71cb7d8b5",
-      "version": 3
+      "sha256": "b9b95f2b2f7b40520633d4a61c5639a143af8bd066654f030b951ea2b50fe556",
+      "version": 4
     },
     {
       "mechanic_id": "infect",
@@ -7299,12 +7299,12 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/handling-triggered-abilities.json",
-      "contract_sha256": "3653f08b9223552561ba07e6a70e4c9726bf967a8b81fab3f1131db71cb7d8b5",
-      "contract_version": 3,
+      "contract_sha256": "b9b95f2b2f7b40520633d4a61c5639a143af8bd066654f030b951ea2b50fe556",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "oracle_ir trigger lowering plus the typed trigger_batches occurrence/APNAP/placement owner, trigger_targeting, and narrow CommanderEngine discovery/stabilization coordination",
-      "implementation_version": "trigger-handling-foundation-v4",
+      "implementation_component": "immutable zone_trigger_events occurrences, extracted trigger_discovery matching, oracle_ir trigger lowering, typed trigger_batches APNAP/placement ownership, trigger_targeting, and narrow CommanderEngine coordination",
+      "implementation_version": "trigger-handling-foundation-v5",
       "kind": "rules_section",
       "known_blockers": [
         "the Oracle compiler recognizes selected whole-text trigger templates rather than the complete trigger grammar",
@@ -7314,7 +7314,7 @@
         "delayed-trigger creation provenance and simultaneous-event selection are not universally typed even though detected occurrences now share one typed placement path",
         "entry and leaves look-back evaluation does not yet use the complete continuous-effect and LKI exception matrix",
         "Aura paired-object zone-change lookup and hidden-zone finding are incomplete",
-        "generated trigger effects remain provisional until every effect dependency is trusted"
+        "generated trigger effects promote only when normalized event detection, placement, and every effect dependency are capability-closed; draw triggers remain provisional while zone.draw.library_to_hand retains its replacement blocker"
       ],
       "mechanic_id": "cr-603-handling-triggered-abilities",
       "official_name": "Handling Triggered Abilities",
@@ -7326,6 +7326,11 @@
         "test_trigger_waits_for_stabilization_then_becomes_top_stack_object",
         "test_trigger_controller_is_frozen_at_trigger_time",
         "test_simple_self_trigger_compiles_to_normalized_engine_event",
+        "test_fixed_life_self_trigger_is_capability_closed_and_exact",
+        "test_fixed_life_self_enter_trigger_replays_exactly",
+        "test_derives_exact_enter_and_death_events",
+        "test_source_that_leaves_still_observes_simultaneous_death",
+        "test_private_library_to_hand_move_produces_no_public_trigger_event",
         "test_generated_enters_trigger_reaches_arbiter_fail_closed",
         "test_self_dies_trigger_uses_last_known_controller",
         "test_padeem_hexproof_and_intervening_upkeep_condition",

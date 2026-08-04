@@ -41,6 +41,7 @@ from mtg_commander_sim.rules_corpus import verify_rules_corpus
 from mtg_commander_sim.rules.capabilities import (
     load_default_capability_registry,
 )
+from mtg_commander_sim.record import checkpoint_envelope, replay_record
 from mtg_commander_sim.semantics import (
     SemanticProgram,
     SemanticRegistry,
@@ -1171,6 +1172,7 @@ class OracleIRTests(unittest.TestCase):
         self.assertEqual(
             (
                 "cr-603-handling-triggered-abilities",
+                "trigger-event-normalized-zone-change",
                 "cr-121-drawing-a-card",
             ),
             node.mechanics,
@@ -1182,6 +1184,86 @@ class OracleIRTests(unittest.TestCase):
             [{"op": "draw", "player": "$controller", "count": 1,
               "private": True}],
             programs[0].effects,
+        )
+        capability_ir = compile_oracle_card(
+            record,
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+        )
+        capability_node = capability_ir.faces[0].nodes[0]
+        self.assertNotEqual("exact", capability_ir.status)
+        self.assertEqual(
+            {
+                "trigger.event.normalized_zone_change",
+                "trigger.placement.apnap",
+                "zone.draw.library_to_hand",
+            },
+            set(capability_node.capability_dependencies),
+        )
+        self.assertTrue(
+            any(
+                "zone.draw.library_to_hand" in blocker
+                for blocker in capability_ir.material_residuals[0].blockers
+            )
+        )
+        registry = SemanticRegistry(include_builtin_packs=False)
+        generation = register_generated_programs(
+            self.db,
+            registry,
+            (record,),
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+            promote_exact_trigger_programs=True,
+        )
+        self.assertEqual(0, generation["exact_programs_promoted"])
+        self.assertTrue(
+            all(program.trust_level == "provisional" for program in registry.programs())
+        )
+
+    def test_fixed_life_self_trigger_is_capability_closed_and_exact(self):
+        record = self.db.lookup("Lone Missionary")
+        capabilities = load_default_capability_registry()
+        ir = compile_oracle_card(
+            record,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        node = ir.faces[0].nodes[0]
+
+        self.assertEqual("exact", ir.status)
+        self.assertEqual("permanent.enter.self", node.event)
+        self.assertEqual("gain-life-controller-v1", node.template_id)
+        self.assertEqual(
+            {
+                "life.change.effect",
+                "trigger.event.normalized_zone_change",
+                "trigger.placement.apnap",
+            },
+            set(node.capability_dependencies),
+        )
+        programs = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertFalse(programs[0].requires_arbiter)
+        registry = SemanticRegistry(include_builtin_packs=False)
+        generation = register_generated_programs(
+            self.db,
+            registry,
+            (record,),
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+            promote_exact_trigger_programs=True,
+        )
+        self.assertEqual(1, generation["exact_programs_promoted"])
+        self.assertEqual(0, generation["runtime_handlers_promoted"])
+        self.assertEqual(
+            ["trusted"],
+            [program.trust_level for program in registry.programs()],
         )
 
     def test_trigger_with_uncompiled_condition_remains_residual(self):
@@ -1429,6 +1511,7 @@ class OracleIRTests(unittest.TestCase):
             entries=[
                 DeckEntry("Zimone and Dina", board="commander"),
                 DeckEntry("Elvish Visionary"),
+                DeckEntry("Lone Missionary"),
                 DeckEntry("Kingfisher"),
                 DeckEntry("Moss Diamond"),
             ],
@@ -1482,6 +1565,61 @@ class OracleIRTests(unittest.TestCase):
             "arbiter.resolve",
             engine.state.pending_decision.kind,
         )
+
+    def test_fixed_life_self_enter_trigger_replays_exactly(self):
+        session = self._trigger_session()
+        engine = session.engine
+        missionary = next(
+            card
+            for card in engine.state.cards.values()
+            if card.printed_name == "Lone Missionary"
+        )
+        engine.move_card(missionary.object_id, "hand")
+        engine.state.active_player = "A"
+        engine.state.started = True
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.priority_player = None
+        engine.state.priority_passes = []
+        engine.state.players["A"].mana_pool["W"] = 1
+        engine.state.players["A"].mana_pool["C"] = 1
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        result = session.act(
+            "pilot:A",
+            {
+                "action": "cast",
+                "card": missionary.ref,
+                "from": "hand",
+                "auto_pay": True,
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        for _ in range(12):
+            if engine.state.players["A"].life == 44:
+                break
+            session.next_task()
+            principals = session.pending_principals()
+            if not principals:
+                continue
+            for principal in principals:
+                passed = session.act(principal, {"a": "pass"})
+                self.assertTrue(passed.ok, passed.summary)
+        self.assertEqual(44, engine.state.players["A"].life)
+        self.assertFalse(
+            engine.state.pending_decision
+            and engine.state.pending_decision.kind == "arbiter.resolve"
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "fixed-life-trigger-replay"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
 
     def test_self_dies_trigger_uses_last_known_controller(self):
         session = self._trigger_session()

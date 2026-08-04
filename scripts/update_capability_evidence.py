@@ -38,6 +38,16 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "life.change.effect": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_life_effect_commit_mutant_is_killed"
+    ),
+    "trigger.event.normalized_zone_change": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_zone_trigger_detection_mutant_is_killed"
+    ),
     "continuous.basic_land_type.add_all_lands": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

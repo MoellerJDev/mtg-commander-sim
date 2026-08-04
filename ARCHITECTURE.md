@@ -2,7 +2,7 @@
 title: "Consolidated architecture reference"
 status: "current"
 authoritative_source: "implemented runtime and focused architecture documents"
-verified: "2026-08-02"
+verified: "2026-08-03"
 audience: "maintainers and integration contributors"
 maintenance: "hand-maintained"
 ---
@@ -318,7 +318,7 @@ update cannot inherit stale conformance. Missing or duplicate cases fail
 corpus verification.
 
 The Oracle compiler preserves source spans and emits typed ability, cost,
-target, trigger, replacement, and effect nodes. Oracle IR v21 lowers simple
+target, trigger, replacement, and effect nodes. Oracle IR v22 lowers simple
 self enters/dies/leaves triggers, unconditional enters-tapped text, fixed
 self/target effects, basic creature-token creation, and reviewed whole-line
 fixed-mana attack/block declaration costs, combat-declaration restrictions,
@@ -766,6 +766,19 @@ two former continuation shapes have explicit read/resume compatibility, but new
 games write only `trigger_batch_id`. Complete event grammar, delayed creation
 provenance, state/reflexive triggers, and the special second CR 603.3b part
 remain blocked.
+
+`mtg_commander_sim.zone_trigger_events` now owns strict immutable facts for a
+committed cross-zone occurrence. Enter events inspect current characteristics;
+leave and dies events inspect the previous controller, logical incarnation,
+characteristics, attachments, and pre-move source-zone snapshot. The pure
+detector emits a bounded normalized vocabulary, while
+`zone_trigger_processing` coordinates turn history and submits discovered
+abilities to the ordinary batch. `trigger_discovery` owns read-only semantic
+matching and stack-occurrence construction behind a narrow protocol. It has no
+state mutation authority and no printed-card-name behavior. Oracle IR v22
+declares event detection, APNAP placement, and result capabilities separately,
+so fixed-life self triggers can be trusted without incorrectly promoting
+draw-to-hand behavior whose replacement boundary remains incomplete.
 
 Card-centric interaction remains a protocol adapter, not a second rules
 engine. The kernel supplies card refs, face-specific labels, current costs,

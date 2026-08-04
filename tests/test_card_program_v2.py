@@ -160,7 +160,7 @@ class CardProgramV2Tests(unittest.TestCase):
             trust_level="trusted",
         )
 
-        self.assertEqual("oracle-ir-v21", current.compiler_version)
+        self.assertEqual("oracle-ir-v22", current.compiler_version)
         self.assertEqual(
             "capability_closed", current.trust_closure["trust_basis"]
         )
@@ -182,7 +182,7 @@ class CardProgramV2Tests(unittest.TestCase):
             capability_profile="commander_review",
             trust_level="trusted",
         )
-        self.assertEqual("oracle-ir-v21", current.compiler_version)
+        self.assertEqual("oracle-ir-v22", current.compiler_version)
         self.assertEqual("capability_closed", current.trust_closure["trust_basis"])
         self.assertEqual(
             ["choose_damage_source", "life"],
@@ -336,6 +336,7 @@ class CardProgramV2Tests(unittest.TestCase):
                 "counter.placement.quantity_replacement",
                 "damage.prevention.persistent_amount",
                 "damage.prevention.triggered_results",
+                "trigger.event.normalized_zone_change",
                 "trigger.placement.apnap",
             },
             set(program.capability_dependencies),

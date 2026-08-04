@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-603-handling-triggered-abilities",
   "official_name": "Handling Triggered Abilities",
   "effective_date": "2026-06-19",
@@ -105,6 +105,7 @@
       "source and linked-object logical incarnation"
     ],
     "state_writes": [
+      "immutable normalized zone-change occurrence",
       "versioned immutable pending APNAP trigger batch",
       "triggered ability stack object",
       "delayed trigger record"
@@ -171,6 +172,10 @@
   ],
   "witness_cards": [
     {
+      "name": "Lone Missionary",
+      "oracle_id": "626f1dc3-3b14-4873-902f-ffec5487a97d"
+    },
+    {
       "name": "Elvish Visionary",
       "oracle_id": "c6a3a882-a127-4590-93d7-679ef4313efe"
     },
@@ -193,6 +198,11 @@
     "test_trigger_waits_for_stabilization_then_becomes_top_stack_object",
     "test_trigger_controller_is_frozen_at_trigger_time",
     "test_simple_self_trigger_compiles_to_normalized_engine_event",
+    "test_fixed_life_self_trigger_is_capability_closed_and_exact",
+    "test_fixed_life_self_enter_trigger_replays_exactly",
+    "test_derives_exact_enter_and_death_events",
+    "test_source_that_leaves_still_observes_simultaneous_death",
+    "test_private_library_to_hand_move_produces_no_public_trigger_event",
     "test_generated_enters_trigger_reaches_arbiter_fail_closed",
     "test_self_dies_trigger_uses_last_known_controller",
     "test_padeem_hexproof_and_intervening_upkeep_condition",
@@ -208,8 +218,8 @@
     "test_damage_and_resulting_death_triggers_share_one_order_batch"
   ],
   "implementation": {
-    "component": "oracle_ir trigger lowering plus the typed trigger_batches occurrence/APNAP/placement owner, trigger_targeting, and narrow CommanderEngine discovery/stabilization coordination",
-    "version": "trigger-handling-foundation-v4"
+    "component": "immutable zone_trigger_events occurrences, extracted trigger_discovery matching, oracle_ir trigger lowering, typed trigger_batches APNAP/placement ownership, trigger_targeting, and narrow CommanderEngine coordination",
+    "version": "trigger-handling-foundation-v5"
   },
   "known_blockers": [
     "the Oracle compiler recognizes selected whole-text trigger templates rather than the complete trigger grammar",
@@ -219,7 +229,7 @@
     "delayed-trigger creation provenance and simultaneous-event selection are not universally typed even though detected occurrences now share one typed placement path",
     "entry and leaves look-back evaluation does not yet use the complete continuous-effect and LKI exception matrix",
     "Aura paired-object zone-change lookup and hidden-zone finding are incomplete",
-    "generated trigger effects remain provisional until every effect dependency is trusted"
+    "generated trigger effects promote only when normalized event detection, placement, and every effect dependency are capability-closed; draw triggers remain provisional while zone.draw.library_to_hand retains its replacement blocker"
   ],
   "review_status": "draft"
 }

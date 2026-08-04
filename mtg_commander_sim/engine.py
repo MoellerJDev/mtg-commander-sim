@@ -94,6 +94,14 @@ from .trigger_processing import (
     enqueue_trigger_batch,
     start_delayed_trigger_batch,
 )
+from .trigger_discovery import (
+    dispatch_semantic_event,
+    semantic_event_condition_matches,
+    semantic_event_matches,
+    semantic_event_value,
+)
+from .zone_trigger_events import ZoneChangeOccurrence
+from .zone_trigger_processing import dispatch_zone_change_occurrence
 from .life_state import (
     pay_life_cost,
 )
@@ -2339,69 +2347,46 @@ class CommanderEngine(
         reason: str,
         trigger_batch: list[StackItem] | None = None,
     ) -> None:
-        """Emit normalized semantic events for one authoritative zone change.
+        """Compatibility adapter from committed moves to immutable facts."""
 
-        Departure handlers receive the battlefield source set and active zones
-        captured before the move.  That last-known-information snapshot is what
-        lets a permanent see itself die or leave while still keeping the actual
-        zone mutation atomic from the perspective of effect resolution.
-        """
-
+        occurrence = ZoneChangeOccurrence(
+            object_id=card.object_id,
+            card_ref=card.ref,
+            owner=card.owner,
+            origin=origin,
+            destination=destination or card.zone,
+            previous_controller=origin_controller,
+            current_controller=card.controller,
+            previous_logical_object_id=origin_logical_object_id,
+            current_logical_object_id=card.logical_object_id,
+            zone_change_counter=card.zone_change_counter,
+            token=card.is_token,
+            card_object=card.is_card_object,
+            previous_characteristics=origin_data,
+            current_characteristics=self._effective_card_data(card),
+            previous_attachments=tuple(origin_attachments),
+            previous_attached_to=origin_attached_to,
+            tapped=card.tapped,
+            cause=reason,
+        )
         owns_trigger_batch = trigger_batch is None
         event_triggers = trigger_batch if trigger_batch is not None else []
+        dispatch_zone_change_occurrence(
+            self,
+            occurrence,
+            card,
+            departure_sources=departure_sources,
+            departure_source_zones=departure_source_zones,
+            trigger_batch=event_triggers,
+        )
+        # Historical source-pinned special cases remain isolated in this
+        # compatibility adapter until their generic descriptors are closed.
+        event_destination = occurrence.destination
+        origin_data = occurrence.previous_characteristics
         origin_types, _, _ = self._type_parts(
             str(origin_data.get("type_line") or "")
         )
-        event_destination = destination or card.zone
-        common = {
-            "card": card.ref,
-            "card_object_identity": origin_logical_object_id,
-            "card_zone_change_counter": card.zone_change_counter,
-            "owner": card.owner,
-            "controller": card.controller,
-            "previous_controller": origin_controller,
-            "from": origin,
-            "to": event_destination,
-            "reason": reason,
-            "token": card.is_token,
-            "attachments": list(origin_attachments),
-            "attached_to": origin_attached_to,
-            "types": sorted(origin_types),
-        }
         if origin == "battlefield" and event_destination != "battlefield":
-            departure_context = {
-                **common,
-                "controller": origin_controller,
-                "types": sorted(origin_types),
-            }
-            for event in (
-                "permanent.leave",
-                *(
-                    ("creature.dies",)
-                    if event_destination == "graveyard" and "creature" in origin_types
-                    else ()
-                ),
-                *(
-                    ("artifact.graveyard",)
-                    if event_destination == "graveyard" and "artifact" in origin_types
-                    else ()
-                ),
-                *(("permanent.graveyard",) if event_destination == "graveyard" else ()),
-            ):
-                self._dispatch_semantic_event(
-                    event,
-                    departure_context,
-                    sources=departure_sources,
-                    source_zones=departure_source_zones,
-                    trigger_batch=event_triggers,
-                )
-            if event_destination == "graveyard" and "creature" in origin_types:
-                self._record_turn_history(
-                    "creature_died",
-                    actor=origin_controller,
-                    object_incarnation=origin_logical_object_id,
-                    types=origin_types,
-                )
             if (
                 event_destination == "graveyard"
                 and "artifact" in origin_types
@@ -2460,6 +2445,8 @@ class CommanderEngine(
                             },
                         )
                     )
+        if owns_trigger_batch:
+            enqueue_trigger_batch(self, event_triggers)
             if (
                 event_destination == "graveyard"
                 and "creature" in origin_types
@@ -2506,56 +2493,6 @@ class CommanderEngine(
                             },
                         )
                     )
-        if origin == "graveyard" and event_destination != "graveyard":
-            self._dispatch_semantic_event(
-                "card.leave_graveyard",
-                common,
-                trigger_batch=event_triggers,
-            )
-        if origin == "hand" and event_destination == "graveyard":
-            self._dispatch_semantic_event(
-                "card.discarded",
-                common,
-                trigger_batch=event_triggers,
-            )
-        if event_destination != "battlefield" or origin == "battlefield":
-            if owns_trigger_batch:
-                enqueue_trigger_batch(self, event_triggers)
-            return
-        entered_data = self._effective_card_data(card)
-        entered_types, entered_subtypes, _ = self._type_parts(
-            str(entered_data.get("type_line") or "")
-        )
-        entered_context = {
-            **common,
-            "controller": card.controller,
-            "types": sorted(entered_types),
-            "subtypes": sorted(entered_subtypes),
-            "mana_value": float(
-                entered_data.get("mana_value", 0) or 0
-            ),
-            "tapped": card.tapped,
-        }
-        self._dispatch_semantic_event(
-            "permanent.enter",
-            entered_context,
-            trigger_batch=event_triggers,
-        )
-        for card_type in ("artifact", "creature", "land", "enchantment"):
-            if card_type in entered_types:
-                self._dispatch_semantic_event(
-                    f"{card_type}.enter",
-                    entered_context,
-                    trigger_batch=event_triggers,
-                )
-        if "saga" in entered_subtypes:
-            self._add_saga_lore(
-                card,
-                trigger_batch=event_triggers,
-                reason="Saga entered",
-            )
-        if owns_trigger_batch:
-            enqueue_trigger_batch(self, event_triggers)
 
     def _add_saga_lore(
         self,
@@ -7304,27 +7241,12 @@ class CommanderEngine(
         source: CardInstance,
         context: Mapping[str, Any],
     ) -> Any:
-        substitutions = {
-            "$source.controller": source.controller,
-            "$source.owner": source.owner,
-            "$source.ref": source.ref,
-            "$source.object_id": source.object_id,
-            "$active_player": self.state.active_player,
-        }
-        if isinstance(value, str) and value in substitutions:
-            return substitutions[value]
-        if isinstance(value, str) and value.startswith("$context."):
-            return context.get(value.removeprefix("$context."))
-        if isinstance(value, list):
-            return [
-                self._semantic_event_value(
-                    item,
-                    source=source,
-                    context=context,
-                )
-                for item in value
-            ]
-        return value
+        return semantic_event_value(
+            self,
+            value,
+            source=source,
+            context=context,
+        )
 
     def _semantic_event_condition_matches(
         self,
@@ -7333,173 +7255,11 @@ class CommanderEngine(
         source: CardInstance,
         context: Mapping[str, Any],
     ) -> bool:
-        """Evaluate a declarative trigger condition against event context.
-
-        Conditions deliberately read only normalized event fields and stable
-        source identity. They cannot mutate state or execute semantic effects.
-        """
-
-        if "all" in condition:
-            values = condition.get("all")
-            if not isinstance(values, Sequence) or isinstance(
-                values, (str, bytes)
-            ):
-                raise GameRuleError("Semantic event 'all' must be a list")
-            return all(
-                self._semantic_event_condition_matches(
-                    dict(item),
-                    source=source,
-                    context=context,
-                )
-                for item in values
-                if isinstance(item, Mapping)
-            )
-        if "any" in condition:
-            values = condition.get("any")
-            if not isinstance(values, Sequence) or isinstance(
-                values, (str, bytes)
-            ):
-                raise GameRuleError("Semantic event 'any' must be a list")
-            return any(
-                self._semantic_event_condition_matches(
-                    dict(item),
-                    source=source,
-                    context=context,
-                )
-                for item in values
-                if isinstance(item, Mapping)
-            )
-        if "not" in condition:
-            nested = condition.get("not")
-            if not isinstance(nested, Mapping):
-                raise GameRuleError("Semantic event 'not' must be an object")
-            return not self._semantic_event_condition_matches(
-                nested,
-                source=source,
-                context=context,
-            )
-
-        field = str(condition.get("field") or "")
-        if not field:
-            raise GameRuleError("Semantic event condition requires a field")
-        if field == "source_controller_subtype_count":
-            subtype = str(condition.get("subtype") or "").casefold()
-            if not subtype:
-                raise GameRuleError(
-                    "Subtype-count condition requires a subtype"
-                )
-            actual = sum(
-                1
-                for object_id in self.state.players[
-                    source.controller
-                ].zones["battlefield"]
-                if self.state.cards[object_id].controller
-                == source.controller
-                and subtype
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(object_id).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[1]
-            )
-        elif field == "source_controller_type_count":
-            card_type = str(condition.get("type") or "").casefold()
-            if not card_type:
-                raise GameRuleError(
-                    "Type-count condition requires a card type"
-                )
-            actual = sum(
-                1
-                for object_id in self.state.players[
-                    source.controller
-                ].zones["battlefield"]
-                if self.state.cards[object_id].controller
-                == source.controller
-                and card_type
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(object_id).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[0]
-            )
-        elif (
-            field
-            == "source_controller_controls_highest_artifact_mana_value"
-        ):
-            controlled_values: list[float] = []
-            all_values: list[float] = []
-            for active_seat in self.active_seats:
-                for object_id in self.state.players[
-                    active_seat
-                ].zones["battlefield"]:
-                    permanent = self.state.cards[object_id]
-                    if permanent.phased_out:
-                        continue
-                    data = self._effective_card_data(permanent)
-                    types, _, _ = self._type_parts(
-                        str(data.get("type_line") or "")
-                    )
-                    if "artifact" not in types:
-                        continue
-                    value = float(data.get("mana_value") or 0)
-                    all_values.append(value)
-                    if permanent.controller == source.controller:
-                        controlled_values.append(value)
-            actual = bool(
-                controlled_values
-                and max(controlled_values) == max(all_values)
-            )
-        elif field.startswith("source_annotation."):
-            actual = source.annotations.get(
-                field.removeprefix("source_annotation.")
-            )
-        elif field == "source_active_face":
-            actual = source.active_face or (
-                (
-                    self.card_record(source).faces[0].get("name")
-                    if self.card_record(source) is not None
-                    and self.card_record(source).faces
-                    else None
-                )
-            )
-        else:
-            actual = context.get(field)
-        expected = self._semantic_event_value(
-            condition.get("value"),
+        return semantic_event_condition_matches(
+            self,
+            condition,
             source=source,
             context=context,
-        )
-        op = str(condition.get("op") or "eq")
-        if op == "eq":
-            return actual == expected
-        if op == "ne":
-            return actual != expected
-        if op == "in":
-            return actual in (expected or [])
-        if op == "not_in":
-            return actual not in (expected or [])
-        if op == "contains_any":
-            return bool(set(actual or []).intersection(expected or []))
-        if op == "gte":
-            return actual is not None and actual >= expected
-        if op == "gt":
-            return actual is not None and actual > expected
-        if op == "lte":
-            return actual is not None and actual <= expected
-        if op == "lt":
-            return actual is not None and actual < expected
-        if op == "truthy":
-            return bool(actual)
-        if op == "falsy":
-            return not bool(actual)
-        raise GameRuleError(
-            f"Unsupported semantic event condition operator {op!r}"
         )
 
     def _semantic_event_matches(
@@ -7511,69 +7271,14 @@ class CommanderEngine(
         *,
         source_zone: str | None = None,
     ) -> bool:
-        self_event = program.event.endswith(".self")
-        program_event = (
-            program.event.removesuffix(".self")
-            if self_event
-            else program.event
+        return semantic_event_matches(
+            self,
+            program,
+            source,
+            event,
+            context,
+            source_zone=source_zone,
         )
-        if (
-            program_event != event
-            or program.active_zone != (source_zone or source.zone)
-        ):
-            return False
-        if self_event and str(context.get("card") or "") != source.ref:
-            return False
-        trigger_controller = (
-            str(context.get("previous_controller"))
-            if (
-                self_event
-                and context.get("previous_controller") is not None
-                and event
-                in {
-                    "artifact.graveyard",
-                    "creature.dies",
-                    "permanent.graveyard",
-                    "permanent.leave",
-                }
-            )
-            else source.controller
-        )
-        if trigger_controller not in self.active_seats:
-            return False
-        if program.event_condition is not None:
-            return self._semantic_event_condition_matches(
-                program.event_condition,
-                source=source,
-                context=context,
-            )
-        if event == "land.enter":
-            entered = self._resolve_object(
-                source.controller,
-                str(context.get("card")),
-                zones={"battlefield"},
-            )
-            return entered.controller == source.controller
-        if event == "card.second_draw":
-            return context.get("player") == source.controller
-        if event == "step.begin":
-            return (
-                context.get("player") == source.controller
-                and context.get("step") == "beginning_combat"
-            )
-        if event == "artifact.enter":
-            entered = self._resolve_object(
-                source.controller,
-                str(context.get("card")),
-                zones={"battlefield"},
-            )
-            return entered.controller == source.controller
-        if event == "creature.dies" and not self_event:
-            return (
-                context.get("previous_controller")
-                == source.controller
-            )
-        return True
 
     def _dispatch_semantic_event(
         self,
@@ -7584,201 +7289,14 @@ class CommanderEngine(
         source_zones: Mapping[str, str] | None = None,
         trigger_batch: list[StackItem] | None = None,
     ) -> list[str]:
-        """Queue data-driven triggers for a normalized authoritative event."""
-
-        triggered: list[StackItem] = []
-        candidates = list(sources) if sources is not None else self._semantic_event_sources()
-        for source in candidates:
-            active_zone = (
-                source_zones.get(source.object_id, source.zone)
-                if source_zones is not None
-                else source.zone
-            )
-            for program in self.semantics.programs_for_oracle(
-                source.oracle_id,
-                active_zone=active_zone,
-            ):
-                if program.trust_level == "unresolved":
-                    continue
-                if not self._semantic_event_matches(
-                    program,
-                    source,
-                    event,
-                    context,
-                    source_zone=active_zone,
-                ):
-                    continue
-                if (
-                    self.state.config.semantic_policy == "trusted_only"
-                    and not self.semantic_program_is_current_trusted(program)
-                ):
-                    self._pause_for_unsupported_semantic(
-                        program=program,
-                        event=event,
-                        source=source,
-                    )
-                    return [item.ref for item in triggered]
-                trigger_controller = (
-                    str(context.get("previous_controller"))
-                    if (
-                        program.event.endswith(".self")
-                        and str(context.get("card") or "")
-                        == source.ref
-                        and context.get("previous_controller") is not None
-                        and event
-                        in {
-                            "artifact.graveyard",
-                            "creature.dies",
-                            "permanent.graveyard",
-                            "permanent.leave",
-                        }
-                    )
-                    else source.controller
-                )
-                ref = self._next_ref("S")
-                item = StackItem(
-                    stack_id=self._stable_runtime_id("stack", ref),
-                    ref=ref,
-                    kind="triggered_ability",
-                    controller=trigger_controller,
-                    label=program.label,
-                    source_object_id=source.object_id,
-                    semantic_key=program.key,
-                    visibility=list(self.seats),
-                    context={
-                        "event": event,
-                        **copy.deepcopy(dict(context)),
-                        "source_logical_object_id": (
-                            source.logical_object_id
-                        ),
-                        **(
-                            {"trigger_target_selection_pending": True}
-                            if program.target_schema
-                            else {}
-                        ),
-                    },
-                )
-                if (
-                    trigger_batch is not None
-                    and "one_or_more_event_batch" in program.coverage
-                    and any(
-                        existing.semantic_key == item.semantic_key
-                        and existing.source_object_id
-                        == item.source_object_id
-                        and existing.context.get("event") == event
-                        for existing in trigger_batch
-                    )
-                ):
-                    continue
-                trigger_count = 1
-                entering_types = {
-                    str(value).casefold()
-                    for value in context.get("types", [])
-                }
-                if (
-                    event
-                    in {
-                        "permanent.enter",
-                        "artifact.enter",
-                        "creature.enter",
-                        "land.enter",
-                        "enchantment.enter",
-                    }
-                    and entering_types.intersection(
-                        {"artifact", "creature"}
-                    )
-                    and source.zone == "battlefield"
-                ):
-                    trigger_count += sum(
-                        1
-                        for permanent_id in self.state.players[
-                            item.controller
-                        ].zones["battlefield"]
-                        if self.state.cards[
-                            permanent_id
-                        ].controller
-                        == item.controller
-                        and not self.state.cards[
-                            permanent_id
-                        ].phased_out
-                        and (
-                            (
-                                "if an artifact or creature entering causes "
-                                "a triggered ability of a permanent you "
-                                "control to trigger, that ability triggers "
-                                "an additional time"
-                            )
-                            in str(
-                                (
-                                    self.card_record(
-                                        self.state.cards[permanent_id]
-                                    ).oracle_text
-                                    if self.card_record(
-                                        self.state.cards[permanent_id]
-                                    )
-                                    is not None
-                                    else ""
-                                )
-                            ).casefold()
-                        )
-                    )
-                source_types, source_subtypes, _ = self._type_parts(
-                    str(
-                        self._effective_card_data(source).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )
-                if (
-                    "creature" in source_types
-                    and source.printed_name != "Roaming Throne"
-                ):
-                    trigger_count += sum(
-                        1
-                        for permanent_id in self.state.players[
-                            item.controller
-                        ].zones["battlefield"]
-                        if self.state.cards[
-                            permanent_id
-                        ].controller
-                        == item.controller
-                        and not self.state.cards[
-                            permanent_id
-                        ].phased_out
-                        and self.state.cards[
-                            permanent_id
-                        ].printed_name
-                        == "Roaming Throne"
-                        and str(
-                            self.state.cards[
-                                permanent_id
-                            ].annotations.get(
-                                "chosen_creature_type", ""
-                            )
-                        ).casefold()
-                        in source_subtypes
-                    )
-                triggered.append(item)
-                for copy_index in range(1, trigger_count):
-                    copy_ref = self._next_ref("S")
-                    copied = StackItem.from_dict(item.to_dict())
-                    copied.stack_id = self._stable_runtime_id(
-                        "stack", copy_ref
-                    )
-                    copied.ref = copy_ref
-                    copied.context = {
-                        **copy.deepcopy(item.context),
-                        "additional_trigger_copy": copy_index,
-                    }
-                    triggered.append(copied)
-                if "consume_evoked_marker" in program.coverage:
-                    source.annotations.pop("evoked", None)
-        if trigger_batch is not None:
-            trigger_batch.extend(triggered)
-        elif triggered:
-            enqueue_trigger_batch(self, triggered)
-        return [item.ref for item in triggered]
+        return dispatch_semantic_event(
+            self,
+            event,
+            context,
+            sources=sources,
+            source_zones=source_zones,
+            trigger_batch=trigger_batch,
+        )
 
     def _semantic_target_options(
         self,
@@ -8768,8 +8286,24 @@ class CommanderEngine(
             record = self.card_record(item.card_object_id)
             if record and item.default_destination == "battlefield":
                 oracle = record.oracle_text.casefold()
-                semantic_markers = ("when ", "whenever ", "as ~ enters", "as this", "enters with", "you may have")
-                return not any(marker in oracle for marker in semantic_markers)
+                replacement_markers = (
+                    "as ~ enters",
+                    "as this",
+                    "enters with",
+                    "you may have",
+                )
+                if any(marker in oracle for marker in replacement_markers):
+                    return False
+                if re.search(r"\b(?:when|whenever)\b", oracle) is None:
+                    return True
+                event_programs = self.semantics.programs_for_oracle(
+                    record.oracle_id
+                )
+                return bool(event_programs) and all(
+                    self.semantic_program_is_current_trusted(program)
+                    and not program.requires_arbiter
+                    for program in event_programs
+                )
         return False
 
     def _begin_battle_entry_protector_choice(

@@ -2,7 +2,7 @@
 title: "CardProgram V2"
 status: "current"
 authoritative_source: "mtg_commander_sim/card_programs, mtg_commander_sim/semantics.py, and schemas/card-program-v2.schema.json"
-verified: "2026-08-01"
+verified: "2026-08-03"
 audience: "compiler, rules, replay, and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
@@ -58,6 +58,12 @@ fail closed.
   manifest or command fingerprint fails explicitly.
 - Runtime accepts registered operations only. Oracle prose is not parsed
   during a state transition.
+- Oracle IR v22 gives simple self enter/dies/leaves triggers three independent
+  closure dimensions: normalized zone-event detection, ordinary APNAP trigger
+  placement, and the result operation. Session registration promotes only
+  exact trigger programs for which every declared capability is trusted. A
+  fixed life trigger can therefore execute without an arbiter, while an exact
+  ETB draw trigger remains provisional on the blocked draw-event capability.
 
 ## Execution ownership
 
@@ -99,6 +105,7 @@ handler schema version, and capability dependencies. This mapping is derived
 from the frozen runtime registry and is not a second serialized authority.
 
 See [ADR 0005](../adr/0005-card-program-v2.md), the
+[normalized zone-trigger decision](../adr/0019-normalized-zone-trigger-discovery.md),
 [semantic-node guide](../extension/semantic-node.md), the
 [typed-handler boundary](semantic-handlers.md), the
 [trust-closure boundary](trust-closure.md), the

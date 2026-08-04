@@ -9,6 +9,8 @@ from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
 from mtg_commander_sim import trigger_batches as trigger_batches_module
+from mtg_commander_sim import zone_trigger_events as zone_trigger_events_module
+from mtg_commander_sim.effect_runtime import life_effects
 from mtg_commander_sim.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
@@ -64,6 +66,7 @@ from mtg_commander_sim.semantic_runtime.life_replacements import (
     LifeReplacementSourceContext,
 )
 from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
+from mtg_commander_sim.zone_trigger_events import ZoneChangeOccurrence
 
 
 def _event(*, assigned: int, dealt: int, prevented: int) -> DamageEvent:
@@ -287,6 +290,69 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         with patch.object(DamageEvent, "__post_init__", lambda _event: None):
             with self.assertRaises(AssertionError):
                 assert_negative_assignment_rejected()
+
+    def test_life_effect_commit_mutant_is_killed(self):
+        def resolved_life(commit) -> int:
+            session = make_session(
+                self.db,
+                self.mishra,
+                self.zimone,
+                players=2,
+                seed=119001,
+            )
+            keep_all(session)
+            with patch.object(
+                life_effects,
+                "commit_life_change_batch",
+                commit,
+            ):
+                session.engine.apply_effect(
+                    {"op": "life", "player": "A", "delta": 4},
+                    actor="A",
+                )
+            return session.state.players["A"].life
+
+        real_commit = life_effects.commit_life_change_batch
+        self.assertEqual(44, resolved_life(real_commit))
+        self.assertNotEqual(44, resolved_life(lambda *_args, **_kwargs: None))
+
+    def test_zone_trigger_detection_mutant_is_killed(self):
+        value = ZoneChangeOccurrence(
+            object_id="mutation-zone-object",
+            card_ref="A01",
+            owner="A",
+            origin="battlefield",
+            destination="graveyard",
+            previous_controller="A",
+            current_controller="A",
+            previous_logical_object_id="mutation-zone-object:0",
+            current_logical_object_id="mutation-zone-object:1",
+            zone_change_counter=1,
+            token=False,
+            card_object=True,
+            previous_characteristics={"type_line": "Creature — Test"},
+            current_characteristics={"type_line": "Creature — Test"},
+        )
+
+        def assert_dies_event() -> None:
+            self.assertIn(
+                "creature.dies",
+                {
+                    event.kind
+                    for event in zone_trigger_events_module.normalized_zone_trigger_events(
+                        value
+                    )
+                },
+            )
+
+        assert_dies_event()
+        with patch.object(
+            zone_trigger_events_module,
+            "normalized_zone_trigger_events",
+            return_value=(),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_dies_event()
 
     def test_commander_identity_mutant_is_killed(self):
         def assert_physical_designations_remain_separate() -> None:
