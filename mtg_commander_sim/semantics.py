@@ -655,10 +655,22 @@ class SemanticRegistry:
         ]
 
     def card_program_for_oracle(self, oracle_id: str) -> Any | None:
-        if self._card_program_cache is None:
-            self.card_programs()
-        assert self._card_program_cache is not None
-        return self._card_program_cache.get(oracle_id)
+        if self._card_program_cache is not None:
+            return self._card_program_cache.get(oracle_id)
+
+        # Runtime trust checks are scoped to one physical card's Oracle
+        # program.  Building every compatibility group here lets an unrelated
+        # provisional or malformed group prevent otherwise valid cards from
+        # evaluating their pinned handlers.  Keep the all-card adapter strict
+        # for snapshots and audits, but isolate the ordinary point lookup.
+        programs = self.programs_for_oracle(oracle_id)
+        if not programs:
+            return None
+        from .card_programs.adapters import (
+            card_program_from_semantic_programs,
+        )
+
+        return card_program_from_semantic_programs(programs)
 
     def card_program_fingerprints(self) -> dict[str, str]:
         return {

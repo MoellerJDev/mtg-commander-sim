@@ -4,6 +4,10 @@ import copy
 from collections.abc import Mapping, Sequence
 from typing import Any, Protocol
 
+from .ability_fragments import (
+    canonical_ability_fragments,
+    granted_triggered_specs,
+)
 from .errors import GameRuleError
 from .model import CardInstance, StackItem
 from .semantics import SemanticProgram
@@ -431,6 +435,9 @@ def dispatch_semantic_event(
     *,
     sources: Sequence[CardInstance] | None = None,
     source_zones: Mapping[str, str] | None = None,
+    source_characteristics: Mapping[
+        str, Mapping[str, Any]
+    ] | None = None,
     trigger_batch: list[StackItem] | None = None,
 ) -> list[str]:
     """Detect data-driven triggers for one normalized authoritative event."""
@@ -445,10 +452,39 @@ def dispatch_semantic_event(
             if source_zones is not None
             else source.zone
         )
-        for program in host.semantics.programs_for_oracle(
-            source.oracle_id,
-            active_zone=active_zone,
+        programs = list(
+            program
+            for program in host.semantics.programs_for_oracle(
+                source.oracle_id,
+                active_zone=active_zone,
+            )
+            if not program.provenance.get("granted_only")
+        )
+        characteristics = (
+            source_characteristics.get(source.object_id)
+            if source_characteristics is not None
+            else None
+        ) or host._effective_card_data(source)
+        for granted in granted_triggered_specs(
+            canonical_ability_fragments(
+                characteristics.get("ability_fragments", ())
+            )
         ):
+            if granted.event != event:
+                continue
+            program = host.semantics.get(granted.semantic_key)
+            if program is None:
+                raise GameRuleError(
+                    "A typed granted trigger references an unknown "
+                    f"semantic program {granted.semantic_key!r}"
+                )
+            if program.event != granted.event:
+                raise GameRuleError(
+                    "A typed granted trigger disagrees with its semantic "
+                    "program event"
+                )
+            programs.append(program)
+        for program in programs:
             if program.trust_level == "unresolved":
                 continue
             if not semantic_event_matches(

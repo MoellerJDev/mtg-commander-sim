@@ -91,6 +91,11 @@ flowchart LR
   Runtime-handler deduplication consumes the entire canonical typed query and
   modifier, so a reviewed handler cannot shadow a generated handler with
   different semantics.
+- Oracle IR v29 lowers the represented Enchant and protection keyword grammar
+  into immutable runtime fragments. Runtime casting, Aura entry/legality,
+  targeting, blocking, attachment, and damage consume those fragments without
+  reparsing Oracle text. Unsupported protection qualities and Enchant
+  restrictions remain precise material residuals.
 
 ## Extension points
 

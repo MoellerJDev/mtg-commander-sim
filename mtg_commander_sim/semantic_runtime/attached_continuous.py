@@ -11,6 +11,7 @@ from ..continuous_effect_model import (
     Layer,
 )
 from ..object_predicate import ObjectQuerySpec
+from ..ability_fragments import ability_fragment_from_dict
 from .component_registry import exact_fields
 from .context import SemanticNodeError
 from .continuous_components import ContinuousEffectSourceContext
@@ -29,6 +30,7 @@ class AttachedFixedCharacteristicsNode:
     add_abilities: tuple[str, ...]
     remove_abilities: tuple[str, ...]
     add_rules_text: tuple[str, ...]
+    add_ability_fragments: tuple[Mapping[str, Any], ...]
     power: int
     toughness: int
 
@@ -57,6 +59,27 @@ def _rules_text_values(value: Any) -> tuple[str, ...]:
             "modifier.add_rules_text values must be unique"
         )
     return result
+
+
+def _ability_fragment_values(
+    value: Any,
+) -> tuple[Mapping[str, Any], ...]:
+    if not isinstance(value, list):
+        raise SemanticNodeError(
+            "modifier.add_ability_fragments must be an array"
+        )
+    result: list[Mapping[str, Any]] = []
+    for index, candidate in enumerate(value):
+        if not isinstance(candidate, Mapping):
+            raise SemanticNodeError(
+                "modifier.add_ability_fragments entries must be objects"
+            )
+        try:
+            ability_fragment_from_dict(candidate)
+        except ValueError as exc:
+            raise SemanticNodeError(str(exc)) from exc
+        result.append(dict(candidate))
+    return tuple(result)
 
 
 def _type_operations(value: Any) -> tuple[ContinuousOperation, ...]:
@@ -155,6 +178,7 @@ class AttachedFixedCharacteristicsHandler:
                 "add_abilities",
                 "remove_abilities",
                 "add_rules_text",
+                "add_ability_fragments",
                 "power",
                 "toughness",
             },
@@ -175,6 +199,9 @@ class AttachedFixedCharacteristicsHandler:
                 modifier["remove_abilities"], field="modifier.remove_abilities"
             ),
             add_rules_text=_rules_text_values(modifier["add_rules_text"]),
+            add_ability_fragments=_ability_fragment_values(
+                modifier["add_ability_fragments"]
+            ),
             power=power,
             toughness=toughness,
         )
@@ -183,6 +210,7 @@ class AttachedFixedCharacteristicsHandler:
             or node.add_abilities
             or node.remove_abilities
             or node.add_rules_text
+            or node.add_ability_fragments
             or node.power
             or node.toughness
         ):
@@ -230,6 +258,10 @@ class AttachedFixedCharacteristicsHandler:
             *(
                 ContinuousOperation("add_rules_text", line)
                 for line in node.add_rules_text
+            ),
+            *(
+                ContinuousOperation("add_ability_fragment", fragment)
+                for fragment in node.add_ability_fragments
             ),
         )
         if ability_operations:

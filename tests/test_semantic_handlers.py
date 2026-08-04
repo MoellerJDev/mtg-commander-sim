@@ -322,7 +322,7 @@ class TypedSemanticHandlerTests(unittest.TestCase):
             {"op": "untap_all_creatures"}, context
         )
 
-        self.assertEqual("generic.tap-permanent.v1", tap.handler_id)
+        self.assertEqual("generic.tap-permanent.v2", tap.handler_id)
         self.assertEqual(
             SetPermanentTappedIntent(
                 object_ref="C9",

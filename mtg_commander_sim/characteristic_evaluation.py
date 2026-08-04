@@ -14,6 +14,10 @@ from .continuous_effects import (
 )
 from .model import CardInstance
 from .util import unique_preserving_order
+from .ability_fragments import (
+    ability_fragment_to_dict,
+    canonical_ability_fragments,
+)
 
 
 _CARD_TYPES = {
@@ -108,11 +112,17 @@ def _base_characteristic_state(
         mana_cost=str(result.get("mana_cost") or ""),
         mana_value=float(result.get("mana_value") or 0),
         text=str(result.get("oracle_text") or ""),
+        executable_text=str(result.get("oracle_text") or ""),
         supertypes=set(supertypes),
         card_types=set(card_types),
         subtypes=set(subtypes),
         colors={str(value).upper() for value in result.get("colors", [])},
         abilities=[str(value) for value in result.get("keywords", [])],
+        ability_fragments=list(
+            canonical_ability_fragments(
+                result.get("ability_fragments", ())
+            )
+        ),
         power=_numeric(result.get("power")),
         toughness=_numeric(result.get("toughness")),
         loyalty=_numeric(result.get("loyalty")),
@@ -136,6 +146,7 @@ def _copy_effect(
         "defense": "defense",
         "colors": "colors",
         "keywords": "abilities",
+        "ability_fragments": "ability_fragments",
     }
     numeric_fields = {"power", "toughness", "loyalty", "defense"}
     for source_field, target_field in field_map.items():
@@ -263,10 +274,17 @@ def _render_characteristics(
             "mana_cost": values["mana_cost"],
             "mana_value": values["mana_value"],
             "oracle_text": values["text"],
+            "executable_oracle_text": values["executable_text"],
             "colors": [
                 color for color in "WUBRGC" if color in set(values["colors"])
             ],
             "keywords": unique_preserving_order(values["abilities"]),
+            "ability_fragments": [
+                ability_fragment_to_dict(value)
+                for value in canonical_ability_fragments(
+                    values["ability_fragments"]
+                )
+            ],
         }
     )
     for field in ("power", "toughness", "loyalty", "defense"):
@@ -321,9 +339,18 @@ def evaluate_card_characteristics(
         or runtime_effects
     )
     if not layered:
+        result["executable_oracle_text"] = str(
+            result.get("oracle_text") or ""
+        )
         result["keywords"] = unique_preserving_order(
             list(result.get("keywords") or [])
         )
+        result["ability_fragments"] = [
+            ability_fragment_to_dict(value)
+            for value in canonical_ability_fragments(
+                result.get("ability_fragments", ())
+            )
+        ]
         return result
 
     state = _base_characteristic_state(card, result)

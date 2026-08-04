@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from contextlib import contextmanager
 import json
 from pathlib import Path
 import tempfile
@@ -18,7 +19,15 @@ from mtg_commander_sim.aura import (
     parse_simple_enchant_line,
     simple_enchant_spec_from_oracle,
 )
+from mtg_commander_sim.ability_fragments import (
+    ProtectionQualityKind,
+    ProtectionSpec,
+    ability_fragment_to_dict,
+)
 from mtg_commander_sim.carddb import CardRecord
+from mtg_commander_sim.compiler.program_generation import (
+    register_generated_programs,
+)
 from mtg_commander_sim.model import CardInstance
 from mtg_commander_sim.oracle_ir import compile_oracle_card
 from mtg_commander_sim.record import checkpoint_envelope, replay_record
@@ -286,9 +295,36 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
                 else original(value)
             )
 
-        return session, aura, target, patch.object(
-            engine, "card_record", side_effect=record_for
-        )
+        @contextmanager
+        def compiled_record():
+            engine_type = type(engine)
+            original_trust = engine_type.semantic_program_is_current_trusted
+
+            def trust_fixture_program(host, program):
+                return bool(
+                    program is not None
+                    and program.oracle_id == record.oracle_id
+                    and program.trust_level == "trusted"
+                ) or original_trust(host, program)
+
+            with patch.object(
+                engine, "card_record", side_effect=record_for
+            ), patch.object(
+                engine_type,
+                "semantic_program_is_current_trusted",
+                new=trust_fixture_program,
+            ):
+                register_generated_programs(
+                    engine.card_db,
+                    engine.semantics,
+                    (record,),
+                    capability_registry=load_default_capability_registry(),
+                    capability_profile=engine.state.config.review_profile,
+                    promote_exact_runtime_handlers=True,
+                )
+                yield
+
+        return session, aura, target, compiled_record()
 
     def add_fixture_aura(self, engine, seat: str, zone: str):
         record = aura_record("fixture:simple-aura")
@@ -330,7 +366,38 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
                 return aura_record(instance.oracle_id)
             return original(host, value)
 
-        return patch.object(engine_type, "card_record", new=record_for)
+        @contextmanager
+        def compiled_record():
+            record = aura_record("fixture:simple-aura")
+            original_trust = (
+                engine_type.semantic_program_is_current_trusted
+            )
+
+            def trust_fixture_program(host, program):
+                return bool(
+                    program is not None
+                    and program.oracle_id == record.oracle_id
+                    and program.trust_level == "trusted"
+                ) or original_trust(host, program)
+
+            with patch.object(
+                engine_type, "card_record", new=record_for
+            ), patch.object(
+                engine_type,
+                "semantic_program_is_current_trusted",
+                new=trust_fixture_program,
+            ):
+                register_generated_programs(
+                    engine.card_db,
+                    engine.semantics,
+                    (record,),
+                    capability_registry=load_default_capability_registry(),
+                    capability_profile=engine.state.config.review_profile,
+                    promote_exact_runtime_handlers=True,
+                )
+                yield
+
+        return compiled_record()
 
     def test_aura_offer_requires_and_projects_one_legal_spell_target(self):
         session, aura, target, records = self.fixture()
@@ -407,6 +474,37 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             self.assertEqual("graveyard", aura.zone)
             self.assertFalse(engine.state.stack)
 
+    def test_live_aura_paths_never_recompile_oracle_text(self):
+        session, aura, target, records = self.fixture()
+        engine = session.engine
+        engine.state.players["A"].mana_pool["U"] = 1
+        with records, patch(
+            "mtg_commander_sim.aura.grammar.simple_enchant_spec_from_oracle",
+            side_effect=AssertionError("runtime Oracle compiler invoked"),
+        ):
+            hints = engine._priority_action_hints("A")
+            self.assertIn(
+                aura.ref,
+                {
+                    action.get("card")
+                    for action in hints["actions"]
+                },
+            )
+            engine._cast(
+                "A",
+                {
+                    "card": aura.ref,
+                    "targets": [target.ref],
+                    "pay": "manual",
+                    "payment": {"U": 1},
+                },
+            )
+            engine.permissions.invalidate_current()
+            engine.state.pending_decision = None
+            engine.state.priority_player = None
+            engine._prepare_stack_resolution()
+            self.assertEqual(target.object_id, aura.attached_to)
+
     def test_nonspell_entry_pauses_for_choice_and_resumes_exact_effect(self):
         session, aura, target, records = self.fixture()
         engine = session.engine
@@ -473,6 +571,11 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             "type_line": "Token Enchantment — Aura",
             "oracle_text": "Enchant creature",
             "colors": ["U"],
+            "ability_fragments": [
+                ability_fragment_to_dict(
+                    SimpleEnchantSpec("creature")
+                )
+            ],
         }
         with records:
             before = copy.deepcopy(engine.state.to_dict())
@@ -522,7 +625,7 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
         engine = session.engine
         before = copy.deepcopy(engine.state.to_dict())
         with records, self.assertRaisesRegex(
-            GameRuleError, "supported battlefield-object grammar"
+            GameRuleError, "compiled Enchant descriptor"
         ):
             engine.move_card(
                 aura.object_id,
@@ -554,7 +657,15 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             )
             engine.change_control(target.object_id, "A")
             target.annotations["copy_overrides"] = {
-                "oracle_text": "Protection from blue",
+                "keywords": ["Protection"],
+                "ability_fragments": [
+                    ability_fragment_to_dict(
+                        ProtectionSpec(
+                            ProtectionQualityKind.COLOR,
+                            "U",
+                        )
+                    )
+                ],
             }
             self.assertFalse(
                 engine._attachment_is_legal(aura, subtypes={"aura"})
@@ -636,6 +747,25 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             controller="B",
             log=False,
         )
+        protected_ref = engine.create_token(
+            "B",
+            name="Protection Replay Witness",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "oracle_text": "Protection from blue",
+                "keywords": ["Protection"],
+                "power": "2",
+                "toughness": "2",
+                "ability_fragments": [
+                    ability_fragment_to_dict(
+                        ProtectionSpec(
+                            ProtectionQualityKind.COLOR,
+                            "U",
+                        )
+                    )
+                ],
+            },
+        )[0]
         aura = self.add_fixture_aura(engine, "A", "graveyard")
         engine.semantics.put(
             SemanticProgram(
@@ -682,6 +812,11 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
             packet = session.packet("pilot:A", full=True)
             rendered = json.dumps(packet, sort_keys=True)
             self.assertIn(target.ref, rendered)
+            legal_refs = packet["decision"]["ctx"]["target_schema"][
+                "legal_refs"
+            ]
+            self.assertIn(target.ref, legal_refs)
+            self.assertNotIn(protected_ref, legal_refs)
             self.assertNotIn(target.object_id, rendered)
             self.assertNotIn(aura.object_id, rendered)
 

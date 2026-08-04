@@ -4,6 +4,10 @@ import re
 from typing import Any, Mapping
 
 from ..object_predicate import ObjectQuerySpec
+from ..ability_fragments import (
+    ability_fragment_to_dict,
+    parse_protection_line,
+)
 from .creature_subtypes import canonical_creature_subtype
 
 
@@ -226,6 +230,7 @@ def attached_fixed_characteristics_handler(
     type_operations: list[dict[str, Any]] = []
     add_abilities: tuple[str, ...] = ()
     remove_abilities: tuple[str, ...] = ()
+    add_ability_fragments: tuple[Mapping[str, Any], ...] = ()
     power = 0
     toughness = 0
 
@@ -243,8 +248,19 @@ def attached_fixed_characteristics_handler(
     elif ability_match is not None:
         parsed = _attached_abilities(ability_match.group("abilities"))
         if parsed is None:
-            return None
-        if ability_match.group("verb").casefold() == "has":
+            protection = (
+                parse_protection_line(ability_match.group("abilities"))
+                if ability_match.group("verb").casefold() == "has"
+                else None
+            )
+            if protection is None:
+                return None
+            add_abilities = ("Protection",)
+            add_ability_fragments = tuple(
+                ability_fragment_to_dict(fragment)
+                for fragment in protection
+            )
+        elif ability_match.group("verb").casefold() == "has":
             add_abilities = parsed
         else:
             remove_abilities = parsed
@@ -268,6 +284,7 @@ def attached_fixed_characteristics_handler(
         type_operations
         or add_abilities
         or remove_abilities
+        or add_ability_fragments
         or power
         or toughness
     ):
@@ -284,6 +301,9 @@ def attached_fixed_characteristics_handler(
                 "add_abilities": list(add_abilities),
                 "remove_abilities": list(remove_abilities),
                 "add_rules_text": [],
+                "add_ability_fragments": list(
+                    add_ability_fragments
+                ),
                 "power": power,
                 "toughness": toughness,
             },

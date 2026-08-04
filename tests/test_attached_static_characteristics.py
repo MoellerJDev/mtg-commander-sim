@@ -341,7 +341,6 @@ class AttachedContinuousCompilerTests(unittest.TestCase):
         for line in (
             "Equipped creature gets +X/+X.",
             "Equipped creature gets +1/+1 for each artifact you control.",
-            "Enchanted creature has protection from red.",
             "Enchanted creature can't attack.",
             'Equipped creature has "{T}: Draw a card."',
             "As long as enchanted creature is red, it gets +1/+1.",
@@ -350,6 +349,28 @@ class AttachedContinuousCompilerTests(unittest.TestCase):
                 self.assertIsNone(
                     attached_fixed_characteristics_handler(line)
                 )
+
+    def test_compiler_lowers_granted_protection_to_a_typed_fragment(self):
+        result = attached_fixed_characteristics_handler(
+            "Enchanted creature has protection from red."
+        )
+        self.assertIsNotNone(result)
+        modifier = result[1]["modifier"]
+        self.assertEqual(["Protection"], modifier["add_abilities"])
+        self.assertEqual([], modifier["add_rules_text"])
+        self.assertEqual(
+            [
+                {
+                    "kind": "protection",
+                    "value": {
+                        "schema_version": 1,
+                        "quality_kind": "color",
+                        "quality": "R",
+                    },
+                }
+            ],
+            modifier["add_ability_fragments"],
+        )
 
     def test_fixed_equip_keyword_has_exact_bounded_capability(self):
         greaves = self.db.lookup("Lightning Greaves")

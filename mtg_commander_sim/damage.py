@@ -66,6 +66,11 @@ from .prevention_triggers import (
     PreventionTriggerOccurrence,
     prevention_trigger_stack_item,
 )
+from .protection import (
+    ProtectionSource,
+    ProtectionVerdict,
+    protection_verdict,
+)
 from .trigger_processing import enqueue_trigger_batch
 
 
@@ -100,8 +105,6 @@ class DamageHost(Protocol):
         *,
         zones: set[str] | None = None,
     ) -> Any: ...
-
-    def _protection_colors(self, card: Any) -> set[str]: ...
 
     def _combat_damage_target_exists(self, target: str) -> bool: ...
 
@@ -691,9 +694,19 @@ def _protection_prevention_effects(
             assert recipient.object_id is not None
             card = host.state.cards.get(recipient.object_id)
             if card is not None:
-                protected = bool(
-                    host._protection_colors(card).intersection(source.colors)
+                verdict = protection_verdict(
+                    host._effective_card_data(card),
+                    ProtectionSource(
+                        colors=frozenset(source.colors),
+                        card_types=frozenset(source.types),
+                        subtypes=frozenset(source.subtypes),
+                    ),
                 )
+                if verdict is ProtectionVerdict.UNRESOLVED:
+                    raise DamageError(
+                        "Damage recipient has unresolved protection semantics"
+                    )
+                protected = verdict is ProtectionVerdict.BLOCKED
             source_id = f"rules:protection:{recipient.object_id}"
         if not protected:
             continue

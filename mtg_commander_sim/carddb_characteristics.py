@@ -35,6 +35,9 @@ def base_card_characteristics(
             "keywords": list(values.get("keywords", [])),
             "colors": list(values.get("colors", [])),
             "produced_mana": list(values.get("produced_mana", [])),
+            "ability_fragments": list(
+                values.get("ability_fragments", [])
+            ),
         }
 
     face = None
@@ -60,6 +63,7 @@ def base_card_characteristics(
         "keywords": list(record.keywords),
         "colors": list(record.colors),
         "produced_mana": list(record.produced_mana),
+        "ability_fragments": [],
     }
 
 

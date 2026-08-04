@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.ability_fragments import ability_fragment_to_dict
+from mtg_commander_sim.aura import SimpleEnchantSpec
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.oracle_ir import compile_oracle_card
 from mtg_commander_sim.record import (
@@ -113,6 +115,9 @@ class CombatDeclarationCostTests(unittest.TestCase):
                     "Enchanted creature can't attack or block unless its "
                     f"controller pays {cost}."
                 ),
+                "ability_fragments": [
+                    ability_fragment_to_dict(SimpleEnchantSpec("creature"))
+                ],
             },
             aura_target_ref=creature.ref,
         )[0]

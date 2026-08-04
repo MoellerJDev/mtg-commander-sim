@@ -74,7 +74,8 @@
       "test_semantic_handlers",
       "test_semantic_searches",
       "test_targeting_v070",
-      "test_trigger_targeting"
+      "test_trigger_targeting",
+      "test_typed_ability_fragments"
     ],
     "triggers-turns-exact-decks": [
       "test_beginning_phase_rules",

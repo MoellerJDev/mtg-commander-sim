@@ -6,6 +6,11 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session, pass_current
+from mtg_commander_sim.ability_fragments import (
+    ProtectionQualityKind,
+    ProtectionSpec,
+    ability_fragment_to_dict,
+)
 from mtg_commander_sim.combat import (
     DOUBLE_STRIKE,
     FIRST_STRIKE,
@@ -195,6 +200,7 @@ class CombatKeywordRuleTests(unittest.TestCase):
         keywords: tuple[str, ...] = (),
         colors: tuple[str, ...] = (),
         oracle_text: str = "",
+        ability_fragments: tuple[dict, ...] = (),
     ):
         ref = engine.create_token(
             controller,
@@ -206,6 +212,7 @@ class CombatKeywordRuleTests(unittest.TestCase):
                 "keywords": list(keywords),
                 "colors": list(colors),
                 "oracle_text": oracle_text,
+                "ability_fragments": list(ability_fragments),
             },
         )[0]
         return engine._resolve_object(
@@ -362,6 +369,15 @@ class CombatKeywordRuleTests(unittest.TestCase):
             "B",
             "Protected blocker",
             oracle_text="Protection from green",
+            keywords=("Protection",),
+            ability_fragments=(
+                ability_fragment_to_dict(
+                    ProtectionSpec(
+                        ProtectionQualityKind.COLOR,
+                        "G",
+                    )
+                ),
+            ),
         )
         self.set_combat(engine, attacker, blocker)
         life_a = engine.state.players["A"].life

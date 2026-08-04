@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import copy
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from .model import CardInstance, StackItem
@@ -12,6 +14,12 @@ from .zone_trigger_events import (
 
 
 class ZoneTriggerProcessingHost(Protocol):
+    def _semantic_event_sources(self) -> Sequence[CardInstance]: ...
+
+    def _effective_card_data(
+        self, card: CardInstance
+    ) -> Mapping[str, Any]: ...
+
     def _dispatch_semantic_event(
         self,
         event: str,
@@ -19,6 +27,9 @@ class ZoneTriggerProcessingHost(Protocol):
         *,
         sources: Sequence[CardInstance] | None = None,
         source_zones: Mapping[str, str] | None = None,
+        source_characteristics: Mapping[
+            str, Mapping[str, Any]
+        ] | None = None,
         trigger_batch: list[StackItem] | None = None,
     ) -> list[str]: ...
 
@@ -30,6 +41,41 @@ class ZoneTriggerProcessingHost(Protocol):
         object_incarnation: str,
         types: set[str],
     ) -> None: ...
+
+
+@dataclass(frozen=True, slots=True)
+class DepartureTriggerSnapshot:
+    sources: tuple[CardInstance, ...] = ()
+    source_zones: Mapping[str, str] = field(default_factory=dict)
+    source_characteristics: Mapping[
+        str, Mapping[str, Any]
+    ] = field(default_factory=dict)
+
+
+def capture_departure_trigger_sources(
+    host: ZoneTriggerProcessingHost,
+    *,
+    semantic_events: bool,
+    origin: str,
+) -> DepartureTriggerSnapshot:
+    """Snapshot battlefield trigger sources and LKI before zone mutation."""
+
+    if not semantic_events or origin != "battlefield":
+        return DepartureTriggerSnapshot((), {}, {})
+    sources = tuple(
+        copy.deepcopy(source)
+        for source in host._semantic_event_sources()
+    )
+    return DepartureTriggerSnapshot(
+        sources=sources,
+        source_zones={source.object_id: source.zone for source in sources},
+        source_characteristics={
+            source.object_id: copy.deepcopy(
+                host._effective_card_data(source)
+            )
+            for source in sources
+        },
+    )
 
     def _add_saga_lore(
         self,
@@ -47,6 +93,9 @@ def dispatch_zone_change_occurrence(
     *,
     departure_sources: Sequence[CardInstance],
     departure_source_zones: Mapping[str, str],
+    departure_source_characteristics: Mapping[
+        str, Mapping[str, Any]
+    ],
     trigger_batch: list[StackItem] | None = None,
 ) -> None:
     """Detect represented events from immutable facts, then use CR 603.3."""
@@ -62,6 +111,7 @@ def dispatch_zone_change_occurrence(
                 context,
                 sources=departure_sources,
                 source_zones=departure_source_zones,
+                source_characteristics=departure_source_characteristics,
                 trigger_batch=pending,
             )
         else:
@@ -103,5 +153,7 @@ def dispatch_zone_change_occurrence(
 
 __all__ = [
     "ZoneTriggerProcessingHost",
+    "DepartureTriggerSnapshot",
+    "capture_departure_trigger_sources",
     "dispatch_zone_change_occurrence",
 ]

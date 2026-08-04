@@ -61,7 +61,12 @@ server, provider, and pilot success never promote rules fidelity by themselves.
   the same evaluator consumed by seat projection.
   Bounded simple-object Auras use one immutable target grammar from compiler
   through casting, resolution, nonspell entry, token preflight, and CR 704
-  legality; unsupported Enchant forms fail before mutation.
+  legality; runtime never recompiles Oracle text. A typed source-pinned linked
+  descriptor covers the represented graveyard-creature Aura transition.
+  Represented protection qualities use typed DEBT checks for targets, damage,
+  blocking, and attachments, while typed layer-6 grants drive activation and
+  trigger discovery instead of executable display text. Unsupported Enchant
+  and protection forms fail before mutation.
   Most other orchestration and mutation remains centralized in
   `CommanderEngine`.
 - Reviewed semantic packs close selected card and interaction slices through
@@ -128,11 +133,11 @@ generated compiler report records the resulting exact-card and residual deltas.
 The canonical draw transaction, Dredge replacement, APNAP batches, private
 continuations, fixed limits, instruction doubling, prospective-drawer optional
 legality, iterative large-count coordination, and Oracle IR v27 compiler path
-are now represented. Before broader promotion, the next bounded hardening batch
-closes continuous-handler identity and qualified-creature grammar; typed Aura
-descriptor/protection hardening follows it. CR 121.6c/121.7 draw-result action
-and nested ordering remain the next draw semantics boundary after those trust
-corrections.
+are now represented. Continuous-handler identity consumes complete typed query
+and modifier descriptors, qualified-creature grammar is registry-closed, and
+the typed Aura/protection/granted-ability boundary is now implemented by Oracle
+IR v29. CR 121.6c/121.7 draw-result action and nested ordering remain the next
+draw semantics boundary after these trust corrections.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

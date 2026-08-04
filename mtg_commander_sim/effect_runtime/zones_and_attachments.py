@@ -304,12 +304,6 @@ def _apply_reanimate_attached_creature_aura(
         creature,
         source_timestamp=host._next_zone_timestamp(),
     )
-    aura.annotations["enchant_target_schema"] = {
-        "zones": ["battlefield"],
-        "categories": ["permanent"],
-        "creature": True,
-        "count": 1,
-    }
     link_annotation = str(
         effect.get("link_annotation") or "reanimated_creature"
     )

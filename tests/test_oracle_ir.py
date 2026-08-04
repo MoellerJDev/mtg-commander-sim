@@ -1447,6 +1447,51 @@ class OracleIRTests(unittest.TestCase):
         self.assertEqual("exact", bolt.status)
         self.assertEqual(0, len(bolt.material_residuals))
 
+    def test_partial_keyword_line_promotes_only_typed_protection_fragment(self):
+        record = self.db.lookup("Scryb Ranger")
+        capabilities = load_default_capability_registry()
+        ir = compile_oracle_card(
+            record,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        compound = next(
+            node
+            for node in ir.faces[0].nodes
+            if "protection" in node.mechanics
+        )
+
+        self.assertEqual("partial", ir.status)
+        self.assertFalse(compound.exact)
+        self.assertEqual(
+            ("protection.typed.debt",),
+            compound.capability_dependencies,
+        )
+        self.assertEqual(
+            ["ability.static.protection.v1"],
+            [handler["handler_id"] for handler in compound.handlers],
+        )
+
+        registry = SemanticRegistry(include_builtin_packs=False)
+        generation = register_generated_programs(
+            self.db,
+            registry,
+            (record,),
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+            promote_exact_runtime_handlers=True,
+        )
+        programs = registry.runtime_handler_programs_for_oracle(
+            record.oracle_id,
+            active_zone="battlefield",
+            event="continuous",
+        )
+        self.assertEqual(1, generation["runtime_handlers_promoted"])
+        self.assertEqual(1, len(programs))
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertIn("protection", programs[0].coverage)
+        self.assertNotIn("flying", programs[0].coverage)
+
     def test_material_unknowns_fail_closed_with_specific_residuals(self):
         rest = compile_oracle_card(self.db.lookup("Rest in Peace"))
         self.assertEqual("unresolved", rest.status)

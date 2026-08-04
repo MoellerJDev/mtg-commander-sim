@@ -44,12 +44,33 @@ def set_permanent_tapped(
     actor: str,
     tapped: bool,
     reason: str,
+    logical_object_id: str | None = None,
     revert: bool = False,
     log: bool = True,
 ) -> str:
     """Commit one validated tap-state intent through authoritative state."""
 
-    card = host._resolve_object(actor, object_ref, zones={"battlefield"})
+    card = next(
+        (
+            candidate
+            for candidate in host.state.cards.values()
+            if candidate.ref == object_ref
+        ),
+        None,
+    )
+    if card is None:
+        card = host._resolve_object(
+            actor,
+            object_ref,
+            zones={"battlefield"},
+        )
+    if (
+        logical_object_id is not None
+        and card.logical_object_id != logical_object_id
+    ):
+        return card.ref
+    if card.zone != "battlefield":
+        return card.ref
     if tapped:
         changed = not card.tapped
         card.tapped = True

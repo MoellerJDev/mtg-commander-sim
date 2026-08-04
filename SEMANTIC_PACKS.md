@@ -141,10 +141,24 @@ battlefield-object Enchant grammar to the trusted
 `attachment.aura.simple_object` capability. The Aura runtime requires a legal
 cast target, revalidates it on resolution, handles nonspell entry through a
 seat-scoped replayable choice, and applies token-entry preflight without
-creating an unattached illegal token. General Enchant qualities, players,
-nonbattlefield objects, Aura creatures, exotic Equip costs, dynamic or
-conditional attached values, and full CR 613 dependencies remain residual and
-fail closed.
+creating an unattached illegal token. Oracle IR v29 now emits the immutable
+Enchant descriptor once; casting offers, proposal validation, resolution,
+nonspell entry, token entry, and state-based legality consume that exact typed
+value and never reparse live Oracle text. A source-pinned linked descriptor
+also preserves Animate Dead's graveyard-creature restriction and exact
+physical link after reanimation without a mutable target-schema annotation.
+
+Layer 6 executable grants are distinct from display rules text. Typed granted
+activated and triggered fragments participate in characteristic evaluation,
+activation/trigger discovery, source identity, last-known information, runtime
+fingerprints, and replay. Thornbite Staff uses this path; its prior printed-name
+trigger and effect-text activation dispatch are gone. A bounded typed
+protection component supplies represented color, card-type, Aura-subtype, and
+everything qualities to targeting, blocking, attachment, and damage checks.
+Unsupported or text-only protection fails closed. General Enchant qualities,
+players, arbitrary nonbattlefield objects, Aura creatures, exotic Equip costs,
+dynamic or conditional attached values, broader protection qualities, and full
+CR 613 dependencies remain residual and fail closed.
 
 ## Typed tap-state execution
 

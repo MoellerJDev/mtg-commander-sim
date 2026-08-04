@@ -33,7 +33,7 @@ from mtg_commander_sim.rules.capabilities import (
 from mtg_commander_sim.card_programs.validation import (
     canonical_program_fingerprint,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
+from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -160,7 +160,7 @@ class CardProgramV2Tests(unittest.TestCase):
             trust_level="trusted",
         )
 
-        self.assertEqual("oracle-ir-v28", current.compiler_version)
+        self.assertEqual("oracle-ir-v30", current.compiler_version)
         self.assertEqual(
             "capability_closed", current.trust_closure["trust_basis"]
         )
@@ -182,7 +182,7 @@ class CardProgramV2Tests(unittest.TestCase):
             capability_profile="commander_review",
             trust_level="trusted",
         )
-        self.assertEqual("oracle-ir-v28", current.compiler_version)
+        self.assertEqual("oracle-ir-v30", current.compiler_version)
         self.assertEqual("capability_closed", current.trust_closure["trust_basis"])
         self.assertEqual(
             ["choose_damage_source", "life"],
@@ -448,6 +448,37 @@ class CardProgramV2Tests(unittest.TestCase):
                     CardProgram.from_dict(program.to_dict()).to_dict(),
                 )
 
+    def test_point_lookup_isolated_from_unrelated_invalid_group(self):
+        registry = SemanticRegistry(include_builtin_packs=False)
+        invalid_oracle = "00000000-0000-4000-8000-000000000001"
+        valid_oracle = "00000000-0000-4000-8000-000000000002"
+        for key in ("test:duplicate-one", "test:duplicate-two"):
+            registry.put(
+                SemanticProgram(
+                    key=key,
+                    label=key,
+                    oracle_id=invalid_oracle,
+                    ability_id="spell:front",
+                )
+            )
+        registry.put(
+            SemanticProgram(
+                key="test:valid",
+                label="Valid",
+                oracle_id=valid_oracle,
+                ability_id="static:front:n1",
+            )
+        )
+
+        self.assertEqual(
+            valid_oracle,
+            registry.card_program_for_oracle(valid_oracle).oracle_id,
+        )
+        with self.assertRaisesRegex(CardProgramError, "ability IDs"):
+            registry.card_program_for_oracle(invalid_oracle)
+        with self.assertRaisesRegex(CardProgramError, "ability IDs"):
+            registry.card_programs()
+
     def test_registry_snapshot_roundtrips_canonical_and_legacy_views(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "semantics.json"
@@ -662,6 +693,7 @@ class CardProgramV2Tests(unittest.TestCase):
         ]
         self.assertEqual(
             {
+                "ability.enchant.linked_graveyard_creature.v1": [],
                 "continuous.anthem.power_toughness.v1": [
                     "continuous.power_toughness.fixed_anthem"
                 ],

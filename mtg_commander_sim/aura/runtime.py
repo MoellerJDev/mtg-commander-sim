@@ -4,16 +4,24 @@ from typing import Any, Iterable, Mapping, Protocol
 
 from ..attachments import attach_objects
 from ..model import CardInstance
+from ..protection import (
+    ProtectionSource,
+    ProtectionVerdict,
+    protection_verdict,
+)
 from ..targets import TargetGroup
 from ..util import unique_preserving_order
-from .grammar import is_aura_type_line, simple_enchant_spec_from_oracle
+from .grammar import is_aura_type_line
 from .model import (
     AuraEntryChoiceRequired,
     AuraEntryOutcome,
     AuraEntryPlan,
     AuraRuleError,
+    EnchantSpec,
+    LinkedGraveyardCreatureEnchantSpec,
     SimpleEnchantSpec,
     AuraZoneMovePreflight,
+    enchant_spec_from_dict,
 )
 
 
@@ -36,9 +44,12 @@ class AuraRuntimeHost(Protocol):
         as_target: bool = True,
     ) -> bool: ...
 
-    def _protection_colors(self, card: CardInstance) -> set[str]: ...
-
-    def _source_colors_for_ref(self, source_ref: str | None) -> set[str]: ...
+    def _compiled_enchant_spec(
+        self,
+        card: CardInstance,
+        *,
+        face_name: str | None = None,
+    ) -> EnchantSpec | None: ...
 
     def _next_zone_timestamp(self) -> int: ...
 
@@ -65,40 +76,32 @@ def _protection_allows_attachment(
     aura: CardInstance,
     target: CardInstance,
 ) -> bool:
-    oracle = str(
-        host._effective_card_data(target).get("oracle_text") or ""
-    ).casefold()
-    if any(
-        marker in oracle
-        for marker in (
-            "protection from everything",
-            "protection from enchantments",
-            "protection from auras",
-        )
-    ):
-        return False
-    aura_colors = {
-        str(color).upper()
-        for color in host._effective_card_data(aura).get("colors", [])
-    }
-    return not host._protection_colors(target).intersection(aura_colors)
+    aura_data = host._effective_card_data(aura)
+    verdict = protection_verdict(
+        host._effective_card_data(target),
+        ProtectionSource.from_characteristics(aura_data),
+    )
+    return verdict is ProtectionVerdict.ALLOWED
 
 
 def legal_aura_target_refs(
     host: AuraRuntimeHost,
     aura: CardInstance,
-    spec: SimpleEnchantSpec,
+    spec: EnchantSpec,
     *,
     controller: str,
     as_target: bool,
 ) -> tuple[str, ...]:
-    group = TargetGroup.from_mapping(spec.target_schema())
+    group = TargetGroup.from_mapping(spec.target_schema(aura))
+    linked_target_id = spec.linked_target_object_id(aura)
     refs: list[str] = []
     for row in host._target_candidate_rows(controller, group):
         target = row.get("card")
         if not isinstance(target, CardInstance):
             continue
         if target.object_id == aura.object_id or target.phased_out:
+            continue
+        if linked_target_id is not None and target.object_id != linked_target_id:
             continue
         if not host._target_row_matches(
             controller,
@@ -120,14 +123,11 @@ def simple_aura_attachment_is_legal(
 ) -> bool | None:
     if aura.attached_to is None:
         return False
-    data = host._effective_card_data(aura)
-    spec = simple_enchant_spec_from_oracle(
-        str(data.get("oracle_text") or "")
-    )
+    spec = host._compiled_enchant_spec(aura)
     if spec is None:
         return None
     target = host.state.cards.get(aura.attached_to)
-    if target is None or target.zone != "battlefield":
+    if target is None:
         return False
     return target.ref in legal_aura_target_refs(
         host,
@@ -142,16 +142,17 @@ def prepare_aura_entry(
     host: AuraRuntimeHost,
     aura: CardInstance,
     *,
-    oracle_text: str,
+    spec: EnchantSpec,
     controller: str,
     target_ref: str | None,
     resolving_as_spell: bool,
 ) -> AuraEntryPlan:
-    spec = simple_enchant_spec_from_oracle(oracle_text)
-    if spec is None:
+    if not isinstance(
+        spec,
+        (SimpleEnchantSpec, LinkedGraveyardCreatureEnchantSpec),
+    ):
         raise AuraRuleError(
-            "This Aura's Enchant restriction is not in the supported "
-            "battlefield-object grammar"
+            "Aura entry requires one trusted compiled Enchant descriptor"
         )
     legal = legal_aura_target_refs(
         host,
@@ -196,6 +197,7 @@ def preflight_aura_zone_move(
     requested_destination: str,
     destination_type_line: str,
     enter_face: str | None,
+    enchant_spec: EnchantSpec | None,
     controller: str | None,
     target_ref: str | None,
     resolving_as_spell: bool,
@@ -209,28 +211,21 @@ def preflight_aura_zone_move(
         or bool(aura.annotations.get("pending_aura_target"))
     ):
         return AuraZoneMovePreflight(destination)
-    oracle_text = str(
-        host._effective_card_data(aura).get("oracle_text") or ""
+    spec = enchant_spec or host._compiled_enchant_spec(
+        aura,
+        face_name=enter_face,
     )
-    if enter_face is not None:
-        record = host.card_record(aura)
-        selected_face = next(
-            (
-                face
-                for face in (record.faces if record else ())
-                if str(face.get("name") or "") == enter_face
-            ),
-            None,
+    if spec is None:
+        raise error_type(
+            "This Aura lacks one trusted compiled Enchant descriptor"
         )
-        if selected_face is not None:
-            oracle_text = str(selected_face.get("oracle_text") or "")
     entry_controller = controller or aura.owner
     host._require_seat(entry_controller)
     try:
         plan = prepare_aura_entry(
             host,
             aura,
-            oracle_text=oracle_text,
+            spec=spec,
             controller=entry_controller,
             target_ref=target_ref,
             resolving_as_spell=resolving_as_spell,
@@ -290,6 +285,14 @@ def commit_aura_zone_move(
 
 def aura_resolution_move_kwargs(item: Any) -> dict[str, Any]:
     is_aura = bool(item.context.get("aura_spell"))
+    raw_spec = item.context.get("aura_enchant_spec")
+    spec = None
+    if is_aura:
+        if not isinstance(raw_spec, Mapping):
+            raise AuraRuleError(
+                "A resolving Aura lacks its compiled Enchant descriptor"
+            )
+        spec = enchant_spec_from_dict(raw_spec)
     return {
         "aura_target_ref": (
             str(item.targets[0])
@@ -297,6 +300,7 @@ def aura_resolution_move_kwargs(item: Any) -> dict[str, Any]:
             else None
         ),
         "resolving_as_aura_spell": is_aura,
+        "aura_enchant_spec": spec,
     }
 
 
@@ -326,7 +330,7 @@ def commit_aura_entry_attachment(
         ),
         None,
     )
-    if target is None or target.zone != "battlefield":
+    if target is None or target.ref not in plan.legal_target_refs:
         raise AuraRuleError("Aura entry target left before attachment")
     attach_objects(
         host.state.cards,

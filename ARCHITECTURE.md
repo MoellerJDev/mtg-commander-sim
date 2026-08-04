@@ -168,7 +168,13 @@ The focused `aura/` subsystem owns immutable simple Enchant predicates,
 mandatory cast targets, resolution and nonspell entry planning, seat-scoped
 entry continuations, and live attachment legality. Zone and token producers
 complete that preflight before authoritative mutation and delegate the actual
-reciprocal relation to `attachments.py`.
+reciprocal relation to `attachments.py`. Compiler-produced Enchant and
+protection fragments are the sole executable Aura/protection authority at
+runtime; Oracle text remains display/provenance data. Layer-6 executable grants
+are typed activated/triggered fragments, so appended display rules text cannot
+silently create an ability. A source-pinned linked Enchant descriptor covers
+the represented graveyard-creature transition without changing CardProgram v2
+or Game Record v3.
 Focused token-creation, counter-placement, and damage owners commit final
 results, and replacement choices suspend as seat-scoped replayable
 continuations. Their scope remains deliberately narrower than universal CR

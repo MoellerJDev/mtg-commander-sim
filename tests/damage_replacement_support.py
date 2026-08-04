@@ -20,11 +20,15 @@ from mtg_commander_sim.damage import (
 from mtg_commander_sim.deck import DeckLoader
 from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import CardInstance, StackItem
+from mtg_commander_sim.oracle_ir import register_generated_programs
 from mtg_commander_sim.projection import StateProjector
 from mtg_commander_sim.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
+)
+from mtg_commander_sim.rules.capabilities import (
+    load_default_capability_registry,
 )
 from mtg_commander_sim.replacement_effects import (
     ReplacementChoiceRequired,
@@ -185,6 +189,20 @@ class DamageReplacementPipelineBase(unittest.TestCase):
         ref: str,
     ) -> CardInstance:
         record = self.db.lookup(name)
+        # Direct fixture injection bypasses CommanderSession's deck compiler.
+        # Register the same exact per-card runtime descriptors a real loaded
+        # deck receives before placing this object into authoritative state.
+        register_generated_programs(
+            self.db,
+            engine.semantics,
+            (record,),
+            trust_level="provisional",
+            capability_registry=load_default_capability_registry(),
+            capability_profile=engine.state.config.review_profile,
+            promote_exact_runtime_handlers=True,
+            promote_exact_trigger_programs=True,
+            promote_exact_capability_declarations=True,
+        )
         card = CardInstance(
             object_id=f"fixture:{ref}",
             ref=ref,
