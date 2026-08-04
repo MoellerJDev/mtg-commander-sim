@@ -461,13 +461,19 @@ class SemanticChoiceCoordinationMixin:
             )
         except SemanticChoiceError as exc:
             raise GameRuleError(str(exc)) from exc
+        preparation_intents = tuple(preparation.preparation_intents)
+        # Only a single typed draw intent needs to leave this immediate
+        # preparation path for the replacement-aware draw coordinator.  Other
+        # preparations may intentionally be an ordered sequence (for example,
+        # explore reveals a card and then moves it); each of those intents is
+        # still committed separately below.
         preparation_plan = (
             IntentPlan(
                 operation=handler.operation,
                 handler_id=handler.handler_id,
-                intents=tuple(preparation.preparation_intents),
+                intents=preparation_intents,
             )
-            if preparation.preparation_intents
+            if len(preparation_intents) == 1
             else None
         )
         draw_request = (
@@ -502,9 +508,7 @@ class SemanticChoiceCoordinationMixin:
                 },
             )
             return
-        for intent in (
-            preparation_plan.intents if preparation_plan is not None else ()
-        ):
+        for intent in preparation_intents:
             execute_intent_plan(
                 self,
                 IntentPlan(
