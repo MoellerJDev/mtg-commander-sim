@@ -1,0 +1,165 @@
+{
+  "escapes": [
+    {
+      "category": "missing_affected_test",
+      "deterministic": true,
+      "failed_surfaces": [
+        "compiler-cardprogram",
+        "generated-validation"
+      ],
+      "head_sha": "7c0b09bd8c5ead149827513af1d4045ce38208c0",
+      "id": "ci-20260804-01",
+      "impact_edge_status": "added",
+      "regressions": [
+        "test_continuous_compiler_hardening"
+      ],
+      "resolution": "The fixture was made portable and the compiler family remains explicitly routed to compiler-cardprogram and generated validation.",
+      "run_id": 30916877307,
+      "summary": "Compiler hardening tests used cards absent from the compact CI database."
+    },
+    {
+      "category": "generated_artifact_drift",
+      "deterministic": true,
+      "failed_surfaces": [
+        "generated-validation"
+      ],
+      "head_sha": "00ec31ec8ae402106a07f9bb95a2c6ac7c3ed959",
+      "id": "ci-20260804-02",
+      "impact_edge_status": "added",
+      "regressions": [
+        "test_architecture_audit",
+        "test_platform_status"
+      ],
+      "resolution": "Platform and coverage sources now select their exact generated freshness checks through the path policy.",
+      "run_id": 30918937537,
+      "summary": "Architecture and platform generated outputs did not match their authoritative sources."
+    },
+    {
+      "category": "source_correctness",
+      "deterministic": true,
+      "failed_surfaces": [
+        "compiler-cardprogram",
+        "rules-events-replacements",
+        "state-actions-damage",
+        "generated-validation"
+      ],
+      "head_sha": "331d0ebfe439be6f05a3dc4e4fe15642fc3aeb1b",
+      "id": "ci-20260804-03",
+      "impact_edge_status": "added",
+      "regressions": [
+        "test_card_program_v2",
+        "test_damage_replacement_integration",
+        "test_damage_replacement_multiplayer",
+        "test_exact_combat_keywords"
+      ],
+      "resolution": "Protection, compiler, damage, and continuous-effect paths now select every affected functional shard through explicit rules.",
+      "run_id": 30930608139,
+      "summary": "The typed protection transition exposed stale compiler fingerprints and incorrect fail-closed behavior in damage and targeting consumers."
+    },
+    {
+      "category": "source_correctness",
+      "deterministic": true,
+      "failed_surfaces": [
+        "rules-events-replacements",
+        "state-actions-damage"
+      ],
+      "head_sha": "f39ff658a1c0fb24e385594a279c36be158a0653",
+      "id": "ci-20260804-04",
+      "impact_edge_status": "added",
+      "regressions": [
+        "test_damage_replacement_integration",
+        "test_damage_replacement_multiplayer",
+        "test_exact_combat_keywords"
+      ],
+      "resolution": "The exact protection consumers are covered by both replacement and damage shards in the machine-readable policy.",
+      "run_id": 30931679921,
+      "summary": "Protection runtime discovery still rejected represented colored-source interactions after the first correction."
+    },
+    {
+      "category": "browser_integration",
+      "deterministic": true,
+      "failed_surfaces": [
+        "browser-full"
+      ],
+      "head_sha": "2682095ee1a4777c17447d3db7cca409d2b9bbb2",
+      "id": "ci-20260804-05",
+      "impact_edge_status": "not_applicable",
+      "regressions": [
+        "four-player.spec.ts"
+      ],
+      "resolution": "The production auto-pass race was fixed and the public full-browser gate remains authoritative for headless journeys.",
+      "run_id": 30940720886,
+      "summary": "A selected-action modal raced auto-pass and two long browser journeys timed out."
+    }
+  ],
+  "known_flaky_tests": [],
+  "limitations": {
+    "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
+    "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
+  },
+  "observed_at": "2026-08-04T20:10:48Z",
+  "recent_pull_requests": [
+    {
+      "critical_path_seconds": 1488.0,
+      "final_run_conclusion": "success",
+      "final_run_id": 30913382652,
+      "head_sha": "b5a59b8ab7a37866aaf3227f3e3bb3056035066d",
+      "number": 87,
+      "push_count": null,
+      "slot_b_inactive_seconds": null,
+      "workflow_runs_observed": 5
+    },
+    {
+      "critical_path_seconds": 300.0,
+      "final_run_conclusion": "success",
+      "final_run_id": 30920252836,
+      "head_sha": "e9fd5ec666fdbef2cd4f5735dc734445572b7533",
+      "number": 88,
+      "push_count": null,
+      "slot_b_inactive_seconds": null,
+      "workflow_runs_observed": 3
+    },
+    {
+      "critical_path_seconds": 850.0,
+      "final_run_conclusion": "success",
+      "final_run_id": 30935545835,
+      "head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
+      "number": 89,
+      "push_count": null,
+      "slot_b_inactive_seconds": null,
+      "workflow_runs_observed": 5
+    },
+    {
+      "critical_path_seconds": 724.0,
+      "final_run_conclusion": "success",
+      "final_run_id": 30945744299,
+      "head_sha": "1776d5329d02e35d7dcff58f69a4aafb2cf484c9",
+      "number": 90,
+      "push_count": null,
+      "slot_b_inactive_seconds": null,
+      "workflow_runs_observed": 3
+    }
+  ],
+  "repository": "MoellerJDev/mtg-commander-sim",
+  "schema_version": 1,
+  "source_fingerprint": "951e4eea930548d4ec4bacae3135af661b403a6b7f3882c8f2840652566ffdb5",
+  "summary": {
+    "average_critical_path_seconds": 840.5,
+    "average_pushes_per_merged_pr": null,
+    "average_slot_b_inactive_seconds": null,
+    "category_counts": {
+      "browser_integration": 1,
+      "generated_artifact_drift": 1,
+      "missing_affected_test": 1,
+      "source_correctness": 2
+    },
+    "current_missing_impact_edges": [],
+    "deterministic_escape_count": 5,
+    "escape_count": 5,
+    "exact_head_pass_rate": 1.0,
+    "known_flaky_test_count": 0,
+    "repeated_failure_categories": [
+      "source_correctness"
+    ]
+  }
+}

@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       browser_full: ${{ steps.impact.outputs.browser_full }}
+      browser_matrix: ${{ steps.impact.outputs.browser_matrix }}
       windows_full: ${{ steps.impact.outputs.windows_full }}
     steps:
       - uses: actions/checkout@v4
@@ -106,6 +107,7 @@ jobs:
       - name: Verify generated outputs
         run: |
           python scripts/update_capability_evidence.py --check
+          python scripts/update_ci_escape_report.py --check
           python scripts/update_rules_scheduler.py --check
           python scripts/update_module_classifications.py --check
           python scripts/benchmark_continuous_effects.py --check
@@ -177,11 +179,17 @@ jobs:
           python scripts/verify_wheel.py
 
   browser:
-    name: PR / Browser
+    name: PR / Browser / ${{ matrix.shard }}-${{ matrix.total }}
     needs: plan
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.browser_matrix) }}
     env:
-      MTG_CARD_DB: data/test-ci.sqlite3
+      MTG_CARD_DB: data/test-ci-${{ matrix.shard }}.sqlite3
+      MTG_E2E_SERVER_PORT: ${{ matrix.server_port }}
+      MTG_E2E_WEB_PORT: ${{ matrix.web_port }}
+      MTG_E2E_RUNTIME_DIR: ../local/playwright-shard-${{ matrix.shard }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -209,7 +217,7 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --fixture tests/fixtures/draw-rules-cards.json
-          --output data/test-ci.sqlite3
+          --output data/test-ci-${{ matrix.shard }}.sqlite3
       - name: Verify generated protocol types and production build
         run: |
           npm run generate:types --prefix web
@@ -223,7 +231,9 @@ jobs:
         run: npm run e2e:smoke --prefix web
       - name: Run complete browser journeys for affected changes
         if: needs.plan.outputs.browser_full == 'true'
-        run: npm run e2e --prefix web
+        run: >-
+          npm run e2e --prefix web --
+          --shard=${{ matrix.shard }}/${{ matrix.total }}
 
   certification:
     name: PR / Certification

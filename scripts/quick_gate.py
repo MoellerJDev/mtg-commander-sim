@@ -98,6 +98,11 @@ def build_plan(paths: Sequence[str]) -> dict:
             "scripts/update_capability_evidence.py",
             "--check",
         ),
+        "ci-escape-report": (
+            python,
+            "scripts/update_ci_escape_report.py",
+            "--check",
+        ),
         "documentation": (python, "scripts/validate_documentation.py", "--check"),
         "module-classifications": (
             python,

@@ -5,10 +5,20 @@ import unittest
 
 from tests.common import ROOT
 from scripts.ci_metrics import build_metrics, markdown
+from scripts.ci_plan import browser_matrix
 from scripts.verify_ci_needs import failed_dependencies
 
 
 class CiPipelineTests(unittest.TestCase):
+    def test_browser_matrix_uses_one_smoke_or_two_isolated_full_shards(self):
+        smoke = browser_matrix(False)["include"]
+        full = browser_matrix(True)["include"]
+        self.assertEqual(1, len(smoke))
+        self.assertEqual(2, len(full))
+        self.assertEqual({1, 2}, {row["shard"] for row in full})
+        self.assertEqual(2, len({row["server_port"] for row in full}))
+        self.assertEqual(2, len({row["web_port"] for row in full}))
+
     def test_certification_fails_for_any_non_success_dependency(self):
         self.assertEqual(
             ("browser", "windows"),
@@ -57,6 +67,8 @@ class CiPipelineTests(unittest.TestCase):
         )
         self.assertIn("cancel-in-progress: true", pr)
         self.assertIn("PR / Certification", pr)
+        self.assertIn("fromJSON(needs.plan.outputs.browser_matrix)", pr)
+        self.assertIn("--shard=${{ matrix.shard }}/${{ matrix.total }}", pr)
         self.assertIn("scripts/test_shards.py run", pr)
         generated = pr.split("\n  generated:", 1)[1].split("\n  package:", 1)[0]
         package = pr.split("\n  package:", 1)[1].split("\n  windows:", 1)[0]
