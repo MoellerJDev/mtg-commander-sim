@@ -10,7 +10,7 @@
     "branch": "fix/duel-turn-state-and-table-clarity",
     "branch_ancestry": {
       "focused_branch_base": "561dc6462f99f81e3413145f8d8755e338ae54ec",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_unique_commits_over_main": 7
     },
     "pull_requests": [
       {
@@ -651,7 +651,7 @@
   "provenance": {
     "feature_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
     "certified_head_sha": "58f13457a2e4ade605f0ab788116fe62e9150d47",
-    "generation_timestamp": "2026-08-04T18:15:00Z"
+    "generation_timestamp": "2026-08-04T18:34:45Z"
   },
   "snapshots": {
     "comprehensive_rules": {
