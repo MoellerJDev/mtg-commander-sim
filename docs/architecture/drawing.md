@@ -18,13 +18,15 @@ permission derived from turn draw history and live fixed restrictions.
 to-hand draws, prohibited and empty-library attempts, draw history/events, and
 the represented Dredge mill-and-return result.
 
-`drawing/coordinator.py` sequences individual events, discovers trusted runtime
-instruction-count and individual replacements, recomputes permission before
-each individual event, issues a private affected-player choice when necessary, and
-resumes either a later draw, an APNAP batch, draw-step entry, or the exact next
-spell instruction. `drawing/continuation.py` owns that strict immutable Game
-Record v3 value. Historical v3 Dredge continuations keep an explicit validated
-compatibility path and are not silently reinterpreted.
+`drawing/coordinator.py` iteratively drains individual events and queued
+instructions, discovers trusted runtime instruction-count and individual
+replacements, recomputes permission before each individual event, issues a
+private affected-player choice when necessary, and resumes from the exact
+remaining count without growing the Python call stack. The same trampoline
+continues an APNAP batch, draw-step entry, or the exact next spell instruction.
+`drawing/continuation.py` owns that strict immutable Game Record v3 value.
+Historical v3 Dredge continuations keep an explicit validated compatibility
+path and are not silently reinterpreted.
 
 Turn draws, fixed resolving-effect draws, conditional opponent-cast-color
 draws, optional-follow-up draws, and draw-each-player effects converge on this
@@ -42,6 +44,10 @@ active only for a trusted exact graveyard CardProgram, requires enough cards in
 the library, and pins physical identity plus zone-change counter through the
 choice. A replacement is considered even when the library is empty, and it
 finishes before a multi-card sequence or later resolution instruction resumes.
+Replacement-free and prevented instructions of at least 2,000 draws, an
+instruction suspended after 500 events with 1,500 remaining, and a 2,000-item
+zero-count batch are regression-tested without recursion. Each excess draw past
+the current library is still committed as its own empty-library attempt.
 
 `restriction.draw.maximum-per-turn.v1` discovers trusted, nonphased battlefield
 sources and supports the closed any-player, opponent, and source-controller
@@ -62,5 +68,6 @@ scheduler.
 Primary focused assurance lives in `test_draw_transaction_model.py`,
 `test_draw_transaction_commit.py`, `test_draw_continuation.py`,
 `test_draw_replacement_components.py`, `test_draw_step_rules.py`,
-`test_draw_restrictions.py`, `test_optional_draw_choices.py`,
+`test_draw_restrictions.py`, `test_draw_coordinator_iteration.py`,
+`test_optional_draw_choices.py`,
 `test_semantic_handlers.py`, and `test_exact_zimone_closure.py`.

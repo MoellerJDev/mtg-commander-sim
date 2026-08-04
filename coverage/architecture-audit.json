@@ -3235,7 +3235,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 89547,
+      "logical_lines": 89569,
       "methods": {
         "dunder": 196,
         "private": 621,
@@ -3538,6 +3538,13 @@
           "physical_lines": 618
         },
         {
+          "file": "mtg_commander_sim/drawing/coordinator.py",
+          "functions_and_methods": 22,
+          "language": "python",
+          "logical_lines": 569,
+          "physical_lines": 625
+        },
+        {
           "file": "mtg_commander_sim/abilities.py",
           "functions_and_methods": 20,
           "language": "python",
@@ -3557,13 +3564,6 @@
           "language": "python",
           "logical_lines": 547,
           "physical_lines": 624
-        },
-        {
-          "file": "mtg_commander_sim/drawing/coordinator.py",
-          "functions_and_methods": 20,
-          "language": "python",
-          "logical_lines": 547,
-          "physical_lines": 595
         },
         {
           "file": "mtg_commander_sim/rules/casting/costs.py",
@@ -5218,7 +5218,7 @@
           "physical_lines": 1589
         }
       ],
-      "physical_lines": 97446,
+      "physical_lines": 97476,
       "python_file_count": 204,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -5236,7 +5236,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1080,
+      "top_level_functions": 1082,
       "web_file_count": 13
     },
     "semantic_handlers": {
@@ -7217,7 +7217,7 @@
         {
           "condition": "pending.choice.optional_options or not options or any( effect_id not in by_id or len(by_id[effect_id].operations) != 1 or by_id[effect_id].operations[0].to_dict() != {\"op\": \"multiply\", \"field\": \"count\", \"factor\": 2} for effect_id in options",
           "file": "mtg_commander_sim/drawing/coordinator.py",
-          "line": 204,
+          "line": 228,
           "string_literals": [
             "count",
             "factor",
@@ -8248,7 +8248,7 @@
     "baseline_main_commit": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9",
     "baseline_worktree_clean": true,
     "phase": "draw_limits_optional_choice_and_instruction_replacement",
-    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, and measurable corpus gains while extracting fixed-count parsing from the oversized Oracle coordinator.",
+    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, measurable corpus gains, and iterative large-count/event-batch coordination while extracting fixed-count parsing from the oversized Oracle coordinator.",
     "verified_at": "2026-08-04"
   },
   "compiler": {
@@ -8433,10 +8433,10 @@
         },
         "declaration_count": 328,
         "declaration_source_fingerprint": "3913780105617bc0ac29c9c0a121d00adf15865aaae39921a3f9760ac72485d4",
-        "fingerprint": "95218a88ee82dd7cd0dad1a3648f264cfda0de429b22a58a6a442b39422f27d2",
-        "registry_fingerprint": "a2d6263220eb18f139230bdb2eda407d684ae3aba6318ccc186e1aa1c7e05120"
+        "fingerprint": "3f5cc8d336a05fccb465f2bcd708515f7f5fc0789ee62cabd29062f9a9aa06e6",
+        "registry_fingerprint": "9d879283a17ef95c1fc27e64f5048d71d7298ea8cc28af9e56eac2719fcdcfee"
       },
-      "fingerprint": "a2d6263220eb18f139230bdb2eda407d684ae3aba6318ccc186e1aa1c7e05120",
+      "fingerprint": "9d879283a17ef95c1fc27e64f5048d71d7298ea8cc28af9e56eac2719fcdcfee",
       "implementation_mutation_status_counts": {
         "killed": 35,
         "not_run": 7
@@ -9069,7 +9069,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "1a01ab616176a9f1d8f3ffbf59e16b5bf2ebac671835a40c3b79bb4f6ac8cb2a"
+          "verified": "2a39209a78cc92fef99cace0a1c201122c4020cd6163cfe566b7534424582965"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9150,7 +9150,7 @@
   "generated": {
     "card_specificity_source": "platform/card-specificity-baseline.json",
     "generator": "scripts/update_architecture_audit.py",
-    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, and measurable corpus gains while extracting fixed-count parsing from the oversized Oracle coordinator.",
+    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, measurable corpus gains, and iterative large-count/event-batch coordination while extracting fixed-count parsing from the oversized Oracle coordinator.",
     "source": "platform/architecture-audit-source.json",
     "stale_check": "python scripts/update_architecture_audit.py --check"
   },
@@ -9507,18 +9507,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1405,
-      "discovered_total": 4705,
+      "conventional_ast_cases": 1412,
+      "discovered_total": 4712,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 34,
         "fuzz_named": 1,
         "privacy_or_projection_named": 17,
-        "replay_named": 84,
+        "replay_named": 85,
         "server_named": 18
       },
       "reconciles": true,
-      "test_files": 149
+      "test_files": 150
     }
   }
 }

@@ -37,9 +37,13 @@ history and empty-library state, and exposes no arbitrary state callback.
 The draw coordinator is a read-only orchestration boundary. It creates one
 replacement event per draw, applies APNAP replacement ordering, suspends through
 the existing replacement continuation machinery when a choice is required, and
-delegates the final mutation to the draw transaction. Turn draws, stack effects,
-semantic choices, conditional effects, and ordered instructions all enter that
-same coordinator. Unrouted `DrawCardsIntent` values fail closed.
+delegates the final mutation to the draw transaction. Individual events and
+queued instructions are drained by an iterative trampoline, so legal large
+counts are not bounded by Python recursion depth. A suspended choice serializes
+the exact remaining count and re-enters that same loop after completion. Turn
+draws, stack effects, semantic choices, conditional effects, and ordered
+instructions all enter that same coordinator. Unrouted `DrawCardsIntent` values
+fail closed.
 
 Trusted graveyard draw replacements are discovered by a generic semantic
 runtime component using a narrow structural state protocol. Runtime descriptor
@@ -89,7 +93,8 @@ keeps the oversized module ratchet moving downward while preserving callers.
 ## Consequences
 
 - Represented draws now share one replacement-aware, replay-pinned mutation
-  path, including private choice and empty-library behavior.
+  path, including private choice, empty-library behavior, and iterative large-
+  count coordination.
 - The engine loses draw sequencing and producer-specific mutation branches;
   live draw-limit and optional-draw legality.
 - The compiler gains generic fixed draw, draw-limit, unconditional doubling,

@@ -30,6 +30,7 @@
       "test_damage_replacement_model",
       "test_damage_replacement_multiplayer",
       "test_draw_continuation",
+      "test_draw_coordinator_iteration",
       "test_draw_replacement_components",
       "test_draw_restrictions",
       "test_draw_transaction_commit",

@@ -5,7 +5,7 @@
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-04",
     "phase": "draw_limits_optional_choice_and_instruction_replacement",
-    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, and measurable corpus gains while extracting fixed-count parsing from the oversized Oracle coordinator."
+    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, measurable corpus gains, and iterative large-count/event-batch coordination while extracting fixed-count parsing from the oversized Oracle coordinator."
   },
   "ci": {
     "workflow": "CI",

@@ -30,6 +30,10 @@ maintenance: "hand-maintained"
   drawer. Oracle IR v27 makes Spirit of the Labyrinth, Thought Reflection, and
   Oculus newly exact in Commander; exact/trusted programs rise 722 to 725 and
   capability-closed programs rise 719 to 722.
+- Replaced recursive per-card and queued-instruction draw coordination with an
+  iterative trampoline. Replacement-free and prevented counts of 2,000,
+  midpoint suspension/resume, over-library attempts, private continuation, and
+  exact replay now have focused regressions.
 - Conditional/dynamic limits, complete draw-as-cost producers, shared-team
   ordering, CR 121.6c/121.7 result actions, reveal-as-drawn, and broader
   replacement grammar remain explicit blockers.

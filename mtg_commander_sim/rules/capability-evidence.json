@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "a2d6263220eb18f139230bdb2eda407d684ae3aba6318ccc186e1aa1c7e05120",
+  "registry_fingerprint": "9d879283a17ef95c1fc27e64f5048d71d7298ea8cc28af9e56eac2719fcdcfee",
   "declaration_source_fingerprint": "3913780105617bc0ac29c9c0a121d00adf15865aaae39921a3f9760ac72485d4",
   "declarations": [
     {
@@ -6230,5 +6230,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "95218a88ee82dd7cd0dad1a3648f264cfda0de429b22a58a6a442b39422f27d2"
+  "fingerprint": "3f5cc8d336a05fccb465f2bcd708515f7f5fc0789ee62cabd29062f9a9aa06e6"
 }

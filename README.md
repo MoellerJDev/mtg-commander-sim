@@ -389,7 +389,9 @@ generated documentation fixtures with bearer capabilities redacted. See
 - Oracle IR v27 fixed ordinary and optional draw templates, fixed draw
   prohibitions, unconditional controller doubling, and keyword-derived
   Dredge, backed by one replacement-aware draw transaction and live draw-
-  permission query rather than direct library-to-hand mutation
+  permission query rather than direct library-to-hand mutation; individual
+  events and queued instructions are iteratively drained, including exact
+  suspension/resume for legally large draw counts
 - CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice

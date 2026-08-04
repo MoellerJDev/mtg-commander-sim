@@ -110,8 +110,35 @@ def begin_draw_sequence(
 ) -> None:
     """Resolve one draw instruction, then each draw independently."""
 
-    host._require_seat(seat)
     resume = DrawResume.from_dict(dict(continuation or {"kind": "none"}))
+    prepared_count = _prepare_runtime_draw_count(
+        host,
+        seat,
+        count,
+        reason=reason,
+        private=private,
+    )
+    _continue_draw_sequence(
+        host,
+        seat,
+        prepared_count,
+        reason=reason,
+        private=private,
+        resume=resume,
+    )
+
+
+def _prepare_runtime_draw_count(
+    host: DrawCoordinatorHost,
+    seat: str,
+    count: int,
+    *,
+    reason: str,
+    private: bool,
+) -> int:
+    """Prepare one instruction before the iterative per-draw coordinator."""
+
+    host._require_seat(seat)
     instruction_request = DrawInstructionRequest(
         event_id=draw_event_id(host, seat, "instruction"),
         player=seat,
@@ -125,13 +152,14 @@ def begin_draw_sequence(
         instruction_request,
         instruction_effects,
     )
-    _continue_draw_sequence(
-        host,
-        seat,
-        instruction.count or 0,
-        reason=reason,
-        private=private,
-        resume=resume,
+    return instruction.count or 0
+
+
+def _draw_batch_resume(draws: tuple[QueuedDraw, ...]) -> DrawResume:
+    return (
+        DrawResume(kind="draw_batch", draws=draws)
+        if draws
+        else DrawResume.none()
     )
 
 
@@ -152,11 +180,7 @@ def begin_draw_batch(
         current.count,
         reason=current.reason,
         private=current.private,
-        continuation=(
-            DrawResume(kind="draw_batch", draws=remaining).to_dict()
-            if remaining
-            else DrawResume.none().to_dict()
-        ),
+        continuation=_draw_batch_resume(remaining).to_dict(),
     )
 
 
@@ -234,66 +258,72 @@ def _continue_draw_sequence(
     private: bool,
     resume: DrawResume,
 ) -> None:
-    if remaining <= 0:
-        resume_after_draw(host, resume)
-        return
-    request = DrawEventRequest(
-        event_id=draw_event_id(host, seat, "event"),
-        player=seat,
-        library_size=len(host.state.players[seat].zones[_LIBRARY_ZONE]),
-        reason=reason,
-        private=private,
-    )
-    permission = _draw_permission(host, seat)
-    if not permission.allows_individual_draw():
-        prepared = prepare_draw_event(
-            request,
-            apnap_order=host.apnap_order(),
-            prohibition_ids=permission.restriction_ids,
-        )
-        commit_prepared_draw(host, prepared)
-        _continue_draw_sequence(
-            host,
-            seat,
-            remaining - 1,
-            reason=reason,
-            private=private,
-            resume=resume,
-        )
-        return
-    effects = _replacement_effects(host, seat)
-    prepared = prepare_draw_event(
-        request,
-        apnap_order=host.apnap_order(),
-        effects=effects,
-        require_all_selections=False,
-    )
-    if prepared.pending is not None:
-        _issue_draw_replacement_choice(
-            host,
-            DrawDecisionContinuation(
-                event_id=request.event_id,
-                seat=seat,
-                remaining_draws=remaining,
-                library_size=request.library_size,
+    """Drain draw events and queued instructions without Python recursion."""
+
+    while True:
+        while remaining > 0:
+            request = DrawEventRequest(
+                event_id=draw_event_id(host, seat, "event"),
+                player=seat,
+                library_size=len(
+                    host.state.players[seat].zones[_LIBRARY_ZONE]
+                ),
                 reason=reason,
                 private=private,
+            )
+            permission = _draw_permission(host, seat)
+            if not permission.allows_individual_draw():
+                prepared = prepare_draw_event(
+                    request,
+                    apnap_order=host.apnap_order(),
+                    prohibition_ids=permission.restriction_ids,
+                )
+                commit_prepared_draw(host, prepared)
+                remaining -= 1
+                continue
+            effects = _replacement_effects(host, seat)
+            prepared = prepare_draw_event(
+                request,
+                apnap_order=host.apnap_order(),
                 effects=effects,
-                selections=(),
-                after=resume,
-            ),
-            prepared,
+                require_all_selections=False,
+            )
+            if prepared.pending is not None:
+                _issue_draw_replacement_choice(
+                    host,
+                    DrawDecisionContinuation(
+                        event_id=request.event_id,
+                        seat=seat,
+                        remaining_draws=remaining,
+                        library_size=request.library_size,
+                        reason=reason,
+                        private=private,
+                        effects=effects,
+                        selections=(),
+                        after=resume,
+                    ),
+                    prepared,
+                )
+                return
+            commit_prepared_draw(host, prepared)
+            remaining -= 1
+
+        if resume.kind != "draw_batch":
+            resume_after_draw(host, resume)
+            return
+
+        current, queued = resume.draws[0], resume.draws[1:]
+        seat = current.player
+        reason = current.reason
+        private = current.private
+        remaining = _prepare_runtime_draw_count(
+            host,
+            seat,
+            current.count,
+            reason=reason,
+            private=private,
         )
-        return
-    commit_prepared_draw(host, prepared)
-    _continue_draw_sequence(
-        host,
-        seat,
-        remaining - 1,
-        reason=reason,
-        private=private,
-        resume=resume,
-    )
+        resume = _draw_batch_resume(queued)
 
 
 def _choice_id(effect: Any) -> str:

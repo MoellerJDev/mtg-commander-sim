@@ -13460,14 +13460,17 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_draw_transaction_model.DrawTransactionModelTests.test_instruction_count_is_replaced_before_individual_draws",
-        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge"
+        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge",
+        "tests.test_draw_coordinator_iteration.DrawCoordinatorIterationTests.test_two_thousand_replacement_free_draws_do_not_recurse",
+        "tests.test_draw_coordinator_iteration.DrawCoordinatorIterationTests.test_two_thousand_prevented_draws_do_not_recurse"
       ],
       "implementation_components": [
         "drawing.prepare_draw_instruction",
-        "drawing.begin_draw_sequence"
+        "drawing.begin_draw_sequence",
+        "drawing.coordinator._continue_draw_sequence"
       ],
       "notes": [
-        "Every represented multiple-card instruction commits one independently replaceable draw at a time."
+        "Every represented multiple-card instruction commits one independently replaceable draw at a time through an iterative coordinator that is not bounded by Python recursion depth."
       ],
       "required_scenarios": [
         "positive",
@@ -13598,14 +13601,16 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_uses_apnap_order_and_exact_engine_path",
-        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge"
+        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge",
+        "tests.test_draw_coordinator_iteration.DrawCoordinatorIterationTests.test_large_zero_count_batch_is_trampolined"
       ],
       "implementation_components": [
         "semantic_runtime.DrawEachPlayerHandler",
-        "drawing.begin_draw_batch"
+        "drawing.begin_draw_batch",
+        "drawing.coordinator._draw_batch_resume"
       ],
       "notes": [
-        "The active player completes the represented batch before each remaining player in turn order, including replacement pauses."
+        "The active player completes the represented batch before each remaining player in turn order, including replacement pauses; queued instructions are trampolined rather than recursively nested."
       ],
       "required_scenarios": [
         "positive",
@@ -13761,14 +13766,15 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_draw_step_rules.DrawStepRuleTests.test_empty_library_loss_is_checked_before_draw_step_priority",
-        "tests.test_draw_transaction_commit.DrawTransactionCommitTests.test_prevented_empty_draw_does_not_mark_empty_library_loss"
+        "tests.test_draw_transaction_commit.DrawTransactionCommitTests.test_prevented_empty_draw_does_not_mark_empty_library_loss",
+        "tests.test_draw_coordinator_iteration.DrawCoordinatorReplayTests.test_draw_past_library_records_each_empty_attempt"
       ],
       "implementation_components": [
         "drawing.commit_prepared_draw",
         "state_based_actions"
       ],
       "notes": [
-        "Only an un-replaced empty-library attempt sets the state-based loss marker."
+        "Only an un-replaced empty-library attempt sets the state-based loss marker, and every excess draw in one instruction remains an independently recorded attempt."
       ],
       "required_scenarios": [
         "positive",
@@ -13922,15 +13928,18 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge",
-        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_veil_conditional_draw_pauses_for_dredge_before_permissions"
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_veil_conditional_draw_pauses_for_dredge_before_permissions",
+        "tests.test_draw_coordinator_iteration.DrawCoordinatorIterationTests.test_large_sequence_suspends_and_resumes_from_remaining_count",
+        "tests.test_draw_coordinator_iteration.DrawCoordinatorReplayTests.test_resumed_multi_draw_sequence_is_private_and_replays_exactly"
       ],
       "implementation_components": [
         "drawing.DrawDecisionContinuation",
         "drawing.begin_draw_sequence",
+        "drawing.coordinator._continue_draw_sequence",
         "drawing.resume_after_draw"
       ],
       "notes": [
-        "Typed resumptions pin the remaining draw count and later instructions until the selected replacement completes."
+        "Typed resumptions pin the remaining draw count and later instructions until the selected replacement completes, then re-enter the same iterative coordinator with exact replay and seat-scoped visibility."
       ],
       "required_scenarios": [
         "positive",
