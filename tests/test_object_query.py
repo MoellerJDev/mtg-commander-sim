@@ -60,6 +60,28 @@ class ObjectQueryTests(unittest.TestCase):
             ),
         )
 
+    def test_types_any_is_distinct_from_types_all(self):
+        self.assertEqual(
+            ("C1", "C2"),
+            tuple(
+                row.ref
+                for row in query_objects(
+                    self.rows,
+                    ObjectQuerySpec(types_any=("land", "creature")),
+                )
+            ),
+        )
+        self.assertEqual(
+            (),
+            tuple(
+                row.ref
+                for row in query_objects(
+                    self.rows,
+                    ObjectQuerySpec(types_all=("land", "creature")),
+                )
+            ),
+        )
+
     def test_non_target_query_preserves_owner_controller_distinction(self):
         self.assertEqual(
             ("C2",),
@@ -134,10 +156,18 @@ class ObjectQueryTests(unittest.TestCase):
         self.assertEqual(spec, ObjectQuerySpec.from_dict(serialized))
         self.assertEqual(["battlefield", "graveyard"], serialized["zones"])
         self.assertEqual(["U"], serialized["colors_all"])
+        self.assertEqual([], serialized["types_any"])
         malformed = dict(serialized)
         malformed["surprise"] = True
         with self.assertRaisesRegex(ObjectQueryError, "unknown surprise"):
             ObjectQuerySpec.from_dict(malformed)
+
+    def test_legacy_query_shape_round_trips_without_changing_record_bytes(self):
+        serialized = ObjectQuerySpec(types_all=("creature",)).to_dict()
+        serialized.pop("types_any")
+        restored = ObjectQuerySpec.from_dict(serialized)
+        self.assertEqual(serialized, restored.to_dict())
+        self.assertEqual([], restored.canonical_dict()["types_any"])
 
     def test_term_lists_reject_nonstrings_empty_values_and_case_duplicates(self):
         malformed_values = (

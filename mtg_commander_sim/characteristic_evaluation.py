@@ -42,8 +42,16 @@ def type_parts(type_line: str) -> tuple[set[str], set[str], set[str]]:
     return (
         words.intersection(_CARD_TYPES),
         {
-            word.casefold()
-            for word in re.findall(word_pattern, right)
+            "time lord" if word.casefold() == "timelord" else word.casefold()
+            for word in re.findall(
+                word_pattern,
+                re.sub(
+                    r"\bTime\s+Lord\b",
+                    "TimeLord",
+                    right,
+                    flags=re.IGNORECASE,
+                ),
+            )
         },
         words.intersection(_SUPERTYPES),
     )
