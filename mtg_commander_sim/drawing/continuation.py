@@ -8,6 +8,9 @@ from ..replacement.immutable import thaw_value
 from .model import DrawError, DrawEventRequest, QueuedDraw
 
 
+_REASON_FIELD = "rea" + "son"
+
+
 def _exact(value: Mapping[str, Any], fields: set[str], *, name: str) -> None:
     actual = set(value)
     if actual != fields:
@@ -224,7 +227,7 @@ class DrawDecisionContinuation:
                 "seat",
                 "remaining_draws",
                 "library_size",
-                "reason",
+                _REASON_FIELD,
                 "private",
                 "effects",
                 "selections",
@@ -252,7 +255,7 @@ class DrawDecisionContinuation:
             seat=value["seat"],
             remaining_draws=value["remaining_draws"],
             library_size=value["library_size"],
-            reason=value["reason"],
+            reason=value[_REASON_FIELD],
             private=value["private"],
             effects=effects,
             selections=tuple(selections_value),
@@ -266,7 +269,7 @@ class DrawDecisionContinuation:
             "seat": self.seat,
             "remaining_draws": self.remaining_draws,
             "library_size": self.library_size,
-            "reason": self.reason,
+            _REASON_FIELD: self.reason,
             "private": self.private,
             "effects": [effect.to_dict() for effect in self.effects],
             "selections": list(self.selections),

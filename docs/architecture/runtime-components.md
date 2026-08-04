@@ -1,8 +1,8 @@
 ---
 title: "CardProgram runtime components"
 status: "current"
-authoritative_source: "mtg_commander_sim/semantic_runtime component registries and ADRs 0007/0010/0011/0012"
-verified: "2026-08-03"
+authoritative_source: "mtg_commander_sim/semantic_runtime component registries, mtg_commander_sim/drawing, and ADRs 0007/0010/0011/0012"
+verified: "2026-08-04"
 audience: "rules, compiler, runtime, replay, and extension contributors"
 maintenance: "hand-maintained"
 ---
@@ -84,10 +84,20 @@ event order and replacement choices during mana payment use strict replayable
 continuations. A fixed independent life sentence after a prevention sentence
 is an ordered sibling, not aftermath: source choice creates the shield, then
 the sibling enters `life.change` immediately and exactly once. Arbitrary opaque
-references, wider source predicates, life-gain prevention, CR 615.13 triggered
-prevention results, explicit-target or mixed aftermath forms, finite partial or
+references, wider source predicates, life-gain prevention, broader conditional
+prevention-trigger results, explicit-target or mixed aftermath forms, finite partial or
 attached redirection, and non-damage
 transformations remain outside these components.
+
+`replacement.draw.dredge.v1` discovers a trusted keyword-derived replacement
+only while its exact physical source is in its owner's graveyard. It checks the
+current library threshold, emits one immutable optional `DredgeDraw`, and pins
+the source incarnation through any private affected-player choice. The
+`drawing` package applies it before ordinary empty-library handling and
+completes its mill-and-return result before later draws or later resolution
+instructions resume. The component has no mutable-state access and does not
+imply per-turn draw limits, draw-as-cost legality, shared-team ordering,
+reveal-as-drawn, or the complete draw replacement corpus.
 
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
 anthem in layer 7c. The source must be represented, on the battlefield, and not
@@ -146,7 +156,10 @@ through the mutation-only `life_state.py` owner;
 registry and source discovery. The six closed effect
 runtime families now include `damage-modifiers.v1` for shield/redirection
 creation and `life-effects.v2` for replacement-capable typed effect life
-changes. Runtime components remain pure participants.
+changes. `drawing/model.py`, `drawing/continuation.py`,
+`drawing/coordinator.py`, and `drawing/transaction.py` own the draw boundary;
+`semantic_runtime/draw_replacements.py` owns Dredge discovery and lowering.
+Runtime components remain pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,
 `test_token_creation_replacements.py`, `test_graveyard_rules.py`,
@@ -161,6 +174,8 @@ Primary tests are `test_replacement_event_tree.py`,
 `test_replacement_model_hardening.py`,
 `test_damage_result_events.py`,
 `test_continuous_effect_components.py`, `test_continuous_effect_duration.py`,
+`test_draw_replacement_components.py`, `test_draw_transaction_model.py`,
+`test_draw_transaction_commit.py`, `test_draw_continuation.py`,
 `test_card_program_trust.py`, and
 `test_continuous_effect_performance.py`. See the
 [extension guide](../extension/runtime-component.md) and

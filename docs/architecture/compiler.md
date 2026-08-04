@@ -2,7 +2,7 @@
 title: "Oracle compiler"
 status: "current"
 authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, the capability registry, and pinned coverage artifacts"
-verified: "2026-08-03"
+verified: "2026-08-04"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---
@@ -77,6 +77,11 @@ flowchart LR
   keyword grammar to a mandatory target schema and the trusted Aura capability.
   Qualities, subtypes, players, cards in other zones, multiple restrictions,
   and Aura creatures remain material residuals.
+- Oracle IR v26 lowers closed fixed draw instructions for the controller,
+  target player, target opponent, and each player, plus keyword-derived
+  `Dredge N`. Those programs require the trusted bounded draw capability and
+  runtime component; dynamic counts, optional-draw legality, and unrelated
+  residual text still prevent exact promotion.
 
 ## Extension points
 

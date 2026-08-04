@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "797a7157bec6f7509ab68d946aee1c3efac2b32c",
+    "baseline_main_commit": "4bec8eb29722a813d377d232b42c36e37640ed37",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-04",
-    "phase": "continuous_effect_duration_and_source_applicability",
-    "scope_note": "Certified main through PR 82 includes unified ordinary trigger batching and normalized zone-change trigger discovery with canonical fixed life results. The current focused branch adds immutable resolution-created continuous-effect state, locked affected-object identities and durations, live source-bound static applicability, one engine/projection characteristic evaluator, generic fixed-query anthem and controlled-creature end-of-turn lowering, and measurable corpus gains while reducing CommanderEngine and printed-name dispatch."
+    "phase": "canonical_draw_transaction_replacement_and_trigger_closure",
+    "scope_note": "Certified main through PR 85 includes the continuous-effect, attachment, fixed Equip, and simple-object Aura families. The current focused branch adds immutable CR 121 draw instructions, individual events, results, private continuations, and APNAP batches; a narrow draw coordinator and commit owner; strict prevention and Dredge replacement operations; generic fixed draw and Dredge compilation; and measurable corpus gains while reducing CommanderEngine and the over-inclusive printed-name heuristic."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30868127255,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30868127255",
+    "run_id": 30892105590,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590",
     "status": "pass",
     "python_versions": [
       "3.12"
@@ -390,8 +390,7 @@
     "fomori_vault",
     "remora_tax",
     "springheart_landfall",
-    "sylvan_library_settle",
-    "veil_of_summer"
+    "sylvan_library_settle"
   ],
   "card_named_helpers": [
     {
@@ -409,6 +408,7 @@
     "docs/architecture/compiler.md",
     "docs/architecture/semantic-handlers.md",
     "docs/architecture/runtime-components.md",
+    "docs/architecture/drawing.md",
     "docs/architecture/server-runtime.md",
     "docs/architecture/replay.md",
     "docs/architecture/visibility.md",

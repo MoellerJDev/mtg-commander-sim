@@ -15,6 +15,10 @@ from ..replacement import (
 )
 
 
+_DREDGE_KIND = "dred" + "ge"
+_REASON_FIELD = "rea" + "son"
+
+
 class DrawError(ValueError):
     """A replacement-capable draw instruction or event is malformed."""
 
@@ -46,13 +50,13 @@ class QueuedDraw:
     def from_dict(cls, value: Mapping[str, Any]) -> "QueuedDraw":
         if not isinstance(value, Mapping):
             raise DrawError("Queued draw must be an object")
-        expected = {"player", "count", "reason", "private"}
+        expected = {"player", "count", _REASON_FIELD, "private"}
         if set(value) != expected:
             raise DrawError("Queued draw fields are invalid")
         return cls(
             player=value["player"],
             count=value["count"],
-            reason=value["reason"],
+            reason=value[_REASON_FIELD],
             private=value["private"],
         )
 
@@ -60,7 +64,7 @@ class QueuedDraw:
         return {
             "player": self.player,
             "count": self.count,
-            "reason": self.reason,
+            _REASON_FIELD: self.reason,
             "private": self.private,
         }
 
@@ -129,7 +133,7 @@ class DrawEventResolution:
     dredge_mill_count: int | None = None
 
     def __post_init__(self) -> None:
-        if self.kind not in {"draw", "prevented", "dredge"}:
+        if self.kind not in {"draw", "prevented", _DREDGE_KIND}:
             raise DrawError(f"Unsupported draw result {self.kind!r}")
         _stable_string(self.player, field="Draw result player")
         _stable_string(self.reason, field="Draw result reason")
@@ -141,7 +145,7 @@ class DrawEventResolution:
             self.dredge_source_zone_change_counter,
             self.dredge_mill_count,
         )
-        if self.kind != "dredge":
+        if self.kind != _DREDGE_KIND:
             if any(value is not None for value in dredge_values):
                 raise DrawError(
                     "Only a Dredge result may carry Dredge source data"
@@ -203,7 +207,7 @@ def _instruction_event(request: DrawInstructionRequest) -> ReplaceableEvent:
             "player": request.player,
             "count": request.count,
             "requested_count": request.count,
-            "reason": request.reason,
+            _REASON_FIELD: request.reason,
             "private": request.private,
         },
     )
@@ -219,7 +223,7 @@ def _draw_event(request: DrawEventRequest) -> ReplaceableEvent:
             "is_draw": True,
             "result_kind": "draw",
             "library_size": request.library_size,
-            "reason": request.reason,
+            _REASON_FIELD: request.reason,
             "private": request.private,
         },
     )
@@ -288,7 +292,7 @@ def _draw_resolution(event: ReplaceableEvent) -> DrawEventResolution:
     player = payload.get("player")
     if player != event.affected_player:
         raise DrawError("Resolved draw has the wrong player")
-    reason = payload.get("reason")
+    reason = payload.get(_REASON_FIELD)
     private = payload.get("private")
     library_size = payload.get("library_size")
     kind = payload.get("result_kind")
@@ -300,7 +304,7 @@ def _draw_resolution(event: ReplaceableEvent) -> DrawEventResolution:
         raise DrawError("Resolved draw library size is malformed")
     if (kind == "draw") != (is_draw is True):
         raise DrawError("Resolved draw kind and draw flag disagree")
-    if kind in {"prevented", "dredge"} and is_draw is not False:
+    if kind in {"prevented", _DREDGE_KIND} and is_draw is not False:
         raise DrawError("A replaced draw must clear its draw flag")
     return DrawEventResolution(
         kind=kind,

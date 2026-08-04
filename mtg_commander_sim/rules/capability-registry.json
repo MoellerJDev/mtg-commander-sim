@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 23,
+  "registry_version": 24,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -163,21 +163,21 @@
     },
     {
       "id": "zone.draw.library_to_hand",
-      "version": 2,
+      "version": 3,
       "official_rules": ["121.1", "121.2", "121.2a", "121.2c", "121.4", "121.5", "121.6", "121.6a", "121.6b", "702.52a", "702.52b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability": {
-        "summary": "Resolve an authorized draw instruction one card at a time through immutable replacement events, private affected-player choices, canonical draw state, and the represented Dredge keyword result.",
+        "summary": "Resolve represented turn, stack, conditional, optional-follow-up, and APNAP draw instructions one card at a time through immutable replacement events, private affected-player choices, canonical draw state, and the represented Dredge keyword result.",
         "inputs": ["resolved active player", "nonnegative draw count", "draw reason and visibility", "trusted typed draw replacement effects", "canonical affected-player selections"],
         "outputs": ["immutable draw instruction and event results", "replacement journal", "drawn object ids and private identity event", "empty-library draw attempt", "represented Dredge mill and graveyard-to-hand result"],
-        "exclusions": ["shared-team turn ordering", "draw effects with unresolved dynamic counts", "uncompiled draw replacement wording other than represented Dredge", "effects that move a library card to hand without drawing it", "complete skip-draw and draw-step replacement grammar"]
+        "exclusions": ["shared-team turn ordering", "draw effects with unresolved dynamic counts", "uncompiled draw replacement wording other than represented Dredge", "effects that move a library card to hand without drawing it", "complete skip-draw and draw-step replacement grammar", "per-turn draw-limit prohibitions and optional-draw or draw-as-cost legality", "casting-process face-down draws and reveal-as-drawn choices"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.drawing.model.prepare_draw_event", "mtg_commander_sim.drawing.transaction.commit_prepared_draw", "mtg_commander_sim.semantic_runtime.draw_replacements.DredgeReplacementHandler", "mtg_commander_sim.engine.CommanderEngine"],
+      "implementation_components": ["mtg_commander_sim.drawing.model.prepare_draw_event", "mtg_commander_sim.drawing.transaction.commit_prepared_draw", "mtg_commander_sim.drawing.coordinator.begin_draw_sequence", "mtg_commander_sim.drawing.coordinator.begin_draw_batch", "mtg_commander_sim.semantic_runtime.draw_replacements.DredgeReplacementHandler", "mtg_commander_sim.semantic_choices.conditional_draw.OpponentCastColorDrawHandler"],
       "positive_tests": ["test_ordinary_draw_commits_zone_history_and_events_once", "test_dredge_mills_top_cards_and_returns_the_pinned_source", "test_draw_handler_lowers_typed_intent_through_read_only_context"],
       "negative_tests": ["test_changed_library_or_source_fails_before_draw_mutation", "test_prevented_empty_draw_does_not_mark_empty_library_loss", "test_registered_node_validation_fails_before_mutation"],
-      "interaction_tests": ["test_trusted_draw_replacement_finishes_before_priority", "test_draw_prevention_applies_even_to_an_empty_library"],
-      "multiplayer_tests": ["test_draw_each_player_uses_apnap_order_and_exact_engine_path"],
+      "interaction_tests": ["test_trusted_draw_replacement_finishes_before_priority", "test_draw_prevention_applies_even_to_an_empty_library", "test_semantic_choice_preparation_draw_uses_replacement_coordinator", "test_veil_conditional_draw_pauses_for_dredge_before_permissions"],
+      "multiplayer_tests": ["test_draw_each_player_uses_apnap_order_and_exact_engine_path", "test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge"],
       "privacy_tests": ["test_draw_replacement_choice_is_visible_only_to_affected_seat"],
       "replay_tests": ["test_first_turn_profile_modifier_and_exact_replay", "test_migrated_semantic_effect_replays_exactly"],
       "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],

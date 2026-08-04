@@ -386,6 +386,9 @@ generated documentation fixtures with bearer capabilities redacted. See
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence,
   plus typed current-turn cast, death, damage, and prior-player-attack gates
+- Oracle IR v26 fixed ordinary draw templates and keyword-derived Dredge,
+  backed by one replacement-aware draw transaction rather than direct
+  library-to-hand mutation
 - CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice
@@ -846,12 +849,17 @@ remaining replay-compatible with older v3 records.
 The typed semantic-handler migration moved its first executable effect
 families into `mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an
 immutable seat/order query, produce typed intents, and declare bounded rule
-capabilities. The executor reuses canonical engine mutation methods. Draw,
-table-wide draw, and monarch designation are the first migrated operations;
-ordinary CardProgram stack resolution now reaches those handlers, and draw
-intents retain the existing replacement-aware draw sequence. All other
-operations remain explicitly on the measured legacy path. This is an
-architecture milestone, not a broader rules-completeness claim.
+capabilities. Draw intents cannot execute through the ordinary intent sink:
+turn draws, resolving fixed draws, conditional draws, optional-follow-up draws,
+and APNAP table draws all enter `mtg_commander_sim.drawing`. That package owns
+the immutable instruction/event model, private replacement continuation,
+validation, and commit; `CommanderEngine` is only its narrow coordinator host.
+The current replacement vocabulary includes prevention and generic keyword-
+derived Dredge, including empty-library applicability and exact sequence
+resumption. All other operations remain explicitly on the measured legacy
+path. This is a bounded CR 121 capability, not a claim that draw limits,
+draw-as-cost, shared-team turns, reveal-as-drawn, or every draw replacement is
+implemented.
 
 The runtime-component migration moves bounded card-specific core debt into
 versioned CardProgram data. Reviewed fixed additional-token replacements now
@@ -925,7 +933,7 @@ predicates, life-gain prevention (including `can't gain life`), other
 non-effect-runtime life producers, explicit-target or mixed immediate aftermath
 wording, broader conditional prevention-trigger results, partial or
 attached redirection, non-damage transformations, unresolved dynamic Toxic
-values, remaining result-replacement families, universal draw/entry
+values, remaining result-replacement families, universal entry
 replacement participation, broad CR 614/615/616 closure, layer dependencies,
 and state-derived modifiers remain unsupported.
 

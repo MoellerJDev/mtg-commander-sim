@@ -93,6 +93,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
     if relative.startswith(
         (
             "mtg_commander_sim/aura/",
+            "mtg_commander_sim/drawing/",
             "mtg_commander_sim/replacement/",
             "mtg_commander_sim/rules/",
         )
@@ -163,6 +164,8 @@ def _owner(relative: str, layer: str) -> str:
         return "rules_capabilities"
     if relative.startswith("mtg_commander_sim/aura/"):
         return "aura_rules"
+    if relative.startswith("mtg_commander_sim/drawing/"):
+        return "drawing"
     if relative.startswith("mtg_commander_sim/replacement/"):
         return "replacement_effects"
     if relative == "mtg_commander_sim/commander.py":
@@ -313,6 +316,7 @@ def build_classifications() -> dict[str, Any]:
                             "damage_transaction.py",
                             "damage_results.py",
                             "delayed_triggers.py",
+                            "drawing/",
                             "life_change.py",
                             "life_state.py",
                             "mana_activation.py",

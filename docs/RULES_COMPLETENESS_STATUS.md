@@ -125,9 +125,11 @@ every unclassified nonpassing rule. Normalized zone-change triggers, canonical
 fixed life results, the shared CR 611 applicability/duration boundary, and the
 bounded CR 303 Aura family now compose through typed replayable owners. The
 generated compiler report records the resulting exact-card and residual deltas.
-The next selected dependency-ready batch is the canonical draw transaction and
-draw replacement/trigger boundary rather than another low-yield attachment
-micro-family.
+The canonical draw transaction, Dredge replacement, APNAP batches, private
+continuations, and fixed draw compiler path are now represented. The next
+selected dependency-ready batch closes per-turn draw-limit prohibitions and
+optional-draw legality for CR 121.2a-b and 121.3-121.3a rather than returning
+to a low-yield attachment micro-family.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
 must use the eventual typed override boundary with source fingerprints,

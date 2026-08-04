@@ -128,6 +128,30 @@ class HandRuleTests(unittest.TestCase):
         self.assertTrue(result.ok, result.summary)
         self.assertEqual(player.max_hand_size, len(player.zones["hand"]))
 
+    def test_library_to_hand_move_is_not_a_draw(self):
+        session = self.make_session(402021, players=2)
+        engine = session.engine
+        player = engine.state.players["B"]
+        hidden = engine.state.cards[player.zones["library"][-1]]
+        history_before = tuple(player.draw_history)
+        event_before = engine.state.event_sequence
+
+        engine.move_card(
+            hidden.object_id,
+            "hand",
+            reason="CR 121.5 non-draw library-to-hand move",
+        )
+
+        self.assertEqual(history_before, tuple(player.draw_history))
+        self.assertFalse(
+            any(
+                event.event_id > event_before
+                and event.code.startswith("card.draw")
+                for event in engine.state.events
+            )
+        )
+        self.assertFalse(player.attempted_empty_draw)
+
     def test_hidden_card_put_into_hand_keeps_identity_private(self):
         session = self.make_session(40203, players=4)
         engine = session.engine

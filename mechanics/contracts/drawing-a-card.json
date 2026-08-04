@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "cr-121-drawing-a-card",
+  "official_name": "Drawing a Card",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "121", "121.1", "121.2", "121.2a", "121.2b", "121.2c",
+    "121.2d", "121.3", "121.3a", "121.4", "121.5", "121.6",
+    "121.6a", "121.6b", "121.6c", "121.7", "121.8", "121.9"
+  ],
+  "glossary_references": ["Draw"],
+  "dependencies": [
+    "zones", "replacement-effects", "state-based-actions", "priority",
+    "hidden-information", "multiplayer", "casting", "activation"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["library", "hand", "graveyard"],
+    "objects": ["top library card", "draw instruction", "individual draw event", "replacement source"],
+    "events": [
+      "draw-count instruction replacement", "one individual draw at a time",
+      "ordinary library-to-hand draw", "prevented draw", "Dredge replacement",
+      "empty-library draw attempt", "draw and second-draw trigger facts"
+    ],
+    "state_reads": [
+      "affected player", "library size and top object", "APNAP order",
+      "trusted replacement sources", "replacement selections"
+    ],
+    "state_writes": [
+      "library and hand zones", "draw history", "empty-library attempt marker",
+      "Dredge mill and source return", "private and public draw events"
+    ],
+    "costs": [
+      "draws performed while casting or activating and complete draw-as-cost legality remain blocked"
+    ],
+    "timing": [
+      "a multiple-card instruction is considered before its individual draws",
+      "each represented draw replacement completes before the sequence resumes",
+      "a draw does not use the stack"
+    ],
+    "targets": ["a represented draw names one affected player"],
+    "choices": [
+      "the affected player privately chooses among applicable optional replacements",
+      "optional-draw feasibility under global draw prohibitions remains blocked"
+    ],
+    "hidden_information": [
+      "ordinary drawn-card identity is owner-only plus analyst",
+      "public draw events disclose count and reason, not card identity"
+    ],
+    "apnap": [
+      "when several players draw, the active player completes all draws first, followed in turn order"
+    ],
+    "layers": ["draw prohibitions and continuous skip effects are external dependencies"],
+    "replacement_effects": [
+      "typed count and individual-draw event models are distinct",
+      "represented prevention and Dredge apply even to an empty library",
+      "runtime count-modification producers and the complete replacement corpus remain incomplete"
+    ],
+    "copy": ["no copy operation is intrinsic to drawing"],
+    "control_change": ["the affected player, not a source controller, owns the draw choice"],
+    "zone_change": [
+      "ordinary draw moves exactly the current top library object to hand",
+      "a non-draw library-to-hand move does not create draw history or draw events"
+    ],
+    "source_leaves": [
+      "Dredge pins physical source identity and zone-change counter through the private choice"
+    ]
+  },
+  "variants": [
+    "single and multiple draws", "several players drawing in APNAP order",
+    "empty-library ordinary and prevented draws", "Dredge",
+    "draw-step and resolving-effect producers", "conditional resolving-effect draw"
+  ],
+  "witness_cards": [
+    {"name": "Life from the Loam", "oracle_id": "ac8fba34-512c-4f24-999a-ab72f1ce4acb"},
+    {"name": "Veil of Summer", "oracle_id": "002965be-a36f-4a09-9ce0-c6535bca1703"}
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_contract_traces_every_cr_121_rule",
+    "test_ordinary_draw_commits_zone_history_and_events_once",
+    "test_instruction_count_is_replaced_before_individual_draws",
+    "test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge",
+    "test_prevented_empty_draw_does_not_mark_empty_library_loss",
+    "test_empty_library_loss_is_checked_before_draw_step_priority",
+    "test_library_to_hand_move_is_not_a_draw",
+    "test_veil_conditional_draw_pauses_for_dredge_before_permissions",
+    "test_draw_replacement_choice_is_visible_only_to_affected_seat",
+    "test_first_turn_profile_modifier_and_exact_replay"
+  ],
+  "implementation": {
+    "component": "mtg_commander_sim.drawing immutable model, transaction, continuation, and coordinator facade",
+    "version": "draw-transaction-v1"
+  },
+  "known_blockers": [
+    "draw-limit prohibitions and optional draw/cost legality are not compiled",
+    "shared-team turns are not supported",
+    "additional actions on a drawn card and result-generated draw ordering are incomplete",
+    "draws during casting or activation are not held face down",
+    "optional reveal-as-drawn choices are not implemented",
+    "the complete draw replacement and prevention Oracle grammar is not compiled"
+  ],
+  "review_status": "reviewed"
+}

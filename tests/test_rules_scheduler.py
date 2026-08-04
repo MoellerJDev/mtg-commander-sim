@@ -62,15 +62,15 @@ class RulesSchedulerTests(unittest.TestCase):
             for subsystem in self.queue["subsystems"]
             for rule in subsystem["rules"]
         ]
-        self.assertEqual(3045, len(queued))
+        self.assertEqual(3036, len(queued))
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
-            367,
+            376,
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
-            2678,
+            2660,
             self.queue["summary"]["behavioral_review_required"],
         )
 
@@ -125,7 +125,7 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "draw-transaction-replacement-and-trigger-closure",
+            "draw-limits-and-optional-choice-closure",
             selected["batch_id"],
         )
         self.assertEqual(
@@ -133,22 +133,20 @@ class RulesSchedulerTests(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "121.1",
-                "121.2",
                 "121.2a",
                 "121.2b",
-                "121.2c",
-                "121.2d",
                 "121.3",
+                "121.3a",
             },
             set(selected["rule_ids"]),
         )
         self.assertTrue(
             all(
-                not rule["reviewed"]
-                and rule["classification"] == "unclassified"
-                and rule["conformance_status"] == "unreviewed"
-                and rule["work_state"] == "behavioral_review_required"
+                rule["reviewed"]
+                and rule["classification"] == "behavioral"
+                and rule["conformance_status"] == "blocked"
+                and rule["work_state"]
+                in {"reviewed_behavioral_blocked", "blocked_by_queued_rule"}
                 for rule in selected["rules"]
             )
         )

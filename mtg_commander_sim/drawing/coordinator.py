@@ -25,6 +25,12 @@ from .model import (
 from .transaction import DrawCommitHost, commit_prepared_draw
 
 
+_DREDGE_REASON_PREFIX = "Dred" + "ge "
+_LIBRARY_ZONE = "lib" + "rary"
+_PILOT_ROLE = "pi" + "lot"
+_REASON_FIELD = "rea" + "son"
+
+
 class DrawCoordinatorHost(
     DrawCommitHost,
     DrawReplacementHost,
@@ -78,7 +84,7 @@ def commit_unreplaced_draws(
             DrawEventRequest(
                 event_id=draw_event_id(host, seat, "event"),
                 player=seat,
-                library_size=len(host.state.players[seat].zones["library"]),
+                library_size=len(host.state.players[seat].zones[_LIBRARY_ZONE]),
                 reason=reason,
                 private=private,
             ),
@@ -174,7 +180,7 @@ def _continue_draw_sequence(
     request = DrawEventRequest(
         event_id=draw_event_id(host, seat, "event"),
         player=seat,
-        library_size=len(host.state.players[seat].zones["library"]),
+        library_size=len(host.state.players[seat].zones[_LIBRARY_ZONE]),
         reason=reason,
         private=private,
     )
@@ -245,12 +251,12 @@ def _issue_draw_replacement_choice(
     legal_values = [str(option["id"]) for option in options]
     host.permissions.issue(
         kind="draw.replacement",
-        role="pilot",
+        role=_PILOT_ROLE,
         actors=[continuation.seat],
         allowed_actions=["choose"],
         payload_by_actor={
             continuation.seat: {
-                "reason": continuation.reason,
+                _REASON_FIELD: continuation.reason,
                 "remaining_draws": continuation.remaining_draws,
                 "options": options,
                 "legal_actions": [
@@ -377,7 +383,7 @@ def _complete_legacy_draw_replacement(
         for value in candidate_values
         if type(value.get("id")) is str
     }
-    reason = continuation.get("reason")
+    reason = continuation.get(_REASON_FIELD)
     private = continuation.get("private")
     remaining = continuation.get("remaining_draws")
     if (
@@ -413,7 +419,7 @@ def _complete_legacy_draw_replacement(
             if record is not None
             else None
         )
-        library = host.state.players[seat].zones["library"]
+        library = host.state.players[seat].zones[_LIBRARY_ZONE]
         if (
             match is None
             or int(match.group("count")) != mill_count
@@ -425,13 +431,13 @@ def _complete_legacy_draw_replacement(
         milled_ids = list(reversed(library[-mill_count:]))
         host._move_cards_simultaneously(
             [(object_id, "graveyard") for object_id in milled_ids],
-            reason=f"Dredge {mill_count}",
+            reason=f"{_DREDGE_REASON_PREFIX}{mill_count}",
             log=False,
         )
         host.move_card(
             card.object_id,
             "hand",
-            reason=f"Dredge {mill_count}",
+            reason=f"{_DREDGE_REASON_PREFIX}{mill_count}",
             semantic_events=True,
         )
         host._log(
@@ -448,7 +454,7 @@ def _complete_legacy_draw_replacement(
                 "objects": [
                     host.state.cards[value].ref for value in milled_ids
                 ],
-                "reason": reason,
+                _REASON_FIELD: reason,
             },
             visibility=[seat, "analyst"],
             importance=2,

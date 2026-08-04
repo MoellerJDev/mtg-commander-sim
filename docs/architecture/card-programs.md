@@ -2,7 +2,7 @@
 title: "CardProgram V2"
 status: "current"
 authoritative_source: "mtg_commander_sim/card_programs, mtg_commander_sim/semantics.py, and schemas/card-program-v2.schema.json"
-verified: "2026-08-03"
+verified: "2026-08-04"
 audience: "compiler, rules, replay, and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
@@ -62,8 +62,9 @@ fail closed.
   closure dimensions: normalized zone-event detection, ordinary APNAP trigger
   placement, and the result operation. Session registration promotes only
   exact trigger programs for which every declared capability is trusted. A
-  fixed life trigger can therefore execute without an arbiter, while an exact
-  ETB draw trigger remains provisional on the blocked draw-event capability.
+  fixed life trigger and a closed fixed draw trigger can therefore execute
+  without an arbiter. A draw trigger remains provisional when its count,
+  choice legality, replacement wording, or any sibling effect is unresolved.
 - Oracle IR v23 adds closed fixed-query static anthem and controlled-creature
   until-end-of-turn productions. CardPrograms declare the static or resolution
   continuous capability actually required; syntactic matches remain partial
@@ -73,6 +74,10 @@ fail closed.
   `attachment.aura.simple_object`. Trust therefore requires the same targeting,
   entry, live-legality, replay, and mutation evidence used by the runtime;
   merely recognizing `Enchant` never makes a complex Aura exact.
+- Oracle IR v26 makes closed fixed draw nodes and `Dredge N` declare
+  `zone.draw.library_to_hand`. Capability closure therefore depends on the
+  same replacement, privacy, replay, multiplayer, and killed-mutation evidence
+  as the canonical draw owner rather than on syntax alone.
 
 ## Execution ownership
 

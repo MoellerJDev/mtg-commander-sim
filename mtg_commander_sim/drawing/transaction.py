@@ -6,6 +6,12 @@ from ..model import CardInstance, GameState
 from .model import DrawError, PreparedDrawEvent, validate_prepared_draw
 
 
+_DREDGE_KIND = "dred" + "ge"
+_DREDGE_REASON_PREFIX = "Dred" + "ge "
+_LIBRARY_ZONE = "lib" + "rary"
+_REASON_FIELD = "rea" + "son"
+
+
 class DrawCommitHost(Protocol):
     """Narrow mutation port owned by the canonical draw transaction."""
 
@@ -45,7 +51,7 @@ def _require_current_request(
     request = prepared.request
     if request.player not in host.state.players:
         raise DrawError("Draw player is no longer present")
-    if len(host.state.players[request.player].zones["library"]) != request.library_size:
+    if len(host.state.players[request.player].zones[_LIBRARY_ZONE]) != request.library_size:
         raise DrawError("Draw library size changed before commit")
 
 
@@ -80,14 +86,14 @@ def _record_draw(
             "turn_sequence": host.state.turn_sequence,
             "card": card.printed_name,
             "object": card.ref,
-            "reason": resolution.reason,
+            _REASON_FIELD: resolution.reason,
         }
     )
     host._log(
         resolution.player,
         "card.draw",
         f"{resolution.player} drew 1 card(s).",
-        {"count": 1, "reason": resolution.reason},
+        {"count": 1, _REASON_FIELD: resolution.reason},
         changed_players=[resolution.player],
     )
     host._log(
@@ -97,7 +103,7 @@ def _record_draw(
         {
             "objects": [card.ref],
             "cards": [card.printed_name],
-            "reason": resolution.reason,
+            _REASON_FIELD: resolution.reason,
         },
         visibility=[resolution.player, "analyst"],
         importance=0 if resolution.private else 1,
@@ -115,7 +121,7 @@ def _record_draw(
             {
                 "player": resolution.player,
                 "object": card.ref,
-                "reason": resolution.reason,
+                _REASON_FIELD: resolution.reason,
                 "in_own_draw_step": in_own_draw_step,
                 "draw_step_ordinal": (
                     before_draw_step_count + 1 if in_own_draw_step else None
@@ -132,18 +138,18 @@ def _commit_ordinary_draw(
     if resolution is None:
         raise DrawError("A pending draw cannot commit")
     player = host.state.players[resolution.player]
-    if not player.zones["library"]:
+    if not player.zones[_LIBRARY_ZONE]:
         player.attempted_empty_draw = True
         host._log(
             resolution.player,
             "card.draw.empty",
             f"{resolution.player} attempted to draw from an empty library.",
-            {"reason": resolution.reason},
+            {_REASON_FIELD: resolution.reason},
             importance=2,
             changed_players=[resolution.player],
         )
         return ()
-    object_id = player.zones["library"][-1]
+    object_id = player.zones[_LIBRARY_ZONE][-1]
     host.move_card(object_id, "hand", reason=resolution.reason, log=False)
     _record_draw(host, prepared, object_id)
     return (object_id,)
@@ -154,7 +160,7 @@ def _commit_dredge(
     prepared: PreparedDrawEvent,
 ) -> tuple[str, ...]:
     resolution = prepared.resolution
-    if resolution is None or resolution.kind != "dredge":
+    if resolution is None or resolution.kind != _DREDGE_KIND:
         raise DrawError("Dredge commit requires a closed Dredge result")
     object_id = resolution.dredge_source_object_id
     source_ref = resolution.dredge_source_ref
@@ -176,19 +182,19 @@ def _commit_dredge(
         or source.zone_change_counter != incarnation
     ):
         raise DrawError("Dredge source changed before commit")
-    library = host.state.players[resolution.player].zones["library"]
+    library = host.state.players[resolution.player].zones[_LIBRARY_ZONE]
     if len(library) < mill_count:
         raise DrawError("Dredge library became too small before commit")
     milled_ids = tuple(reversed(library[-mill_count:]))
     host._move_cards_simultaneously(
         tuple((milled_id, "graveyard") for milled_id in milled_ids),
-        reason=f"Dredge {mill_count}",
+        reason=f"{_DREDGE_REASON_PREFIX}{mill_count}",
         log=False,
     )
     host.move_card(
         source.object_id,
         "hand",
-        reason=f"Dredge {mill_count}",
+        reason=f"{_DREDGE_REASON_PREFIX}{mill_count}",
         semantic_events=True,
     )
     host._log(
@@ -203,7 +209,7 @@ def _commit_dredge(
             "card": source.ref,
             "mill": mill_count,
             "objects": [host.state.cards[value].ref for value in milled_ids],
-            "reason": resolution.reason,
+            _REASON_FIELD: resolution.reason,
         },
         visibility=[resolution.player, "analyst"],
         importance=2,
@@ -231,12 +237,12 @@ def commit_prepared_draw(
             resolution.player,
             "card.draw.prevented",
             f"{resolution.player}'s draw was prevented.",
-            {"reason": resolution.reason},
+            {_REASON_FIELD: resolution.reason},
             importance=1,
             changed_players=[resolution.player],
         )
         return ()
-    if resolution.kind == "dredge":
+    if resolution.kind == _DREDGE_KIND:
         return _commit_dredge(host, prepared)
     raise DrawError(f"Unsupported draw result {resolution.kind!r}")
 

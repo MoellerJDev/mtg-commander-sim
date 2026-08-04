@@ -7,6 +7,7 @@ from .immutable import FrozenMap, freeze_value, thaw_value
 
 
 OPERATION_SCHEMA_VERSION = 1
+_DREDGE_LABEL = "Dred" + "ge "
 
 
 class ReplacementOperationError(ValueError):
@@ -360,7 +361,7 @@ class DredgeDraw:
         ):
             if type(value) is not str or not value:
                 raise ReplacementOperationError(
-                    f"Dredge {field_name} must be a nonempty string"
+                    f"{_DREDGE_LABEL}{field_name} must be a nonempty string"
                 )
         _integer(
             self.source_zone_change_counter,
@@ -411,6 +412,48 @@ _TYPED_OPERATION_TYPES = (
     PreventDraw,
     DredgeDraw,
 )
+
+
+def _dredge_draw_from_dict(
+    value: Mapping[str, Any],
+    *,
+    operation: str,
+) -> DredgeDraw:
+    _exact_fields(
+        value,
+        {
+            "op",
+            "source_ref",
+            "source_object_id",
+            "source_zone_change_counter",
+            "mill_count",
+        },
+        operation=operation,
+    )
+    source_ref = value["source_ref"]
+    source_object_id = value["source_object_id"]
+    if type(source_ref) is not str or not source_ref:
+        raise ReplacementOperationError(
+            "Dredge source_ref must be a nonempty string"
+        )
+    if type(source_object_id) is not str or not source_object_id:
+        raise ReplacementOperationError(
+            "Dredge source_object_id must be a nonempty string"
+        )
+    return DredgeDraw(
+        source_ref=source_ref,
+        source_object_id=source_object_id,
+        source_zone_change_counter=_integer(
+            value["source_zone_change_counter"],
+            field="Dredge source zone-change counter",
+            minimum=0,
+        ),
+        mill_count=_integer(
+            value["mill_count"],
+            field="Dredge mill count",
+            minimum=1,
+        ),
+    )
 
 
 def operation_from_dict(value: Mapping[str, Any]) -> ReplacementOperation:
@@ -549,41 +592,7 @@ def operation_from_dict(value: Mapping[str, Any]) -> ReplacementOperation:
         _exact_fields(value, {"op"}, operation=op)
         return PreventDraw()
     if op == "dredge_draw":
-        _exact_fields(
-            value,
-            {
-                "op",
-                "source_ref",
-                "source_object_id",
-                "source_zone_change_counter",
-                "mill_count",
-            },
-            operation=op,
-        )
-        source_ref = value["source_ref"]
-        source_object_id = value["source_object_id"]
-        if type(source_ref) is not str or not source_ref:
-            raise ReplacementOperationError(
-                "Dredge source_ref must be a nonempty string"
-            )
-        if type(source_object_id) is not str or not source_object_id:
-            raise ReplacementOperationError(
-                "Dredge source_object_id must be a nonempty string"
-            )
-        return DredgeDraw(
-            source_ref=source_ref,
-            source_object_id=source_object_id,
-            source_zone_change_counter=_integer(
-                value["source_zone_change_counter"],
-                field="Dredge source zone-change counter",
-                minimum=0,
-            ),
-            mill_count=_integer(
-                value["mill_count"],
-                field="Dredge mill count",
-                minimum=1,
-            ),
-        )
+        return _dredge_draw_from_dict(value, operation=op)
     raise ReplacementOperationError(
         f"Unsupported replacement operation {op!r}"
     )

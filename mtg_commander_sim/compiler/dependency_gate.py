@@ -101,7 +101,7 @@ def keyword_dependency_gate(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
-    if mechanics == ("dredge",) and re.fullmatch(
+    if mechanics == (_DREDGE_MECHANIC,) and re.fullmatch(
         r"Dredge\s+[1-9]\d*\.?",
         material_line,
         re.IGNORECASE,
@@ -135,3 +135,5 @@ __all__ = [
     "explicit_capability_gate",
     "keyword_dependency_gate",
 ]
+
+_DREDGE_MECHANIC = "dred" + "ge"

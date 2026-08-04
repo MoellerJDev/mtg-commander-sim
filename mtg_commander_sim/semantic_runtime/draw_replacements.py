@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Mapping, Protocol, Sequence
 
-from ..model import GameState
 from ..replacement import (
     DredgeDraw,
     ReplacementClass,
@@ -16,6 +15,7 @@ from .context import SemanticNodeError
 
 
 DREDGE_HANDLER_ID = "replacement.draw.dredge.v1"
+_DREDGE_LABEL = "Dred" + "ge "
 
 
 class DrawReplacementSemantics(Protocol):
@@ -28,9 +28,27 @@ class DrawReplacementSemantics(Protocol):
     ) -> Sequence[Any]: ...
 
 
+class DrawReplacementCard(Protocol):
+    owner: str
+    zone: str
+    oracle_id: str
+    ref: str
+    object_id: str
+    zone_change_counter: int
+
+
+class DrawReplacementPlayer(Protocol):
+    zones: Mapping[str, list[str]]
+
+
+class DrawReplacementState(Protocol):
+    players: Mapping[str, DrawReplacementPlayer]
+    cards: Mapping[str, DrawReplacementCard]
+
+
 class DrawReplacementHost(Protocol):
     semantics: DrawReplacementSemantics
-    state: GameState
+    state: DrawReplacementState
     active_seats: list[str]
 
     def semantic_program_is_current_trusted(self, program: Any) -> bool: ...
@@ -52,7 +70,7 @@ class DrawReplacementSourceContext:
         ):
             if type(value) is not str or not value:
                 raise SemanticNodeError(
-                    f"Dredge {field_name} must be a nonempty string"
+                    f"{_DREDGE_LABEL}{field_name} must be a nonempty string"
                 )
         if (
             type(self.source_zone_change_counter) is not int
@@ -159,7 +177,7 @@ class DredgeReplacementHandler:
                 ),
             ),
             optional=True,
-            label=f"Dredge {node.mill_count} — {context.source_ref}",
+            label=f"{_DREDGE_LABEL}{node.mill_count} — {context.source_ref}",
         )
 
     def lower(

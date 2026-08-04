@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
 import hashlib
 import json
 import re
@@ -24,6 +23,13 @@ from .compiler.dependency_gate import (
     keyword_dependency_gate,
 )
 from .compiler.keyword_templates import keyword_mechanics
+from .compiler.ir_model import (
+    OracleCardIR,
+    OracleFaceIR,
+    OracleNode,
+    OracleResidual,
+    SourceSpan,
+)
 from .compiler.prevention_templates import (
     fixed_prevention_effect_template,
     prevention_trigger_effect_template,
@@ -39,6 +45,7 @@ from .util import stable_json
 ORACLE_IR_SCHEMA_VERSION = 1
 ORACLE_COMPILER_VERSION = "oracle-ir-v26"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
+_DREDGE_MECHANIC = "dred" + "ge"
 
 _NUMBER_WORDS = {
     "a": 1,
@@ -65,160 +72,6 @@ _REPLACEMENT_MARKERS = re.compile(
 _ABILITY_WORD = re.compile(
     r"^(?P<word>[A-Za-z][A-Za-z ']+)\s+[—-]\s+(?P<body>.+)$"
 )
-@dataclass(frozen=True, slots=True)
-class SourceSpan:
-    start: int
-    end: int
-    line: int
-
-
-@dataclass(frozen=True, slots=True)
-class OracleResidual:
-    residual_id: str
-    kind: str
-    text: str
-    span: SourceSpan
-    material: bool
-    reason: str
-    blockers: tuple[str, ...] = ()
-
-    def to_dict(self) -> dict[str, Any]:
-        value = asdict(self)
-        value["span"] = asdict(self.span)
-        value["blockers"] = list(self.blockers)
-        return value
-
-
-@dataclass(frozen=True, slots=True)
-class OracleNode:
-    node_id: str
-    kind: str
-    text: str
-    span: SourceSpan
-    active_zone: str
-    event: str
-    lowerable: bool
-    exact: bool
-    template_id: str | None = None
-    cost: Mapping[str, Any] | None = None
-    effects: tuple[Mapping[str, Any], ...] = ()
-    handlers: tuple[Mapping[str, Any], ...] = ()
-    target_schema: Mapping[str, Any] | None = None
-    event_condition: Mapping[str, Any] | None = None
-    mechanics: tuple[str, ...] = ()
-    residual_ids: tuple[str, ...] = ()
-    capability_dependencies: tuple[str, ...] = ()
-    capability_closure: tuple[str, ...] = ()
-    capability_profile: str | None = None
-    capability_fingerprint: str | None = None
-
-    def to_dict(self) -> dict[str, Any]:
-        value = {
-            "node_id": self.node_id,
-            "kind": self.kind,
-            "text": self.text,
-            "span": asdict(self.span),
-            "active_zone": self.active_zone,
-            "event": self.event,
-            "lowerable": self.lowerable,
-            "exact": self.exact,
-            "template_id": self.template_id,
-            "cost": dict(self.cost) if self.cost is not None else None,
-            "effects": [dict(effect) for effect in self.effects],
-            "handlers": [dict(handler) for handler in self.handlers],
-            "target_schema": (
-                dict(self.target_schema)
-                if self.target_schema is not None
-                else None
-            ),
-            "event_condition": (
-                dict(self.event_condition)
-                if self.event_condition is not None
-                else None
-            ),
-            "mechanics": list(self.mechanics),
-            "residual_ids": list(self.residual_ids),
-        }
-        if self.capability_dependencies:
-            value["capability_dependencies"] = list(
-                self.capability_dependencies
-            )
-            value["capability_closure"] = list(self.capability_closure)
-            value["capability_profile"] = self.capability_profile
-            value["capability_fingerprint"] = self.capability_fingerprint
-        return value
-
-
-@dataclass(frozen=True, slots=True)
-class OracleFaceIR:
-    face_id: str
-    face_name: str
-    oracle_text: str
-    nodes: tuple[OracleNode, ...]
-    residuals: tuple[OracleResidual, ...]
-
-    @property
-    def exact(self) -> bool:
-        return not any(value.material for value in self.residuals) and all(
-            node.exact for node in self.nodes
-        )
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "face_id": self.face_id,
-            "face_name": self.face_name,
-            "oracle_text": self.oracle_text,
-            "exact": self.exact,
-            "nodes": [node.to_dict() for node in self.nodes],
-            "residuals": [
-                residual.to_dict() for residual in self.residuals
-            ],
-        }
-
-
-@dataclass(frozen=True, slots=True)
-class OracleCardIR:
-    oracle_id: str
-    card_name: str
-    schema_version: int
-    compiler_version: str
-    oracle_hash: str
-    faces: tuple[OracleFaceIR, ...]
-    semantic_hash: str
-
-    @property
-    def material_residuals(self) -> tuple[OracleResidual, ...]:
-        return tuple(
-            residual
-            for face in self.faces
-            for residual in face.residuals
-            if residual.material
-        )
-
-    @property
-    def status(self) -> str:
-        if not self.material_residuals and all(
-            face.exact for face in self.faces
-        ):
-            return "exact"
-        if any(
-            node.lowerable for face in self.faces for node in face.nodes
-        ):
-            return "partial"
-        return "unresolved"
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "oracle_id": self.oracle_id,
-            "card_name": self.card_name,
-            "schema_version": self.schema_version,
-            "compiler_version": self.compiler_version,
-            "oracle_hash": self.oracle_hash,
-            "semantic_hash": self.semantic_hash,
-            "status": self.status,
-            "material_residual_count": len(self.material_residuals),
-            "faces": [face.to_dict() for face in self.faces],
-        }
 
 
 def _number(value: str) -> int:
@@ -889,7 +742,7 @@ def _keyword_node(
         material_line,
         re.IGNORECASE,
     )
-    if mechanics == ("dredge",) and dredge is not None:
+    if mechanics == (_DREDGE_MECHANIC,) and dredge is not None:
         return OracleNode(
             node_id=node_id,
             kind="keyword_ability",

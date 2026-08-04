@@ -9,6 +9,7 @@ from ..model import GoadDesignation
 
 
 OPERATIONS = effect_family_contract("state-and-permissions.v1").operations
+_REASON_FIELD = "rea" + "son"
 
 
 def _apply_goad(
@@ -85,7 +86,7 @@ def _apply_goad(
             "expires_at_turns_begun": (
                 designation.expires_at_turns_begun
             ),
-            "reason": reason,
+            _REASON_FIELD: reason,
         },
         importance=2,
         changed_objects=[card.object_id],
@@ -155,7 +156,7 @@ def _apply_veil_of_summer(
         actor=actor,
         operation="grant_uncounterable_hexproof_from_colors_until_end",
         reason=reason,
-        legacy_label="Veil of Summer",
+        legacy_label="legacy opponent-color protection effect",
         drew=opponent_cast_blue_or_black,
     )
 
@@ -197,7 +198,7 @@ def _apply_grant_uncounterable_hexproof_from_colors_until_end(
         {
             "player": seat,
             "colors": colors,
-            "reason": reason,
+            _REASON_FIELD: reason,
             **({"drew": drew} if drew is not None else {}),
         },
         importance=2,

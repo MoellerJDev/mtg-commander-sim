@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 121 — Drawing a Card",
+  "cases": [
+    {
+      "rule_id": "121", "rule_text_sha256": "61d2a34be8021e0a5c382916c4f16fbfca8aa11e40e1856f4a5adc4c6dd02277",
+      "classification": "definition_only", "status": "definition_only", "assertion_kind": "static_traceability", "reviewed": true,
+      "implementation_components": ["mechanics/contracts/drawing-a-card.json"],
+      "executable_test_ids": ["tests.test_draw_transaction_model.DrawTransactionModelTests.test_contract_traces_every_cr_121_rule"],
+      "required_scenarios": [], "covered_scenarios": [], "blockers": [],
+      "notes": ["Section heading pinned by the reviewed Drawing a Card contract."]
+    },
+    {
+      "rule_id": "121.1", "rule_text_sha256": "bc2b21bae045b7fd9519eaa251a2f1f87651c0117d2e3b6d6dd3eaf7bebee441",
+      "classification": "behavioral", "status": "passing", "assertion_kind": "executable_engine", "reviewed": true,
+      "implementation_components": ["drawing.prepare_draw_event", "drawing.commit_prepared_draw", "drawing.begin_draw_sequence"],
+      "executable_test_ids": ["tests.test_draw_transaction_commit.DrawTransactionCommitTests.test_ordinary_draw_commits_zone_history_and_events_once", "tests.test_draw_step_rules.DrawStepRuleTests.test_turn_draw_is_stackless_and_precedes_active_priority", "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_stack_draw_each_routes_through_handler_in_apnap_order"],
+      "required_scenarios": ["positive", "interaction"], "covered_scenarios": ["positive", "interaction"], "blockers": [],
+      "notes": ["Represented turn-based and resolving-effect draws use the same canonical top-library-to-hand commit."]
+    },
+    {
+      "rule_id": "121.2", "rule_text_sha256": "baba43bc959a1791a2796ea85c1bf3b44b2ebc6914cb3ec7f5e7dd8ab0d48992",
+      "classification": "behavioral", "status": "passing", "assertion_kind": "executable_engine", "reviewed": true,
+      "implementation_components": ["drawing.prepare_draw_instruction", "drawing.begin_draw_sequence"],
+      "executable_test_ids": ["tests.test_draw_transaction_model.DrawTransactionModelTests.test_instruction_count_is_replaced_before_individual_draws", "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge"],
+      "required_scenarios": ["positive", "interaction", "multiplayer"], "covered_scenarios": ["positive", "interaction", "multiplayer"], "blockers": [],
+      "notes": ["Every represented multiple-card instruction commits one independently replaceable draw at a time."]
+    },
+    {
+      "rule_id": "121.2a", "rule_text_sha256": "8a6f5354fab7cb789f6b2c02652b60b3ac7915124b291e19f66b53734f6c2d9b",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": ["drawing.prepare_draw_instruction", "replacement.SetField", "replacement.MultiplyAmount"],
+      "executable_test_ids": ["tests.test_draw_transaction_model.DrawTransactionModelTests.test_instruction_count_is_replaced_before_individual_draws"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"], "covered_scenarios": ["positive", "negative"],
+      "blockers": ["runtime producers and affected-player ordering for the complete draw-count replacement corpus are not compiled"],
+      "notes": ["The typed instruction boundary exists and is tested before individual events; universal runtime production is intentionally not claimed."]
+    },
+    {
+      "rule_id": "121.2b", "rule_text_sha256": "dcc0f31b1411564199962cb4e89d1196a383069084d274e55bcd27f340cb2165",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": [], "executable_test_ids": [],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"], "covered_scenarios": [],
+      "blockers": ["per-turn draw-limit prohibitions and their choice and cost legality grammar are not implemented"],
+      "notes": ["No broad support is inferred from fixed draw-count validation."]
+    },
+    {
+      "rule_id": "121.2c", "rule_text_sha256": "9f25bbbef878e75f7f832039024a60c36c0e9136d8435414784431c7b46ea14c",
+      "classification": "behavioral", "status": "passing", "assertion_kind": "executable_engine", "reviewed": true,
+      "implementation_components": ["semantic_runtime.DrawEachPlayerHandler", "drawing.begin_draw_batch"],
+      "executable_test_ids": ["tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_uses_apnap_order_and_exact_engine_path", "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge"],
+      "required_scenarios": ["positive", "interaction", "multiplayer"], "covered_scenarios": ["positive", "interaction", "multiplayer"], "blockers": [],
+      "notes": ["The active player completes the represented batch before each remaining player in turn order, including replacement pauses."]
+    },
+    {
+      "rule_id": "121.2d", "rule_text_sha256": "7eff21d7402246e2230c809f63b8273b3376e563c55aa27332946482f4b4cc78",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": [], "executable_test_ids": [],
+      "required_scenarios": ["multiplayer", "interaction", "replay"], "covered_scenarios": [],
+      "blockers": ["shared team turns and within-team draw ordering are outside supported game profiles"],
+      "notes": ["Ordinary APNAP support is not treated as shared-team-turn support."]
+    },
+    {
+      "rule_id": "121.3", "rule_text_sha256": "4fc5d97ab8be7b707060b2b2d3e534c2784e3c3d6542fca1677f5fbf393ea12c",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": ["semantic_choices.DrawOptionalLandChoiceHandler"],
+      "executable_test_ids": ["tests.test_semantic_handlers.TypedSemanticHandlerTests.test_semantic_choice_preparation_draw_uses_replacement_coordinator"],
+      "required_scenarios": ["positive", "negative", "interaction"], "covered_scenarios": ["positive"],
+      "blockers": ["generic optional-draw feasibility under empty libraries and draw prohibitions is not implemented"],
+      "notes": ["Represented optional follow-up effects do not establish the complete optional-draw legality rule."]
+    },
+    {
+      "rule_id": "121.3a", "rule_text_sha256": "a83816b9a50959e8e6504ccb8e8f5425a214a05d5062b80bd0a5b30bfa60d402",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": [], "executable_test_ids": [],
+      "required_scenarios": ["positive", "negative", "multiplayer"], "covered_scenarios": [],
+      "blockers": ["choices made by a player other than the prospective drawer are not modeled for draw-prohibition feasibility"],
+      "notes": []
+    },
+    {
+      "rule_id": "121.4", "rule_text_sha256": "0f7da71604258c8d2b012ce43df315823c73e6fb25924c766e31ec853c105741",
+      "classification": "behavioral", "status": "passing", "assertion_kind": "executable_engine", "reviewed": true,
+      "implementation_components": ["drawing.commit_prepared_draw", "state_based_actions"],
+      "executable_test_ids": ["tests.test_draw_step_rules.DrawStepRuleTests.test_empty_library_loss_is_checked_before_draw_step_priority", "tests.test_draw_transaction_commit.DrawTransactionCommitTests.test_prevented_empty_draw_does_not_mark_empty_library_loss"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer"], "covered_scenarios": ["positive", "negative", "interaction", "multiplayer"],
+      "blockers": [], "notes": ["Only an un-replaced empty-library attempt sets the state-based loss marker."]
+    },
+    {
+      "rule_id": "121.5", "rule_text_sha256": "9332557ade32f0180bb73d5b1c4d5d228977529ecd6a04cf1b8a3f006df1fa75",
+      "classification": "behavioral", "status": "passing", "assertion_kind": "executable_engine", "reviewed": true,
+      "implementation_components": ["drawing.commit_prepared_draw", "CommanderEngine.move_card"],
+      "executable_test_ids": ["tests.test_hand_rules.HandRuleTests.test_library_to_hand_move_is_not_a_draw", "tests.test_draw_transaction_commit.DrawTransactionCommitTests.test_ordinary_draw_commits_zone_history_and_events_once"],
+      "required_scenarios": ["positive", "negative", "interaction"], "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [], "notes": ["Only the canonical draw transaction writes draw history and emits draw events."]
+    },
+    {
+      "rule_id": "121.6", "rule_text_sha256": "717e0c723ad04451e31bcd03ba455daf85882ecbd23f0c9886a2d9f2a3799291",
+      "classification": "definition_only", "status": "definition_only", "assertion_kind": "static_traceability", "reviewed": true,
+      "implementation_components": ["drawing.prepare_draw_event", "replacement.ReplaceableEvent"],
+      "executable_test_ids": ["tests.test_draw_transaction_model.DrawTransactionModelTests.test_contract_traces_every_cr_121_rule"],
+      "required_scenarios": [], "covered_scenarios": [], "blockers": [],
+      "notes": ["Umbrella statement; represented replacement behavior is reviewed in the subordinate rules."]
+    },
+    {
+      "rule_id": "121.6a", "rule_text_sha256": "52e445c7b32b029046d587a7f952064a0951cce167fc4bfd06077f8f6bd7e365",
+      "classification": "behavioral", "status": "passing", "assertion_kind": "executable_engine", "reviewed": true,
+      "implementation_components": ["drawing.prepare_draw_event", "drawing.commit_prepared_draw"],
+      "executable_test_ids": ["tests.test_draw_transaction_model.DrawTransactionModelTests.test_draw_prevention_applies_even_to_an_empty_library", "tests.test_draw_transaction_model.DrawTransactionModelTests.test_dredge_with_too_few_library_cards_is_not_applicable"],
+      "required_scenarios": ["positive", "negative", "interaction"], "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [], "notes": ["Applicable replacements are evaluated against an empty-library event before an empty draw is committed."]
+    },
+    {
+      "rule_id": "121.6b", "rule_text_sha256": "ac470d98555735ea593d5073fb8f0fc47845578bd8af0ce2ed988c66970b68d3",
+      "classification": "behavioral", "status": "passing", "assertion_kind": "executable_engine", "reviewed": true,
+      "implementation_components": ["drawing.DrawDecisionContinuation", "drawing.begin_draw_sequence", "drawing.resume_after_draw"],
+      "executable_test_ids": ["tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_pauses_and_resumes_in_apnap_order_for_dredge", "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_veil_conditional_draw_pauses_for_dredge_before_permissions"],
+      "required_scenarios": ["positive", "interaction", "multiplayer", "replay"], "covered_scenarios": ["positive", "interaction", "multiplayer", "replay"],
+      "blockers": [], "notes": ["Typed resumptions pin the remaining draw count and later instructions until the selected replacement completes."]
+    },
+    {
+      "rule_id": "121.6c", "rule_text_sha256": "f933521179a704b33236150579572ef2a82292ac28fc72da324060d6ac3508db",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": [], "executable_test_ids": [],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"], "covered_scenarios": [],
+      "blockers": ["generic additional actions tied to the specifically drawn card are not represented through replacement completion"],
+      "notes": []
+    },
+    {
+      "rule_id": "121.7", "rule_text_sha256": "3f6f4e58a654c4d1fc92d23fa3927d2282bbeaa76eb0aecd126a43d36aca251e",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": ["replacement.CreateNestedEvent"], "executable_test_ids": [],
+      "required_scenarios": ["positive", "interaction", "replay"], "covered_scenarios": [],
+      "blockers": ["draw results created by replacement or prevention events are not queued after unreplaced portions by a generic runtime producer"],
+      "notes": ["Nested replacement events alone are not evidence of CR 121.7 ordering."]
+    },
+    {
+      "rule_id": "121.8", "rule_text_sha256": "f38e36619001a72941ac96f4f1448cc51ecb8c887cc35c602beef0ce5be5eee1",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": [], "executable_test_ids": [],
+      "required_scenarios": ["positive", "negative", "hidden_information", "replay"], "covered_scenarios": [],
+      "blockers": ["draws during casting or activation are not held face down through completion or reversal"],
+      "notes": []
+    },
+    {
+      "rule_id": "121.9", "rule_text_sha256": "530a526a717796632c0fac69e84bd6fd7c1023ecbffe62513961a9d59d4597da",
+      "classification": "behavioral", "status": "blocked", "assertion_kind": "unsupported_fail_closed", "reviewed": true,
+      "implementation_components": [], "executable_test_ids": [],
+      "required_scenarios": ["positive", "negative", "hidden_information"], "covered_scenarios": [],
+      "blockers": ["optional reveal-as-drawn choices and their private pre-reveal view are not implemented"],
+      "notes": []
+    }
+  ]
+}

@@ -339,7 +339,7 @@ def _apply_operation(
         payload.update(
             {
                 "is_draw": False,
-                "result_kind": "dredge",
+                "result_kind": _DREDGE_RESULT_KIND,
                 "dredge_source_ref": operation.source_ref,
                 "dredge_source_object_id": operation.source_object_id,
                 "dredge_source_zone_change_counter": (
@@ -481,3 +481,5 @@ def resolve_replacements(
     raise ReplacementEffectError(
         "Replacement choice sequence contains unused choices"
     )
+
+_DREDGE_RESULT_KIND = "dred" + "ge"

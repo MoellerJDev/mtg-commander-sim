@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
+from pathlib import Path
 import unittest
 
 from mtg_commander_sim.drawing import (
@@ -58,6 +60,23 @@ def dredge_effect(
 
 
 class DrawTransactionModelTests(unittest.TestCase):
+    def test_contract_traces_every_cr_121_rule(self):
+        root = Path(__file__).resolve().parents[1]
+        contract = json.loads(
+            (
+                root / "mechanics" / "contracts" / "drawing-a-card.json"
+            ).read_text(encoding="utf-8")
+        )
+        self.assertEqual(
+            {
+                "121", "121.1", "121.2", "121.2a", "121.2b",
+                "121.2c", "121.2d", "121.3", "121.3a", "121.4",
+                "121.5", "121.6", "121.6a", "121.6b", "121.6c",
+                "121.7", "121.8", "121.9",
+            },
+            set(contract["rule_references"]),
+        )
+
     def test_instruction_count_is_replaced_before_individual_draws(self):
         request = DrawInstructionRequest(
             event_id="draw:instruction:1",
