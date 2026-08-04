@@ -104,15 +104,11 @@ from .damage import (
 )
 from .damage_prevention import expire_end_of_turn_damage_modifiers
 from .drawing import (
-    commit_prepared_draw,
-    DrawDecisionContinuation,
+    begin_draw_sequence,
+    commit_unreplaced_draws,
+    complete_draw_replacement,
     DrawError,
-    DrawEventRequest,
-    DrawInstructionRequest,
-    DrawResume,
-    prepare_draw_event,
-    prepare_draw_instruction,
-    prepare_ordinary_draw,
+    resume_after_draw,
 )
 from .delayed_triggers import materialize_delayed_trigger
 from .trigger_targeting import begin_pending_trigger_target_selection
@@ -232,7 +228,6 @@ from .semantic_runtime import (
     execute_intent_plan,
     log_applied_zone_replacements,
     PreparedZoneChange,
-    collect_draw_replacement_effects,
     prepare_zone_change_replacement,
     prepare_draw_resolution,
 )
@@ -2279,47 +2274,18 @@ class CommanderEngine(
         reached.  Opening hands and mulligan redraws are not game draws.
         """
 
-        self._require_seat(seat)
-        drawn: list[str] = []
         try:
-            instruction = prepare_draw_instruction(
-                DrawInstructionRequest(
-                    event_id=self._draw_event_id(seat, "unreplaced"),
-                    player=seat,
-                    count=count,
+            return list(
+                commit_unreplaced_draws(
+                    self,
+                    seat,
+                    count,
                     reason=reason,
                     private=private,
-                ),
-                apnap_order=self.apnap_order(),
-            )
-            for _ in range(instruction.count or 0):
-                prepared = prepare_draw_event(
-                    DrawEventRequest(
-                        event_id=self._draw_event_id(seat, "event"),
-                        player=seat,
-                        library_size=len(
-                            self.state.players[seat].zones["library"]
-                        ),
-                        reason=reason,
-                        private=private,
-                    ),
-                    apnap_order=self.apnap_order(),
                 )
-                committed = commit_prepared_draw(self, prepared)
-                drawn.extend(committed)
-                if not committed:
-                    # One attempted draw is sufficient to establish the CR
-                    # 704.5b state before the next state-based-action check.
-                    break
+            )
         except DrawError as exc:
             raise GameRuleError(str(exc)) from exc
-        return drawn
-
-    def _draw_event_id(self, seat: str, scope: str) -> str:
-        return (
-            f"draw:{self.state.game_id}:{self.state.turn_sequence}:"
-            f"{self.state.event_sequence + 1}:{seat}:{scope}"
-        )
 
     def _begin_draw_sequence(
         self,
@@ -2332,366 +2298,32 @@ class CommanderEngine(
     ) -> None:
         """Resolve one draw instruction, then each draw independently."""
 
-        self._require_seat(seat)
         try:
-            resume = DrawResume.from_dict(
-                dict(continuation or {"kind": "none"})
-            )
-            instruction = prepare_draw_instruction(
-                DrawInstructionRequest(
-                    event_id=self._draw_event_id(seat, "instruction"),
-                    player=seat,
-                    count=count,
-                    reason=reason,
-                    private=private,
-                ),
-                apnap_order=self.apnap_order(),
+            begin_draw_sequence(
+                self,
+                seat,
+                count,
+                reason=reason,
+                private=private,
+                continuation=continuation,
             )
         except DrawError as exc:
             raise GameRuleError(str(exc)) from exc
-        self._continue_draw_sequence(
-            seat,
-            instruction.count or 0,
-            reason=reason,
-            private=private,
-            resume=resume,
-        )
-
-    def _continue_draw_sequence(
-        self,
-        seat: str,
-        remaining: int,
-        *,
-        reason: str,
-        private: bool,
-        resume: DrawResume,
-    ) -> None:
-        if remaining <= 0:
-            self._resume_after_draw(resume)
-            return
-        request = DrawEventRequest(
-            event_id=self._draw_event_id(seat, "event"),
-            player=seat,
-            library_size=len(self.state.players[seat].zones["library"]),
-            reason=reason,
-            private=private,
-        )
-        try:
-            effects = collect_draw_replacement_effects(self, seat)
-            prepared = prepare_draw_event(
-                request,
-                apnap_order=self.apnap_order(),
-                effects=effects,
-                require_all_selections=False,
-            )
-        except (DrawError, SemanticNodeError) as exc:
-            raise GameRuleError(str(exc)) from exc
-        if prepared.pending is not None:
-            self._issue_draw_replacement_choice(
-                DrawDecisionContinuation(
-                    event_id=request.event_id,
-                    seat=seat,
-                    remaining_draws=remaining,
-                    library_size=request.library_size,
-                    reason=reason,
-                    private=private,
-                    effects=effects,
-                    selections=(),
-                    after=resume,
-                ),
-                prepared,
-            )
-            return
-        try:
-            commit_prepared_draw(self, prepared)
-        except DrawError as exc:
-            raise GameRuleError(str(exc)) from exc
-        self._continue_draw_sequence(
-            seat,
-            remaining - 1,
-            reason=reason,
-            private=private,
-            resume=resume,
-        )
-
-    def _issue_draw_replacement_choice(
-        self,
-        continuation: DrawDecisionContinuation,
-        prepared: Any,
-    ) -> None:
-        pending = prepared.pending
-        if pending is None or pending.choice.chooser != continuation.seat:
-            raise GameRuleError(
-                "Draw replacement choice has the wrong affected player"
-            )
-        by_id = {effect.effect_id: effect for effect in continuation.effects}
-        options = [
-            {
-                "id": (
-                    getattr(by_id[effect_id].operations[0], "source_ref", "")
-                    or effect_id
-                ),
-                "label": by_id[effect_id].label or effect_id,
-            }
-            for effect_id in pending.choice.options
-        ]
-        ordinary_allowed = set(pending.choice.options) == set(
-            pending.choice.optional_options
-        )
-        if ordinary_allowed:
-            options.insert(0, {"id": "draw", "label": "Draw a card"})
-        legal_values = [str(option["id"]) for option in options]
-        self.permissions.issue(
-            kind="draw.replacement",
-            role="pilot",
-            actors=[continuation.seat],
-            allowed_actions=["choose"],
-            payload_by_actor={
-                continuation.seat: {
-                    "reason": continuation.reason,
-                    "remaining_draws": continuation.remaining_draws,
-                    "options": options,
-                    "legal_actions": [
-                        {
-                            "id": "choose",
-                            "action": "choose",
-                            "choice_schema": {
-                                "field": "choice",
-                                "legal_values": legal_values,
-                            },
-                        }
-                    ],
-                }
-            },
-            continuation=continuation.to_dict(),
-        )
 
     def _complete_draw_replacement(self, decision: Any) -> None:
-        raw_continuation = decision.continuation
-        if "schema_version" not in raw_continuation:
-            self._complete_legacy_draw_replacement(decision)
-            return
         try:
-            continuation = DrawDecisionContinuation.from_dict(
-                raw_continuation
-            )
+            complete_draw_replacement(self, decision)
         except DrawError as exc:
             raise GameRuleError(str(exc)) from exc
-        seat = decision.actors[0]
-        if seat != continuation.seat:
-            raise GameRuleError("Draw continuation seat changed")
-        response = decision.responses[seat]
-        choice = response.get("choice")
-        if type(choice) is not str or not choice:
-            raise GameRuleError("Draw replacement choice is required")
-        try:
-            current_effects = collect_draw_replacement_effects(self, seat)
-        except SemanticNodeError as exc:
-            raise GameRuleError(str(exc)) from exc
-        if current_effects != continuation.effects:
-            raise GameRuleError(
-                "Draw replacement sources changed before completion"
-            )
-        try:
-            current = prepare_draw_event(
-                continuation.request,
-                apnap_order=self.apnap_order(),
-                effects=continuation.effects,
-                selections=continuation.selections,
-                require_all_selections=False,
-            )
-            if current.pending is None:
-                raise DrawError("Draw replacement continuation is already closed")
-            if choice == "draw":
-                prepared = prepare_ordinary_draw(
-                    continuation.request,
-                    apnap_order=self.apnap_order(),
-                    effects=continuation.effects,
-                    selections=continuation.selections,
-                )
-                selections = tuple(
-                    selection.effect_id for selection in prepared.journal
-                )
-            else:
-                selected_effect = next(
-                    (
-                        effect_id
-                        for effect_id in current.pending.choice.options
-                        if effect_id == choice
-                        or any(
-                            getattr(operation, "source_ref", None) == choice
-                            for operation in next(
-                                effect
-                                for effect in continuation.effects
-                                if effect.effect_id == effect_id
-                            ).operations
-                        )
-                    ),
-                    None,
-                )
-                if selected_effect is None:
-                    raise DrawError("Selected draw replacement is not available")
-                selections = (*continuation.selections, selected_effect)
-                prepared = prepare_draw_event(
-                    continuation.request,
-                    apnap_order=self.apnap_order(),
-                    effects=continuation.effects,
-                    selections=selections,
-                    require_all_selections=False,
-                )
-        except DrawError as exc:
-            raise GameRuleError(str(exc)) from exc
-        if prepared.pending is not None:
-            self._issue_draw_replacement_choice(
-                replace(continuation, selections=tuple(selections)),
-                prepared,
-            )
-            return
-        try:
-            commit_prepared_draw(self, prepared)
-        except DrawError as exc:
-            raise GameRuleError(str(exc)) from exc
-        self._continue_draw_sequence(
-            seat,
-            continuation.remaining_draws - 1,
-            reason=continuation.reason,
-            private=continuation.private,
-            resume=continuation.after,
-        )
-
-    def _complete_legacy_draw_replacement(self, decision: Any) -> None:
-        """Explicit Game Record v3 compatibility for pre-transaction saves."""
-
-        seat = decision.actors[0]
-        response = decision.responses[seat]
-        continuation = dict(decision.continuation)
-        choice = response.get("choice")
-        if type(choice) is not str or not choice:
-            raise GameRuleError("Legacy draw replacement choice is required")
-        candidate_values = continuation.get("candidates")
-        if not isinstance(candidate_values, list) or any(
-            not isinstance(value, Mapping) for value in candidate_values
-        ):
-            raise GameRuleError("Legacy draw candidates are malformed")
-        candidates = {
-            value.get("id"): value
-            for value in candidate_values
-            if type(value.get("id")) is str
-        }
-        reason = continuation.get("reason")
-        private = continuation.get("private")
-        remaining = continuation.get("remaining_draws")
-        if (
-            type(reason) is not str
-            or not reason
-            or type(private) is not bool
-            or type(remaining) is not int
-            or remaining < 1
-        ):
-            raise GameRuleError("Legacy draw continuation is malformed")
-        if choice == "draw":
-            self.draw(seat, 1, reason=reason, private=private)
-        elif choice in candidates:
-            candidate = candidates[choice]
-            mill_count = candidate.get("mill")
-            if type(mill_count) is not int or mill_count < 1:
-                raise GameRuleError("Legacy Dredge count is malformed")
-            card = self._resolve_object(
-                seat,
-                choice,
-                zones={"graveyard"},
-                owned_only=True,
-            )
-            record = self.card_record(card)
-            match = (
-                re.search(r"\bDredge\s+(?P<count>\d+)\b", record.oracle_text, re.IGNORECASE)
-                if record is not None
-                else None
-            )
-            library = self.state.players[seat].zones["library"]
-            if (
-                match is None
-                or int(match.group("count")) != mill_count
-                or len(library) < mill_count
-            ):
-                raise GameRuleError(
-                    "The legacy Dredge replacement is no longer available"
-                )
-            milled_ids = list(reversed(library[-mill_count:]))
-            self._move_cards_simultaneously(
-                [(object_id, "graveyard") for object_id in milled_ids],
-                reason=f"Dredge {mill_count}",
-                log=False,
-            )
-            self.move_card(
-                card.object_id,
-                "hand",
-                reason=f"Dredge {mill_count}",
-                semantic_events=True,
-            )
-            self._log(
-                seat,
-                "draw.replaced.dredge",
-                f"{seat} replaced a draw by milling {mill_count} and returning {card.ref}.",
-                {
-                    "player": seat,
-                    "card": card.ref,
-                    "mill": mill_count,
-                    "objects": [self.state.cards[value].ref for value in milled_ids],
-                    "reason": reason,
-                },
-                visibility=[seat, "analyst"],
-                importance=2,
-                changed_objects=[card.object_id, *milled_ids],
-                changed_players=[seat],
-            )
-        else:
-            raise GameRuleError(
-                "Choose the normal draw or an available legacy Dredge card"
-            )
-        try:
-            resume = DrawResume.from_dict(
-                dict(continuation.get("after") or {"kind": "none"})
-            )
-        except DrawError as exc:
-            raise GameRuleError(str(exc)) from exc
-        self._continue_draw_sequence(
-            seat,
-            remaining - 1,
-            reason=reason,
-            private=private,
-            resume=resume,
-        )
 
     def _resume_after_draw(
         self,
-        continuation: DrawResume | Mapping[str, Any],
+        continuation: Mapping[str, Any],
     ) -> None:
         try:
-            resume = (
-                continuation
-                if isinstance(continuation, DrawResume)
-                else DrawResume.from_dict(continuation)
-            )
+            resume_after_draw(self, continuation)
         except DrawError as exc:
             raise GameRuleError(str(exc)) from exc
-        if resume.kind == "none":
-            return
-        if resume.kind == "turn_draw":
-            self._complete_draw_step_entry(resume.seat)
-            return
-        if resume.kind == "semantic_resolution":
-            self._continue_resolution(
-                stack_ref=resume.stack_ref,
-                effects=[thaw_value(value) for value in resume.effects],
-                destination=resume.destination,
-                note=resume.note,
-                instruction_pointer=resume.instruction_pointer,
-            )
-            return
-        raise GameRuleError(
-            f"Unsupported post-draw continuation {resume.kind!r}"
-        )
 
     def _complete_draw_step_entry(self, active: str) -> None:
         """Put draw-step triggers on the stack only after the turn draw.

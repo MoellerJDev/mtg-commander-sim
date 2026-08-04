@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.drawing import (
     DrawError,
     DrawEventRequest,
     commit_prepared_draw,
+    complete_draw_replacement,
     prepare_draw_event,
 )
 from mtg_commander_sim.replacement import (
@@ -161,6 +163,51 @@ class DrawTransactionCommitTests(unittest.TestCase):
         with self.assertRaisesRegex(DrawError, "library size changed"):
             commit_prepared_draw(engine, prepared)
         self.assertEqual(hand_before, tuple(engine.state.players["A"].zones["hand"]))
+
+    def test_legacy_v3_dredge_continuation_remains_explicitly_replayable(self):
+        engine = self.make_engine(12105)
+        player = engine.state.players["B"]
+        source = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B" and card.printed_name == "Life from the Loam"
+        )
+        engine.move_card(
+            source.object_id,
+            "graveyard",
+            log=False,
+            semantic_events=False,
+        )
+        top_three = tuple(reversed(player.zones["library"][-3:]))
+        decision = SimpleNamespace(
+            actors=["B"],
+            responses={"B": {"choice": source.ref}},
+            continuation={
+                "seat": "B",
+                "remaining_draws": 1,
+                "reason": "historical Game Record v3 draw",
+                "private": False,
+                "candidates": [
+                    {
+                        "id": source.ref,
+                        "name": source.printed_name,
+                        "mill": 3,
+                    }
+                ],
+                "after": {"kind": "none"},
+            },
+        )
+
+        complete_draw_replacement(engine, decision)
+
+        self.assertEqual("hand", source.zone)
+        self.assertTrue(
+            all(
+                engine.state.cards[object_id].zone == "graveyard"
+                for object_id in top_three
+            )
+        )
+        self.assertEqual("draw.replaced.dredge", engine.state.events[-1].code)
 
 
 if __name__ == "__main__":
