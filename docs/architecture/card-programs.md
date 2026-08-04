@@ -74,7 +74,8 @@ fail closed.
   `attachment.aura.simple_object`. Trust therefore requires the same targeting,
   entry, live-legality, replay, and mutation evidence used by the runtime;
   merely recognizing `Enchant` never makes a complex Aura exact.
-- Oracle IR v26 makes closed fixed draw nodes and `Dredge N` declare
+- Oracle IR v27 makes closed fixed mandatory/optional draw nodes, fixed
+  prohibitions, unconditional controller doubling, and `Dredge N` declare
   `zone.draw.library_to_hand`. Capability closure therefore depends on the
   same replacement, privacy, replay, multiplayer, and killed-mutation evidence
   as the canonical draw owner rather than on syntax alone.

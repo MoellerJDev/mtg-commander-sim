@@ -26,6 +26,7 @@ from .model import (
 )
 from .registry import SemanticChoiceHandler, SemanticChoiceRegistry
 from .defaults import default_semantic_choice_registry
+from .optional_draw import OptionalDrawHandler
 
 __all__ = [
     "AutoContinue",
@@ -35,6 +36,7 @@ __all__ = [
     "DistributionChoice",
     "ObjectChoice",
     "ObjectRulesQuery",
+    "OptionalDrawHandler",
     "OrderingChoice",
     "ScalarChoice",
     "SearchChoice",

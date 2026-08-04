@@ -386,9 +386,12 @@ generated documentation fixtures with bearer capabilities redacted. See
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence,
   plus typed current-turn cast, death, damage, and prior-player-attack gates
-- Oracle IR v26 fixed ordinary draw templates and keyword-derived Dredge,
-  backed by one replacement-aware draw transaction rather than direct
-  library-to-hand mutation
+- Oracle IR v27 fixed ordinary and optional draw templates, fixed draw
+  prohibitions, unconditional controller doubling, and keyword-derived
+  Dredge, backed by one replacement-aware draw transaction and live draw-
+  permission query rather than direct library-to-hand mutation; individual
+  events and queued instructions are iteratively drained, including exact
+  suspension/resume for legally large draw counts
 - CR 613 layer/sublayer, timestamp, dependency, and cycle-audit primitives,
   now used for common copy/type/keyword annotations
 - CR 616 replacement/prevention priority and affected-player-choice
@@ -854,12 +857,15 @@ turn draws, resolving fixed draws, conditional draws, optional-follow-up draws,
 and APNAP table draws all enter `mtg_commander_sim.drawing`. That package owns
 the immutable instruction/event model, private replacement continuation,
 validation, and commit; `CommanderEngine` is only its narrow coordinator host.
-The current replacement vocabulary includes prevention and generic keyword-
-derived Dredge, including empty-library applicability and exact sequence
-resumption. All other operations remain explicitly on the measured legacy
-path. This is a bounded CR 121 capability, not a claim that draw limits,
-draw-as-cost, shared-team turns, reveal-as-drawn, or every draw replacement is
-implemented.
+The current replacement vocabulary includes prevention, fixed instruction
+doubling, and generic keyword-derived Dredge, including empty-library
+applicability and exact sequence resumption. Live battlefield restrictions
+enforce fixed no-draw and maximum-one-per-turn wording before every individual
+event. Optional choices validate the prospective drawer and complete count;
+mandatory multi-draws may occur partially, and Dredge does not consume a draw
+allowance. This is a bounded CR 121 capability, not a claim that shared-team
+turns, conditional/dynamic limits, every draw-as-cost producer, CR 121.6c/121.7
+result actions, reveal-as-drawn, or every replacement is implemented.
 
 The runtime-component migration moves bounded card-specific core debt into
 versioned CardProgram data. Reviewed fixed additional-token replacements now

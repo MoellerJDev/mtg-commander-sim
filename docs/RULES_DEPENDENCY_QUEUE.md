@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,036
-- Reviewed behavioral blockers: 376
+- Queued rules: 3,032
+- Reviewed behavioral blockers: 372
 - Behavioral classification/review required: 2,660
-- Passing behavioral rules: 148
+- Passing behavioral rules: 152
 - Subsystems: 21
-- Queue fingerprint: `5ada148b69227b7c7609a7dc666ace87c02a0b3ea7c56e00aeec33198b3efc5c`
+- Queue fingerprint: `d518dd24f75bff655c236afd0e9ba3a268abd5e31cb7d0b901fae4c1d7082704`
 
 ## Selected next batch
 
-- Batch: `draw-limits-and-optional-choice-closure`
+- Batch: `draw-result-actions-and-nested-ordering-closure`
 - Subsystem: `resources`
-- Rules: `121.2a`, `121.2b`, `121.3`, `121.3a`
+- Rules: `121.6c`, `121.7`
 - Target capabilities: `zone.draw.library_to_hand`
-- Rationale: The canonical draw transaction, individual-event replacement path, APNAP batches, Dredge, empty-library handling, private choice, exact replay, and fixed draw compiler path are now represented. The next coherent CR 121 boundary is per-turn draw limits and optional-draw legality, including count-instruction replacement production and choices made by someone other than the prospective drawer.
+- Rationale: Draw instruction replacement, per-turn prohibitions, optional-draw legality, Dredge, APNAP batches, and exact replay are represented. The next dependency-ready CR 121 boundary is ordering additional actions attached to a replaced draw and draws created by replacement or prevention effects after the unreplaced event portions.
 
 Exit criteria:
 
-- Represent a typed per-player draw-limit prohibition with deterministic reset and replay semantics.
-- Apply the limit to each individual draw while allowing partial execution of mandatory multi-card instructions.
-- Reject choices and costs that require an illegal number of draws before mutation.
-- Evaluate optional draw legality against the prospective drawer even when another player makes the choice.
-- Compile common fixed draw-limit and optional-draw wording without card-name branches.
-- Keep shared-team turns, face-down casting-process draws, reveal-as-drawn choices, and unrelated replacement-result ordering explicitly blocked.
+- Represent typed post-draw actions attached to the specifically drawn card without losing physical identity.
+- Queue draw instructions created by replacement or prevention results after the unreplaced event portions in canonical order.
+- Suspend and resume any required choices with strict replay-pinned continuations.
+- Cover simultaneous and multiplayer ordering without leaking drawn-card identity.
+- Compile at least one reusable Oracle wording family for each implemented result path.
+- Keep casting-process face-down draws, reveal-as-drawn choices, and unrelated replacement-result families explicitly blocked.
 
 ## Dependency schedule
 
@@ -48,7 +48,7 @@ Exit criteria:
 | 4 | `mana-costs-priority` | `core-game`, `characteristics`, `objects-permanents-tokens` | 175 | 0 | 175 | `oracle_parser`, `card_program_costs`, `card_program_targets`, `mechanic_contracts` |
 | 5 | `card-types` | `characteristics`, `objects-permanents-tokens` | 168 | 17 | 151 | `oracle_normalization`, `card_program_typing`, `mechanic_contracts` |
 | 6 | `zones` | `objects-permanents-tokens`, `card-types` | 39 | 39 | 0 | `card_program_zone_permissions`, `mechanic_contracts` |
-| 7 | `resources` | `mana-costs-priority`, `zones` | 73 | 12 | 61 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 7 | `resources` | `mana-costs-priority`, `zones` | 69 | 8 | 61 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 11 | 11 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 9 | `turn-structure` | `mana-costs-priority`, `zones`, `resources` | 26 | 26 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 10 | `casting-activation` | `mana-costs-priority`, `zones`, `turn-structure` | 46 | 46 | 0 | `oracle_parser`, `card_program_costs`, `card_program_lowering`, `mechanic_contracts` |

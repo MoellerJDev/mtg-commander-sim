@@ -43,6 +43,7 @@ jobs:
           --fixture tests/fixtures/scryfall-exact-lists.json
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
+          --fixture tests/fixtures/draw-rules-cards.json
           --output data/test-ci.sqlite3
       - name: Run deterministic replay and server smoke
         run: python scripts/test_shards.py run main-smoke

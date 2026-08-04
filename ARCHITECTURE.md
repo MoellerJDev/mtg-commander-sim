@@ -791,9 +791,10 @@ matching and stack-occurrence construction behind a narrow protocol. It has no
 state mutation authority and no printed-card-name behavior. Oracle IR v22
 declares event detection, APNAP placement, and result capabilities separately,
 so fixed-life self triggers and capability-closed fixed draw triggers can be
-trusted independently. Dynamic counts, optional-draw legality, unresolved
-replacement wording, or any unsupported sibling effect still keep the
-containing program provisional.
+trusted independently. Oracle IR v27 additionally lowers closed fixed optional
+draws, prohibitions, and unconditional controller doubling; dynamic counts,
+conditional limits, unresolved replacement wording, or any unsupported sibling
+effect still keep the containing program provisional.
 
 Card-centric interaction remains a protocol adapter, not a second rules
 engine. The kernel supplies card refs, face-specific labels, current costs,
@@ -981,10 +982,13 @@ The new rules primitives sit below both generated and hand-authored semantics:
   and resumes the same semantic instruction without exposing authoritative
   batches in projections.
 - `drawing/` owns immutable CR 121 instruction, individual-event, result,
-  continuation, sequencing, and commit responsibilities for represented game
-  draws. Every routed producer applies trusted replacements one card at a time;
-  private choices, APNAP batches, empty-library attempts, and Dredge resume
-  exactly. See [`docs/architecture/drawing.md`](docs/architecture/drawing.md).
+  permission, continuation, sequencing, and commit responsibilities for
+  represented game draws. Every routed producer rechecks live restrictions and
+  applies trusted replacements one card at a time through an iterative
+  coordinator; private choices, APNAP batches, prohibited/empty-library
+  attempts, instruction doubling, and Dredge resume exactly without consuming
+  Python stack depth per card or queued instruction. See
+  [`docs/architecture/drawing.md`](docs/architecture/drawing.md).
 - `token_creation.py` is the focused authoritative token mutation owner. It
   discovers trusted runtime components, resolves and rediscovers represented
   replacements, commits one timestamped token batch, and then dispatches enter
@@ -1066,10 +1070,11 @@ values, incomplete continuous-characteristic closure, and remaining result-
 replacement families remain outside it.
 Represented turn, stack-resolution, conditional, optional-follow-up, and APNAP
 draw producers route through the immutable `drawing` instruction/event model,
-replacement continuation, and commit owner. Setup and mulligan redraws remain
-explicit enclosing-procedure operations rather than game draw events. Draw
-limits, draw-as-cost legality, shared-team ordering, reveal-as-drawn, and the
-complete replacement-result queue remain blocked. Not every zone/enters
+replacement continuation, iterative coordinator, and commit owner. Setup and
+mulligan redraws remain explicit enclosing-procedure operations rather than
+game draw events. Dynamic draw limits, complete draw-as-cost production,
+shared-team ordering, reveal-as-drawn, and the complete replacement-result
+queue remain blocked. Not every zone/enters
 producer routes through the replacement engine, and
 the state-action evaluator does not yet
 cover Sagas, dungeons, Roles, speed, maximum-counter wording outside the

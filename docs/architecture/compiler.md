@@ -77,11 +77,12 @@ flowchart LR
   keyword grammar to a mandatory target schema and the trusted Aura capability.
   Qualities, subtypes, players, cards in other zones, multiple restrictions,
   and Aura creatures remain material residuals.
-- Oracle IR v26 lowers closed fixed draw instructions for the controller,
+- Oracle IR v27 lowers closed fixed mandatory and optional draw instructions for the controller,
   target player, target opponent, and each player, plus keyword-derived
-  `Dredge N`. Those programs require the trusted bounded draw capability and
-  runtime component; dynamic counts, optional-draw legality, and unrelated
-  residual text still prevent exact promotion.
+  `Dredge N`, fixed no-draw/maximum-one restrictions, and unconditional
+  controller doubling. Those programs require the trusted bounded draw
+  capability and runtime components; dynamic counts, conditional limits, and
+  unrelated residual text still prevent exact promotion.
 
 ## Extension points
 

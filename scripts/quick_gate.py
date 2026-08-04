@@ -74,6 +74,8 @@ def build_plan(paths: Sequence[str]) -> dict:
                         "tests/fixtures/browser-lifecycle-cards.json",
                         "--fixture",
                         "tests/fixtures/damage-result-cards.json",
+                        "--fixture",
+                        "tests/fixtures/draw-rules-cards.json",
                         "--output",
                         str(database),
                     ),

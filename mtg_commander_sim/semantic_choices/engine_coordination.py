@@ -7,6 +7,7 @@ from ..errors import GameRuleError
 from ..model import StackItem
 from ..object_query import object_query_result
 from ..replacement.immutable import thaw_value
+from ..semantic_runtime.draw_restrictions import current_draw_permission
 from ..semantic_runtime import (
     IntentPlan,
     execute_intent_plan,
@@ -402,6 +403,14 @@ class SemanticChoiceCoordinationMixin:
                 )
                 for seat in self.seats
             },
+            draw_permissions_by_seat=(
+                {
+                    seat: current_draw_permission(self, seat).to_dict()
+                    for seat in self.active_seats
+                }
+                if choice_effect.get("op") == "offer_draw"
+                else {}
+            ),
             materialized_choice_candidates=self._semantic_choice_candidates(
                 actor, choice_effect, source_ref
             ),

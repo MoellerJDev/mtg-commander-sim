@@ -70,6 +70,7 @@ VALID_EFFECT_OPERATIONS = {
     "draw_each_player",
     "draw_if_opponent_cast_colors_this_turn",
     "draw_optional_land",
+    "offer_draw",
     "end_turn",
     "explore",
     "fabricate",

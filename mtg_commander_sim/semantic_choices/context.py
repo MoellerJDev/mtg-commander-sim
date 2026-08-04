@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
 from ..replacement.immutable import FrozenMap
+from ..drawing.restrictions import DrawPermission
 from ..object_query import ObjectQueryResult
 
 ChoiceObjectView = ObjectQueryResult
@@ -105,6 +106,8 @@ class SemanticChoiceQuery(
 
     def opponent_cast_colors_this_turn(self, seat: str) -> tuple[str, ...]: ...
 
+    def draw_permission(self, seat: str) -> DrawPermission: ...
+
     def choice_candidate_refs(self) -> tuple[str, ...]: ...
 
     def damage_source_candidate_refs(self) -> tuple[str, ...]: ...
@@ -134,6 +137,7 @@ class SnapshotSemanticChoiceQuery:
     validated_targets: FrozenMap = field(default_factory=FrozenMap)
     drawn_this_turn_by_seat: FrozenMap = field(default_factory=FrozenMap)
     opponent_cast_colors_by_seat: FrozenMap = field(default_factory=FrozenMap)
+    draw_permissions_by_seat: FrozenMap = field(default_factory=FrozenMap)
     materialized_choice_candidates: tuple[str, ...] = ()
     materialized_damage_source_candidates: tuple[str, ...] | None = None
     current_turn_sequence: int = 0
@@ -149,6 +153,7 @@ class SnapshotSemanticChoiceQuery:
             "validated_targets",
             "drawn_this_turn_by_seat",
             "opponent_cast_colors_by_seat",
+            "draw_permissions_by_seat",
         ):
             value = getattr(self, field_name)
             if not isinstance(value, FrozenMap):
@@ -286,6 +291,16 @@ class SnapshotSemanticChoiceQuery:
             str(value)
             for value in self.opponent_cast_colors_by_seat.get(seat, ())
         )
+
+    def draw_permission(self, seat: str) -> DrawPermission:
+        if seat not in self.seat_order:
+            raise ValueError(f"Unknown seat {seat!r}")
+        value = self.draw_permissions_by_seat.get(seat)
+        if not isinstance(value, Mapping):
+            raise ValueError(
+                f"Draw permission was not materialized for {seat}"
+            )
+        return DrawPermission.from_dict(value)
 
     def choice_candidate_refs(self) -> tuple[str, ...]:
         return self.materialized_choice_candidates

@@ -9,8 +9,10 @@ from ..replacement.immutable import thaw_value
 from ..semantic_runtime.context import SemanticNodeError
 from ..semantic_runtime.draw_replacements import (
     DrawReplacementHost,
+    collect_draw_instruction_replacement_effects,
     collect_draw_replacement_effects,
 )
+from ..semantic_runtime.draw_restrictions import current_draw_permission
 from .continuation import DrawDecisionContinuation, DrawResume
 from .model import (
     DrawError,
@@ -108,25 +110,56 @@ def begin_draw_sequence(
 ) -> None:
     """Resolve one draw instruction, then each draw independently."""
 
-    host._require_seat(seat)
     resume = DrawResume.from_dict(dict(continuation or {"kind": "none"}))
-    instruction = prepare_draw_instruction(
-        DrawInstructionRequest(
-            event_id=draw_event_id(host, seat, "instruction"),
-            player=seat,
-            count=count,
-            reason=reason,
-            private=private,
-        ),
-        apnap_order=host.apnap_order(),
+    prepared_count = _prepare_runtime_draw_count(
+        host,
+        seat,
+        count,
+        reason=reason,
+        private=private,
     )
     _continue_draw_sequence(
         host,
         seat,
-        instruction.count or 0,
+        prepared_count,
         reason=reason,
         private=private,
         resume=resume,
+    )
+
+
+def _prepare_runtime_draw_count(
+    host: DrawCoordinatorHost,
+    seat: str,
+    count: int,
+    *,
+    reason: str,
+    private: bool,
+) -> int:
+    """Prepare one instruction before the iterative per-draw coordinator."""
+
+    host._require_seat(seat)
+    instruction_request = DrawInstructionRequest(
+        event_id=draw_event_id(host, seat, "instruction"),
+        player=seat,
+        count=count,
+        reason=reason,
+        private=private,
+    )
+    instruction_effects = _instruction_replacement_effects(host, seat)
+    instruction = _prepare_runtime_draw_instruction(
+        host,
+        instruction_request,
+        instruction_effects,
+    )
+    return instruction.count or 0
+
+
+def _draw_batch_resume(draws: tuple[QueuedDraw, ...]) -> DrawResume:
+    return (
+        DrawResume(kind="draw_batch", draws=draws)
+        if draws
+        else DrawResume.none()
     )
 
 
@@ -147,11 +180,7 @@ def begin_draw_batch(
         current.count,
         reason=current.reason,
         private=current.private,
-        continuation=(
-            DrawResume(kind="draw_batch", draws=remaining).to_dict()
-            if remaining
-            else DrawResume.none().to_dict()
-        ),
+        continuation=_draw_batch_resume(remaining).to_dict(),
     )
 
 
@@ -165,6 +194,61 @@ def _replacement_effects(
         raise DrawError(str(exc)) from exc
 
 
+def _instruction_replacement_effects(
+    host: DrawCoordinatorHost,
+    seat: str,
+) -> tuple[Any, ...]:
+    try:
+        return collect_draw_instruction_replacement_effects(host, seat)
+    except SemanticNodeError as exc:
+        raise DrawError(str(exc)) from exc
+
+
+def _prepare_runtime_draw_instruction(
+    host: DrawCoordinatorHost,
+    request: DrawInstructionRequest,
+    effects: tuple[Any, ...],
+) -> Any:
+    """Resolve the closed commutative draw-doubling family canonically."""
+
+    selections: list[str] = []
+    while True:
+        prepared = prepare_draw_instruction(
+            request,
+            apnap_order=host.apnap_order(),
+            effects=effects,
+            selections=selections,
+            require_all_selections=False,
+        )
+        pending = prepared.pending
+        if pending is None:
+            return prepared
+        by_id = {effect.effect_id: effect for effect in effects}
+        options = tuple(pending.choice.options)
+        if (
+            pending.choice.optional_options
+            or not options
+            or any(
+                effect_id not in by_id
+                or len(by_id[effect_id].operations) != 1
+                or by_id[effect_id].operations[0].to_dict()
+                != {"op": "multiply", "field": "count", "factor": 2}
+                for effect_id in options
+            )
+        ):
+            raise DrawError(
+                "A draw instruction requires an unsupported material replacement choice"
+            )
+        selections.append(sorted(options)[0])
+
+
+def _draw_permission(host: DrawCoordinatorHost, seat: str) -> Any:
+    try:
+        return current_draw_permission(host, seat)
+    except SemanticNodeError as exc:
+        raise DrawError(str(exc)) from exc
+
+
 def _continue_draw_sequence(
     host: DrawCoordinatorHost,
     seat: str,
@@ -174,49 +258,72 @@ def _continue_draw_sequence(
     private: bool,
     resume: DrawResume,
 ) -> None:
-    if remaining <= 0:
-        resume_after_draw(host, resume)
-        return
-    request = DrawEventRequest(
-        event_id=draw_event_id(host, seat, "event"),
-        player=seat,
-        library_size=len(host.state.players[seat].zones[_LIBRARY_ZONE]),
-        reason=reason,
-        private=private,
-    )
-    effects = _replacement_effects(host, seat)
-    prepared = prepare_draw_event(
-        request,
-        apnap_order=host.apnap_order(),
-        effects=effects,
-        require_all_selections=False,
-    )
-    if prepared.pending is not None:
-        _issue_draw_replacement_choice(
-            host,
-            DrawDecisionContinuation(
-                event_id=request.event_id,
-                seat=seat,
-                remaining_draws=remaining,
-                library_size=request.library_size,
+    """Drain draw events and queued instructions without Python recursion."""
+
+    while True:
+        while remaining > 0:
+            request = DrawEventRequest(
+                event_id=draw_event_id(host, seat, "event"),
+                player=seat,
+                library_size=len(
+                    host.state.players[seat].zones[_LIBRARY_ZONE]
+                ),
                 reason=reason,
                 private=private,
+            )
+            permission = _draw_permission(host, seat)
+            if not permission.allows_individual_draw():
+                prepared = prepare_draw_event(
+                    request,
+                    apnap_order=host.apnap_order(),
+                    prohibition_ids=permission.restriction_ids,
+                )
+                commit_prepared_draw(host, prepared)
+                remaining -= 1
+                continue
+            effects = _replacement_effects(host, seat)
+            prepared = prepare_draw_event(
+                request,
+                apnap_order=host.apnap_order(),
                 effects=effects,
-                selections=(),
-                after=resume,
-            ),
-            prepared,
+                require_all_selections=False,
+            )
+            if prepared.pending is not None:
+                _issue_draw_replacement_choice(
+                    host,
+                    DrawDecisionContinuation(
+                        event_id=request.event_id,
+                        seat=seat,
+                        remaining_draws=remaining,
+                        library_size=request.library_size,
+                        reason=reason,
+                        private=private,
+                        effects=effects,
+                        selections=(),
+                        after=resume,
+                    ),
+                    prepared,
+                )
+                return
+            commit_prepared_draw(host, prepared)
+            remaining -= 1
+
+        if resume.kind != "draw_batch":
+            resume_after_draw(host, resume)
+            return
+
+        current, queued = resume.draws[0], resume.draws[1:]
+        seat = current.player
+        reason = current.reason
+        private = current.private
+        remaining = _prepare_runtime_draw_count(
+            host,
+            seat,
+            current.count,
+            reason=reason,
+            private=private,
         )
-        return
-    commit_prepared_draw(host, prepared)
-    _continue_draw_sequence(
-        host,
-        seat,
-        remaining - 1,
-        reason=reason,
-        private=private,
-        resume=resume,
-    )
+        resume = _draw_batch_resume(queued)
 
 
 def _choice_id(effect: Any) -> str:

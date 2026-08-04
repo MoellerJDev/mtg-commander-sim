@@ -148,6 +148,8 @@ def build_steps(
                 "tests/fixtures/browser-lifecycle-cards.json",
                 "--fixture",
                 "tests/fixtures/damage-result-cards.json",
+                "--fixture",
+                "tests/fixtures/draw-rules-cards.json",
                 "--output",
                 str(database),
             ),

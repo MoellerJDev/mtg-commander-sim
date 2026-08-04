@@ -37,9 +37,13 @@ history and empty-library state, and exposes no arbitrary state callback.
 The draw coordinator is a read-only orchestration boundary. It creates one
 replacement event per draw, applies APNAP replacement ordering, suspends through
 the existing replacement continuation machinery when a choice is required, and
-delegates the final mutation to the draw transaction. Turn draws, stack effects,
-semantic choices, conditional effects, and ordered instructions all enter that
-same coordinator. Unrouted `DrawCardsIntent` values fail closed.
+delegates the final mutation to the draw transaction. Individual events and
+queued instructions are drained by an iterative trampoline, so legal large
+counts are not bounded by Python recursion depth. A suspended choice serializes
+the exact remaining count and re-enters that same loop after completion. Turn
+draws, stack effects, semantic choices, conditional effects, and ordered
+instructions all enter that same coordinator. Unrouted `DrawCardsIntent` values
+fail closed.
 
 Trusted graveyard draw replacements are discovered by a generic semantic
 runtime component using a narrow structural state protocol. Runtime descriptor
@@ -47,6 +51,21 @@ data lowers to typed `DredgeDraw` replacement operations before it participates
 in a game. The operation revalidates physical source identity and graveyard
 continuity, mills through the canonical zone path, and returns the original card
 to hand instead of committing the replaced draw.
+
+Draw permission is a separate immutable query over turn history and live,
+trusted battlefield restrictions. The coordinator recomputes that permission
+before each individual event, so a mandatory multi-draw can occur partially
+while an optional draw or draw cost is legal only when its complete count is
+possible. An empty library is not itself a draw prohibition. Unconditional
+fixed draw doubling modifies the instruction count before individual events;
+the resulting events still receive independent restriction and replacement
+handling.
+
+`offer_draw` is the reviewed generic semantic operation for a seat-scoped
+optional draw choice. Its handler records chooser and prospective drawer
+separately, validates the prospective drawer before issuing and completing the
+choice, and lowers an accepted choice back into the canonical mandatory draw
+path. It has no direct mutation or hidden-zone authority.
 
 `draw_if_opponent_cast_colors_this_turn` and
 `grant_uncounterable_hexproof_from_colors_until_end` are reviewed generic
@@ -74,11 +93,13 @@ keeps the oversized module ratchet moving downward while preserving callers.
 ## Consequences
 
 - Represented draws now share one replacement-aware, replay-pinned mutation
-  path, including private choice and empty-library behavior.
+  path, including private choice, empty-library behavior, and iterative large-
+  count coordination.
 - The engine loses draw sequencing and producer-specific mutation branches;
-  future draw limits and optional-draw legality can extend the focused boundary.
-- The compiler gains generic fixed draw and graveyard keyword templates with
-  measurable corpus promotions.
-- Shared-team turns, complete draw-limit grammar, reveal-as-drawn choices,
+  live draw-limit and optional-draw legality.
+- The compiler gains generic fixed draw, draw-limit, unconditional doubling,
+  optional-draw, and graveyard keyword templates with measurable corpus
+  promotions.
+- Shared-team turns, conditional and dynamic draw-limit grammar, reveal-as-drawn choices,
   face-down casting-process draws, and complete replacement-result ordering
   remain explicitly unsupported until their dependencies are implemented.

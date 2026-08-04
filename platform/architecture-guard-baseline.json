@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "e537d250850544003cbac2c3a00b9d8802de7d85",
+  "baseline_commit": "5029c62c98bdad72549625af9a7c3dde5e333ef9",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -2337,7 +2337,7 @@
   },
   "exception_binding": {
     "adr": "docs/adr/0021-canonical-draw-transaction.md",
-    "allowance_fingerprint": "17422925bca1c4fc541554b603f649ef8ff9e2fa12a55aa8b6213712492f1339",
+    "allowance_fingerprint": "cc239a1be1360786a5249ae281371778b76a74a1e1b16a522089f3cd0e4ec8a8",
     "exception_id": "ARCH-EXC-0006"
   },
   "legacy_card_specific_operations": [
@@ -2526,12 +2526,12 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 527,
+      "logical_lines": 523,
       "symbol": "_compile_face"
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 526,
+      "logical_lines": 459,
       "symbol": "_effect_template"
     },
     {
@@ -2601,7 +2601,7 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 1618
+      "logical_lines": 1541
     },
     {
       "file": "mtg_commander_sim/record.py",
@@ -2707,6 +2707,7 @@
     "next_spell_improvise",
     "next_spell_uncounterable",
     "note",
+    "offer_draw",
     "pay_or_lose",
     "populate_with_haste",
     "prepare_graveyard_creature_aura",

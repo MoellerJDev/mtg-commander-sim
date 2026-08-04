@@ -142,8 +142,8 @@
     {
       "mechanic_id": "cr-121-drawing-a-card",
       "path": "mechanics/contracts/drawing-a-card.json",
-      "sha256": "52ef7dae74e987672fcf826901b4eb31d594d92f7564b7f45475e655085efa79",
-      "version": 1
+      "sha256": "f038a4c08f5f03d8405744524db998bf5266b0e3ce8cec262b295b6f8d6e2334",
+      "version": 3
     },
     {
       "mechanic_id": "cr-609-effects",
@@ -5659,19 +5659,20 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/drawing-a-card.json",
-      "contract_sha256": "52ef7dae74e987672fcf826901b4eb31d594d92f7564b7f45475e655085efa79",
-      "contract_version": 1,
+      "contract_sha256": "f038a4c08f5f03d8405744524db998bf5266b0e3ce8cec262b295b6f8d6e2334",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "mtg_commander_sim.drawing immutable model, transaction, continuation, and coordinator facade",
-      "implementation_version": "draw-transaction-v1",
+      "implementation_component": "mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
+      "implementation_version": "draw-transaction-v3",
       "kind": "rules_section",
       "known_blockers": [
-        "draw-limit prohibitions and optional draw/cost legality are not compiled",
         "shared-team turns are not supported",
         "additional actions on a drawn card and result-generated draw ordering are incomplete",
         "draws during casting or activation are not held face down",
         "optional reveal-as-drawn choices are not implemented",
+        "conditional and first-draw count modifiers are not compiled",
+        "draw-as-cost feasibility has no current Oracle producer",
         "the complete draw replacement and prevention Oracle grammar is not compiled"
       ],
       "mechanic_id": "cr-121-drawing-a-card",
@@ -5689,7 +5690,19 @@
         "test_library_to_hand_move_is_not_a_draw",
         "test_veil_conditional_draw_pauses_for_dredge_before_permissions",
         "test_draw_replacement_choice_is_visible_only_to_affected_seat",
-        "test_first_turn_profile_modifier_and_exact_replay"
+        "test_first_turn_profile_modifier_and_exact_replay",
+        "test_mandatory_multi_draw_partially_occurs_under_maximum_one",
+        "test_draw_prohibition_is_checked_before_dredge_replacements",
+        "test_dredge_does_not_consume_maximum_one_draw_allowance",
+        "test_two_draw_doublers_modify_instruction_before_individual_draws",
+        "test_optional_draw_choice_is_seat_scoped_and_replays_exactly",
+        "test_generic_draw_prohibition_replays_exactly",
+        "test_two_thousand_replacement_free_draws_do_not_recurse",
+        "test_two_thousand_prevented_draws_do_not_recurse",
+        "test_large_sequence_suspends_and_resumes_from_remaining_count",
+        "test_large_zero_count_batch_is_trampolined",
+        "test_draw_past_library_records_each_empty_attempt",
+        "test_resumed_multi_draw_sequence_is_private_and_replays_exactly"
       ],
       "trust_level": "untrusted"
     },

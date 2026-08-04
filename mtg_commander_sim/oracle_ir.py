@@ -22,6 +22,8 @@ from .compiler.dependency_gate import (
     explicit_capability_gate as _explicit_capability_gate,
     keyword_dependency_gate,
 )
+from .compiler.draw_templates import fixed_draw_effect_template
+from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.ir_model import (
     OracleCardIR,
@@ -34,7 +36,7 @@ from .compiler.prevention_templates import (
     fixed_prevention_effect_template,
     prevention_trigger_effect_template,
 )
-from .compiler.runtime_templates import static_runtime_template
+from .compiler.runtime_templates import StaticRuntimeTemplate, static_runtime_template
 from .declaration_costs import parse_declaration_cost_line
 from .declaration_restrictions import parse_declaration_restriction_line
 from .rules.capabilities import CapabilityRegistry
@@ -43,24 +45,10 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v26"
+ORACLE_COMPILER_VERSION = "oracle-ir-v27"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _DREDGE_MECHANIC = "dred" + "ge"
 
-_NUMBER_WORDS = {
-    "a": 1,
-    "an": 1,
-    "one": 1,
-    "two": 2,
-    "three": 3,
-    "four": 4,
-    "five": 5,
-    "six": 6,
-    "seven": 7,
-    "eight": 8,
-    "nine": 9,
-    "ten": 10,
-}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
     re.IGNORECASE,
@@ -72,15 +60,6 @@ _REPLACEMENT_MARKERS = re.compile(
 _ABILITY_WORD = re.compile(
     r"^(?P<word>[A-Za-z][A-Za-z ']+)\s+[—-]\s+(?P<body>.+)$"
 )
-
-
-def _number(value: str) -> int:
-    normalized = value.casefold()
-    return (
-        int(normalized)
-        if normalized.isdigit()
-        else _NUMBER_WORDS[normalized]
-    )
 
 
 def _source_lines(text: str) -> Iterable[tuple[str, SourceSpan]]:
@@ -124,6 +103,21 @@ def _damage_to_target_effect(amount: int) -> dict[str, Any]:
     }
 
 
+def _static_runtime_for_face(
+    text: str,
+    type_line: str,
+    permanent: bool,
+) -> StaticRuntimeTemplate | None:
+    return static_runtime_template(
+        text,
+        source_damageable=any(
+            card_type in type_line.casefold()
+            for card_type in ("battle", "creature", "planeswalker")
+        ),
+        source_permanent=permanent,
+    )
+
+
 def _effect_template(
     text: str,
     *,
@@ -154,76 +148,9 @@ def _effect_template(
             None,
             ("cr-725-the-monarch",),
         )
-    match = re.fullmatch(
-        r"(?:you )?draw (?P<count>a|one|two|three|four|five|six|seven|"
-        r"eight|nine|ten|\d+) cards?\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        return (
-            "draw-controller-v1",
-            (
-                {
-                    "op": "draw",
-                    "player": "$controller",
-                    "count": _number(match.group("count")),
-                    "private": True,
-                },
-            ),
-            None,
-            ("cr-121-drawing-a-card",),
-        )
-    match = re.fullmatch(
-        r"target (?P<relation>player|opponent) draws "
-        r"(?P<count>a|one|two|three|four|five|six|seven|eight|nine|"
-        r"ten|\d+) cards?\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        relation = match.group("relation").casefold()
-        return (
-            f"draw-target-{relation}-v1",
-            (
-                {
-                    "op": "draw",
-                    "player": "$target.0",
-                    "count": _number(match.group("count")),
-                    "private": True,
-                },
-            ),
-            {
-                "zones": ["player"],
-                "categories": ["player"],
-                "player_relation": (
-                    "opponent" if relation == "opponent" else "any"
-                ),
-                "count": 1,
-            },
-            ("cr-121-drawing-a-card", "cr-115-targets"),
-        )
-    match = re.fullmatch(
-        r"each player draws (?P<count>a|one|two|three|four|five|six|"
-        r"seven|eight|nine|ten|\d+) cards?\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        return (
-            "draw-each-player-v1",
-            (
-                {
-                    "op": "draw_each_player",
-                    "count": _number(match.group("count")),
-                },
-            ),
-            None,
-            (
-                "cr-121-drawing-a-card",
-                "cr-101-the-magic-golden-rules",
-            ),
-        )
+    draw_template = fixed_draw_effect_template(normalized)
+    if draw_template is not None:
+        return draw_template
     match = re.fullmatch(
         r"you gain (?P<count>\d+) life\.?",
         normalized,
@@ -1374,12 +1301,8 @@ def _compile_face(
             )
             continue
 
-        runtime_template = static_runtime_template(
-            material_line,
-            source_damageable=any(
-                card_type in type_line.casefold()
-                for card_type in ("battle", "creature", "planeswalker")
-            ),
+        runtime_template = _static_runtime_for_face(
+            material_line, type_line, permanent
         )
         if runtime_template is not None:
             nodes.append(

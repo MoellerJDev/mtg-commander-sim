@@ -2843,7 +2843,7 @@
       "capability_id": "life.change.effect",
       "evidence_class": "interaction",
       "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_drain_log_reports_final_replacement_adjusted_values",
-      "official_rule_ids": ["119.1","119.2","119.3","119.4","119.9"],
+      "official_rule_ids": ["119.1", "119.2", "119.3", "119.4", "119.9"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
     },
@@ -2851,7 +2851,7 @@
       "capability_id": "life.change.effect",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_table_wide_loss_and_drain_are_simultaneous_typed_batches",
-      "official_rule_ids": ["119.1","119.2","119.3","119.4","119.9"],
+      "official_rule_ids": ["119.1", "119.2", "119.3", "119.4", "119.9"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
     },
@@ -2859,7 +2859,7 @@
       "capability_id": "life.change.effect",
       "evidence_class": "mutation",
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_life_effect_commit_mutant_is_killed",
-      "official_rule_ids": ["119.1","119.2","119.3","119.4","119.9"],
+      "official_rule_ids": ["119.1", "119.2", "119.3", "119.4", "119.9"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
     },
@@ -2867,7 +2867,7 @@
       "capability_id": "life.change.effect",
       "evidence_class": "negative",
       "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_invalid_batch_member_rolls_back_every_life_change",
-      "official_rule_ids": ["119.1","119.2","119.3","119.4","119.9"],
+      "official_rule_ids": ["119.1", "119.2", "119.3", "119.4", "119.9"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
     },
@@ -2875,7 +2875,7 @@
       "capability_id": "life.change.effect",
       "evidence_class": "positive",
       "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_life_and_loss_commit_through_the_typed_batch_owner",
-      "official_rule_ids": ["119.1","119.2","119.3","119.4","119.9"],
+      "official_rule_ids": ["119.1", "119.2", "119.3", "119.4", "119.9"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
     },
@@ -2883,7 +2883,7 @@
       "capability_id": "life.change.effect",
       "evidence_class": "positive",
       "test_id": "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly",
-      "official_rule_ids": ["119.1","119.2","119.3","119.4","119.9"],
+      "official_rule_ids": ["119.1", "119.2", "119.3", "119.4", "119.9"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
     },
@@ -2891,7 +2891,7 @@
       "capability_id": "life.change.effect",
       "evidence_class": "replay",
       "test_id": "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly",
-      "official_rule_ids": ["119.1","119.2","119.3","119.4","119.9"],
+      "official_rule_ids": ["119.1", "119.2", "119.3", "119.4", "119.9"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Commit a represented fixed life gain or life loss instruction through one replacement-capable typed life-change batch before mutating player life totals."
     },
@@ -3759,7 +3759,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "interaction",
       "test_id": "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -3767,7 +3767,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "interaction",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerIntegrationTests.test_source_that_leaves_still_observes_simultaneous_death",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -3775,7 +3775,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -3783,7 +3783,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "mutation",
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_zone_trigger_detection_mutant_is_killed",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -3791,7 +3791,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "negative",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_occurrence_rejects_malformed_and_non_event_moves_are_empty",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -3799,7 +3799,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "positive",
       "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_self_dies_trigger_uses_last_known_battlefield_zone",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -3807,7 +3807,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "positive",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_derives_exact_enter_and_death_events",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -3815,7 +3815,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "privacy",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_private_library_to_hand_move_produces_no_public_trigger_event",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Do not derive a public normalized trigger event for an ordinary private library-to-hand move; visibility-dependent hidden-zone trigger families remain excluded and fail closed."
     },
@@ -3823,7 +3823,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "replay",
       "test_id": "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly",
-      "official_rule_ids": ["603.2","603.6","603.6a","603.6c","603.10","603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -4221,12 +4221,42 @@
     {
       "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "interaction",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_dredge_does_not_consume_maximum_one_draw_allowance",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "A replaced draw does not consume a maximum-one allowance, so a later individual draw in the instruction remains permitted."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "interaction",
       "test_id": "tests.test_draw_step_rules.DrawStepRuleTests.test_trusted_draw_replacement_finishes_before_priority",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -4245,12 +4275,42 @@
     {
       "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "multiplayer",
+      "test_id": "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_four_player_chooser_uses_prospective_drawer_legality",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate optional-draw feasibility against the prospective drawer even when another active player owns the choice."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "multiplayer",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_each_player_uses_apnap_order_and_exact_engine_path",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -4274,7 +4334,10 @@
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -4292,13 +4355,70 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_draw_restriction_mutant_is_killed",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill removal of live draw-restriction collection with an authoritative prohibition result assertion."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_draw_prohibition_is_checked_before_dredge_replacements",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a prohibited individual draw before collecting or offering any replacement for that nonexistent draw event."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "negative",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_registered_node_validation_fails_before_mutation",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -4317,12 +4437,96 @@
     {
       "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "positive",
+      "test_id": "tests.test_draw_replacement_components.DrawInstructionReplacementIntegrationTests.test_two_draw_doublers_modify_instruction_before_individual_draws",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply represented unconditional draw-count replacements to the instruction before creating its individual draw events."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionIntegrationTests.test_mandatory_multi_draw_partially_occurs_under_maximum_one",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Allow a mandatory multi-card instruction to perform every currently permitted individual draw and prohibit only the remainder."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_draw_restrictions.DrawRestrictionModelTests.test_optional_empty_library_draw_remains_legal_without_a_prohibition",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep an optional draw legal when the library is empty unless an actual draw prohibition applies."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "positive",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_draw_handler_lowers_typed_intent_through_read_only_context",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -4346,7 +4550,10 @@
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
@@ -4364,13 +4571,97 @@
     },
     {
       "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_optional_draw_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project an optional-draw decision only to its chooser while retaining private drawn-card identity."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "replay",
+      "test_id": "tests.test_optional_draw_choices.OptionalDrawChoiceIntegrationTests.test_optional_draw_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact structured optional-draw choice and its canonical draw continuation."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
+      "evidence_class": "replay",
+      "test_id": "tests.test_oracle_ir.OracleIRTests.test_generic_draw_prohibition_replays_exactly",
+      "official_rule_ids": [
+        "121.1",
+        "121.2",
+        "121.2a",
+        "121.2b",
+        "121.2c",
+        "121.3",
+        "121.3a",
+        "121.4",
+        "121.5",
+        "121.6",
+        "121.6a",
+        "121.6b",
+        "702.52a",
+        "702.52b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay a generically compiled battlefield draw restriction and the exact permitted and prohibited individual results."
+    },
+    {
+      "capability_id": "zone.draw.library_to_hand",
       "evidence_class": "replay",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_migrated_semantic_effect_replays_exactly",
       "official_rule_ids": [
         "121.1",
         "121.2",
         "121.2a",
+        "121.2b",
         "121.2c",
+        "121.3",
+        "121.3a",
         "121.4",
         "121.5",
         "121.6",
