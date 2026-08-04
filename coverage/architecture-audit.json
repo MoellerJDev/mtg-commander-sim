@@ -3141,7 +3141,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 84608,
+      "logical_lines": 84619,
       "methods": {
         "dunder": 180,
         "private": 602,
@@ -3437,18 +3437,18 @@
           "physical_lines": 615
         },
         {
+          "file": "mtg_commander_sim/continuous_effect_model.py",
+          "functions_and_methods": 14,
+          "language": "python",
+          "logical_lines": 548,
+          "physical_lines": 589
+        },
+        {
           "file": "mtg_commander_sim/deck.py",
           "functions_and_methods": 18,
           "language": "python",
           "logical_lines": 547,
           "physical_lines": 624
-        },
-        {
-          "file": "mtg_commander_sim/continuous_effect_model.py",
-          "functions_and_methods": 14,
-          "language": "python",
-          "logical_lines": 537,
-          "physical_lines": 578
         },
         {
           "file": "mtg_commander_sim/rules/casting/costs.py",
@@ -4977,7 +4977,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 91920,
+      "physical_lines": 91931,
       "python_file_count": 183,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -6595,7 +6595,7 @@
         {
           "condition": "op not in {\"set_types\", \"add_types\", \"remove_types\"} and field is not None",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 147,
+          "line": 156,
           "string_literals": [
             "add_types",
             "remove_types",
@@ -6606,7 +6606,7 @@
         {
           "condition": "op == \"copy_values\"",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 149,
+          "line": 158,
           "string_literals": [
             "copy_values"
           ],
@@ -6615,7 +6615,7 @@
         {
           "condition": "op == \"face_down\"",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 151,
+          "line": 160,
           "string_literals": [
             "face_down"
           ],
@@ -6624,7 +6624,7 @@
         {
           "condition": "op == \"set_controller\"",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 190,
+          "line": 201,
           "string_literals": [
             "set_controller"
           ],
@@ -6633,7 +6633,7 @@
         {
           "condition": "op == \"replace_text\"",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 193,
+          "line": 204,
           "string_literals": [
             "replace_text"
           ],
@@ -6642,7 +6642,7 @@
         {
           "condition": "op in {\"set_types\", \"add_types\", \"remove_types\"}",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 198,
+          "line": 209,
           "string_literals": [
             "add_types",
             "remove_types",
@@ -6653,7 +6653,7 @@
         {
           "condition": "op in {\"set_colors\", \"add_colors\", \"remove_colors\"}",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 202,
+          "line": 213,
           "string_literals": [
             "add_colors",
             "remove_colors",
@@ -6664,7 +6664,7 @@
         {
           "condition": "op in {\"add_ability\", \"remove_ability\"}",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 208,
+          "line": 219,
           "string_literals": [
             "add_ability",
             "remove_ability"
@@ -6674,7 +6674,7 @@
         {
           "condition": "op in {\"remove_all_abilities\", \"switch_power_toughness\"}",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 211,
+          "line": 222,
           "string_literals": [
             "remove_all_abilities",
             "switch_power_toughness"
@@ -6684,7 +6684,7 @@
         {
           "condition": "op in {\"set_power_toughness\", \"modify_power_toughness\"}",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 214,
+          "line": 225,
           "string_literals": [
             "modify_power_toughness",
             "set_power_toughness"
@@ -6694,21 +6694,21 @@
         {
           "condition": "type(self.op) is not str or not self.op",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 228,
+          "line": 239,
           "string_literals": [],
           "symbol": "__post_init__"
         },
         {
           "condition": "self.op not in _OPERATION_LAYERS",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 232,
+          "line": 243,
           "string_literals": [],
           "symbol": "__post_init__"
         },
         {
           "condition": "set(value) != {\"op\", \"value\", \"field\"}",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 267,
+          "line": 278,
           "string_literals": [
             "field",
             "op",
@@ -6719,7 +6719,7 @@
         {
           "condition": "type(value[\"op\"]) is not str",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 271,
+          "line": 282,
           "string_literals": [
             "op"
           ],
@@ -6728,14 +6728,14 @@
         {
           "condition": "not all( isinstance(operation, ContinuousOperation) for operation in operations )",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 394,
+          "line": 405,
           "string_literals": [],
           "symbol": "__post_init__"
         },
         {
           "condition": "any( _OPERATION_LAYERS[operation.op] is not self.layer for operation in operations )",
           "file": "mtg_commander_sim/continuous_effect_model.py",
-          "line": 401,
+          "line": 412,
           "string_literals": [],
           "symbol": "__post_init__"
         },
@@ -8652,7 +8652,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "4eccd65cc11ef3e3606f367bd724b4276b728b95e4242e39cf736fb6597feace"
+          "verified": "8cce9022ae3f84cf776f9da8eacd1b1d2cbe557d44562d9d124743493f31171a"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9090,8 +9090,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1309,
-      "discovered_total": 4609,
+      "conventional_ast_cases": 1310,
+      "discovered_total": 4610,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 30,

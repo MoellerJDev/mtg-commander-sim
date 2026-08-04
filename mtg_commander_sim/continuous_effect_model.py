@@ -100,13 +100,18 @@ def _nonempty_words(value: Any, *, field_name: str) -> tuple[str, ...]:
     return words
 
 
-def _string_array(value: Any, *, field_name: str) -> tuple[str, ...]:
+def _string_array(
+    value: Any,
+    *,
+    field_name: str,
+    unique: bool = True,
+) -> tuple[str, ...]:
     if not isinstance(value, (list, tuple)):
         raise ContinuousEffectError(f"{field_name} must be a string array")
     words = tuple(value)
     if not all(type(item) is str and item for item in words):
         raise ContinuousEffectError(f"{field_name} must be a string array")
-    if len({item.casefold() for item in words}) != len(words):
+    if unique and len({item.casefold() for item in words}) != len(words):
         raise ContinuousEffectError(f"{field_name} values must be unique")
     return words
 
@@ -119,7 +124,11 @@ def _validate_copy_values(value: Any) -> None:
         raise ContinuousEffectError(f"Unknown copiable fields: {sorted(unknown)}")
     for field_name, field_value in value.items():
         if field_name in _WORD_FIELDS:
-            _string_array(field_value, field_name=f"copy_values.{field_name}")
+            _string_array(
+                field_value,
+                field_name=f"copy_values.{field_name}",
+                unique=field_name != "abilities",
+            )
         elif field_name in {"name", "controller", "mana_cost", "text"}:
             if type(field_value) is not str:
                 raise ContinuousEffectError(
@@ -168,7 +177,9 @@ def _validate_operation_value(op: str, value: Any, field: str | None) -> None:
             raise ContinuousEffectError("face_down contains unknown fields")
         for field_name in _WORD_FIELDS.intersection(value):
             _string_array(
-                value[field_name], field_name=f"face_down.{field_name}"
+                value[field_name],
+                field_name=f"face_down.{field_name}",
+                unique=field_name != "abilities",
             )
         for field_name in {"name", "mana_cost", "text"}.intersection(value):
             if type(value[field_name]) is not str:

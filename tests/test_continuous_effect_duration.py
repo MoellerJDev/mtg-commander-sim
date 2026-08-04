@@ -134,6 +134,20 @@ class ContinuousEffectModelTests(unittest.TestCase):
         )
         self.assertEqual(before, effect.fingerprint)
 
+    def test_copy_values_preserve_duplicate_ability_instances_only(self):
+        operation = ContinuousOperation(
+            "copy_values",
+            {"abilities": ["Toxic 1", "Toxic 1"]},
+        )
+        self.assertEqual(
+            ("Toxic 1", "Toxic 1"), operation.value["abilities"]
+        )
+        with self.assertRaisesRegex(ContinuousEffectError, "unique"):
+            ContinuousOperation(
+                "copy_values",
+                {"colors": ["G", "g"]},
+            )
+
     def test_canonical_round_trip_and_construction_order_share_fingerprint(self):
         first = ContinuousOperation(
             "copy_values", {"colors": ["G"], "name": "Copy"}
