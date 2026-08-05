@@ -354,6 +354,118 @@
       "applicability_note": "Replay the attack declaration and verify both tap outcomes exactly."
     },
     {
+      "capability_id": "combat.block.flying",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Consume current effect-granted Flying and Reach through the same offer and command legality path."
+    },
+    {
+      "capability_id": "combat.block.flying",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Evaluate the attacked player's blockers independently in a four-player combat."
+    },
+    {
+      "capability_id": "combat.block.flying",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_aerial_blocking_flying_and_reach_mutants_are_killed",
+      "official_rule_ids": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a mutation that stops recognizing Flying on the current attacker."
+    },
+    {
+      "capability_id": "combat.block.flying",
+      "evidence_class": "negative",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingTests.test_malformed_keyword_snapshot_fails_closed",
+      "official_rule_ids": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject malformed or noncanonical current keyword snapshots before advertising a block."
+    },
+    {
+      "capability_id": "combat.block.flying",
+      "evidence_class": "positive",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingTests.test_flying_attacker_requires_flying_or_reach_blocker",
+      "official_rule_ids": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject a ground blocker and allow Flying or Reach blockers for a Flying attacker."
+    },
+    {
+      "capability_id": "combat.block.flying",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Issue the block task only to the defending seat while using public battlefield characteristics."
+    },
+    {
+      "capability_id": "combat.block.flying",
+      "evidence_class": "replay",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the accepted Reach block from an exact four-player checkpoint."
+    },
+    {
+      "capability_id": "combat.block.reach",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Consume current effect-granted Reach as the exception to current Flying."
+    },
+    {
+      "capability_id": "combat.block.reach",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Apply Reach only to the defending seat's blocker in a four-player combat."
+    },
+    {
+      "capability_id": "combat.block.reach",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_aerial_blocking_flying_and_reach_mutants_are_killed",
+      "official_rule_ids": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a mutation that removes Reach from the allowed aerial blocker set."
+    },
+    {
+      "capability_id": "combat.block.reach",
+      "evidence_class": "negative",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingTests.test_malformed_keyword_snapshot_fails_closed",
+      "official_rule_ids": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject malformed blocker keyword state instead of guessing that Reach applies."
+    },
+    {
+      "capability_id": "combat.block.reach",
+      "evidence_class": "positive",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingTests.test_flying_attacker_requires_flying_or_reach_blocker",
+      "official_rule_ids": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Allow a Reach creature to block a Flying attacker without granting Flying."
+    },
+    {
+      "capability_id": "combat.block.reach",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep the current block task seat-scoped while consuming only public Reach state."
+    },
+    {
+      "capability_id": "combat.block.reach",
+      "evidence_class": "replay",
+      "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
+      "official_rule_ids": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the accepted Reach block and exact combat relation."
+    },
+    {
       "capability_id": "continuous.attached.fixed_characteristics",
       "evidence_class": "interaction",
       "test_id": "tests.test_attached_static_characteristics.AttachedContinuousModelTests.test_type_and_ability_removal_use_their_canonical_layers",

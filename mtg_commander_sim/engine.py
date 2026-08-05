@@ -137,6 +137,8 @@ from .life_state import (
     pay_life_cost,
 )
 from . import haste
+from .aerial_blocking import aerial_block_verdict
+from .keyword_abilities import normalized_characteristic_keywords
 from .errors import GameRuleError, StateInvariantError
 from .deck import DeckDefinition
 from .mana import (
@@ -10290,14 +10292,8 @@ class CommanderEngine(
     ) -> tuple[bool, str | None]:
         attacker_data = self._effective_card_data(attacker)
         blocker_data = self._effective_card_data(blocker)
-        attacker_keywords = {
-            str(value).casefold()
-            for value in attacker_data.get("keywords", [])
-        }
-        blocker_keywords = {
-            str(value).casefold()
-            for value in blocker_data.get("keywords", [])
-        }
+        attacker_keywords = normalized_characteristic_keywords(attacker_data)
+        blocker_keywords = normalized_characteristic_keywords(blocker_data)
         blocker_types, _, _ = self._type_parts(
             str(blocker_data.get("type_line") or "")
         )
@@ -10369,11 +10365,9 @@ class CommanderEngine(
             return False, "attacker_has_shadow"
         if "shadow" in blocker_keywords and "shadow" not in attacker_keywords:
             return False, "blocker_has_shadow"
-        if (
-            "flying" in attacker_keywords
-            and not blocker_keywords.intersection({"flying", "reach"})
-        ):
-            return False, "attacker_has_flying"
+        aerial = aerial_block_verdict(attacker_keywords, blocker_keywords)
+        if not aerial.allowed:
+            return False, aerial.reason
         if protection_verdict(
             attacker_data,
             ProtectionSource.from_characteristics(blocker_data),

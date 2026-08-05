@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 28,
+  "registry_version": 29,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -428,6 +428,60 @@
       "dependency_fail_closed_rationale": "This bounded resolution-created characteristic effect has no capability dependencies beyond the shared typed continuous-effect evaluator.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_resolution_continuous_effect_commit_mutant_is_killed removes the canonical journal commit and the characteristic result assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.block.reach",
+      "version": 1,
+      "official_rules": ["509.1b", "702.17", "702.17a", "702.17b", "702.17c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Recognize reach in a proposed blocker's current represented effective keyword state as the CR 702.17b exception to the Flying restriction.",
+        "inputs": ["fully validated proposed blocker-attacker pair", "blocker current represented effective keywords", "attacker current represented effective keywords"],
+        "outputs": ["reach blocker permitted past the Flying restriction", "case-insensitive redundant reach result"],
+        "exclusions": ["blocker eligibility unrelated to Flying", "other evasion and blocking restrictions or requirements", "block declaration costs", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords", "mtg_commander_sim.aerial_blocking.aerial_block_verdict", "CommanderEngine._can_block"],
+      "positive_tests": ["test_flying_attacker_requires_flying_or_reach_blocker", "test_current_flying_and_reach_share_offer_and_command_legality"],
+      "negative_tests": ["test_malformed_keyword_snapshot_fails_closed"],
+      "interaction_tests": ["test_current_keywords_are_case_insensitive_and_redundant", "test_current_flying_and_reach_share_offer_and_command_legality"],
+      "multiplayer_tests": ["test_current_flying_and_reach_share_offer_and_command_legality"],
+      "privacy_tests": ["test_current_flying_and_reach_share_offer_and_command_legality"],
+      "replay_tests": ["test_current_flying_and_reach_share_offer_and_command_legality"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The bounded reach exception consumes canonical current keyword snapshots and has no capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_aerial_blocking_flying_and_reach_mutants_are_killed removes reach from the allowed aerial blocker set and the canonical reach block assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.block.flying",
+      "version": 1,
+      "official_rules": ["509.1b", "702.9", "702.9a", "702.9b", "702.9c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Apply the Flying block restriction to a fully validated proposed blocker-attacker pair using both objects' current represented effective keyword states.",
+        "inputs": ["fully validated proposed blocker-attacker pair", "attacker current represented effective keywords", "blocker current represented effective keywords"],
+        "outputs": ["ground blocker rejected for a flying attacker", "flying or reach blocker permitted past the Flying restriction", "case-insensitive redundant flying result"],
+        "exclusions": ["blocker eligibility unrelated to Flying", "other evasion and blocking restrictions or requirements", "block declaration costs", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
+      },
+      "dependencies": ["combat.block.reach"],
+      "implementation_components": ["mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords", "mtg_commander_sim.aerial_blocking.aerial_block_verdict", "CommanderEngine._can_block"],
+      "positive_tests": ["test_flying_attacker_requires_flying_or_reach_blocker", "test_current_flying_and_reach_share_offer_and_command_legality"],
+      "negative_tests": ["test_ground_attacker_is_outside_aerial_restriction", "test_malformed_keyword_snapshot_fails_closed"],
+      "interaction_tests": ["test_current_keywords_are_case_insensitive_and_redundant", "test_current_flying_and_reach_share_offer_and_command_legality"],
+      "multiplayer_tests": ["test_current_flying_and_reach_share_offer_and_command_legality"],
+      "privacy_tests": ["test_current_flying_and_reach_share_offer_and_command_legality"],
+      "replay_tests": ["test_current_flying_and_reach_share_offer_and_command_legality"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Capability-closure tests demote Flying when the coupled reach exception capability is blocked.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_aerial_blocking_flying_and_reach_mutants_are_killed changes the recognized Flying keyword and the ground-block rejection assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

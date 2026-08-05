@@ -3,6 +3,11 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any, Protocol
 
+from .keyword_abilities import (
+    EffectiveKeywordError,
+    normalized_effective_keywords as _normalized_effective_keywords,
+)
+
 
 HASTE_KEYWORD = "haste"
 
@@ -29,16 +34,10 @@ def normalized_effective_keywords(
 ) -> frozenset[str]:
     """Return the object's current represented keywords, case-insensitively."""
 
-    data = host._effective_card_data(card)
-    if not isinstance(data, Mapping):
-        raise HasteRuleError("Effective characteristics must be a mapping")
-    raw_keywords = data.get("keywords", ())
-    if not isinstance(raw_keywords, (list, tuple, set, frozenset)) or any(
-        not isinstance(keyword, str) or not keyword.strip()
-        for keyword in raw_keywords
-    ):
-        raise HasteRuleError("Effective keywords are malformed")
-    return frozenset(keyword.strip().casefold() for keyword in raw_keywords)
+    try:
+        return _normalized_effective_keywords(host, card)
+    except EffectiveKeywordError as exc:
+        raise HasteRuleError(str(exc)) from exc
 
 
 def has_effective_haste(host: HasteRuleHost, card: Any) -> bool:

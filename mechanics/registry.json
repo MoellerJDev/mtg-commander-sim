@@ -1,5 +1,5 @@
 {
-  "contract_count": 65,
+  "contract_count": 66,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -184,8 +184,8 @@
     {
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
-      "sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
-      "version": 1
+      "sha256": "0badd9bd97dce55a7c62b62171ad8141d1968237a90c99f339fd49b29ea611d9",
+      "version": 2
     },
     {
       "mechanic_id": "goad",
@@ -299,6 +299,12 @@
       "mechanic_id": "protection",
       "path": "mechanics/contracts/protection.json",
       "sha256": "c686682ab64c723b4f1bf53c4b18687fbefeed612229a9469847f89f789bf337",
+      "version": 1
+    },
+    {
+      "mechanic_id": "reach",
+      "path": "mechanics/contracts/reach.json",
+      "sha256": "79572c28213ee85e804a1eb932080e0d328553d0388246d7180f274bdcc5d53d",
       "version": 1
     },
     {
@@ -1771,28 +1777,27 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/flying.json",
-      "contract_sha256": "e75cae496f5ecaa720ef71ae1c7d73eab1066fd69b5f2e9ca98c12128b4b35c2",
-      "contract_version": 1,
-      "coverage_status": "partial",
+      "contract_sha256": "0badd9bd97dce55a7c62b62171ad8141d1968237a90c99f339fd49b29ea611d9",
+      "contract_version": 2,
+      "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "CommanderEngine._block_pair_legality",
-      "implementation_version": "combat-keywords-v1",
+      "implementation_component": "mtg_commander_sim.aerial_blocking.aerial_block_verdict",
+      "implementation_version": "aerial-blocking-v1",
       "kind": "keyword_ability",
-      "known_blockers": [
-        "full continuous-effect layer and dependency evaluation",
-        "complete copy and face-down characteristic evaluation"
-      ],
+      "known_blockers": [],
       "mechanic_id": "flying",
       "official_name": "Flying",
       "rule_references": [
         "702.9"
       ],
       "test_ids": [
-        "test_flying_attacker_exposes_only_flying_or_reach_blockers"
+        "test_flying_attacker_requires_flying_or_reach_blocker",
+        "test_current_flying_and_reach_share_offer_and_command_legality",
+        "test_current_keywords_are_case_insensitive_and_redundant"
       ],
-      "trust_level": "untrusted"
+      "trust_level": "trusted"
     },
     {
       "category": "additional_rules",
@@ -3098,20 +3103,28 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/reach.json",
+      "contract_sha256": "79572c28213ee85e804a1eb932080e0d328553d0388246d7180f274bdcc5d53d",
+      "contract_version": 1,
+      "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.aerial_blocking.aerial_block_verdict",
+      "implementation_version": "aerial-blocking-v1",
       "kind": "keyword_ability",
+      "known_blockers": [],
       "mechanic_id": "reach",
       "official_name": "Reach",
       "rule_references": [
         "702.17"
       ],
-      "test_ids": [],
-      "trust_level": "untrusted"
+      "test_ids": [
+        "test_flying_attacker_requires_flying_or_reach_blocker",
+        "test_current_flying_and_reach_share_offer_and_command_legality",
+        "test_current_keywords_are_case_insensitive_and_redundant"
+      ],
+      "trust_level": "trusted"
     },
     {
       "category": "additional_rules",
@@ -9946,5 +9959,5 @@
       "taxonomy_id": "cr-905-conspiracy-draft"
     }
   ],
-  "trusted_mechanic_count": 2
+  "trusted_mechanic_count": 4
 }

@@ -12,13 +12,14 @@ maintenance: "hand-maintained"
 Every mechanic must receive a versioned contract before the generated registry
 may mark it trusted.
 
-The integrated source tree currently contains 62 partial contracts, one tested
-contract, one trusted contract, and 361 unclassified mechanics. Vigilance is
-the first trusted mechanic contract, bounded to CR 508.1f and CR 702.20's
-attack-declaration tap exception using the attacker's current effective
-keywords. Broader combat, continuous-effect, copying, and granted-keyword
-behavior remains governed by its own capabilities. The snapshot-complete gate
-remains false.
+The integrated source tree currently contains 61 partial contracts, one tested
+contract, four trusted contracts, and 359 unclassified mechanics. Vigilance
+and Haste use current represented effective keywords for their bounded attack,
+tap-cost, and activation behavior. Flying and Reach share the typed aerial
+block-legality owner while retaining separate dependency-closed capabilities.
+Broader combat, continuous-effect, copying, and granted-keyword behavior
+remains governed by its own capabilities. The snapshot-complete gate remains
+false.
 
 A contract records its CR/glossary references, dependencies, zones, objects,
 events, state reads/writes, costs, timing, targets and choices, hidden
@@ -35,7 +36,7 @@ Contracts use `mechanics/contract.schema.json` plus cross-field validation in
 cards and tests, and have no known blockers. A partial contract links evidence
 without allowing a happy-path test to be mistaken for complete support.
 
-Current partial contracts cover Flying, deathtouch, protection, simple
+Current partial contracts cover deathtouch, protection, simple
 compiler families, CR 613 continuous-effect ordering, CR 616 replacement/
 prevention ordering, CR 400 logical object incarnation, CR 111 token
 lifecycle, CR 707 represented copy-object lifecycle, serialized

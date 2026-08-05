@@ -9,6 +9,7 @@
   "protected_rules_modules": [
     "mtg_commander_sim/abilities.py",
     "mtg_commander_sim/ability_fragments.py",
+    "mtg_commander_sim/aerial_blocking.py",
     "mtg_commander_sim/choice_forms.py",
     "mtg_commander_sim/combat.py",
     "mtg_commander_sim/combat_constraints.py",
@@ -31,6 +32,7 @@
     "mtg_commander_sim/engine.py",
     "mtg_commander_sim/enchant_spec.py",
     "mtg_commander_sim/haste.py",
+    "mtg_commander_sim/keyword_abilities.py",
     "mtg_commander_sim/life_change.py",
     "mtg_commander_sim/life_state.py",
     "mtg_commander_sim/mana.py",

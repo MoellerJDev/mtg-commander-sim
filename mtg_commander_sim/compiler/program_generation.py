@@ -166,8 +166,8 @@ def _validate_generated_program_trust(
         )
         is not None
     )
-    if generated_nodes and all(
-        node.exact or _independently_exact_protection_handler(node)
+    if generated_nodes and any(
+        _generated_node_is_independently_exact(node)
         for node in generated_nodes
     ):
         return
@@ -201,6 +201,12 @@ def _independently_exact_protection_handler(node: Any) -> bool:
     )
 
 
+def _generated_node_is_independently_exact(node: Any) -> bool:
+    return bool(
+        node.exact or _independently_exact_protection_handler(node)
+    )
+
+
 def generated_programs(
     db: CardDatabase,
     record: CardRecord,
@@ -227,6 +233,14 @@ def generated_programs(
     rulings_hash = rulings_source_hash(db, record)
     for face in ir.faces:
         for node in face.nodes:
+            if trust_level == "trusted" and not _generated_node_is_independently_exact(node):
+                # Trust is a property of the precise source-spanned node, not
+                # of every other lowerable sentence printed on the card.  A
+                # closed capability declaration may therefore be promoted
+                # while an unrelated sibling remains provisional.  The
+                # provisional registration pass still retains that sibling,
+                # so whole-card trust cannot be inferred from this filtering.
+                continue
             keyword_declaration = (
                 node.kind == "keyword_ability"
                 and bool(node.capability_dependencies)
