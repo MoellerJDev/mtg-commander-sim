@@ -215,22 +215,33 @@ class FixedManaCompilerTests(unittest.TestCase):
                 self.assertFalse(any(node.handlers for node in ir.faces[0].nodes))
 
     def test_fixed_output_mana_mode_mutants_are_killed(self):
-        ability = replace(
-            parse_activated_abilities(
-                card_name="Typed Mana Relic",
-                oracle_text="{T}: Add {G} or {U}.",
-            )[0],
-            ability_id="ab4",
-            line_index=3,
-        )
-        spec = compile_fixed_activated_mana_ability(ability)
-        self.assertIsNotNone(spec)
-        assert spec is not None
-        observed = [mode.bundle for mode in spec.modes]
-        self.assertEqual(1, observed[0]["G"])
-        self.assertEqual(1, observed[1]["U"])
-        self.assertEqual(0, observed[0]["U"])
-        self.assertEqual(0, observed[1]["G"])
+        def assert_exact_modes() -> None:
+            ability = replace(
+                parse_activated_abilities(
+                    card_name="Typed Mana Relic",
+                    oracle_text="{T}: Add {G} or {U}.",
+                )[0],
+                ability_id="ab4",
+                line_index=3,
+            )
+            spec = compile_fixed_activated_mana_ability(ability)
+            self.assertIsNotNone(spec)
+            assert spec is not None
+            observed = [mode.bundle for mode in spec.modes]
+            self.assertEqual(1, observed[0]["G"])
+            self.assertEqual(1, observed[1]["U"])
+            self.assertEqual(0, observed[0]["U"])
+            self.assertEqual(0, observed[1]["G"])
+
+        assert_exact_modes()
+        with mock.patch(
+            "mtg_commander_sim.fixed_mana_abilities._symbol_bundle",
+            side_effect=lambda text: FixedManaMode.from_bundle(
+                {"U" if "G" in text else "G": 1}
+            ),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_exact_modes()
 
 
 class FixedManaRuntimeTests(unittest.TestCase):
