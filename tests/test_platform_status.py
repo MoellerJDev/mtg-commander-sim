@@ -282,6 +282,23 @@ class PlatformStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "trails current main"):
             _validate_provenance(source)
 
+    def test_historical_certified_head_may_trail_current_main(self):
+        source = json.loads(
+            (ROOT / "platform" / "readiness-source.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        source["integration"]["pull_requests"] = []
+        source["provenance"]["certified_head_sha"] = subprocess.check_output(
+            ["git", "rev-parse", "origin/main^"],
+            cwd=ROOT,
+            text=True,
+        ).strip()
+        source["provenance"]["certified_head_classification"] = (
+            "historical_certified"
+        )
+        _validate_provenance(source)
+
     def test_current_card_baseline_is_derived_not_hand_copied(self):
         source = json.loads(
             (ROOT / "platform" / "readiness-source.json").read_text(

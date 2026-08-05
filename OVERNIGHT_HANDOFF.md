@@ -20,10 +20,12 @@ default branch. PR 102's generic fixed-damage effect-clause family is merged at
 `28e5d4882ef4126d587232357915c6706a071326`; exact-head run `31043382697`
 passed every required job. The merge-commit method preserves all seven feature
 commits on `main`, so deleting the topic branch cannot make provenance
-unreachable. Post-merge smoke `31043864091` passed all integration tests and
-then correctly rejected the now-stale active-candidate label. The immediate
-`ci/reconcile-pr102-main-status` branch records merged repository truth before
-audited stale branches are removed.
+unreachable. PR 103 then reconciled the generated status at merge
+`d226ecbbad0a3d4d50326cf3e5d416290d4a2c07`; exact-head run `31044973484`
+passed. The static report now identifies that SHA as a historical certified
+checkpoint rather than repeatedly mislabeling a pre-merge SHA as current
+`main`. This makes the generated provenance truthful and merge-stable while
+live CI remains the authority for the current `main` head.
 
 Always re-read the live branch, pull request, exact-head CI, worktree, and
 generated status before acting:

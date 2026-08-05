@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "063f9e0860e7870f413f06edcc4213661bb24615c458c5cdb0737a5228d6e209"
+verified: "67e30bd23f7da957ec408e0a4f4f076936a0cdd851918d544bfa1d1ab89c49e9"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,10 +15,10 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `063f9e0860e7870f413f06edcc4213661bb24615c458c5cdb0737a5228d6e209` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `67e30bd23f7da957ec408e0a4f4f076936a0cdd851918d544bfa1d1ab89c49e9` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `c3d144ebf0e1f16da5be93f8c0e5517f19193944`
-- Certified exact head: `28e5d4882ef4126d587232357915c6706a071326`
-- Generation timestamp: `2026-08-05T20:26:00Z`
+- Certified exact head: `d226ecbbad0a3d4d50326cf3e5d416290d4a2c07`
+- Generation timestamp: `2026-08-05T20:50:00Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
 - Active future phase: `none recorded; derive active PR state at generation time`
@@ -102,7 +102,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4855
+- Tests discovered: 4856
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31043382697](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31043382697) — `pass`
 - Compile: `pass`

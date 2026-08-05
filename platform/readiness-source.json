@@ -7,10 +7,10 @@
   },
   "integration": {
     "active_phase": null,
-    "branch": "ci/reconcile-pr102-main-status",
+    "branch": "main",
     "branch_ancestry": {
-      "focused_branch_base": "28e5d4882ef4126d587232357915c6706a071326",
-      "focused_branch_unique_commits_over_main": 1
+      "focused_branch_base": "d226ecbbad0a3d4d50326cf3e5d416290d4a2c07",
+      "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
       {
@@ -726,6 +726,13 @@
         "number": 102,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/102"
+      },
+      {
+        "base": "main",
+        "head": "ci/reconcile-pr102-main-status",
+        "number": 103,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/103"
       }
     ],
     "tags": [
@@ -742,9 +749,9 @@
   "provenance": {
     "feature_head_sha": "c3d144ebf0e1f16da5be93f8c0e5517f19193944",
     "feature_head_classification": "historical_integrated",
-    "certified_head_sha": "28e5d4882ef4126d587232357915c6706a071326",
-    "certified_head_classification": "current_main",
-    "generation_timestamp": "2026-08-05T20:26:00Z"
+    "certified_head_sha": "d226ecbbad0a3d4d50326cf3e5d416290d4a2c07",
+    "certified_head_classification": "historical_certified",
+    "generation_timestamp": "2026-08-05T20:50:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
