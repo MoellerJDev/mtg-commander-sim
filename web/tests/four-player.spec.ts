@@ -615,11 +615,31 @@ test("@browser-lifecycle a shared-cookie 1v1 lobby can replace rooms, remove a p
       .filter({ has: host.locator(".card-copy strong", { hasText: "Swamp" }) });
     await expect(swamp).toHaveCount(1);
     await passUntilDraggable([host, opponent], swamp, testInfo);
-    const beforeDrop = await viewRevision(host);
-    await swamp.dragTo(host.getByTestId("own-battlefield"));
-    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
-    await expect(host.getByTestId("own-battlefield")).toContainText("Swamp");
-    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
+    const swampRef = await swamp.getAttribute("data-card-ref");
+    expect(swampRef).toBeTruthy();
+    const battlefieldCards = host
+      .getByTestId("own-battlefield")
+      .locator(".card-tile");
+    const battlefieldCount = await battlefieldCards.count();
+    // The pass which reaches main phase can still publish after the land offer
+    // appears. Submit the exact current capability and certify zone outcomes;
+    // an unrelated delayed revision is not evidence that a drag succeeded.
+    const playSwamp = host
+      .getByTestId("decision-panel")
+      .getByRole("button", { name: /^Play Swamp$/ })
+      .first();
+    await expect(playSwamp).toBeEnabled();
+    await playSwamp.click();
+    const dialog = host.getByTestId("choice-dialog");
+    await expect.poll(async () =>
+      (await dialog.isVisible())
+      || (await battlefieldCards.count()) > battlefieldCount,
+    ).toBe(true);
+    if (await dialog.isVisible()) await submitOpenChoice(host);
+    await expect(
+      host.getByTestId("own-hand").locator(`[data-card-ref="${swampRef}"]`),
+    ).toHaveCount(0);
+    await expect(battlefieldCards).toHaveCount(battlefieldCount + 1);
 
     await host.getByTestId("action-concede").click();
     await expect(host.getByTestId("choice-dialog")).toContainText("Concede game");
