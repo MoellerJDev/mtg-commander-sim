@@ -129,8 +129,10 @@
     "test_fixed_output_compiler_lowers_source_spanned_cardprogram",
     "test_fixed_output_compiler_leaves_dynamic_and_restricted_variants_residual",
     "test_compiled_fixed_output_offer_and_activation_share_modes",
+    "test_fixed_mandatory_costs_commit_through_canonical_owners",
     "test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana",
     "test_invalid_compiled_mana_mode_rolls_back",
+    "test_invalid_mode_rolls_back_fixed_mandatory_costs",
     "test_compiled_fixed_output_is_controller_scoped_in_four_player_game",
     "test_compiled_fixed_output_projection_exposes_no_hidden_cards",
     "test_compiled_fixed_output_activation_replays_exactly"

@@ -376,6 +376,86 @@ class FixedManaRuntimeTests(unittest.TestCase):
         )
         self.assertEqual(before_events, len(session.state.events))
 
+    def test_fixed_mandatory_costs_commit_through_canonical_owners(self):
+        session = self.session(60527)
+        ring, _ = self._ring(session)
+        engine = session.engine
+        player = session.state.players[ring.controller]
+        player.mana_pool["C"] = 1
+        life_before = player.life
+        parsed = parse_activated_abilities(
+            card_name="Typed Mana Relic",
+            oracle_text=(
+                "{1}, {T}, Pay 2 life, Sacrifice this artifact: "
+                "Add {B}{B}{B}."
+            ),
+        )[0]
+        spec = compile_fixed_activated_mana_ability(parsed)
+        self.assertIsNotNone(spec)
+        assert spec is not None
+        ability = spec.to_activated_ability()
+
+        with mock.patch.object(
+            engine, "_activated_abilities", return_value=(ability,)
+        ):
+            result = session.act(
+                f"pilot:{ring.controller}",
+                {
+                    "a": "activate",
+                    "source": ring.ref,
+                    "ability": ability.ability_id,
+                },
+            )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("graveyard", ring.zone)
+        self.assertEqual(life_before - 2, player.life)
+        self.assertEqual(0, player.mana_pool["C"])
+        self.assertEqual(3, player.mana_pool["B"])
+
+    def test_invalid_mode_rolls_back_fixed_mandatory_costs(self):
+        session = self.session(60528)
+        ring, _ = self._ring(session)
+        engine = session.engine
+        player = session.state.players[ring.controller]
+        player.mana_pool["C"] = 1
+        before_pool = dict(player.mana_pool)
+        life_before = player.life
+        parsed = parse_activated_abilities(
+            card_name="Typed Mana Relic",
+            oracle_text=(
+                "{1}, {T}, Pay 2 life, Sacrifice this artifact: "
+                "Add {B}{B}{B}."
+            ),
+        )[0]
+        spec = compile_fixed_activated_mana_ability(parsed)
+        self.assertIsNotNone(spec)
+        assert spec is not None
+        ability = spec.to_activated_ability()
+
+        with mock.patch.object(
+            engine, "_activated_abilities", return_value=(ability,)
+        ):
+            result = session.act(
+                f"pilot:{ring.controller}",
+                {
+                    "a": "activate",
+                    "source": ring.ref,
+                    "ability": ability.ability_id,
+                    "mana_output": {"U": 3},
+                },
+            )
+
+        self.assertFalse(result.ok)
+        restored_ring = session.state.cards[ring.object_id]
+        self.assertEqual("battlefield", restored_ring.zone)
+        self.assertFalse(restored_ring.tapped)
+        self.assertEqual(life_before, session.state.players[ring.controller].life)
+        self.assertEqual(
+            before_pool,
+            dict(session.state.players[ring.controller].mana_pool),
+        )
+
     def test_compiled_fixed_output_creature_respects_haste_cost_dependency(self):
         session = self.session(60522)
         engine = session.engine

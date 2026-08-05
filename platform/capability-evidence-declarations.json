@@ -3378,6 +3378,14 @@
     },
     {
       "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_invalid_mode_rolls_back_fixed_mandatory_costs",
+      "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Roll back mana, life, tap, sacrifice, and output atomically when a submitted fixed output mode is invalid."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
       "evidence_class": "positive",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaCompilerTests.test_fixed_output_compiler_lowers_source_spanned_cardprogram",
       "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
@@ -3391,6 +3399,14 @@
       "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Use the same typed mode set for action exposure and immediate stackless activation."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_fixed_mandatory_costs_commit_through_canonical_owners",
+      "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Pay fixed mana, tap, life, and source-sacrifice costs through their canonical owners before adding the typed fixed output."
     },
     {
       "capability_id": "mana.activated.fixed_output",
