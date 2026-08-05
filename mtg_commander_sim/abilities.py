@@ -224,11 +224,10 @@ def _split_cost_clauses(cost_text: str) -> list[str]:
 def _strip_inline_reminder_and_granted_text(line: str) -> str:
     """Keep only activated abilities printed on the source itself.
 
-    Parenthetical token reminder text and quoted abilities granted to other
-    objects can contain colons, but neither is an activated ability of this
-    card. A fully parenthesized basic-land-type mana reminder remains
-    supported below because that reminder represents an intrinsic ability of
-    the land itself.
+    Parenthetical reminder text and quoted abilities granted to other objects
+    can contain colons, but neither is an activated ability of this card.
+    Basic land types receive their mana abilities from the intrinsic type
+    owner rather than from their parenthesized Oracle reminder.
     """
 
     result: list[str] = []
@@ -501,10 +500,7 @@ def _cost_choice(lower: str) -> CostChoice | None:
 
 def _normalized_ability_line(raw_line: str) -> tuple[str, str | None]:
     line = raw_line.strip()
-    if line.startswith("({T}: Add ") and line.endswith(")"):
-        line = line[1:-1].strip()
-    else:
-        line = _strip_inline_reminder_and_granted_text(line)
+    line = _strip_inline_reminder_and_granted_text(line)
     for keyword, effect in (
         ("Cycling", "Draw a card."),
         (

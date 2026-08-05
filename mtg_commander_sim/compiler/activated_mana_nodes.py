@@ -149,6 +149,35 @@ def activated_oracle_node(
 ) -> OracleNode | None:
     """Compile one complete colon-form activated-ability Oracle line."""
 
+    reminder_line = line.strip()
+    if (
+        reminder_line.casefold().startswith("({t}: add ")
+        and reminder_line.endswith(")")
+    ):
+        residual_id = append_residual(
+            residuals,
+            kind="mana_ability",
+            text=line,
+            span=span,
+            reason=(
+                "parenthesized mana reminder text is nonexecuting and "
+                "requires the separate intrinsic basic-land-type ability "
+                "owner"
+            ),
+            blockers=("intrinsic basic-land-type mana capability",),
+        )
+        return OracleNode(
+            node_id=node_id,
+            kind="reminder_text",
+            text=line,
+            span=span,
+            active_zone="all",
+            event="none",
+            lowerable=False,
+            exact=False,
+            template_id="basic-land-mana-reminder-residual-v1",
+            residual_ids=(residual_id,),
+        )
     abilities = parse_activated_abilities(
         card_name=card_name,
         oracle_text=line,
