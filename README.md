@@ -433,7 +433,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   loyalty costs
 - source-reviewed CR 605 mana abilities with corrected target/loyalty
   exclusions, immediate activated-mana resolution, payment-path witnesses,
-  and explicit blockers for generic triggered mana abilities
+  and source-spanned CardProgram V2 lowering for target-free nonloyalty
+  activated abilities whose fixed outputs and mandatory costs are completely
+  represented. One typed descriptor supplies both the advertised choices and
+  accepted command. Dynamic, conditional, restricted, triggered, side-effecting,
+  and arbitrary nested-payment variants remain explicit residuals.
 - source-reviewed CR 604 static-ability scope with source-leaves and
   moved-attachment witnesses; generic CDA, attachment, stack, zone-permission,
   and current-information/LKI handling remain blocked
@@ -888,6 +892,14 @@ choosing reusable rules work, not a claim of Comprehensive Rules or Oracle
 completeness. The first measured harvest adds generic Vigilance declaration
 behavior and promotes 35 Commander-legal CardPrograms to exact; exact two-face
 positional binding also removes the former Tithing Blade construction failure.
+The fixed-output activated-mana harvest compiles target-free, nonloyalty
+abilities with completely represented mandatory costs and output modes into one
+source-spanned typed descriptor. It promotes 173 Commander-legal CardPrograms,
+reduces material residuals by 1,314, and deliberately leaves dynamic,
+conditional, restricted, triggered, side-effecting, and parenthesized
+basic-land reminder wording outside this capability. Basic land types continue
+to grant their separate intrinsic mana abilities through the existing CR 305.6
+owner rather than through executable reminder text.
 
 The typed semantic-handler migration moved its first executable effect
 families into `mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an
@@ -1287,7 +1299,12 @@ container isolation when filesystem-level isolation must also be proven.
   semantic/generated adapters, audit commands, and runtime validation
 - `mtg_commander_sim/semantic_runtime/` — frozen typed effect/runtime-handler
   registries, immutable rules queries, typed intents, and canonical execution
-- `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
+- `mtg_commander_sim/fixed_mana_abilities.py` — immutable fixed-output
+  activated-mana descriptor and closed Oracle grammar
+- `mtg_commander_sim/mana_ability_runtime.py` — advertised/accepted mana-mode
+  owner, with isolated compatibility paths for not-yet-compiled variants
+- `mtg_commander_sim/mana.py` — conservative mana source planning and legacy
+  compatibility extraction
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
 - `mtg_commander_sim/rules/action_proposals.py` — immutable canonical action
   offers and proposal fingerprints

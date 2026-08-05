@@ -328,7 +328,7 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
             any(source.object_id == opal.object_id for source in engine.available_mana_sources("A"))
         )
 
-    def test_parenthesized_basic_land_mana_ability_is_compiled(self):
+    def test_parenthesized_basic_land_reminder_uses_intrinsic_abilities(self):
         session = make_session(self.db, self.mishra, self.zimone, seed=510)
         keep_all(session)
         engine = session.engine
@@ -342,14 +342,16 @@ class ActivatedAbilityAndCostTests(unittest.TestCase):
         )
 
         hints = engine._priority_action_hints("B")
-        self.assertTrue(
-            any(
-                item["s"] == pool.ref
-                and item["a"] == "ab1"
-                and not item.get("needs_rules")
-                for item in hints["mana_abilities"]
-            )
+        pool_abilities = {
+            item["a"]
+            for item in hints["mana_abilities"]
+            if item["s"] == pool.ref and not item.get("needs_rules")
+        }
+        self.assertEqual(
+            {"intrinsic_island", "intrinsic_forest"},
+            pool_abilities,
         )
+        self.assertNotIn("ab1", pool_abilities)
         self.assertFalse(
             any(
                 item.get("s") == pool.ref

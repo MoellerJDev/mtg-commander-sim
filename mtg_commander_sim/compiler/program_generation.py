@@ -116,7 +116,7 @@ def _generated_ability_id(
 ) -> str | None:
     if kind == "spell_ability":
         return f"spell:{face_id}"
-    if kind == "activated_ability":
+    if kind in {"activated_ability", "mana_ability"}:
         return f"ability:ab{line}"
     if kind == "triggered_ability":
         return f"trigger:{face_id}:n{line}"
@@ -130,6 +130,8 @@ def _generated_coverage(*, kind: str, runtime_handler: bool) -> str:
         return "spell_resolution"
     if kind == "triggered_ability":
         return "triggered_ability"
+    if kind == "mana_ability":
+        return "activated_mana_ability"
     if runtime_handler:
         return "runtime_static_handler"
     return "activated_ability"

@@ -5,7 +5,6 @@ import json
 import re
 from typing import Any, Iterable, Mapping, Sequence
 
-from .abilities import parse_activated_abilities
 from .aura import keyword_target_schema
 from .carddb import CardDatabase, CardRecord
 from .compiler.corpus_reporting import (
@@ -16,7 +15,9 @@ from .compiler.corpus_reporting import (
 from .compiler.continuous_templates import (
     controlled_creature_until_end_of_turn_effect,
 )
-from .compiler.activated_costs import activated_ability_cost
+from .compiler.activated_mana_nodes import (
+    activated_oracle_node,
+)
 from .compiler.ability_keyword_fragments import (
     lower_ability_keyword_fragments,
 )
@@ -30,6 +31,7 @@ from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.keyword_nodes import dredge_keyword_node
 from .compiler.ir_model import (
+    append_residual as _residual,
     OracleCardIR,
     OracleFaceIR,
     OracleNode,
@@ -49,7 +51,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v30"
+ORACLE_COMPILER_VERSION = "oracle-ir-v31"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
@@ -605,30 +607,6 @@ def _reviewed_effect_template(
     return prevention or _effect_template(text, card_name=card_name)
 
 
-def _residual(
-    residuals: list[OracleResidual],
-    *,
-    kind: str,
-    text: str,
-    span: SourceSpan,
-    reason: str,
-    blockers: Sequence[str] = (),
-) -> str:
-    residual_id = f"r{len(residuals) + 1}"
-    residuals.append(
-        OracleResidual(
-            residual_id=residual_id,
-            kind=kind,
-            text=text,
-            span=span,
-            material=True,
-            reason=reason,
-            blockers=tuple(blockers),
-        )
-    )
-    return residual_id
-
-
 def _keyword_node(
     *,
     node_id: str,
@@ -958,98 +936,16 @@ def _compile_face(
             nodes.append(keyword_node)
             continue
 
-        abilities = parse_activated_abilities(
-            card_name=face_name or record.name,
-            oracle_text=line,
-            keywords=keywords,
+        activated_node = activated_oracle_node(
+            node_id=node_id, line=line, span=span,
+            card_name=face_name or record.name, keywords=keywords,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile, residuals=residuals,
+            effect_template=_reviewed_effect_template,
         )
-        if abilities:
-            ability = abilities[0]
-            template, effects, target_schema, mechanics = (
-                _reviewed_effect_template(
-                    ability.effect_text,
-                    card_name=face_name or record.name,
-                )
-            )
-            residual_ids: list[str] = []
-            if not ability.compiled_cost:
-                residual_ids.append(
-                    _residual(
-                        residuals,
-                        kind="cost",
-                        text=ability.cost_text,
-                        span=span,
-                        reason="mandatory activated cost is not compiled",
-                        blockers=(
-                            "complete alternate/additional-cost grammar",
-                            "restricted payment predicates",
-                        ),
-                    )
-                )
-            if template is None and not ability.mana_ability:
-                residual_ids.append(
-                    _residual(
-                        residuals,
-                        kind="effect",
-                        text=ability.effect_text,
-                        span=span,
-                        reason="activated effect has no exact generic template",
-                    )
-                )
-            lowerable = not residual_ids and (
-                template is not None or ability.mana_ability
-            )
-            dependencies = (
-                mechanics
-                if template is not None
-                else ("cr-605-mana-abilities",)
-            )
-            missing = sorted(
-                set(dependencies) - trusted_mechanics
-            )
-            if lowerable and missing:
-                residual_ids.append(
-                    _residual(
-                        residuals,
-                        kind="dependency_contract",
-                        text=line,
-                        span=span,
-                        reason=(
-                            "lowerable ability depends on untrusted "
-                            "mechanic contracts"
-                        ),
-                        blockers=tuple(
-                            f"mechanic:{mechanic}"
-                            for mechanic in missing
-                        ),
-                    )
-                )
-            nodes.append(
-                OracleNode(
-                    node_id=node_id,
-                    kind=(
-                        "mana_ability"
-                        if ability.mana_ability
-                        else "activated_ability"
-                    ),
-                    text=line,
-                    span=span,
-                    active_zone=ability.zones[0],
-                    event="activate",
-                    lowerable=lowerable,
-                    exact=lowerable and not missing,
-                    template_id=(
-                        "intrinsic-mana-ability-v1"
-                        if ability.mana_ability and template is None
-                        else template
-                    ),
-                cost=activated_ability_cost(ability),
-                    effects=effects,
-                    target_schema=target_schema,
-                    mechanics=mechanics,
-                    residual_ids=tuple(residual_ids),
-                )
-            )
+        if activated_node is not None:
+            nodes.append(activated_node)
             continue
 
         trigger_node = _trigger_node(

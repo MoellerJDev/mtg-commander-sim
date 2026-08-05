@@ -12,6 +12,11 @@ from ...ability_fragments import (
 from ...card_overrides.game_record_v3 import (
     historical_granted_activated_ability_descriptors,
 )
+from ...compiled_mana_abilities import (
+    compiled_fixed_mana_abilities,
+    compiled_fixed_mana_family_present,
+)
+from ...fixed_mana_abilities import FixedManaMode
 from ...mana import BASIC_LAND_MANA
 from ...util import normalize_mana_bundle
 
@@ -34,18 +39,40 @@ def activated_abilities(
     """Compile printed, intrinsic, and explicitly granted activated abilities."""
 
     data = host._effective_card_data(card)
+    executable_oracle_text = str(
+        data.get(
+            "executable_oracle_text",
+            data.get("oracle_text") or "",
+        )
+    )
+    compiled_mana = compiled_fixed_mana_abilities(
+        host,
+        card,
+        executable_oracle_text=executable_oracle_text,
+    )
+    stale_compiled_mana = (
+        not compiled_mana
+        and compiled_fixed_mana_family_present(host, card)
+    )
+    owned_lines = {spec.line_index for spec in compiled_mana}
+    runtime_lines = executable_oracle_text.splitlines()
+    for line_index in owned_lines:
+        if 0 <= line_index < len(runtime_lines):
+            runtime_lines[line_index] = ""
+    runtime_oracle_text = (
+        "" if stale_compiled_mana else "\n".join(runtime_lines)
+    )
     abilities = list(
         parse_activated_abilities(
             card_name=str(data.get("name") or card.printed_name),
-            oracle_text=str(
-                data.get(
-                    "executable_oracle_text",
-                    data.get("oracle_text") or "",
-                )
-            ),
+            oracle_text=runtime_oracle_text,
             keywords=tuple(data.get("keywords") or ()),
         )
     )
+    abilities.extend(
+        spec.to_activated_ability() for spec in compiled_mana
+    )
+    abilities.sort(key=lambda ability: ability.line_index)
     _append_intrinsic_land_abilities(host, data, abilities)
     abilities.extend(_typed_granted_abilities(data))
     abilities.extend(_granted_abilities(card, data))
@@ -116,6 +143,9 @@ def _append_intrinsic_land_abilities(
                     mana=normalize_mana_bundle(None),
                     tap_source=True,
                     mana_ability=True,
+                    fixed_mana_outputs=(
+                        FixedManaMode.from_bundle({color: 1}),
+                    ),
                 )
             )
 

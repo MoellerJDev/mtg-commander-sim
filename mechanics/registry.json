@@ -262,7 +262,7 @@
     {
       "mechanic_id": "cr-605-mana-abilities",
       "path": "mechanics/contracts/mana-abilities.json",
-      "sha256": "e2b3bd043b4b46ed8ef61d8297613c52fb82850e7037c20a3db5ddbd605be5b9",
+      "sha256": "f92b7deaf7fc69d5285c817df7561afe4410c19b600a8a0a7595c036d8055af9",
       "version": 1
     },
     {
@@ -7471,19 +7471,20 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/mana-abilities.json",
-      "contract_sha256": "e2b3bd043b4b46ed8ef61d8297613c52fb82850e7037c20a3db5ddbd605be5b9",
+      "contract_sha256": "f92b7deaf7fc69d5285c817df7561afe4410c19b600a8a0a7595c036d8055af9",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "ActivatedAbility mana classification and CommanderEngine immediate mana/payment paths",
-      "implementation_version": "mana-ability-foundation-v1",
+      "implementation_component": "FixedActivatedManaAbilitySpec, FixedActivatedManaAbilityHandler, activation query, ManaAbilityRuntime, and the canonical mana-activation transaction",
+      "implementation_version": "fixed-output-mana-ability-v1",
       "kind": "rules_section",
       "known_blockers": [
         "triggered mana abilities are not generically identified or dispatched outside the stack",
-        "possible mana-output grammar is incomplete across the Oracle corpus",
+        "dynamic, conditional, restricted, and side-effecting mana-output grammar remains outside the fixed-output capability",
         "explicit mana activation during arbitrary rule/effect payment windows is not exposed as a general nested decision",
         "activation reentrancy is not represented as a state that can be independently tested",
-        "mana-production replacement and trigger integration is incomplete"
+        "mana-production replacement and trigger integration is incomplete",
+        "parenthesized basic-land reminder text remains assigned to the separate intrinsic basic-land-type ability owner"
       ],
       "mechanic_id": "cr-605-mana-abilities",
       "official_name": "Mana Abilities",
@@ -7500,7 +7501,20 @@
         "test_token_reminder_text_does_not_create_source_mana_ability",
         "test_mana_drain_schedules_exact_next_main_phase_mana",
         "test_treasure_exposes_color_choice_and_auto_payment_sacrifices_it",
-        "test_recordless_mana_plan_ignores_submitted_side_effects"
+        "test_recordless_mana_plan_ignores_submitted_side_effects",
+        "test_fixed_output_compiler_lowers_source_spanned_cardprogram",
+        "test_fixed_output_compiler_leaves_dynamic_and_restricted_variants_residual",
+        "test_parenthesized_basic_land_reminder_is_not_an_executable_program",
+        "test_compiled_alternative_output_is_advertised_accepted_and_replayed",
+        "test_compiled_fixed_output_offer_and_activation_share_modes",
+        "test_compiled_fixed_output_can_pay_during_casting",
+        "test_fixed_mandatory_costs_commit_through_canonical_owners",
+        "test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana",
+        "test_invalid_compiled_mana_mode_rolls_back",
+        "test_invalid_mode_rolls_back_fixed_mandatory_costs",
+        "test_compiled_fixed_output_is_controller_scoped_in_four_player_game",
+        "test_compiled_fixed_output_projection_exposes_no_hidden_cards",
+        "test_compiled_fixed_output_activation_replays_exactly"
       ],
       "trust_level": "untrusted"
     },

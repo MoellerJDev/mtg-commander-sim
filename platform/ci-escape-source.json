@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-08-05T09:39:44Z",
+  "observed_at": "2026-08-05T10:41:26Z",
   "repository": "MoellerJDev/mtg-commander-sim",
   "escapes": [
     {
@@ -130,6 +130,21 @@
       "regressions": ["four-player.spec.ts: natural commander-damage winner"],
       "impact_edge_status": "not_applicable",
       "resolution": "Authorized pass submissions are now keyed by decision ID, land confirmation snapshots the hand only after the card is currently playable, and the witness verifies distinct precombat and postcombat main-phase commander offers; both focused journeys passed together headlessly in 27.9 minutes against the CI compact database."
+    },
+    {
+      "id": "ci-20260805-10",
+      "run_id": 30998174979,
+      "head_sha": "c2340f8e90f2b4a7bd0466377c0ef1a776ab85d3",
+      "category": "missing_affected_test",
+      "deterministic": true,
+      "summary": "The fixed-mana runtime component increased two independently ratcheted inventories while the handoff duplicated numerical metrics reserved for generated status reports.",
+      "failed_surfaces": ["compiler-cardprogram", "generated-validation"],
+      "regressions": [
+        "test_card_program_trust.CardProgramTrustTests.test_global_handler_and_component_inventory_is_capability_bound",
+        "test_documentation_policy.DocumentationPolicyTests.test_repository_documentation_passes"
+      ],
+      "impact_edge_status": "added",
+      "resolution": "Both handler inventories now ratchet at nineteen and the handoff links to generated frontier and architecture reports instead of copying grouped numerical metrics."
     }
   ],
   "recent_pull_requests": [

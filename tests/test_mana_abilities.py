@@ -7,7 +7,6 @@ from pathlib import Path
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.abilities import parse_activated_abilities
-from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.mana_undo import (
     available_mana_undo,
     undo_mana_activation,
@@ -173,7 +172,7 @@ class ManaAbilityRuleTests(unittest.TestCase):
         )
         self.assertTrue(island.tapped)
 
-    def test_multicolor_land_requires_and_honors_one_mana_mode(self):
+    def test_multityped_land_exposes_distinct_intrinsic_mana_abilities(self):
         engine = self.make_engine(60505)
         pool = self.card(engine, "B", "Breeding Pool")
         engine.move_card(
@@ -184,45 +183,38 @@ class ManaAbilityRuleTests(unittest.TestCase):
             log=False,
         )
         self.prepare_main(engine, "B")
-        ability = engine._activated_abilities(pool)[0]
-        modes = engine._mana_modes_for_ability("B", pool, ability)
-        action = next(
-            action
-            for action in engine._priority_action_hints("B")["actions"]
-            if action.get("source") == pool.ref
-            and action.get("ability") == ability.ability_id
-        )
-
+        abilities = {
+            ability.ability_id: ability
+            for ability in engine._activated_abilities(pool)
+        }
         self.assertEqual(
-            [{"U": 1}, {"G": 1}],
+            {"intrinsic_island", "intrinsic_forest"},
+            set(abilities),
+        )
+        self.assertEqual(
+            {"intrinsic_island", "intrinsic_forest"},
+            {
+                action["ability"]
+                for action in engine._priority_action_hints("B")["actions"]
+                if action.get("source") == pool.ref
+            },
+        )
+        forest_ability = abilities["intrinsic_forest"]
+        self.assertEqual(
+            [{"G": 1}],
             [
                 {key: amount for key, amount in mode.bundle.items() if amount}
-                for mode in modes
+                for mode in engine._mana_modes_for_ability(
+                    "B", pool, forest_ability
+                )
             ],
         )
-        self.assertEqual(
-            "Breeding Pool — Add {G} or {U}.",
-            action["label"],
-        )
-        self.assertTrue(action["mana_ability"])
-        self.assertEqual(
-            [{"U": 1}, {"G": 1}],
-            [
-                option["value"]
-                for option in action["choice_schema"]["mana_output"][
-                    "options"
-                ]
-            ],
-        )
-        with self.assertRaisesRegex(GameRuleError, "Choose which mana"):
-            engine._mana_output_for_ability("B", pool, ability, {})
 
         engine._activate(
             "B",
             {
                 "source": pool.ref,
-                "ability": ability.ability_id,
-                "mana_output": {"G": 1},
+                "ability": forest_ability.ability_id,
             },
         )
 

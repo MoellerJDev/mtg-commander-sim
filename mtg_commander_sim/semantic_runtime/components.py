@@ -14,6 +14,7 @@ from .damage_results import default_damage_result_replacement_registry
 from .draw_replacements import default_draw_replacement_registry
 from .draw_restrictions import default_draw_restriction_registry
 from .life_replacements import default_life_replacement_registry
+from .mana_abilities import default_fixed_mana_ability_registry
 from .continuous_components import (
     default_continuous_effect_component_registry,
 )
@@ -33,6 +34,7 @@ def runtime_component_registries() -> tuple[Any, ...]:
         default_draw_replacement_registry(),
         default_draw_restriction_registry(),
         default_life_replacement_registry(),
+        default_fixed_mana_ability_registry(),
         default_token_creation_replacement_registry(),
         default_zone_change_replacement_registry(),
     )
