@@ -130,8 +130,9 @@ succeeded. Protect `main` with the exact required status context
 `PR / Certification`.
 
 The pre-sharding public baseline is run `31025126367`: its single Windows
-discovery process executed 4,838 tests in 2,265.245 seconds (37 minutes,
-45.245 seconds) before reporting the already-corrected generated-audit drift.
+discovery process executed the complete test allocation in 2,265.245 seconds
+(37 minutes, 45.245 seconds) before reporting the already-corrected
+generated-audit drift.
 Use the exact-head matrix metrics—not that historical total—to decide whether
 the five-runner ceiling or shard allocation should change.
 

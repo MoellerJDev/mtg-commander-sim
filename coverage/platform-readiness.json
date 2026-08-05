@@ -19,7 +19,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "76340dec588788083c358969b5853e75c68f7d0819048a5d30eb17041a669c74",
+    "evaluated_source_tree_hash": "6b60dd58f3ed8adc92c991fd2341edad27d1875347fe32ef8319245cec63a7fa",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -230,7 +230,7 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "PR 101 keeps an authoritative four-context lifecycle smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw journeys for typed rules owners, and replaces Playwright file sharding with deterministic nonempty lifecycle, rules, and natural-winner soak groups using isolated databases, runtimes, and ports. A shared progress driver reports decision, phase, revision, event, queue, and persistence state and fails after 90 seconds without real progress. Durable saves run off the event loop while command acknowledgement still waits for the authoritative write; derived review publication is independently timed, atomic, concurrent-writer safe, and no longer blocks ordinary live saves. CI metrics retain observed job-step and per-journey timing, retries, failure class, command/revision counts, and persistence timing without estimating unavailable values. Platform status derives current baselines and fails closed on stale Git/GitHub coordinates. The exact authoritative smoke passed locally in 30.4 seconds with four contexts, four accepted commands, exact retry, pause/resume, reconnect, and observed persistence metrics; public exact-head critical-path timing remains to be measured on this feature head.",
+      "evidence": "PR 101 keeps an authoritative four-context lifecycle smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw journeys for typed rules owners, and replaces Playwright file sharding with deterministic nonempty lifecycle, rules, and natural-winner soak groups using isolated databases, runtimes, and ports. A shared progress driver reports decision, phase, revision, event, queue, and persistence state and fails after 90 seconds without real progress; terminal metrics now query an absent decision panel without Playwright auto-wait. Durable saves run off the event loop while command acknowledgement still waits for the authoritative write; derived review publication is independently timed, atomic, concurrent-writer safe, and no longer blocks ordinary live saves. Full Windows coverage now derives all eleven primary shards from the exact manifest partition and runs them in isolated processes and runners with a five-worker ceiling; focused compatibility is mode-exclusive, the wheel builds exactly once, and a fail-closed Windows certification verifies job mode, manifest completeness, nonempty result artifacts, and package success. The pre-sharding public run 31025126367 executed 4,838 Windows tests in 2,265.245 seconds before reaching the already-corrected generated-audit drift. CI metrics retain observed job-step, per-journey, per-Windows-shard, package, concurrency, and critical-path timing without estimating unavailable values. Platform status derives current baselines and fails closed on stale Git/GitHub coordinates. The exact authoritative smoke passed locally in 30.4 seconds with four contexts, four accepted commands, exact retry, pause/resume, reconnect, and observed persistence metrics; the previously failing terminal turn/draw journey passed in 51.9 seconds and the natural-winner journey passed in 6.0 minutes after its routine action helper was tied to accepted capability and zone outcomes. Public exact-head sharded Windows critical-path timing remains to be measured on this feature head.",
       "id": "focused_browser_impact_and_status_truth",
       "name": "Focused browser impact and repository-truth status",
       "status": "implemented_at_feature_head"
@@ -277,7 +277,7 @@
     "certified_head_classification": "current_main",
     "certified_head_sha": "76c6bf154bfc62e5eae4cb10e391033413349050",
     "feature_head_classification": "active_candidate",
-    "feature_head_sha": "5df48da393931c29fa314e835fa8e252d2544dfd",
+    "feature_head_sha": "5ea8f1e057194bfca573fafd02ecd52f03a178da",
     "generation_timestamp": "2026-08-05T16:22:08Z"
   },
   "repository": {
@@ -347,7 +347,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4838,
+    "deterministic_cases_discovered": 4842,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
@@ -398,7 +398,7 @@
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "deterministic_tests": "certified_main_through_pr100_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31019542461_pass",
-      "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_groups_metrics_parsing_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_concurrent_review_publication_and_architecture_freshness",
+      "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "focused_rules_tests": "pass_flash_source_spans_strict_immutable_permission_offer_command_parity_face_pinning_malformed_input_atomic_rollback_four_player_seat_isolation_privacy_exact_replay_dependency_fail_closed_redundancy_killed_mutation_and_oracle_card_program_closure",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
