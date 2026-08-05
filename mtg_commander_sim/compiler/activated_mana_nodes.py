@@ -12,7 +12,7 @@ from ..fixed_mana_abilities import (
 )
 from ..rules.capabilities import CapabilityRegistry
 from .activated_costs import activated_ability_cost
-from .dependency_gate import explicit_capability_gate
+from .dependency_gate import dependency_gate, explicit_capability_gate
 from .ir_model import (
     append_residual,
     OracleNode,
@@ -230,7 +230,33 @@ def activated_oracle_node(
         template is not None or ability.mana_ability
     )
     dependencies = mechanics if template is not None else ()
-    missing = sorted(set(dependencies) - trusted_mechanics)
+    fixed_damage = (
+        len(effects) == 1
+        and str(effects[0].get("op") or "")
+        in {"damage", "damage_each_opponent"}
+    )
+    damage_gate = (
+        dependency_gate(
+            mechanics=dependencies,
+            effects=effects,
+            target_schema=target_schema,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+        if fixed_damage and capability_registry is not None
+        else None
+    )
+    missing = (
+        damage_gate.blockers
+        if damage_gate is not None
+        else tuple(
+            f"mechanic:{mechanic}"
+            for mechanic in sorted(
+                set(dependencies) - trusted_mechanics
+            )
+        )
+    )
     if lowerable and missing:
         residual_ids.append(
             append_residual(
@@ -241,9 +267,7 @@ def activated_oracle_node(
                 reason=(
                     "lowerable ability depends on untrusted mechanic contracts"
                 ),
-                blockers=tuple(
-                    f"mechanic:{mechanic}" for mechanic in missing
-                ),
+                blockers=tuple(missing),
             )
         )
     return OracleNode(
@@ -267,6 +291,24 @@ def activated_oracle_node(
         target_schema=target_schema,
         mechanics=mechanics,
         residual_ids=tuple(residual_ids),
+        capability_dependencies=(
+            damage_gate.capabilities if damage_gate is not None else ()
+        ),
+        capability_closure=(
+            damage_gate.closure.reachable
+            if damage_gate is not None and damage_gate.closure is not None
+            else ()
+        ),
+        capability_profile=(
+            damage_gate.closure.profile
+            if damage_gate is not None and damage_gate.closure is not None
+            else None
+        ),
+        capability_fingerprint=(
+            damage_gate.closure.fingerprint
+            if damage_gate is not None and damage_gate.closure is not None
+            else None
+        ),
     )
 
 

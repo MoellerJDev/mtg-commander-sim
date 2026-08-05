@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import asdict
 import hashlib
 from typing import Any, Iterable, Mapping
@@ -391,6 +392,7 @@ def register_generated_programs(
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
     promote_exact_trigger_programs: bool = False,
+    promote_exact_effect_programs: bool = False,
     promote_exact_capability_declarations: bool = False,
 ) -> dict[str, Any]:
     from ..oracle_ir import ORACLE_COMPILER_VERSION
@@ -399,6 +401,7 @@ def register_generated_programs(
     skipped_existing = 0
     promoted_runtime_handlers = 0
     promoted_exact_programs = 0
+    promoted_exact_effect_programs = 0
     cards_seen: set[str] = set()
     for record in records:
         if record.oracle_id in cards_seen:
@@ -412,11 +415,21 @@ def register_generated_programs(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
+        effect_key_counts = Counter(
+            program.key
+            for program in provisional_programs
+            if program.effects
+            and program.ability_id.startswith(("spell:", "ability:"))
+        )
+        promotable_effect_keys = {
+            key for key, count in effect_key_counts.items() if count == 1
+        }
         trusted_programs: dict[str, SemanticProgram] = {}
         if (
             (
                 promote_exact_runtime_handlers
                 or promote_exact_trigger_programs
+                or promote_exact_effect_programs
                 or promote_exact_capability_declarations
             )
             and trust_level == "provisional"
@@ -428,6 +441,10 @@ def register_generated_programs(
                     for program in provisional_programs
                 )
                 or any(program.handlers for program in provisional_programs)
+                or (
+                    promote_exact_effect_programs
+                    and bool(promotable_effect_keys)
+                )
                 or (
                     promote_exact_capability_declarations
                     and any(
@@ -450,6 +467,14 @@ def register_generated_programs(
                         capability_profile=capability_profile,
                     )
                     if program.handlers
+                    or (
+                        promote_exact_effect_programs
+                        and program.key in promotable_effect_keys
+                        and program.effects
+                        and program.ability_id.startswith(
+                            ("spell:", "ability:")
+                        )
+                    )
                     or (
                         promote_exact_trigger_programs
                         and program.ability_id.startswith("trigger:")
@@ -496,6 +521,14 @@ def register_generated_programs(
                 promoted_exact_programs += 1
                 if program.handlers:
                     promoted_runtime_handlers += 1
+                if (
+                    program.key in promotable_effect_keys
+                    and program.effects
+                    and program.ability_id.startswith(
+                        ("spell:", "ability:")
+                    )
+                ):
+                    promoted_exact_effect_programs += 1
             registry.put(program)
             generated += 1
     return {
@@ -504,6 +537,9 @@ def register_generated_programs(
         "programs_skipped_existing": skipped_existing,
         "runtime_handlers_promoted": promoted_runtime_handlers,
         "exact_programs_promoted": promoted_exact_programs,
+        "exact_effect_programs_promoted": (
+            promoted_exact_effect_programs
+        ),
         "trust_level": trust_level,
         "compiler_version": ORACLE_COMPILER_VERSION,
         "capability_registry_fingerprint": (

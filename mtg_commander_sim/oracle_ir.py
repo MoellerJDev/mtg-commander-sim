@@ -32,6 +32,7 @@ from .compiler.dependency_gate import (
     keyword_dependency_gate,
 )
 from .compiler.draw_templates import fixed_draw_effect_template
+from .compiler.damage_templates import fixed_damage_effect_template
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.keyword_nodes import dredge_keyword_node
@@ -103,15 +104,6 @@ def _without_parenthetical_reminder(text: str) -> str:
     return "".join(result).strip()
 
 
-def _damage_to_target_effect(amount: int) -> dict[str, Any]:
-    return {
-        "op": "damage",
-        "source": "$source",
-        "target": "$target.0",
-        "amount": amount,
-    }
-
-
 def _static_runtime_for_face(
     text: str,
     type_line: str,
@@ -140,7 +132,6 @@ def _effect_template(
     """Compile only whole, reviewed Oracle sentence templates."""
 
     normalized = text.strip()
-    name = re.escape(card_name)
     if re.fullmatch(
         r"you become the monarch\.?",
         normalized,
@@ -198,41 +189,12 @@ def _effect_template(
                 "cr-101-the-magic-golden-rules",
             ),
         )
-    match = re.fullmatch(
-        rf"(?:{name}|this spell) deals (?P<count>\d+) damage to any target\.?",
+    fixed_damage = fixed_damage_effect_template(
         normalized,
-        re.IGNORECASE,
+        card_name=card_name,
     )
-    if match:
-        return (
-            "damage-any-target-v1",
-            (_damage_to_target_effect(int(match.group("count"))),),
-            {
-                "zones": ["player", "battlefield"],
-                "categories": ["player", "permanent"],
-                "predicate": "damageable",
-                "count": 1,
-            },
-            ("cr-120-damage", "cr-115-targets"),
-        )
-    match = re.fullmatch(
-        r"this (?P<kind>artifact|creature|enchantment|permanent) deals "
-        r"(?P<count>\d+) damage to any target\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        return (
-            f"damage-any-target-self-{match.group('kind').casefold()}-v1",
-            (_damage_to_target_effect(int(match.group("count"))),),
-            {
-                "zones": ["player", "battlefield"],
-                "categories": ["player", "permanent"],
-                "predicate": "damageable",
-                "count": 1,
-            },
-            ("cr-120-damage", "cr-115-targets"),
-        )
+    if fixed_damage is not None:
+        return fixed_damage.compiled()
     match = re.fullmatch(
         r"destroy target (?P<kinds>artifact|creature|enchantment|land|"
         r"permanent|artifact or enchantment|creature or planeswalker)\.?",
@@ -1510,6 +1472,7 @@ def register_generated_programs(
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
     promote_exact_trigger_programs: bool = False,
+    promote_exact_effect_programs: bool = False,
     promote_exact_capability_declarations: bool = False,
 ) -> dict[str, Any]:
     """Compatibility API for extracted generated-program registration."""
@@ -1526,6 +1489,7 @@ def register_generated_programs(
         capability_profile=capability_profile,
         promote_exact_runtime_handlers=promote_exact_runtime_handlers,
         promote_exact_trigger_programs=promote_exact_trigger_programs,
+        promote_exact_effect_programs=promote_exact_effect_programs,
         promote_exact_capability_declarations=(
             promote_exact_capability_declarations
         ),
