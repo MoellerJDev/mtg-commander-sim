@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim import aerial_blocking as aerial_blocking_module
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
@@ -1193,6 +1194,39 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_haste_exceptions_apply()
+
+    def test_aerial_blocking_flying_and_reach_mutants_are_killed(self):
+        def assert_ground_cannot_block_flying() -> None:
+            verdict = aerial_blocking_module.aerial_block_verdict(
+                frozenset({"flying"}),
+                frozenset(),
+            )
+            self.assertFalse(verdict.allowed)
+
+        def assert_reach_can_block_flying() -> None:
+            verdict = aerial_blocking_module.aerial_block_verdict(
+                frozenset({"flying"}),
+                frozenset({"reach"}),
+            )
+            self.assertTrue(verdict.allowed)
+
+        assert_ground_cannot_block_flying()
+        with patch.object(
+            aerial_blocking_module,
+            "FLYING_KEYWORD",
+            "mutated-flying",
+        ):
+            with self.assertRaises(AssertionError):
+                assert_ground_cannot_block_flying()
+
+        assert_reach_can_block_flying()
+        with patch.object(
+            aerial_blocking_module,
+            "AERIAL_BLOCKER_KEYWORDS",
+            frozenset({"flying"}),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_reach_can_block_flying()
 
     def test_replacement_nested_order_mutant_is_killed(self):
         child = replacement_effects.ReplaceableEvent(

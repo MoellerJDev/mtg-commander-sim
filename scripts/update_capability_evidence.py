@@ -48,6 +48,16 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_haste_attack_and_activation_mutant_is_killed"
     ),
+    "combat.block.flying": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_aerial_blocking_flying_and_reach_mutants_are_killed"
+    ),
+    "combat.block.reach": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_aerial_blocking_flying_and_reach_mutants_are_killed"
+    ),
     "combat.attack.vigilance": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

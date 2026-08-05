@@ -6,10 +6,10 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "generic_haste_summoning_sickness_certification",
-    "branch": "rules/generic-haste-summoning-sickness",
+    "active_phase": "generic_flying_reach_block_legality_certification",
+    "branch": "rules/flying-reach-block-legality",
     "branch_ancestry": {
-      "focused_branch_base": "9a94b82f8744df29757e056b24c3b29e29ad5553",
+      "focused_branch_base": "b3f9846deac2c907de92878e72a20b21255f6e89",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -663,6 +663,13 @@
         "number": 93,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/93"
+      },
+      {
+        "base": "main",
+        "head": "rules/generic-haste-summoning-sickness",
+        "number": 94,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/94"
       }
     ],
     "tags": [
@@ -677,9 +684,9 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "bad0b4bd01ce4f23a29b9c3f9a03df7177f52006",
-    "certified_head_sha": "9a94b82f8744df29757e056b24c3b29e29ad5553",
-    "generation_timestamp": "2026-08-05T00:57:33Z"
+    "feature_head_sha": "c42a0bb48dfe619dc2ba83cd2a7a3c42c44390f3",
+    "certified_head_sha": "b3f9846deac2c907de92878e72a20b21255f6e89",
+    "generation_timestamp": "2026-08-05T01:34:31Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -858,6 +865,18 @@
       "evidence": "PR 93 adds a deterministic Commander-legal card-unlock frontier with sole-, paired-, and three-family blocker analysis; evaluates both lowerable residuals and capability-closure failures; and rejects stale, internally inconsistent, or inflated gain projections. The first direct harvest routes current effective Vigilance through the canonical attack declaration and tap-state owner, promoting exactly 35 Commander-legal cards and reducing material residuals by 35 without printed-name behavior. Exact-head run 30959180040 passed every required Python, generated, package, Windows, browser, certification, and metrics job before merge commit 9a94b82; post-merge main-smoke run 30961096927 is green."
     },
     {
+      "id": "generic_haste_summoning_sickness_harvest",
+      "name": "Generic Haste and summoning-sickness harvest",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 94 routes current represented effective Haste through one typed read-only CR 302.6/702.10 owner shared by attack, activated-ability, mana-source, payment, and as-though-Haste legality. Source-spanned CardProgram capabilities promoted exactly 32 Commander-legal cards and reduced Commander material residuals by 367 without printed-name behavior. Exact-head run 30965130610 passed every required job before merge commit b3f9846; post-merge main-smoke run 30965839654 is green."
+    },
+    {
+      "id": "generic_flying_reach_block_legality_harvest",
+      "name": "Generic Flying and Reach block-legality harvest",
+      "status": "development_local_certification_pending",
+      "evidence": "The active PR 95 branch extracts the intrinsic CR 702.9/702.17 Flying and Reach pair into a typed read-only aerial block owner consuming one canonical current effective-characteristic snapshot. Advertisement and command acceptance share CommanderEngine._can_block; unsupported ability-changing and copy producers remain fail-closed through their own capability closure. Separate source-spanned Flying and Reach CardProgram capabilities promote exactly 229 Commander-legal cards and reduce Commander material residuals by 3,171, matching the selected frontier bundle. Full-corpus Oracle exact rises by 351, trusted capability-closed CardPrograms by 347, and material CardProgram residuals fall by 3,534. Focused legality, rollback, multiplayer, privacy, exact replay, closure, and killed-mutation evidence passes locally; exact-head CI remains pending."
+    },
+    {
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
@@ -881,8 +900,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eighteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_aura_entry_draw_typed_ability_fragment_and_haste_eligibility_owners",
-    "capability_evidence": "implemented_registry_v28_with_46_records_36_trusted_and_359_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "semantic_handlers": "implemented_six_registered_read_only_typed_intent_handlers_plus_eighteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict binding and focused tap token counter damage damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility and aerial_block_legality owners",
+    "capability_evidence": "implemented_registry_v29_with_48_records_38_trusted_and_373_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -892,14 +911,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 30959180040,
+      "run_id": 30965130610,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30959180040"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30965130610"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr93_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_generic_haste_summoning_sickness_card_program_capability_evidence_architecture_replay_and_mutation_tests_pass",
-      "focused_rules_tests": "pass_haste_current_effective_keyword_case_redundancy_timestamp_control_change_as_though_haste_malformed_input_four_player_seat_isolation_exact_replay_killed_mutation_and_oracle_card_program_closure",
+      "deterministic_tests": "certified_main_through_pr94_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_generic_flying_reach_block_legality_capability_evidence_replay_privacy_rollback_multiplayer_and_mutation_tests_pass",
+      "focused_rules_tests": "pass_flying_reach_current_effective_keyword_case_redundancy_offer_command_parity_malformed_input_atomic_rollback_four_player_seat_isolation_exact_replay_dependency_fail_closed_killed_mutation_and_oracle_card_program_closure",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -915,11 +934,11 @@
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
       "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-    "card_program_census": "oracle_ir_v30_full_38542_trusted_1268_capability_closed_1265_legacy_reviewed_2_mixed_1_residual_35026_failed_2248_material_residual_65254; full_oracle_exact_3508_partial_15970_unresolved_19064_material_residual_65263; commander_legal_31623_trusted_814_capability_closed_811_legacy_reviewed_2_mixed_1_residual_30809_failed_0_material_residual_56810; commander_oracle_exact_814_partial_14553_unresolved_16256_material_residual_56810; generic_Haste_summoning_sickness_behavior_promotes_exactly_32_commander_legal_cards_and_45_full_corpus_cards; unsupported_conditional_Haste_and_other_nonclosed_Oracle_grammar_remain_explicit_material_residuals"
+    "card_program_census": "oracle_ir_v30_full_38542_trusted_1615_capability_closed_1612_legacy_reviewed_2_mixed_1_residual_34679_failed_2248_material_residual_61720; full_oracle_exact_3859_partial_15619_unresolved_19064_material_residual_61725; commander_legal_31623_trusted_1043_capability_closed_1040_legacy_reviewed_2_mixed_1_residual_30580_failed_0_material_residual_53639; commander_oracle_exact_1043_partial_14324_unresolved_16256_material_residual_53639; generic_Flying_and_Reach_block_legality_promotes_exactly_229_commander_legal_cards_and_reduces_commander_material_residuals_by_3171; full_corpus_oracle_exact_promotes_351_and_capability_closed_card_programs_promote_347; unsupported_ability_changing_copy_face_down_other_evasion_requirements_costs_and_nonclosed_Oracle_grammar_remain_explicit_material_residuals"
   },
   "blockers": [
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
-    "generic Vigilance and Haste now consume current effective keywords through canonical attack, tap-state, activation, and mana-payment owners; conditional haste acquisition, additional attack or activation prohibitions, universal replacement participation beyond represented stun/runtime-component events, and complete effective-characteristic closure remain explicit blockers",
+    "generic Vigilance, Haste, Flying, and Reach consume current represented effective keywords through canonical attack, tap-state, activation, mana-payment, and block-legality owners; unsupported ability-changing and copy producers, conditional haste acquisition, other evasion and declaration requirements or costs, and complete effective-characteristic closure remain explicit blockers",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
     "represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics; simple battlefield-object Auras now cast, revalidate, enter, attach, and fail closed generically, but player/graveyard/quality/subtype/compound/multiple Enchant grammar, Aura creatures, complete phasing, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally",
@@ -931,5 +950,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "After exact-head certification of the generic Haste and summoning-sickness foundation-plus-harvest, begin one dependency-ready reusable family from the refreshed frontier in Slot B; ordinary mana-ability capability closure is the leading bounded candidate, while the coarse continuous-layers frontier remains explicitly split by ownership boundary."
+  "next_task": "Publish and exact-head certify the generic Flying and Reach foundation-plus-harvest. Then select one bounded dependency-ready reusable family from frontier fingerprint 38a7ac0f5619b34f44b88492e88ad1fdfe45fa7427f85302c313c33974c756fa; ordinary mana abilities remain the leading high-yield candidate but carry high interaction risk and explicit activation, payment, trigger, priority, and stack prerequisites, while the coarse continuous-layers row must remain split by real ownership boundaries."
 }

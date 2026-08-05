@@ -76,6 +76,20 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/aerial_blocking.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/arena.py",
       "layer": "application",
       "owning_subsystem": "legacy_application",
@@ -1300,6 +1314,20 @@
     },
     {
       "file": "mtg_commander_sim/haste.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/keyword_abilities.py",
       "layer": "rules",
       "owning_subsystem": "legacy_rules",
       "allowed_dependency_layers": [
@@ -3154,5 +3182,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "718a1e0d5f83cf766cea40e843046a05393a874d4146da7eab988032658b7d0d"
+  "fingerprint": "d9b011b56c9349c0a85e22ebec7293d027b9c3eda534cc9f66250ff58e15146a"
 }

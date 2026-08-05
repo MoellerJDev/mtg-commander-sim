@@ -135,6 +135,7 @@ class MechanicContractTests(unittest.TestCase):
                 "lifelink",
                 "menace",
                 "protection",
+                "reach",
                 "tap-and-untap",
                 "toxic",
                 "trample",
@@ -149,9 +150,17 @@ class MechanicContractTests(unittest.TestCase):
             for row in overlaid["mechanics"]
             if row["mechanic_id"] == "flying"
         )
-        self.assertEqual("partial", flying["coverage_status"])
-        self.assertEqual("untrusted", flying["trust_level"])
-        self.assertTrue(flying["known_blockers"])
+        reach = next(
+            row
+            for row in overlaid["mechanics"]
+            if row["mechanic_id"] == "reach"
+        )
+        self.assertEqual("trusted", flying["coverage_status"])
+        self.assertEqual("trusted", flying["trust_level"])
+        self.assertEqual([], flying["known_blockers"])
+        self.assertEqual("trusted", reach["coverage_status"])
+        self.assertEqual("trusted", reach["trust_level"])
+        self.assertEqual([], reach["known_blockers"])
         self.assertTrue(verify_rules_corpus(ROOT)["ok"])
 
     def test_trusted_contract_cannot_retain_known_blockers(self):
@@ -166,6 +175,7 @@ class MechanicContractTests(unittest.TestCase):
         contract["coverage_status"] = "trusted"
         contract["trust_level"] = "trusted"
         contract["review_status"] = "reviewed"
+        contract["known_blockers"] = ["fixture blocker"]
         with self.assertRaises(MechanicContractError):
             validate_mechanic_contract(contract)
 
@@ -573,6 +583,29 @@ class OracleIRTests(unittest.TestCase):
                 f"{record.oracle_id}:static:front:n1"
             )
         )
+
+    def test_exact_keyword_capability_promotes_beside_residual_ability(self):
+        record = self.db.lookup("Faerie Mastermind")
+        capabilities = load_default_capability_registry()
+
+        programs = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+
+        self.assertEqual(
+            [f"{record.oracle_id}:static:front:n2"],
+            [program.key for program in programs],
+        )
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertEqual(
+            ["combat.block.flying"],
+            programs[0].capability_dependencies,
+        )
+        self.assertEqual(2, programs[0].provenance["source_span"]["line"])
 
     def test_dynamic_and_aftermath_prevention_compile_generically(self):
         base = self.db.lookup("Lightning Bolt")
@@ -1150,10 +1183,7 @@ class OracleIRTests(unittest.TestCase):
                     capability_registry=capabilities,
                     capability_profile="commander_review",
                 )
-                self.assertEqual(
-                    "exact" if name == "Oculus" else "partial",
-                    ir.status,
-                )
+                self.assertEqual("exact", ir.status)
                 trigger = next(
                     value
                     for value in ir.faces[0].nodes
@@ -1449,7 +1479,7 @@ class OracleIRTests(unittest.TestCase):
         self.assertEqual("exact", bolt.status)
         self.assertEqual(0, len(bolt.material_residuals))
 
-    def test_partial_keyword_line_promotes_only_typed_protection_fragment(self):
+    def test_mixed_keyword_line_preserves_runtime_and_capability_coverage(self):
         record = self.db.lookup("Scryb Ranger")
         capabilities = load_default_capability_registry()
         ir = compile_oracle_card(
@@ -1464,7 +1494,7 @@ class OracleIRTests(unittest.TestCase):
         )
 
         self.assertEqual("partial", ir.status)
-        self.assertFalse(compound.exact)
+        self.assertTrue(compound.exact)
         self.assertEqual(
             ("protection.typed.debt",),
             compound.capability_dependencies,
@@ -1492,7 +1522,7 @@ class OracleIRTests(unittest.TestCase):
         self.assertEqual(1, len(programs))
         self.assertEqual("trusted", programs[0].trust_level)
         self.assertIn("protection", programs[0].coverage)
-        self.assertNotIn("flying", programs[0].coverage)
+        self.assertIn("flying", programs[0].coverage)
 
     def test_vigilance_keyword_uses_the_bounded_combat_capability(self):
         # Keep this grammar unit independent of the full Scryfall database.
@@ -1578,6 +1608,58 @@ class OracleIRTests(unittest.TestCase):
             ],
             programs[0].capability_dependencies,
         )
+
+    def test_flying_and_reach_use_source_spanned_block_capabilities(self):
+        base = self.db.lookup("Wight of the Reliquary")
+        capabilities = load_default_capability_registry()
+
+        for keyword, capability_id in (
+            ("Flying", "combat.block.flying"),
+            ("Reach", "combat.block.reach"),
+        ):
+            with self.subTest(keyword=keyword):
+                record = replace(
+                    base,
+                    oracle_id=f"fixture-{keyword.casefold()}",
+                    name=f"Fixture {keyword}",
+                    oracle_text=keyword,
+                    keywords=(keyword,),
+                )
+                ir = compile_oracle_card(
+                    record,
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+
+                self.assertEqual("exact", ir.status)
+                self.assertEqual(0, len(ir.material_residuals))
+                node = ir.faces[0].nodes[0]
+                self.assertEqual((keyword.casefold(),), node.mechanics)
+                self.assertEqual(
+                    (capability_id,), node.capability_dependencies
+                )
+                self.assertEqual(
+                    keyword,
+                    record.oracle_text[node.span.start : node.span.end],
+                )
+                programs = generated_programs(
+                    self.db,
+                    record,
+                    trust_level="trusted",
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+                self.assertEqual(1, len(programs))
+                self.assertEqual("trusted", programs[0].trust_level)
+                self.assertEqual(
+                    [capability_id],
+                    programs[0].capability_dependencies,
+                )
+                if keyword == "Flying":
+                    self.assertIn(
+                        "combat.block.reach",
+                        programs[0].capability_closure["reachable"],
+                    )
 
     def test_material_unknowns_fail_closed_with_specific_residuals(self):
         rest = compile_oracle_card(self.db.lookup("Rest in Peace"))

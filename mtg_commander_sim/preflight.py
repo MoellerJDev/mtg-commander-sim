@@ -423,19 +423,38 @@ def _material_effect_categories(record: CardRecord) -> list[str]:
     return sorted(categories)
 
 
+def _status_oracle_ir(
+    record: CardRecord,
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+):
+    return compile_oracle_card(
+        record,
+        capability_registry=(
+            capability_registry or load_default_capability_registry()
+        ),
+        capability_profile=capability_profile,
+    )
+
+
+def _status_source_hashes(
+    db: CardDatabase | None,
+    record: CardRecord,
+) -> tuple[str | None, str | None]:
+    return _card_source_hashes(db, record) if db is not None else (None, None)
+
+
 def card_semantic_status(
     record: CardRecord,
     registry: SemanticRegistry,
     *,
     db: CardDatabase | None = None,
+    capability_registry: CapabilityRegistry | None = None,
+    capability_profile: str = "commander_review",
 ) -> dict[str, Any]:
-    oracle_ir = compile_oracle_card(record)
+    oracle_ir = _status_oracle_ir(record, capability_registry, capability_profile)
     programs = registry.programs_for_oracle(record.oracle_id)
-    oracle_hash, rulings_hash = (
-        _card_source_hashes(db, record)
-        if db is not None
-        else (None, None)
-    )
+    oracle_hash, rulings_hash = _status_source_hashes(db, record)
     program_rows: list[dict[str, Any]] = []
     trusted_programs = []
     drifted_programs = []
@@ -752,28 +771,14 @@ def _register_deck_programs(
     )
 
 
-def semantic_preflight(
+def _deck_preflight_rows(
     db: CardDatabase,
-    deck_or_source: DeckDefinition | str | Path,
-    *,
-    registry: SemanticRegistry | None = None,
-    cache_dir: str | Path | None = None,
-    force_refresh: bool = False,
-    capability_profile: str = "commander_review",
-) -> dict[str, Any]:
-    registry = registry or SemanticRegistry()
-    capability_registry = load_default_capability_registry()
-    deck = (
-        deck_or_source
-        if isinstance(deck_or_source, DeckDefinition)
-        else DeckLoader(db, cache_dir=cache_dir).load(
-            deck_or_source, force_refresh=force_refresh
-        )
-    )
-    generation = _register_deck_programs(
-        db, deck, registry, capability_registry, capability_profile
-    )
-    cards = []
+    deck: DeckDefinition,
+    registry: SemanticRegistry,
+    capability_registry: CapabilityRegistry,
+    capability_profile: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    cards: list[dict[str, Any]] = []
     card_programs: dict[str, Any] = {}
     for entry in deck.entries:
         if entry.board not in {"mainboard", "commander"}:
@@ -783,6 +788,8 @@ def semantic_preflight(
             record,
             registry,
             db=db,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
         )
         program = registry.card_program_for_oracle(record.oracle_id)
         if program is not None:
@@ -807,6 +814,33 @@ def semantic_preflight(
             row["card_program_runtime_binding"] = None
         row["quantity"] = entry.quantity
         cards.append(row)
+    return cards, card_programs
+
+
+def semantic_preflight(
+    db: CardDatabase,
+    deck_or_source: DeckDefinition | str | Path,
+    *,
+    registry: SemanticRegistry | None = None,
+    cache_dir: str | Path | None = None,
+    force_refresh: bool = False,
+    capability_profile: str = "commander_review",
+) -> dict[str, Any]:
+    registry = registry or SemanticRegistry()
+    capability_registry = load_default_capability_registry()
+    deck = (
+        deck_or_source
+        if isinstance(deck_or_source, DeckDefinition)
+        else DeckLoader(db, cache_dir=cache_dir).load(
+            deck_or_source, force_refresh=force_refresh
+        )
+    )
+    generation = _register_deck_programs(
+        db, deck, registry, capability_registry, capability_profile
+    )
+    cards, card_programs = _deck_preflight_rows(
+        db, deck, registry, capability_registry, capability_profile
+    )
     quantities = Counter()
     for row in cards:
         quantities[row["status"]] += int(row["quantity"])

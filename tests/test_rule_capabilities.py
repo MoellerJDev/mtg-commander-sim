@@ -167,6 +167,36 @@ class CapabilityRegistryTests(unittest.TestCase):
             )
         )
 
+    def test_flying_dependency_fails_closed_when_reach_is_blocked(self):
+        registry = load_default_capability_registry()
+        trusted = registry.closure(
+            ["combat.block.flying"],
+            profile="commander_review",
+        )
+        self.assertTrue(trusted.trusted)
+        self.assertIn("combat.block.reach", trusted.reachable)
+
+        value = _registry_value()
+        reach = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "combat.block.reach"
+        )
+        reach["status"] = "blocked"
+        reach["blockers"] = ["dependency mutation"]
+        closure = CapabilityRegistry(value).closure(
+            ["combat.block.flying"],
+            profile="commander_review",
+        )
+
+        self.assertFalse(closure.trusted)
+        self.assertTrue(
+            any(
+                "status:combat.block.reach:blocked" in blocker
+                for blocker in closure.blockers
+            )
+        )
+
     def test_closure_is_transitive_deterministic_and_profile_scoped(self):
         registry = load_default_capability_registry()
         first = registry.closure(

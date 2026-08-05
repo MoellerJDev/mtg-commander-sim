@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/28`
+- Registry schema/version: `1/29`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `10b64bcd6cf6f9de178c41b1ea28c2c6f24c3ab90f4533b6a5760b1e194bbe84`
-- Evidence fingerprint: `ca551b39130383e16cc7599a8558196347e565a5b97b596f300f56278ec23787`
-- Explicit evidence declarations: 359
-- Capability records: 46
-- Trusted records: 36
+- Registry fingerprint: `c873df463cb54427099e32d5fba1fe256f039fec95181982a652ff0966c9d5db`
+- Evidence fingerprint: `3552177256e88492469a9f9fefeebb232a3dfaaa35a6097973cf40f654535c4b`
+- Explicit evidence declarations: 373
+- Capability records: 48
+- Trusted records: 38
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 21, "not_run": 3, "passed": 22}`
-- Implementation mutation statuses: `{"killed": 39, "not_run": 7}`
+- Dependency fail-closed statuses: `{"not_applicable": 22, "not_run": 3, "passed": 23}`
+- Implementation mutation statuses: `{"killed": 41, "not_run": 7}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -74,15 +74,15 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 3,508 | 15,970 | 19,064 | 65,263 | false |
-| Commander legal | 31,623 | 814 | 14,553 | 16,256 | 56,810 | false |
+| Full Oracle | 38,542 | 3,859 | 15,619 | 19,064 | 61,725 | false |
+| Commander legal | 31,623 | 1,043 | 14,324 | 16,256 | 53,639 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
-| `dependency_contract` | 16,110 |
 | `trigger` | 15,274 |
+| `dependency_contract` | 12,572 |
 | `spell_effect` | 11,321 |
 | `static_ability` | 11,148 |
 | `effect` | 7,240 |

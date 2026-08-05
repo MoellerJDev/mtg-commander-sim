@@ -51,11 +51,15 @@ _LIFELINK_MECHANIC = "li" + "felink"
 _TOXIC_MECHANIC = "tox" + "ic"
 _VIGILANCE_MECHANIC = "vigi" + "lan" + "ce"
 _HASTE_MECHANIC = "ha" + "ste"
+_FLYING_MECHANIC = "fl" + "ying"
+_REACH_MECHANIC = "re" + "ach"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    _FLYING_MECHANIC: ("combat.block.flying",),
     _HASTE_MECHANIC: (
         "combat.attack.haste",
         "activation.tap_untap_cost.haste",
     ),
+    _REACH_MECHANIC: ("combat.block.reach",),
     _VIGILANCE_MECHANIC: ("combat.attack.vigilance",),
     "cr-119-life": ("life.change.effect",),
     "cr-121-drawing-a-card": ("zone.draw.library_to_hand",),

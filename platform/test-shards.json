@@ -103,6 +103,7 @@
       "test_state_based_actions"
     ],
     "combat-declarations": [
+      "test_aerial_blocking",
       "test_beginning_of_combat_rules",
       "test_combat_declaration_constraints",
       "test_combat_declaration_costs",
