@@ -2,7 +2,7 @@
 title: "Damage transaction"
 status: "current"
 authoritative_source: "mtg_commander_sim/damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
-verified: "2026-08-03"
+verified: "2026-08-05"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -42,6 +42,24 @@ stale recipient identity, unrepresented source fact, or malformed result leaf
 rejects the batch before any result commits. State-based actions still occur
 after damage; the transaction does not destroy creatures or remove defeated
 players itself.
+
+## Compiled fixed-damage producers
+
+One immutable compiler template lowers fixed positive-integer damage clauses
+for spell, triggered, and activated contexts into the same typed damage effect.
+The closed recipient vocabulary is: any target, target creature, target
+creature or planeswalker, target player, target opponent, target player or
+planeswalker, target opponent or planeswalker, and each opponent. Target
+schemas encode both public object kinds and controller relationships, so legal
+action discovery and resolution revalidation consume the same restriction.
+
+Dynamic or zero amounts, divided damage, conditional clauses, mass creature or
+player damage, rider-bearing clauses, multiple-target wording, and arbitrary
+recipient qualifications remain explicit compiler residuals. The runtime does
+not inspect Oracle prose to broaden this grammar. Capability inference also
+validates the complete normalized effect and target shapes; malformed amounts,
+extra fields, or broader target schemas fail closed instead of inheriting a
+damage capability by operation name alone.
 
 If prevention reduces an in-progress event to zero, that event no longer
 offers later replacement or prevention effects (CR 120.8 and 614.7a).

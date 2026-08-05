@@ -2050,8 +2050,8 @@ class OracleIRTests(unittest.TestCase):
             f"{bolt.oracle_id}:spell:front"
         )
         self.assertIsNotNone(program)
-        self.assertEqual("provisional", program.trust_level)
-        self.assertTrue(program.requires_arbiter)
+        self.assertEqual("trusted", program.trust_level)
+        self.assertFalse(program.requires_arbiter)
 
     def _trigger_session(self):
         deck_a = DeckDefinition(
@@ -2291,7 +2291,7 @@ class OracleIRTests(unittest.TestCase):
         engine.state.players["A"].mana_pool["R"] = 1
         return session, bolt
 
-    def test_generated_spell_routes_to_arbiter_in_default_policy(self):
+    def test_exact_generated_spell_resolves_without_arbiter(self):
         session, bolt = self._generated_spell_session()
         engine = session.engine
         engine._cast(
@@ -2306,26 +2306,25 @@ class OracleIRTests(unittest.TestCase):
         engine.state.pending_decision = None
         engine.state.priority_player = None
         engine._prepare_stack_resolution()
-        self.assertEqual(
-            "arbiter.resolve",
-            engine.state.pending_decision.kind,
-        )
-        self.assertEqual(
-            ["arbiter"], session.pending_principals()
+        self.assertEqual(37, engine.state.players["B"].life)
+        self.assertFalse(engine.state.stack)
+        self.assertFalse(
+            engine.state.pending_decision
+            and engine.state.pending_decision.kind == "arbiter.resolve"
         )
 
-    def test_generated_spell_is_withheld_under_trusted_only(self):
+    def test_exact_generated_spell_is_available_under_trusted_only(self):
         session, bolt = self._generated_spell_session(
             trusted_only=True
         )
         hints = session.engine._priority_action_hints("A")
-        self.assertFalse(
+        self.assertTrue(
             any(
                 action.get("card") == bolt.ref
                 for action in hints["actions"]
             )
         )
-        self.assertTrue(
+        self.assertFalse(
             any(
                 row.get("card") == bolt.ref
                 and row.get("reason")

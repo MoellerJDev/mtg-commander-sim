@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import re
-from typing import Any
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Mapping
 
 
 _ABILITY_WORD = re.compile(
@@ -27,6 +29,192 @@ _REDIRECT_TO_SOURCE = re.compile(
     r"this (?:creature|permanent) instead\.?$",
     re.IGNORECASE,
 )
+
+
+class FixedDamageRecipient(str, Enum):
+    """Closed recipient vocabulary for fixed direct-damage instructions."""
+
+    ANY_TARGET = "any_target"
+    CREATURE = "creature"
+    CREATURE_OR_PLANESWALKER = "creature_or_planeswalker"
+    PLAYER = "player"
+    OPPONENT = "opponent"
+    PLAYER_OR_PLANESWALKER = "player_or_planeswalker"
+    OPPONENT_OR_PLANESWALKER = "opponent_or_planeswalker"
+    EACH_OPPONENT = "each_opponent"
+
+
+_FIXED_DAMAGE_RECIPIENTS: tuple[tuple[str, FixedDamageRecipient], ...] = (
+    ("target creature or planeswalker", FixedDamageRecipient.CREATURE_OR_PLANESWALKER),
+    ("target player or planeswalker", FixedDamageRecipient.PLAYER_OR_PLANESWALKER),
+    ("target opponent or planeswalker", FixedDamageRecipient.OPPONENT_OR_PLANESWALKER),
+    ("target creature", FixedDamageRecipient.CREATURE),
+    ("target player", FixedDamageRecipient.PLAYER),
+    ("target opponent", FixedDamageRecipient.OPPONENT),
+    ("any target", FixedDamageRecipient.ANY_TARGET),
+    ("each opponent", FixedDamageRecipient.EACH_OPPONENT),
+)
+_FIXED_DAMAGE_SOURCE_KINDS = (
+    "artifact",
+    "battle",
+    "creature",
+    "enchantment",
+    "land",
+    "permanent",
+    "planeswalker",
+    "spell",
+)
+
+
+@dataclass(frozen=True, slots=True)
+class FixedDamageEffectTemplate:
+    """Typed lowering result for one positive fixed-damage instruction."""
+
+    amount: int
+    recipient: FixedDamageRecipient
+    source_kind: str | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.amount, int) or isinstance(self.amount, bool):
+            raise ValueError("Fixed damage amount must be an integer")
+        if self.amount <= 0:
+            raise ValueError("Fixed damage amount must be positive")
+        if not isinstance(self.recipient, FixedDamageRecipient):
+            raise ValueError("Fixed damage recipient is unsupported")
+        if self.source_kind is not None and self.source_kind not in (
+            *_FIXED_DAMAGE_SOURCE_KINDS,
+            "named",
+        ):
+            raise ValueError("Fixed damage source kind is unsupported")
+
+    @property
+    def template_id(self) -> str:
+        if self.recipient is FixedDamageRecipient.ANY_TARGET:
+            if self.source_kind not in {None, "named", "spell"}:
+                return f"damage-any-target-self-{self.source_kind}-v1"
+            return "damage-any-target-v1"
+        return f"damage-{self.recipient.value.replace('_', '-')}-v1"
+
+    @property
+    def effects(self) -> tuple[Mapping[str, Any], ...]:
+        if self.recipient is FixedDamageRecipient.EACH_OPPONENT:
+            return (
+                {
+                    "op": "damage_each_opponent",
+                    "source": "$source",
+                    "amount": self.amount,
+                },
+            )
+        return (
+            {
+                "op": "damage",
+                "source": "$source",
+                "target": "$target.0",
+                "amount": self.amount,
+            },
+        )
+
+    @property
+    def target_schema(self) -> Mapping[str, Any] | None:
+        if self.recipient is FixedDamageRecipient.EACH_OPPONENT:
+            return None
+        if self.recipient is FixedDamageRecipient.ANY_TARGET:
+            return {
+                "zones": ["player", "battlefield"],
+                "categories": ["player", "permanent"],
+                "predicate": "damageable",
+                "count": 1,
+            }
+        if self.recipient is FixedDamageRecipient.CREATURE:
+            return {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "types_any": ["creature"],
+                "count": 1,
+            }
+        if self.recipient is FixedDamageRecipient.CREATURE_OR_PLANESWALKER:
+            return {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "types_any": ["creature", "planeswalker"],
+                "count": 1,
+            }
+        if self.recipient in {
+            FixedDamageRecipient.PLAYER_OR_PLANESWALKER,
+            FixedDamageRecipient.OPPONENT_OR_PLANESWALKER,
+        }:
+            schema: dict[str, Any] = {
+                "zones": ["player", "battlefield"],
+                "categories": ["player", "permanent"],
+                "predicate": "player_or_planeswalker",
+                "count": 1,
+            }
+            if self.recipient is FixedDamageRecipient.OPPONENT_OR_PLANESWALKER:
+                schema["player_relation"] = "opponent"
+            return schema
+        schema = {
+            "zones": ["player"],
+            "categories": ["player"],
+            "count": 1,
+        }
+        if self.recipient is FixedDamageRecipient.OPPONENT:
+            schema["player_relation"] = "opponent"
+        return schema
+
+    @property
+    def mechanics(self) -> tuple[str, ...]:
+        if self.recipient is FixedDamageRecipient.EACH_OPPONENT:
+            return ("cr-120-damage",)
+        return ("cr-120-damage", "cr-115-targets")
+
+    def compiled(
+        self,
+    ) -> tuple[
+        str,
+        tuple[Mapping[str, Any], ...],
+        Mapping[str, Any] | None,
+        tuple[str, ...],
+    ]:
+        return (
+            self.template_id,
+            self.effects,
+            self.target_schema,
+            self.mechanics,
+        )
+
+
+def fixed_damage_effect_template(
+    text: str,
+    *,
+    card_name: str,
+) -> FixedDamageEffectTemplate | None:
+    """Recognize one whole fixed-damage clause without interpreting riders."""
+
+    source = re.fullmatch(
+        rf"(?P<source>{re.escape(card_name)}|this "
+        rf"(?P<kind>{'|'.join(_FIXED_DAMAGE_SOURCE_KINDS)})) deals "
+        r"(?P<amount>[1-9][0-9]*) damage to (?P<recipient>.+?)\.?",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if source is None:
+        return None
+    recipient_text = source.group("recipient").casefold()
+    recipient = next(
+        (
+            value
+            for phrase, value in _FIXED_DAMAGE_RECIPIENTS
+            if recipient_text == phrase
+        ),
+        None,
+    )
+    if recipient is None:
+        return None
+    return FixedDamageEffectTemplate(
+        amount=int(source.group("amount")),
+        recipient=recipient,
+        source_kind=(source.group("kind") or "named").casefold(),
+    )
 
 
 def _source_condition(phrase: str) -> tuple[str, list[str]] | None:

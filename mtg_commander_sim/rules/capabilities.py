@@ -8,6 +8,7 @@ import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from .component_resolution import implementation_component_resolves
+from .node_capability_shapes import fixed_damage_node_capabilities
 
 from ..util import stable_json
 
@@ -715,28 +716,13 @@ def capability_dependencies_for_node(
             "continuous.resolution.fixed_characteristics_until_end_of_turn"
         )
     schema = dict(target_schema or {})
-    reviewed_damage_shape = (
-        mechanics == {"cr-120-damage", "cr-115-targets"}
-        and operations == {"damage"}
-        and schema
-        == {
-            "zones": ["player", "battlefield"],
-            "categories": ["player", "permanent"],
-            "predicate": "damageable",
-            "count": 1,
-        }
+    dependencies.update(
+        fixed_damage_node_capabilities(
+            effects=effects,
+            target_schema=target_schema,
+            mechanic_ids=mechanics,
+        )
     )
-    if reviewed_damage_shape:
-        dependencies.add("damage.amount.positive")
-        categories = {str(value) for value in schema.get("categories", [])}
-        if "player" in categories:
-            dependencies.add("damage.result.player_life")
-        if (
-            "permanent" in categories
-            and schema.get("predicate") == "damageable"
-        ):
-            dependencies.add("damage.result.multitype_permanent")
-        dependencies.add("target.public.player_or_damageable_permanent")
     if (
         "create_damage_prevention_shield" in all_operations
         and "cr-615-prevention-effects" in mechanics

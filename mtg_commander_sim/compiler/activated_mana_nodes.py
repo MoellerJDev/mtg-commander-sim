@@ -12,7 +12,11 @@ from ..fixed_mana_abilities import (
 )
 from ..rules.capabilities import CapabilityRegistry
 from .activated_costs import activated_ability_cost
-from .dependency_gate import explicit_capability_gate
+from .dependency_gate import (
+    DependencyGate,
+    dependency_gate,
+    explicit_capability_gate,
+)
 from .ir_model import (
     append_residual,
     OracleNode,
@@ -129,6 +133,79 @@ def unresolved_activated_mana_residual(
     )
 
 
+def _activated_effect_residuals(
+    *,
+    ability: Any,
+    template: str | None,
+    line: str,
+    span: SourceSpan,
+    residuals: list[OracleResidual],
+) -> list[str]:
+    residual_ids: list[str] = []
+    if not ability.compiled_cost:
+        residual_ids.append(
+            append_residual(
+                residuals,
+                kind="cost",
+                text=ability.cost_text,
+                span=span,
+                reason="mandatory activated cost is not compiled",
+                blockers=(
+                    "complete alternate/additional-cost grammar",
+                    "restricted payment predicates",
+                ),
+            )
+        )
+    if template is None and not ability.mana_ability:
+        residual_ids.append(
+            append_residual(
+                residuals,
+                kind="effect",
+                text=ability.effect_text,
+                span=span,
+                reason="activated effect has no exact generic template",
+            )
+        )
+    if ability.mana_ability:
+        residual_ids.append(
+            unresolved_activated_mana_residual(
+                ability, span, residuals, source_line=line
+            )
+        )
+    return residual_ids
+
+
+def _activated_effect_dependency_gate(
+    *,
+    effects: tuple[Mapping[str, Any], ...],
+    target_schema: Mapping[str, Any] | None,
+    mechanics: tuple[str, ...],
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+) -> DependencyGate:
+    fixed_damage = (
+        len(effects) == 1
+        and str(effects[0].get("op") or "")
+        in {"damage", "damage_each_opponent"}
+    )
+    if fixed_damage and capability_registry is not None:
+        return dependency_gate(
+            mechanics=mechanics,
+            effects=effects,
+            target_schema=target_schema,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+    return DependencyGate(
+        blockers=tuple(
+            f"mechanic:{mechanic}"
+            for mechanic in sorted(set(mechanics) - trusted_mechanics)
+        )
+    )
+
+
 def activated_oracle_node(
     *,
     node_id: str,
@@ -195,43 +272,26 @@ def activated_oracle_node(
         ability.effect_text,
         card_name=card_name,
     )
-    residual_ids: list[str] = []
-    if not ability.compiled_cost:
-        residual_ids.append(
-            append_residual(
-                residuals,
-                kind="cost",
-                text=ability.cost_text,
-                span=span,
-                reason="mandatory activated cost is not compiled",
-                blockers=(
-                    "complete alternate/additional-cost grammar",
-                    "restricted payment predicates",
-                ),
-            )
-        )
-    if template is None and not ability.mana_ability:
-        residual_ids.append(
-            append_residual(
-                residuals,
-                kind="effect",
-                text=ability.effect_text,
-                span=span,
-                reason="activated effect has no exact generic template",
-            )
-        )
-    if ability.mana_ability:
-        residual_ids.append(
-            unresolved_activated_mana_residual(
-                ability, span, residuals, source_line=line
-            )
-        )
+    residual_ids = _activated_effect_residuals(
+        ability=ability,
+        template=template,
+        line=line,
+        span=span,
+        residuals=residuals,
+    )
     lowerable = not residual_ids and (
         template is not None or ability.mana_ability
     )
     dependencies = mechanics if template is not None else ()
-    missing = sorted(set(dependencies) - trusted_mechanics)
-    if lowerable and missing:
+    gate = _activated_effect_dependency_gate(
+        effects=effects,
+        target_schema=target_schema,
+        mechanics=dependencies,
+        trusted_mechanics=trusted_mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+    if lowerable and gate.blockers:
         residual_ids.append(
             append_residual(
                 residuals,
@@ -241,9 +301,7 @@ def activated_oracle_node(
                 reason=(
                     "lowerable ability depends on untrusted mechanic contracts"
                 ),
-                blockers=tuple(
-                    f"mechanic:{mechanic}" for mechanic in missing
-                ),
+                blockers=gate.blockers,
             )
         )
     return OracleNode(
@@ -256,7 +314,7 @@ def activated_oracle_node(
         active_zone=ability.zones[0],
         event="activate",
         lowerable=lowerable,
-        exact=lowerable and not missing,
+        exact=lowerable and not gate.blockers,
         template_id=(
             "intrinsic-mana-ability-v1"
             if ability.mana_ability and template is None
@@ -267,6 +325,22 @@ def activated_oracle_node(
         target_schema=target_schema,
         mechanics=mechanics,
         residual_ids=tuple(residual_ids),
+        capability_dependencies=gate.capabilities,
+        capability_closure=(
+            gate.closure.reachable
+            if gate.closure is not None
+            else ()
+        ),
+        capability_profile=(
+            gate.closure.profile
+            if gate.closure is not None
+            else None
+        ),
+        capability_fingerprint=(
+            gate.closure.fingerprint
+            if gate.closure is not None
+            else None
+        ),
     )
 
 

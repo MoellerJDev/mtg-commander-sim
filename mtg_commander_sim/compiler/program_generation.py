@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import asdict
 import hashlib
 from typing import Any, Iterable, Mapping
@@ -10,6 +11,7 @@ from ..rules.capabilities import (
     CapabilityRegistry,
     capability_covered_mechanics,
 )
+from ..rules.node_capability_shapes import fixed_damage_node_capabilities
 from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
 
@@ -223,6 +225,28 @@ def _generated_static_declaration(node: Any) -> bool:
     )
 
 
+def _is_closed_fixed_damage_program(program: SemanticProgram) -> bool:
+    """Recognize only the reviewed fixed-damage effect-program family."""
+
+    template_id = str(program.provenance.get("template_id") or "")
+    if not template_id.startswith("damage-"):
+        return False
+    required = set(
+        fixed_damage_node_capabilities(
+            effects=program.effects,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value.startswith("cr-")
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def generated_programs(
     db: CardDatabase,
     record: CardRecord,
@@ -380,6 +404,114 @@ def generated_programs(
     return programs
 
 
+def _trusted_program_is_requested(
+    program: SemanticProgram,
+    *,
+    promotable_fixed_damage_keys: set[str],
+    promote_exact_trigger_programs: bool,
+    promote_exact_fixed_damage_programs: bool,
+    promote_exact_capability_declarations: bool,
+) -> bool:
+    return bool(
+        program.handlers
+        or (
+            promote_exact_fixed_damage_programs
+            and program.key in promotable_fixed_damage_keys
+            and _is_closed_fixed_damage_program(program)
+            and program.ability_id.startswith(("spell:", "ability:"))
+        )
+        or (
+            promote_exact_trigger_programs
+            and program.ability_id.startswith("trigger:")
+        )
+        or (
+            promote_exact_capability_declarations
+            and program.ability_id.startswith("static:")
+            and program.capability_dependencies
+        )
+    )
+
+
+def _trusted_generated_programs(
+    db: CardDatabase,
+    record: CardRecord,
+    *,
+    provisional_programs: list[SemanticProgram],
+    promotable_fixed_damage_keys: set[str],
+    trust_level: str,
+    trusted_mechanics: Iterable[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    promote_exact_runtime_handlers: bool,
+    promote_exact_trigger_programs: bool,
+    promote_exact_fixed_damage_programs: bool,
+    promote_exact_capability_declarations: bool,
+) -> dict[str, SemanticProgram]:
+    promotion_requested = any(
+        (
+            promote_exact_runtime_handlers,
+            promote_exact_trigger_programs,
+            promote_exact_fixed_damage_programs,
+            promote_exact_capability_declarations,
+        )
+    )
+    candidate_exists = bool(
+        promote_exact_trigger_programs
+        and any(
+            program.ability_id.startswith("trigger:")
+            for program in provisional_programs
+        )
+        or any(program.handlers for program in provisional_programs)
+        or (
+            promote_exact_fixed_damage_programs
+            and promotable_fixed_damage_keys
+        )
+        or (
+            promote_exact_capability_declarations
+            and any(
+                program.ability_id.startswith("static:")
+                and program.capability_dependencies
+                for program in provisional_programs
+            )
+        )
+    )
+    if (
+        not promotion_requested
+        or trust_level != "provisional"
+        or capability_registry is None
+        or not candidate_exists
+    ):
+        return {}
+    try:
+        candidates = generated_programs(
+            db,
+            record,
+            trust_level="trusted",
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+    except ValueError as exc:
+        if "cannot be promoted to trusted generated semantics" not in str(exc):
+            raise
+        return {}
+    return {
+        program.key: program
+        for program in candidates
+        if _trusted_program_is_requested(
+            program,
+            promotable_fixed_damage_keys=promotable_fixed_damage_keys,
+            promote_exact_trigger_programs=promote_exact_trigger_programs,
+            promote_exact_fixed_damage_programs=(
+                promote_exact_fixed_damage_programs
+            ),
+            promote_exact_capability_declarations=(
+                promote_exact_capability_declarations
+            ),
+        )
+    }
+
+
 def register_generated_programs(
     db: CardDatabase,
     registry: SemanticRegistry,
@@ -391,6 +523,7 @@ def register_generated_programs(
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
     promote_exact_trigger_programs: bool = False,
+    promote_exact_fixed_damage_programs: bool = False,
     promote_exact_capability_declarations: bool = False,
 ) -> dict[str, Any]:
     from ..oracle_ir import ORACLE_COMPILER_VERSION
@@ -399,6 +532,7 @@ def register_generated_programs(
     skipped_existing = 0
     promoted_runtime_handlers = 0
     promoted_exact_programs = 0
+    promoted_exact_fixed_damage_programs = 0
     cards_seen: set[str] = set()
     for record in records:
         if record.oracle_id in cards_seen:
@@ -412,57 +546,35 @@ def register_generated_programs(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
-        trusted_programs: dict[str, SemanticProgram] = {}
-        if (
-            (
-                promote_exact_runtime_handlers
-                or promote_exact_trigger_programs
-                or promote_exact_capability_declarations
-            )
-            and trust_level == "provisional"
-            and capability_registry is not None
-            and (
-                promote_exact_trigger_programs
-                and any(
-                    program.ability_id.startswith("trigger:")
-                    for program in provisional_programs
-                )
-                or any(program.handlers for program in provisional_programs)
-                or (
-                    promote_exact_capability_declarations
-                    and any(
-                        program.ability_id.startswith("static:")
-                        and program.capability_dependencies
-                        for program in provisional_programs
-                    )
-                )
-            )
-        ):
-            try:
-                trusted_programs = {
-                    program.key: program
-                    for program in generated_programs(
-                        db,
-                        record,
-                        trust_level="trusted",
-                        trusted_mechanics=trusted_mechanics,
-                        capability_registry=capability_registry,
-                        capability_profile=capability_profile,
-                    )
-                    if program.handlers
-                    or (
-                        promote_exact_trigger_programs
-                        and program.ability_id.startswith("trigger:")
-                    )
-                    or (
-                        promote_exact_capability_declarations
-                        and program.ability_id.startswith("static:")
-                        and program.capability_dependencies
-                    )
-                }
-            except ValueError as exc:
-                if "cannot be promoted to trusted generated semantics" not in str(exc):
-                    raise
+        fixed_damage_key_counts = Counter(
+            program.key
+            for program in provisional_programs
+            if _is_closed_fixed_damage_program(program)
+            and program.ability_id.startswith(("spell:", "ability:"))
+        )
+        promotable_fixed_damage_keys = {
+            key
+            for key, count in fixed_damage_key_counts.items()
+            if count == 1
+        }
+        trusted_programs = _trusted_generated_programs(
+            db,
+            record,
+            provisional_programs=provisional_programs,
+            promotable_fixed_damage_keys=promotable_fixed_damage_keys,
+            trust_level=trust_level,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            promote_exact_runtime_handlers=promote_exact_runtime_handlers,
+            promote_exact_trigger_programs=promote_exact_trigger_programs,
+            promote_exact_fixed_damage_programs=(
+                promote_exact_fixed_damage_programs
+            ),
+            promote_exact_capability_declarations=(
+                promote_exact_capability_declarations
+            ),
+        )
         for provisional in provisional_programs:
             program = trusted_programs.get(provisional.key, provisional)
             if registry.get(program.key) is not None:
@@ -496,6 +608,14 @@ def register_generated_programs(
                 promoted_exact_programs += 1
                 if program.handlers:
                     promoted_runtime_handlers += 1
+                if (
+                    program.key in promotable_fixed_damage_keys
+                    and _is_closed_fixed_damage_program(program)
+                    and program.ability_id.startswith(
+                        ("spell:", "ability:")
+                    )
+                ):
+                    promoted_exact_fixed_damage_programs += 1
             registry.put(program)
             generated += 1
     return {
@@ -504,6 +624,9 @@ def register_generated_programs(
         "programs_skipped_existing": skipped_existing,
         "runtime_handlers_promoted": promoted_runtime_handlers,
         "exact_programs_promoted": promoted_exact_programs,
+        "exact_fixed_damage_programs_promoted": (
+            promoted_exact_fixed_damage_programs
+        ),
         "trust_level": trust_level,
         "compiler_version": ORACLE_COMPILER_VERSION,
         "capability_registry_fingerprint": (
