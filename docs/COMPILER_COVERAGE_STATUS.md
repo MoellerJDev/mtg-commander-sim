@@ -13,10 +13,10 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v32`
+- Compiler: `oracle-ir-v33`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,532 physical / 1,481 logical lines
+- Compiler module: 1,498 physical / 1,449 logical lines
 
 ## Canonical CardProgram
 
@@ -74,18 +74,18 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 4,106 | 15,048 | 19,388 | 59,688 | false |
-| Commander legal | 31,623 | 1,268 | 13,831 | 16,524 | 51,733 | false |
+| Full Oracle | 38,542 | 4,191 | 15,070 | 19,281 | 59,464 | false |
+| Commander legal | 31,623 | 1,351 | 13,850 | 16,422 | 51,520 | false |
 
 ## Full-corpus residual kinds
 
 | Kind | Count |
 |---|---:|
 | `trigger` | 15,274 |
-| `spell_effect` | 11,321 |
+| `spell_effect` | 11,241 |
 | `static_ability` | 11,148 |
-| `dependency_contract` | 9,764 |
-| `effect` | 7,240 |
+| `dependency_contract` | 9,689 |
+| `effect` | 7,171 |
 | `cost` | 2,015 |
 | `replacement_effect` | 1,758 |
 | `mana_ability` | 771 |

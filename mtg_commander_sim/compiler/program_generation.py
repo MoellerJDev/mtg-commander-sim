@@ -404,6 +404,114 @@ def generated_programs(
     return programs
 
 
+def _trusted_program_is_requested(
+    program: SemanticProgram,
+    *,
+    promotable_fixed_damage_keys: set[str],
+    promote_exact_trigger_programs: bool,
+    promote_exact_fixed_damage_programs: bool,
+    promote_exact_capability_declarations: bool,
+) -> bool:
+    return bool(
+        program.handlers
+        or (
+            promote_exact_fixed_damage_programs
+            and program.key in promotable_fixed_damage_keys
+            and _is_closed_fixed_damage_program(program)
+            and program.ability_id.startswith(("spell:", "ability:"))
+        )
+        or (
+            promote_exact_trigger_programs
+            and program.ability_id.startswith("trigger:")
+        )
+        or (
+            promote_exact_capability_declarations
+            and program.ability_id.startswith("static:")
+            and program.capability_dependencies
+        )
+    )
+
+
+def _trusted_generated_programs(
+    db: CardDatabase,
+    record: CardRecord,
+    *,
+    provisional_programs: list[SemanticProgram],
+    promotable_fixed_damage_keys: set[str],
+    trust_level: str,
+    trusted_mechanics: Iterable[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    promote_exact_runtime_handlers: bool,
+    promote_exact_trigger_programs: bool,
+    promote_exact_fixed_damage_programs: bool,
+    promote_exact_capability_declarations: bool,
+) -> dict[str, SemanticProgram]:
+    promotion_requested = any(
+        (
+            promote_exact_runtime_handlers,
+            promote_exact_trigger_programs,
+            promote_exact_fixed_damage_programs,
+            promote_exact_capability_declarations,
+        )
+    )
+    candidate_exists = bool(
+        promote_exact_trigger_programs
+        and any(
+            program.ability_id.startswith("trigger:")
+            for program in provisional_programs
+        )
+        or any(program.handlers for program in provisional_programs)
+        or (
+            promote_exact_fixed_damage_programs
+            and promotable_fixed_damage_keys
+        )
+        or (
+            promote_exact_capability_declarations
+            and any(
+                program.ability_id.startswith("static:")
+                and program.capability_dependencies
+                for program in provisional_programs
+            )
+        )
+    )
+    if (
+        not promotion_requested
+        or trust_level != "provisional"
+        or capability_registry is None
+        or not candidate_exists
+    ):
+        return {}
+    try:
+        candidates = generated_programs(
+            db,
+            record,
+            trust_level="trusted",
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+        )
+    except ValueError as exc:
+        if "cannot be promoted to trusted generated semantics" not in str(exc):
+            raise
+        return {}
+    return {
+        program.key: program
+        for program in candidates
+        if _trusted_program_is_requested(
+            program,
+            promotable_fixed_damage_keys=promotable_fixed_damage_keys,
+            promote_exact_trigger_programs=promote_exact_trigger_programs,
+            promote_exact_fixed_damage_programs=(
+                promote_exact_fixed_damage_programs
+            ),
+            promote_exact_capability_declarations=(
+                promote_exact_capability_declarations
+            ),
+        )
+    }
+
+
 def register_generated_programs(
     db: CardDatabase,
     registry: SemanticRegistry,
@@ -449,70 +557,24 @@ def register_generated_programs(
             for key, count in fixed_damage_key_counts.items()
             if count == 1
         }
-        trusted_programs: dict[str, SemanticProgram] = {}
-        if (
-            (
-                promote_exact_runtime_handlers
-                or promote_exact_trigger_programs
-                or promote_exact_fixed_damage_programs
-                or promote_exact_capability_declarations
-            )
-            and trust_level == "provisional"
-            and capability_registry is not None
-            and (
-                promote_exact_trigger_programs
-                and any(
-                    program.ability_id.startswith("trigger:")
-                    for program in provisional_programs
-                )
-                or any(program.handlers for program in provisional_programs)
-                or (
-                    promote_exact_fixed_damage_programs
-                    and bool(promotable_fixed_damage_keys)
-                )
-                or (
-                    promote_exact_capability_declarations
-                    and any(
-                        program.ability_id.startswith("static:")
-                        and program.capability_dependencies
-                        for program in provisional_programs
-                    )
-                )
-            )
-        ):
-            try:
-                trusted_programs = {
-                    program.key: program
-                    for program in generated_programs(
-                        db,
-                        record,
-                        trust_level="trusted",
-                        trusted_mechanics=trusted_mechanics,
-                        capability_registry=capability_registry,
-                        capability_profile=capability_profile,
-                    )
-                    if program.handlers
-                    or (
-                        promote_exact_fixed_damage_programs
-                        and program.key in promotable_fixed_damage_keys
-                        and _is_closed_fixed_damage_program(program)
-                        and program.ability_id.startswith(
-                            ("spell:", "ability:")
-                        )
-                    )
-                    or (
-                        promote_exact_trigger_programs
-                        and program.ability_id.startswith("trigger:")
-                    )
-                    or (
-                        promote_exact_capability_declarations
-                        and program.ability_id.startswith("static:")
-                        and program.capability_dependencies
-                    )
-                }
-            except ValueError as exc:
-                if "cannot be promoted to trusted generated semantics" not in str(exc):
-                    raise
+        trusted_programs = _trusted_generated_programs(
+            db,
+            record,
+            provisional_programs=provisional_programs,
+            promotable_fixed_damage_keys=promotable_fixed_damage_keys,
+            trust_level=trust_level,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            promote_exact_runtime_handlers=promote_exact_runtime_handlers,
+            promote_exact_trigger_programs=promote_exact_trigger_programs,
+            promote_exact_fixed_damage_programs=(
+                promote_exact_fixed_damage_programs
+            ),
+            promote_exact_capability_declarations=(
+                promote_exact_capability_declarations
+            ),
+        )
         for provisional in provisional_programs:
             program = trusted_programs.get(provisional.key, provisional)
             if registry.get(program.key) is not None:
