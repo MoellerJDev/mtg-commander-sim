@@ -103,6 +103,21 @@
       ],
       "impact_edge_status": "not_applicable",
       "resolution": "The journeys now wait for authoritative projected results across persisted transitions and retain bounded whole-test budgets; both focused witnesses pass headlessly against the CI compact database."
+    },
+    {
+      "id": "ci-20260805-08",
+      "run_id": 30982463835,
+      "head_sha": "9bc723d92153bd42301223fd0da3181ada24ae40",
+      "category": "flaky_test",
+      "deterministic": false,
+      "summary": "The same durability-heavy browser journeys exposed two remaining one-seat capability assumptions: a fixed host-only attackers wait and a Seat B pass clicked after its projected capability transitioned.",
+      "failed_surfaces": ["browser-full"],
+      "regressions": [
+        "four-player.spec.ts: commander combat damage",
+        "four-player.spec.ts: natural commander-damage winner"
+      ],
+      "impact_edge_status": "not_applicable",
+      "resolution": "One shared coordinator now advances only the currently authorized server pass until a strategic decision, seat-qualified opportunity, or projected result is reached; the two witnesses pass together in one headless worker against the CI compact database."
     }
   ],
   "recent_pull_requests": [
