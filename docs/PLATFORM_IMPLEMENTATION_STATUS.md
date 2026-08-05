@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "81fc81763c8de831804769d81ce4d57b449fa7d8bb65867262d2bf669560f325"
+verified: "c9471d6a3d6153cbc1335b1b1ff16996f327ea4fe9c50d52ca5325fa3c9bda92"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,7 +15,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `81fc81763c8de831804769d81ce4d57b449fa7d8bb65867262d2bf669560f325` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `c9471d6a3d6153cbc1335b1b1ff16996f327ea4fe9c50d52ca5325fa3c9bda92` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `5ea8f1e057194bfca573fafd02ecd52f03a178da`
 - Certified exact head: `76c6bf154bfc62e5eae4cb10e391033413349050`
 - Generation timestamp: `2026-08-05T16:22:08Z`

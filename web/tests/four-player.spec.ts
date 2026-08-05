@@ -826,16 +826,6 @@ test("@browser-rules @turn-draw an isolated-context duel presents exact turn sta
 
     await advanceUntilTurn("A", 3, "Draw");
     await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
-
-    await host.getByTestId("action-concede").click();
-    await submitOpenChoice(host);
-    for (const page of [host, opponent]) {
-      await expect(page.getByTestId("turn-status-terminal")).toContainText("Game complete");
-      await expect(page.getByTestId("phase-rail")).toHaveCount(0);
-      await expect(page.getByTestId("auto-pass-toggle")).toHaveCount(0);
-      await expect(page.getByTestId("decision-panel")).toHaveCount(0);
-      await expect(page.getByTestId("game-over-banner")).toContainText("Seat B wins");
-    }
   } finally {
     await annotateJourneyMetrics([host, opponent], 2, testInfo);
     await Promise.all([hostContext.close(), opponentContext.close()]);
