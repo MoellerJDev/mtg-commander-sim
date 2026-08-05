@@ -2,7 +2,7 @@
 title: "Mechanic capability extension guide"
 status: "current"
 authoritative_source: "mtg_commander_sim/rules/capabilities.py, its packaged registry, and ADR 0004"
-verified: "2026-08-03"
+verified: "2026-08-05"
 audience: "rules, compiler, and architecture contributors"
 maintenance: "hand-maintained"
 ---

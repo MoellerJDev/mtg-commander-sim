@@ -2,403 +2,129 @@
 title: "Semantic packs"
 status: "current"
 authoritative_source: "CardProgram V2 adapter, semantic pack schema, loader, and tracked packs"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "rules and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
 
 # Semantic packs
 
-Semantic packs compile reviewed Oracle behavior into the engine's generic
-effect DSL. They extend `SemanticRegistry`; they do not replace the Game Record
-or grant pilots state-mutation authority.
+Semantic packs are reviewed compatibility inputs for card behavior that is not
+yet fully produced by generic Oracle compilation. The loader converts them into
+canonical CardProgram V2 objects and the same typed runtime boundaries used by
+generated programs. Packs do not replace Game Record v3, grant a client mutation
+authority or make an LLM a rules source.
 
-Pack schema v3 is now a compatibility input to canonical CardProgram V2. On
-load, programs are grouped by Oracle ID, source hashes and face identity are
-validated, and deterministic card/semantic/trust fingerprints are computed.
-The resulting CardProgram basis is `legacy_reviewed` (or `mixed` when combined
-with capability-closed generated abilities), never capability-closed merely
-because the pack is reviewed.
-The semantic-key map remains a derived runtime and historical-record index.
-Saved registries contain both views and reject any mismatch.
+Current generic/card coverage and trust basis is generated in
+[`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md). This
+reference intentionally contains no exact-list counts or version-era status
+ledger.
 
-## Program identity
+## Identity and schema
 
-Each JSON program records:
+Each program identifies:
 
-- Oracle ID and stable semantic key
-- face or ability identifier
-- active zone and trigger/event identity
-- semantic schema and program version
-- target/choice schema where required
-- generic effects and destination
-- coverage labels and characterization tests
-- source Oracle and rulings hashes
-- authoring provenance and review status
-- trust level
+- Oracle ID, face and stable ability key;
+- active zone and trigger/event identity;
+- semantic schema and program version;
+- typed targets, choices, costs, effects and destinations;
+- capability and runtime-component requirements;
+- source Oracle and rulings hashes;
+- characterization tests, authoring provenance and review status;
+- trust level and explicit blockers.
 
-The source hashes pin the Scryfall snapshot used for review. An empty rulings
-list still has the deterministic SHA-256 hash of its serialized empty array.
-Pack files are included as package data in the wheel.
-Missing hashes on an ephemeral development program are represented as explicit
-trust blockers; conflicting nonempty hashes for one Oracle group fail loading.
+Programs are grouped by Oracle ID. Conflicting source hashes or face identities
+fail loading. Deterministic CardProgram, semantic-registry and trust
+fingerprints are stored with a game. The semantic-key map is a derived runtime
+and historical-record index; saved registries reject a mismatch between views.
 
-## Corpus compilation
+Pack schema v3 remains a supported compatibility input. Loading a reviewed pack
+normally produces trust basis `legacy_reviewed`, or `mixed` when it composes
+with capability-closed generated abilities. Review alone never upgrades the
+program to capability-closed.
 
-Hand-authored packs remain valid reviewed artifacts, but they are not the
-scaling architecture for arbitrary new decks. The rules-completeness pipeline
-pins the official CR, Oracle, and rulings snapshots, validates mechanic
-contracts, and compiles Oracle text into a typed intermediate representation.
-Recognized whole-text templates lower into the same generic DSL and kernel
-primitives used by current packs.
+## Relationship to generic compilation
 
-Oracle IR v12 includes a shared combat-declaration cost grammar for exact
-fixed ordinary-mana intrinsic, attached-Aura, defending-player attack, and global block-tax
-sentences. The compiler records a typed static-cost node and the engine uses
-the same parser to derive live costs. Complex symbols, appended instructions,
-and broader conditional forms retain material residuals and stop fail closed;
-this is reusable sentence-family support, not card-name coverage.
+Hand-authored packs are not the scaling architecture for arbitrary decks. The
+Oracle compiler recognizes closed whole-text and ability-clause grammars,
+emits source-spanned typed nodes, preserves every unmatched material span as a
+residual, and declares the required capabilities. Generated and reviewed nodes
+then share CardProgram validation and runtime execution.
 
-The same version includes a shared declaration-restriction grammar. Exact
-absolute, not-alone, count, type, supertype, subtype, token, keyword, color,
-goad, source-stat, denied-blocker, except-by, attached-evasion, and
-can-block-only families compile into typed static nodes and feed the same
-finite solver at runtime. The grammar also represents minimum-other and
-filtered-companion declarations, attacking-alone and no-other-creature
-evasion, source-controller-relative attack/block options, per-player attack
-caps, source-specific attack maxima, and defending-player shared-creature-
-subtype thresholds. Changeling contributes once to every shared subtype.
-Multiple represented restrictions are cumulative.
-Typed battlefield conditions cover controller, attacking-player, and
-defending-player permanent existence; public monarch/poison player state;
-another-object exclusion; tapped state;
-type, supertype, subtype, color, keyword, power, and toughness filters; minimum
-counts; and relative creature/land counts. They are destination-specific in
-multiplayer and use the same evaluator for direct block-pair checks and solver
-domains. Player, planeswalker, and Battle destinations are typed rather than
-inferred from card names. Reviewed current-turn predicates compile for
-creature and noncreature spells cast, controlled creature deaths, opponents
-actually dealt damage, the direct player already attacked by one object
-incarnation, and an opponent that cast a spell. These query hashed
-`TurnHistory` facts recorded by generic cast, zone-change, damage, and attack
-transitions. Broader history, compound-with-unrelated-effects, temporary, and
-multi-block families
-retain material residuals instead of being guessed.
+At creation time, a reviewed program can shadow an equivalent generated ability
+for the same source identity so the engine does not create duplicate triggers or
+effects. The shadowing decision is deterministic and fingerprinted. It does not
+hide unrelated residual text.
 
-At deck creation, generated programs are added only when their stable
-Oracle/face/ability key is not already supplied by a reviewed pack. Reviewed
-trigger event handlers also shadow equivalent generated event handlers even
-when their author-defined keys differ; this prevents duplicate triggers. A
-generated program records source line offsets, Oracle/rulings hashes, compiler
-and template IDs, and a semantic hash. It is `provisional` and
-`requires_arbiter=true` until every mechanic dependency is trusted. Under
-`trusted_only`, it is withheld or stopped rather than executed.
+When substantially similar reviewed descriptors recur, add a generic compiler
+production and runtime component instead of a third card-specific pack.
 
-Any material unparsed Oracle span, untrusted mechanic dependency, or source
-hash mismatch fails trusted preflight. A card-specific override must record why
-generic compilation failed and pin its Oracle/rulings/rule/test provenance.
-See `RULES_COMPLETENESS.md`.
+## Runtime boundary
 
-## Normalized damage events
+The executor accepts only validated, versioned operations and registered typed
+components. Runtime placeholders such as `$controller` and `$target.0` resolve
+against authoritative stack/source context. A component receives immutable
+rules facts and emits a typed result or intent; it has no arbitrary callback,
+card-name dispatch or unrestricted `GameState` access.
 
-The current combat path emits `damage.dealt` only for a positive final dealt
-result. Its immutable context correlates the exact source and recipient,
-logical source incarnation, controllers, public characteristics, assigned,
-dealt, and prevented amounts, combat step, and first-strike-step status.
-Programs for “this source” use `damage.dealt.self`; broader programs use
-`damage.dealt` with declarative event conditions. Prevented and zero damage do
-not dispatch the event.
+Replacement, continuous, trigger, damage, draw, life, counter, attachment and
+other families participate only through their canonical coordinators and
+mutation owners. A source-pinned witness proves that exact reviewed descriptor,
+not universal support for similar-looking Oracle text.
 
-Represented damage triggers remain pending while post-damage state-based
-actions run. Any represented triggers discovered by those actions merge into
-the same unstarted APNAP/controller-order batch before priority. Final dealt
-components become immutable affected-subject result trees; represented Infect,
-Wither, Lifelink, fixed Toxic, fixed life-gain multiplication, and a whole-
-result life floor resolve before one atomic commit. This is not a claim that
-arbitrary damage Oracle text is compiled. Oracle IR v15 covers a closed family
-of fixed finite shields and static redirection to a current damageable source;
-durable consumption and simultaneous allocation use the canonical damage
-transaction. Dynamic/divided shields, prevention aftermath effects, partial or
-attached redirection, unresolved dynamic Toxic values, incomplete continuous
-ability closure, remaining CR 120.4 result replacements, excess damage, and
-trigger-on-trigger placement remain explicit untrusted dependencies. Represented
-source keyword facts are snapshotted and use last-known information if the
-source leaves before the damage result commits.
-
-## Attached continuous characteristics
-
-The `continuous.attached.fixed-characteristics.v1` runtime component emits
-typed layer-4, layer-6, and layer-7c operations only while its source is
-attached to the exact current logical target. The shared attachment owner
-maintains reciprocal identities and relation timestamps, so detach, reattach,
-phasing, source or target departure, and leave-and-return cannot preserve a
-stale modifier. Oracle IR v24 lowers closed fixed enchanted/equipped/fortified
-type, supported keyword, separately reviewed rules-text, and power/toughness
-wording without card-name dispatch. Printed fixed ordinary-mana Equip is a
-separate trusted capability that targets a creature its controller controls and
-resolves through the ordinary stack. Oracle IR v25 lowers a closed
-battlefield-object Enchant grammar to the trusted
-`attachment.aura.simple_object` capability. The Aura runtime requires a legal
-cast target, revalidates it on resolution, handles nonspell entry through a
-seat-scoped replayable choice, and applies token-entry preflight without
-creating an unattached illegal token. Oracle IR v29 now emits the immutable
-Enchant descriptor once; casting offers, proposal validation, resolution,
-nonspell entry, token entry, and state-based legality consume that exact typed
-value and never reparse live Oracle text. A source-pinned linked descriptor
-also preserves Animate Dead's graveyard-creature restriction and exact
-physical link after reanimation without a mutable target-schema annotation.
-
-Layer 6 executable grants are distinct from display rules text. Typed granted
-activated and triggered fragments participate in characteristic evaluation,
-activation/trigger discovery, source identity, last-known information, runtime
-fingerprints, and replay. Thornbite Staff uses this path; its prior printed-name
-trigger and effect-text activation dispatch are gone. A bounded typed
-protection component supplies represented color, card-type, Aura-subtype, and
-everything qualities to targeting, blocking, attachment, and damage checks.
-Unsupported or text-only protection fails closed. General Enchant qualities,
-players, arbitrary nonbattlefield objects, Aura creatures, exotic Equip costs,
-dynamic or conditional attached values, broader protection qualities, and full
-CR 613 dependencies remain residual and fail closed.
-
-## Typed tap-state execution
-
-Pack effects using `tap`, `untap`, or `untap_all_creatures` now lower through
-the frozen semantic-handler registry rather than their former
-`CommanderEngine.apply_effect` branches. Strict schemas produce typed
-tap-state intents from read-only context; the rules-layer tap-state port then
-resolves and commits authoritative battlefield changes. Single untap preserves
-the represented stun-counter replacement, while aggregate untap uses effective
-creature types and excludes phased-out permanents. Failed validation and
-resolution roll back transactionally and replay through the same registered
-handler fingerprint.
-
-This migration does not promote a reviewed pack to capability-closed and does
-not claim all tap/untap interactions. Universal replacement participation, tap/untap
-prohibitions, and complete derived-characteristic closure remain explicit
-capability blockers.
-
-## Replacement runtime components
-
-Source-pinned `handlers` descriptors represent bounded replacement behavior
-without card-name or Oracle-ID dispatch in the universal engine.
-`replacement.token.additional.v1` contributes a fixed additional-token effect;
-`replacement.zone.destination.v1` contributes a reviewed destination rewrite
-and fixed counter intents. Multiple represented effects use the affected
-seat's choice, APNAP traversal, rediscovery, containing-event-before-contained-
-event ordering, and an exact selection journal. A suspended choice projects
-only chooser-safe labels and options and resumes the same semantic instruction
-through Game Record v3.
-
-The current zone witness is Dauthi Voidwalker, loaded from reviewed semantic
-data with exact Oracle/rulings fingerprints. Historical complete snapshots that
-predate the descriptor may use the validated pinned compatibility component;
-current snapshots pin the descriptor directly. Effect-generated permanent
-counters use the shared counter-placement boundary. Damage uses fixed quantity,
-fixed prevention, durable finite-shield, and static redirection descriptors
-before the result tree;
-`replacement.life.gain.multiplier.v1` and
-`replacement.damage.result.life_floor.v1` participate within that result tree.
-Boon Reflection and Worship are source-pinned shape witnesses, not engine
-branches. This does not establish universal replacement/prevention coverage:
-dynamic or multi-target shield creation, prevention aftermath effects, finite
-partial or attached redirection, prohibition, draw, entry, and remaining
-life/counter/result families remain blocked unless a separately trusted
-component covers their exact shape.
-
-`replacement.draw.dredge.v1` is the first generic draw-replacement runtime
-component. It is discovered only from a trusted graveyard CardProgram, pins
-the source's physical identity and zone-change counter, checks the current
-library threshold, and lowers to a typed `DredgeDraw` operation. Turn,
-resolution, conditional, optional-follow-up, and APNAP draw producers all use
-the same immutable draw coordinator and private affected-player continuation.
-The ordinary intent executor rejects draw intents that have not been routed
-through that owner. Per-turn draw limits, draw-as-cost legality, shared-team
-ordering, reveal-as-drawn, and uncompiled replacement wording remain
-fail-closed.
-
-Continuous runtime descriptors use the same trust and replay boundary. The
-fixed-query anthem component lowers a strict `ObjectQuerySpec` plus layer-7c
-power/toughness operations; it has no card-name knowledge and no mutable state
-access. Its source must remain a represented, phased-in battlefield object,
-and membership is recomputed from current characteristics. Resolution-created
-fixed type, subtype, keyword, and power/toughness modifiers instead commit to
-the additive continuous-effect journal with an explicit until-end-of-turn
-duration and a locked physical/logical object set. A semantic program cannot
-provide or spoof the authoritative resolution source context. These closed
-families do not imply support for arbitrary static abilities, state-derived
-quantities, control changes, permission changes, or every duration.
+Semantic choices suspend through versioned replay-pinned continuations. Private
+candidates project only to the chooser, while public journals retain the
+minimum replay/audit identity permitted by the rules.
 
 ## Trust
 
-The pack-level `trusted` label means the declared compatibility behavior is
-reviewed and characterized for this implementation. It is not fine-grained
-capability closure. CardProgram trust basis and applicable closure are the
-authoritative higher-level reports. `provisional` can support development characterization but
-cannot make a material interaction eligible as conformance or release evidence.
-`unresolved` fails closed in strict mode and requires future implementation.
-Development arbitration can help author a reviewed fixture, but it is never
-production legality. `intentionally_ignored` is only appropriate when the
-omitted ability is demonstrably irrelevant to the recorded operation.
+Pack-level `trusted` means the declared compatibility behavior was reviewed and
+characterized. CardProgram capability closure is the stronger product gate.
+`provisional` is development-only, `unresolved` fails strict preflight, and
+`intentionally_ignored` is valid only for text proven immaterial to the selected
+operation and profile.
 
-The executor accepts validated DSL operations only. The kernel selects programs
-by Oracle/ability keys and runtime events, not printed-name branches. Runtime
-placeholders such as `$controller` and `$target.0` are resolved against the
-current stack object.
+Trusted-only play fails when any materially reachable ability has:
 
-The browser-reported interaction pack follows the same rule. Its reviewed
-Oracle-ID programs cover Sunscorched Desert's targeted entry damage and Orcish
-Bowmasters' permanent resolution, entry/extra-draw triggers, and Amass Orcs.
-`amass` and permanent `add_subtype` are reusable DSL operations: the executor
-creates an Army only when necessary, delegates among multiple Armies, adds the
-named creature type, and places counters. This is reusable mechanic coverage,
-not a printed-name branch or a claim that arbitrary Amass variants are already
-compiled.
+- unparsed Oracle text;
+- an untrusted or missing capability;
+- a source hash mismatch;
+- an unsupported target, cost, timing, layer or replacement dependency;
+- a failed interaction, replay, privacy or mutation gate.
 
-## Version 0.8.0 exact-list closure
-
-The pinned July 28, 2026 Zimone and Dina and Mishra, Eminent One lists each
-preflight at 100 fully playable cards, with no partial or unresolved entries
-and no expected arbiter calls. The closure is backed by deterministic
-characterization scenarios and exact Oracle/rulings hashes in
-`zzz-v080-exact-deck-closure.json`.
-
-The final Mishra families include Daretti's loyalty, exchange, and emblem
-return; its emblem effect now creates a typed public command-zone object and
-binds the return trigger to that exact source. They also include Demonic
-Junker's per-player destroy and Crew 2; both faces of Tithing Blade including
-Craft; Transmute Artifact's staged sacrifice/search/payment; and Urza's
-Saga's lore progression, granted abilities, restricted chapter-III search,
-and final sacrifice. The exact-list pack also covers the remaining Zimone
-engines, alternate/additional costs, restricted mana, copy/token engines,
-linked choices, replacement effects, and turn-control effects.
-
-This result is intentionally bounded to the two validated deck-list
-fingerprints. It does not imply that similarly worded cards outside those
-lists, arbitrary Oracle prose, continuous-effect layers, or every Commander
-rules interaction are implemented.
-
-## Version 0.7.0 interaction slice
-
-Target schemas are declarative plans rather than card-name conditionals. They
-support modal groups, public zones, players and stack objects, target counts,
-distinctness, state/type/color/mana-value filters, controller and owner
-relationships, source exclusion, and resolution-time conditions. Mandatory
-groups with insufficient candidates remove the cast or activation from the
-ordinary legal alternatives.
-
-Action advertisement and execution share immutable casting and activation
-proposal queries. A semantic program may contribute a validated static cast
-cost modifier or grant a serialized activated-ability descriptor; generic
-Oracle lowering handles the represented Crew and Craft keyword forms. The
-engine does not identify those abilities by printed name or Oracle ID.
-
-The interaction pack pins current local Oracle and rulings hashes and has
-deterministic positive and negative scenarios for:
-
-- An Offer You Can't Refuse, Mana Drain, Swan Song, Force of Negation, Pact of
-  Negation, Flusterstorm, Red Elemental Blast, and Pyroblast
-- Assassin's Trophy, Abrade, Chaos Warp, Feed the Swarm, Tear Asunder, Force of
-  Vigor, Toxic Deluge, Vandalblast, and Deadly Rollick
-- Boseiju, Who Endures; Otawara, Soaring City; Cankerbloom; Soul-Guide
-  Lantern; and Pithing Needle
-
-These programs preserve their different target timing, modes, destinations,
-delayed payments/mana, storm copies, kicker/overload/pitch costs, life-X, and
-token results. They are not interchangeable templates.
-
-## Version 0.6.0 vertical slice
-
-The bundled packs characterize:
-
-- Zimone and Dina permanent, activation, optional land placement, eight-land
-  repetition, and second-card-drawn target
-- Lotus Cobra permanent and controller-selected landfall mana
-- Field of the Dead's seven-distinct-land-name threshold
-- Warren Soultrader permanent and Treasure-producing activation
-- provisional Gravecrawler graveyard permission and the tested aggregate loop
-- Zulaport Cutthroat's role in the tested aggregate loop
-- Mishra, Eminent One and its beginning-of-combat Warform choice
-- 4/4 hasty Warform characteristic override and delayed end-step sacrifice
-- provisional Ichor Wellspring coverage
-- provisional Gonti's Aether Heart permanent plus trusted artifact-entry energy
-- trusted Red Elemental Blast and provisional Pyroblast target/resolution
-- provisional generic hidden-library searches for Entomb, Three Visits,
-  Nature's Lore, Fabricate, Goblin Engineer's entry trigger, Survival of the
-  Fittest, Elvish Reclaimer, and Wight of the Reliquary
-
-This was not complete coverage of either 100-card deck at the time of the
-0.6.0 release. Version 0.8.0 closes the two pinned exact lists; generated
-preflight reports remain the authoritative inventory for any other snapshot.
-
-Version 0.6.0 improves legal-action and continuation exactness without claiming broad Oracle
-coverage:
-
-- mandatory activated costs must be currently payable before an action is
-  advertised
-- Boseiju Channel is withheld without enough independent mana
-- tapped-source and tap-symbol availability are exact for Sensei's Divining Top
-- Mox Opal validates the public three-artifact Metalcraft condition before it
-  can pay another action
-- fully parenthesized basic-land reminder abilities are normalized
-- `Sacrifice a land` is a compiled delegated mandatory cost
-- a resolving program can suspend on a seat-private search, persist its
-  versioned semantic frame, then resume exactly after the choice
-- restrictive and optional hidden-zone searches support legal fail-to-find
-- destination, reveal, shuffle, typed-land entry, and shockland life choices
-  are server-controlled
-
-Ordered plans may name a future private search choice without knowing its
-physical object reference. The server resolves that name only after the scoped
-choice exists. Execution stops on a response, stack/cost/target change, hidden
-draw, new unsupplied choice, combat, semantic uncertainty, or fidelity failure.
-
-At the 0.6.0 boundary, other activation conditions and complex tutors remained
-unresolved rather than guessed. Version 0.8.0 supplies exact-list compilation
-for those cards. The primary coordinator still never chooses a private search
-result for the player.
+Development arbitration may help characterize a future pack. It is not
+production legality and cannot silently mutate an active game.
 
 ## Preflight
 
-```bash
-python simctl.py semantics preflight <deck-file-or-public-moxfield-url> \
-  --db data/scryfall-20260728-compact.sqlite3 \
-  --cache-dir run/deck-cache \
+Run preflight against the current managed snapshot:
+
+```powershell
+.\.venv\Scripts\python.exe simctl.py semantics preflight `
+  <deck-file-or-public-moxfield-url> `
+  --db data/scryfall-current.sqlite3 `
+  --cache-dir run/deck-cache `
   --output run/preflight.json
 ```
 
-The report includes total, fully playable, partial, and unresolved card counts;
-unresolved cast costs, activated abilities, triggered abilities, and
-replacement effects; expected arbiter calls; loaded pack hashes; and whether
-`deck_review_eligible` is possible.
+The report separates fully playable, partial and unresolved cards; identifies
+material residual categories and trust dependencies; pins loaded pack hashes;
+and states whether the selected operation profile can proceed. A deck label or
+commander-name fallback is not exact-list profiling.
 
-Preflight is deliberately conservative. Generic built-ins cover ordinary mana,
-basic/typed lands, bond lands, fetch search/shuffle, shockland entry choice, and
-the currently compiled land conditions. A card is not promoted merely because
-some of its text resembles a supported family.
+## Add or replace coverage
 
-For the July 28, 2026 decks, the current reports are:
+1. Read the exact pinned Oracle text, official rulings and relevant rules.
+2. Prefer extending a reusable compiler grammar and typed rules family.
+3. If an override is irreducible, document why and use the narrow extension
+   boundary.
+4. Add deterministic positive, negative, interaction, multiplayer, rollback,
+   replay, privacy and mutation evidence as applicable.
+5. Record fresh source hashes, capability dependencies and the lowest honest
+   trust level.
+6. Run preflight and focused tests, then regenerate final corpus reports once.
+7. Remove obsolete pack behavior after generic compilation becomes the sole
+   owner.
 
-| Live deck | Fully playable | Partial | Unresolved | Expected arbiter calls | Review eligible possible |
-|---|---:|---:|---:|---:|---|
-| Zimone and Dina (`g5vt…`) | 100 | 0 | 0 | 0 | yes |
-| Mishra, Eminent One (`armNI…`) | 100 | 0 | 0 | 0 | yes |
-
-Those counts apply only to the validated July 28, 2026 fingerprints. Neither a
-scripted turn-eight duel nor a duplicated-list Codex run is deck-quality or
-matchup evidence.
-
-## Adding coverage
-
-1. Read the exact local Oracle card and applicable rulings.
-2. Add or extend generic DSL support without card-name branches in
-   `CommanderEngine`.
-3. Add a deterministic scenario exercising choices, targets, timing, costs,
-   triggers, and replay.
-4. Author the program with fresh source hashes, provenance, tests, and the
-   lowest honest trust level.
-5. Run preflight and the complete suite.
-6. Regenerate and replay any fixture whose semantic fingerprint changed.
-
-Do not mark a whole card trusted when only its spell-to-battlefield transition
-is implemented and an activated, triggered, or replacement ability remains
-materially unresolved.
+Never mark a whole card trusted when a material activated, triggered, static,
+replacement or alternate-zone ability remains unresolved.

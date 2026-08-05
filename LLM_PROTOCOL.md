@@ -2,12 +2,12 @@
 title: "LLM pilot and arbiter protocol"
 status: "current"
 authoritative_source: "pilot protocol schemas and session implementation"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "pilot-provider and protocol contributors"
 maintenance: "hand-maintained"
 ---
 
-# LLM Pilot and Arbiter Protocol
+# LLM pilot and arbiter protocol
 
 This document describes an optional untrusted client adapter retained for
 experimentation. It is not the product architecture, a rules authority, or a
@@ -50,18 +50,19 @@ Use short object references. Request rulings only when an interaction is
 material. Use a yield when there is no plausible action before a defined stop.
 ```
 
-## Packet protocol 2.1
+## Packet protocol 3.0
 
 ### Full bootstrap
 
 ```json
 {
-  "v":"2.1",
+  "v":"3.0",
   "mode":"full",
   "principal":"pilot:A",
   "pkt":1,
   "base":null,
   "view":"35b27d09191ffba709cd",
+  "view_revision":0,
   "state":{
     "rev":0,
     "event":6,
@@ -93,12 +94,13 @@ material. Use a yield when there is no plausible action before a defined stop.
 
 ```json
 {
-  "v":"2.1",
+  "v":"3.0",
   "mode":"delta",
   "principal":"pilot:A",
   "pkt":2,
   "base":"35b27d09191ffba709cd",
   "view":"e84b4a13aca4595e7e1a",
+  "view_revision":1,
   "rev":1,
   "event":11,
   "patch":[

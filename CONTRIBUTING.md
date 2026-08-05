@@ -2,7 +2,7 @@
 title: "Contributing"
 status: "current"
 authoritative_source: "repository merge, test, and review policy"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "contributors"
 maintenance: "hand-maintained"
 ---
@@ -71,3 +71,20 @@ two-slot workflow, shard ownership, nightly depth, and recovery commands.
 
 Use focused commits. Versioned feature work should update the changelog,
 architecture documentation, fidelity reporting, and replay tests together.
+
+## Repository and documentation hygiene
+
+The repository contains source, schemas, public fixtures, generated reports and
+sanitized examples. It must not contain live Game Records, checkpoints, private
+zones, raw capabilities, credentials, pilot memory, SQLite databases, Scryfall
+archives, image/deck caches, build output or local virtual environments.
+`scripts/validate_repository.py` checks tracked files and reachable history;
+tests create private records only in temporary directories from sanitized
+recipes.
+
+Use the documentation standard in [`docs/index.md`](docs/index.md). Describe
+current behavior in present tense, keep changing measurements in generated
+reports, and remove superseded guidance in the same pull request. Do not add a
+branch handoff, progress diary, archived status page or duplicate architecture
+overview. Add an ADR only for a durable decision whose alternatives and
+consequences matter after the implementation has changed.

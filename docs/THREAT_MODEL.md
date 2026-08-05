@@ -2,7 +2,7 @@
 title: "Threat model"
 status: "current"
 authoritative_source: "implemented local server, protocol, projection, and repository controls"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "maintainers, security reviewers, and deployers"
 maintenance: "hand-maintained"
 ---
@@ -46,8 +46,9 @@ paths, provider credentials, and third-party card content.
 
 The local machine and Python process are assumed to be controlled by the user.
 The current server is not hardened against a hostile host administrator, local
-malware, denial of service, or Internet-scale abuse. Public hosting requires the
-separate [hosted deployment target](operations/hosted.md) and an independent
-security review.
+malware, denial of service, or Internet-scale abuse. The application has no
+supported public-hosting mode; any deployment beyond the local trust boundary
+requires an independent architecture, operations, content-rights, and security
+review.
 
 Report vulnerabilities through the process in [SECURITY.md](../SECURITY.md).

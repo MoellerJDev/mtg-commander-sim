@@ -2,7 +2,7 @@
 title: "Runtime-component extension guide"
 status: "current"
 authoritative_source: "semantic runtime registries, CardProgram V2 schema, and architecture policy"
-verified: "2026-08-01"
+verified: "2026-08-05"
 audience: "rules, compiler, and semantic-runtime contributors"
 maintenance: "hand-maintained"
 ---

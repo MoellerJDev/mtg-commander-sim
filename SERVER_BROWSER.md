@@ -2,14 +2,14 @@
 title: "Server and browser vertical slice"
 status: "current"
 authoritative_source: "server and web implementation plus browser tests"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "local users, operators, and client/server contributors"
 maintenance: "hand-maintained"
 ---
 
 # Server and browser vertical slice
 
-Version 0.8.0 includes an executable, responsive two- or four-player browser slice with
+The application includes an executable, responsive two- or four-player browser slice with
 card-centric play/cast/activate interaction and generic forms for the rules engine's
 current server-issued choice schemas. One
 Python process builds and serves the browser, manages the local Scryfall data

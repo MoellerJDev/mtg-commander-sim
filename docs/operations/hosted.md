@@ -1,32 +1,26 @@
 ---
-title: "Hosted deployment target"
-status: "target"
-authoritative_source: "documented gaps in server runtime and threat model"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
-audience: "future deployers and security contributors"
+title: "Deployment boundary"
+status: "current"
+authoritative_source: "implemented single-process local server and security boundary"
+verified: "2026-08-05"
+audience: "operators and deployment reviewers"
 maintenance: "hand-maintained"
 ---
 
-# Hosted deployment target
+# Deployment boundary
 
-The current application is not a supported public hosted service. Static-site
-hosting alone cannot run the authoritative Python engine, durable actor,
-WebSockets, SQLite/Game Record persistence, managed card data, authentication,
-or image cache.
+The application supports a single-process local deployment on a user-controlled
+machine. It does not provide a supported public Internet or multi-host mode.
 
-Before adding a hosted mode, write an ADR and implement at least:
+The current runtime has lightweight guest identity, local SQLite control data,
+filesystem Game Records, one in-process actor per loaded game, local Scryfall
+data and an on-demand image cache. It does not provide production accounts,
+external actor leasing, distributed locks, rate limiting, abuse controls,
+multi-process ownership, TLS termination, backup orchestration or rights-cleared
+hosted card assets.
 
-- TLS termination, strict origins, secure cookies, CSRF, rate limits, request
-  size/time limits, secret rotation, and production account recovery;
-- a durable database and object-store design with backup/restore and retention;
-- single-writer ownership leases or deterministic routing for every game;
-- multi-process-safe idempotency, lifecycle recovery, deployments, migrations,
-  health checks, and observability without hidden-data logging;
-- licensed/attributed content handling, bounded image caching, egress policy,
-  and Scryfall/Moxfield terms review;
-- abuse controls, privacy review, accessibility validation, and independent
-  security assessment.
-
-Do not expose the development server directly to the Internet. A future design
-must preserve the same projected protocol, exact replay, pinned rules/card data,
-and fail-closed fidelity boundary.
+Do not expose the local server directly to an untrusted network. A hosted
+deployment requires a separate architecture and security review covering
+identity, authorization, storage, actor ownership, recovery, observability,
+network controls, data retention and Scryfall/card-image terms. Until that work
+is implemented and documented, use the [local operations guide](local-app.md).

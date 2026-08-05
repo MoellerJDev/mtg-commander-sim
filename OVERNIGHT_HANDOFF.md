@@ -1,34 +1,19 @@
 ---
-title: "Integration handoff"
+title: "Integration checkpoint"
 status: "current"
-authoritative_source: "git main and generated status artifacts"
+authoritative_source: "live Git state and generated status reports"
 verified: "2026-08-05"
-audience: "maintainers continuing the migration"
+audience: "maintainers resuming repository work"
 maintenance: "hand-maintained"
 ---
 
-# Integration handoff
+# Integration checkpoint
 
-This is a sanitized operational handoff. It contains no credentials,
-capabilities, private hands, library order, private choices, live Game Records,
-or provider-session data.
+This file intentionally contains no branch name, commit SHA, CI run number,
+coverage count or copied milestone narrative. Those hand-maintained snapshots
+became stale as soon as work merged.
 
-## Integration coordinate
-
-The public repository is `MoellerJDev/mtg-commander-sim`; `main` is the only
-default branch. PR 102's generic fixed-damage effect-clause family is merged at
-`28e5d4882ef4126d587232357915c6706a071326`; exact-head run `31043382697`
-passed every required job. The merge-commit method preserves all seven feature
-commits on `main`, so deleting the topic branch cannot make provenance
-unreachable. PR 103 then reconciled the generated status at merge
-`d226ecbbad0a3d4d50326cf3e5d416290d4a2c07`; exact-head run `31044973484`
-passed. The static report now identifies that SHA as a historical certified
-checkpoint rather than repeatedly mislabeling a pre-merge SHA as current
-`main`. This makes the generated provenance truthful and merge-stable while
-live CI remains the authority for the current `main` head.
-
-Always re-read the live branch, pull request, exact-head CI, worktree, and
-generated status before acting:
+Before continuing, inspect the live repository and GitHub state:
 
 ```powershell
 git fetch origin --prune
@@ -39,65 +24,21 @@ gh pr list --state open --limit 50
 gh run list --limit 20
 ```
 
-The exact current platform, compiler, rules, test, and architecture figures are
-generated in [platform status](docs/PLATFORM_IMPLEMENTATION_STATUS.md),
-[compiler coverage](docs/COMPILER_COVERAGE_STATUS.md), and
-[architecture debt](docs/ARCHITECTURE_DEBT_STATUS.md). Do not copy those counts
-into this handoff.
+Then read:
 
-## Active checkpoints
+- [platform implementation status](docs/PLATFORM_IMPLEMENTATION_STATUS.md) for
+  integrated milestones and the exact next task;
+- [compiler coverage](docs/COMPILER_COVERAGE_STATUS.md) and the generated
+  [card-unlock frontier](coverage/card-unlock-frontier.md) for rules-family
+  selection;
+- [architecture debt](docs/ARCHITECTURE_DEBT_STATUS.md) for ratcheted source
+  measurements;
+- [CI workflow](docs/development/ci-pipeline.md) for exact-head certification
+  and the two-slot process;
+- [agent instructions](AGENTS.md) for current repository policy.
 
-The merged CI system uses one versioned machine-readable impact policy for an
-authoritative four-context lifecycle smoke, focused mana/action, combat, and
-turn/draw journeys, and deterministic nonempty lifecycle, rules, and
-natural-winner soak groups. Full Windows coverage is eleven process-isolated
-primary shards plus one wheel job and a fail-closed certification aggregator.
-The longest measured test shard is multiplayer/Commander at 372.399 seconds;
-the complete Windows critical path remains within the 8–12 minute target.
-
-The fixed-damage checkpoint is a shared effect-clause family, not a card
-override. It recognizes a closed fixed-quantity damage grammar across spell,
-triggered, and activated contexts; lowers source-spanned CardProgram V2 nodes;
-uses the existing canonical target, damage, replay, and privacy paths; and
-keeps dynamic, divided, conditional, rider-bearing, and unsupported recipient
-forms as material residuals. It is integrated on current `main`. The refreshed
-Commander census records a positive exact-card harvest with no demotions or
-construction failures; the authoritative deltas remain in the generated
-compiler-coverage report. Focused compiler/runtime tests and the deterministic
-impacted quick gate pass, as do the regenerated frontier, architecture,
-documentation, repository, and shard checks. Public exact-head certification
-is green.
-
-The active `compiler/reusable-piece-coverage-matrix` branch implements the next
-substantive foundation without creating a second capability registry, mechanic
-registry, or card scheduler. It derives a versioned reusable-piece ontology,
-complete material-ability/card relation index, pairwise interaction inventory,
-complex-card composition benchmark, and durable adoption baseline from the
-existing compiler, capability, runtime, rules, and card-frontier authorities.
-The generated matrix and CLI expose shared blockers for later rules batches;
-they do not promote cards or claim new gameplay behavior by themselves.
-
-## Working method
-
-Use at most two substantive worktrees: Slot A under exact-head certification
-and Slot B for the next independent rules batch. Run focused tests during
-implementation and the deterministic quick gate before commit:
-
-```powershell
-.\.venv\Scripts\python.exe scripts/quick_gate.py --dry-run
-.\.venv\Scripts\python.exe scripts/quick_gate.py
-```
-
-Do not run the complete local merge gate for every ordinary rules branch. CI is
-the normal certification authority; the full local gate is reserved for
-releases and exceptional persistence, replay, privacy, or packaging risk. Keep
-all browser automation isolated and headless, with reports configured never to
-open.
-
-The full operating procedure is the
-[CI pipeline guide](docs/development/ci-pipeline.md). Complete and certify the
-active reusable-piece inventory as one substantive branch, merge it, verify the
-new `main`, and remove only local or remote topic branches proven fully merged.
-Use the resulting matrix with the card-unlock frontier to choose the next
-bounded rules family. Do not force-push published history or select the coarse
-continuous-layers/dependencies frontier row as one batch.
+Use one active rules PR and at most one independent next-batch worktree. Prefer
+focused local tests and the change-impact quick gate; public exact-head CI is the
+normal merge authority. Browser automation must remain isolated and headless.
+After merge, verify fresh `main`, remove only branches proven fully merged, and
+select the next dependency-ready reusable rules family from regenerated data.

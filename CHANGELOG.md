@@ -2,7 +2,7 @@
 title: "Changelog"
 status: "historical"
 authoritative_source: "merged repository history"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "users and maintainers"
 maintenance: "hand-maintained"
 ---
@@ -10,6 +10,18 @@ maintenance: "hand-maintained"
 # Changelog
 
 ## Unreleased
+
+### Current-state documentation system
+
+- Adopted a repository-wide docs-as-code standard based on Diátaxis, stable
+  C4 context/container views, indexed ADRs, generated volatile status, and
+  present-tense living guidance.
+- Replaced the oversized README and monolithic architecture reference with
+  concise entry points, consolidated rules/conformance/semantic-pack policy,
+  and made `AGENTS.md` a durable navigation and maintenance contract.
+- Removed superseded migration, redesign, roadmap, handoff, archived status,
+  repository-hygiene, baseline, and historical Oracle Markdown duplicates.
+  Durable decisions remain in ADRs and history remains available in Git.
 
 ### Reusable rules-piece coverage matrix
 

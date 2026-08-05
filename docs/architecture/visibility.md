@@ -2,7 +2,7 @@
 title: "Visibility and projection"
 status: "current"
 authoritative_source: "StateProjector, protocol schemas, and privacy tests"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "client, server, pilot, and security contributors"
 maintenance: "hand-maintained"
 ---

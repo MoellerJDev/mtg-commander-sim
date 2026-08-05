@@ -2,7 +2,7 @@
 title: "CardProgram runtime components"
 status: "current"
 authoritative_source: "mtg_commander_sim/semantic_runtime component registries, mtg_commander_sim/drawing, and ADRs 0007/0010/0011/0012"
-verified: "2026-08-04"
+verified: "2026-08-05"
 audience: "rules, compiler, runtime, replay, and extension contributors"
 maintenance: "hand-maintained"
 ---

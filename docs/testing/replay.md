@@ -2,7 +2,7 @@
 title: "Replay testing"
 status: "current"
 authoritative_source: "record replay tests and local merge gate"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "engine, persistence, and protocol contributors"
 maintenance: "hand-maintained"
 ---

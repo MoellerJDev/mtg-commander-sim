@@ -2,7 +2,7 @@
 title: "Replay architecture"
 status: "current"
 authoritative_source: "Game Record v3 implementation, CardProgram V2 registry, and replay verifier"
-verified: "2026-08-01"
+verified: "2026-08-05"
 audience: "engine, persistence, and test contributors"
 maintenance: "hand-maintained"
 ---

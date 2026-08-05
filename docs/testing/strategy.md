@@ -2,7 +2,7 @@
 title: "Testing strategy"
 status: "current"
 authoritative_source: "tests, quick gate, sharded PR certification, and nightly assurance"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "all contributors"
 maintenance: "hand-maintained"
 ---

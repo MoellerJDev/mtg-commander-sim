@@ -2,7 +2,7 @@
 title: "Pilot providers"
 status: "current"
 authoritative_source: "pilot implementations, protocol schemas, and provider tests"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "pilot-provider implementers and arena operators"
 maintenance: "hand-maintained"
 ---
@@ -13,8 +13,8 @@ Pilot providers are optional automation clients. The authoritative platform,
 ordinary gameplay, tests, rules enforcement, persistence, replay, and releases
 must operate without them or any AI dependency.
 
-Version 0.6.0 separates strategic inference from the authoritative game. A
-provider implements:
+Strategic inference is separate from the authoritative game. A provider
+implements:
 
 ```python
 PilotProvider.decide(observation, decision, memory) -> PilotResponse
@@ -167,7 +167,7 @@ invalidates stale tutor, combo, and mulligan assumptions.
 
 ```bash
 python simctl.py pilot-run \
-  --db data/scryfall-20260728-compact.sqlite3 \
+  --db data/scryfall-current.sqlite3 \
   --profile commander_duel \
   --deck A=<public-moxfield-url> \
   --deck B=<public-moxfield-url> \

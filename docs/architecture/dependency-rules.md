@@ -2,7 +2,7 @@
 title: "Dependency and mutation rules"
 status: "current"
 authoritative_source: "platform/architecture-policy.json and architecture validator"
-verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+verified: "2026-08-05"
 audience: "all code contributors"
 maintenance: "hand-maintained"
 ---

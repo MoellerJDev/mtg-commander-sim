@@ -2,7 +2,7 @@
 title: "Runtime containers"
 status: "current"
 authoritative_source: "mtg_commander_sim, server, web, platform, and coverage trees"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "contributors and operators"
 maintenance: "hand-maintained"
 ---

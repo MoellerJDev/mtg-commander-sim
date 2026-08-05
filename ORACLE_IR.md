@@ -2,7 +2,7 @@
 title: "Typed Oracle IR"
 status: "current"
 authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, and mtg_commander_sim/rules/capabilities.py"
-verified: "2026-08-01"
+verified: "2026-08-05"
 audience: "compiler and semantic contributors"
 maintenance: "hand-maintained"
 ---

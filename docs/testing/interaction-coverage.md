@@ -2,7 +2,7 @@
 title: "Interaction coverage"
 status: "current"
 authoritative_source: "mechanic contracts, conformance records, semantic programs, and tests"
-verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
+verified: "2026-08-05"
 audience: "rules and test contributors"
 maintenance: "hand-maintained"
 ---
