@@ -84,6 +84,15 @@ class PythonRuntimeTests(unittest.TestCase):
         )[0]
         self.assertIn("fetch-depth: 0", checkout)
 
+        nightly = (workflows / "nightly.yml").read_text(encoding="utf-8")
+        mutation_and_soak = nightly.split("  mutation-and-soak:\n", 1)[1].split(
+            "\n  corpus:\n", 1
+        )[0]
+        checkout = mutation_and_soak.split("actions/checkout@v4", 1)[1].split(
+            "actions/setup-python@v5", 1
+        )[0]
+        self.assertIn("fetch-depth: 0", checkout)
+
     def test_workflow_policy_accepts_variable_job_counts_and_fails_missing_pin(self):
         setup = (
             "steps:\n"

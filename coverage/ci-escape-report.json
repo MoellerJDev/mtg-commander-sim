@@ -174,6 +174,22 @@
       "resolution": "Both handler inventories now ratchet at nineteen and the handoff links to generated frontier and architecture reports instead of copying grouped numerical metrics.",
       "run_id": 30998174979,
       "summary": "The fixed-mana runtime component increased two independently ratcheted inventories while the handoff duplicated numerical metrics reserved for generated status reports."
+    },
+    {
+      "category": "infrastructure",
+      "deterministic": true,
+      "failed_surfaces": [
+        "nightly-mutation-and-soak"
+      ],
+      "head_sha": "6033efe107a9c0451c3a2616a8fa6b6ae646a390",
+      "id": "ci-20260805-11",
+      "impact_edge_status": "not_applicable",
+      "regressions": [
+        "test_python_runtime.PythonRuntimeTests.test_provenance_validating_workflows_fetch_complete_history"
+      ],
+      "resolution": "The provenance-validating nightly mutation-and-soak job now fetches complete history, and the workflow policy test ratchets that exact job boundary.",
+      "run_id": 30987626101,
+      "summary": "The nightly mutation-and-soak job ran repository provenance validation from a depth-one checkout, so a valid recorded ancestor commit was unavailable to git cat-file."
     }
   ],
   "known_flaky_tests": [],
@@ -181,7 +197,7 @@
     "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
     "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
   },
-  "observed_at": "2026-08-05T10:41:26Z",
+  "observed_at": "2026-08-05T11:46:31Z",
   "recent_pull_requests": [
     {
       "critical_path_seconds": 1488.0,
@@ -226,7 +242,7 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "99fe7180cd3dcd0efb518c20ae08e2580a61a406aaa4d1834bcbf7f627d8957b",
+  "source_fingerprint": "374e93ca5a37a3eb5cf4dfb2e4e5915d4a975925dab3bd2be07d8b25743d546e",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,
@@ -235,12 +251,13 @@
       "browser_integration": 1,
       "flaky_test": 4,
       "generated_artifact_drift": 1,
+      "infrastructure": 1,
       "missing_affected_test": 2,
       "source_correctness": 2
     },
     "current_missing_impact_edges": [],
-    "deterministic_escape_count": 6,
-    "escape_count": 10,
+    "deterministic_escape_count": 7,
+    "escape_count": 11,
     "exact_head_pass_rate": 1.0,
     "known_flaky_test_count": 0,
     "repeated_failure_categories": [

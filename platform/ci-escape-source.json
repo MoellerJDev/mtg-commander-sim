@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-08-05T10:41:26Z",
+  "observed_at": "2026-08-05T11:46:31Z",
   "repository": "MoellerJDev/mtg-commander-sim",
   "escapes": [
     {
@@ -145,6 +145,20 @@
       ],
       "impact_edge_status": "added",
       "resolution": "Both handler inventories now ratchet at nineteen and the handoff links to generated frontier and architecture reports instead of copying grouped numerical metrics."
+    },
+    {
+      "id": "ci-20260805-11",
+      "run_id": 30987626101,
+      "head_sha": "6033efe107a9c0451c3a2616a8fa6b6ae646a390",
+      "category": "infrastructure",
+      "deterministic": true,
+      "summary": "The nightly mutation-and-soak job ran repository provenance validation from a depth-one checkout, so a valid recorded ancestor commit was unavailable to git cat-file.",
+      "failed_surfaces": ["nightly-mutation-and-soak"],
+      "regressions": [
+        "test_python_runtime.PythonRuntimeTests.test_provenance_validating_workflows_fetch_complete_history"
+      ],
+      "impact_edge_status": "not_applicable",
+      "resolution": "The provenance-validating nightly mutation-and-soak job now fetches complete history, and the workflow policy test ratchets that exact job boundary."
     }
   ],
   "recent_pull_requests": [

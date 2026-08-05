@@ -121,6 +121,9 @@ jobs:
       MTG_CARD_DB: data/test-ci.sqlite3
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Repository validation resolves every recorded certified/feature SHA.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
