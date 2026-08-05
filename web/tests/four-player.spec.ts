@@ -344,7 +344,34 @@ Mainboard:
 49 Mountain
 `;
 
-test("@smoke four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
+test("@smoke four shared-cookie browser tabs retain isolated lobby seats", async ({ browser }) => {
+  const context = await browser.newContext();
+  const pages: Page[] = [];
+  try {
+    for (const seat of "ABCD") {
+      const page = await context.newPage();
+      pages.push(page);
+      await enter(page, `Smoke ${seat}`);
+    }
+    await pages[0].getByTestId("create-room").click();
+    const invite = await pages[0].getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    for (let index = 1; index < pages.length; index += 1) {
+      const seat = "ABCD"[index];
+      await pages[index].getByTestId("invite-code").fill(invite!);
+      await pages[index].getByTestId("seat-select").selectOption(seat);
+      await pages[index].getByTestId("join-room").click();
+    }
+    for (let index = 0; index < pages.length; index += 1) {
+      await expect(pages[index].getByTestId(`seat-${"ABCD"[index]}`)).toHaveClass(/mine/);
+    }
+    await expect(pages[0].getByTestId("room-invite")).toHaveText(invite!);
+  } finally {
+    await context.close();
+  }
+});
+
+test("@reconnect @lifecycle four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
   try {
@@ -665,7 +692,7 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
   }
 });
 
-test("an isolated-context duel presents exact turn state and Spire Garden correctly", async ({ browser }) => {
+test("@turn-draw an isolated-context duel presents exact turn state and Spire Garden correctly", async ({ browser }) => {
   test.setTimeout(180_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
@@ -820,7 +847,7 @@ test("an isolated-context duel presents exact turn state and Spire Garden correc
   }
 });
 
-test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmasters", async ({ browser }) => {
+test("@mana-action a duel stabilizes land ETBs, permits a stack response, and resolves Bowmasters", async ({ browser }) => {
   // This journey persists every manual mana and priority transition. Hosted
   // runners can exceed the suite default without any individual wait stalling.
   test.setTimeout(180_000);
@@ -961,7 +988,7 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
   }
 });
 
-test("a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
+test("@combat a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
   // This journey crosses several auto-pass windows and persists each real
   // command. Preserve assertion-driven waits while leaving hosted runners
   // enough time for durability writes and context cleanup under serial load.
@@ -1059,7 +1086,7 @@ test("a duel declares an attacker in the browser and applies commander combat da
   }
 });
 
-test("a trusted browser duel reaches a natural commander-damage winner", async ({ browser }) => {
+test("@natural-winner @persistence a trusted browser duel reaches a natural commander-damage winner", async ({ browser }) => {
   // This intentionally natural game persists more than one hundred real
   // commands. It completes near five minutes alone and can take longer after
   // the preceding serial journeys, especially on Windows or hosted CI.

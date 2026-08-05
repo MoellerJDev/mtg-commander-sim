@@ -51,6 +51,7 @@ def browser_matrix(browser_full: bool) -> dict:
 def _write_github_output(path: Path, plan: dict) -> None:
     values = {
         "browser_full": str(plan["browser_full"]).lower(),
+        "browser_focus_grep": "|".join(plan["browser_focus_patterns"]),
         "windows_full": str(plan["windows_full"]).lower(),
         "changed_files": json.dumps(plan["changed_files"], separators=(",", ":")),
         "browser_matrix": json.dumps(

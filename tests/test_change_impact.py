@@ -17,7 +17,7 @@ class ChangeImpactTests(unittest.TestCase):
 
     def test_policy_is_versioned_and_fingerprinted(self):
         policy, fingerprint = load_impact_policy()
-        self.assertEqual(1, policy["schema_version"])
+        self.assertEqual(2, policy["schema_version"])
         self.assertEqual(64, len(fingerprint))
 
     def test_changed_test_module_is_run_exactly(self):
@@ -38,6 +38,37 @@ class ChangeImpactTests(unittest.TestCase):
             with self.subTest(path=path):
                 plan = classify_changes([path])
                 self.assertFalse(plan.browser_full)
+
+    def test_rules_paths_select_only_their_focused_browser_journey(self):
+        cases = {
+            "mtg_commander_sim/fixed_mana_abilities.py": ("mana-action",),
+            "mtg_commander_sim/declaration_restrictions.py": ("combat",),
+            "mtg_commander_sim/drawing/coordinator.py": ("turn-draw",),
+        }
+        for path, expected in cases.items():
+            with self.subTest(path=path):
+                plan = classify_changes([path])
+                self.assertFalse(plan.browser_full)
+                self.assertEqual(expected, plan.browser_focuses)
+
+    def test_compiler_and_engine_only_changes_keep_compact_smoke_only(self):
+        for path in (
+            "mtg_commander_sim/compiler/damage_templates.py",
+            "mtg_commander_sim/engine.py",
+            "mtg_commander_sim/session.py",
+        ):
+            with self.subTest(path=path):
+                plan = classify_changes([path])
+                self.assertFalse(plan.browser_full)
+                self.assertEqual((), plan.browser_focuses)
+
+    def test_persistence_and_projection_still_require_complete_browser(self):
+        for path in (
+            "mtg_commander_sim/persistence.py",
+            "mtg_commander_sim/projection.py",
+        ):
+            with self.subTest(path=path):
+                self.assertTrue(classify_changes([path]).browser_full)
 
     def test_protection_changes_cover_each_interaction_owner(self):
         plan = classify_changes(["mtg_commander_sim/protection.py"])
@@ -88,6 +119,15 @@ class ChangeImpactTests(unittest.TestCase):
         )
         self.assertTrue(plan.browser_full)
         self.assertTrue(plan.windows_full)
+
+    def test_labels_can_select_focused_browser_journeys(self):
+        plan = classify_changes(
+            ["README.md"],
+            labels=("browser-combat", "browser-turn-draw"),
+        )
+        self.assertFalse(plan.browser_full)
+        self.assertEqual(("combat", "turn-draw"), plan.browser_focuses)
+        self.assertEqual(("@combat", "@turn-draw"), plan.browser_focus_patterns)
 
 
 if __name__ == "__main__":

@@ -1,10 +1,15 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "default_checks": [
     "compile",
     "python-runtime",
     "repository"
   ],
+  "browser_focuses": {
+    "combat": "@combat",
+    "mana-action": "@mana-action",
+    "turn-draw": "@turn-draw"
+  },
   "path_rules": [
     {
       "id": "changed-python-test",
@@ -140,7 +145,8 @@
         "mtg_commander_sim/permissions.py",
         "mtg_commander_sim/stack*.py"
       ],
-      "test_suites": ["casting-costs-mana"]
+      "test_suites": ["casting-costs-mana"],
+      "browser_focuses": ["mana-action"]
     },
     {
       "id": "targets-choices-continuations-suite",
@@ -166,12 +172,18 @@
       "test_suites": ["triggers-turns-exact-decks"]
     },
     {
+      "id": "draw-browser-journey",
+      "patterns": ["mtg_commander_sim/drawing/**"],
+      "browser_focuses": ["turn-draw"]
+    },
+    {
       "id": "combat-declarations-suite",
       "patterns": [
         "mtg_commander_sim/declaration_*.py",
         "mtg_commander_sim/combat_constraints.py"
       ],
-      "test_suites": ["combat-declarations"]
+      "test_suites": ["combat-declarations"],
+      "browser_focuses": ["combat"]
     },
     {
       "id": "state-actions-damage-suite",
@@ -185,7 +197,8 @@
         "mtg_commander_sim/state_based_actions.py",
         "mtg_commander_sim/state_planner.py"
       ],
-      "test_suites": ["state-actions-damage"]
+      "test_suites": ["state-actions-damage"],
+      "browser_focuses": ["combat"]
     },
     {
       "id": "multiplayer-commander-suite",
@@ -238,14 +251,18 @@
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/rules/action_catalog.py",
         "mtg_commander_sim/rules/action_explanations.py",
-        "mtg_commander_sim/session.py",
         "mtg_commander_sim/service.py"
       ],
       "browser_full": true
     },
     {
-      "id": "browser-facing-priority-owner",
-      "patterns": ["mtg_commander_sim/engine.py"],
+      "id": "browser-lifecycle-persistence",
+      "patterns": [
+        "mtg_commander_sim/persistence.py",
+        "mtg_commander_sim/record*.py",
+        "mtg_commander_sim/runtime.py",
+        "mtg_commander_sim/service.py"
+      ],
       "browser_full": true
     },
     {
@@ -278,6 +295,9 @@
   ],
   "forced_labels": {
     "browser-full": "browser_full",
+    "browser-combat": "browser_focus:combat",
+    "browser-mana-action": "browser_focus:mana-action",
+    "browser-turn-draw": "browser_focus:turn-draw",
     "windows-full": "windows_full"
   }
 }

@@ -68,6 +68,8 @@ class CiPipelineTests(unittest.TestCase):
         self.assertIn("cancel-in-progress: true", pr)
         self.assertIn("PR / Certification", pr)
         self.assertIn("fromJSON(needs.plan.outputs.browser_matrix)", pr)
+        self.assertIn("needs.plan.outputs.browser_focus_grep", pr)
+        self.assertIn("Run focused browser journeys for affected rules", pr)
         self.assertIn("--shard=${{ matrix.shard }}/${{ matrix.total }}", pr)
         self.assertIn("scripts/test_shards.py run", pr)
         generated = pr.split("\n  generated:", 1)[1].split("\n  package:", 1)[0]

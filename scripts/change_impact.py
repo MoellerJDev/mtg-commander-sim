@@ -21,6 +21,8 @@ class ImpactPlan:
     test_suites: tuple[str, ...]
     checks: tuple[str, ...]
     browser_full: bool
+    browser_focuses: tuple[str, ...]
+    browser_focus_patterns: tuple[str, ...]
     windows_full: bool
     policy_schema_version: int
     policy_fingerprint: str
@@ -106,14 +108,30 @@ def load_impact_policy(path: Path = POLICY_PATH) -> tuple[dict, str]:
     if set(value) != {
         "schema_version",
         "default_checks",
+        "browser_focuses",
         "path_rules",
         "fallback_test_suites",
         "forced_labels",
     }:
         raise ValueError("Change-impact policy has unknown or missing fields")
-    if value["schema_version"] != 1:
+    if value["schema_version"] != 2:
         raise ValueError("Unsupported change-impact policy schema")
     _string_tuple(value["default_checks"], field="default_checks")
+    browser_focuses = value["browser_focuses"]
+    if (
+        not isinstance(browser_focuses, dict)
+        or not browser_focuses
+        or any(
+            not isinstance(name, str)
+            or not name
+            or not isinstance(pattern, str)
+            or not pattern.startswith("@")
+            for name, pattern in browser_focuses.items()
+        )
+    ):
+        raise ValueError(
+            "browser_focuses must map nonempty IDs to Playwright tags"
+        )
     rules = value["path_rules"]
     if not isinstance(rules, list) or not rules:
         raise ValueError("path_rules must be a nonempty list")
@@ -123,6 +141,7 @@ def load_impact_policy(path: Path = POLICY_PATH) -> tuple[dict, str]:
         "collect_test_module",
         "test_suites",
         "checks",
+        "browser_focuses",
         "browser_full",
         "windows_full",
     }
@@ -139,6 +158,16 @@ def load_impact_policy(path: Path = POLICY_PATH) -> tuple[dict, str]:
             raise ValueError(f"path_rules[{index}].patterns cannot be empty")
         _string_tuple(rule.get("test_suites"), field=f"path_rules[{index}].test_suites")
         _string_tuple(rule.get("checks"), field=f"path_rules[{index}].checks")
+        selected_focuses = _string_tuple(
+            rule.get("browser_focuses"),
+            field=f"path_rules[{index}].browser_focuses",
+        )
+        unknown_focuses = sorted(set(selected_focuses).difference(browser_focuses))
+        if unknown_focuses:
+            raise ValueError(
+                f"path_rules[{index}].browser_focuses are unknown: "
+                + ", ".join(unknown_focuses)
+            )
         for field in ("collect_test_module", "browser_full", "windows_full"):
             if field in rule and not isinstance(rule[field], bool):
                 raise ValueError(f"path_rules[{index}].{field} must be boolean")
@@ -166,7 +195,14 @@ def load_impact_policy(path: Path = POLICY_PATH) -> tuple[dict, str]:
     if not isinstance(labels, dict) or not all(
         isinstance(key, str)
         and key
-        and target in {"browser_full", "windows_full"}
+        and (
+            target in {"browser_full", "windows_full"}
+            or (
+                isinstance(target, str)
+                and target.startswith("browser_focus:")
+                and target.removeprefix("browser_focus:") in browser_focuses
+            )
+        )
         for key, target in labels.items()
     ):
         raise ValueError("forced_labels must map labels to supported platform gates")
@@ -194,6 +230,7 @@ def classify_changes(
     checks = set(_string_tuple(policy["default_checks"], field="default_checks"))
     matched_rule_ids: set[str] = set()
     browser_reasons: set[str] = set()
+    browser_focuses: set[str] = set()
     windows_reasons: set[str] = set()
 
     for path in changed:
@@ -211,6 +248,12 @@ def classify_changes(
                 path_has_suite = True
                 suites.update(selected_suites)
             checks.update(_string_tuple(rule.get("checks"), field=f"{rule_id}.checks"))
+            browser_focuses.update(
+                _string_tuple(
+                    rule.get("browser_focuses"),
+                    field=f"{rule_id}.browser_focuses",
+                )
+            )
             if rule.get("collect_test_module"):
                 modules.add(Path(path).stem)
             if rule.get("browser_full"):
@@ -234,12 +277,20 @@ def classify_changes(
             browser_reasons.add(f"label:{label}")
         elif target == "windows_full":
             windows_reasons.add(f"label:{label}")
+        elif target.startswith("browser_focus:"):
+            browser_focuses.add(target.removeprefix("browser_focus:"))
+    ordered_focuses = tuple(sorted(browser_focuses))
     return ImpactPlan(
         changed_files=changed,
         test_modules=tuple(sorted(modules)),
         test_suites=tuple(sorted(suites)),
         checks=tuple(sorted(checks)),
         browser_full=bool(browser_reasons),
+        browser_focuses=ordered_focuses,
+        browser_focus_patterns=tuple(
+            str(policy["browser_focuses"][focus])
+            for focus in ordered_focuses
+        ),
         windows_full=bool(windows_reasons),
         policy_schema_version=int(policy["schema_version"]),
         policy_fingerprint=policy_fingerprint,

@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       browser_full: ${{ steps.impact.outputs.browser_full }}
+      browser_focus_grep: ${{ steps.impact.outputs.browser_focus_grep }}
       browser_matrix: ${{ steps.impact.outputs.browser_matrix }}
       windows_full: ${{ steps.impact.outputs.windows_full }}
     steps:
@@ -230,6 +231,14 @@ jobs:
       - name: Run compact four-context smoke
         if: needs.plan.outputs.browser_full != 'true'
         run: npm run e2e:smoke --prefix web
+      - name: Run focused browser journeys for affected rules
+        if: >-
+          needs.plan.outputs.browser_full != 'true' &&
+          needs.plan.outputs.browser_focus_grep != ''
+        working-directory: web
+        env:
+          MTG_BROWSER_FOCUS_GREP: ${{ needs.plan.outputs.browser_focus_grep }}
+        run: npx playwright test --grep "$MTG_BROWSER_FOCUS_GREP"
       - name: Run complete browser journeys for affected changes
         if: needs.plan.outputs.browser_full == 'true'
         run: >-
