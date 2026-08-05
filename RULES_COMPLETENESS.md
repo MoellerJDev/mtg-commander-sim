@@ -1,297 +1,140 @@
 ---
 title: "Rules completeness program"
 status: "current"
-authoritative_source: "pinned rules corpus, coverage schemas, and trust policy"
-verified: "3bb415ef898e3c013eaf78007c4169cc530111f5"
-audience: "rules, compiler, and test contributors"
+authoritative_source: "pinned rules corpus, compiler, capability registry, CardPrograms, and generated coverage"
+verified: "2026-08-05"
+audience: "rules, compiler, and engine contributors"
 maintenance: "hand-maintained"
 ---
 
 # Rules completeness program
 
-## Goal and current status
+The goal is reproducible rules and card support for a pinned Comprehensive
+Rules, Oracle and rulings snapshot. The simulator does not claim complete Magic
+support while material grammar, capabilities or interactions remain unresolved.
 
-The long-term goal is deterministic enforcement of the pinned Magic
-Comprehensive Rules and Oracle corpus for any supported deck, without writing
-one engine branch per card.
+Current implementation, compiler and architecture status is generated in:
 
-The integrated `main` branch establishes the versioned corpus, typed Oracle IR,
-mechanic contracts, and generic CR 400/613/616/704 primitives. It does not yet
-claim complete rules or Oracle coverage. Current corpus, conformance, mechanic,
-compiler, residual, and trust figures are generated from the pinned JSON in
-[`coverage/rules-coverage.md`](coverage/rules-coverage.md),
-[`coverage/rules-conformance.md`](coverage/rules-conformance.md), and
-[`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md).
-`current_snapshot_complete` is a machine-derived gate, not a hand-maintained
-claim.
+- [`docs/RULES_COMPLETENESS_STATUS.md`](docs/RULES_COMPLETENESS_STATUS.md)
+- [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md)
+- [`coverage/card-unlock-frontier.md`](coverage/card-unlock-frontier.md)
+- [`coverage/reusable-piece-matrix.md`](coverage/reusable-piece-matrix.md)
+- [`docs/RULES_DEPENDENCY_QUEUE.md`](docs/RULES_DEPENDENCY_QUEUE.md)
 
-Existing reviewed engine behavior and semantic packs remain available, but the
-new corpus does not retroactively label them trusted until contracts, rule
-references, and conformance tests are linked.
+## Generic support for new decks
 
-Oracle IR v12 additionally structures exact whole-line forms for simple self
-enters/dies/leaves triggers, unconditional enters-tapped replacements, fixed
-self pumps and keyword grants, one-counter instructions, and basic creature
-token creation, plus target-creature goad instructions with optional opponent-
-controller constraints. It also lowers reviewed current-turn declaration gates
-for spells cast, controlled creature deaths, positive player damage, and prior
-direct-player attacks through a generic hashed look-back journal. These remain
-provisional wherever a dependency contract is partial.
+A new deck does not require one branch per card. Deck loading resolves cards
+against the pinned local Scryfall database, compiles each Oracle face into
+source-spanned CardProgram V2 nodes, declares fine-grained capabilities, and
+checks the complete materially reachable program.
 
-## New decks: generic compilation, not one branch per card
-
-Most cards should be supported by reusable machinery:
+The normal path is:
 
 ```text
-Pinned CR + Oracle + rulings
-              │
-              ▼
-      versioned mechanics contracts
-              │
-              ▼
-        typed Oracle semantic IR
-              │
-              ▼
-  generic costs / targets / effects / layers
-              │
-              ▼
-       authoritative legal actions
+pinned Oracle and rulings
+          |
+   typed Oracle IR
+          |
+  CardProgram V2 nodes
+          |
+capability and interaction closure
+          |
+typed runtime queries, proposals, coordinators and mutation owners
 ```
 
-A new deck load now:
+Supported wording automatically benefits every equivalent card. Unsupported
+wording remains a precise residual and fails trusted preflight. Card-specific
+reviewed overrides are compatibility exceptions, not the scaling model; repeated
+shapes must become a generic compiler production.
 
-1. Resolve its current Oracle IDs and faces from the pinned local database.
-2. Parses each ability into typed nodes such as costs, targets, triggers,
-   replacement effects, continuous effects, searches, copies, and durations.
-3. Links recognized nodes to mechanic dependency identifiers and source spans.
-4. Keeps generated programs provisional and arbiter-gated until every
-   dependency is trusted.
-5. Rejects trusted execution if any material Oracle span remains unparsed or
-   depends on an untrusted contract.
-6. Caches generated programs by Oracle/rulings/compiler/semantic hashes.
+## Pinned inputs
 
-That makes common wording and mechanics reusable across thousands of cards.
-For example, one correct flying, Ward, Cycling, landfall, target-plan, or
-zone-change implementation can serve every compatible Oracle template.
+`rules/source-manifest.json` pins the Comprehensive Rules source. The managed
+card-data service pins Oracle and rulings exports in the local database.
+Compiler, capability, mechanic-contract, runtime-component and semantic hashes
+complete the executable identity stored with Game Record v3.
 
-Some cards are genuine exceptions. A card-specific override is allowed only
-when generic compilation cannot express it. The override must pin the Oracle
-ID, Oracle hash, rulings hash, compiler failure category, rule references,
-review status, and deterministic tests. Card-name conditions do not belong in
-the turn, stack, cost, target, combat, or zone kernels.
+Refreshing Scryfall data can introduce new wording or change a deck fingerprint.
+The new snapshot is compiled and validated independently. It never changes the
+meaning of an in-progress or historical game.
 
-## Pinned source snapshot
+## Completeness dimensions
 
-`simctl rules sync` locates the TXT link through the official Magic Rules page,
-downloads it only from an allowlisted Wizards HTTPS host, and saves the
-original under ignored `local/rules/`.
+Card and rules support is evaluated across separate dimensions:
 
-Tracked derived files contain no rules prose:
+- syntax: every material Oracle span is classified;
+- lowering: recognized syntax becomes typed nodes with exact source spans;
+- capability: every node declares the behavior it requires;
+- implementation: each required capability resolves to one canonical owner;
+- interaction: materially reachable cross-card behavior is represented or
+  explicitly blocked;
+- format/profile: Commander and multiplayer dependencies close for the selected
+  game profile;
+- assurance: positive, negative, replay, rollback, multiplayer, privacy,
+  property and mutation evidence passes where applicable.
 
-- `rules/manifest.json`
-- `rules/rule-index.json`
-- `rules/glossary-index.json`
-- `rules/mechanic-index.json`
-- `rules/dependency-graph.json`
-- `rules/conformance-cases.json`
-- `mechanics/registry.json`
-- `coverage/rules-coverage.json`
-- `coverage/rules-conformance.json`
-- `coverage/mechanics-coverage.json`
-- `coverage/rules-delta.json`
-- `coverage/oracle-coverage.json`
-- `coverage/oracle-coverage-commander.json`
+“Parsed,” “lowerable,” “exact Oracle IR,” “capability-closed,” and “trusted
+CardProgram” are intentionally different claims.
 
-The manifest pins:
+## Family acceptance
 
-- effective date and official URLs
-- raw CR SHA-256 and byte size
-- parser/schema versions
-- hashes of every derived index
-- Oracle and rulings bulk timestamps, archive SHA-256 values, filenames, and
-  record counts when a local Scryfall database is supplied
+A rules-family change is complete only when it:
 
-An existing Game Record continues to pin its own engine and semantic registry.
-A later rules download cannot silently alter old command replay.
+1. implements one reusable behavioral family with a typed owner;
+2. routes every represented producer through that owner;
+3. shares legal-action advertisement and command validation;
+4. removes the competing legacy implementation;
+5. lowers applicable Oracle grammar without runtime text parsing;
+6. declares precise capability and ambient interaction dependencies;
+7. rejects unsupported variants before mutation;
+8. adds the applicable conformance and trust evidence;
+9. improves or holds measured architecture debt;
+10. regenerates the corpus, card frontier and reusable-piece matrix at the final
+    exact head.
+
+A dataclass, witness card, test-count increase or generated report is not a
+rules-family implementation by itself.
+
+## Trust and overrides
+
+Trusted capabilities require a resolvable implementation, current official rule
+references, supported profile coverage, no blockers and the mandatory evidence
+set enforced by the registry. Dependencies fail closed. Capability authors
+cannot waive the minimum by declaring an empty evidence list.
+
+A genuinely irreducible override pins Oracle, rulings, rule, compiler and test
+identity and documents why generic lowering is unavailable. It remains visible
+in specificity and trust reports. Do not add printed-name or Oracle-ID behavior
+to the universal engine.
 
 ## Commands
 
-Sync the official rules and pin the local Scryfall snapshot:
+Use the project interpreter and managed current database:
 
-```bash
-python simctl.py rules sync \
-  --root . \
+```powershell
+.\.venv\Scripts\python.exe simctl.py rules verify
+.\.venv\Scripts\python.exe simctl.py rules coverage
+.\.venv\Scripts\python.exe simctl.py rules queue
+.\.venv\Scripts\python.exe simctl.py rules next
+.\.venv\Scripts\python.exe simctl.py pieces next
+.\.venv\Scripts\python.exe scripts\update_card_unlock_frontier.py --check `
+  --db data/scryfall-current.sqlite3
+.\.venv\Scripts\python.exe scripts\update_reusable_piece_matrix.py --check `
   --db data/scryfall-current.sqlite3
 ```
 
-Inspect and verify:
+Run focused tests during implementation and the change-impact quick gate before
+publishing. Regenerate expensive full-corpus artifacts once at the final exact
+head, then require public CI for that same SHA.
 
-```bash
-python simctl.py rules inventory --root .
-python simctl.py rules coverage --root .
-python simctl.py rules conformance --root .
-python simctl.py rules next --root . --limit 20
-python simctl.py rules verify --root .
-python simctl.py rules report --root . --output local/rules-report.md
-```
+## Selecting the next family
 
-Compare a current corpus to an older checked-out/exported root:
+Use the refreshed dependency queue, card-unlock frontier and reusable-piece
+matrix. Prefer a bounded family that removes a shared blocker, reduces engine
+responsibility and unlocks multiple cards. Do not use a stale hand-written
+roadmap or traverse rules numerically.
 
-```bash
-python simctl.py rules diff \
-  --root . \
-  --against ../previous-rules-snapshot
-```
-
-The diff identifies added, removed, changed, and hash-identical renumbered
-rules, writes JSON/Markdown artifacts, and blocks completeness until the delta
-is reviewed.
-
-The conformance corpus contains one record for every numbered rule. Newly
-generated records are `unreviewed` and `inventory_only`; their generated
-source-linkage tests do not count as semantic correctness. A passing case must
-link reviewed implementation components and executable tests and cover every
-scenario declared for that rule. A changed rule-text hash invalidates its
-review fields. See `RULE_CONFORMANCE.md`.
-
-The older in-game lookup remains available:
-
-```bash
-python simctl.py rules \
-  --db data/scryfall-current.sqlite3 \
-  --game run/example \
-    "Sensei's Divining Top"
-```
-
-Compile and explain arbitrary Oracle cards:
-
-```bash
-python simctl.py oracle parse "Lightning Bolt" \
-  --db data/scryfall-current.sqlite3
-python simctl.py oracle explain "Rest in Peace" \
-  --db data/scryfall-current.sqlite3
-python simctl.py oracle residuals \
-  --db data/scryfall-current.sqlite3
-python simctl.py oracle coverage \
-  --db data/scryfall-current.sqlite3 \
-  --output coverage/oracle-coverage.json
-```
-
-Coverage artifacts omit Oracle prose and store identity, source span, reason,
-blockers, and residual text hashes.
-
-## Implemented generic foundations
-
-`continuous_effects.py` implements CR 613 layer/sublayer ordering,
-characteristic-defining-first/timestamp/dependency ordering, audited
-dependency cycles, applicability/duration predicates, and typed copy, control,
-text, type, color, ability, and power/toughness operations. The engine uses it
-for copy overrides, bestow type changes, added types/subtypes, and temporary
-keyword grants. Other legacy static-ability paths have not all been migrated,
-so the contract remains partial.
-
-`replacement/` implements deep-immutable CR 614-616 event trees, recursive
-affected-player/object chooser validation, canonical optional declines,
-strict continuation deserialization, rechecking, one application per
-effect/event, and a closed typed operation vocabulary. The small
-`replacement_effects.py` facade preserves imports. The subsystem is not yet
-connected to every zone, draw, damage, and enters producer, and persistent
-shields/redirection remain incomplete, so its contract remains partial.
-
-The zone kernel implements a stable physical card identity plus a serialized
-logical-incarnation counter and zone-entry timestamp moment. Ordinary
-cross-zone moves, draws, casts, and same-zone exile/command moves create new
-incarnations; objects moved simultaneously to one destination share a
-timestamp moment. Target snapshots and implemented linked delayed moves
-require the recorded incarnation. State that cannot survive CR 400.7 is
-cleared, while a permanent spell retains its logical incarnation under CR
-400.7a and implemented stack-to-battlefield continuations such as as-enters
-choices are explicit. The contract remains partial because the full CR 400.7
-exception matrix, merged/melded and face-down objects, stickers, all legacy
-physical-reference links, and complete CR 613.7m relative timestamp choices
-have not yet migrated to typed policies.
-
-`state_based_actions.py` implements an order-invariant CR 704 permanent
-snapshot and distinguishes non-destruction graveyard moves, destruction,
-unattachment, opposing +1/+1 and -1/-1 counter removal, and token or copy
-cessation. The engine integrates that batch into its fixed-point loop, reuses
-declarative attachment predicates, and preserves pre-batch last-known
-information for simultaneous moves. Tokens and invalid-zone copies first reach
-their destination, then cease during the next SBA check without a second
-zone-change event. Spell copies, card copies, and tokens are distinct typed
-objects; copied permanent spells become the same represented object as token
-permanents without a token-creation event. A separate serialized World-since
-timestamp supports CR 704.5k: the unique newest World permanent survives,
-while a newest-duration tie moves every World permanent simultaneously.
-Player loss, poison, empty draw, commander damage, planeswalker loyalty, and
-the legend rule remain integrated in `CommanderEngine`. The contracts remain
-partial: complete copiable values, card-copy casting/playing, Prepare,
-specialized copy interactions, maximum-counter wording outside the reviewed
-numeric self-restriction family, Sagas, dungeons, space sculptor, Roles,
-speed, complete enchant-quality grammar, regeneration, and simultaneous
-loss-event replacement still block trust.
-
-The partial CR 120/210/310 contracts add generic Battle state. Derived
-characteristics carry printed defense through copying; battlefield entry
-initializes new defense counters; damage removes loyalty, marks creature
-damage, and removes defense according to every applicable permanent type.
-Siege protectors are chosen during resolution, exposed publicly without
-authoritative object identity, used for attack/block routing, and repaired by
-state-based action. The last-defense trigger and zero-defense exception are
-logical-incarnation-aware and replayable. That trigger now exiles the exact
-source incarnation and offers a replayable cast-or-decline choice for the
-transformed face without paying its mana cost. Tokens cease after exile.
-Compiled target schemas are exposed to the pilot, while unresolved mandatory
-target grammar stops for arbitration.
-
-This is not complete Battle support. Replacement ordering for the defeated
-trigger's exile, cast-time modes/targets/additional costs outside compiled
-schemas, type/control changes during combat, full damage-event replacement
-ordering, nonspell as-enters protector continuations, and future Battle-type
-protector predicates remain blocked. Post-snapshot Control Point previews are
-rejected rather than guessed.
-
-The Oracle compiler currently recognizes whole-sentence templates for simple
-draw, life, damage, destroy, exile, return, counter, mill, tap/untap, scry,
-power/toughness modification, printed keyword lists, and intrinsic mana
-abilities. It never drops an unrecognized suffix; mutation tests verify that
-added material text creates a residual.
-
-## Trust gates
-
-A rules or mechanic entry may move to `trusted` only after:
-
-- a concise reviewed summary and behavioral classification
-- an implementation component
-- explicit dependency and applicability records
-- a versioned mechanic contract
-- positive, negative, interaction, multiplayer, and replay tests as applicable
-- matching CR, Oracle, rulings, compiler, and implementation hashes
-
-Any changed source hash invalidates the affected trust chain. Unknown
-coverage, unparsed material Oracle text, an unresolved cost/target/layer
-construct, or a surviving critical mutation blocks evidence-mode
-completeness.
-
-## Remaining implementation slices
-
-The remaining work proceeds by dependency and blocked-card impact:
-
-1. Strict server-issued action/choice schemas.
-2. Complete object-identity continuation policies, last-known information,
-   faces, merged objects, and linked abilities.
-3. Casting, costs, restricted mana, and cost modification ordering.
-4. Targeting, modes, distributions, resolution, and linked choices.
-5. Complete trigger detection/order and the remaining state-based actions.
-6. Migrate all continuous effects to the new evaluator, including CDA
-   discovery, face-down/merged objects, players/game rules, and APNAP
-   timestamps.
-7. Connect replacement/prevention ordering to every replaceable event,
-   including nested events and simultaneous APNAP choices.
-8. Complete combat assignment and damage.
-9. Specialized layouts, player designations, Commander, and multiplayer.
-10. Typed Oracle IR coverage, differential tests, seeded fuzzing, and mutation
-    gates across the complete pinned snapshot.
-
-Until those gates pass, reports must describe exact implemented slices rather
-than “complete Magic support.”
+Reports must state implemented and blocked rule IDs, capability changes,
+producers migrated, architecture deltas, card/residual deltas, assurance results
+and known limitations. If measured support falls after a correctness fix, report
+the demotion rather than preserving a false positive.

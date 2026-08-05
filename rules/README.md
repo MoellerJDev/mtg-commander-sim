@@ -2,7 +2,7 @@
 title: "Derived Comprehensive Rules metadata"
 status: "current"
 authoritative_source: "simctl rules sync and tracked rules indexes"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "rules and compiler contributors"
 maintenance: "hand-maintained"
 ---

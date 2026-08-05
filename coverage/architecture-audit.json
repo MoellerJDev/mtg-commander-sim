@@ -9264,11 +9264,11 @@
       {
         "file": "docs/index.md",
         "metadata": {
-          "audience": "users, operators, and contributors",
-          "authoritative_source": "repository documentation policy",
+          "audience": "users, operators, contributors, and coding agents",
+          "authoritative_source": "repository documentation policy and maintained documentation set",
           "maintenance": "hand-maintained",
           "status": "current",
-          "title": "Documentation map",
+          "title": "Documentation map and standard",
           "verified": "2026-08-05"
         },
         "metadata_complete": true,
@@ -9283,7 +9283,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "System context",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9297,7 +9297,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Runtime containers",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9311,7 +9311,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Rules kernel",
-          "verified": "2026-08-02"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9339,7 +9339,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Oracle compiler",
-          "verified": "2026-08-04"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9353,7 +9353,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Typed semantic handlers",
-          "verified": "2026-08-04"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9367,7 +9367,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "CardProgram runtime components",
-          "verified": "2026-08-04"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9395,7 +9395,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Drawing-card transaction",
-          "verified": "2026-08-04"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9423,7 +9423,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Replay architecture",
-          "verified": "2026-08-01"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9437,7 +9437,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Visibility and projection",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9451,7 +9451,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Dependency and mutation rules",
-          "verified": "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9465,7 +9465,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "CardProgram trust and applicable closure",
-          "verified": "2026-08-03"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9479,7 +9479,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Card override extension guide",
-          "verified": "2026-08-01"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9493,7 +9493,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Mechanic capability extension guide",
-          "verified": "2026-08-03"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9507,7 +9507,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Semantic node extension guide",
-          "verified": "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9521,7 +9521,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Runtime-component extension guide",
-          "verified": "2026-08-01"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9535,7 +9535,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Testing strategy",
-          "verified": "2026-08-02"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9549,7 +9549,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Interaction coverage",
-          "verified": "3bb415ef898e3c013eaf78007c4169cc530111f5"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9563,7 +9563,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Replay testing",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9577,7 +9577,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Privacy testing",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9591,7 +9591,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Mutation testing policy",
-          "verified": "2026-08-03"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9605,7 +9605,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Local application operations",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9614,12 +9614,12 @@
       {
         "file": "docs/operations/hosted.md",
         "metadata": {
-          "audience": "future deployers and security contributors",
-          "authoritative_source": "documented gaps in server runtime and threat model",
+          "audience": "operators and deployment reviewers",
+          "authoritative_source": "implemented single-process local server and security boundary",
           "maintenance": "hand-maintained",
-          "status": "target",
-          "title": "Hosted deployment target",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "status": "current",
+          "title": "Deployment boundary",
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9633,7 +9633,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Legal and third-party content boundary",
-          "verified": "65fb55cc7c6dd2ccb1cee517860dd99e2aefe67d"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9647,7 +9647,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Threat model",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9661,7 +9661,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "2f83b2de258b54524390fb7008000136ea02ce64e37b97192d6b24922f6fe7bf"
+          "verified": "f3f9f7c9c108415b641475f067e743fcb6c2f4675320f12f0054f446b5afa883"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9670,11 +9670,11 @@
       {
         "file": "docs/RULES_COMPLETENESS_STATUS.md",
         "metadata": {
-          "audience": "rules, compiler, and engine contributors",
-          "authoritative_source": "pinned rules and generated coverage artifacts",
+          "audience": "rules, compiler, engine, and product contributors",
+          "authoritative_source": "pinned rules, generated coverage, capability evidence, and CardProgram census",
           "maintenance": "hand-maintained",
           "status": "current",
-          "title": "Rules completeness implementation status",
+          "title": "Rules completeness status",
           "verified": "2026-08-05"
         },
         "metadata_complete": true,
@@ -9712,11 +9712,11 @@
       {
         "file": "OVERNIGHT_HANDOFF.md",
         "metadata": {
-          "audience": "maintainers continuing the migration",
-          "authoritative_source": "git main and generated status artifacts",
+          "audience": "maintainers resuming repository work",
+          "authoritative_source": "live Git state and generated status reports",
           "maintenance": "hand-maintained",
           "status": "current",
-          "title": "Integration handoff",
+          "title": "Integration checkpoint",
           "verified": "2026-08-05"
         },
         "metadata_complete": true,

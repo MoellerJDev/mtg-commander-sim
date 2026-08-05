@@ -2,7 +2,7 @@
 title: "Game Record v3"
 status: "current"
 authoritative_source: "mtg_commander_sim/record.py and record schemas"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "engine, persistence, replay, and analyst contributors"
 maintenance: "hand-maintained"
 ---
@@ -217,7 +217,7 @@ commands cannot be reconstructed honestly.
 
 An unfinished record replays its accepted-command prefix. A passing prefix
 proves that every accepted transition reproduced the saved checkpoint; it does
-not imply that the game ended. Version 0.6.0 uses explicit lifecycle states:
+not imply that the game ended. Current records use explicit lifecycle states:
 `created`, `in_progress`, `paused`, `complete`, `aborted`, and `corrupt`.
 Paused records carry a structured `pause_reason`, and Codex arenas copy that
 reason into `codex_arena.stop_reason`.
@@ -328,7 +328,7 @@ requires a terminal game, replay verification, complete historical
 alternatives/reasons, trusted materially relevant semantics, the requested
 format, no material rules conflict, and a genuinely strategic pilot.
 
-Version 0.7.0 fails legal-action exposure when any meaningful window is
+The fidelity gate fails legal-action exposure when any meaningful window is
 incorrectly suppressed or a mandatory-target action is advertised without
 legal targets. The report records `profile_fingerprint_match`,
 `action_opportunity_coverage`, `suppressed_meaningful_windows`,
@@ -337,8 +337,8 @@ legal targets. The report records `profile_fingerprint_match`,
 `provider_identity_verified`, `model_identity_verified`,
 `seat_projection_verified`, and `codex_subagent_run`.
 
-Version 0.8.0 records use the same Game Record v3 layout. CardProgram V2 and
-semantic closure do not redesign the record: replay pins card/ability program
+CardProgram V2 and semantic closure do not redesign Game Record v3: replay pins
+card/ability program
 identity, source hashes, accepted commands, transition hashes, opportunity
 rows, and honest provider metadata. A 100/100 exact-list preflight is necessary
 but not sufficient for matchup evidence; the terminal, replay, pilot,

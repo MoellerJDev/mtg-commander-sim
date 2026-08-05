@@ -2,7 +2,7 @@
 title: "Local card database"
 status: "current"
 authoritative_source: "managed Scryfall data service and card database schema"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "local operators and data-layer contributors"
 maintenance: "hand-maintained"
 ---
@@ -22,18 +22,20 @@ python scripts/build_test_database.py build \
   --output data/test-ci.sqlite3
 ```
 
-For a complete local corpus, use the bulk-data refresh command documented in
-the root README. A legacy complete bundle may instead place
-`scryfall-20260728-compact.sqlite3.gz` here and run:
+For the complete local corpus, start the application normally or run the managed
+bulk-data refresh explicitly:
 
-```bash
-python scripts/bootstrap_data.py
+```powershell
+.\.venv\Scripts\python.exe scripts\bootstrap_data.py `
+  --refresh-from-scryfall `
+  --output data/scryfall-current.sqlite3
 ```
 
-The legacy default runtime path is:
+The active runtime path is:
 
 ```text
-data/scryfall-20260728-compact.sqlite3
+data/scryfall-current.sqlite3
 ```
 
-Neither database path is packaged in the wheel.
+Managed snapshots, compressed bulk files and card images are local cache data.
+They are ignored by Git and are not packaged in the wheel.

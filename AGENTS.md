@@ -1,7 +1,7 @@
 ---
 title: "Codex project instructions"
 status: "current"
-authoritative_source: "repository contribution and architecture policy"
+authoritative_source: "repository contribution, architecture, and documentation policy"
 verified: "2026-08-05"
 audience: "Codex agents and contributors"
 maintenance: "hand-maintained"
@@ -9,201 +9,167 @@ maintenance: "hand-maintained"
 
 # Codex project instructions
 
-## Browser ownership and headless testing
+Read this file completely before changing the repository. These instructions
+are durable guardrails, not a status report. Never add branch names, pull
+request numbers, CI run IDs, test totals or transient task notes here.
 
-- Treat every system-browser window and Codex in-app browser as user-owned
-  state. Never open, reuse, focus, or navigate a visible browser during agent
-  work unless the user explicitly requests visible browser interaction in that
-  same task. A prior request, an already-open browser, or a running localhost
-  listener is not authorization.
-- Starting a listener such as `127.0.0.1:18080` is test infrastructure only.
-  It must not launch or navigate a browser. Probe HTTP endpoints with a CLI
-  client and run UI checks in an isolated headless Playwright browser.
-- Agent-driven server checks must use
-  `.\.venv\Scripts\python.exe -m server --no-open`; never run a bare server
-  command, pass `--open`, invoke `webbrowser`, use an OS
-  browser-launch command, or use a browser-control tool unless the user has
-  explicitly requested an interactive/manual browser session.
-- Keep Vite `open: false` and HTML reporters configured with `open: "never"`.
-  Stop server processes started for an automated check when the check ends.
+## Find current context
 
-## Nonnegotiable boundaries
+1. Inspect Git, worktree, pull-request and CI state instead of trusting a prior
+   handoff.
+2. Read [`docs/index.md`](docs/index.md) and use its task routing table.
+3. Read the relevant generated status report before choosing rules or
+   architecture work.
+4. Read only the architecture, reference, operations and ADR documents required
+   by the task, then inspect their authoritative code and tests.
+5. Treat implementation, schemas, machine-readable policy and executable tests
+   as current behavior. Generated reports own changing measurements. ADRs and
+   the changelog explain history; they do not override current behavior.
 
-- `CommanderEngine` is authoritative. Never let a pilot mutate zones, life, mana, stack, counters, or effects directly.
-- Every player command must be authorized by an unconsumed capability issued to that authenticated principal.
-- Only the arbiter may submit generic effects, and only while holding an `arbiter.resolve` capability.
-- Hidden information must be projected by principal. Never solve a UI issue by exposing full state.
-- No Scryfall network calls during a game. Use local SQLite data.
-- Unknown Oracle semantics must fail into an arbiter decision; never guess silently.
-- Rules/Oracle completeness is snapshot-scoped. Pin CR, Oracle, rulings,
-  compiler, mechanic-contract, and semantic hashes before promoting coverage.
-- A material typed-Oracle compiler residual or untrusted mechanic dependency
-  must fail trusted preflight; never discard unsupported Oracle text.
-- A yield is an optimization, never authority to suppress a changed meaningful-action signature. `suppressed_meaningful_windows` must remain zero.
-- Pilots select server-advertised ability/cost options. Never restore arbitrary `declared_cost`, `cost_effects`, or uncompiled cast-from-zone input in strict mode.
-- Treat `principal` as authenticated transport metadata, never as a seat chosen inside a client command body.
-- Keep public protocol objects JSON-serializable, versioned, and hash-resynchronizable.
-- The realistic mulligan guard is policy, not a Magic rule; preserve the distinction.
-- Codex arena pilots use only their fixed-seat tool surface. Never give a pilot a run path to inspect, another seat's packet/memory, a raw capability, or authoritative checkpoint.
-- The primary Codex task may arbitrate public rules context but must never choose a strategic seat action or silently repair a legal poor choice.
-- Never label provider/model/thread identity as observed unless it came from an actual invocation. Preserve `null` when the platform does not expose a value.
-- Never promote a duplicated-deck fixture or a run with incomplete material semantics to matchup evidence.
-- Semantic choices that suspend resolution must persist a versioned,
-  replayable frame. Private search candidates go only to the searching seat;
-  public records must not reveal a nonrevealed result moved to hand.
-- Record summaries and provider counters are derived from journals. Never
-  upgrade recorded provider/model identity to verified by inference, and never
-  describe accepted-prefix replay as a completed game.
-- Product gameplay, rules enforcement, CI, merge gates, and releases must not
-  require an LLM, Codex runtime, provider credential, or live AI ruling. An AI
-  client is optional and has no authority beyond the ordinary projected client
-  protocol.
-- Do not spend product slices improving AI strategy, model routing, prompts, or
-  provider sessions. Keep existing provider-specific adapters isolated from the
-  authoritative rules and application layers.
+Useful status entry points:
 
-## Current architecture program
+- [`docs/PLATFORM_IMPLEMENTATION_STATUS.md`](docs/PLATFORM_IMPLEMENTATION_STATUS.md)
+- [`docs/RULES_COMPLETENESS_STATUS.md`](docs/RULES_COMPLETENESS_STATUS.md)
+- [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md)
+- [`docs/ARCHITECTURE_DEBT_STATUS.md`](docs/ARCHITECTURE_DEBT_STATUS.md)
+- [`coverage/card-unlock-frontier.md`](coverage/card-unlock-frontier.md)
+- [`coverage/reusable-piece-matrix.md`](coverage/reusable-piece-matrix.md)
 
-The repository is migrating incrementally from the current centralized engine
-to domain-owned rules modules. Follow the ordered phases recorded in the active
-project objective; do not use a feature request as permission for a big-bang
-rewrite.
+## Authority and safety boundaries
 
-- Certified `main` is CPython 3.12-only and integrates shared immutable casting
-  and activation proposal builders. Action advertisement and command execution
-  must continue to rebuild the same legality/cost proposal; do not return
-  casting, activation, or payment legality to `CommanderEngine`.
-- Certified `main` includes default-deny runtime trust, the dependency-ordered
-  behavioral-rules scheduler, immutable nested replacement trees, typed
-  replacement operations, physical commander designation identity, canonical
-  damage results, durable prevention/redirection state, and focused token,
-  zone, counter, life, and damage mutation owners. Generated reports, rather
-  than branch chronology, are the source of current counts.
-- Certified main includes typed prevention continuations and aftermath,
-  normalized ordinary trigger occurrence/APNAP placement, canonical draw and
-  life transactions, iterative large draw coordination, pinned Aura and
-  protection descriptors, typed granted abilities, fixed-query and locked-set
-  continuous effects, typed mana abilities, shared cast permissions, effective
-  Flying/Reach/Haste/Vigilance legality, and closed fixed-damage CardPrograms.
-  These are bounded families; unsupported source categories, conditions,
-  qualities, durations, dynamic values, and broader replacement/layer/trigger
-  grammar remain fail-closed as recorded in generated residuals.
-- The reusable-piece matrix joins the existing rules, capability, mechanic,
-  compiler, CardProgram, runtime, assurance, frontier, and corpus authorities.
-  It is reporting infrastructure, not a competing scheduler or trust owner.
-  Every new rules family must update it through normal registry/compiler inputs,
-  preserve zero unclassified material spans, and report interaction gaps and
-  program-baseline deltas honestly.
-- Preserve Game Record v3 commands, exact replay, principal projections, and
-  fail-closed semantics during every extraction.
-- Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
-  operations, or card-specific helpers to the universal engine.
-- A production module above 1,500 logical lines or a function above 150 logical
-  lines is measured debt and requires the documented review path for new growth.
+- `CommanderEngine` and its typed rules subsystems are authoritative. A client
+  never mutates zones, life, mana, stack, counters, choices or effects.
+- Every player command uses an unconsumed capability issued to the authenticated
+  principal. `principal` is transport identity, never client-selected data.
+- Only a scoped arbiter capability can submit generic effects. Product gameplay,
+  rules enforcement, CI and releases cannot depend on an LLM or live AI ruling.
+- Project hidden information by principal. Never solve a UI or test problem by
+  exposing an authoritative checkpoint, library order or another seat's data.
+- Use the pinned local Scryfall snapshot during games. Network access belongs to
+  managed data refresh outside game transitions.
+- Material unknown Oracle semantics, unsupported grammar and untrusted
+  capability dependencies fail closed before mutation.
+- A yield is an optimization, never authority to suppress a changed meaningful
+  action. `suppressed_meaningful_windows` must remain zero.
+- Advertised actions and accepted commands consume the same typed legality,
+  cost and target authority.
+- Preserve protocol versioning, deterministic hashes, transactional rollback,
+  principal projection and exact Game Record v3 replay.
+- Do not infer provider/model identity, completion, rules fidelity or matchup
+  evidence from partial or duplicated fixtures.
 
-The machine-readable baseline is `coverage/architecture-audit.json`; its
-generated presentations are `docs/ARCHITECTURE_DEBT_STATUS.md` and
-`docs/COMPILER_COVERAGE_STATUS.md`. Hand-maintained documents must link to those
-figures rather than copying them.
+## Rules and architecture changes
 
-## Development and certification workflow
+The repository is incrementally extracting coherent rules ownership from the
+central engine. Do not perform a big-bang rewrite and do not move code merely to
+reduce a line count.
 
-Use only the ignored worktree-local CPython 3.12 environment. Do not rely on a
-global `python` alias. Keep one branch in GitHub certification while developing
-the next independent branch in a second worktree; never mix changes between
-the two slots. The complete commands, recovery procedure, and shard ownership
-live in [the CI pipeline guide](docs/development/ci-pipeline.md).
+A valid rules family:
 
-During development, run the new tests and adjacent impacted modules. Before
-committing an ordinary change, run the deterministic quick gate:
+- represents a reusable Comprehensive Rules behavior rather than a card name,
+  collector number, set code or Oracle ID;
+- uses immutable typed queries/proposals/transactions and a narrow mutation
+  owner;
+- removes the prior implementation and narrows dependency direction;
+- lowers source-spanned CardProgram V2 nodes when Oracle text participates;
+- declares fine-grained capabilities and ambient interaction dependencies;
+- shares legality between offers and command validation;
+- fails closed for unsupported variants;
+- adds positive, negative, malformed-input, rollback, multiplayer, replay,
+  privacy, property and focused mutation evidence where applicable;
+- regenerates rules, compiler, card, architecture and status artifacts once at
+  the final exact head.
+
+Do not add a second capability, mechanic, compiler, scheduler or runtime
+component registry. Do not add runtime Oracle parsing or arbitrary executable
+callbacks. Repeated source-pinned descriptors must become a generic compiler
+production and component family.
+
+Follow [`docs/architecture/dependency-rules.md`](docs/architecture/dependency-rules.md)
+and the accepted [ADRs](docs/adr/index.md). A production module or function over
+the policy threshold is measured debt; growth requires the documented review
+path. The generated architecture audit is the measurement authority.
+
+## Browser ownership
+
+Every visible browser—including the Codex in-app browser—is user-owned state.
+Do not open, reuse, focus or navigate one unless the user explicitly requests
+visible interaction in the current task.
+
+- Automated server checks use
+  `.\.venv\Scripts\python.exe -m server --no-open`.
+- Probe HTTP endpoints with CLI clients.
+- Run UI checks only in isolated headless Playwright contexts.
+- Keep Vite `open: false` and HTML reporters at `open: "never"`.
+- Stop processes started for a check when the check ends.
+
+An open browser, prior permission or running localhost listener is not current
+authorization.
+
+## Development and certification
+
+Use the worktree-local CPython 3.12 environment, never a global `python` alias.
+Keep one substantive branch under certification and at most one independent
+next-batch worktree. Do not mix their changes.
+
+During development, run new and adjacent impacted tests. Before publishing an
+ordinary change, inspect and run the deterministic quick gate:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts/quick_gate.py
+.\.venv\Scripts\python.exe scripts\quick_gate.py --dry-run
+.\.venv\Scripts\python.exe scripts\quick_gate.py
 ```
 
-The quick gate classifies committed and working-tree paths, builds the compact
-offline database when needed, compiles Python, runs affected test modules or
-functional shards, and invokes relevant generated, architecture, rules,
-repository, package, or browser-build checks. Inspect its plan with
-`--dry-run`. It never starts a visible browser and does not run browser E2E
-locally.
+Public exact-head pull-request CI is the normal merge authority. The full local
+merge gate is for releases and unusually high-risk persistence, replay, privacy
+or packaging changes. Browser automation remains headless. The complete
+workflow and recovery commands are in
+[`docs/development/ci-pipeline.md`](docs/development/ci-pipeline.md).
 
-The public pull-request workflow is the normal certification authority. It
-runs ten balanced Linux functional shards plus generated/architecture,
-package, focused Windows compatibility, and isolated headless-browser jobs.
-Platform-sensitive changes replace the focused Windows overlay with the full
-manifest-derived primary-shard matrix. Those shards use separate Windows
-runners, processes, compact databases, and runtime directories with at most
-five workers, while one independent job builds the Windows wheel exactly once.
-`PR / Windows Certification` validates mode-specific job results, the exact
-manifest partition, and one nonempty result artifact per required shard before
-the stable certification context can pass.
-Every substantive PR runs authoritative four-context lifecycle smoke; typed rules owners select
-focused mana/action, combat, or turn/draw journeys, while browser, protocol,
-projection, persistence, lifecycle, reconnect, room, WebSocket, workflow, and
-browser-facing schema changes run the complete isolated Playwright groups.
-Changed-symbol ownership keeps priority and yield changes inside the legacy
-engine on the complete browser path without charging unrelated compiler work.
-The complete browser path has three deterministic nonempty groups—lifecycle,
-rules, and natural-winner soak—each with an isolated database, runtime, and port
-pair. Long journeys must use the shared progress driver and fail after 90
-seconds without a real decision, revision, event, phase, or persistence-state
-change; never restore nested multi-minute polling loops.
-Every required dependency feeds the stable `PR / Certification` result; protect
-`main` with that exact context. Do not enable auto-merge until the protection
-is confirmed, because GitHub otherwise treats the merge as immediately
-eligible.
+Never stage `run/`, `local/`, SQLite databases, Scryfall archives, image or deck
+caches, raw capabilities, private packets, provider memory or live Game Records.
+Use temporary directories and sanitized recipes for regression records.
 
-`scripts/local_merge_gate.py` remains available for releases and unusually
-high-risk persistence, replay, privacy, or packaging changes. It is not the
-default iteration gate for every rules PR. Complete Windows, browser, property,
-mutation, security, and current-corpus depth also runs on the nightly workflow.
+## Documentation contract
 
-Set `MTG_CARD_DB` when the database is outside `data/`. Never stage `run/`, a
-SQLite database, a raw deck cache, a capability-bearing packet, or a live Game
-Record. Regression records must be generated in a temporary directory from
-sanitized recipes.
+This repository uses a docs-as-code adaptation of Diátaxis:
 
-## Architecture tests required
+- tutorials teach a safe first success;
+- how-to guides solve a concrete operator or contributor task;
+- reference pages state precise interfaces and facts;
+- explanations describe architecture and rationale;
+- ADRs preserve durable decisions and consequences;
+- generated reports are the only authority for changing counts, fingerprints,
+  branch integration state and next-work selection.
 
-Changes touching turns, priority, combat, state-based actions, mulligans, permissions, projection patches, or semantic resolution require regression tests.
+For every implementation change, update the smallest existing document that
+owns the affected behavior. Do not create a progress diary, branch handoff,
+duplicate overview or one-page-per-feature note.
 
-Changes touching legal-action generation or yields also require opportunity
-journal assertions, a zero-suppression check, and exact replay of the
-seed-20260730 fixture.
+Living documentation must:
 
-For a new client feature:
+- describe the immediate current state in present tense;
+- distinguish implemented behavior from explicit limitations;
+- avoid PR/SHA/run/test/card totals and other volatile facts;
+- link to generated status instead of copying it;
+- have one primary audience and one documentation purpose;
+- use sentence-case headings, literal language and repository-relative links;
+- identify commands that are safe to copy;
+- delete or rewrite superseded guidance in the same PR;
+- update [`docs/index.md`](docs/index.md) when files move, appear or disappear.
 
-1. reuse or add a capability action
-2. project data only to principals that need it
-3. update protocol schema and reducer tests
-4. keep transport logic out of `CommanderEngine`
-5. preserve one ephemeral projection cursor per network connection
-6. derive the principal from authenticated room membership, never request JSON
+Use an ADR only for a durable architecture decision whose alternatives and
+consequences future contributors need. Supersede accepted ADRs; do not rewrite
+their historical decision. Keep historical narrative only in ADRs and
+[`CHANGELOG.md`](CHANGELOG.md).
 
-For new card semantics:
+Run the documentation fitness functions after any Markdown change:
 
-1. prefer generic DSL operations
-2. use runtime placeholders rather than physical object IDs
-3. delegate strategic player choices
-4. include a deterministic rules test
-5. do not hard-code a deck name or commander into the kernel
-6. add anchored whole-text templates to `oracle_ir.py`, preserving unmatched
-   material text as a residual
-7. keep generated programs provisional until every mechanic dependency has a
-   trusted contract
-8. add positive, negative, runtime, mutation, and source-hash tests
+```powershell
+.\.venv\Scripts\python.exe scripts\validate_documentation.py --check
+.\.venv\Scripts\python.exe scripts\update_platform_status.py --check
+.\.venv\Scripts\python.exe scripts\update_architecture_audit.py --check
+```
 
-Put reusable CR 613 operations in `continuous_effects.py`. Put CR 614-616
-immutable models, typed operations, applicability, ordering, and replay logic
-under `mtg_commander_sim/replacement/`; `replacement_effects.py` is only the
-narrow compatibility facade. Record evidence and blockers in a versioned
-mechanic contract, regenerate the registry, and verify the pinned rules corpus.
-
-## Performance targets
-
-- After bootstrap, routine packets should usually remain below 1,000 estimated input tokens.
-- Empty known priority windows should make no model call.
-- A repeated live decision without a state change should stay below 400 estimated tokens.
-- Prefer automatic transitions, yields, and semantic caching over more model calls.
-- Preserve patch hash validation; never trade correctness for a smaller unverified delta.
+If a document disagrees with code or generated evidence, fix or remove the
+document. Never preserve a stale statement for continuity.

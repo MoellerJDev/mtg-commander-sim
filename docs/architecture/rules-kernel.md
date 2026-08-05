@@ -2,7 +2,7 @@
 title: "Rules kernel"
 status: "current"
 authoritative_source: "mtg_commander_sim engine and rules modules"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "rules and engine contributors"
 maintenance: "hand-maintained"
 ---

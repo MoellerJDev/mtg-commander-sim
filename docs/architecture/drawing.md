@@ -2,7 +2,7 @@
 title: "Drawing-card transaction"
 status: "current"
 authoritative_source: "mtg_commander_sim/drawing, semantic_runtime/draw_replacements.py, and CR 121 contract/conformance artifacts"
-verified: "2026-08-04"
+verified: "2026-08-05"
 audience: "rules, compiler, replay, and engine contributors"
 maintenance: "hand-maintained"
 ---

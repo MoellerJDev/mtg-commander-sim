@@ -2,7 +2,7 @@
 title: "Privacy testing"
 status: "current"
 authoritative_source: "projection, protocol, pilot, and server privacy tests"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "security, server, client, and pilot contributors"
 maintenance: "hand-maintained"
 ---

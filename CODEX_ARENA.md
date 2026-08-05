@@ -2,7 +2,7 @@
 title: "Codex Commander Arena"
 status: "current"
 authoritative_source: "Codex pilot configuration and arena commands"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "Codex arena operators and pilot-provider contributors"
 maintenance: "hand-maintained"
 ---
@@ -14,8 +14,8 @@ plan. Codex sessions are untrusted clients and are not required for gameplay,
 legality, CI, merges, releases, or rules decisions. Current platform work must
 not optimize prompts, models, provider routing, or live AI games.
 
-Version 0.8.0 supports one neutral primary Codex task coordinating exactly four
-persistent, seat-isolated strategic pilot tasks.
+The optional arena adapter supports one neutral primary Codex task coordinating
+exactly four persistent, seat-isolated strategic pilot tasks.
 
 ## Roles
 
@@ -83,7 +83,7 @@ counts, and continuation after elimination.
 
 ```powershell
 python simctl.py arena-create `
-  --db data/scryfall-20260728-compact.sqlite3 `
+  --db data/scryfall-current.sqlite3 `
   --deck A=https://moxfield.com/decks/g5vtVfRuS0W5KxZuYqZHGQ `
   --deck B=https://moxfield.com/decks/armNI_ntVUagNNygnUVyxQ `
   --deck C=https://moxfield.com/decks/g5vtVfRuS0W5KxZuYqZHGQ `
@@ -115,7 +115,7 @@ MCP round trips:
 
 ```powershell
 python simctl.py arena-codex-run `
-  --db data/scryfall-20260728-compact.sqlite3 `
+  --db data/scryfall-current.sqlite3 `
   --game run/codex-arena `
   --model gpt-5.6-sol `
   --reasoning-effort low `
@@ -284,9 +284,9 @@ python simctl.py refresh-record run/codex-arena --db data/scryfall-current.sqlit
 python simctl.py verify-record run/codex-arena --db data/scryfall-current.sqlite3
 python simctl.py inspect-game run/codex-arena --pretty
 python simctl.py inspect-decisions run/codex-arena
-python simctl.py report run/codex-arena --db data/scryfall-20260728-compact.sqlite3
+python simctl.py report run/codex-arena --db data/scryfall-current.sqlite3
 python simctl.py replay run/codex-arena `
-  --db data/scryfall-20260728-compact.sqlite3 --verify
+  --db data/scryfall-current.sqlite3 --verify
 ```
 
 The manifest records actual thread labels/IDs, invocation counts/timestamps,
@@ -311,8 +311,7 @@ requires trusted material semantics, terminal replay-verified games,
 legal-action exposure, exact profiles, genuine strategic pilots, and a
 predeclared multi-game sample methodology.
 
-The characterized 0.5.0 record remains paused at its original Entomb arbiter
-boundary after refresh; identity values that lacked provenance remain
-unverified. Version 0.6.0 can execute the generic private searches covered by
-its provisional tutor pack, but provisional or unresolved material semantics
-still prevent matchup evidence.
+Historical stopped records remain evidence only for the behavior and provider
+identity they actually captured. Provisional or unresolved material semantics,
+an unfinished prefix, duplicated decks, or unverified provider metadata prevent
+matchup evidence.

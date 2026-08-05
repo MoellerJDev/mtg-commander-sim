@@ -2,7 +2,7 @@
 title: "Typed semantic handlers"
 status: "current"
 authoritative_source: "mtg_commander_sim/semantic_runtime and platform/architecture-policy.json"
-verified: "2026-08-04"
+verified: "2026-08-05"
 audience: "rules, compiler, and replay contributors"
 maintenance: "hand-maintained"
 ---

@@ -9,7 +9,7 @@
     "active_phase": null,
     "branch": "main",
     "branch_ancestry": {
-      "focused_branch_base": "d226ecbbad0a3d4d50326cf3e5d416290d4a2c07",
+      "focused_branch_base": "0c229ab9543ae2cb631c9b17326fa15a869f6d97",
       "focused_branch_unique_commits_over_main": 0
     },
     "pull_requests": [
@@ -733,6 +733,20 @@
         "number": 103,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/103"
+      },
+      {
+        "base": "main",
+        "head": "ci/stabilize-merged-main-provenance",
+        "number": 104,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/104"
+      },
+      {
+        "base": "main",
+        "head": "compiler/reusable-piece-coverage-matrix",
+        "number": 105,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/105"
       }
     ],
     "tags": [
@@ -747,11 +761,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "c3d144ebf0e1f16da5be93f8c0e5517f19193944",
+    "feature_head_sha": "19648f22c1cc8b8ad3c9eb84abf5a5779a18d331",
     "feature_head_classification": "historical_integrated",
-    "certified_head_sha": "d226ecbbad0a3d4d50326cf3e5d416290d4a2c07",
+    "certified_head_sha": "19648f22c1cc8b8ad3c9eb84abf5a5779a18d331",
     "certified_head_classification": "historical_certified",
-    "generation_timestamp": "2026-08-05T20:50:00Z"
+    "generation_timestamp": "2026-08-05T23:35:58Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -974,8 +988,8 @@
     {
       "id": "reusable_rules_piece_inventory",
       "name": "Reusable rules-piece matrix and durable program baseline",
-      "status": "implemented_repository_artifact",
-      "evidence": "The repository generates a versioned Commander-scoped ontology, complete material-ability card relation index, registered capability/mechanic/compiler/runtime inventory, pairwise interaction index, complex-card composition benchmark, durable accelerator-adoption baseline, and current delta. Independent compiler, runtime, assurance, corpus, and interaction axes remain fail-closed; source fingerprints, canonical compression, joins, and generated Markdown are freshness-checked. Card-text-shaped residual clusters remain exact frontier drill-down data but collapse to their shared missing compiler-grammar boundary rather than becoming fake reusable rules. The CLI inspects pieces and cards from the generated indexes without compiling Oracle or touching live game state."
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 105 integrates the versioned Commander-scoped reusable-piece ontology, complete material-ability card relation index, capability/mechanic/compiler/runtime inventory, pairwise interaction index, complex-card composition benchmark, durable adoption baseline, current delta, and CLI drill-down. Independent compiler, runtime, assurance, corpus, and interaction axes remain fail-closed. Public exact-head run 31053278703 passed every required job for feature head 19648f22c1cc8b8ad3c9eb84abf5a5779a18d331; merge commit 0c229ab9543ae2cb631c9b17326fa15a869f6d97 is on main and post-merge smoke 31054011153 passed."
     },
     {
       "id": "rules_snapshot",
@@ -1013,13 +1027,13 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31043382697,
+      "run_id": 31053278703,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31043382697"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31053278703"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr102_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31043864091_passed_all_29_tests_then_rejected_only_the_stale_active_candidate_label_corrected_immediately_after_merge",
+      "deterministic_tests": "certified_main_through_pr105_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31054011153_pass",
       "focused_rules_tests": "pass_fixed_damage_closed_grammar_source_spans_spell_trigger_activation_lowering_target_and_each_opponent_capabilities_offer_command_parity_malformed_input_atomic_rollback_four_player_simultaneity_privacy_exact_replay_dependency_fail_closed_and_killed_mutation",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",

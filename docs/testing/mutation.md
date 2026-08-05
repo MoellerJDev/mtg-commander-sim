@@ -2,7 +2,7 @@
 title: "Mutation testing policy"
 status: "current"
 authoritative_source: "capability registry v14, capability evidence declarations, and executable mutation tests"
-verified: "2026-08-03"
+verified: "2026-08-05"
 audience: "rules, security, replay, and trust contributors"
 maintenance: "hand-maintained"
 ---

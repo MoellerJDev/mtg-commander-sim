@@ -2,7 +2,7 @@
 title: "Oracle compiler"
 status: "current"
 authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, the capability registry, and pinned coverage artifacts"
-verified: "2026-08-04"
+verified: "2026-08-05"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---

@@ -2,7 +2,7 @@
 title: "Card override extension guide"
 status: "current"
 authoritative_source: "CardProgram V2 validation, semantic pack compatibility, and compiler trust policy"
-verified: "2026-08-01"
+verified: "2026-08-05"
 audience: "rules and compiler contributors"
 maintenance: "hand-maintained"
 ---

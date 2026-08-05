@@ -47,5 +47,5 @@ not an administrative pause and cannot be cleared by ordinary resume.
 
 This is a single-process local-development topology. Production accounts,
 external actor leasing, rate limiting, multi-process ownership, PostgreSQL,
-TLS/reverse-proxy operations, and hosted deployment are target work described
-in [hosted operations](../operations/hosted.md).
+TLS/reverse-proxy operations, and hosted deployment are not implemented or
+supported by the current application.

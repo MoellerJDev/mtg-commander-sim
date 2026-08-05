@@ -2,7 +2,7 @@
 title: "Semantic node extension guide"
 status: "current"
 authoritative_source: "Oracle IR and semantic executor implementation"
-verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+verified: "2026-08-05"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---

@@ -2,7 +2,7 @@
 title: "ADR template"
 status: "current"
 authoritative_source: "documentation and architecture policy"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "architecture contributors"
 maintenance: "hand-maintained"
 ---
