@@ -163,6 +163,13 @@ locally.
 The public pull-request workflow is the normal certification authority. It
 runs ten balanced Linux functional shards plus generated/architecture,
 package, focused Windows compatibility, and isolated headless-browser jobs.
+Platform-sensitive changes replace the focused Windows overlay with the full
+manifest-derived primary-shard matrix. Those shards use separate Windows
+runners, processes, compact databases, and runtime directories with at most
+five workers, while one independent job builds the Windows wheel exactly once.
+`PR / Windows Certification` validates mode-specific job results, the exact
+manifest partition, and one nonempty result artifact per required shard before
+the stable certification context can pass.
 Every substantive PR runs authoritative four-context lifecycle smoke; typed rules owners select
 focused mana/action, combat, or turn/draw journeys, while browser, protocol,
 projection, persistence, lifecycle, reconnect, room, WebSocket, workflow, and

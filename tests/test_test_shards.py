@@ -6,6 +6,7 @@ import unittest
 from scripts.test_shards import (
     discovered_modules,
     load_manifest,
+    primary_matrix,
     suite_modules,
     TestShardError,
     validate_partition,
@@ -19,6 +20,14 @@ class TestShardManifestTests(unittest.TestCase):
     def test_every_test_module_has_one_primary_shard(self):
         summary = validate_partition(self.manifest)
         self.assertEqual(len(discovered_modules()), summary["test_modules"])
+
+    def test_primary_matrix_uses_every_authoritative_shard_once(self):
+        rows = primary_matrix(self.manifest)["include"]
+        self.assertEqual(
+            list(self.manifest["primary_shards"]),
+            [row["shard"] for row in rows],
+        )
+        self.assertIn("generated-validation", [row["shard"] for row in rows])
 
     def test_duplicate_primary_assignment_fails_closed(self):
         mutated = deepcopy(self.manifest)

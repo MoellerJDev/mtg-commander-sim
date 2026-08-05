@@ -96,8 +96,15 @@ not the default per-commit gate.
 - generated inventory, rules, documentation, repository, and architecture
   validation;
 - wheel build and clean-install verification;
-- a focused Windows compatibility overlay, widened to the complete suite for
-  platform-sensitive changes or the `windows-full` label;
+- a focused Windows compatibility overlay for ordinary changes;
+- for platform-sensitive changes or the `windows-full` label, all eleven
+  authoritative primary shards on isolated Windows runners and Python
+  processes, with `fail-fast: false`, at most five concurrent workers,
+  per-shard compact databases and runtime roots, and no shared writable state;
+- one separate Windows wheel build and clean-install verification, followed by
+  `PR / Windows Certification`, which fails closed on the wrong mode, missing,
+  skipped, failed, duplicate, or zero-test shard results, a manifest partition
+  gap, or package failure;
 - browser build plus a compact authoritative four-context lifecycle smoke;
 - focused `mana-action`, `combat`, or `turn-draw` Playwright journeys selected
   by the affected typed rules owner (or the matching `browser-*` label);
@@ -117,9 +124,16 @@ workflow ownership changes. Focused journey tags are closed policy values in
 `platform/change-impact-policy.json`; adding an arbitrary test title cannot
 silently expand or bypass the gate.
 
-The final `PR / Certification` job receives every required job through
-`needs` and fails unless all succeeded. Protect `main` with the exact required
-status context `PR / Certification`.
+The final `PR / Certification` job receives the stable Windows certification
+result and every other required job through `needs`, and fails unless all
+succeeded. Protect `main` with the exact required status context
+`PR / Certification`.
+
+The pre-sharding public baseline is run `31025126367`: its single Windows
+discovery process executed 4,838 tests in 2,265.245 seconds (37 minutes,
+45.245 seconds) before reporting the already-corrected generated-audit drift.
+Use the exact-head matrix metrics—not that historical total—to decide whether
+the five-runner ceiling or shard allocation should change.
 
 Do not use `gh pr merge --auto` until branch protection is confirmed. Without a
 required check, GitHub may merge immediately while jobs are still running.
@@ -129,11 +143,14 @@ certification is in progress.
 The nonblocking metrics job records observed queue, job, step, and critical-path
 durations plus Playwright journey duration, status, retries, failure class,
 browser-context count, accepted command count, authoritative/projected
-revisions, and measured persistence/review time. Raw JSON reports and the
-combined `ci-metrics` artifact are retained for 14 days so future group changes
-can use measured history. Cache-hit rate, agent idle time, and stale-run
-cancellation remain `null` when GitHub does not expose measured data; the
-reporting code never estimates them as observations.
+revisions, and measured persistence/review time. It also reports each Windows
+shard's queue, setup, test and total duration, executed test count, the one-time
+package duration, the Windows critical path, and actual overlapping test-runner
+concurrency. Raw JSON reports and the combined `ci-metrics` artifact are
+retained for 14 days so future shard changes use measured history. Cache-hit
+rate, agent idle time, and stale-run cancellation remain `null` when GitHub
+does not expose measured data; the reporting code never estimates them as
+observations.
 
 Long browser journeys use one shared progress driver rather than nested timeout
 loops. It observes the decision ID, phase/step, active and priority players,
@@ -214,6 +231,19 @@ Validate ownership after adding, renaming, or deleting a test module:
 ```powershell
 .\.venv\Scripts\python.exe scripts/test_shards.py validate
 ```
+
+Every primary shard is directly reproducible on Windows and can write the same
+compact result record consumed by public certification and metrics:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/test_shards.py run core-domain `
+  --result-json local/windows-results/core-domain.json
+```
+
+`generated-validation` is a primary shard, not a second full-discovery pass.
+The complete Windows matrix therefore executes every discovered test module
+exactly once. `windows-compat` remains an intentionally overlapping focused
+suite and never runs alongside the full matrix.
 
 Keep functional shard weights close enough to use parallel capacity. Split by
 coherent subsystem ownership, not by individual test methods. The generated

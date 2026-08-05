@@ -21,6 +21,7 @@ jobs:
       browser_focus_grep: ${{ steps.impact.outputs.browser_focus_grep }}
       browser_matrix: ${{ steps.impact.outputs.browser_matrix }}
       windows_full: ${{ steps.impact.outputs.windows_full }}
+      windows_matrix: ${{ steps.impact.outputs.windows_matrix }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -140,17 +141,16 @@ jobs:
       - name: Verify clean wheel installation and CLI
         run: python scripts/verify_wheel.py
 
-  windows:
-    name: PR / Windows compatibility
+  windows_compatibility:
+    name: PR / Windows / compatibility
     needs: plan
+    if: needs.plan.outputs.windows_full != 'true'
     runs-on: windows-latest
     env:
-      MTG_CARD_DB: data/test-ci.sqlite3
+      MTG_CARD_DB: data/test-ci-windows-compat.sqlite3
+      MTG_SERVER_DATA: ${{ runner.temp }}\mtg-windows-compat
     steps:
       - uses: actions/checkout@v4
-        with:
-          # The complete Windows suite validates certified commit provenance.
-          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -167,18 +167,107 @@ jobs:
             --fixture tests/fixtures/browser-lifecycle-cards.json `
             --fixture tests/fixtures/damage-result-cards.json `
             --fixture tests/fixtures/draw-rules-cards.json `
-            --output data/test-ci.sqlite3
+            --output data/test-ci-windows-compat.sqlite3
       - name: Run focused Windows compatibility suite
-        if: needs.plan.outputs.windows_full != 'true'
-        run: python scripts/test_shards.py run windows-compat
-      - name: Run complete Windows suite for platform-sensitive changes
-        if: needs.plan.outputs.windows_full == 'true'
-        run: python -m unittest discover -s tests -p "test_*.py" -v
+        run: >-
+          python scripts/test_shards.py run windows-compat
+          --result-json local/windows-results/windows-compat.json
+      - name: Upload Windows compatibility result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-results-compatibility-${{ github.run_id }}
+          path: local/windows-results/windows-compat.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  windows_full:
+    name: PR / Windows / ${{ matrix.shard }}
+    needs: plan
+    if: needs.plan.outputs.windows_full == 'true'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.windows_matrix) }}
+    env:
+      MTG_CARD_DB: data/test-ci-windows-${{ matrix.shard }}.sqlite3
+      MTG_SERVER_DATA: ${{ runner.temp }}\mtg-windows-${{ matrix.shard }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history remains available to provenance tests in every shard.
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install package and test dependencies
+        run: python -m pip install -e . -r requirements-dev.txt
+      - name: Validate manifest, runtime, and build isolated card database
+        shell: pwsh
+        run: |
+          python scripts/test_shards.py validate
+          python scripts/validate_python_runtime.py
+          python scripts/build_test_database.py build `
+            --fixture tests/fixtures/scryfall-exact-lists.json `
+            --fixture tests/fixtures/browser-lifecycle-cards.json `
+            --fixture tests/fixtures/damage-result-cards.json `
+            --fixture tests/fixtures/draw-rules-cards.json `
+            --output "data/test-ci-windows-${{ matrix.shard }}.sqlite3"
+      - name: Run full Windows shard
+        run: >-
+          python scripts/test_shards.py run "${{ matrix.shard }}"
+          --result-json "local/windows-results/${{ matrix.shard }}.json"
+      - name: Upload Windows shard result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-results-${{ matrix.shard }}-${{ github.run_id }}
+          path: local/windows-results/${{ matrix.shard }}.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  windows_package:
+    name: PR / Windows / package
+    needs: plan
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+          cache: pip
+      - name: Install build tooling
+        run: python -m pip install -e . -r requirements-dev.txt
       - name: Build and verify Windows wheel
         shell: pwsh
         run: |
           python -m build --wheel
           python scripts/verify_wheel.py
+
+  windows_certification:
+    name: PR / Windows Certification
+    if: always()
+    needs: [plan, windows_compatibility, windows_full, windows_package]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Windows shard results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: windows-results-*-${{ github.run_id }}
+          path: local/windows-results
+          merge-multiple: false
+      - name: Certify Windows mode, partition, results, and package
+        env:
+          CI_WINDOWS_NEEDS_JSON: ${{ toJSON(needs) }}
+        run: >-
+          python scripts/verify_windows_ci.py
+          --results-dir local/windows-results
+          --full "${{ needs.plan.outputs.windows_full }}"
 
   browser:
     name: PR / Browser / ${{ matrix.group }}
@@ -262,7 +351,7 @@ jobs:
   certification:
     name: PR / Certification
     if: always()
-    needs: [plan, python, generated, package, windows, browser]
+    needs: [plan, python, generated, package, windows_certification, browser]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -274,7 +363,7 @@ jobs:
   metrics:
     name: PR / Metrics
     if: always()
-    needs: [plan, python, generated, package, windows, browser, certification]
+    needs: [plan, python, generated, package, windows_certification, browser, certification]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -283,6 +372,12 @@ jobs:
         with:
           pattern: browser-results-*-${{ github.run_id }}
           path: local/browser-results
+          merge-multiple: false
+      - name: Download Windows shard reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: windows-results-*-${{ github.run_id }}
+          path: local/windows-results
           merge-multiple: false
       - name: Fetch observed run timings
         env:
@@ -295,6 +390,7 @@ jobs:
             --run-json local/ci-run.json \
             --jobs-json local/ci-jobs.json \
             --browser-report-dir local/browser-results \
+            --windows-report-dir local/windows-results \
             --output local/ci-metrics.json \
             --summary "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4

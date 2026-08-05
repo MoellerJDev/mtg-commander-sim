@@ -45,11 +45,16 @@ export async function viewRevision(page: Page): Promise<number> {
 }
 
 async function currentDecisionId(page: Page): Promise<string | null> {
-  return (
-    (await page
-      .getByTestId("decision-panel")
-      .getAttribute("data-decision-id")) || null
-  );
+  // A terminal projection correctly has no decision panel. `getAttribute`
+  // auto-waits for a matching element and would turn metrics collection into
+  // a suite-length timeout, so query the current zero-or-one element set
+  // without waiting for a decision to reappear.
+  const values = await page
+    .getByTestId("decision-panel")
+    .evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute("data-decision-id")),
+    );
+  return values[0] || null;
 }
 
 async function actionIsReady(page: Page): Promise<boolean> {

@@ -18,6 +18,7 @@ from scripts.change_impact import (
     github_base,
     github_event_labels,
 )
+from scripts.test_shards import load_manifest, primary_matrix
 
 
 def browser_matrix(browser_full: bool) -> dict:
@@ -63,6 +64,9 @@ def _write_github_output(path: Path, plan: dict) -> None:
         "changed_files": json.dumps(plan["changed_files"], separators=(",", ":")),
         "browser_matrix": json.dumps(
             browser_matrix(bool(plan["browser_full"])), separators=(",", ":")
+        ),
+        "windows_matrix": json.dumps(
+            primary_matrix(load_manifest()), separators=(",", ":")
         ),
     }
     with path.open("a", encoding="utf-8", newline="\n") as stream:

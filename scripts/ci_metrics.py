@@ -155,10 +155,128 @@ def load_browser_reports(directory: Path | None) -> list[tuple[str, dict]]:
     return reports
 
 
+def load_windows_reports(directory: Path | None) -> list[dict]:
+    if directory is None or not directory.exists():
+        return []
+    reports = []
+    for path in sorted(directory.rglob("*.json")):
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(document, dict):
+            raise ValueError(f"Windows report {path} must be an object")
+        if document.get("type") != "unittest-shard-result":
+            raise ValueError(f"Windows report {path} has an unknown type")
+        reports.append(document)
+    return reports
+
+
+def _sum_setup_steps(job: Mapping[str, Any]) -> float | None:
+    total = 0.0
+    observed = False
+    for step in _step_rows(job):
+        if step["name"] in {
+            "Run focused Windows compatibility suite",
+            "Run full Windows shard",
+        }:
+            break
+        duration = step["duration_seconds"]
+        if duration is not None:
+            total += duration
+            observed = True
+    return round(total, 3) if observed else None
+
+
+def _step_duration(job: Mapping[str, Any], name: str) -> float | None:
+    for step in _step_rows(job):
+        if step["name"] == name:
+            return step["duration_seconds"]
+    return None
+
+
+def _maximum_concurrency(jobs: Sequence[Mapping[str, Any]]) -> int | None:
+    events = []
+    for job in jobs:
+        started = _time(job.get("started_at"))
+        completed = _time(job.get("completed_at"))
+        if started is None or completed is None:
+            continue
+        events.extend(((started, 1), (completed, -1)))
+    if not events:
+        return None
+    current = 0
+    maximum = 0
+    for _, delta in sorted(events, key=lambda item: (item[0], item[1])):
+        current += delta
+        maximum = max(maximum, current)
+    return maximum
+
+
+def windows_metrics(
+    run: Mapping[str, Any],
+    jobs: Sequence[Mapping[str, Any]],
+    reports: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    created = _time(str(run.get("created_at") or ""))
+    by_name = {str(job.get("name") or "unknown"): job for job in jobs}
+    shards = []
+    worker_jobs = []
+    for report in reports:
+        suite = str(report.get("suite") or "unknown")
+        name = f"PR / Windows / {'compatibility' if suite == 'windows-compat' else suite}"
+        job = by_name.get(name)
+        if job is not None:
+            worker_jobs.append(job)
+        started = _time(job.get("started_at")) if job is not None else None
+        shards.append(
+            {
+                "name": suite,
+                "conclusion": job.get("conclusion") if job is not None else None,
+                "queue_seconds": (
+                    round((started - created).total_seconds(), 3)
+                    if started is not None and created is not None
+                    else None
+                ),
+                "setup_duration_seconds": (
+                    _sum_setup_steps(job) if job is not None else None
+                ),
+                "test_duration_seconds": report.get("duration_seconds"),
+                "test_count": report.get("tests_run"),
+                "skipped_test_count": report.get("skipped"),
+                "job_duration_seconds": (
+                    _duration(job.get("started_at"), job.get("completed_at"))
+                    if job is not None
+                    else None
+                ),
+            }
+        )
+    package = by_name.get("PR / Windows / package")
+    windows_jobs = [
+        job
+        for job in jobs
+        if str(job.get("name") or "").startswith("PR / Windows")
+    ]
+    completions = [_time(job.get("completed_at")) for job in windows_jobs]
+    completions = [value for value in completions if value is not None]
+    return {
+        "shards": sorted(shards, key=lambda row: row["name"]),
+        "package_duration_seconds": (
+            _step_duration(package, "Build and verify Windows wheel")
+            if package is not None
+            else None
+        ),
+        "critical_path_seconds_observed": (
+            round((max(completions) - created).total_seconds(), 3)
+            if completions and created is not None
+            else None
+        ),
+        "max_runner_concurrency_observed": _maximum_concurrency(worker_jobs),
+    }
+
+
 def build_metrics(
     run: Mapping,
     jobs_document: Mapping,
     browser_reports: Sequence[tuple[str, Mapping[str, Any]]] = (),
+    windows_reports: Sequence[Mapping[str, Any]] = (),
 ) -> dict:
     jobs = jobs_document.get("jobs")
     if not isinstance(jobs, Sequence):
@@ -200,7 +318,7 @@ def build_metrics(
         for journey in playwright_metrics(document, group=group)
     ]
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "run_id": run.get("id"),
         "head_sha": run.get("head_sha"),
         "status": run.get("status"),
@@ -214,6 +332,7 @@ def build_metrics(
         "browser_journeys": sorted(
             journeys, key=lambda row: (row["group"], row["title"])
         ),
+        "windows": windows_metrics(run, jobs, windows_reports),
     }
 
 
@@ -250,6 +369,28 @@ def markdown(metrics: Mapping) -> str:
                 f"{journey['retry_count']} | "
                 f"{journey['failure_classification']} |"
             )
+    windows = metrics.get("windows") or {}
+    windows_shards = windows.get("shards") or []
+    if windows_shards:
+        lines.extend(
+            [
+                "",
+                "- Windows critical path: "
+                f"{windows.get('critical_path_seconds_observed')} seconds",
+                f"- Windows package: {windows.get('package_duration_seconds')} seconds",
+                "- Observed Windows runner concurrency: "
+                f"{windows.get('max_runner_concurrency_observed')}",
+                "",
+                "| Windows shard | Queue | Setup | Tests | Test duration | Job duration |",
+                "|---|---:|---:|---:|---:|---:|",
+            ]
+        )
+        for shard in windows_shards:
+            lines.append(
+                f"| {shard['name']} | {shard['queue_seconds']} | "
+                f"{shard['setup_duration_seconds']} | {shard['test_count']} | "
+                f"{shard['test_duration_seconds']} | {shard['job_duration_seconds']} |"
+            )
     return "\n".join(lines) + "\n"
 
 
@@ -258,6 +399,7 @@ def main() -> int:
     parser.add_argument("--run-json", required=True)
     parser.add_argument("--jobs-json", required=True)
     parser.add_argument("--browser-report-dir")
+    parser.add_argument("--windows-report-dir")
     parser.add_argument("--output", required=True)
     parser.add_argument("--summary")
     args = parser.parse_args()
@@ -266,7 +408,10 @@ def main() -> int:
     reports = load_browser_reports(
         Path(args.browser_report_dir) if args.browser_report_dir else None
     )
-    metrics = build_metrics(run, jobs, reports)
+    windows_reports = load_windows_reports(
+        Path(args.windows_report_dir) if args.windows_report_dir else None
+    )
+    metrics = build_metrics(run, jobs, reports, windows_reports)
     Path(args.output).write_text(
         json.dumps(metrics, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

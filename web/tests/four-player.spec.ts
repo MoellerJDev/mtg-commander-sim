@@ -1090,12 +1090,43 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
         [host, opponent], land, testInfo, 90_000,
       );
       // Advancing to this seat's main phase may include that turn's draw.
-      // Snapshot the projected hand only after the card is currently playable.
-      const handCount = await cards.count();
-      const revision = await viewRevision(page);
-      await land.dragTo(page.getByTestId("own-battlefield"));
-      await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
-      await expect(cards).toHaveCount(handCount - 1, {
+      // Pin the physical card rather than total hand size: Auto-pass may
+      // legitimately advance far enough for a later private draw immediately
+      // after this accepted land play.
+      const landRef = await land.getAttribute("data-card-ref");
+      expect(landRef).toBeTruthy();
+      const landName = await land.locator(".card-copy strong").textContent();
+      expect(landName).toBeTruthy();
+      const battlefieldCards = page
+        .getByTestId("own-battlefield")
+        .locator(".card-tile");
+      const battlefieldCount = await battlefieldCards.count();
+      // This durability soak exercises more than a hundred routine commands.
+      // Use the exact current capability instead of accepting an unrelated
+      // delayed pass revision as evidence that a drag command was submitted.
+      const playAction = page
+        .getByTestId("decision-panel")
+        .getByRole("button", {
+          name: new RegExp(`^Play ${landName}$`, "i"),
+        })
+        .first();
+      await expect(playAction).toBeEnabled();
+      await playAction.click();
+      const dialog = page.getByTestId("choice-dialog");
+      await expect.poll(async () =>
+        (await dialog.isVisible())
+        || (await battlefieldCards.count()) > battlefieldCount,
+      ).toBe(true);
+      if (await dialog.isVisible()) await submitOpenChoice(page);
+      await expect(
+        cards.locator(`[data-card-ref="${landRef}"]`),
+      ).toHaveCount(0, {
+        timeout: durableTransitionTimeout,
+      });
+      // Hidden-to-public projection intentionally replaces the private hand
+      // reference, so certify the public battlefield count rather than
+      // assuming identity continuity across that privacy boundary.
+      await expect(battlefieldCards).toHaveCount(battlefieldCount + 1, {
         timeout: durableTransitionTimeout,
       });
     }
