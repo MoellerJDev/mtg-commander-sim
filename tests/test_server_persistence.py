@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from common import load_assets, make_session
 from mtg_commander_sim import (
@@ -14,6 +16,7 @@ from mtg_commander_sim import (
     PROTOCOL_VERSION,
     SqliteIdempotencyRepository,
 )
+from mtg_commander_sim.review_artifacts import write_review_artifacts
 
 
 class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
@@ -89,12 +92,18 @@ class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as tmp:
             persistence = DirectoryGamePersistence(Path(tmp) / "games")
             service = GameService(session)
-            persistence.save(service)
+            live_timing = persistence.save(service)
             record_dir = persistence.game_directory(session.state.game_id)
 
             self.assertTrue((record_dir / "manifest.json").exists())
             self.assertFalse((record_dir / "review.json").exists())
             self.assertFalse((record_dir / "review.md").exists())
+            self.assertGreaterEqual(
+                live_timing["authoritative_seconds"], 0.0
+            )
+            self.assertGreaterEqual(
+                live_timing["derived_review_seconds"], 0.0
+            )
 
             session.pause(
                 {
@@ -102,9 +111,12 @@ class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
                     "label": "Focused persistence test",
                 }
             )
-            persistence.save(service)
+            paused_timing = persistence.save(service)
             self.assertTrue((record_dir / "review.json").exists())
             self.assertTrue((record_dir / "review.md").exists())
+            self.assertGreaterEqual(
+                paused_timing["derived_review_seconds"], 0.0
+            )
 
             session.resume()
             persistence.save(service)
@@ -118,6 +130,96 @@ class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
 
             self.assertTrue((record_dir / "review.json").exists())
             self.assertTrue((record_dir / "review.md").exists())
+
+    async def test_interrupted_review_replace_preserves_prior_review(self):
+        session = self.make_session(33005)
+        session.pause(
+            {
+                "kind": "administrative_stop",
+                "label": "Atomic review interruption test",
+            }
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            persistence = DirectoryGamePersistence(Path(tmp) / "games")
+            service = GameService(session)
+            persistence.save(service)
+            record_dir = persistence.game_directory(session.state.game_id)
+            review_path = record_dir / "review.json"
+            previous = review_path.read_bytes()
+            json.loads(previous)
+
+            from mtg_commander_sim import review_artifacts as report_module
+
+            real_replace = report_module.os.replace
+
+            def fail_review_replace(source, target):
+                if Path(target).name == "review.json":
+                    raise OSError("injected review replace interruption")
+                return real_replace(source, target)
+
+            with mock.patch.object(
+                report_module.os, "replace", side_effect=fail_review_replace
+            ):
+                with self.assertRaisesRegex(
+                    OSError, "injected review replace interruption"
+                ):
+                    write_review_artifacts(
+                        record_dir,
+                        session.engine,
+                        decisions=session.decisions,
+                        manifest=json.loads(
+                            (record_dir / "manifest.json").read_text(
+                                encoding="utf-8"
+                            )
+                        ),
+                    )
+
+            self.assertEqual(previous, review_path.read_bytes())
+            json.loads(review_path.read_text(encoding="utf-8"))
+            restored = persistence.load(self.db, session.state.game_id)
+            self.assertEqual(session.state.revision, restored.session.state.revision)
+
+    async def test_concurrent_review_writers_leave_complete_artifacts(self):
+        session = self.make_session(33006)
+        session.pause(
+            {
+                "kind": "administrative_stop",
+                "label": "Concurrent review writer test",
+            }
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            persistence = DirectoryGamePersistence(Path(tmp) / "games")
+            service = GameService(session)
+            persistence.save(service)
+            record_dir = persistence.game_directory(session.state.game_id)
+            manifest = json.loads(
+                (record_dir / "manifest.json").read_text(encoding="utf-8")
+            )
+
+            def write_review():
+                return write_review_artifacts(
+                    record_dir,
+                    session.engine,
+                    decisions=session.decisions,
+                    manifest=manifest,
+                )
+
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                results = list(executor.map(lambda _: write_review(), range(8)))
+
+            self.assertEqual(8, len(results))
+            json.loads(
+                (record_dir / "manifest.json").read_text(encoding="utf-8")
+            )
+            json.loads(
+                (record_dir / "review.json").read_text(encoding="utf-8")
+            )
+            self.assertTrue(
+                (record_dir / "review.md").read_text(encoding="utf-8")
+            )
+            self.assertEqual([], list(record_dir.glob(".*.tmp")))
+            restored = persistence.load(self.db, session.state.game_id)
+            self.assertEqual(session.state.revision, restored.session.state.revision)
 
     async def test_sqlite_idempotency_survives_service_restart_without_token(self):
         session = self.make_session(33002)

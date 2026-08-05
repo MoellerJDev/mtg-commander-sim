@@ -143,6 +143,13 @@ export interface GameLifecycle {
   commands: number;
   decisions: number;
   events: number;
+  persistence: {
+    pending: boolean;
+    pending_seconds: number | null;
+    last_total_seconds: number | null;
+    last_authoritative_seconds: number | null;
+    last_derived_review_seconds: number | null;
+  };
 }
 
 export interface PublicGameEvent {

@@ -162,6 +162,19 @@ class CommanderEngine:
             with self.subTest(path=path):
                 self.assertTrue(classify_changes([path]).browser_full)
 
+    def test_natural_winner_rules_owners_require_soak_group(self):
+        for path in (
+            "mtg_commander_sim/commander.py",
+            "mtg_commander_sim/damage_results.py",
+            "mtg_commander_sim/state_based_actions.py",
+        ):
+            with self.subTest(path=path):
+                plan = classify_changes([path])
+                self.assertTrue(plan.browser_full)
+                self.assertIn(
+                    "natural-winner-critical-path", plan.matched_rule_ids
+                )
+
     def test_protection_changes_cover_each_interaction_owner(self):
         plan = classify_changes(["mtg_commander_sim/protection.py"])
 

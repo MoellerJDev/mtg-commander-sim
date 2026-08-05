@@ -4,6 +4,7 @@ import json
 import copy
 from dataclasses import dataclass, field
 from pathlib import Path
+import time
 from typing import Any, Mapping, Sequence
 
 from .carddb import CardDatabase
@@ -28,7 +29,7 @@ from .record import (
     write_record,
 )
 from .record_trust import semantic_execution_provenance_row
-from .report import write_review_artifacts
+from .review_artifacts import write_review_artifacts
 from .semantics import SemanticRegistry
 
 
@@ -936,7 +937,8 @@ class CommanderSession:
         directory: str | Path,
         *,
         include_review: bool = True,
-    ) -> None:
+    ) -> dict[str, float]:
+        started = time.perf_counter()
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
         if not self.initial_checkpoint:
@@ -984,6 +986,8 @@ class CommanderSession:
             json.dumps(self.plans, indent=2, sort_keys=True),
             encoding="utf-8",
         )
+        authoritative_seconds = time.perf_counter() - started
+        derived_started = time.perf_counter()
         if include_review:
             write_review_artifacts(
                 directory,
@@ -997,6 +1001,12 @@ class CommanderSession:
             # resumed live save rather than leaving a misleading snapshot.
             for name in ("review.json", "review.md"):
                 (directory / name).unlink(missing_ok=True)
+        derived_seconds = time.perf_counter() - derived_started
+        return {
+            "authoritative_seconds": authoritative_seconds,
+            "derived_review_seconds": derived_seconds,
+            "total_seconds": time.perf_counter() - started,
+        }
 
     def pause(
         self,

@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Literal, Protocol
+import time
+from typing import Any, Literal, Mapping, Protocol
 
 from .service import CommandEnvelope, CommandReceipt, GameService
 
@@ -20,7 +21,7 @@ class GameLifecycleConflict(ValueError):
 
 
 class GamePersistence(Protocol):
-    def save(self, service: GameService) -> None: ...
+    def save(self, service: GameService) -> Mapping[str, float] | None: ...
 
 
 @dataclass(slots=True)
@@ -68,6 +69,12 @@ class GameActor:
         self._closed = False
         self._failure: BaseException | None = None
         self.processed_messages = 0
+        self._processing_kind: str | None = None
+        self._persistence_pending = False
+        self._persistence_started_at: float | None = None
+        self._last_persistence_seconds: float | None = None
+        self._last_authoritative_persistence_seconds: float | None = None
+        self._last_derived_review_seconds: float | None = None
 
     @property
     def queue_depth(self) -> int:
@@ -188,7 +195,63 @@ class GameActor:
             "commands": len(session.commands),
             "decisions": len(session.decisions),
             "events": len(state.events),
+            "persistence": self.progress_snapshot()["persistence"],
         }
+
+    def progress_snapshot(self) -> dict[str, Any]:
+        pending_seconds = (
+            round(time.perf_counter() - self._persistence_started_at, 3)
+            if self._persistence_pending
+            and self._persistence_started_at is not None
+            else None
+        )
+        return {
+            "processing_kind": self._processing_kind,
+            "queue_depth": self.queue_depth,
+            "persistence": {
+                "pending": self._persistence_pending,
+                "pending_seconds": pending_seconds,
+                "last_total_seconds": self._last_persistence_seconds,
+                "last_authoritative_seconds": (
+                    self._last_authoritative_persistence_seconds
+                ),
+                "last_derived_review_seconds": self._last_derived_review_seconds,
+            },
+        }
+
+    async def _persist(self) -> None:
+        if self.persistence is None:
+            return
+        self._persistence_pending = True
+        self._persistence_started_at = time.perf_counter()
+        try:
+            timing = await asyncio.to_thread(
+                self.persistence.save,
+                self.service,
+            )
+            elapsed = time.perf_counter() - self._persistence_started_at
+            self._last_persistence_seconds = round(elapsed, 6)
+            if isinstance(timing, Mapping):
+                authoritative = timing.get("authoritative_seconds")
+                derived = timing.get("derived_review_seconds")
+                self._last_authoritative_persistence_seconds = (
+                    round(float(authoritative), 6)
+                    if authoritative is not None
+                    else None
+                )
+                self._last_derived_review_seconds = (
+                    round(float(derived), 6)
+                    if derived is not None
+                    else None
+                )
+        finally:
+            if self._persistence_started_at is not None:
+                self._last_persistence_seconds = round(
+                    time.perf_counter() - self._persistence_started_at,
+                    6,
+                )
+            self._persistence_pending = False
+            self._persistence_started_at = None
 
     async def inspect(self) -> dict[str, Any]:
         loop = asyncio.get_running_loop()
@@ -212,9 +275,33 @@ class GameActor:
             _ActorMessage(kind="resume", future=loop.create_future())
         )
 
+    async def _handle_command(self, message: _ActorMessage) -> CommandReceipt:
+        if message.envelope is None:
+            raise RuntimeError("Command message is missing envelope")
+        result = self.service.command(
+            message.envelope,
+            principal=str(message.principal),
+            commit_idempotency=False,
+        )
+        if (
+            result.ok
+            and result.state_changed
+            and not result.replayed
+            and self.persistence is not None
+        ):
+            await self._persist()
+        if not result.replayed:
+            self.service.remember(
+                message.envelope,
+                str(message.principal),
+                result,
+            )
+        return result
+
     async def _run(self) -> None:
         while True:
             message = await self._mailbox.get()
+            self._processing_kind = message.kind
             try:
                 if message.kind == "stop":
                     if not message.future.done():
@@ -242,26 +329,7 @@ class GameActor:
                     self.service.drop_projection_cursor(message.cursor_key)
                     result = None
                 elif message.kind == "command":
-                    if message.envelope is None:
-                        raise RuntimeError("Command message is missing envelope")
-                    result = self.service.command(
-                        message.envelope,
-                        principal=str(message.principal),
-                        commit_idempotency=False,
-                    )
-                    if (
-                        result.ok
-                        and result.state_changed
-                        and not result.replayed
-                        and self.persistence is not None
-                    ):
-                        self.persistence.save(self.service)
-                    if not result.replayed:
-                        self.service.remember(
-                            message.envelope,
-                            str(message.principal),
-                            result,
-                        )
+                    result = await self._handle_command(message)
                 elif message.kind == "poll":
                     result = self.service.poll()
                 elif message.kind == "inspect":
@@ -299,7 +367,7 @@ class GameActor:
                             }
                         )
                         if self.persistence is not None:
-                            self.persistence.save(self.service)
+                            await self._persist()
                         result = {
                             **self._lifecycle_summary(),
                             "changed": True,
@@ -328,7 +396,7 @@ class GameActor:
                             )
                         session.resume()
                         if self.persistence is not None:
-                            self.persistence.save(self.service)
+                            await self._persist()
                         result = {
                             **self._lifecycle_summary(),
                             "changed": True,
@@ -373,6 +441,7 @@ class GameActor:
                 if not message.future.done():
                     message.future.set_exception(response_exception)
             finally:
+                self._processing_kind = None
                 self._mailbox.task_done()
 
     async def close(self) -> None:

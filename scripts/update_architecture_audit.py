@@ -31,6 +31,12 @@ except ModuleNotFoundError:  # Direct `python scripts/...` execution.
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# Architecture generation must inspect and import the same checkout.  This is
+# especially important when the command runs from a secondary Git worktree
+# using a virtual environment whose editable install points at another one.
+root_text = str(ROOT)
+if root_text not in sys.path:
+    sys.path.insert(0, root_text)
 SOURCE = ROOT / "platform" / "architecture-audit-source.json"
 CARD_BASELINE = ROOT / "platform" / "card-specificity-baseline.json"
 CARD_NAME_INDEX = ROOT / "platform" / "card-name-hash-index.json"

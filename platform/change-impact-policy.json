@@ -201,6 +201,18 @@
       "browser_focuses": ["combat"]
     },
     {
+      "id": "natural-winner-critical-path",
+      "patterns": [
+        "mtg_commander_sim/commander.py",
+        "mtg_commander_sim/record_commander_identity.py",
+        "mtg_commander_sim/combat.py",
+        "mtg_commander_sim/damage_results.py",
+        "mtg_commander_sim/state_based_actions.py",
+        "mtg_commander_sim/state_planner.py"
+      ],
+      "browser_full": true
+    },
+    {
       "id": "multiplayer-commander-suite",
       "patterns": [
         "mtg_commander_sim/commander.py",

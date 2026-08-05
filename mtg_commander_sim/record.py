@@ -1122,7 +1122,7 @@ def verify_record_suffix(
     existing proof chain; every appended command is then checked normally.
     """
 
-    from .report import write_review_artifacts
+    from .review_artifacts import write_review_artifacts
     from .session import CommanderSession
 
     directory = Path(directory)
@@ -1252,7 +1252,7 @@ def refresh_record(
 ) -> dict[str, Any]:
     """Rebuild every derived field from durable journals and checkpoint state."""
 
-    from .report import write_review_artifacts
+    from .review_artifacts import write_review_artifacts
     from .session import CommanderSession
 
     directory = Path(directory)

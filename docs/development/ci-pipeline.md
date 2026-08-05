@@ -98,19 +98,22 @@ not the default per-commit gate.
 - wheel build and clean-install verification;
 - a focused Windows compatibility overlay, widened to the complete suite for
   platform-sensitive changes or the `windows-full` label;
-- browser build plus a compact four-context seat-isolation smoke journey;
+- browser build plus a compact authoritative four-context lifecycle smoke;
 - focused `mana-action`, `combat`, or `turn-draw` Playwright journeys selected
   by the affected typed rules owner (or the matching `browser-*` label);
-- two isolated complete Playwright shards for browser, protocol, projection,
+- three deterministic complete Playwright groups for browser, protocol, projection,
   reconnect, room, WebSocket, lifecycle, persistence, browser-facing choice or
-  action schema changes, workflow changes, or the `browser-full` label. Full
-  shards use distinct ports, runtime directories, and SQLite databases.
+  action schema changes, workflow changes, natural-winner critical rules, or
+  the `browser-full` label. The nonempty `lifecycle`, `rules`, and `soak`
+  groups use distinct ports, runtime directories, and SQLite databases.
 
-The compact smoke is intentionally not the reconnect test. It proves that four
-tabs sharing one cookie jar still retain four distinct lobby seats and takes
-seconds rather than replaying an entire lifecycle. The reconnect and natural
-winner journeys retain their complete behavior under the nightly and full
-browser gates. Focused journey tags are closed policy values in
+The compact smoke is the bounded reconnect/lifecycle journey: it starts the
+real server, creates four seat-isolated tabs, validates private hands, submits
+accepted mulligan commands including an exact retry, survives pause/resume and
+reconnect, and closes every context. It does not play a natural game to a
+winner. Natural completion remains in the `soak` group and runs when browser,
+persistence, replay, Commander-damage, combat-completion, state-based-loss, or
+workflow ownership changes. Focused journey tags are closed policy values in
 `platform/change-impact-policy.json`; adding an arbitrary test title cannot
 silently expand or bypass the gate.
 
@@ -123,10 +126,22 @@ required check, GitHub may merge immediately while jobs are still running.
 Once protection is active, auto-merge is safe only for the immutable SHA whose
 certification is in progress.
 
-The nonblocking metrics job records observed queue, job, and critical-path
-durations as an artifact and job summary. Cache-hit rate, agent idle time, and
-stale-run cancellation remain `null` when GitHub does not expose measured data;
-the reporting code never estimates them as observations.
+The nonblocking metrics job records observed queue, job, step, and critical-path
+durations plus Playwright journey duration, status, retries, failure class,
+browser-context count, accepted command count, authoritative/projected
+revisions, and measured persistence/review time. Raw JSON reports and the
+combined `ci-metrics` artifact are retained for 14 days so future group changes
+can use measured history. Cache-hit rate, agent idle time, and stale-run
+cancellation remain `null` when GitHub does not expose measured data; the
+reporting code never estimates them as observations.
+
+Long browser journeys use one shared progress driver rather than nested timeout
+loops. It observes the decision ID, phase/step, active and priority players,
+view/state revisions, accepted command and event counts, latest event, actor
+queue, and pending persistence. Ninety seconds without a real change fails with
+a compact snapshot and exact one-test rerun command. Ordinary command
+acknowledgements still wait for authoritative durability, while review artifacts
+remain derived and are generated only for paused or terminal records.
 
 `scripts/update_platform_status.py` treats current Git and pull-request facts
 as validation inputs rather than prose. Active PR phases must identify a real
@@ -153,7 +168,8 @@ second complete pre-merge suite.
 `.github/workflows/nightly.yml` owns expensive breadth:
 
 - complete deterministic Python suites on Ubuntu and Windows;
-- all isolated headless Chromium journeys;
+- all three isolated headless Chromium groups, including the natural-winner
+  soak;
 - at least 100,000 deterministic property transitions across parallel jobs;
 - focused implementation mutations, natural-winner/persistence soak, and
   performance/repository checks;
@@ -163,6 +179,29 @@ second complete pre-merge suite.
 
 Nightly failures are real regressions or assurance debt. Fix them on a focused
 branch; do not weaken the nightly budget to make a failure disappear.
+
+## Headless browser commands
+
+The public workflow is authoritative, but a focused local reproduction may be
+run headlessly after assigning isolated paths and ports. None of these commands
+opens a visible browser or HTML report:
+
+```powershell
+$env:MTG_CARD_DB = "data/test-ci-smoke.sqlite3"
+$env:MTG_E2E_SERVER_PORT = "18081"
+$env:MTG_E2E_WEB_PORT = "15171"
+$env:MTG_E2E_RUNTIME_DIR = "../local/playwright-smoke"
+$env:MTG_PLAYWRIGHT_JSON = "../local/playwright-smoke.json"
+npm run e2e:smoke --prefix web
+
+Set-Location web
+npx playwright test --grep "@browser-lifecycle"
+npx playwright test --grep "@browser-rules"
+npx playwright test --grep "@browser-soak"
+```
+
+Use different database, runtime, and port values when groups run concurrently.
+On failure, prefer the exact `--grep` command printed by the progress diagnostic.
 
 ## Shard maintenance
 

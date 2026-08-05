@@ -4,6 +4,7 @@ import difflib
 import hashlib
 import json
 import sqlite3
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Iterator, Sequence
@@ -432,11 +433,31 @@ class CardDatabase:
         self.path = Path(path)
         if not self.path.exists():
             raise FileNotFoundError(self.path)
-        self.connection = sqlite3.connect(self.path)
-        self.connection.row_factory = sqlite3.Row
+        self._connections: list[sqlite3.Connection] = []
+        self._connections_lock = threading.Lock()
+        self._thread_local = threading.local()
+
+    @property
+    def connection(self) -> sqlite3.Connection:
+        connection = getattr(self._thread_local, "connection", None)
+        if connection is None:
+            # CardDatabase is an immutable snapshot reader.  Give each worker
+            # thread its own SQLite handle so durable persistence and derived
+            # review work can run off the event loop without sharing cursors.
+            connection = sqlite3.connect(self.path, check_same_thread=False)
+            connection.row_factory = sqlite3.Row
+            with self._connections_lock:
+                self._connections.append(connection)
+            self._thread_local.connection = connection
+        return connection
 
     def close(self) -> None:
-        self.connection.close()
+        with self._connections_lock:
+            connections = tuple(self._connections)
+            self._connections.clear()
+        for connection in connections:
+            connection.close()
+        self._thread_local = threading.local()
 
     def __enter__(self) -> "CardDatabase":
         return self

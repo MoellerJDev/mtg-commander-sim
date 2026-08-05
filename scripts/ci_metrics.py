@@ -4,7 +4,7 @@ import argparse
 from datetime import datetime
 import json
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 
 def _time(value: str | None) -> datetime | None:
@@ -21,7 +21,145 @@ def _duration(start: str | None, end: str | None) -> float | None:
     return round((completed - started).total_seconds(), 3)
 
 
-def build_metrics(run: Mapping, jobs_document: Mapping) -> dict:
+def _step_rows(job: Mapping[str, Any]) -> list[dict[str, Any]]:
+    steps = job.get("steps") or []
+    if not isinstance(steps, Sequence):
+        raise ValueError("Job steps must be a list")
+    rows: list[dict[str, Any]] = []
+    for step in steps:
+        if not isinstance(step, Mapping):
+            raise ValueError("Every job step must be an object")
+        rows.append(
+            {
+                "name": str(step.get("name") or "unknown"),
+                "conclusion": step.get("conclusion"),
+                "duration_seconds": _duration(
+                    step.get("started_at"), step.get("completed_at")
+                ),
+            }
+        )
+    return rows
+
+
+def _specs(suites: Iterable[Mapping[str, Any]]) -> Iterable[Mapping[str, Any]]:
+    for suite in suites:
+        specs = suite.get("specs") or []
+        if not isinstance(specs, Sequence):
+            raise ValueError("Playwright suite specs must be a list")
+        for spec in specs:
+            if not isinstance(spec, Mapping):
+                raise ValueError("Every Playwright spec must be an object")
+            yield spec
+        children = suite.get("suites") or []
+        if not isinstance(children, Sequence):
+            raise ValueError("Nested Playwright suites must be a list")
+        yield from _specs(
+            child
+            for child in children
+            if isinstance(child, Mapping)
+        )
+
+
+def _failure_classification(status: str, errors: Sequence[Any]) -> str:
+    if status in {"passed", "expected"}:
+        return "none"
+    if status == "skipped":
+        return "skipped"
+    if status in {"timedOut", "timeout"}:
+        return "timeout"
+    if status == "interrupted":
+        return "interrupted"
+    joined = " ".join(
+        str(error.get("message") if isinstance(error, Mapping) else error)
+        for error in errors
+    ).lower()
+    return "timeout" if "timeout" in joined else "test_failure"
+
+
+def _annotation_metrics(test: Mapping[str, Any]) -> dict[str, Any]:
+    annotations = test.get("annotations") or []
+    if not isinstance(annotations, Sequence):
+        return {}
+    for annotation in annotations:
+        if not isinstance(annotation, Mapping):
+            continue
+        if annotation.get("type") != "commander-journey-metrics":
+            continue
+        description = annotation.get("description")
+        if not isinstance(description, str):
+            continue
+        try:
+            parsed = json.loads(description)
+        except json.JSONDecodeError:
+            continue
+        return dict(parsed) if isinstance(parsed, Mapping) else {}
+    return {}
+
+
+def playwright_metrics(
+    document: Mapping[str, Any], *, group: str
+) -> list[dict[str, Any]]:
+    suites = document.get("suites") or []
+    if not isinstance(suites, Sequence):
+        raise ValueError("Playwright report must contain a suites list")
+    journeys: list[dict[str, Any]] = []
+    for spec in _specs(
+        suite for suite in suites if isinstance(suite, Mapping)
+    ):
+        tests = spec.get("tests") or []
+        if not isinstance(tests, Sequence):
+            raise ValueError("Playwright spec tests must be a list")
+        for test in tests:
+            if not isinstance(test, Mapping):
+                raise ValueError("Every Playwright test must be an object")
+            results = test.get("results") or []
+            if not isinstance(results, Sequence):
+                raise ValueError("Playwright test results must be a list")
+            result_rows = [
+                result for result in results if isinstance(result, Mapping)
+            ]
+            final = result_rows[-1] if result_rows else {}
+            status = str(final.get("status") or "not_run")
+            errors = final.get("errors") or []
+            if not isinstance(errors, Sequence):
+                errors = []
+            journeys.append(
+                {
+                    "group": group,
+                    "title": str(spec.get("title") or "unknown"),
+                    "file": spec.get("file"),
+                    "status": status,
+                    "duration_seconds": round(
+                        float(final.get("duration") or 0) / 1000, 3
+                    ),
+                    "retry_count": max(0, len(result_rows) - 1),
+                    "failure_classification": _failure_classification(
+                        status, errors
+                    ),
+                    "game_metrics": _annotation_metrics(test),
+                }
+            )
+    return journeys
+
+
+def load_browser_reports(directory: Path | None) -> list[tuple[str, dict]]:
+    if directory is None or not directory.exists():
+        return []
+    reports: list[tuple[str, dict]] = []
+    for path in sorted(directory.rglob("playwright-*.json")):
+        group = path.stem.removeprefix("playwright-")
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(document, dict):
+            raise ValueError(f"Playwright report {path} must be an object")
+        reports.append((group, document))
+    return reports
+
+
+def build_metrics(
+    run: Mapping,
+    jobs_document: Mapping,
+    browser_reports: Sequence[tuple[str, Mapping[str, Any]]] = (),
+) -> dict:
     jobs = jobs_document.get("jobs")
     if not isinstance(jobs, Sequence):
         raise ValueError("Jobs document must contain a jobs list")
@@ -38,6 +176,7 @@ def build_metrics(run: Mapping, jobs_document: Mapping) -> dict:
                 "duration_seconds": _duration(
                     job.get("started_at"), job.get("completed_at")
                 ),
+                "steps": _step_rows(job),
             }
         )
     created = _time(str(run.get("created_at") or ""))
@@ -55,8 +194,13 @@ def build_metrics(run: Mapping, jobs_document: Mapping) -> dict:
         if created is not None and completions
         else None
     )
+    journeys = [
+        journey
+        for group, document in browser_reports
+        for journey in playwright_metrics(document, group=group)
+    ]
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "run_id": run.get("id"),
         "head_sha": run.get("head_sha"),
         "status": run.get("status"),
@@ -67,6 +211,9 @@ def build_metrics(run: Mapping, jobs_document: Mapping) -> dict:
         "agent_idle_seconds": None,
         "stale_run_cancellation_count": None,
         "jobs": sorted(rows, key=lambda row: row["name"]),
+        "browser_journeys": sorted(
+            journeys, key=lambda row: (row["group"], row["title"])
+        ),
     }
 
 
@@ -87,6 +234,22 @@ def markdown(metrics: Mapping) -> str:
         lines.append(
             f"| {row['name']} | {row['conclusion']} | {row['duration_seconds']} |"
         )
+    journeys = metrics.get("browser_journeys") or []
+    if journeys:
+        lines.extend(
+            [
+                "",
+                "| Browser group | Journey | Status | Duration | Retries | Failure class |",
+                "|---|---|---|---:|---:|---|",
+            ]
+        )
+        for journey in journeys:
+            lines.append(
+                f"| {journey['group']} | {journey['title']} | "
+                f"{journey['status']} | {journey['duration_seconds']} | "
+                f"{journey['retry_count']} | "
+                f"{journey['failure_classification']} |"
+            )
     return "\n".join(lines) + "\n"
 
 
@@ -94,12 +257,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Summarize GitHub Actions timing")
     parser.add_argument("--run-json", required=True)
     parser.add_argument("--jobs-json", required=True)
+    parser.add_argument("--browser-report-dir")
     parser.add_argument("--output", required=True)
     parser.add_argument("--summary")
     args = parser.parse_args()
     run = json.loads(Path(args.run_json).read_text(encoding="utf-8"))
     jobs = json.loads(Path(args.jobs_json).read_text(encoding="utf-8"))
-    metrics = build_metrics(run, jobs)
+    reports = load_browser_reports(
+        Path(args.browser_report_dir) if args.browser_report_dir else None
+    )
+    metrics = build_metrics(run, jobs, reports)
     Path(args.output).write_text(
         json.dumps(metrics, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

@@ -163,12 +163,17 @@ locally.
 The public pull-request workflow is the normal certification authority. It
 runs ten balanced Linux functional shards plus generated/architecture,
 package, focused Windows compatibility, and isolated headless-browser jobs.
-Every substantive PR runs compact browser smoke; typed rules owners select
+Every substantive PR runs authoritative four-context lifecycle smoke; typed rules owners select
 focused mana/action, combat, or turn/draw journeys, while browser, protocol,
 projection, persistence, lifecycle, reconnect, room, WebSocket, workflow, and
-browser-facing schema changes run the complete isolated Playwright shards.
+browser-facing schema changes run the complete isolated Playwright groups.
 Changed-symbol ownership keeps priority and yield changes inside the legacy
 engine on the complete browser path without charging unrelated compiler work.
+The complete browser path has three deterministic nonempty groups—lifecycle,
+rules, and natural-winner soak—each with an isolated database, runtime, and port
+pair. Long journeys must use the shared progress driver and fail after 90
+seconds without a real decision, revision, event, phase, or persistence-state
+change; never restore nested multi-minute polling loops.
 Every required dependency feeds the stable `PR / Certification` result; protect
 `main` with that exact context. Do not enable auto-merge until the protection
 is confirmed, because GitHub otherwise treats the merge as immediately

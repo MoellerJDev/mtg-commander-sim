@@ -21,32 +21,38 @@ from scripts.change_impact import (
 
 
 def browser_matrix(browser_full: bool) -> dict:
-    shards = (
+    groups = (
         (
             {
-                "shard": 1,
-                "total": 2,
+                "group": "lifecycle",
+                "grep": "@browser-lifecycle",
                 "server_port": 18081,
                 "web_port": 15171,
             },
             {
-                "shard": 2,
-                "total": 2,
+                "group": "rules",
+                "grep": "@browser-rules",
                 "server_port": 18082,
                 "web_port": 15172,
+            },
+            {
+                "group": "soak",
+                "grep": "@browser-soak",
+                "server_port": 18083,
+                "web_port": 15173,
             },
         )
         if browser_full
         else (
             {
-                "shard": 1,
-                "total": 1,
+                "group": "smoke",
+                "grep": "@smoke",
                 "server_port": 18081,
                 "web_port": 15171,
             },
         )
     )
-    return {"include": list(shards)}
+    return {"include": list(groups)}
 
 
 def _write_github_output(path: Path, plan: dict) -> None:

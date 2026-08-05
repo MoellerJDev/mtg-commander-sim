@@ -181,17 +181,19 @@ jobs:
           python scripts/verify_wheel.py
 
   browser:
-    name: PR / Browser / ${{ matrix.shard }}-${{ matrix.total }}
+    name: PR / Browser / ${{ matrix.group }}
     needs: plan
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.browser_matrix) }}
     env:
-      MTG_CARD_DB: data/test-ci-${{ matrix.shard }}.sqlite3
+      MTG_BROWSER_GROUP: ${{ matrix.group }}
+      MTG_CARD_DB: data/test-ci-${{ matrix.group }}.sqlite3
       MTG_E2E_SERVER_PORT: ${{ matrix.server_port }}
       MTG_E2E_WEB_PORT: ${{ matrix.web_port }}
-      MTG_E2E_RUNTIME_DIR: ../local/playwright-shard-${{ matrix.shard }}
+      MTG_E2E_RUNTIME_DIR: ../local/playwright-${{ matrix.group }}
+      MTG_PLAYWRIGHT_JSON: ../local/playwright-${{ matrix.group }}.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -219,7 +221,7 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --fixture tests/fixtures/draw-rules-cards.json
-          --output data/test-ci-${{ matrix.shard }}.sqlite3
+          --output data/test-ci-${{ matrix.group }}.sqlite3
       - name: Verify generated protocol types and production build
         run: |
           npm run generate:types --prefix web
@@ -238,12 +240,24 @@ jobs:
         working-directory: web
         env:
           MTG_BROWSER_FOCUS_GREP: ${{ needs.plan.outputs.browser_focus_grep }}
+          MTG_PLAYWRIGHT_JSON: ../local/playwright-focused.json
         run: npx playwright test --grep "$MTG_BROWSER_FOCUS_GREP"
       - name: Run complete browser journeys for affected changes
         if: needs.plan.outputs.browser_full == 'true'
-        run: >-
-          npm run e2e --prefix web --
-          --shard=${{ matrix.shard }}/${{ matrix.total }}
+        working-directory: web
+        env:
+          MTG_BROWSER_GROUP_GREP: ${{ matrix.grep }}
+        run: npx playwright test --grep "$MTG_BROWSER_GROUP_GREP"
+      - name: Upload browser journey report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-results-${{ matrix.group }}-${{ github.run_id }}
+          path: |
+            local/playwright-*.json
+            web/test-results
+          if-no-files-found: warn
+          retention-days: 14
 
   certification:
     name: PR / Certification
@@ -264,6 +278,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Download browser journey reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: browser-results-*-${{ github.run_id }}
+          path: local/browser-results
+          merge-multiple: false
       - name: Fetch observed run timings
         env:
           GH_TOKEN: ${{ github.token }}
@@ -274,6 +294,7 @@ jobs:
           python scripts/ci_metrics.py \
             --run-json local/ci-run.json \
             --jobs-json local/ci-jobs.json \
+            --browser-report-dir local/browser-results \
             --output local/ci-metrics.json \
             --summary "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
