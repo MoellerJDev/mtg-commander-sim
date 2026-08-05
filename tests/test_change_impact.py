@@ -1,8 +1,16 @@
 from __future__ import annotations
 
+from pathlib import Path
+import subprocess
+import tempfile
 import unittest
 
-from scripts.change_impact import classify_changes, load_impact_policy
+from scripts.change_impact import (
+    _symbols_for_ranges,
+    changed_python_symbols,
+    classify_changes,
+    load_impact_policy,
+)
 
 
 class ChangeImpactTests(unittest.TestCase):
@@ -17,7 +25,7 @@ class ChangeImpactTests(unittest.TestCase):
 
     def test_policy_is_versioned_and_fingerprinted(self):
         policy, fingerprint = load_impact_policy()
-        self.assertEqual(2, policy["schema_version"])
+        self.assertEqual(3, policy["schema_version"])
         self.assertEqual(64, len(fingerprint))
 
     def test_changed_test_module_is_run_exactly(self):
@@ -61,6 +69,90 @@ class ChangeImpactTests(unittest.TestCase):
                 plan = classify_changes([path])
                 self.assertFalse(plan.browser_full)
                 self.assertEqual((), plan.browser_focuses)
+
+    def test_engine_priority_or_yield_symbols_require_complete_browser(self):
+        for symbol in (
+            "CommanderEngine._grant_priority",
+            "CommanderEngine._set_yield",
+            "CommanderEngine._record_action_opportunity",
+        ):
+            with self.subTest(symbol=symbol):
+                plan = classify_changes(
+                    ["mtg_commander_sim/engine.py"],
+                    changed_symbols=(f"mtg_commander_sim/engine.py:{symbol}",),
+                )
+                self.assertTrue(plan.browser_full)
+                self.assertIn(
+                    "browser-facing-priority-and-yield",
+                    plan.matched_rule_ids,
+                )
+
+    def test_changed_line_ranges_resolve_the_smallest_qualified_symbol(self):
+        source = """\
+class CommanderEngine:
+    def _grant_priority(self):
+        value = 1
+        return value
+
+    def unrelated(self):
+        return 2
+"""
+        self.assertEqual(
+            ("CommanderEngine._grant_priority",),
+            _symbols_for_ranges(source, ((3, 3, ""),)),
+        )
+
+    def test_changed_symbol_discovery_includes_deleted_base_method(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(
+                ["git", "config", "user.email", "tests@example.invalid"],
+                cwd=root,
+                check=True,
+            )
+            subprocess.run(
+                ["git", "config", "user.name", "Impact Tests"],
+                cwd=root,
+                check=True,
+            )
+            module = root / "mtg_commander_sim" / "engine.py"
+            module.parent.mkdir()
+            module.write_text(
+                "class CommanderEngine:\n"
+                "    def _grant_priority(self):\n"
+                "        return True\n",
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "."], cwd=root, check=True)
+            subprocess.run(
+                ["git", "commit", "-q", "-m", "base"],
+                cwd=root,
+                check=True,
+            )
+            base = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=root,
+                text=True,
+                encoding="ascii",
+            ).strip()
+            module.write_text(
+                "class CommanderEngine:\n"
+                "    def unrelated(self):\n"
+                "        return False\n",
+                encoding="utf-8",
+            )
+
+            symbols = changed_python_symbols(
+                base,
+                include_worktree=True,
+                root=root,
+            )
+
+        self.assertIn(
+            "mtg_commander_sim/engine.py:CommanderEngine._grant_priority",
+            symbols,
+        )
 
     def test_persistence_and_projection_still_require_complete_browser(self):
         for path in (

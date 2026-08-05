@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import ast
 from dataclasses import asdict, dataclass
 from fnmatch import fnmatchcase
 import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 from typing import Iterable, Mapping, Sequence
 
@@ -17,6 +19,7 @@ POLICY_PATH = ROOT / "platform" / "change-impact-policy.json"
 @dataclass(frozen=True)
 class ImpactPlan:
     changed_files: tuple[str, ...]
+    changed_symbols: tuple[str, ...]
     test_modules: tuple[str, ...]
     test_suites: tuple[str, ...]
     checks: tuple[str, ...]
@@ -90,6 +93,172 @@ def changed_files(
     return _normalized(output)
 
 
+_HUNK = re.compile(
+    r"^@@ -(?P<old_start>\d+)(?:,(?P<old_count>\d+))? "
+    r"\+(?P<start>\d+)(?:,(?P<count>\d+))? @@(?P<context>.*)$"
+)
+
+
+def _python_symbols(source: str) -> tuple[tuple[str, int, int], ...]:
+    """Return deterministic qualified function spans for one Python module."""
+
+    tree = ast.parse(source)
+    found: list[tuple[str, int, int]] = []
+
+    def visit(node: ast.AST, parents: tuple[str, ...]) -> None:
+        for child in ast.iter_child_nodes(node):
+            if isinstance(
+                child,
+                (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef),
+            ):
+                name = ".".join((*parents, child.name))
+                decorators = [
+                    int(value.lineno)
+                    for value in getattr(child, "decorator_list", ())
+                ]
+                start = min([int(child.lineno), *decorators])
+                end = int(getattr(child, "end_lineno", child.lineno))
+                if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    found.append((name, start, end))
+                visit(child, (*parents, child.name))
+            else:
+                visit(child, parents)
+
+    visit(tree, ())
+    return tuple(sorted(found))
+
+
+def _symbols_for_ranges(
+    source: str,
+    ranges: Sequence[tuple[int, int, str]],
+) -> tuple[str, ...]:
+    spans = _python_symbols(source)
+    selected: set[str] = set()
+    for start, end, context in ranges:
+        candidates = [
+            name
+            for name, span_start, span_end in spans
+            if span_start <= end and span_end >= start
+        ]
+        if candidates:
+            selected.update(candidates)
+            continue
+        context_match = re.search(
+            r"(?:async\s+)?def\s+([A-Za-z_]\w*)",
+            context,
+        )
+        if context_match:
+            suffix = "." + context_match.group(1)
+            matching = [name for name, _, _ in spans if name.endswith(suffix)]
+            if len(matching) == 1:
+                selected.add(matching[0])
+    return tuple(sorted(selected))
+
+
+def changed_python_symbols(
+    base: str,
+    *,
+    include_worktree: bool,
+    root: Path = ROOT,
+) -> tuple[str, ...]:
+    """Map changed Python hunks to their current qualified function owners."""
+
+    subprocess.run(
+        ["git", "rev-parse", "--verify", f"{base}^{{commit}}"],
+        cwd=root,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    separator = "" if include_worktree else "...HEAD"
+    comparison_base = (
+        base
+        if include_worktree
+        else subprocess.check_output(
+            ["git", "merge-base", base, "HEAD"],
+            cwd=root,
+            text=True,
+            encoding="ascii",
+        ).strip()
+    )
+    diff = subprocess.check_output(
+        [
+            "git",
+            "diff",
+            "--no-ext-diff",
+            "--no-color",
+            "--unified=0",
+            "--diff-filter=ACMR",
+            f"{base}{separator}",
+            "--",
+            "*.py",
+        ],
+        cwd=root,
+        text=True,
+        encoding="utf-8",
+    ).splitlines()
+    ranges_by_path: dict[str, list[tuple[int, int, str]]] = {}
+    old_ranges_by_path: dict[str, list[tuple[int, int, str]]] = {}
+    current_path: str | None = None
+    for line in diff:
+        if line.startswith("+++ b/"):
+            current_path = line[6:]
+            continue
+        match = _HUNK.match(line)
+        if current_path is None or match is None:
+            continue
+        start = int(match.group("start"))
+        count = int(match.group("count") or 1)
+        end = start + max(count, 1) - 1
+        old_start = int(match.group("old_start"))
+        old_count = int(match.group("old_count") or 1)
+        old_end = old_start + max(old_count, 1) - 1
+        ranges_by_path.setdefault(current_path, []).append(
+            (start, end, match.group("context").strip())
+        )
+        old_ranges_by_path.setdefault(current_path, []).append(
+            (old_start, old_end, match.group("context").strip())
+        )
+    if include_worktree:
+        untracked = subprocess.check_output(
+            ["git", "ls-files", "--others", "--exclude-standard", "--", "*.py"],
+            cwd=root,
+            text=True,
+            encoding="utf-8",
+        ).splitlines()
+        for relative in untracked:
+            path = root / relative
+            if path.is_file():
+                line_count = len(path.read_text(encoding="utf-8").splitlines())
+                ranges_by_path.setdefault(relative.replace("\\", "/"), []).append(
+                    (1, max(line_count, 1), "")
+                )
+    selected: set[str] = set()
+    for relative, ranges in ranges_by_path.items():
+        path = root / relative
+        if not path.is_file():
+            continue
+        try:
+            symbols = _symbols_for_ranges(path.read_text(encoding="utf-8"), ranges)
+        except (SyntaxError, UnicodeDecodeError):
+            continue
+        selected.update(f"{relative}:{symbol}" for symbol in symbols)
+    for relative, ranges in old_ranges_by_path.items():
+        try:
+            source = subprocess.check_output(
+                ["git", "show", f"{comparison_base}:{relative}"],
+                cwd=root,
+                text=True,
+                encoding="utf-8",
+                stderr=subprocess.DEVNULL,
+            )
+            symbols = _symbols_for_ranges(source, ranges)
+        except (subprocess.CalledProcessError, SyntaxError, UnicodeDecodeError):
+            continue
+        selected.update(f"{relative}:{symbol}" for symbol in symbols)
+    return tuple(sorted(selected))
+
+
 def _string_tuple(value: object, *, field: str) -> tuple[str, ...]:
     if value is None:
         return ()
@@ -110,11 +279,12 @@ def load_impact_policy(path: Path = POLICY_PATH) -> tuple[dict, str]:
         "default_checks",
         "browser_focuses",
         "path_rules",
+        "symbol_rules",
         "fallback_test_suites",
         "forced_labels",
     }:
         raise ValueError("Change-impact policy has unknown or missing fields")
-    if value["schema_version"] != 2:
+    if value["schema_version"] != 3:
         raise ValueError("Unsupported change-impact policy schema")
     _string_tuple(value["default_checks"], field="default_checks")
     browser_focuses = value["browser_focuses"]
@@ -171,6 +341,52 @@ def load_impact_policy(path: Path = POLICY_PATH) -> tuple[dict, str]:
         for field in ("collect_test_module", "browser_full", "windows_full"):
             if field in rule and not isinstance(rule[field], bool):
                 raise ValueError(f"path_rules[{index}].{field} must be boolean")
+    symbol_rules = value["symbol_rules"]
+    if not isinstance(symbol_rules, list):
+        raise ValueError("symbol_rules must be a list")
+    allowed_symbol_rule_fields = (
+        allowed_rule_fields.difference({"collect_test_module"}) | {"symbols"}
+    )
+    for index, rule in enumerate(symbol_rules):
+        if (
+            not isinstance(rule, dict)
+            or not set(rule).issubset(allowed_symbol_rule_fields)
+        ):
+            raise ValueError(f"symbol_rules[{index}] has invalid fields")
+        rule_id = rule.get("id")
+        if not isinstance(rule_id, str) or not rule_id or rule_id in seen:
+            raise ValueError(f"symbol_rules[{index}].id must be unique and nonempty")
+        seen.add(rule_id)
+        patterns = _string_tuple(
+            rule.get("patterns"), field=f"symbol_rules[{index}].patterns"
+        )
+        symbols = _string_tuple(
+            rule.get("symbols"), field=f"symbol_rules[{index}].symbols"
+        )
+        if not patterns or not symbols:
+            raise ValueError(
+                f"symbol_rules[{index}] requires patterns and symbols"
+            )
+        _string_tuple(
+            rule.get("test_suites"),
+            field=f"symbol_rules[{index}].test_suites",
+        )
+        _string_tuple(
+            rule.get("checks"), field=f"symbol_rules[{index}].checks"
+        )
+        selected_focuses = _string_tuple(
+            rule.get("browser_focuses"),
+            field=f"symbol_rules[{index}].browser_focuses",
+        )
+        unknown_focuses = sorted(set(selected_focuses).difference(browser_focuses))
+        if unknown_focuses:
+            raise ValueError(
+                f"symbol_rules[{index}].browser_focuses are unknown: "
+                + ", ".join(unknown_focuses)
+            )
+        for field in ("browser_full", "windows_full"):
+            if field in rule and not isinstance(rule[field], bool):
+                raise ValueError(f"symbol_rules[{index}].{field} must be boolean")
     fallbacks = value["fallback_test_suites"]
     if not isinstance(fallbacks, list):
         raise ValueError("fallback_test_suites must be a list")
@@ -219,10 +435,12 @@ def _matches_patterns(path: str, patterns: Sequence[str]) -> bool:
 def classify_changes(
     paths: Sequence[str],
     *,
+    changed_symbols: Sequence[str] = (),
     labels: Sequence[str] = (),
     policy_path: Path = POLICY_PATH,
 ) -> ImpactPlan:
     changed = _normalized(paths)
+    normalized_symbols = tuple(sorted(set(changed_symbols)))
     normalized_labels = {label.casefold() for label in labels}
     policy, policy_fingerprint = load_impact_policy(policy_path)
     suites: set[str] = set()
@@ -270,6 +488,38 @@ def classify_changes(
                     matched_rule_ids.add(str(fallback["id"]))
                     break
 
+    for entry in normalized_symbols:
+        path, separator, symbol = entry.rpartition(":")
+        if not separator or not path or not symbol:
+            raise ValueError("changed_symbols entries must be path:symbol")
+        for rule in policy["symbol_rules"]:
+            if not _matches_patterns(path, rule["patterns"]):
+                continue
+            if symbol not in _string_tuple(
+                rule["symbols"], field=f"{rule['id']}.symbols"
+            ):
+                continue
+            rule_id = str(rule["id"])
+            matched_rule_ids.add(rule_id)
+            suites.update(
+                _string_tuple(
+                    rule.get("test_suites"), field=f"{rule_id}.test_suites"
+                )
+            )
+            checks.update(
+                _string_tuple(rule.get("checks"), field=f"{rule_id}.checks")
+            )
+            browser_focuses.update(
+                _string_tuple(
+                    rule.get("browser_focuses"),
+                    field=f"{rule_id}.browser_focuses",
+                )
+            )
+            if rule.get("browser_full"):
+                browser_reasons.add(f"symbol:{path}:{symbol}:{rule_id}")
+            if rule.get("windows_full"):
+                windows_reasons.add(f"symbol:{path}:{symbol}:{rule_id}")
+
     for label, target in policy["forced_labels"].items():
         if label.casefold() not in normalized_labels:
             continue
@@ -282,6 +532,7 @@ def classify_changes(
     ordered_focuses = tuple(sorted(browser_focuses))
     return ImpactPlan(
         changed_files=changed,
+        changed_symbols=normalized_symbols,
         test_modules=tuple(sorted(modules)),
         test_suites=tuple(sorted(suites)),
         checks=tuple(sorted(checks)),

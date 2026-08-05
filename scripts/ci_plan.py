@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.change_impact import (
     changed_files,
+    changed_python_symbols,
     classify_changes,
     github_base,
     github_event_labels,
@@ -72,6 +73,10 @@ def main() -> int:
     base = args.base or github_base(args.event)
     plan = classify_changes(
         changed_files(base, include_worktree=False),
+        changed_symbols=changed_python_symbols(
+            base,
+            include_worktree=False,
+        ),
         labels=github_event_labels(args.event),
     ).to_dict()
     output = args.github_output or os.environ.get("GITHUB_OUTPUT")

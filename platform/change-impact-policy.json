@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "default_checks": [
     "compile",
     "python-runtime",
@@ -284,6 +284,29 @@
         "mtg_commander_sim/bulk.py"
       ],
       "windows_full": true
+    }
+  ],
+  "symbol_rules": [
+    {
+      "id": "browser-facing-priority-and-yield",
+      "patterns": ["mtg_commander_sim/engine.py"],
+      "symbols": [
+        "CommanderEngine._yield_change_epoch",
+        "CommanderEngine._increment_yield_change_epoch",
+        "CommanderEngine._update_yield_change_epochs",
+        "CommanderEngine._grant_priority",
+        "CommanderEngine._issue_priority",
+        "CommanderEngine._complete_priority",
+        "CommanderEngine._set_yield",
+        "CommanderEngine._yield_stop_reason",
+        "CommanderEngine._yield_stopped",
+        "CommanderEngine._record_action_opportunity",
+        "CommanderEngine._pass_priority",
+        "CommanderEngine._check_priority",
+        "CommanderEngine._priority_action_hints",
+        "CommanderEngine._priority_window_empty"
+      ],
+      "browser_full": true
     }
   ],
   "fallback_test_suites": [

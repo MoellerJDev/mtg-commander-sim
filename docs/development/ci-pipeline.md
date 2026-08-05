@@ -66,7 +66,11 @@ server, lifecycle, and persistence paths are explicit. `engine.py` and
 `session.py` no longer imply every browser journey by path alone: the typed
 subsystem changed alongside them selects any focused public behavior. A
 compiler-only change with no browser-facing runtime or schema change therefore
-keeps the compact smoke only. Cross-cutting protection and
+keeps the compact smoke only. For responsibilities still inside the legacy
+engine, the planner maps changed Python hunks in both the base and candidate
+trees to qualified function owners. Changes to the enumerated priority, yield,
+and action-opportunity methods require complete browser E2E; unrelated engine
+orchestration does not inherit that cost. Cross-cutting protection and
 attachment sources deliberately select compiler, replacement, targeting, and
 state-action owners so a source-correctness regression cannot escape through a
 single narrow shard. `scripts/quick_gate.py` includes
