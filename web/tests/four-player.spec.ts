@@ -225,20 +225,26 @@ async function passUntilDraggable(
   await expect(card).toHaveAttribute("draggable", "true");
 }
 
-async function waitForActionReady(
+async function advanceToActionReady(
   pages: readonly Page[],
   action: Locator,
   testInfo: TestInfo,
   durabilityTimeout = 45_000,
 ) {
-  // A newer projection can expose the next capability before the prior HTTP
-  // command finishes its authoritative durability acknowledgement. Do not
-  // submit another pass or force-click through the global serialization lock.
+  // Stop advancing as soon as the exact capability exists, even if React still
+  // has it disabled behind the previous command's serialization lock. A goal
+  // based only on a card's draggable projection can otherwise submit the main-
+  // phase pass while that projection is still settling.
   await driveUntil(pages, async () => actionIsReady(action), testInfo, {
-    label: "wait for current action acknowledgement",
+    label: "advance to exact ready action",
     noProgressMs: durabilityTimeout,
     advance: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      if (await action.count()) return true;
+      for (const page of pages) {
+        const result = await submitAuthorizedPass(page);
+        if (result !== "unavailable") return true;
+      }
       return true;
     },
   });
@@ -633,7 +639,6 @@ test("@browser-lifecycle a shared-cookie 1v1 lobby can replace rooms, remove a p
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Swamp" }) });
     await expect(swamp).toHaveCount(1);
-    await passUntilDraggable([host, opponent], swamp, testInfo);
     const swampRef = await swamp.getAttribute("data-card-ref");
     expect(swampRef).toBeTruthy();
     const battlefieldCards = host
@@ -643,11 +648,8 @@ test("@browser-lifecycle a shared-cookie 1v1 lobby can replace rooms, remove a p
     // The pass which reaches main phase can still publish after the land offer
     // appears. Submit the exact current capability and certify zone outcomes;
     // an unrelated delayed revision is not evidence that a drag succeeded.
-    const playSwamp = host
-      .getByTestId("decision-panel")
-      .getByRole("button", { name: /^Play Swamp$/ })
-      .first();
-    await waitForActionReady([host, opponent], playSwamp, testInfo);
+    const playSwamp = host.getByTestId(`action-play-land:${swampRef}`);
+    await advanceToActionReady([host, opponent], playSwamp, testInfo);
     await playSwamp.click();
     const dialog = host.getByTestId("choice-dialog");
     await expect.poll(async () =>
@@ -1125,9 +1127,6 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
       // This natural-winner witness runs after the other durability-heavy
       // journeys in its serial shard. A single accepted command can take more
       // than the shared helper's normal budget while prior records flush.
-      await passUntilDraggable(
-        [host, opponent], land, testInfo, 90_000,
-      );
       // Advancing to this seat's main phase may include that turn's draw.
       // Pin the physical card rather than total hand size: Auto-pass may
       // legitimately advance far enough for a later private draw immediately
@@ -1143,13 +1142,8 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
       // This durability soak exercises more than a hundred routine commands.
       // Use the exact current capability instead of accepting an unrelated
       // delayed pass revision as evidence that a drag command was submitted.
-      const playAction = page
-        .getByTestId("decision-panel")
-        .getByRole("button", {
-          name: new RegExp(`^Play ${landName}$`, "i"),
-        })
-        .first();
-      await waitForActionReady(
+      const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      await advanceToActionReady(
         [host, opponent], playAction, testInfo, durableTransitionTimeout,
       );
       await playAction.click();
