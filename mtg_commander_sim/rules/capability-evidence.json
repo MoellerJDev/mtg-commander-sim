@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "0e47ece3bdf2dda1f400c8a0b483d35f93b77c6516cf083b2901cbaf6e2582ec",
-  "declaration_source_fingerprint": "6cbc8a0595da0c0809345c5e201257b879e22a693dd6b3051f5c562e820fbea7",
+  "registry_fingerprint": "b6c251c0865721a3bbe11c6112799e94de021caedcce883f20fe87e9cf8ee924",
+  "declaration_source_fingerprint": "1e3eb089f4a83b6e7bb09e8d89f43e12ff60d31ffd55de8fb85396e754980e20",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -5175,6 +5175,25 @@
     },
     {
       "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_invalid_mode_rolls_back_fixed_mandatory_costs",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Roll back mana, life, tap, sacrifice, and output atomically when a submitted fixed output mode is invalid."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
       "evidence_class": "positive",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaCompilerTests.test_fixed_output_compiler_lowers_source_spanned_cardprogram",
       "official_rule_ids": [
@@ -5210,6 +5229,25 @@
         "commander_review"
       ],
       "applicability_note": "Use the same typed mode set for action exposure and immediate stackless activation."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_fixed_mandatory_costs_commit_through_canonical_owners",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Pay fixed mana, tap, life, and source-sacrifice costs through their canonical owners before adding the typed fixed output."
     },
     {
       "capability_id": "mana.activated.fixed_output",
@@ -7294,5 +7332,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "8877fb508c463686db5801952f1fbd74927af4eb1d6cbc0d3928fd6d23a97f2b"
+  "fingerprint": "96673c98e3e7692c730d71a38f0acedaf0549cd8b70420751d4f909e2350c504"
 }

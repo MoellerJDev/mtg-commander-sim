@@ -199,6 +199,11 @@ class FixedManaCompilerTests(unittest.TestCase):
             "{T}: Add {G}. Spend this mana only to cast a creature spell.",
             "+1: Add {G}.",
             "{T}: Target player adds {G}.",
+            "Discard a card: Add {G}.",
+            "Exile a card from your graveyard: Add {B}.",
+            "{Q}: Add {U}.",
+            "Remove a counter from this artifact: Add {C}.",
+            "Sacrifice a creature: Add {C}{C}.",
         ):
             with self.subTest(text=text):
                 ir = compile_oracle_card(
