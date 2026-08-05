@@ -512,6 +512,13 @@ class FixedManaRuntimeTests(unittest.TestCase):
     def test_compiled_fixed_output_is_controller_scoped_in_four_player_game(self):
         session = self.session(60523, players=4)
         ring = self._card(session.engine, "Sol Ring", owner="A")
+        session.engine.move_card(
+            ring.object_id,
+            "battlefield",
+            controller="C",
+            tapped=False,
+            log=False,
+        )
         self._prepare_priority(session, ring)
         ability = next(
             row
@@ -520,14 +527,23 @@ class FixedManaRuntimeTests(unittest.TestCase):
         )
         own_sources = {
             action.get("source")
-            for action in session.engine._priority_action_hints("A")["actions"]
+            for action in session.engine._priority_action_hints("C")["actions"]
         }
         opposing_sources = {
             action.get("source")
-            for action in session.engine._priority_action_hints("D")["actions"]
+            for action in session.engine._priority_action_hints("A")["actions"]
         }
+        self.assertEqual("A", ring.owner)
+        self.assertEqual("C", ring.controller)
         self.assertIn(ring.ref, own_sources)
         self.assertNotIn(ring.ref, opposing_sources)
+        result = session.act(
+            "pilot:C",
+            {"a": "activate", "source": ring.ref, "ability": ability.ability_id},
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(2, session.state.players["C"].mana_pool["C"])
+        self.assertEqual(0, session.state.players["A"].mana_pool["C"])
 
     def test_compiled_fixed_output_projection_exposes_no_hidden_cards(self):
         session = self.session(60524, players=4)
