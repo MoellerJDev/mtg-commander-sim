@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "90bd18b1ab9d475c1e5e4a9d24423635ca99422e1e033970bce6ca1407162873",
-  "declaration_source_fingerprint": "4aa88d401e63e6dbf8a3ce56c1cdc2237677ff0f1e0098007a84fc58572402d9",
+  "registry_fingerprint": "80ef16839c62622d423b5aa43d6006593706164933560d2616143abfd277461c",
+  "declaration_source_fingerprint": "595b8f03e62fdd14b3a65534075383534049b4590c1f388808b919b6fb28918f",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -5214,6 +5214,25 @@
     {
       "capability_id": "mana.activated.fixed_output",
       "evidence_class": "positive",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_alternative_output_is_advertised_accepted_and_replayed",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Advertise the complete typed alternative output set and accept an exact selected member without widening legality."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "positive",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_fixed_output_can_pay_during_casting",
       "official_rule_ids": [
         "106.1",
@@ -5286,6 +5305,25 @@
         "commander_review"
       ],
       "applicability_note": "Project the public mana source and legal action without exposing an opposing hand object."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "replay",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_alternative_output_is_advertised_accepted_and_replayed",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact selected alternative output from the submitted activation command."
     },
     {
       "capability_id": "mana.activated.fixed_output",
@@ -7351,5 +7389,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "ba2df8adae20abf804bf6cfb954c099fbf7218a487c35bf7e4cee4a0d6454678"
+  "fingerprint": "c858c18a6ce40cc23c8fbd05158ba9af4c7ce6da2c92372a3c7b5205c4cdf366"
 }

@@ -577,6 +577,52 @@ class FixedManaRuntimeTests(unittest.TestCase):
             replay = replay_record(game_dir, self.db, verify=True)
         self.assertTrue(replay["ok"], replay)
 
+    def test_compiled_alternative_output_is_advertised_accepted_and_replayed(self):
+        session = self.session(60530)
+        source = self._card(session.engine, "Luxury Suite", owner="A")
+        self._prepare_priority(session, source)
+        ability = next(
+            row
+            for row in session.engine._activated_abilities(source)
+            if row.fixed_mana_outputs
+        )
+        modes = session.engine._mana_modes_for_ability(
+            source.controller, source, ability
+        )
+        self.assertEqual(
+            [{"B": 1}, {"R": 1}],
+            [
+                {
+                    color: amount
+                    for color, amount in mode.bundle.items()
+                    if amount
+                }
+                for mode in modes
+            ],
+        )
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        result = session.act(
+            f"pilot:{source.controller}",
+            {
+                "a": "activate",
+                "source": source.ref,
+                "ability": ability.ability_id,
+                "mana_output": {"R": 1},
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(1, session.state.players[source.controller].mana_pool["R"])
+        self.assertEqual(0, session.state.players[source.controller].mana_pool["B"])
+
+        with tempfile.TemporaryDirectory() as temporary:
+            game_dir = Path(temporary) / "fixed-mana-choice-replay"
+            session.save(game_dir)
+            replay = replay_record(game_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -3395,6 +3395,14 @@
     {
       "capability_id": "mana.activated.fixed_output",
       "evidence_class": "positive",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_alternative_output_is_advertised_accepted_and_replayed",
+      "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Advertise the complete typed alternative output set and accept an exact selected member without widening legality."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "positive",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_fixed_output_can_pay_during_casting",
       "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
@@ -3423,6 +3431,14 @@
       "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Project the public mana source and legal action without exposing an opposing hand object."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "replay",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_alternative_output_is_advertised_accepted_and_replayed",
+      "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the exact selected alternative output from the submitted activation command."
     },
     {
       "capability_id": "mana.activated.fixed_output",

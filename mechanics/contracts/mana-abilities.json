@@ -128,6 +128,7 @@
     "test_recordless_mana_plan_ignores_submitted_side_effects",
     "test_fixed_output_compiler_lowers_source_spanned_cardprogram",
     "test_fixed_output_compiler_leaves_dynamic_and_restricted_variants_residual",
+    "test_compiled_alternative_output_is_advertised_accepted_and_replayed",
     "test_compiled_fixed_output_offer_and_activation_share_modes",
     "test_compiled_fixed_output_can_pay_during_casting",
     "test_fixed_mandatory_costs_commit_through_canonical_owners",
