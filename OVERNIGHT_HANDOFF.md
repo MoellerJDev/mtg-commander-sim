@@ -16,13 +16,17 @@ or provider-session data.
 ## Integration coordinate
 
 The public repository is `MoellerJDev/mtg-commander-sim`; `main` is the only
-default branch. PR 98's fixed-output mana family is merged at
-`9a03e4688b61d29ae10fd338ad7db2aeebe74336`. PR 99's full-history nightly
-provenance repair is merged at
-`2aa1b6d6ff8f75ab219665618a247b315b7fc411`, with exact-head certification and
-post-merge main smoke green. The active implementation branch is
-`rules/generic-flash-cast-timing`, merged locally with that protected main
-rather than rebased or force-pushed.
+default branch. PR 100's generic compiled Flash family and live-review
+persistence correction are merged at
+`76c6bf154bfc62e5eae4cb10e391033413349050`; exact-head run `31016464622` and
+post-merge main-smoke run `31019542461` are green. The fresh full-history
+nightly run `31008277066` is also green, so the older shallow-provenance failure
+is historical rather than current repository state.
+
+The focused certification candidate is
+`ci/focused-browser-impact-and-status-truth`. The preserved independent rules
+checkpoint is `rules/generic-damage-effect-clauses`. Neither branch is merged
+or represented as certified until GitHub says so.
 
 Always re-read the live branch, pull request, exact-head CI, worktree, and
 generated status before acting:
@@ -42,40 +46,37 @@ generated in [platform status](docs/PLATFORM_IMPLEMENTATION_STATUS.md),
 [architecture debt](docs/ARCHITECTURE_DEBT_STATUS.md). Do not copy those counts
 into this handoff.
 
-## Active rules slice
+## Active checkpoints
 
-The Flash branch is a coherent foundation-plus-harvest slice for face-pinned
-printed Flash, not a claim to complete cast timing or CR 702.8. One immutable
-typed permission and one registered runtime component supply action
-advertisement and command validation from the same legality function.
-CardProgram V2 lowering emits exact source spans and selected-face identities;
-no runtime Oracle parsing, printed name, collector number, set code, or Oracle
-ID selects behavior, and the engine gains no state-write owner.
+The CI candidate introduces one versioned machine-readable impact policy for
+authoritative four-context lifecycle smoke, focused mana/action, combat, and
+turn/draw journeys, and deterministic nonempty lifecycle, rules, and
+natural-winner soak groups. Browser, server, protocol, projection,
+persistence, lifecycle, reconnect, room, WebSocket, workflow, and
+browser-facing schema paths remain complete-E2E triggers. Python hunk ownership
+also makes the priority, yield, and action-opportunity methods still housed in
+`CommanderEngine` request complete browser E2E without turning every internal
+engine edit into a full browser run. The same branch makes platform-status
+generation reject stale ancestry and mismatched open/merged pull-request facts
+and derives current test/CardProgram baselines from authoritative artifacts.
+Long journeys use one shared 90-second no-progress diagnostic across decisions,
+turn state, revisions, events, actor queues, and durability. Game persistence
+runs off the event loop without acknowledging commands before the authoritative
+write, and CI retains measured journey, retry, revision, command, and
+persistence timing. The exact local smoke passed in 30.4 seconds; GitHub exact-
+head measurements remain pending until PR 101 completes.
 
-The selection came from frontier family `keyword_dependency:flash`: 591
-affected Commander cards, 52 sole-blocker cards, 125 one-additional-blocker
-opportunities, 592 expected exact abilities, 52 expected exact cards, and 592
-expected residual removals. It had no capability prerequisites and medium
-interaction risk. This is a universal typed timing foundation plus its direct
-generic keyword harvest.
+The fixed-damage checkpoint is a shared effect-clause family, not a card
+override. It recognizes a closed fixed-quantity damage grammar across spell,
+triggered, and activated contexts; lowers source-spanned CardProgram V2 nodes;
+uses the existing canonical target, damage, replay, and privacy paths; and
+keeps dynamic, divided, conditional, rider-bearing, and unsupported recipient
+forms as material residuals. Its final corpus and architecture artifacts must
+be regenerated only after it contains the merged CI predecessor.
 
-The one final regeneration matched the prediction exactly. Commander exact and
-trusted CardPrograms rise from 1,216 to 1,268, capability-closed programs rise
-from 1,212 to 1,264, partial cards fall from 13,883 to 13,831, unresolved cards
-remain 16,524, failures remain zero, and material residuals fall from 52,325 to
-51,733. `CommanderEngine` shrinks by seven logical lines and direct GameState
-writes remain 135. Exact current architecture and corpus figures live in the
-generated [architecture debt report](docs/ARCHITECTURE_DEBT_STATUS.md) and
-[compiler coverage report](docs/COMPILER_COVERAGE_STATUS.md).
-
-Conditional, granted, removed, and player-wide as-though Flash remain explicit
-residuals. Priority, zone permission, land-play timing, other cast
-prohibitions, costs, and targets keep their existing independent owners. Raw
-keyword metadata without the trusted compiled permission fails closed.
-
-`main` protection is active, strict, and requires `PR / Certification` with
-administrator enforcement. Enable auto-merge only after the PR exists and let
-that protected exact-head context decide the merge.
+After those two checkpoints, the next substantive foundation is the generated
+reusable-rules-piece matrix plus durable program baseline. Do not create a
+second capability registry, mechanic registry, or card scheduler.
 
 ## Working method
 
@@ -95,10 +96,9 @@ all browser automation isolated and headless, with reports configured never to
 open.
 
 The full operating procedure is the
-[CI pipeline guide](docs/development/ci-pipeline.md). PR 99 is merged and this
-Flash successor now contains its protected merge commit. Publish this branch
-without rebasing or force-pushing. It does not change a browser-facing schema;
-Playwright shard balancing remains separate. While exact-head CI runs, select
-the next dependency-ready typed family from refreshed frontier fingerprint
-`411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86`, and do
-not select the complete continuous-layers/dependencies row.
+[CI pipeline guide](docs/development/ci-pipeline.md). Publish the focused CI
+candidate first. While it certifies, update the fixed-damage worktree from its
+merged predecessor and finish that bounded grammar family. While the damage
+candidate certifies, create the reusable-piece matrix foundation from current
+`main`. Do not wait idly for CI, force-push published history, or select the
+coarse continuous-layers/dependencies frontier row as one batch.

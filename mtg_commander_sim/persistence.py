@@ -218,9 +218,9 @@ class DirectoryGamePersistence:
             raise ValueError("Game path escaped the persistence root")
         return target
 
-    def save(self, service: GameService) -> None:
+    def save(self, service: GameService) -> dict[str, float]:
         session = service.session
-        service.session.save(
+        return service.session.save(
             self.game_directory(session.state.game_id),
             include_review=(
                 session.state.game_over

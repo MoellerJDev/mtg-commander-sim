@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import time
 from typing import Any, AsyncIterator, Literal
 from urllib.parse import urlsplit
 import uuid
@@ -264,14 +265,23 @@ class _StoreGamePersistence(GamePersistence):
         self.records = records
         self.store = store
 
-    def save(self, service: GameService) -> None:
+    def save(self, service: GameService) -> dict[str, float]:
+        started = time.perf_counter()
         _pause_browser_rules_boundary(service)
-        self.records.save(service)
+        timing = dict(self.records.save(service))
+        store_started = time.perf_counter()
         self.store.update_game_state(
             service.session.state.game_id,
             service.session.state.revision,
             _server_game_status(service),
         )
+        timing["authoritative_seconds"] = (
+            float(timing.get("authoritative_seconds") or 0.0)
+            + time.perf_counter()
+            - store_started
+        )
+        timing["total_seconds"] = time.perf_counter() - started
+        return timing
 
 
 class ProjectionHub:
@@ -501,6 +511,44 @@ def _translate_store_error(exc: BaseException) -> HTTPException:
     if isinstance(exc, StoreConflict):
         return HTTPException(status_code=409, detail=str(exc))
     raise exc
+
+
+async def _inspect_game_payload(
+    runtime: ServerRuntime, game_id: str, guest_id: str
+) -> dict[str, Any]:
+    try:
+        return {"game": await runtime.game_summary(game_id, guest_id)}
+    except (StoreForbidden, StoreNotFound) as exc:
+        raise _translate_store_error(exc) from exc
+    except (KeyError, ValueError) as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+async def _game_progress_payload(
+    runtime: ServerRuntime, game_id: str, guest_id: str
+) -> dict[str, Any]:
+    """Return public actor/persistence progress without mailbox queuing."""
+
+    try:
+        runtime.store.game_membership(game_id, guest_id)
+        actor = await runtime.actor(game_id)
+        return actor.progress_snapshot()
+    except (StoreForbidden, StoreNotFound) as exc:
+        raise _translate_store_error(exc) from exc
+    except (KeyError, ValueError) as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+def _register_game_progress_route(app: FastAPI) -> None:
+    @app.get("/api/v1/games/{game_id}/progress")
+    async def game_progress(
+        game_id: str,
+        guest: dict[str, Any] = Depends(_guest),
+        runtime: ServerRuntime = Depends(_runtime),
+    ) -> dict[str, Any]:
+        return await _game_progress_payload(
+            runtime, game_id, guest["guest_id"]
+        )
 
 
 def _compact_preflight(report: dict[str, Any]) -> dict[str, Any]:
@@ -1043,16 +1091,11 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
         guest: dict[str, Any] = Depends(_guest),
         runtime: ServerRuntime = Depends(_runtime),
     ) -> dict[str, Any]:
-        try:
-            return {
-                "game": await runtime.game_summary(
-                    game_id, guest["guest_id"]
-                )
-            }
-        except (StoreForbidden, StoreNotFound) as exc:
-            raise _translate_store_error(exc) from exc
-        except (KeyError, ValueError) as exc:
-            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        return await _inspect_game_payload(
+            runtime, game_id, guest["guest_id"]
+        )
+
+    _register_game_progress_route(app)
 
     @app.get("/api/v1/games/{game_id}/events")
     async def public_game_events(

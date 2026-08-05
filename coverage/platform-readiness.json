@@ -19,14 +19,18 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111",
+    "evaluated_source_tree_hash": "c9471d6a3d6153cbc1335b1b1ff16996f327ea4fe9c50d52ca5325fa3c9bda92",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "generic_compiled_flash_cast_timing_certification",
+    "active_phase": {
+      "head": "ci/focused-browser-impact-and-status-truth",
+      "id": "focused_browser_impact_and_status_truth",
+      "pull_request": 101
+    },
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -220,10 +224,16 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The active branch is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. While repairing the exact-head browser gate, the branch also moved derived review generation off ordinary live command acknowledgements while retaining durable replay inputs and review generation at pause, terminal, and explicit-save boundaries. The previously timing-out natural-winner journey passes locally in 6.7 minutes with machine-readable decision-ID synchronization.",
+      "evidence": "PR 100 is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. The branch also moved derived review generation off ordinary live command acknowledgements while retaining durable replay inputs and review generation at pause, terminal, and explicit-save boundaries. Exact-head run 31016464622 passed every required Linux, generated, package, Windows, and browser job; merge commit 76c6bf1 is on main and post-merge main-smoke run 31019542461 is green.",
       "id": "generic_compiled_flash_cast_timing_harvest",
       "name": "Generic compiled Flash cast timing",
-      "status": "development_local_certification_pending"
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "PR 101 keeps an authoritative four-context lifecycle smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw journeys for typed rules owners, and replaces Playwright file sharding with deterministic nonempty lifecycle, rules, and natural-winner soak groups using isolated databases, runtimes, and ports. A shared progress driver reports decision, phase, revision, event, queue, and persistence state and fails after 90 seconds without real progress; terminal metrics now query an absent decision panel without Playwright auto-wait. Durable saves run off the event loop while command acknowledgement still waits for the authoritative write; derived review publication is independently timed, atomic, concurrent-writer safe, and no longer blocks ordinary live saves. Full Windows coverage now derives all eleven primary shards from the exact manifest partition and runs them in isolated processes and runners with a five-worker ceiling; focused compatibility is mode-exclusive, the wheel builds exactly once, and a fail-closed Windows certification verifies job mode, manifest completeness, nonempty result artifacts, and package success. The pre-sharding public run 31025126367 executed 4,838 Windows tests in 2,265.245 seconds before reaching the already-corrected generated-audit drift. CI metrics retain observed job-step, per-journey, per-Windows-shard, package, concurrency, and critical-path timing without estimating unavailable values. Platform status derives current baselines and fails closed on stale Git/GitHub coordinates. The exact authoritative smoke passed locally in 30.4 seconds with four contexts, four accepted commands, exact retry, pause/resume, reconnect, and observed persistence metrics; the previously failing terminal turn/draw journey passed in 51.9 seconds and the natural-winner journey passed in 6.0 minutes after its routine action helper was tied to accepted capability and zone outcomes. Public exact-head sharded Windows critical-path timing remains to be measured on this feature head.",
+      "id": "focused_browser_impact_and_status_truth",
+      "name": "Focused browser impact and repository-truth status",
+      "status": "implemented_at_feature_head"
     },
     {
       "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
@@ -238,7 +248,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Publish and exact-head certify the generic compiled Flash foundation-plus-harvest against frontier fingerprint 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. While CI runs, select the next bounded dependency-ready typed family; do not select the coarse continuous-layers row and preserve conditional, granted, removed, and player-wide as-though Flash as explicit residuals.",
+  "next_task": "Exact-head certify the focused browser-impact and repository-truth status branch. Then integrate and certify the preserved fixed-damage effect-clause family before beginning the reusable-piece matrix and durable program baseline required by the active accelerator objective.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -264,9 +274,11 @@
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
-    "certified_head_sha": "2aa1b6d6ff8f75ab219665618a247b315b7fc411",
-    "feature_head_sha": "7dc4c44c8ff3455dac29807e4ca6155780d2a88d",
-    "generation_timestamp": "2026-08-05T14:38:35Z"
+    "certified_head_classification": "current_main",
+    "certified_head_sha": "76c6bf154bfc62e5eae4cb10e391033413349050",
+    "feature_head_classification": "active_candidate",
+    "feature_head_sha": "5ea8f1e057194bfca573fafd02ecd52f03a178da",
+    "generation_timestamp": "2026-08-05T16:22:08Z"
   },
   "repository": {
     "default_branch": "main",
@@ -335,27 +347,58 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4820,
+    "deterministic_cases_discovered": 4842,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
-    "web_files": 31
+    "web_files": 32
   },
   "validation": {
-    "card_program_census": "oracle_ir_v32_full_38542_trusted_1862_capability_closed_1858_legacy_reviewed_3_mixed_1_residual_34432_failed_2248_material_card_program_residual_59683; full_oracle_exact_4106_partial_15048_unresolved_19388_material_residual_59688; commander_legal_31623_trusted_1268_capability_closed_1264_legacy_reviewed_3_mixed_1_residual_30355_failed_0_material_residual_51733; commander_oracle_exact_1268_partial_13831_unresolved_16524_material_residual_51733; printed_flash_promotes_exactly_52_commander_legal_cards_and_removes_592_commander_material_residuals; conditional_granted_removed_player_wide_as_though_and_land_timing_variants_remain_explicit_residuals",
+    "card_program_census": {
+      "commander": {
+        "cards_considered": 31623,
+        "material_residuals": 51733,
+        "status_counts": {
+          "residual": 30355,
+          "trusted": 1268
+        },
+        "trust_basis_counts": {
+          "capability_closed": 1264,
+          "legacy_reviewed": 3,
+          "mixed": 1,
+          "unresolved": 30355
+        }
+      },
+      "full": {
+        "cards_considered": 38542,
+        "material_residuals": 59683,
+        "status_counts": {
+          "failed": 2248,
+          "residual": 34432,
+          "trusted": 1862
+        },
+        "trust_basis_counts": {
+          "capability_closed": 1858,
+          "legacy_reviewed": 3,
+          "mixed": 1,
+          "unresolved": 34432
+        }
+      }
+    },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31005825457,
+      "run_id": 31016464622,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31005825457"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31016464622"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
       "browser_reported_rules_regressions": "pass_existing_modal_land_mana_tap_undo_public_tapped_commander_damage_and_casting_regressions_plus_active_main_phase_auto_pass_hold_and_fixed_resizable_hand_dock",
-      "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
+      "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr99_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_flash_capability_evidence_replay_privacy_rollback_multiplayer_and_mutation_tests_pass",
+      "deterministic_tests": "certified_main_through_pr100_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31019542461_pass",
+      "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "focused_rules_tests": "pass_flash_source_spans_strict_immutable_permission_offer_command_parity_face_pinning_malformed_input_atomic_rollback_four_player_seat_isolation_privacy_exact_replay_dependency_fail_closed_redundancy_killed_mutation_and_oracle_card_program_closure",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",

@@ -1,6 +1,12 @@
-import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Browser, type BrowserContext, type Locator, type Page, type TestInfo } from "@playwright/test";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import {
+  annotateJourneyMetrics,
+  driveUntil,
+  submitAuthorizedPass,
+  viewRevision,
+} from "./support/progress";
 
 async function enter(page: Page, name: string) {
   await page.goto("/");
@@ -29,10 +35,6 @@ async function submitDeck(page: Page, seat: string, text: string) {
     zimone ? "Zimone and Dina" : "Mishra, Eminent One",
     text,
   );
-}
-
-async function viewRevision(page: Page): Promise<number> {
-  return Number(await page.locator(".game-shell").getAttribute("data-view-revision"));
 }
 
 async function expectCardSurface(page: Page, seat: string) {
@@ -146,64 +148,23 @@ async function actionIsReady(action: Locator): Promise<boolean> {
   return action.isEnabled({ timeout: 250 }).catch(() => false);
 }
 
-const submittedPassDecision = new WeakMap<Page, string>();
-
-async function currentDecisionId(page: Page): Promise<string | null> {
-  return await page.getByTestId("decision-panel").getAttribute("data-decision-id") || null;
-}
-
-async function authorizedPassIsReady(page: Page): Promise<boolean> {
-  const decisionId = await currentDecisionId(page);
-  if (!decisionId || submittedPassDecision.get(page) === decisionId) return false;
-  return actionIsReady(page.getByTestId("action-pass"));
-}
-
-async function submitAuthorizedPass(page: Page): Promise<"submitted" | "raced" | "unavailable"> {
-  const pass = page.getByTestId("action-pass");
-  const decisionId = await currentDecisionId(page);
-  if (!decisionId || submittedPassDecision.get(page) === decisionId
-    || !(await actionIsReady(pass))) return "unavailable";
-  const revision = await viewRevision(page);
-  try {
-    await submitMaybeFormAction(page, "pass", 2_000);
-    submittedPassDecision.set(page, decisionId);
-    return "submitted";
-  } catch (error) {
-    // A safe Auto-pass or another accepted command may consume the observed
-    // capability before Chromium reaches it. Preserve a real failure only
-    // while the exact same pass remains executable.
-    if (await actionIsReady(pass)) throw error;
-    if ((await viewRevision(page)) > revision) {
-      submittedPassDecision.set(page, decisionId);
-      return "submitted";
-    }
-    return "raced";
-  }
-}
-
 async function advanceToDecision(
   pages: readonly Page[],
   decisionPage: Page,
   expectedText: string,
+  testInfo: TestInfo,
   durabilityTimeout = 90_000,
 ) {
   const panel = decisionPage.getByTestId("decision-panel");
-  for (let attempts = 0; attempts < 24; attempts += 1) {
-    await expect.poll(async () => {
-      if ((await panel.textContent())?.includes(expectedText)) return "decision";
-      for (let index = 0; index < pages.length; index += 1) {
-        if (await authorizedPassIsReady(pages[index])) {
-          return `pass-${index}`;
-        }
-      }
-      return "waiting";
-    }, { timeout: durabilityTimeout }).not.toBe("waiting");
-    if ((await panel.textContent())?.includes(expectedText)) return;
-    for (const page of pages) {
-      if (await submitAuthorizedPass(page) !== "unavailable") break;
-    }
-  }
-  await expect(panel).toContainText(expectedText, { timeout: durabilityTimeout });
+  await driveUntil(
+    pages,
+    async () => (await panel.textContent())?.includes(expectedText) ?? false,
+    testInfo,
+    {
+      label: `advance to decision ${expectedText}`,
+      noProgressMs: durabilityTimeout,
+    },
+  );
 }
 
 async function declineSeatOpportunity(
@@ -211,66 +172,45 @@ async function declineSeatOpportunity(
   seatPage: Page,
   opportunity: Locator,
   expectedStep: "Main Phase 1" | "Main Phase 2",
+  testInfo: TestInfo,
   durabilityTimeout = 90_000,
 ) {
-  const seatPass = seatPage.getByTestId("action-pass");
   const step = seatPage.getByTestId("exact-step-label");
-  for (let attempts = 0; attempts < 24; attempts += 1) {
-    await expect.poll(async () => {
-      const seatReady = await authorizedPassIsReady(seatPage);
-      if (seatReady && await step.textContent() === expectedStep) {
-        return await actionIsReady(opportunity)
-          ? "seat-opportunity"
-          : "missing-opportunity";
-      }
-      for (let index = 0; index < pages.length; index += 1) {
-        if (await authorizedPassIsReady(pages[index])) {
-          return `pass-${index}`;
-        }
-      }
-      return "waiting";
-    }, { timeout: durabilityTimeout }).not.toBe("waiting");
-    if (await authorizedPassIsReady(seatPage)
-      && await step.textContent() === expectedStep) {
-      expect(await actionIsReady(opportunity)).toBe(true);
-      const result = await submitAuthorizedPass(seatPage);
-      if (result === "submitted") return;
-      continue;
-    }
-    for (const page of pages) {
-      if (await submitAuthorizedPass(page) !== "unavailable") break;
-    }
+  await driveUntil(
+    pages,
+    async () =>
+      (await step.textContent()) === expectedStep &&
+      (await actionIsReady(opportunity)) &&
+      (await actionIsReady(seatPage.getByTestId("action-pass"))),
+    testInfo,
+    {
+      label: `expose ${expectedStep} seat opportunity`,
+      noProgressMs: durabilityTimeout,
+    },
+  );
+  expect(await actionIsReady(opportunity)).toBe(true);
+  const result = await submitAuthorizedPass(seatPage);
+  if (result !== "submitted") {
+    throw new Error(`The intended seat pass ${result} after opportunity exposure`);
   }
-  throw new Error("The intended seat opportunity never exposed an authorized pass");
 }
 
 async function passUntilProjection(
   pages: readonly Page[],
   projected: () => Promise<boolean>,
+  testInfo: TestInfo,
   durabilityTimeout = 90_000,
 ) {
-  for (let attempts = 0; attempts < 24; attempts += 1) {
-    if (await projected()) return;
-    await expect.poll(async () => {
-      if (await projected()) return "projected";
-      for (let index = 0; index < pages.length; index += 1) {
-        if (await authorizedPassIsReady(pages[index])) {
-          return `pass-${index}`;
-        }
-      }
-      return "waiting";
-    }, { timeout: durabilityTimeout }).not.toBe("waiting");
-    if (await projected()) return;
-    for (const page of pages) {
-      if (await submitAuthorizedPass(page) !== "unavailable") break;
-    }
-  }
-  await expect.poll(projected, { timeout: durabilityTimeout }).toBe(true);
+  await driveUntil(pages, projected, testInfo, {
+    label: "wait for projected state",
+    noProgressMs: durabilityTimeout,
+  });
 }
 
 async function passUntilDraggable(
   pages: readonly Page[],
   card: Locator,
+  testInfo: TestInfo,
   durabilityTimeout = 45_000,
 ) {
   // A Windows Game Record durability save may briefly keep the accepted
@@ -279,9 +219,35 @@ async function passUntilDraggable(
   await passUntilProjection(
     pages,
     async () => await card.getAttribute("draggable") === "true",
+    testInfo,
     durabilityTimeout,
   );
   await expect(card).toHaveAttribute("draggable", "true");
+}
+
+async function advanceToActionReady(
+  pages: readonly Page[],
+  action: Locator,
+  testInfo: TestInfo,
+  durabilityTimeout = 45_000,
+) {
+  // Stop advancing as soon as the exact capability exists, even if React still
+  // has it disabled behind the previous command's serialization lock. A goal
+  // based only on a card's draggable projection can otherwise submit the main-
+  // phase pass while that projection is still settling.
+  await driveUntil(pages, async () => actionIsReady(action), testInfo, {
+    label: "advance to exact ready action",
+    noProgressMs: durabilityTimeout,
+    advance: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      if (await action.count()) return true;
+      for (const page of pages) {
+        const result = await submitAuthorizedPass(page);
+        if (result !== "unavailable") return true;
+      }
+      return true;
+    },
+  });
 }
 
 const browserTriggerDeck = `Commander:
@@ -344,7 +310,35 @@ Mainboard:
 49 Mountain
 `;
 
-test("@smoke four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }) => {
+test("@browser-lifecycle four shared-cookie browser tabs retain isolated lobby seats", async ({ browser }, testInfo) => {
+  const context = await browser.newContext();
+  const pages: Page[] = [];
+  try {
+    for (const seat of "ABCD") {
+      const page = await context.newPage();
+      pages.push(page);
+      await enter(page, `Smoke ${seat}`);
+    }
+    await pages[0].getByTestId("create-room").click();
+    const invite = await pages[0].getByTestId("room-invite").textContent();
+    expect(invite).toBeTruthy();
+    for (let index = 1; index < pages.length; index += 1) {
+      const seat = "ABCD"[index];
+      await pages[index].getByTestId("invite-code").fill(invite!);
+      await pages[index].getByTestId("seat-select").selectOption(seat);
+      await pages[index].getByTestId("join-room").click();
+    }
+    for (let index = 0; index < pages.length; index += 1) {
+      await expect(pages[index].getByTestId(`seat-${"ABCD"[index]}`)).toHaveClass(/mine/);
+    }
+    await expect(pages[0].getByTestId("room-invite")).toHaveText(invite!);
+  } finally {
+    await annotateJourneyMetrics(pages, 1, testInfo);
+    await context.close();
+  }
+});
+
+test("@smoke @browser-lifecycle @reconnect @lifecycle four shared-cookie browser tabs retain isolated seats through mulligans and reconnect", async ({ browser }, testInfo) => {
   const contexts: BrowserContext[] = [];
   const pages: Page[] = [];
   try {
@@ -487,17 +481,20 @@ test("@smoke four shared-cookie browser tabs retain isolated seats through mulli
     await expect(pages[0].getByTestId("card-inspector-expanded")).toHaveCount(0);
     expect(await pages[0].evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
   } finally {
+    await annotateJourneyMetrics(pages, contexts.length, testInfo);
     await Promise.all(contexts.map((context) => context.close()));
   }
 });
 
-test("an invited spectator receives a read-only projection and complete public log", async ({ browser }) => {
+test("@browser-lifecycle an invited spectator receives a read-only projection and complete public log", async ({ browser }, testInfo) => {
   let playerContexts: BrowserContext[] = [];
+  const metricsPages: Page[] = [];
   const spectatorContext = await browser.newContext();
   try {
     const started = await startFourPlayerGame(browser);
     playerContexts = started.contexts;
     const spectator = await spectatorContext.newPage();
+    metricsPages.push(...started.pages, spectator);
     await enter(spectator, "Table spectator");
     await spectator.getByTestId("invite-code").fill(started.invite);
     await spectator.getByTestId("watch-room").click();
@@ -529,12 +526,17 @@ test("an invited spectator receives a read-only projection and complete public l
     await spectator.getByTestId("open-public-log").click();
     await expect(spectator.getByTestId("public-log-entry").first()).toBeVisible();
   } finally {
+    await annotateJourneyMetrics(
+      metricsPages,
+      playerContexts.length + 1,
+      testInfo,
+    );
     await spectatorContext.close();
     await Promise.all(playerContexts.map((context) => context.close()));
   }
 });
 
-test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a duel", async ({ browser }) => {
+test("@browser-lifecycle a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a duel", async ({ browser }, testInfo) => {
   const context = await browser.newContext();
   const host = await context.newPage();
   const opponent = await context.newPage();
@@ -637,12 +639,28 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: "Swamp" }) });
     await expect(swamp).toHaveCount(1);
-    await passUntilDraggable([host, opponent], swamp);
-    const beforeDrop = await viewRevision(host);
-    await swamp.dragTo(host.getByTestId("own-battlefield"));
-    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeDrop);
-    await expect(host.getByTestId("own-battlefield")).toContainText("Swamp");
-    await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
+    const swampRef = await swamp.getAttribute("data-card-ref");
+    expect(swampRef).toBeTruthy();
+    const battlefieldCards = host
+      .getByTestId("own-battlefield")
+      .locator(".card-tile");
+    const battlefieldCount = await battlefieldCards.count();
+    // The pass which reaches main phase can still publish after the land offer
+    // appears. Submit the exact current capability and certify zone outcomes;
+    // an unrelated delayed revision is not evidence that a drag succeeded.
+    const playSwamp = host.getByTestId(`action-play-land:${swampRef}`);
+    await advanceToActionReady([host, opponent], playSwamp, testInfo);
+    await playSwamp.click();
+    const dialog = host.getByTestId("choice-dialog");
+    await expect.poll(async () =>
+      (await dialog.isVisible())
+      || (await battlefieldCards.count()) > battlefieldCount,
+    ).toBe(true);
+    if (await dialog.isVisible()) await submitOpenChoice(host);
+    await expect(
+      host.getByTestId("own-hand").locator(`[data-card-ref="${swampRef}"]`),
+    ).toHaveCount(0);
+    await expect(battlefieldCards).toHaveCount(battlefieldCount + 1);
 
     await host.getByTestId("action-concede").click();
     await expect(host.getByTestId("choice-dialog")).toContainText("Concede game");
@@ -661,11 +679,12 @@ test("a shared-cookie 1v1 lobby can replace rooms, remove a player, and start a 
       await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
     }
   } finally {
+    await annotateJourneyMetrics([host, opponent], 1, testInfo);
     await context.close().catch(() => undefined);
   }
 });
 
-test("an isolated-context duel presents exact turn state and Spire Garden correctly", async ({ browser }) => {
+test("@browser-rules @turn-draw an isolated-context duel presents exact turn state and Spire Garden correctly", async ({ browser }, testInfo) => {
   test.setTimeout(180_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
@@ -724,7 +743,7 @@ test("an isolated-context duel presents exact turn state and Spire Garden correc
       await expect(page.getByTestId("exact-step-label")).toHaveText("Upkeep");
     }
 
-    await passUntilDraggable([host, opponent], spire);
+    await passUntilDraggable([host, opponent], spire, testInfo);
     await expect(host.getByTestId("active-turn-label")).toHaveText("Seat A's Turn · Turn 1");
     await expect(host.getByTestId("priority-label")).toContainText("Priority: Seat A");
     await expect(host.getByTestId("exact-step-label")).toHaveText("Main Phase 1");
@@ -773,30 +792,32 @@ test("an isolated-context duel presents exact turn state and Spire Garden correc
     await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(6);
 
     async function advanceUntilTurn(active: string, turn: number, step: string) {
-      for (let attempt = 0; attempt < 80; attempt += 1) {
+      await driveUntil(
+        [host, opponent],
+        async () => {
         const activeText = await host.getByTestId("active-turn-label").textContent();
         const stepText = await host.getByTestId("exact-step-label").textContent();
-        if (activeText === `Seat ${active}'s Turn · Turn ${turn}` && stepText === step) return;
-        let advanced = false;
-        for (const page of [host, opponent]) {
-          const discard = page.getByTestId("action-discard");
-          if (await actionIsReady(discard)) {
-            await discard.click();
-            await expect(page.getByTestId("choice-dialog")).toBeVisible();
-            await page.locator('[data-testid^="choice-cards-"]').first().check();
-            await submitOpenChoice(page);
-            advanced = true;
-            break;
-          }
-          const pass = page.getByTestId("action-pass");
-          if (!(await actionIsReady(pass))) continue;
-          await submitMaybeFormAction(page, "pass", 3_000);
-          advanced = true;
-          break;
-        }
-        if (!advanced) await host.waitForTimeout(50);
-      }
-      throw new Error(`Duel did not reach Seat ${active}, turn ${turn}, ${step}`);
+          return activeText === `Seat ${active}'s Turn · Turn ${turn}`
+            && stepText === step;
+        },
+        testInfo,
+        {
+          label: `advance to Seat ${active}, turn ${turn}, ${step}`,
+          noProgressMs: 90_000,
+          advance: async () => {
+            for (const page of [host, opponent]) {
+              const discard = page.getByTestId("action-discard");
+              if (!(await actionIsReady(discard))) continue;
+              await discard.click();
+              await expect(page.getByTestId("choice-dialog")).toBeVisible();
+              await page.locator('[data-testid^="choice-cards-"]').first().check();
+              await submitOpenChoice(page);
+              return true;
+            }
+            return false;
+          },
+        },
+      );
     }
 
     await advanceUntilTurn("B", 2, "Draw");
@@ -805,22 +826,13 @@ test("an isolated-context duel presents exact turn state and Spire Garden correc
 
     await advanceUntilTurn("A", 3, "Draw");
     await expect(host.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
-
-    await host.getByTestId("action-concede").click();
-    await submitOpenChoice(host);
-    for (const page of [host, opponent]) {
-      await expect(page.getByTestId("turn-status-terminal")).toContainText("Game complete");
-      await expect(page.getByTestId("phase-rail")).toHaveCount(0);
-      await expect(page.getByTestId("auto-pass-toggle")).toHaveCount(0);
-      await expect(page.getByTestId("decision-panel")).toHaveCount(0);
-      await expect(page.getByTestId("game-over-banner")).toContainText("Seat B wins");
-    }
   } finally {
+    await annotateJourneyMetrics([host, opponent], 2, testInfo);
     await Promise.all([hostContext.close(), opponentContext.close()]);
   }
 });
 
-test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmasters", async ({ browser }) => {
+test("@browser-rules @mana-action a duel stabilizes land ETBs, permits a stack response, and resolves Bowmasters", async ({ browser }, testInfo) => {
   // This journey persists every manual mana and priority transition. Hosted
   // runners can exceed the suite default without any individual wait stalling.
   test.setTimeout(180_000);
@@ -869,26 +881,26 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
     await expect(host.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
     await expect(opponent.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
 
-    const island = opponent
-      .getByTestId("own-hand")
-      .locator(".hand-card")
-      .filter({ has: opponent.locator(".card-copy strong", { hasText: /^Island$/ }) })
-      .first();
-    await passUntilDraggable([host, opponent], island);
-    const beforeIsland = await viewRevision(opponent);
-    await island.click();
-    await opponent.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Island$/ }).click();
-    await expect.poll(() => viewRevision(opponent)).toBeGreaterThan(beforeIsland);
-    const swamp = host
-      .getByTestId("own-hand")
-      .locator(".hand-card")
-      .filter({ has: host.locator(".card-copy strong", { hasText: /^Swamp$/ }) })
-      .first();
-    await passUntilDraggable([host, opponent], swamp);
-    const beforeSwamp = await viewRevision(host);
-    await swamp.click();
-    await host.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Swamp$/ }).click();
-    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeSwamp);
+    async function playBasicLand(page: Page, name: "Island" | "Swamp") {
+      const cards = page.getByTestId("own-hand").locator(".hand-card");
+      const land = cards
+        .filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) })
+        .first();
+      const landRef = await land.getAttribute("data-card-ref");
+      expect(landRef).toBeTruthy();
+      const battlefieldCards = page
+        .getByTestId("own-battlefield")
+        .locator(".card-tile");
+      const battlefieldCount = await battlefieldCards.count();
+      const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      await advanceToActionReady([host, opponent], playAction, testInfo);
+      await playAction.click();
+      await expect(cards.locator(`[data-card-ref="${landRef}"]`)).toHaveCount(0);
+      await expect(battlefieldCards).toHaveCount(battlefieldCount + 1);
+    }
+
+    await playBasicLand(opponent, "Island");
+    await playBasicLand(host, "Swamp");
 
     await host.getByTestId("auto-mana-toggle").click();
     await expect(host.getByTestId("auto-mana-toggle")).toContainText("Manual mana on");
@@ -957,11 +969,12 @@ test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmas
     await expect(host.getByTestId("game-status")).toHaveText("ACTIVE");
     await expect(host.getByTestId("paused-banner")).toHaveCount(0);
   } finally {
+    await annotateJourneyMetrics([host, opponent], 2, testInfo);
     await Promise.all([hostContext.close(), opponentContext.close()]);
   }
 });
 
-test("a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }) => {
+test("@browser-rules @combat a duel declares an attacker in the browser and applies commander combat damage", async ({ browser }, testInfo) => {
   // This journey crosses several auto-pass windows and persists each real
   // command. Preserve assertion-driven waits while leaving hosted runners
   // enough time for durability writes and context cleanup under serial load.
@@ -999,14 +1012,27 @@ test("a duel declares an attacker in the browser and applies commander combat da
       const land = name
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
-      await passUntilDraggable([host, opponent], land);
-      // Advancing to this seat's main phase may include that turn's draw.
-      // Snapshot the projected hand only after the card is currently playable.
-      const handCount = await cards.count();
-      const revision = await viewRevision(page);
-      await land.dragTo(page.getByTestId("own-battlefield"));
-      await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
-      await expect(cards).toHaveCount(handCount - 1, { timeout: 90_000 });
+      const landRef = await land.getAttribute("data-card-ref");
+      expect(landRef).toBeTruthy();
+      const battlefieldCards = page
+        .getByTestId("own-battlefield")
+        .locator(".card-tile");
+      const battlefieldCount = await battlefieldCards.count();
+      const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      await advanceToActionReady([host, opponent], playAction, testInfo, 90_000);
+      await playAction.click();
+      const dialog = page.getByTestId("choice-dialog");
+      await expect.poll(async () =>
+        (await dialog.isVisible())
+        || (await battlefieldCards.count()) > battlefieldCount,
+      ).toBe(true);
+      if (await dialog.isVisible()) await submitOpenChoice(page);
+      await expect(cards.locator(`[data-card-ref="${landRef}"]`)).toHaveCount(0, {
+        timeout: 90_000,
+      });
+      await expect(battlefieldCards).toHaveCount(battlefieldCount + 1, {
+        timeout: 90_000,
+      });
     }
 
     await playLand(host, "Forest");
@@ -1034,7 +1060,9 @@ test("a duel declares an attacker in the browser and applies commander combat da
     await playLand(host);
 
     await submitFormAction(host, "pass");
-    await advanceToDecision([host, opponent], host, "Combat.Attackers");
+    await advanceToDecision(
+      [host, opponent], host, "Combat.Attackers", testInfo,
+    );
     await host.getByTestId("action-attack").click();
     const attackerChoice = host.locator('[data-testid^="choice-attackers-"]').first();
     await expect(attackerChoice).toBeVisible();
@@ -1048,18 +1076,19 @@ test("a duel declares an attacker in the browser and applies commander combat da
     await passUntilProjection([host, opponent], async () => (
       await host.getByTestId("player-B").getByLabel("37 life").isVisible()
       && await opponent.getByTestId("player-B").getByLabel("37 life").isVisible()
-    ));
+    ), testInfo);
     await expect(host.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
     await expect(opponent.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
     await host.getByTestId("open-public-log").click();
     await expect(host.getByTestId("public-game-log")).toContainText("attacked with 1 creature");
     await expect(host.getByTestId("public-game-log")).toContainText("Combat damage was dealt");
   } finally {
+    await annotateJourneyMetrics([host, opponent], 2, testInfo);
     await Promise.all([hostContext.close(), opponentContext.close()]);
   }
 });
 
-test("a trusted browser duel reaches a natural commander-damage winner", async ({ browser }) => {
+test("@browser-soak @natural-winner @persistence a trusted browser duel reaches a natural commander-damage winner", async ({ browser }, testInfo) => {
   // This intentionally natural game persists more than one hundred real
   // commands. It completes near five minutes alone and can take longer after
   // the preceding serial journeys, especially on Windows or hosted CI.
@@ -1101,14 +1130,41 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       // This natural-winner witness runs after the other durability-heavy
       // journeys in its serial shard. A single accepted command can take more
       // than the shared helper's normal budget while prior records flush.
-      await passUntilDraggable([host, opponent], land, 90_000);
       // Advancing to this seat's main phase may include that turn's draw.
-      // Snapshot the projected hand only after the card is currently playable.
-      const handCount = await cards.count();
-      const revision = await viewRevision(page);
-      await land.dragTo(page.getByTestId("own-battlefield"));
-      await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
-      await expect(cards).toHaveCount(handCount - 1, {
+      // Pin the physical card rather than total hand size: Auto-pass may
+      // legitimately advance far enough for a later private draw immediately
+      // after this accepted land play.
+      const landRef = await land.getAttribute("data-card-ref");
+      expect(landRef).toBeTruthy();
+      const landName = await land.locator(".card-copy strong").textContent();
+      expect(landName).toBeTruthy();
+      const battlefieldCards = page
+        .getByTestId("own-battlefield")
+        .locator(".card-tile");
+      const battlefieldCount = await battlefieldCards.count();
+      // This durability soak exercises more than a hundred routine commands.
+      // Use the exact current capability instead of accepting an unrelated
+      // delayed pass revision as evidence that a drag command was submitted.
+      const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      await advanceToActionReady(
+        [host, opponent], playAction, testInfo, durableTransitionTimeout,
+      );
+      await playAction.click();
+      const dialog = page.getByTestId("choice-dialog");
+      await expect.poll(async () =>
+        (await dialog.isVisible())
+        || (await battlefieldCards.count()) > battlefieldCount,
+      ).toBe(true);
+      if (await dialog.isVisible()) await submitOpenChoice(page);
+      await expect(
+        cards.locator(`[data-card-ref="${landRef}"]`),
+      ).toHaveCount(0, {
+        timeout: durableTransitionTimeout,
+      });
+      // Hidden-to-public projection intentionally replaces the private hand
+      // reference, so certify the public battlefield count rather than
+      // assuming identity continuity across that privacy boundary.
+      await expect(battlefieldCards).toHaveCount(battlefieldCount + 1, {
         timeout: durableTransitionTimeout,
       });
     }
@@ -1124,10 +1180,12 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
         .getByRole("button", { name: /Cast Yargle and Multani/ });
       await declineSeatOpportunity(
         [host, opponent], page, commanderOffer, "Main Phase 1",
+        testInfo,
         durableTransitionTimeout,
       );
       await declineSeatOpportunity(
         [host, opponent], page, commanderOffer, "Main Phase 2",
+        testInfo,
         durableTransitionTimeout,
       );
     }
@@ -1180,7 +1238,8 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       // only that currently authorized pass and stop at the first strategic
       // combat choice.
       await advanceToDecision(
-        [host, opponent], host, "Combat.Attackers", durableTransitionTimeout,
+        [host, opponent], host, "Combat.Attackers", testInfo,
+        durableTransitionTimeout,
       );
       await host.getByTestId("action-attack").click();
       const attackerChoice = host.locator('[data-testid^="choice-attackers-"]').first();
@@ -1199,7 +1258,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
         if (!damage?.includes("18 from Yargle and Multani")) return false;
       }
       return true;
-    }, durableTransitionTimeout);
+    }, testInfo, durableTransitionTimeout);
     for (const page of [host, opponent]) {
       await expect(page.getByTestId("player-B").getByLabel("22 life")).toBeVisible({
         timeout: durableTransitionTimeout,
@@ -1223,7 +1282,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
         }
       }
       return true;
-    }, durableTransitionTimeout);
+    }, testInfo, durableTransitionTimeout);
     for (const page of [host, opponent]) {
       await expect(page.getByTestId("game-status")).toHaveText("COMPLETE", {
         timeout: durableTransitionTimeout,
@@ -1253,16 +1312,19 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       { timeout: durableTransitionTimeout },
     );
   } finally {
+    await annotateJourneyMetrics([host, opponent], 2, testInfo);
     await Promise.all([hostContext.close(), opponentContext.close()]);
   }
 });
 
-test("generic private choice form executes a penalized multiplayer mulligan", async ({ browser }) => {
+test("@browser-lifecycle generic private choice form executes a penalized multiplayer mulligan", async ({ browser }, testInfo) => {
   let contexts: BrowserContext[] = [];
+  let metricsPages: Page[] = [];
   try {
     const started = await startFourPlayerGame(browser);
     contexts = started.contexts;
     const pages = started.pages;
+    metricsPages = pages;
 
     const mulliganTrigger = pages[0].getByTestId("action-mulligan");
     await mulliganTrigger.click();
@@ -1311,6 +1373,11 @@ test("generic private choice form executes a penalized multiplayer mulligan", as
       await expect(opponent.getByTestId("own-hand").locator(".hand-card")).toHaveCount(7);
     }
   } finally {
+    await annotateJourneyMetrics(
+      metricsPages,
+      contexts.length,
+      testInfo,
+    );
     await Promise.all(contexts.map((context) => context.close()));
   }
 });

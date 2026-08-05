@@ -19,6 +19,9 @@ if (pythonExecutable.includes('"')) {
   throw new Error("MTG_PYTHON_EXECUTABLE cannot contain a double quote");
 }
 const pythonCommand = `"${pythonExecutable}"`;
+const jsonReport =
+  process.env.MTG_PLAYWRIGHT_JSON ??
+  path.join("test-results", "playwright-results.json");
 
 export default defineConfig({
   testDir: "./tests",
@@ -26,7 +29,11 @@ export default defineConfig({
   workers: 1,
   timeout: 90_000,
   expect: { timeout: 15_000 },
-  reporter: [["list"], ["html", { open: "never" }]],
+  reporter: [
+    ["list"],
+    ["json", { outputFile: jsonReport }],
+    ["html", { open: "never" }],
+  ],
   use: {
     baseURL: `http://127.0.0.1:${webPort}`,
     // E2E automation must never take over a contributor's system browser.

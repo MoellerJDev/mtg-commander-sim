@@ -13,48 +13,60 @@ if str(ROOT) not in sys.path:
 
 from scripts.change_impact import (
     changed_files,
+    changed_python_symbols,
     classify_changes,
     github_base,
     github_event_labels,
 )
+from scripts.test_shards import load_manifest, primary_matrix
 
 
 def browser_matrix(browser_full: bool) -> dict:
-    shards = (
+    groups = (
         (
             {
-                "shard": 1,
-                "total": 2,
+                "group": "lifecycle",
+                "grep": "@browser-lifecycle",
                 "server_port": 18081,
                 "web_port": 15171,
             },
             {
-                "shard": 2,
-                "total": 2,
+                "group": "rules",
+                "grep": "@browser-rules",
                 "server_port": 18082,
                 "web_port": 15172,
+            },
+            {
+                "group": "soak",
+                "grep": "@browser-soak",
+                "server_port": 18083,
+                "web_port": 15173,
             },
         )
         if browser_full
         else (
             {
-                "shard": 1,
-                "total": 1,
+                "group": "smoke",
+                "grep": "@smoke",
                 "server_port": 18081,
                 "web_port": 15171,
             },
         )
     )
-    return {"include": list(shards)}
+    return {"include": list(groups)}
 
 
 def _write_github_output(path: Path, plan: dict) -> None:
     values = {
         "browser_full": str(plan["browser_full"]).lower(),
+        "browser_focus_grep": "|".join(plan["browser_focus_patterns"]),
         "windows_full": str(plan["windows_full"]).lower(),
         "changed_files": json.dumps(plan["changed_files"], separators=(",", ":")),
         "browser_matrix": json.dumps(
             browser_matrix(bool(plan["browser_full"])), separators=(",", ":")
+        ),
+        "windows_matrix": json.dumps(
+            primary_matrix(load_manifest()), separators=(",", ":")
         ),
     }
     with path.open("a", encoding="utf-8", newline="\n") as stream:
@@ -71,6 +83,10 @@ def main() -> int:
     base = args.base or github_base(args.event)
     plan = classify_changes(
         changed_files(base, include_worktree=False),
+        changed_symbols=changed_python_symbols(
+            base,
+            include_worktree=False,
+        ),
         labels=github_event_labels(args.event),
     ).to_dict()
     output = args.github_output or os.environ.get("GITHUB_OUTPUT")

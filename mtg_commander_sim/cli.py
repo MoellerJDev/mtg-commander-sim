@@ -36,7 +36,8 @@ from .record import (
     replay_record,
     verify_record_integrity,
 )
-from .report import review_markdown, write_review_artifacts
+from .report import review_markdown
+from .review_artifacts import write_review_artifacts
 from .rules_corpus import (
     CORPUS_OPERATIONS,
     RulesCorpusError,

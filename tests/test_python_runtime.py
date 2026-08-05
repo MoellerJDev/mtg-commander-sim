@@ -78,8 +78,10 @@ class PythonRuntimeTests(unittest.TestCase):
                 self.assertIn("fetch-depth: 0", checkout)
 
         ci = (workflows / "ci.yml").read_text(encoding="utf-8")
-        windows = ci.split("  windows:\n", 1)[1].split("\n  browser:\n", 1)[0]
-        checkout = windows.split("actions/checkout@v4", 1)[1].split(
+        windows_full = ci.split("  windows_full:\n", 1)[1].split(
+            "\n  windows_package:\n", 1
+        )[0]
+        checkout = windows_full.split("actions/checkout@v4", 1)[1].split(
             "actions/setup-python@v5", 1
         )[0]
         self.assertIn("fetch-depth: 0", checkout)

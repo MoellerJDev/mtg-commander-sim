@@ -5,6 +5,7 @@ from collections import Counter
 import json
 from pathlib import Path
 import sys
+from time import perf_counter
 import unittest
 from typing import Iterable, Mapping, Sequence
 
@@ -105,6 +106,16 @@ def suite_modules(manifest: Mapping, name: str) -> tuple[str, ...]:
     raise TestShardError(f"Unknown test suite {name!r}")
 
 
+def primary_matrix(manifest: Mapping) -> dict:
+    validate_partition(manifest)
+    return {
+        "include": [
+            {"shard": name}
+            for name in manifest["primary_shards"]
+        ]
+    }
+
+
 def load_suite(modules: Iterable[str]) -> unittest.TestSuite:
     names = tuple(dict.fromkeys(modules))
     if not names:
@@ -116,6 +127,8 @@ def load_suite(modules: Iterable[str]) -> unittest.TestSuite:
             errors.append(str(test))
     if errors:
         raise TestShardError(f"Test module import failed: {errors}")
+    if suite.countTestCases() <= 0:
+        raise TestShardError("Selected test modules contain zero tests")
     return suite
 
 
@@ -141,9 +154,42 @@ def describe(manifest: Mapping) -> dict:
     return dict(sorted(result.items()))
 
 
-def run_modules(modules: Sequence[str], *, verbosity: int = 2) -> bool:
+def run_modules(
+    modules: Sequence[str],
+    *,
+    verbosity: int = 2,
+    suite_name: str | None = None,
+    result_json: Path | None = None,
+) -> bool:
     suite = load_suite(modules)
-    return unittest.TextTestRunner(verbosity=verbosity).run(suite).wasSuccessful()
+    configured_test_count = suite.countTestCases()
+    started = perf_counter()
+    result = unittest.TextTestRunner(verbosity=verbosity).run(suite)
+    duration = round(perf_counter() - started, 3)
+    successful = result.wasSuccessful() and result.testsRun > 0
+    if result_json is not None:
+        document = {
+            "schema_version": 1,
+            "type": "unittest-shard-result",
+            "suite": suite_name,
+            "modules": list(modules),
+            "configured_test_count": configured_test_count,
+            "tests_run": result.testsRun,
+            "duration_seconds": duration,
+            "successful": successful,
+            "failures": len(result.failures),
+            "errors": len(result.errors),
+            "skipped": len(result.skipped),
+            "expected_failures": len(result.expectedFailures),
+            "unexpected_successes": len(result.unexpectedSuccesses),
+        }
+        result_json.parent.mkdir(parents=True, exist_ok=True)
+        result_json.write_text(
+            json.dumps(document, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+    return successful
 
 
 def main() -> int:
@@ -155,8 +201,10 @@ def main() -> int:
     subparsers.add_parser("describe")
     run = subparsers.add_parser("run")
     run.add_argument("suite")
+    run.add_argument("--result-json")
     modules = subparsers.add_parser("run-modules")
     modules.add_argument("module", nargs="+")
+    modules.add_argument("--result-json")
     args = parser.parse_args()
 
     try:
@@ -173,7 +221,17 @@ def main() -> int:
             if args.operation == "run"
             else tuple(args.module)
         )
-        return 0 if run_modules(selected) else 1
+        suite_name = args.suite if args.operation == "run" else "run-modules"
+        result_json = Path(args.result_json) if args.result_json else None
+        return (
+            0
+            if run_modules(
+                selected,
+                suite_name=suite_name,
+                result_json=result_json,
+            )
+            else 1
+        )
     except TestShardError as exc:
         print(json.dumps({"ok": False, "error": str(exc)}, sort_keys=True))
         return 1

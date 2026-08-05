@@ -9,7 +9,6 @@ from typing import Any, Mapping, Sequence
 from .engine import CommanderEngine
 from .model import Event
 from .preflight import card_semantic_status
-from .util import stable_json
 
 MEANINGFUL_CODES = {
     "mulligan.keep.private",
@@ -48,13 +47,6 @@ LEGACY_PLACEHOLDERS = {
     "unknown",
     "not recorded",
 }
-
-
-def _atomic_text(path: Path, text: str) -> None:
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(text, encoding="utf-8")
-    temporary.replace(path)
-
 
 def _card_by_ref(engine: CommanderEngine) -> dict[str, Any]:
     return {card.ref: card for card in engine.state.cards.values()}
@@ -1803,43 +1795,16 @@ def write_review_artifacts(
     decisions: Sequence[Mapping[str, Any]] = (),
     manifest: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    directory = Path(directory)
-    review = derive_review(
+    """Compatibility facade for the derived review-artifact owner."""
+
+    from .review_artifacts import write_review_artifacts as write_artifacts
+
+    return write_artifacts(
+        directory,
         engine,
         decisions=decisions,
         manifest=manifest,
-        record_directory=directory,
     )
-    if manifest is not None:
-        updated = dict(manifest)
-        updated["review"] = {
-            "classification": review["fidelity"]["classification"],
-            "eligible": review["fidelity"]["review_eligible"],
-            "matchup_evidence": review["fidelity"]["matchup_evidence"],
-        }
-        _atomic_text(directory / "manifest.json", stable_json(updated))
-        manifest = updated
-    # Size fields include the derived artifacts themselves. Iterate until their
-    # decimal byte counts stabilize so review.json and review.md use the same
-    # definitions and values.
-    previous_sizes: Mapping[str, Any] | None = None
-    for _ in range(5):
-        _atomic_text(directory / "review.json", stable_json(review))
-        _atomic_text(directory / "review.md", review_markdown(review))
-        refreshed = derive_review(
-            engine,
-            decisions=decisions,
-            manifest=manifest,
-            record_directory=directory,
-        )
-        sizes = refreshed.get("size_comparison")
-        review = refreshed
-        if sizes == previous_sizes:
-            break
-        previous_sizes = sizes
-    _atomic_text(directory / "review.json", stable_json(review))
-    _atomic_text(directory / "review.md", review_markdown(review))
-    return review
 
 
 def concise_report(engine: CommanderEngine) -> str:

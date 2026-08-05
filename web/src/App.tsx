@@ -1318,7 +1318,24 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
     return <CardInspector key={panel} value={inspectionTarget} view={currentView} onExpand={() => setExpandedInspector(true)} />;
   }
   return (
-    <main className={`game-shell${isSpectator ? " spectator-table" : ""} density-${tablePreferences.boardDensity}`} data-view-revision={view.viewRevision} style={tableStyle}>
+    <main
+      className={`game-shell${isSpectator ? " spectator-table" : ""} density-${tablePreferences.boardDensity}`}
+      data-game-id={String(game.id ?? gameId)}
+      data-view-revision={view.viewRevision}
+      data-state-revision={lifecycle?.state_revision ?? -1}
+      data-command-count={lifecycle?.commands ?? 0}
+      data-event-count={lifecycle?.events ?? 0}
+      data-lifecycle-status={lifecycle?.status ?? "loading"}
+      data-phase={String(turn.phase ?? lifecycle?.phase ?? "")}
+      data-step={String(turn.step ?? lifecycle?.step ?? "")}
+      data-active-player={activeSeat}
+      data-priority-player={prioritySeat}
+      data-latest-event-id={publicEvents.at(-1)?.id ?? 0}
+      data-latest-event-code={publicEvents.at(-1)?.code ?? ""}
+      data-last-persistence-ms={Math.round((lifecycle?.persistence.last_total_seconds ?? 0) * 1000)}
+      data-last-derived-review-ms={Math.round((lifecycle?.persistence.last_derived_review_seconds ?? 0) * 1000)}
+      style={tableStyle}
+    >
       {isSpectator && <div className="watch-mode-banner" data-testid="watch-mode"><strong>WATCH MODE</strong><span>Public table and game log · no player controls</span></div>}
       {lifecycle?.status !== "complete" && <a className="skip-link" href="#decision-tray">Skip to current actions</a>}
       <header className="game-topbar">

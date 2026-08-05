@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import threading
 import unittest
 
 from common import load_assets, make_session
@@ -107,6 +108,64 @@ class GameActorTests(unittest.IsolatedAsyncioTestCase):
             ):
                 await asyncio.wait_for(actor.poll(), timeout=5)
         finally:
+            await asyncio.wait_for(manager.close(), timeout=5)
+
+    async def test_slow_persistence_keeps_progress_observable_before_ack(self):
+        save_started = threading.Event()
+        release_save = threading.Event()
+
+        class SlowPersistence:
+            def save(self, service):
+                save_started.set()
+                if not release_save.wait(timeout=5):
+                    raise TimeoutError("test did not release persistence")
+                return {
+                    "authoritative_seconds": 0.25,
+                    "derived_review_seconds": 0.0,
+                    "total_seconds": 0.25,
+                }
+
+        session, service = self.make_service(32008)
+        manager = GameManager()
+        actor = await manager.add(service, persistence=SlowPersistence())
+        command = asyncio.create_task(
+            actor.command("pilot:A", self.envelope(session))
+        )
+        try:
+            started = await asyncio.to_thread(save_started.wait, 5)
+            self.assertTrue(started)
+
+            # Persistence runs outside the event loop.  Public progress remains
+            # readable even though the command cannot be acknowledged yet.
+            await asyncio.sleep(0)
+            snapshot = actor.progress_snapshot()
+            self.assertEqual("command", snapshot["processing_kind"])
+            self.assertTrue(snapshot["persistence"]["pending"])
+            self.assertIsNotNone(
+                snapshot["persistence"]["pending_seconds"]
+            )
+            self.assertFalse(command.done())
+
+            release_save.set()
+            receipt = await asyncio.wait_for(command, timeout=5)
+            self.assertTrue(receipt.ok)
+            complete = actor.progress_snapshot()
+            self.assertFalse(complete["persistence"]["pending"])
+            self.assertGreaterEqual(
+                complete["persistence"]["last_total_seconds"], 0.0
+            )
+            self.assertEqual(
+                0.25,
+                complete["persistence"][
+                    "last_authoritative_seconds"
+                ],
+            )
+            self.assertEqual(
+                0.0,
+                complete["persistence"]["last_derived_review_seconds"],
+            )
+        finally:
+            release_save.set()
             await asyncio.wait_for(manager.close(), timeout=5)
 
     async def test_network_projection_cursors_are_connection_isolated(self):

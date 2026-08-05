@@ -46,10 +46,32 @@ jobs:
         run: python -m unittest discover -s tests -p "test_*.py" -v
 
   browser:
-    name: Nightly / Full browser
+    name: Nightly / Browser / ${{ matrix.group }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - group: lifecycle
+            grep: "@browser-lifecycle"
+            server_port: 18081
+            web_port: 15171
+          - group: rules
+            grep: "@browser-rules"
+            server_port: 18082
+            web_port: 15172
+          - group: soak
+            grep: "@browser-soak"
+            server_port: 18083
+            web_port: 15173
     env:
-      MTG_CARD_DB: data/test-ci.sqlite3
+      MTG_BROWSER_GROUP: ${{ matrix.group }}
+      MTG_BROWSER_GROUP_GREP: ${{ matrix.grep }}
+      MTG_CARD_DB: data/test-ci-${{ matrix.group }}.sqlite3
+      MTG_E2E_SERVER_PORT: ${{ matrix.server_port }}
+      MTG_E2E_WEB_PORT: ${{ matrix.web_port }}
+      MTG_E2E_RUNTIME_DIR: ../local/playwright-${{ matrix.group }}
+      MTG_PLAYWRIGHT_JSON: ../local/playwright-${{ matrix.group }}.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -75,12 +97,23 @@ jobs:
             --fixture tests/fixtures/browser-lifecycle-cards.json \
             --fixture tests/fixtures/damage-result-cards.json \
             --fixture tests/fixtures/draw-rules-cards.json \
-            --output data/test-ci.sqlite3
+            --output data/test-ci-${{ matrix.group }}.sqlite3
       - name: Install headless Chromium
         working-directory: web
         run: npx playwright install --with-deps chromium
-      - name: Run all isolated headless journeys
-        run: npm run e2e --prefix web
+      - name: Run measured isolated headless group
+        working-directory: web
+        run: npx playwright test --grep "$MTG_BROWSER_GROUP_GREP"
+      - name: Upload browser journey report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-browser-${{ matrix.group }}-${{ github.run_id }}
+          path: |
+            local/playwright-${{ matrix.group }}.json
+            web/test-results
+          if-no-files-found: warn
+          retention-days: 14
 
   properties:
     name: Nightly / Property / ${{ matrix.module }}

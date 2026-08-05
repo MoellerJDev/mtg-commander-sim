@@ -254,8 +254,10 @@ For normal development, run the deterministic change-impact quick gate. Use
 
 Pull-request CI is the ordinary exact-head certification authority. It runs
 balanced Linux shards, generated and architecture validation, packaging,
-Windows compatibility, and an isolated headless browser check, then reports a
-single stable `PR / Certification` result. Full cross-platform, browser,
+focused Windows compatibility or a full process-isolated Windows shard matrix,
+and isolated headless browser checks. Windows wheel verification runs once and
+an explicit Windows certification gate checks every required nonempty shard
+before the single stable `PR / Certification` result can pass. Full browser,
 property, mutation, corpus, and security assurance runs nightly. See the
 [CI pipeline guide](docs/development/ci-pipeline.md) for shard ownership,
 two-slot worktrees, branch protection, and recovery.

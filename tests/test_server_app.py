@@ -170,8 +170,20 @@ class ServerApplicationTests(unittest.TestCase):
             f"/api/v1/games/{game_id}/state?full=true",
             headers=self.auth(alice),
         ).json()["packet"]
+        progress = self.client.get(
+            f"/api/v1/games/{game_id}/progress",
+            headers=self.auth(alice),
+        )
+        outsider_progress = self.client.get(
+            f"/api/v1/games/{game_id}/progress",
+            headers=self.auth(carol),
+        )
         self.assertEqual("commander_duel", summary["format_profile"])
         self.assertEqual({"A", "B"}, set(packet["state"]["players"]))
+        self.assertEqual(200, progress.status_code, progress.text)
+        self.assertEqual(0, progress.json()["queue_depth"])
+        self.assertFalse(progress.json()["persistence"]["pending"])
+        self.assertEqual(403, outsider_progress.status_code)
         record_dir = self.settings.game_root / game_id
         checkpoint = json.loads(
             (record_dir / "checkpoint.json").read_text(encoding="utf-8")

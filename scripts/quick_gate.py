@@ -17,7 +17,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.change_impact import changed_files, classify_changes
+from scripts.change_impact import (
+    changed_files,
+    changed_python_symbols,
+    classify_changes,
+)
 from scripts.test_shards import load_manifest, suite_modules, validate_partition
 from scripts.validate_python_runtime import require_supported_python
 
@@ -32,8 +36,12 @@ def _python() -> str:
     return str(Path(sys.executable).resolve())
 
 
-def build_plan(paths: Sequence[str]) -> dict:
-    impact = classify_changes(paths)
+def build_plan(
+    paths: Sequence[str],
+    *,
+    changed_symbols: Sequence[str] = (),
+) -> dict:
+    impact = classify_changes(paths, changed_symbols=changed_symbols)
     manifest = load_manifest()
     validate_partition(manifest)
     modules = list(impact.test_modules)
@@ -213,7 +221,17 @@ def main() -> int:
         if args.changed_file
         else changed_files(args.base, include_worktree=True)
     )
-    plan = build_plan(paths)
+    plan = build_plan(
+        paths,
+        changed_symbols=(
+            ()
+            if args.changed_file
+            else changed_python_symbols(
+                args.base,
+                include_worktree=True,
+            )
+        ),
+    )
     if args.dry_run:
         print(
             json.dumps(
