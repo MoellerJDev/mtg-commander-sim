@@ -718,6 +718,21 @@ class FixedDamageEffectRuntimeTests(unittest.TestCase):
 
         self.assertIn(target.ref, action["target_schema"]["legal_refs"])
         self.assertNotIn("B", action["target_schema"]["legal_refs"])
+        before_rejection = authoritative_state_hash(engine.state)
+        rejected = session.act(
+            "pilot:A",
+            {
+                "action_id": action["id"],
+                "targets": ["B"],
+            },
+        )
+        self.assertFalse(rejected.ok)
+        self.assertFalse(source.tapped)
+        self.assertFalse(engine.state.stack)
+        self.assertEqual(before_rejection, authoritative_state_hash(engine.state))
+        source = engine.state.cards[source.object_id]
+        target = engine.state.cards[target.object_id]
+
         result = session.act(
             "pilot:A",
             {
