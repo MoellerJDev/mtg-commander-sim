@@ -114,10 +114,10 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,820
-- Conventional Python cases: 1,520
+- Python discovered: 4,834
+- Conventional Python cases: 1,534
 - Generated CR conformance cases: 3,300
-- Playwright journeys: 8
+- Playwright journeys: 9
 - Browser unit cases: 22
 - Dedicated property suite: false
 - Mutation score: None

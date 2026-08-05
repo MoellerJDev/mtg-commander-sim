@@ -9444,7 +9444,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111"
+          "verified": "94606813c692ad94c2c029d6a63cbec4229ebc58c7e6c86f7a8aa848d532a0d4"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9852,7 +9852,7 @@
   "tests": {
     "browser": {
       "node_unit_cases": 22,
-      "playwright_e2e_journeys": 8
+      "playwright_e2e_journeys": 9
     },
     "mutation_testing": {
       "capability_mutation_declarations": 46,
@@ -9883,15 +9883,15 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1520,
-      "discovered_total": 4820,
+      "conventional_ast_cases": 1534,
+      "discovered_total": 4834,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
-        "compiler_named": 43,
+        "compiler_named": 44,
         "fuzz_named": 1,
-        "privacy_or_projection_named": 20,
+        "privacy_or_projection_named": 21,
         "replay_named": 89,
-        "server_named": 21
+        "server_named": 25
       },
       "reconciles": true,
       "test_files": 158
