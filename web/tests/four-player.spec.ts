@@ -952,6 +952,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
   const opponent = await opponentContext.newPage();
+  const durableTransitionTimeout = 90_000;
   try {
     await host.route(/\/api\/v1\/rooms$/, async (route) => {
       const request = route.request();
@@ -1022,7 +1023,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
         // before the permanent appears in the projected battlefield.
         await expect(host.getByTestId("own-battlefield")).toContainText(
           "Yargle and Multani",
-          { timeout: 90_000 },
+          { timeout: durableTransitionTimeout },
         );
       }
       await playLand(opponent);
@@ -1034,47 +1035,46 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
     async function attackWithCommander() {
       // A still has a legal land play, so advancing to combat is meaningful
       // and must not be consumed by Auto-pass.
-      // Depending on the exact priority handoff, the first visible pass may be
-      // an immediate priority action rather than the form-backed main-phase
-      // pass. Advance through only those passes until attackers are requested.
-      for (let attempt = 0; attempt < 8; attempt += 1) {
+      // Depending on the exact priority handoff, either seat may briefly own a
+      // server-issued pass before A receives the attackers decision. Submit
+      // only that currently authorized pass and stop at the first strategic
+      // combat choice.
+      for (let attempt = 0; attempt < 16; attempt += 1) {
         const panel = host.getByTestId("decision-panel");
-        const pass = host.getByTestId("action-pass");
         await expect
           .poll(async () => {
             if ((await panel.textContent())?.includes("Combat.Attackers")) {
               return "attackers";
             }
-            return (await pass.isVisible()) && (await pass.isEnabled()) ? "pass" : "waiting";
-          })
+            for (let index = 0; index < 2; index += 1) {
+              const pass = [host, opponent][index].getByTestId("action-pass");
+              if (await actionIsReady(pass)) return `pass-${index}`;
+            }
+            return "waiting";
+          }, { timeout: durableTransitionTimeout })
           .not.toBe("waiting");
         if ((await panel.textContent())?.includes("Combat.Attackers")) {
           break;
         }
-        try {
-          await submitMaybeFormAction(host, "pass", 2_000);
-        } catch {
-          // A projection or the safe auto-pass effect may consume the enabled
-          // pass between the poll and click. Wait for that in-flight command
-          // to reveal either the attackers window or the next manual pass.
-          await expect
-            .poll(async () => {
-              if ((await panel.textContent())?.includes("Combat.Attackers")) {
-                return "attackers";
-              }
-              return (await pass.isVisible()) && (await pass.isEnabled()) ? "pass" : "waiting";
-            })
-            .not.toBe("waiting");
-          if ((await panel.textContent())?.includes("Combat.Attackers")) {
-            break;
+        for (const page of [host, opponent]) {
+          const pass = page.getByTestId("action-pass");
+          if (!(await actionIsReady(pass))) continue;
+          try {
+            await submitMaybeFormAction(page, "pass", 2_000);
+          } catch (error) {
+            // Safe Auto-pass may consume the capability between observation
+            // and submission. Throw only when the same pass is still current;
+            // otherwise the next bounded iteration observes the new owner.
+            if (!((await panel.textContent())?.includes("Combat.Attackers"))
+              && await actionIsReady(pass)) throw error;
           }
-          // If another pass is now ready, the next bounded iteration owns it.
-          // If the capability was consumed, the next iteration waits for the
-          // resulting projection. The final attackers assertion still fails
-          // closed if neither transition occurs.
+          break;
         }
       }
-      await expect(host.getByTestId("decision-panel")).toContainText("Combat.Attackers");
+      await expect(host.getByTestId("decision-panel")).toContainText(
+        "Combat.Attackers",
+        { timeout: durableTransitionTimeout },
+      );
       await host.getByTestId("action-attack").click();
       const attackerChoice = host.locator('[data-testid^="choice-attackers-"]').first();
       await expect(attackerChoice).toBeVisible();
@@ -1084,8 +1084,13 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
 
     await attackWithCommander();
     for (const page of [host, opponent]) {
-      await expect(page.getByTestId("player-B").getByLabel("22 life")).toBeVisible();
-      await expect(page.getByTestId("commander-damage-B")).toContainText("18 from Yargle and Multani");
+      await expect(page.getByTestId("player-B").getByLabel("22 life")).toBeVisible({
+        timeout: durableTransitionTimeout,
+      });
+      await expect(page.getByTestId("commander-damage-B")).toContainText(
+        "18 from Yargle and Multani",
+        { timeout: durableTransitionTimeout },
+      );
     }
     await submitFormAction(host, "pass");
     await playLand(opponent);
@@ -1093,15 +1098,33 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
 
     await attackWithCommander();
     for (const page of [host, opponent]) {
-      await expect(page.getByTestId("game-status")).toHaveText("COMPLETE");
-      await expect(page.getByTestId("game-over-banner")).toContainText("Seat A wins");
-      await expect(page.getByTestId("turn-status-terminal")).toContainText("Game complete");
-      await expect(page.getByTestId("decision-panel")).toHaveCount(0);
-      await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0);
+      await expect(page.getByTestId("game-status")).toHaveText("COMPLETE", {
+        timeout: durableTransitionTimeout,
+      });
+      await expect(page.getByTestId("game-over-banner")).toContainText(
+        "Seat A wins",
+        { timeout: durableTransitionTimeout },
+      );
+      await expect(page.getByTestId("turn-status-terminal")).toContainText(
+        "Game complete",
+        { timeout: durableTransitionTimeout },
+      );
+      await expect(page.getByTestId("decision-panel")).toHaveCount(0, {
+        timeout: durableTransitionTimeout,
+      });
+      await expect(page.locator('[data-testid^="action-"]')).toHaveCount(0, {
+        timeout: durableTransitionTimeout,
+      });
     }
     await host.getByTestId("open-public-log").click();
-    await expect(host.getByTestId("public-game-log")).toContainText("B left the game: state-based loss");
-    await expect(host.getByTestId("public-game-log")).toContainText("A won the game");
+    await expect(host.getByTestId("public-game-log")).toContainText(
+      "B left the game: state-based loss",
+      { timeout: durableTransitionTimeout },
+    );
+    await expect(host.getByTestId("public-game-log")).toContainText(
+      "A won the game",
+      { timeout: durableTransitionTimeout },
+    );
   } finally {
     await Promise.all([hostContext.close(), opponentContext.close()]);
   }
