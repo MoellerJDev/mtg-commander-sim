@@ -892,6 +892,14 @@ choosing reusable rules work, not a claim of Comprehensive Rules or Oracle
 completeness. The first measured harvest adds generic Vigilance declaration
 behavior and promotes 35 Commander-legal CardPrograms to exact; exact two-face
 positional binding also removes the former Tithing Blade construction failure.
+The fixed-output activated-mana harvest compiles target-free, nonloyalty
+abilities with completely represented mandatory costs and output modes into one
+source-spanned typed descriptor. It promotes 173 Commander-legal CardPrograms,
+reduces material residuals by 1,314, and deliberately leaves dynamic,
+conditional, restricted, triggered, side-effecting, and parenthesized
+basic-land reminder wording outside this capability. Basic land types continue
+to grant their separate intrinsic mana abilities through the existing CR 305.6
+owner rather than through executable reminder text.
 
 The typed semantic-handler migration moved its first executable effect
 families into `mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an

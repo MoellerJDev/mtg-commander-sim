@@ -262,7 +262,7 @@
     {
       "mechanic_id": "cr-605-mana-abilities",
       "path": "mechanics/contracts/mana-abilities.json",
-      "sha256": "0aa2bc18d99bbcddd71a7c4e093e4d2b8d3530fc76bb09927da77bcb33e7a325",
+      "sha256": "f92b7deaf7fc69d5285c817df7561afe4410c19b600a8a0a7595c036d8055af9",
       "version": 1
     },
     {
@@ -7471,7 +7471,7 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/mana-abilities.json",
-      "contract_sha256": "0aa2bc18d99bbcddd71a7c4e093e4d2b8d3530fc76bb09927da77bcb33e7a325",
+      "contract_sha256": "f92b7deaf7fc69d5285c817df7561afe4410c19b600a8a0a7595c036d8055af9",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [],
@@ -7483,7 +7483,8 @@
         "dynamic, conditional, restricted, and side-effecting mana-output grammar remains outside the fixed-output capability",
         "explicit mana activation during arbitrary rule/effect payment windows is not exposed as a general nested decision",
         "activation reentrancy is not represented as a state that can be independently tested",
-        "mana-production replacement and trigger integration is incomplete"
+        "mana-production replacement and trigger integration is incomplete",
+        "parenthesized basic-land reminder text remains assigned to the separate intrinsic basic-land-type ability owner"
       ],
       "mechanic_id": "cr-605-mana-abilities",
       "official_name": "Mana Abilities",
@@ -7503,9 +7504,14 @@
         "test_recordless_mana_plan_ignores_submitted_side_effects",
         "test_fixed_output_compiler_lowers_source_spanned_cardprogram",
         "test_fixed_output_compiler_leaves_dynamic_and_restricted_variants_residual",
+        "test_parenthesized_basic_land_reminder_is_not_an_executable_program",
+        "test_compiled_alternative_output_is_advertised_accepted_and_replayed",
         "test_compiled_fixed_output_offer_and_activation_share_modes",
+        "test_compiled_fixed_output_can_pay_during_casting",
+        "test_fixed_mandatory_costs_commit_through_canonical_owners",
         "test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana",
         "test_invalid_compiled_mana_mode_rolls_back",
+        "test_invalid_mode_rolls_back_fixed_mandatory_costs",
         "test_compiled_fixed_output_is_controller_scoped_in_four_player_game",
         "test_compiled_fixed_output_projection_exposes_no_hidden_cards",
         "test_compiled_fixed_output_activation_replays_exactly"
@@ -8768,20 +8774,20 @@
   "sources": {
     "card_data_snapshot": {
       "available": true,
-      "database_schema_version": "1",
+      "database_schema_version": "2",
       "oracle_bulk": {
-        "download_uri": null,
-        "oracle_id_count": 38362,
-        "sha256": null,
-        "source_filename": "oracle-cards-20260728.jsonl",
-        "updated_at": null
+        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
+        "oracle_id_count": 38542,
+        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
+        "updated_at": "2026-08-04T09:02:45.219+00:00"
       },
       "rulings_bulk": {
-        "download_uri": null,
-        "ruling_count": 77999,
-        "sha256": null,
-        "source_filename": "rulings-20260728.jsonl",
-        "updated_at": null
+        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
+        "ruling_count": 77998,
+        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
+        "source_filename": "rulings-20260804090038.jsonl.gz",
+        "updated_at": "2026-08-04T09:00:38.847+00:00"
       }
     },
     "comprehensive_rules": "indexed",
