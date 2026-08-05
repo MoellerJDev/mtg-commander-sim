@@ -122,6 +122,9 @@ class PlatformStatusTests(unittest.TestCase):
         )
         source["integration"]["active_phase"] = None
         source["integration"]["pull_requests"] = []
+        source["provenance"]["feature_head_classification"] = (
+            "active_candidate"
+        )
         source["milestones"][0]["status"] = "implemented_at_feature_head"
         with mock.patch(
             "scripts.update_platform_status._git_is_ancestor",

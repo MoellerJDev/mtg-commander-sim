@@ -6,15 +6,11 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": {
-      "id": "generic_fixed_damage_effect_clauses",
-      "pull_request": 102,
-      "head": "rules/generic-damage-effect-clauses"
-    },
-    "branch": "rules/generic-damage-effect-clauses",
+    "active_phase": null,
+    "branch": "ci/reconcile-pr102-main-status",
     "branch_ancestry": {
-      "focused_branch_base": "d2ae5f4a4242c471bd9d5adee393aa98224afe7b",
-      "focused_branch_unique_commits_over_main": 7
+      "focused_branch_base": "28e5d4882ef4126d587232357915c6706a071326",
+      "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
       {
@@ -728,7 +724,7 @@
         "base": "main",
         "head": "rules/generic-damage-effect-clauses",
         "number": 102,
-        "state": "open",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/102"
       }
     ],
@@ -744,11 +740,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "baa1060194ef458a3a61756e7b1f53772f135048",
-    "feature_head_classification": "active_candidate",
-    "certified_head_sha": "d2ae5f4a4242c471bd9d5adee393aa98224afe7b",
+    "feature_head_sha": "c3d144ebf0e1f16da5be93f8c0e5517f19193944",
+    "feature_head_classification": "historical_integrated",
+    "certified_head_sha": "28e5d4882ef4126d587232357915c6706a071326",
     "certified_head_classification": "current_main",
-    "generation_timestamp": "2026-08-05T19:26:41Z"
+    "generation_timestamp": "2026-08-05T20:26:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -965,8 +961,8 @@
     {
       "id": "generic_fixed_damage_effect_clause_harvest",
       "name": "Generic fixed-damage effect-clause harvest",
-      "status": "implemented_at_feature_head",
-      "evidence": "PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks; public exact-head certification is pending."
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks. Public exact-head run 31043382697 passed every required Linux, generated, package, Windows, and headless-browser job; merge commit 28e5d48 preserves feature provenance on main. Post-merge smoke 31043864091 passed all 29 integration tests before correctly rejecting the stale active-candidate label corrected by the immediate reconciliation change."
     },
     {
       "id": "rules_snapshot",
@@ -1003,13 +999,13 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31037993447,
+      "run_id": 31043382697,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31037993447"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31043382697"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr101_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31038955981_passed_all_29_tests_then_rejected_only_stale_squash_provenance_reconciled_in_pr102",
+      "deterministic_tests": "certified_main_through_pr102_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31043864091_passed_all_29_tests_then_rejected_only_the_stale_active_candidate_label_corrected_immediately_after_merge",
       "focused_rules_tests": "pass_fixed_damage_closed_grammar_source_spans_spell_trigger_activation_lowering_target_and_each_opponent_capabilities_offer_command_parity_malformed_input_atomic_rollback_four_player_simultaneity_privacy_exact_replay_dependency_fail_closed_and_killed_mutation",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
@@ -1044,5 +1040,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Complete and exact-head certify PR 102's generic fixed-damage effect-clause family, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective."
+  "next_task": "Verify the PR 102 post-merge status reconciliation, remove audited stale remote branches, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective."
 }
