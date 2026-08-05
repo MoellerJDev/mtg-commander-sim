@@ -19,18 +19,14 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "a71d2ba2b6717b17356d478c53ed9f424e7d393c3f51cc256b23ce84ef483a6b",
+    "evaluated_source_tree_hash": "063f9e0860e7870f413f06edcc4213661bb24615c458c5cdb0737a5228d6e209",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": {
-      "head": "rules/generic-damage-effect-clauses",
-      "id": "generic_fixed_damage_effect_clauses",
-      "pull_request": 102
-    },
+    "active_phase": null,
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -236,10 +232,10 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks; public exact-head certification is pending.",
+      "evidence": "PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks. Public exact-head run 31043382697 passed every required Linux, generated, package, Windows, and headless-browser job; merge commit 28e5d48 preserves feature provenance on main. Post-merge smoke 31043864091 passed all 29 integration tests before correctly rejecting the stale active-candidate label corrected by the immediate reconciliation change.",
       "id": "generic_fixed_damage_effect_clause_harvest",
       "name": "Generic fixed-damage effect-clause harvest",
-      "status": "implemented_at_feature_head"
+      "status": "integrated_on_certified_main"
     },
     {
       "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
@@ -254,7 +250,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Complete and exact-head certify PR 102's generic fixed-damage effect-clause family, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective.",
+  "next_task": "Verify the PR 102 post-merge status reconciliation, remove audited stale remote branches, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -281,10 +277,10 @@
   },
   "provenance": {
     "certified_head_classification": "current_main",
-    "certified_head_sha": "d2ae5f4a4242c471bd9d5adee393aa98224afe7b",
-    "feature_head_classification": "active_candidate",
-    "feature_head_sha": "baa1060194ef458a3a61756e7b1f53772f135048",
-    "generation_timestamp": "2026-08-05T19:26:41Z"
+    "certified_head_sha": "28e5d4882ef4126d587232357915c6706a071326",
+    "feature_head_classification": "historical_integrated",
+    "feature_head_sha": "c3d144ebf0e1f16da5be93f8c0e5517f19193944",
+    "generation_timestamp": "2026-08-05T20:26:00Z"
   },
   "repository": {
     "default_branch": "main",
@@ -393,9 +389,9 @@
     },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31037993447,
+      "run_id": 31043382697,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31037993447"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31043382697"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -403,7 +399,7 @@
       "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr101_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31038955981_passed_all_29_tests_then_rejected_only_stale_squash_provenance_reconciled_in_pr102",
+      "deterministic_tests": "certified_main_through_pr102_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31043864091_passed_all_29_tests_then_rejected_only_the_stale_active_candidate_label_corrected_immediately_after_merge",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "focused_rules_tests": "pass_fixed_damage_closed_grammar_source_spans_spell_trigger_activation_lowering_target_and_each_opponent_capabilities_offer_command_parity_malformed_input_atomic_rollback_four_player_simultaneity_privacy_exact_replay_dependency_fail_closed_and_killed_mutation",
       "four_player_protocol_demo": "pass",

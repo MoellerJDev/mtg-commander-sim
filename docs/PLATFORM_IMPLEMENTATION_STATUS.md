@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "a71d2ba2b6717b17356d478c53ed9f424e7d393c3f51cc256b23ce84ef483a6b"
+verified: "063f9e0860e7870f413f06edcc4213661bb24615c458c5cdb0737a5228d6e209"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,13 +15,13 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `a71d2ba2b6717b17356d478c53ed9f424e7d393c3f51cc256b23ce84ef483a6b` (`tracked-git-clean-blobs-sha256-v3`)
-- Feature head: `baa1060194ef458a3a61756e7b1f53772f135048`
-- Certified exact head: `d2ae5f4a4242c471bd9d5adee393aa98224afe7b`
-- Generation timestamp: `2026-08-05T19:26:41Z`
+- Evaluated source tree: `063f9e0860e7870f413f06edcc4213661bb24615c458c5cdb0737a5228d6e209` (`tracked-git-clean-blobs-sha256-v3`)
+- Feature head: `c3d144ebf0e1f16da5be93f8c0e5517f19193944`
+- Certified exact head: `28e5d4882ef4126d587232357915c6706a071326`
+- Generation timestamp: `2026-08-05T20:26:00Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
-- Active future phase: `generic_fixed_damage_effect_clauses`
+- Active future phase: `none recorded; derive active PR state at generation time`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -76,7 +76,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Full-history nightly provenance | `integrated_on_certified_main` | PR 99 replaced shallow-checkout ancestry guesses with full-history merge-base provenance and fail-closed shallow-history validation. Nightly assurance run 31008277066 executed on exact main SHA 2aa1b6d6ff8f75ab219665618a247b315b7fc411 and passed the Ubuntu and Windows complete deterministic suites, full isolated headless browser suite, current Oracle census, mutation/soak, property, dependency, and security jobs. This corrects the prior historical shallow-provenance failure; the old failure is not current repository state. |
 | Generic compiled Flash cast timing | `integrated_on_certified_main` | PR 100 is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. The branch also moved derived review generation off ordinary live command acknowledgements while retaining durable replay inputs and review generation at pause, terminal, and explicit-save boundaries. Exact-head run 31016464622 passed every required Linux, generated, package, Windows, and browser job; merge commit 76c6bf1 is on main and post-merge main-smoke run 31019542461 is green. |
 | Focused browser impact and repository-truth status | `integrated_on_certified_main` | PR 101 keeps an authoritative four-context lifecycle smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw journeys for typed rules owners, and replaces Playwright file sharding with deterministic nonempty lifecycle, rules, and natural-winner soak groups using isolated databases, runtimes, and ports. A shared progress driver reports decision, phase, revision, event, queue, and persistence state and fails after 90 seconds without real progress; terminal metrics now query an absent decision panel without Playwright auto-wait. Durable saves run off the event loop while command acknowledgement still waits for the authoritative write; derived review publication is independently timed, atomic, concurrent-writer safe, and no longer blocks ordinary live saves. Full Windows coverage derives all eleven primary shards from the exact manifest partition and runs them in isolated processes and runners with a five-worker ceiling; focused compatibility is mode-exclusive, the wheel builds exactly once, and fail-closed Windows certification verifies job mode, manifest completeness, nonempty result artifacts, and package success. Public exact-head run 31037993447 passed all 4,842 Windows tests, every Linux, generated, package, and isolated headless-browser job, and both certification aggregators. The measured Windows critical path was 667 seconds versus the 2,265.245-second pre-sharding baseline, observed concurrency was five, the longest shard used 372.399 test seconds, and the Windows wheel verification used 18 seconds. Merge commit d2ae5f4 is on main. Post-merge smoke 31038955981 passed all 29 integration tests and failed only because the deleted squash branch left its intermediate feature commit unreachable; PR 102 reconciles that generated provenance with merged repository truth. |
-| Generic fixed-damage effect-clause harvest | `implemented_at_feature_head` | PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks; public exact-head certification is pending. |
+| Generic fixed-damage effect-clause harvest | `integrated_on_certified_main` | PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks. Public exact-head run 31043382697 passed every required Linux, generated, package, Windows, and headless-browser job; merge commit 28e5d48 preserves feature provenance on main. Post-merge smoke 31043864091 passed all 29 integration tests before correctly rejecting the stale active-candidate label corrected by the immediate reconciliation change. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -104,9 +104,9 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 - Tests discovered: 4855
 - Python matrix: Python 3.12 on Ubuntu and Windows
-- Baseline CI: [31037993447](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31037993447) — `pass`
+- Baseline CI: [31043382697](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31043382697) — `pass`
 - Compile: `pass`
-- Deterministic tests: `certified_main_through_pr101_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31038955981_passed_all_29_tests_then_rejected_only_stale_squash_provenance_reconciled_in_pr102`
+- Deterministic tests: `certified_main_through_pr102_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31043864091_passed_all_29_tests_then_rejected_only_the_stale_active_candidate_label_corrected_immediately_after_merge`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -137,7 +137,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-Complete and exact-head certify PR 102's generic fixed-damage effect-clause family, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective.
+Verify the PR 102 post-merge status reconciliation, remove audited stale remote branches, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective.
 
 ## Regeneration
 

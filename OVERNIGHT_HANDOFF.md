@@ -16,18 +16,14 @@ or provider-session data.
 ## Integration coordinate
 
 The public repository is `MoellerJDev/mtg-commander-sim`; `main` is the only
-default branch. PR 101's isolated Browser and full-Windows certification work
-is merged at `d2ae5f4a4242c471bd9d5adee393aa98224afe7b`; exact-head run
-`31037993447` passed all required jobs. It executed all 4,842 Windows tests with
-five observed runners and an 11m07s Windows critical path, down from the
-37m45s serial baseline. Post-merge smoke `31038955981` passed all 29
-integration tests and then rejected only the now-unreachable squash-branch
-feature commit; active PR 102 reconciles that provenance.
-
-The sole active rules candidate is
-`rules/generic-damage-effect-clauses` in PR 102. Its pre-transplant topology is
-preserved locally as `backup/generic-damage-effect-clauses-pre-pr101`; only the
-five substantive rules commits were transplanted onto merged `main`.
+default branch. PR 102's generic fixed-damage effect-clause family is merged at
+`28e5d4882ef4126d587232357915c6706a071326`; exact-head run `31043382697`
+passed every required job. The merge-commit method preserves all seven feature
+commits on `main`, so deleting the topic branch cannot make provenance
+unreachable. Post-merge smoke `31043864091` passed all integration tests and
+then correctly rejected the now-stale active-candidate label. The immediate
+`ci/reconcile-pr102-main-status` branch records merged repository truth before
+audited stale branches are removed.
 
 Always re-read the live branch, pull request, exact-head CI, worktree, and
 generated status before acting:
@@ -62,13 +58,13 @@ override. It recognizes a closed fixed-quantity damage grammar across spell,
 triggered, and activated contexts; lowers source-spanned CardProgram V2 nodes;
 uses the existing canonical target, damage, replay, and privacy paths; and
 keeps dynamic, divided, conditional, rider-bearing, and unsupported recipient
-forms as material residuals. It is now based on merged PR 101. The refreshed
+forms as material residuals. It is integrated on current `main`. The refreshed
 Commander census records a positive exact-card harvest with no demotions or
 construction failures; the authoritative deltas remain in the generated
 compiler-coverage report. Focused compiler/runtime tests and the deterministic
 impacted quick gate pass, as do the regenerated frontier, architecture,
 documentation, repository, and shard checks. Public exact-head certification
-remains pending.
+is green.
 
 After those two checkpoints, the next substantive foundation is the generated
 reusable-rules-piece matrix plus durable program baseline. Do not create a
@@ -92,8 +88,8 @@ all browser automation isolated and headless, with reports configured never to
 open.
 
 The full operating procedure is the
-[CI pipeline guide](docs/development/ci-pipeline.md). Complete PR 102's one-time
-corpus/status regeneration and exact-head certification. While it certifies,
-prepare the reusable-piece matrix foundation from current `main`. Do not wait
-idly for CI, force-push published history, or select the coarse
-continuous-layers/dependencies frontier row as one batch.
+[CI pipeline guide](docs/development/ci-pipeline.md). Merge the bounded PR 102
+status reconciliation, verify `main`, remove the audited stale remote branches,
+and then prepare the reusable-piece matrix foundation from current `main`. Do
+not force-push published history or select the coarse continuous-layers/
+dependencies frontier row as one batch.
