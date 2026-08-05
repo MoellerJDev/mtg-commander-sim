@@ -2,7 +2,7 @@
 title: "CI pipeline and two-slot development"
 status: "current"
 authoritative_source: "GitHub workflows, platform/test-shards.json, and local gate scripts"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "contributors and maintainers"
 maintenance: "hand-maintained"
 ---
@@ -62,7 +62,11 @@ policy consumed by `scripts/change_impact.py`, `scripts/quick_gate.py`, and
 `platform/test-shards.json`, generated checks, and platform gates. Internal
 rules modules are never classified by generic words such as `action` or
 `choice`; browser-facing protocol, projection, action-catalog, choice-form,
-server, and priority-owner paths are explicit. Cross-cutting protection and
+server, lifecycle, and persistence paths are explicit. `engine.py` and
+`session.py` no longer imply every browser journey by path alone: the typed
+subsystem changed alongside them selects any focused public behavior. A
+compiler-only change with no browser-facing runtime or schema change therefore
+keeps the compact smoke only. Cross-cutting protection and
 attachment sources deliberately select compiler, replacement, targeting, and
 state-action owners so a source-correctness regression cannot escape through a
 single narrow shard. `scripts/quick_gate.py` includes
@@ -90,9 +94,21 @@ not the default per-commit gate.
 - wheel build and clean-install verification;
 - a focused Windows compatibility overlay, widened to the complete suite for
   platform-sensitive changes or the `windows-full` label;
-- browser build plus one four-context smoke journey, widened to two isolated
-  Playwright shards for browser-sensitive changes or the `browser-full` label.
-  Full shards use distinct ports, runtime directories, and SQLite databases.
+- browser build plus a compact four-context seat-isolation smoke journey;
+- focused `mana-action`, `combat`, or `turn-draw` Playwright journeys selected
+  by the affected typed rules owner (or the matching `browser-*` label);
+- two isolated complete Playwright shards for browser, protocol, projection,
+  reconnect, room, WebSocket, lifecycle, persistence, browser-facing choice or
+  action schema changes, workflow changes, or the `browser-full` label. Full
+  shards use distinct ports, runtime directories, and SQLite databases.
+
+The compact smoke is intentionally not the reconnect test. It proves that four
+tabs sharing one cookie jar still retain four distinct lobby seats and takes
+seconds rather than replaying an entire lifecycle. The reconnect and natural
+winner journeys retain their complete behavior under the nightly and full
+browser gates. Focused journey tags are closed policy values in
+`platform/change-impact-policy.json`; adding an arbitrary test title cannot
+silently expand or bypass the gate.
 
 The final `PR / Certification` job receives every required job through
 `needs` and fails unless all succeeded. Protect `main` with the exact required
@@ -107,6 +123,14 @@ The nonblocking metrics job records observed queue, job, and critical-path
 durations as an artifact and job summary. Cache-hit rate, agent idle time, and
 stale-run cancellation remain `null` when GitHub does not expose measured data;
 the reporting code never estimates them as observations.
+
+`scripts/update_platform_status.py` treats current Git and pull-request facts
+as validation inputs rather than prose. Active PR phases must identify a real
+open PR whose head contains the recorded candidate commit; a candidate already
+reachable from `main`, a pending PR already merged, or a stale head lacking an
+explicit historical classification fails closed. Current test counts and
+CardProgram census values are derived from the authoritative test inventory and
+coverage artifacts rather than copied into `platform/readiness-source.json`.
 
 Deterministic failures that escape the quick gate are recorded in
 `platform/ci-escape-source.json`. The generated

@@ -301,11 +301,25 @@ def _validate_provenance(source: dict) -> None:
             raise ValueError("integration.pull_requests entries must be objects")
         if str(row.get("state") or "").casefold() not in {"open", "pending"}:
             continue
+        number = row.get("number")
+        if type(number) is not int or number <= 0:
+            raise ValueError("pending pull-request entries require a PR number")
+        pull_request = _github_pull_request(number)
+        if (
+            str(pull_request.get("state") or "").upper() != "OPEN"
+            or pull_request.get("headRefName") != row.get("head")
+            or pull_request.get("baseRefName") != row.get("base")
+        ):
+            raise ValueError(
+                f"pull request #{number} is not the recorded open candidate"
+            )
         head = str(row.get("head") or "")
-        head_sha = _git_ref_or_none(f"origin/{head}")
+        head_sha = str(pull_request.get("headRefOid") or "") or _git_ref_or_none(
+            f"origin/{head}"
+        )
         if head_sha is not None and _git_is_ancestor(head_sha, current_main):
             raise ValueError(
-                f"pull request #{row.get('number')} is merged but described as pending"
+                f"pull request #{number} is merged but described as pending"
             )
     if "card_program_census" in source.get("validation", {}):
         raise ValueError(

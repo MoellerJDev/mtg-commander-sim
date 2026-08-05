@@ -198,15 +198,43 @@ class PlatformStatusTests(unittest.TestCase):
         ]
         with (
             mock.patch(
-                "scripts.update_platform_status._git_ref_or_none",
-                return_value=source["provenance"]["feature_head_sha"],
-            ),
-            mock.patch(
-                "scripts.update_platform_status._git_is_ancestor",
-                return_value=True,
+                "scripts.update_platform_status._github_pull_request",
+                return_value={
+                    "state": "MERGED",
+                    "headRefName": "feature/already-merged",
+                    "headRefOid": source["provenance"]["feature_head_sha"],
+                    "baseRefName": "main",
+                },
             ),
         ):
-            with self.assertRaisesRegex(ValueError, "merged but described"):
+            with self.assertRaisesRegex(ValueError, "not the recorded open"):
+                _validate_provenance(source)
+
+    def test_open_pull_request_coordinates_must_match_github(self):
+        source = json.loads(
+            (ROOT / "platform" / "readiness-source.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        source["integration"]["pull_requests"] = [
+            {
+                "base": "main",
+                "head": "feature/recorded",
+                "number": 999,
+                "state": "open",
+                "url": "https://example.invalid/pull/999",
+            }
+        ]
+        with mock.patch(
+            "scripts.update_platform_status._github_pull_request",
+            return_value={
+                "state": "OPEN",
+                "headRefName": "feature/different",
+                "headRefOid": source["provenance"]["feature_head_sha"],
+                "baseRefName": "main",
+            },
+        ):
+            with self.assertRaisesRegex(ValueError, "not the recorded open"):
                 _validate_provenance(source)
 
     def test_stale_heads_require_explicit_historical_classification(self):
