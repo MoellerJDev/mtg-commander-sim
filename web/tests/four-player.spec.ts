@@ -225,6 +225,25 @@ async function passUntilDraggable(
   await expect(card).toHaveAttribute("draggable", "true");
 }
 
+async function waitForActionReady(
+  pages: readonly Page[],
+  action: Locator,
+  testInfo: TestInfo,
+  durabilityTimeout = 45_000,
+) {
+  // A newer projection can expose the next capability before the prior HTTP
+  // command finishes its authoritative durability acknowledgement. Do not
+  // submit another pass or force-click through the global serialization lock.
+  await driveUntil(pages, async () => actionIsReady(action), testInfo, {
+    label: "wait for current action acknowledgement",
+    noProgressMs: durabilityTimeout,
+    advance: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      return true;
+    },
+  });
+}
+
 const browserTriggerDeck = `Commander:
 1 Mishra, Eminent One
 
@@ -628,7 +647,7 @@ test("@browser-lifecycle a shared-cookie 1v1 lobby can replace rooms, remove a p
       .getByTestId("decision-panel")
       .getByRole("button", { name: /^Play Swamp$/ })
       .first();
-    await expect(playSwamp).toBeEnabled();
+    await waitForActionReady([host, opponent], playSwamp, testInfo);
     await playSwamp.click();
     const dialog = host.getByTestId("choice-dialog");
     await expect.poll(async () =>
@@ -1130,7 +1149,9 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
           name: new RegExp(`^Play ${landName}$`, "i"),
         })
         .first();
-      await expect(playAction).toBeEnabled();
+      await waitForActionReady(
+        [host, opponent], playAction, testInfo, durableTransitionTimeout,
+      );
       await playAction.click();
       const dialog = page.getByTestId("choice-dialog");
       await expect.poll(async () =>
