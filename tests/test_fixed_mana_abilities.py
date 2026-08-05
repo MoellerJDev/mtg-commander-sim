@@ -328,6 +328,25 @@ class FixedManaRuntimeTests(unittest.TestCase):
         self.assertTrue(ring.tapped)
         self.assertEqual(before + 2, engine.state.players[ring.controller].mana_pool["C"])
 
+    def test_compiled_fixed_output_can_pay_during_casting(self):
+        session = self.session(60529)
+        ring, ability = self._ring(session)
+        engine = session.engine
+        spell = self._card(
+            engine, "Strionic Resonator", owner=ring.controller
+        )
+        engine.move_card(spell.object_id, "hand", log=False)
+
+        self.assertTrue(ability.fixed_mana_outputs)
+        engine._cast(
+            ring.controller,
+            {"card": spell.ref, "pay": "auto"},
+        )
+
+        self.assertTrue(ring.tapped)
+        self.assertEqual("stack", spell.zone)
+        self.assertEqual(0, engine.state.players[ring.controller].mana_pool["C"])
+
     def test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana(self):
         session = self.session(60526)
         ring, _ = self._ring(session)

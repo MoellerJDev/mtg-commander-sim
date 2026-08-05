@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "b6c251c0865721a3bbe11c6112799e94de021caedcce883f20fe87e9cf8ee924",
-  "declaration_source_fingerprint": "1e3eb089f4a83b6e7bb09e8d89f43e12ff60d31ffd55de8fb85396e754980e20",
+  "registry_fingerprint": "90bd18b1ab9d475c1e5e4a9d24423635ca99422e1e033970bce6ca1407162873",
+  "declaration_source_fingerprint": "4aa88d401e63e6dbf8a3ce56c1cdc2237677ff0f1e0098007a84fc58572402d9",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -5214,6 +5214,25 @@
     {
       "capability_id": "mana.activated.fixed_output",
       "evidence_class": "positive",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_fixed_output_can_pay_during_casting",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Discover and resolve the same compiled fixed-output mana ability inside a spell's canonical mana-payment window."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "positive",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_fixed_output_offer_and_activation_share_modes",
       "official_rule_ids": [
         "106.1",
@@ -7332,5 +7351,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "96673c98e3e7692c730d71a38f0acedaf0549cd8b70420751d4f909e2350c504"
+  "fingerprint": "ba2df8adae20abf804bf6cfb954c099fbf7218a487c35bf7e4cee4a0d6454678"
 }
