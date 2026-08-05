@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 
 _STATUS_FIELD = "sta" + "tus"
@@ -29,6 +29,32 @@ class OracleResidual:
         value["span"] = asdict(self.span)
         value["blockers"] = list(self.blockers)
         return value
+
+
+def append_residual(
+    residuals: list[OracleResidual],
+    *,
+    kind: str,
+    text: str,
+    span: SourceSpan,
+    reason: str,
+    blockers: Sequence[str] = (),
+) -> str:
+    """Append one canonical material residual and return its stable face ID."""
+
+    residual_id = f"r{len(residuals) + 1}"
+    residuals.append(
+        OracleResidual(
+            residual_id=residual_id,
+            kind=kind,
+            text=text,
+            span=span,
+            material=True,
+            reason=reason,
+            blockers=tuple(blockers),
+        )
+    )
+    return residual_id
 
 
 @dataclass(frozen=True, slots=True)
@@ -169,4 +195,5 @@ __all__ = [
     "OracleNode",
     "OracleResidual",
     "SourceSpan",
+    "append_residual",
 ]

@@ -6,7 +6,7 @@ import random
 import re
 import uuid
 from contextlib import contextmanager
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import Any, Iterable, Iterator, Mapping, Sequence
 
 from .abilities import (
@@ -142,7 +142,6 @@ from .keyword_abilities import normalized_characteristic_keywords
 from .errors import GameRuleError, StateInvariantError
 from .deck import DeckDefinition
 from .mana import (
-    effective_mana_record,
     extract_effective_mana_modes,
     ManaMode,
     ManaPlanError,
@@ -152,6 +151,10 @@ from .mana import (
     parsed_cost,
 )
 from .mana_activation import complete_mana_activation, complete_mana_plan_activations
+from .mana_ability_runtime import (
+    mana_modes_for_ability,
+    mana_output_for_ability,
+)
 from .mana_undo import (
     clear_mana_undo_stack,
     ManaUndoError,
@@ -5313,124 +5316,9 @@ class CommanderEngine(
         ability: ActivatedAbility,
         response: Mapping[str, Any],
     ) -> dict[str, int]:
-        effect_lower = ability.effect_text.casefold()
-        if (
-            "for each color among permanents you control, "
-            "add one mana of that color"
-            in effect_lower
-        ):
-            colors = {
-                str(color).upper()
-                for object_id in self.state.players[seat].zones[
-                    "battlefield"
-                ]
-                if self.state.cards[object_id].controller == seat
-                and not self.state.cards[object_id].phased_out
-                for color in self._effective_card_data(object_id).get(
-                    "colors", []
-                )
-                if str(color).upper() in "WUBRG"
-            }
-            return normalize_mana_bundle(
-                {color: 1 for color in sorted(colors)}
-            )
-        if (
-            "one mana of any color that a land an opponent controls "
-            "could produce"
-            in effect_lower
-        ):
-            legal_colors: set[str] = set()
-            for opponent in self.active_seats:
-                if opponent == seat:
-                    continue
-                for object_id in self.state.players[opponent].zones[
-                    "battlefield"
-                ]:
-                    land = self.state.cards[object_id]
-                    record = effective_mana_record(
-                        self.card_record(land),
-                        self._effective_card_data(land),
-                    )
-                    if (
-                        land.controller != opponent
-                        or land.phased_out
-                        or record is None
-                        or not record.is_land
-                    ):
-                        continue
-                    for mode in extract_mana_modes(
-                        record,
-                        self._commander_identity(opponent),
-                    ):
-                        legal_colors.update(
-                            color
-                            for color, amount in mode.bundle.items()
-                            if color in "WUBRG" and amount
-                        )
-            raw_choice = str(response.get("mana_choice") or "").upper()
-            declared = normalize_mana_bundle(response.get("mana_output"))
-            if raw_choice in "WUBRG" and len(raw_choice) == 1:
-                declared[raw_choice] += 1
-            selected = [
-                color
-                for color in "WUBRG"
-                if declared[color] == 1
-            ]
-            if (
-                len(selected) != 1
-                or sum(declared.values()) != 1
-                or selected[0] not in legal_colors
-            ):
-                raise GameRuleError(
-                    "Declared Fellwar/Orchard mana is not a color an "
-                    "opponent's land could produce"
-                )
-            return declared
-        legal_modes = self._mana_modes_for_ability(seat, source, ability)
-        declared = normalize_mana_bundle(response.get("mana_output"))
-        raw_choice = str(response.get("mana_choice") or "").upper()
-        if raw_choice in "WUBRGC" and len(raw_choice) == 1:
-            declared[raw_choice] += 1
-        if legal_modes:
-            if sum(declared.values()):
-                if not any(
-                    normalize_mana_bundle(mode.bundle) == declared
-                    for mode in legal_modes
-                ):
-                    raise GameRuleError(
-                        "Declared mana output is not a recognized Oracle mana mode"
-                    )
-                return declared
-            if len(legal_modes) == 1:
-                return normalize_mana_bundle(legal_modes[0].bundle)
-            raise GameRuleError("Choose which mana this ability produces")
-
-        output_text = ability.effect_text.split(".", 1)[0]
-        output, complex_symbols = mana_cost_to_vector(output_text)
-        bundle = {color: int(output.get(color, 0)) for color in "WUBRGC"}
-        if output.get("GENERIC"):
-            # Numeric symbols in an Add instruction represent colorless mana.
-            bundle["C"] += int(output["GENERIC"])
-        if sum(bundle.values()) and not complex_symbols:
-            return normalize_mana_bundle(bundle)
-        raw_choice = str(response.get("mana_choice") or "").upper()
-        declared = normalize_mana_bundle(response.get("mana_output"))
-        if raw_choice in "WUBRGC" and len(raw_choice) == 1:
-            declared[raw_choice] += 1
-        record = self.card_record(source)
-        if not record:
-            if (
-                "one mana of any color"
-                in ability.effect_text.casefold()
-                and sum(declared.values()) == 1
-                and declared["C"] == 0
-            ):
-                return declared
-            raise GameRuleError("Custom mana ability needs compiled semantics")
-        legal_modes = extract_mana_modes(record, self._commander_identity(seat))
-        if not any(normalize_mana_bundle(mode.bundle) == declared for mode in legal_modes):
-            raise GameRuleError("Declared mana output is not a recognized Oracle mana mode")
-        return declared
+        return mana_output_for_ability(
+            self, seat, source, ability, response
+        )
 
     def _mana_modes_for_ability(
         self,
@@ -5438,78 +5326,7 @@ class CommanderEngine(
         source: CardInstance,
         ability: ActivatedAbility,
     ) -> tuple[ManaMode, ...]:
-        """Extract only the mana modes produced by one selected ability."""
-
-        record = self.card_record(source)
-        if record is None:
-            effect = ability.effect_text.casefold()
-            if "one mana of any type" in effect:
-                colors = "WUBRGC"
-            elif "one mana of any color" in effect:
-                colors = "WUBRG"
-            else:
-                return ()
-            return tuple(
-                ManaMode(
-                    {
-                        **normalize_mana_bundle(None),
-                        color: 1,
-                    }
-                )
-                for color in colors
-            )
-        effect = ability.effect_text.casefold()
-        if (
-            "one mana of any color that a land an opponent controls "
-            "could produce"
-            in effect
-        ):
-            colors: set[str] = set()
-            for opponent in self.active_seats:
-                if opponent == seat:
-                    continue
-                for object_id in self.state.players[opponent].zones[
-                    "battlefield"
-                ]:
-                    land = self.state.cards[object_id]
-                    land_record = effective_mana_record(
-                        self.card_record(land),
-                        self._effective_card_data(land),
-                    )
-                    if (
-                        land.controller != opponent
-                        or land.phased_out
-                        or land_record is None
-                    ):
-                        continue
-                    for mode in extract_mana_modes(
-                        land_record,
-                        self._commander_identity(opponent),
-                    ):
-                        colors.update(
-                            color
-                            for color, amount in mode.bundle.items()
-                            if color in "WUBRG" and amount
-                        )
-            return tuple(
-                ManaMode(
-                    {
-                        **normalize_mana_bundle(None),
-                        color: 1,
-                    }
-                )
-                for color in sorted(colors)
-            )
-        ability_record = replace(
-            record,
-            oracle_text=f"{{T}}: {ability.effect_text}",
-            type_line="",
-            produced_mana=(),
-        )
-        return extract_mana_modes(
-            ability_record,
-            self._commander_identity(seat),
-        )
+        return mana_modes_for_ability(self, seat, source, ability)
 
     def _recordless_mana_modes(
         self,

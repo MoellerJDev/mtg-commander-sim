@@ -14,6 +14,7 @@ import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from .replacement.immutable import FrozenMap, thaw_value
+from .fixed_mana_abilities import FixedManaMode
 from .util import mana_cost_to_vector, normalize_mana_bundle, parse_mana_symbols
 
 _ACTIVATE_ONLY_SORCERY = re.compile(
@@ -99,6 +100,7 @@ class ActivatedAbility:
     builtin_semantic_key: str | None = None
     target_schema: FrozenMap | None = None
     crew_threshold: int | None = None
+    fixed_mana_outputs: tuple[FixedManaMode, ...] = ()
 
     def __post_init__(self) -> None:
         if self.target_schema is not None and not isinstance(
@@ -107,6 +109,11 @@ class ActivatedAbility:
             object.__setattr__(
                 self, "target_schema", FrozenMap(self.target_schema)
             )
+        if not isinstance(self.fixed_mana_outputs, tuple) or any(
+            not isinstance(mode, FixedManaMode)
+            for mode in self.fixed_mana_outputs
+        ):
+            raise ValueError("fixed_mana_outputs must contain typed modes")
 
     @property
     def compiled_cost(self) -> bool:

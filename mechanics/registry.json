@@ -262,7 +262,7 @@
     {
       "mechanic_id": "cr-605-mana-abilities",
       "path": "mechanics/contracts/mana-abilities.json",
-      "sha256": "e2b3bd043b4b46ed8ef61d8297613c52fb82850e7037c20a3db5ddbd605be5b9",
+      "sha256": "0aa2bc18d99bbcddd71a7c4e093e4d2b8d3530fc76bb09927da77bcb33e7a325",
       "version": 1
     },
     {
@@ -7471,16 +7471,16 @@
     {
       "category": "spells_abilities_effects",
       "contract_path": "mechanics/contracts/mana-abilities.json",
-      "contract_sha256": "e2b3bd043b4b46ed8ef61d8297613c52fb82850e7037c20a3db5ddbd605be5b9",
+      "contract_sha256": "0aa2bc18d99bbcddd71a7c4e093e4d2b8d3530fc76bb09927da77bcb33e7a325",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "ActivatedAbility mana classification and CommanderEngine immediate mana/payment paths",
-      "implementation_version": "mana-ability-foundation-v1",
+      "implementation_component": "FixedActivatedManaAbilitySpec, FixedActivatedManaAbilityHandler, activation query, ManaAbilityRuntime, and the canonical mana-activation transaction",
+      "implementation_version": "fixed-output-mana-ability-v1",
       "kind": "rules_section",
       "known_blockers": [
         "triggered mana abilities are not generically identified or dispatched outside the stack",
-        "possible mana-output grammar is incomplete across the Oracle corpus",
+        "dynamic, conditional, restricted, and side-effecting mana-output grammar remains outside the fixed-output capability",
         "explicit mana activation during arbitrary rule/effect payment windows is not exposed as a general nested decision",
         "activation reentrancy is not represented as a state that can be independently tested",
         "mana-production replacement and trigger integration is incomplete"
@@ -7500,7 +7500,15 @@
         "test_token_reminder_text_does_not_create_source_mana_ability",
         "test_mana_drain_schedules_exact_next_main_phase_mana",
         "test_treasure_exposes_color_choice_and_auto_payment_sacrifices_it",
-        "test_recordless_mana_plan_ignores_submitted_side_effects"
+        "test_recordless_mana_plan_ignores_submitted_side_effects",
+        "test_fixed_output_compiler_lowers_source_spanned_cardprogram",
+        "test_fixed_output_compiler_leaves_dynamic_and_restricted_variants_residual",
+        "test_compiled_fixed_output_offer_and_activation_share_modes",
+        "test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana",
+        "test_invalid_compiled_mana_mode_rolls_back",
+        "test_compiled_fixed_output_is_controller_scoped_in_four_player_game",
+        "test_compiled_fixed_output_projection_exposes_no_hidden_cards",
+        "test_compiled_fixed_output_activation_replays_exactly"
       ],
       "trust_level": "untrusted"
     },
@@ -8760,20 +8768,20 @@
   "sources": {
     "card_data_snapshot": {
       "available": true,
-      "database_schema_version": "2",
+      "database_schema_version": "1",
       "oracle_bulk": {
-        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
-        "oracle_id_count": 38542,
-        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
-        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
-        "updated_at": "2026-08-04T09:02:45.219+00:00"
+        "download_uri": null,
+        "oracle_id_count": 38362,
+        "sha256": null,
+        "source_filename": "oracle-cards-20260728.jsonl",
+        "updated_at": null
       },
       "rulings_bulk": {
-        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
-        "ruling_count": 77998,
-        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
-        "source_filename": "rulings-20260804090038.jsonl.gz",
-        "updated_at": "2026-08-04T09:00:38.847+00:00"
+        "download_uri": null,
+        "ruling_count": 77999,
+        "sha256": null,
+        "source_filename": "rulings-20260728.jsonl",
+        "updated_at": null
       }
     },
     "comprehensive_rules": "indexed",

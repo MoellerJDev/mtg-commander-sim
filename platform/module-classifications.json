@@ -535,6 +535,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/compiled_mana_abilities.py",
+      "layer": "semantics",
+      "owning_subsystem": "mana_rules",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/compiler/__init__.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -566,6 +581,21 @@
     },
     {
       "file": "mtg_commander_sim/compiler/activated_costs.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/compiler/activated_mana_nodes.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
       "allowed_dependency_layers": [
@@ -1313,6 +1343,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/fixed_mana_abilities.py",
+      "layer": "rules",
+      "owning_subsystem": "mana_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/haste.py",
       "layer": "rules",
       "owning_subsystem": "legacy_rules",
@@ -1382,6 +1426,20 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/mana_ability_runtime.py",
+      "layer": "rules",
+      "owning_subsystem": "mana_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/mana_activation.py",
@@ -2768,6 +2826,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/mana_abilities.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_runtime/nodes.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_runtime",
@@ -3182,5 +3255,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "d9b011b56c9349c0a85e22ebec7293d027b9c3eda534cc9f66250ff58e15146a"
+  "fingerprint": "b54862f3ba26f94d93ec3d3c9639b1d6bbb4645e3e59a11b6cd145a9a9a6eabf"
 }

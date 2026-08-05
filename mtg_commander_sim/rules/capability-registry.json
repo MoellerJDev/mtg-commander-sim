@@ -540,6 +540,33 @@
       "status": "trusted"
     },
     {
+      "id": "mana.activated.fixed_output",
+      "version": 1,
+      "official_rules": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and immediately resolve a target-free nonloyalty activated mana ability whose complete fixed output modes and mandatory activation costs are represented by a typed CardProgram descriptor.",
+        "inputs": ["trusted source-spanned fixed-output mana descriptor", "current source-cost availability", "selected fixed output mode"],
+        "outputs": ["one advertised and accepted mode set", "immediate stackless mana-pool result", "replayable activation command"],
+        "exclusions": ["triggered mana abilities", "dynamic or conditional output", "restricted mana", "mana-production replacement and trigger effects", "arbitrary rule or resolving-effect payment windows", "targeted or loyalty abilities"]
+      },
+      "dependencies": ["activation.tap_untap_cost.haste"],
+      "implementation_components": ["mtg_commander_sim.fixed_mana_abilities.compile_fixed_activated_mana_ability", "mtg_commander_sim.semantic_runtime.mana_abilities.FixedActivatedManaAbilityHandler", "mtg_commander_sim.compiled_mana_abilities.compiled_fixed_mana_abilities", "mtg_commander_sim.mana_activation.complete_mana_activation"],
+      "positive_tests": ["test_fixed_output_compiler_lowers_source_spanned_cardprogram", "test_compiled_fixed_output_offer_and_activation_share_modes"],
+      "negative_tests": ["test_fixed_output_compiler_leaves_dynamic_and_restricted_variants_residual", "test_invalid_compiled_mana_mode_rolls_back"],
+      "interaction_tests": ["test_compiled_fixed_output_creature_respects_haste_cost_dependency"],
+      "multiplayer_tests": ["test_compiled_fixed_output_is_controller_scoped_in_four_player_game"],
+      "privacy_tests": ["test_compiled_fixed_output_projection_exposes_no_hidden_cards"],
+      "replay_tests": ["test_compiled_fixed_output_activation_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The compiler and runtime descriptor require the trusted tap-or-untap source-cost eligibility capability; closure without it is rejected before the CardProgram can become trusted.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_fixed_output_mana_mode_mutants_are_killed removes or widens a compiled mode and the shared offer/command assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
       "id": "combat.attack.vigilance",
       "version": 1,
       "official_rules": ["508.1f", "702.20", "702.20a", "702.20b", "702.20c"],
