@@ -19,14 +19,14 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111",
+    "evaluated_source_tree_hash": "be0d265f69a0b7c8b435a729a6c1a82f33ace1d6c8f48e305886db0f1ef5c465",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": "generic_compiled_flash_cast_timing_certification",
+    "active_phase": null,
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -264,7 +264,9 @@
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
+    "certified_head_classification": "historical_certified",
     "certified_head_sha": "2aa1b6d6ff8f75ab219665618a247b315b7fc411",
+    "feature_head_classification": "historical_integrated",
     "feature_head_sha": "7dc4c44c8ff3455dac29807e4ca6155780d2a88d",
     "generation_timestamp": "2026-08-05T14:38:35Z"
   },
@@ -335,14 +337,44 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4820,
+    "deterministic_cases_discovered": 4828,
     "migration_files": 1,
     "schema_files": 16,
     "server_files": 5,
     "web_files": 31
   },
   "validation": {
-    "card_program_census": "oracle_ir_v32_full_38542_trusted_1862_capability_closed_1858_legacy_reviewed_3_mixed_1_residual_34432_failed_2248_material_card_program_residual_59683; full_oracle_exact_4106_partial_15048_unresolved_19388_material_residual_59688; commander_legal_31623_trusted_1268_capability_closed_1264_legacy_reviewed_3_mixed_1_residual_30355_failed_0_material_residual_51733; commander_oracle_exact_1268_partial_13831_unresolved_16524_material_residual_51733; printed_flash_promotes_exactly_52_commander_legal_cards_and_removes_592_commander_material_residuals; conditional_granted_removed_player_wide_as_though_and_land_timing_variants_remain_explicit_residuals",
+    "card_program_census": {
+      "commander": {
+        "cards_considered": 31623,
+        "material_residuals": 51733,
+        "status_counts": {
+          "residual": 30355,
+          "trusted": 1268
+        },
+        "trust_basis_counts": {
+          "capability_closed": 1264,
+          "legacy_reviewed": 3,
+          "mixed": 1,
+          "unresolved": 30355
+        }
+      },
+      "full": {
+        "cards_considered": 38542,
+        "material_residuals": 59683,
+        "status_counts": {
+          "failed": 2248,
+          "residual": 34432,
+          "trusted": 1862
+        },
+        "trust_basis_counts": {
+          "capability_closed": 1858,
+          "legacy_reviewed": 3,
+          "mixed": 1,
+          "unresolved": 34432
+        }
+      }
+    },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
       "run_id": 31005825457,

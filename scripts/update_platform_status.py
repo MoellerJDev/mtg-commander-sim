@@ -4,6 +4,7 @@ import argparse
 import copy
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -59,6 +60,69 @@ def _git_is_ancestor(ancestor: str, descendant: str) -> bool:
         stderr=subprocess.PIPE,
     )
     return completed.returncode == 0
+
+
+def _git_ref_or_none(ref: str) -> str | None:
+    completed = subprocess.run(
+        ["git", "rev-parse", "--verify", f"{ref}^{{commit}}"],
+        cwd=ROOT,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
+    if completed.returncode != 0:
+        return None
+    return completed.stdout.decode("ascii", errors="strict").strip()
+
+
+def _github_pull_request(number: int) -> dict:
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    if event_path and Path(event_path).is_file():
+        event = _load_json(Path(event_path))
+        pull_request = event.get("pull_request")
+        if (
+            isinstance(pull_request, dict)
+            and int(pull_request.get("number") or event.get("number") or 0)
+            == number
+        ):
+            return {
+                "number": number,
+                "state": str(pull_request.get("state") or "").upper(),
+                "headRefName": str(
+                    (pull_request.get("head") or {}).get("ref") or ""
+                ),
+                "headRefOid": str(
+                    (pull_request.get("head") or {}).get("sha") or ""
+                ),
+                "baseRefName": str(
+                    (pull_request.get("base") or {}).get("ref") or ""
+                ),
+            }
+    try:
+        completed = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "view",
+                str(number),
+                "--json",
+                "number,state,headRefName,headRefOid,baseRefName",
+            ],
+            cwd=ROOT,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except OSError as exc:
+        raise ValueError(
+            f"active pull request #{number} could not be verified"
+        ) from exc
+    if completed.returncode != 0:
+        raise ValueError(
+            f"active pull request #{number} could not be verified"
+        )
+    value = json.loads(completed.stdout.decode("utf-8", errors="strict"))
+    if not isinstance(value, dict):
+        raise ValueError(f"active pull request #{number} returned invalid data")
+    return value
 
 
 def _tracked_source_tree_hash() -> str:
@@ -140,7 +204,9 @@ def _validate_provenance(source: dict) -> None:
         raise ValueError("platform readiness source requires provenance")
     required = {
         "feature_head_sha",
+        "feature_head_classification",
         "certified_head_sha",
+        "certified_head_classification",
         "generation_timestamp",
     }
     missing = sorted(required.difference(provenance))
@@ -151,6 +217,18 @@ def _validate_provenance(source: dict) -> None:
         if not isinstance(value, str) or len(value) != 40:
             raise ValueError(f"{key} must be a full Git commit SHA")
         _git("cat-file", "-e", f"{value}^{{commit}}")
+    feature_classification = provenance["feature_head_classification"]
+    if feature_classification not in {
+        "active_candidate",
+        "historical_integrated",
+    }:
+        raise ValueError("feature_head_classification is unsupported")
+    certified_classification = provenance["certified_head_classification"]
+    if certified_classification not in {
+        "current_main",
+        "historical_certified",
+    }:
+        raise ValueError("certified_head_classification is unsupported")
     if "baseline_commit" in source.get("validation", {}):
         raise ValueError(
             "baseline_commit cannot identify evaluated behavior; use provenance"
@@ -162,20 +240,78 @@ def _validate_provenance(source: dict) -> None:
     serialized = json.dumps(source, sort_keys=True).lower()
     if "certification pending" in serialized:
         raise ValueError("a certified head cannot be described as certification pending")
-    if not _git_is_ancestor(
-        provenance["feature_head_sha"], provenance["certified_head_sha"]
+    current_main = _current_merged_main_sha(source)
+    feature_on_main = _git_is_ancestor(
+        provenance["feature_head_sha"], current_main
+    )
+    if feature_classification == "active_candidate" and feature_on_main:
+        raise ValueError("active feature head is already reachable from current main")
+    if feature_classification == "historical_integrated" and not feature_on_main:
+        raise ValueError("historical feature head is not reachable from current main")
+    if not _git_is_ancestor(provenance["certified_head_sha"], current_main):
+        raise ValueError("certified head is not reachable from current main")
+    if (
+        certified_classification == "current_main"
+        and provenance["certified_head_sha"] != current_main
     ):
         raise ValueError(
-            "certified_head_sha must contain feature_head_sha"
+            "certified head trails current main without historical classification"
         )
-    active_phase = source.get("integration", {}).get("active_phase")
-    if active_phase is not None and (
-        not isinstance(active_phase, str) or not active_phase.strip()
-    ):
-        raise ValueError("active_phase must be a nonempty string or null")
-    merged_main_ref = (
-        f"origin/{source['repository']['default_branch']}"
-    )
+    integration = source.get("integration")
+    if not isinstance(integration, dict):
+        raise ValueError("platform readiness source requires integration")
+    active_phase = integration.get("active_phase")
+    if active_phase is not None:
+        if not isinstance(active_phase, dict) or set(active_phase) != {
+            "id",
+            "pull_request",
+            "head",
+        }:
+            raise ValueError(
+                "active_phase must be null or a structured active PR phase"
+            )
+        if (
+            not isinstance(active_phase["id"], str)
+            or not active_phase["id"].strip()
+            or type(active_phase["pull_request"]) is not int
+            or active_phase["pull_request"] <= 0
+            or not isinstance(active_phase["head"], str)
+            or not active_phase["head"].strip()
+        ):
+            raise ValueError("active_phase fields are invalid")
+        if feature_classification != "active_candidate":
+            raise ValueError(
+                "an active PR phase requires an active-candidate feature head"
+            )
+        pull_request = _github_pull_request(active_phase["pull_request"])
+        if str(pull_request.get("state") or "").upper() != "OPEN":
+            raise ValueError("active PR phase has no matching open pull request")
+        if (
+            pull_request.get("headRefName") != active_phase["head"]
+            or pull_request.get("baseRefName")
+            != source["repository"]["default_branch"]
+            or not _git_is_ancestor(
+                provenance["feature_head_sha"],
+                str(pull_request.get("headRefOid") or ""),
+            )
+        ):
+            raise ValueError("active PR phase does not match repository truth")
+    for row in integration.get("pull_requests", ()):
+        if not isinstance(row, dict):
+            raise ValueError("integration.pull_requests entries must be objects")
+        if str(row.get("state") or "").casefold() not in {"open", "pending"}:
+            continue
+        head = str(row.get("head") or "")
+        head_sha = _git_ref_or_none(f"origin/{head}")
+        if head_sha is not None and _git_is_ancestor(head_sha, current_main):
+            raise ValueError(
+                f"pull request #{row.get('number')} is merged but described as pending"
+            )
+    if "card_program_census" in source.get("validation", {}):
+        raise ValueError(
+            "card_program_census must be derived from authoritative coverage artifacts"
+        )
+    merged_main_ref = current_main
     if _git_is_ancestor(
         provenance["certified_head_sha"], merged_main_ref
     ):
@@ -273,6 +409,32 @@ def _rules_metrics() -> dict:
     }
 
 
+def _card_program_metrics() -> dict:
+    def summary(relative: str) -> dict:
+        value = _optional_json(relative) or {}
+        return {
+            "cards_considered": value.get("cards_considered"),
+            "status_counts": value.get("status_counts"),
+            "trust_basis_counts": value.get("trust_basis_counts"),
+            "material_residuals": value.get("material_residuals"),
+        }
+
+    return {
+        "full": summary("coverage/card-program-coverage.json"),
+        "commander": summary(
+            "coverage/card-program-coverage-commander.json"
+        ),
+    }
+
+
+def _active_phase_label(value: object) -> str:
+    if value is None:
+        return "none recorded; derive active PR state at generation time"
+    if isinstance(value, dict):
+        return str(value.get("id") or "invalid active phase")
+    return str(value)
+
+
 def build_report() -> dict:
     source = _load_json(SOURCE)
     if source.get("schema_version") != 2:
@@ -309,6 +471,7 @@ def build_report() -> dict:
         "migration_files": _file_count("migrations"),
     }
     report["rules_coverage"] = _rules_metrics()
+    report["validation"]["card_program_census"] = _card_program_metrics()
     return report
 
 
@@ -347,7 +510,7 @@ def render_readiness(report: dict) -> str:
         f"| Feature head | `{provenance['feature_head_sha']}` |",
         f"| Certified exact head | `{provenance['certified_head_sha']}` |",
         "| Current merged main at runtime | resolved dynamically; not persisted |",
-        f"| Active future phase | `{report['integration']['active_phase']}` |",
+        f"| Active future phase | `{_active_phase_label(report['integration']['active_phase'])}` |",
         f"| Deterministic tests discovered | {report['tests']['deterministic_cases_discovered']} |",
         f"| Authoritative kernel | `{report['platform']['authoritative_kernel']}` |",
         f"| Server runtime | `{report['platform']['http_websocket_server']}` |",
@@ -421,7 +584,7 @@ def render_status(report: dict) -> str:
         "in this tracked report",
         "- Current merged main: resolved dynamically and intentionally not "
         "persisted in this tracked report",
-        f"- Active future phase: `{integration['active_phase']}`",
+        f"- Active future phase: `{_active_phase_label(integration['active_phase'])}`",
         f"- Package version: `{report['package']['version']}`",
         "",
         "Historical integration chronology belongs in `CHANGELOG.md`; this "
@@ -494,6 +657,8 @@ def render_status(report: dict) -> str:
             f"- Replay: `{validation['replay']}`",
             f"- Privacy: `{validation['privacy']}`",
             f"- Semantic preflight: `{validation['semantic_preflight']}`",
+            f"- Commander CardProgram census: "
+            f"`{_value(validation['card_program_census']['commander'])}`",
             "",
             "AI/Codex pilot runs are optional client experiments. They are not "
             "product, rules, CI, merge, or release gates.",

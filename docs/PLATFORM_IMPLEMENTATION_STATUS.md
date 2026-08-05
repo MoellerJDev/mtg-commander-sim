@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111"
+verified: "be0d265f69a0b7c8b435a729a6c1a82f33ace1d6c8f48e305886db0f1ef5c465"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,13 +15,13 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `be0d265f69a0b7c8b435a729a6c1a82f33ace1d6c8f48e305886db0f1ef5c465` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `7dc4c44c8ff3455dac29807e4ca6155780d2a88d`
 - Certified exact head: `2aa1b6d6ff8f75ab219665618a247b315b7fc411`
 - Generation timestamp: `2026-08-05T14:38:35Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
-- Active future phase: `generic_compiled_flash_cast_timing_certification`
+- Active future phase: `none recorded; derive active PR state at generation time`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -100,7 +100,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4820
+- Tests discovered: 4828
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31005825457](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31005825457) — `pass`
 - Compile: `pass`
@@ -112,6 +112,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Replay: `pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner`
 - Privacy: `pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner`
 - Semantic preflight: `reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory`
+- Commander CardProgram census: `cards_considered=31623, material_residuals=51733, status_counts={'residual': 30355, 'trusted': 1268}, trust_basis_counts={'capability_closed': 1264, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 30355}`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
 

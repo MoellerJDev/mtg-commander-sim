@@ -6,7 +6,7 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": "generic_compiled_flash_cast_timing_certification",
+    "active_phase": null,
     "branch": "rules/generic-flash-cast-timing",
     "branch_ancestry": {
       "focused_branch_base": "2aa1b6d6ff8f75ab219665618a247b315b7fc411",
@@ -727,7 +727,9 @@
   },
   "provenance": {
     "feature_head_sha": "7dc4c44c8ff3455dac29807e4ca6155780d2a88d",
+    "feature_head_classification": "historical_integrated",
     "certified_head_sha": "2aa1b6d6ff8f75ab219665618a247b315b7fc411",
+    "certified_head_classification": "historical_certified",
     "generation_timestamp": "2026-08-05T14:38:35Z"
   },
   "snapshots": {
@@ -993,8 +995,7 @@
     },
     "replay": "pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner",
     "privacy": "pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner",
-      "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory",
-    "card_program_census": "oracle_ir_v32_full_38542_trusted_1862_capability_closed_1858_legacy_reviewed_3_mixed_1_residual_34432_failed_2248_material_card_program_residual_59683; full_oracle_exact_4106_partial_15048_unresolved_19388_material_residual_59688; commander_legal_31623_trusted_1268_capability_closed_1264_legacy_reviewed_3_mixed_1_residual_30355_failed_0_material_residual_51733; commander_oracle_exact_1268_partial_13831_unresolved_16524_material_residual_51733; printed_flash_promotes_exactly_52_commander_legal_cards_and_removes_592_commander_material_residuals; conditional_granted_removed_player_wide_as_though_and_land_timing_variants_remain_explicit_residuals"
+    "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory"
   },
   "blockers": [
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
