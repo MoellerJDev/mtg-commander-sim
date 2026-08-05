@@ -53,41 +53,32 @@ canonical tap, sacrifice, life, and mana-cost commit owners. No printed name,
 collector number, set code, or Oracle ID selects behavior, and the engine does
 not gain another state-write owner.
 
-The selection was made from PR 95 frontier fingerprint
-`38a7ac0f5619b34f44b88492e88ad1fdfe45fa7427f85302c313c33974c756fa`.
-The coarse `mechanic_dependency:cr-605-mana-abilities` row contained 1,990
-ability occurrences across 1,762 Commander-legal cards, with 384 sole-blocker
-cards, 499 one-additional-blocker opportunities, and 414 two-additional-blocker
-opportunities. It projected at most 384 full-card promotions and 1,990 removed
-material residuals, but carried high interaction risk and activation, casting,
-cost-payment, loyalty, mana-pool, priority, stack, target, trigger,
-reentrancy, nested-payment, output-grammar, and replacement prerequisites.
+The selection was made from the post-PR-95 card-unlock frontier. The coarse
+`mechanic_dependency:cr-605-mana-abilities` row carried high interaction risk
+and activation, casting, cost-payment, loyalty, mana-pool, priority, stack,
+target, trigger, reentrancy, nested-payment, output-grammar, and replacement
+prerequisites. Exact selection and harvest figures live only in the generated
+[card-unlock frontier](coverage/card-unlock-frontier.md).
 
 This branch intentionally takes only the dependency-closed fixed-output subset.
-The grammar scan expected 173 full-card promotions and 1,314 removed material
-residuals, and the one final regeneration matched both figures. Commander
-Oracle exact/trusted rises from 1,043 to 1,216; capability-closed programs rise
-from 1,040 to 1,212; partial falls from 14,324 to 13,883; unresolved rises from
-16,256 to 16,524; failures remain zero; and residuals fall from 53,639 to
-52,325. The partial-to-unresolved movement is an honest correction: 106
-parenthesized basic-land reminder nodes and unsupported dynamic/conditional
+The one final regeneration matched its predicted promotions and residual
+reduction. The partial-to-unresolved movement is an honest correction:
+parenthesized basic-land reminder nodes and unsupported dynamic or conditional
 variants are no longer treated as executable lowerable mana abilities. There
 are no exact-card demotions. Representative promotions include Sol Ring,
 Llanowar Elves, Gilded Lotus, Lotus Petal, the Signets, and the Pathway lands.
 
-Against the exact PR 95 head, handwritten production changes are +1,248/-327
-lines (net +921) and tests are +692/-38 (net +654), excluding generated
-artifacts and documentation. The new typed owners account for the positive
-production delta while `CommanderEngine` shrinks by 180 logical lines, direct
-GameState-write identities remain 135, printed-name and Oracle-ID heuristics do
-not grow, and `oracle_ir.py` falls below the 1,500-logical-line review threshold.
+The new typed owners account for the positive production delta while
+`CommanderEngine` shrinks, direct GameState-write identities and card-specific
+heuristics do not grow, and `oracle_ir.py` falls below its production-module
+review threshold. Exact architecture and line deltas live only in the generated
+[architecture debt report](docs/ARCHITECTURE_DEBT_STATUS.md).
 
 Dynamic, conditional, restricted, triggered, side-effecting, arbitrary
 resolving-effect payment, target, loyalty, and mana-production replacement or
 trigger variants remain explicit residuals. Basic land types grant distinct
 intrinsic abilities through the existing CR 305.6 owner; reminder text does not
-execute. The refreshed frontier fingerprint is
-`bacd71ee4abf89319e549fc13969ee30372be7ddb964457f2f0e0a4720e55dc2`.
+execute.
 
 `main` protection is active, strict, and requires `PR / Certification` with
 administrator enforcement. Enable auto-merge only after the PR exists and let

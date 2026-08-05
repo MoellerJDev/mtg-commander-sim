@@ -2,7 +2,7 @@
 title: "CI escape report"
 status: "generated"
 authoritative_source: "platform/ci-escape-source.json"
-verified: "24710b1b29390387cd56a87d8e60b4a44e6f49ba01d983a57d4f3db6292b9f5e"
+verified: "99fe7180cd3dcd0efb518c20ae08e2580a61a406aaa4d1834bcbf7f627d8957b"
 audience: "maintainers and contributors"
 maintenance: "generated"
 ---
@@ -13,8 +13,8 @@ This report classifies observed deterministic failures that escaped the local qu
 
 ## Summary
 
-- Escapes: 9
-- Deterministic escapes: 5
+- Escapes: 10
+- Deterministic escapes: 6
 - Current missing impact edges: 0
 - Known flaky tests: 0
 - Average pushes per merged PR: None
@@ -35,6 +35,7 @@ This report classifies observed deterministic failures that escaped the local qu
 | `ci-20260805-07` | [30974377805](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30974377805) | `flaky_test` | `not_applicable` | The journeys now wait for authoritative projected results across persisted transitions and retain bounded whole-test budgets; both focused witnesses pass headlessly against the CI compact database. |
 | `ci-20260805-08` | [30982463835](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30982463835) | `flaky_test` | `not_applicable` | One shared coordinator now advances only the currently authorized server pass until a strategic decision, seat-qualified opportunity, or projected result is reached; the two witnesses pass together in one headless worker against the CI compact database. |
 | `ci-20260805-09` | [30988263099](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30988263099) | `flaky_test` | `not_applicable` | Authorized pass submissions are now keyed by decision ID, land confirmation snapshots the hand only after the card is currently playable, and the witness verifies distinct precombat and postcombat main-phase commander offers; both focused journeys passed together headlessly in 27.9 minutes against the CI compact database. |
+| `ci-20260805-10` | [30998174979](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30998174979) | `missing_affected_test` | `added` | Both handler inventories now ratchet at nineteen and the handoff links to generated frontier and architecture reports instead of copying grouped numerical metrics. |
 
 ## Measurement limitations
 

@@ -156,6 +156,24 @@
       "resolution": "Authorized pass submissions are now keyed by decision ID, land confirmation snapshots the hand only after the card is currently playable, and the witness verifies distinct precombat and postcombat main-phase commander offers; both focused journeys passed together headlessly in 27.9 minutes against the CI compact database.",
       "run_id": 30988263099,
       "summary": "The natural-winner journey reused a projected pass around a slow land transition and could count the pre-draw hand before the next seat's playable main-phase decision."
+    },
+    {
+      "category": "missing_affected_test",
+      "deterministic": true,
+      "failed_surfaces": [
+        "compiler-cardprogram",
+        "generated-validation"
+      ],
+      "head_sha": "c2340f8e90f2b4a7bd0466377c0ef1a776ab85d3",
+      "id": "ci-20260805-10",
+      "impact_edge_status": "added",
+      "regressions": [
+        "test_card_program_trust.CardProgramTrustTests.test_global_handler_and_component_inventory_is_capability_bound",
+        "test_documentation_policy.DocumentationPolicyTests.test_repository_documentation_passes"
+      ],
+      "resolution": "Both handler inventories now ratchet at nineteen and the handoff links to generated frontier and architecture reports instead of copying grouped numerical metrics.",
+      "run_id": 30998174979,
+      "summary": "The fixed-mana runtime component increased two independently ratcheted inventories while the handoff duplicated numerical metrics reserved for generated status reports."
     }
   ],
   "known_flaky_tests": [],
@@ -163,7 +181,7 @@
     "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
     "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
   },
-  "observed_at": "2026-08-05T09:39:44Z",
+  "observed_at": "2026-08-05T10:41:26Z",
   "recent_pull_requests": [
     {
       "critical_path_seconds": 1488.0,
@@ -208,7 +226,7 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "24710b1b29390387cd56a87d8e60b4a44e6f49ba01d983a57d4f3db6292b9f5e",
+  "source_fingerprint": "99fe7180cd3dcd0efb518c20ae08e2580a61a406aaa4d1834bcbf7f627d8957b",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,
@@ -217,16 +235,17 @@
       "browser_integration": 1,
       "flaky_test": 4,
       "generated_artifact_drift": 1,
-      "missing_affected_test": 1,
+      "missing_affected_test": 2,
       "source_correctness": 2
     },
     "current_missing_impact_edges": [],
-    "deterministic_escape_count": 5,
-    "escape_count": 9,
+    "deterministic_escape_count": 6,
+    "escape_count": 10,
     "exact_head_pass_rate": 1.0,
     "known_flaky_test_count": 0,
     "repeated_failure_categories": [
       "flaky_test",
+      "missing_affected_test",
       "source_correctness"
     ]
   }
