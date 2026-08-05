@@ -173,6 +173,28 @@ class CiPipelineTests(unittest.TestCase):
                             }
                         ],
                     },
+                    {
+                        "name": "PR / Windows / casting-costs-mana",
+                        "conclusion": "success",
+                        # GitHub may mark a matrix job started while it is still
+                        # waiting for the strategy's runner slot.
+                        "started_at": "2026-08-03T12:00:11Z",
+                        "completed_at": "2026-08-03T12:02:00Z",
+                        "steps": [
+                            {
+                                "name": "Install package and test dependencies",
+                                "conclusion": "success",
+                                "started_at": "2026-08-03T12:01:00Z",
+                                "completed_at": "2026-08-03T12:01:10Z",
+                            },
+                            {
+                                "name": "Run full Windows shard",
+                                "conclusion": "success",
+                                "started_at": "2026-08-03T12:01:10Z",
+                                "completed_at": "2026-08-03T12:01:40Z",
+                            },
+                        ],
+                    },
                 ]
             },
             [
@@ -226,7 +248,10 @@ class CiPipelineTests(unittest.TestCase):
                     },
                 )
             ],
-            [self._windows_result("core-domain")],
+            [
+                self._windows_result("core-domain"),
+                self._windows_result("casting-costs-mana"),
+            ],
         )
         self.assertEqual(5.0, metrics["queue_seconds"])
         self.assertEqual(125.0, metrics["critical_path_seconds_observed"])
@@ -238,6 +263,7 @@ class CiPipelineTests(unittest.TestCase):
         self.assertEqual("none", journey["failure_classification"])
         self.assertEqual(12, journey["game_metrics"]["accepted_commands"])
         windows = metrics["windows"]
+        self.assertEqual(100.0, windows["critical_path_seconds_observed"])
         self.assertEqual(1, windows["max_runner_concurrency_observed"])
         self.assertEqual(25.0, windows["package_duration_seconds"])
         self.assertEqual(3, windows["shards"][0]["test_count"])

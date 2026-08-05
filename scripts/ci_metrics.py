@@ -192,11 +192,33 @@ def _step_duration(job: Mapping[str, Any], name: str) -> float | None:
     return None
 
 
+def _runner_interval(
+    job: Mapping[str, Any],
+) -> tuple[datetime | None, datetime | None]:
+    steps = job.get("steps")
+    if not isinstance(steps, Sequence) or isinstance(steps, (str, bytes)):
+        return None, None
+    starts = []
+    completions = []
+    for step in steps:
+        if not isinstance(step, Mapping):
+            continue
+        started = _time(step.get("started_at"))
+        completed = _time(step.get("completed_at"))
+        if started is not None:
+            starts.append(started)
+        if completed is not None:
+            completions.append(completed)
+    return (
+        min(starts) if starts else None,
+        max(completions) if completions else None,
+    )
+
+
 def _maximum_concurrency(jobs: Sequence[Mapping[str, Any]]) -> int | None:
     events = []
     for job in jobs:
-        started = _time(job.get("started_at"))
-        completed = _time(job.get("completed_at"))
+        started, completed = _runner_interval(job)
         if started is None or completed is None:
             continue
         events.extend(((started, 1), (completed, -1)))
@@ -225,7 +247,7 @@ def windows_metrics(
         job = by_name.get(name)
         if job is not None:
             worker_jobs.append(job)
-        started = _time(job.get("started_at")) if job is not None else None
+        started, completed = _runner_interval(job) if job is not None else (None, None)
         shards.append(
             {
                 "name": suite,
@@ -242,8 +264,8 @@ def windows_metrics(
                 "test_count": report.get("tests_run"),
                 "skipped_test_count": report.get("skipped"),
                 "job_duration_seconds": (
-                    _duration(job.get("started_at"), job.get("completed_at"))
-                    if job is not None
+                    round((completed - started).total_seconds(), 3)
+                    if started is not None and completed is not None
                     else None
                 ),
             }
@@ -254,7 +276,7 @@ def windows_metrics(
         for job in jobs
         if str(job.get("name") or "").startswith("PR / Windows")
     ]
-    completions = [_time(job.get("completed_at")) for job in windows_jobs]
+    completions = [_runner_interval(job)[1] for job in windows_jobs]
     completions = [value for value in completions if value is not None]
     return {
         "shards": sorted(shards, key=lambda row: row["name"]),
