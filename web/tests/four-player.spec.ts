@@ -137,7 +137,11 @@ async function actionIsReady(action: Locator): Promise<boolean> {
   return action.isEnabled({ timeout: 250 }).catch(() => false);
 }
 
-async function passUntilDraggable(pages: readonly Page[], card: Locator) {
+async function passUntilDraggable(
+  pages: readonly Page[],
+  card: Locator,
+  durabilityTimeout = 45_000,
+) {
   for (let attempts = 0; attempts < 20; attempts += 1) {
     if (await card.getAttribute("draggable") === "true") return;
     await expect.poll(async () => {
@@ -151,7 +155,7 @@ async function passUntilDraggable(pages: readonly Page[], card: Locator) {
       // A Windows Game Record durability save may briefly keep the accepted
       // action disabled while its review artifacts are written. Wait for the
       // authoritative acknowledgement; never manufacture another pass.
-      timeout: 45_000,
+      timeout: durabilityTimeout,
     }).not.toBe("waiting");
     if (await card.getAttribute("draggable") === "true") return;
     for (const page of pages) {
@@ -709,6 +713,9 @@ test("an isolated-context duel presents exact turn state and Spire Garden correc
 });
 
 test("a duel stabilizes land ETBs, permits a stack response, and resolves Bowmasters", async ({ browser }) => {
+  // This journey persists every manual mana and priority transition. Hosted
+  // runners can exceed the suite default without any individual wait stalling.
+  test.setTimeout(180_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -850,7 +857,7 @@ test("a duel declares an attacker in the browser and applies commander combat da
   // This journey crosses several auto-pass windows and persists each real
   // command. Preserve assertion-driven waits while leaving hosted runners
   // enough time for durability writes and context cleanup under serial load.
-  test.setTimeout(240_000);
+  test.setTimeout(420_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -936,7 +943,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
   // This intentionally natural game persists more than one hundred real
   // commands. It completes near five minutes alone and can take longer after
   // the preceding serial journeys, especially on Windows or hosted CI.
-  test.setTimeout(600_000);
+  test.setTimeout(900_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -970,7 +977,10 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       const land = name
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
-      await passUntilDraggable([host, opponent], land);
+      // This natural-winner witness runs after the other durability-heavy
+      // journeys in its serial shard. A single accepted command can take more
+      // than the shared helper's normal budget while prior records flush.
+      await passUntilDraggable([host, opponent], land, 90_000);
       const revision = await viewRevision(page);
       await land.dragTo(page.getByTestId("own-battlefield"));
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
