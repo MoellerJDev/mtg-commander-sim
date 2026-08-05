@@ -2,7 +2,7 @@
 title: "CardProgram V2"
 status: "current"
 authoritative_source: "mtg_commander_sim/card_programs, mtg_commander_sim/semantics.py, and schemas/card-program-v2.schema.json"
-verified: "2026-08-04"
+verified: "2026-08-05"
 audience: "compiler, rules, replay, and semantic-pack contributors"
 maintenance: "hand-maintained"
 ---
@@ -90,6 +90,19 @@ fail closed.
   executable granted ability; grants use typed activated/triggered fragments
   that participate in layer 6, discovery, source identity, trust binding, and
   replay fingerprints.
+- Exact generated spell and activated-effect programs are executable only when
+  their source-pinned semantic key is unique on the card. This lets a closed,
+  capability-verified effect use the ordinary runtime without an arbiter while
+  keeping cards with multiple effect clauses that currently share one key
+  provisional. The compiler must introduce a stable finer-grained ability
+  identity before those ambiguous programs can be promoted; registration never
+  chooses one by iteration order.
+- Fixed positive-integer damage clauses use one typed compiler template across
+  spell, triggered, and activated contexts. Its closed recipient grammar is
+  limited to any target, creature, creature or planeswalker, player, opponent,
+  player or planeswalker, opponent or planeswalker, and each opponent. Dynamic,
+  divided, conditional, mass, rider-bearing, and open-ended target restrictions
+  remain source-spanned residuals rather than approximate executable effects.
 
 ## Execution ownership
 
