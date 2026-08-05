@@ -11,6 +11,20 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Reusable rules-piece coverage matrix
+
+- Added a versioned Commander-scoped inventory that joins existing compiler
+  residual families, capabilities, mechanics, runtime handlers, rules records,
+  and card-unlock-frontier data without introducing a competing rules owner.
+- Added a complete material-ability/card relation index, typed interaction
+  matrix, complex-card composition benchmark, and durable pinned program
+  baseline with current deltas. Independent compiler, runtime, assurance,
+  corpus, and interaction statuses remain fail-closed.
+- Added `simctl pieces` and `simctl card pieces` drill-down commands plus
+  canonical generated-artifact, snapshot, documentation, and CI freshness
+  checks. This inventory is planning evidence only; it does not inflate exact
+  card coverage or claim newly implemented gameplay semantics.
+
 ### Continuous compiler and trust hardening
 
 - Oracle IR v28 validates every creature-subtype anthem candidate against the

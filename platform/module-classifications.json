@@ -1960,6 +1960,51 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/reusable_pieces/__init__.py",
+      "layer": "semantics",
+      "owning_subsystem": "reusable_piece_inventory",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "layer": "semantics",
+      "owning_subsystem": "reusable_piece_inventory",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "layer": "semantics",
+      "owning_subsystem": "reusable_piece_inventory",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/review_artifacts.py",
       "layer": "application",
       "owning_subsystem": "legacy_application",
@@ -3329,5 +3374,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "4c43ac2a6dc4216dc0c22b6f44d99b3510b50f9f3ec52ad96e19744e31a845b9"
+  "fingerprint": "d71617e24a273f52e0783f7512f24a39b0d14a37420b7ae3c48fa20fb5b61cc8"
 }

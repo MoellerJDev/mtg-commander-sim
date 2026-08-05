@@ -132,12 +132,18 @@ python simctl.py card trust-closure "Lightning Bolt" --profile commander_duel \
   --db data/scryfall-current.sqlite3
 python simctl.py card runtime-components --profile commander_review \
   --db data/scryfall-current.sqlite3
+python simctl.py card pieces "Lightning Bolt"
 ```
 
 `card explain` reports faces, abilities, typed nodes, source spans,
 capabilities, tests, residuals, blockers, and runtime handler mapping. `audit`
 checks deterministic round-trip and source linkage. `diff` reports exact
 artifact paths instead of comparing prose.
+
+`card pieces` reads the pinned reusable-piece index and reports how each
+material ability relates to compiler templates, capabilities, mechanics, and
+residual grammar boundaries. It is an inspection join, not an additional
+CardProgram or trust authority.
 
 For migrated nodes, `explain` and `audit` also report the stable handler ID,
 handler schema version, and capability dependencies. This mapping is derived
@@ -150,5 +156,6 @@ the [continuous-effect decision](../adr/0020-continuous-effect-duration-and-appl
 [typed-handler boundary](semantic-handlers.md), the
 [trust-closure boundary](trust-closure.md), the
 [runtime-component boundary](runtime-components.md), the
+[reusable-piece inventory](reusable-rules-pieces.md), the
 [override guide](../extension/card-override.md), and generated
 [compiler status](../COMPILER_COVERAGE_STATUS.md).

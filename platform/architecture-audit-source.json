@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9",
+    "baseline_main_commit": "ff5973728476d66406179a2bc6b5113bd8483aaf",
     "baseline_worktree_clean": true,
-    "verified_at": "2026-08-04",
-    "phase": "draw_limits_optional_choice_and_instruction_replacement",
-    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, measurable corpus gains, and iterative large-count/event-batch coordination while extracting fixed-count parsing from the oversized Oracle coordinator."
+    "verified_at": "2026-08-05",
+    "phase": "reusable_piece_coverage_matrix",
+    "scope_note": "Certified main through PR 102 includes the reusable generic damage-effect clause family and its post-merge status reconciliation. The current focused branch adds the versioned reusable-rules-piece ontology, per-card relation index, interaction matrix, durable program baseline and delta, complex-card composition benchmark, CLI drill-down, freshness gates, and current documentation needed to select later rules families from measured shared blockers."
   },
   "ci": {
     "workflow": "CI",
-    "run_id": 30892105590,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590",
+    "run_id": 31047020917,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31047020917",
     "status": "pass",
     "python_versions": [
       "3.12"
@@ -408,6 +408,7 @@
     "docs/architecture/compiler.md",
     "docs/architecture/semantic-handlers.md",
     "docs/architecture/runtime-components.md",
+    "docs/architecture/reusable-rules-pieces.md",
     "docs/architecture/drawing.md",
     "docs/architecture/server-runtime.md",
     "docs/architecture/replay.md",

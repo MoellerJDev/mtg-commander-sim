@@ -74,6 +74,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
             "mtg_commander_sim/semantic_runtime/",
             "mtg_commander_sim/semantic_choices/",
             "mtg_commander_sim/effect_runtime/",
+            "mtg_commander_sim/reusable_pieces/",
             "mtg_commander_sim/card_overrides/",
         )
     ) or relative in {
@@ -170,6 +171,8 @@ def _owner(relative: str, layer: str) -> str:
         return "effect_runtime"
     if relative.startswith("mtg_commander_sim/card_programs/"):
         return "card_programs"
+    if relative.startswith("mtg_commander_sim/reusable_pieces/"):
+        return "reusable_piece_inventory"
     if relative.startswith("mtg_commander_sim/compiler/"):
         return "oracle_compiler"
     if relative.startswith("mtg_commander_sim/rules/"):

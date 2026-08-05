@@ -44,6 +44,10 @@
     "coverage/oracle-coverage.json",
     "coverage/oracle-coverage-commander.json",
     "coverage/platform-readiness.json",
+    "coverage/reusable-piece-matrix.json.gz",
+    "coverage/reusable-piece-delta.json",
+    "coverage/complex-card-composition.json",
+    "coverage/program-baseline.json",
     "coverage/rules-conformance.json",
     "coverage/rules-coverage.json",
     "coverage/rules-delta.json"

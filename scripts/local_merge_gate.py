@@ -100,6 +100,14 @@ def build_steps(
             ),
         ),
         GateStep(
+            "generated_reusable_piece_freshness",
+            (
+                python,
+                "scripts/update_reusable_piece_matrix.py",
+                "--check",
+            ),
+        ),
+        GateStep(
             "generated_ci_escape_report_freshness",
             (
                 python,

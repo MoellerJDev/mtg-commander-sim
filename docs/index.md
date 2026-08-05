@@ -2,7 +2,7 @@
 title: "Documentation map"
 status: "current"
 authoritative_source: "repository documentation policy"
-verified: "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+verified: "2026-08-05"
 audience: "users, operators, and contributors"
 maintenance: "hand-maintained"
 ---
@@ -34,6 +34,7 @@ indexed here but excluded from documentation front-matter validation.
 - [Card programs](architecture/card-programs.md)
 - [Typed semantic handlers](architecture/semantic-handlers.md)
 - [Runtime components](architecture/runtime-components.md)
+- [Reusable rules-piece inventory](architecture/reusable-rules-pieces.md)
 - [Counter-placement transaction](architecture/counter-placement.md)
 - [Damage transaction](architecture/damage-transactions.md)
 - [Draw transaction](architecture/drawing.md)
@@ -66,6 +67,7 @@ indexed here but excluded from documentation front-matter validation.
 - [ADR 0019 — normalized zone-change trigger discovery](adr/0019-normalized-zone-trigger-discovery.md)
 - [ADR 0020 — continuous-effect duration and applicability ownership](adr/0020-continuous-effect-duration-and-applicability.md)
 - [ADR 0021 — canonical draw transaction and replacement ownership](adr/0021-canonical-draw-transaction.md)
+- [ADR 0022 — reusable rules-piece inventory](adr/0022-reusable-rules-piece-inventory.md)
 - [Legacy consolidated architecture reference](../ARCHITECTURE.md)
 - [Client integration boundary](../CLIENT_INTEGRATION.md)
 - [Game Record v3](../GAME_RECORD.md)
@@ -113,6 +115,9 @@ indexed here but excluded from documentation front-matter validation.
 - [Architecture debt status](ARCHITECTURE_DEBT_STATUS.md)
 - [Compiler coverage status](COMPILER_COVERAGE_STATUS.md)
 - [Commander card-unlock frontier](../coverage/card-unlock-frontier.md)
+- [Reusable rules-piece matrix](../coverage/reusable-piece-matrix.md)
+- [Reusable rules-piece delta](../coverage/reusable-piece-delta.md)
+- [Complex-card composition benchmark](../coverage/complex-card-composition.md)
 - [Platform readiness](../coverage/platform-readiness.md)
 - [Mechanics coverage](../coverage/mechanics-coverage.md)
 - [Rules coverage](../coverage/rules-coverage.md)

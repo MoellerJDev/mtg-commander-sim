@@ -41,7 +41,12 @@
     {
       "id": "generated-coverage-sources",
       "patterns": ["coverage/**", "platform/readiness-source.json"],
-      "checks": ["architecture", "card-unlock-frontier", "platform-status"]
+      "checks": [
+        "architecture",
+        "card-unlock-frontier",
+        "reusable-pieces",
+        "platform-status"
+      ]
     },
     {
       "id": "capability-and-card-program-sources",
@@ -60,7 +65,11 @@
         "schemas/card-program-v2.schema.json",
         "schemas/rule-capability-registry.schema.json"
       ],
-      "checks": ["capability-evidence", "card-unlock-frontier"]
+      "checks": [
+        "capability-evidence",
+        "card-unlock-frontier",
+        "reusable-pieces"
+      ]
     },
     {
       "id": "platform-and-workflow-sources",
@@ -86,12 +95,30 @@
         "mtg_commander_sim/semantic_runtime/mana_abilities.py"
       ],
       "test_suites": ["compiler-cardprogram"],
-      "checks": ["capability-evidence", "card-unlock-frontier"]
+      "checks": [
+        "capability-evidence",
+        "card-unlock-frontier",
+        "reusable-pieces"
+      ]
     },
     {
       "id": "card-unlock-frontier-generator",
       "patterns": ["scripts/update_card_unlock_frontier.py"],
       "checks": ["card-unlock-frontier"]
+    },
+    {
+      "id": "reusable-piece-inventory",
+      "patterns": [
+        "mtg_commander_sim/reusable_pieces/**",
+        "scripts/update_reusable_piece_matrix.py",
+        "platform/reusable-piece-policy.json",
+        "schemas/reusable-piece-policy.schema.json",
+        "schemas/reusable-piece-matrix.schema.json",
+        "rules/rule-index.json",
+        "rules/mechanic-index.json"
+      ],
+      "test_suites": ["generated-validation"],
+      "checks": ["reusable-pieces"]
     },
     {
       "id": "rules-events-replacements-suite",

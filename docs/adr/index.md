@@ -2,7 +2,7 @@
 title: "Architecture decision records"
 status: "current"
 authoritative_source: "docs/adr decision records"
-verified: "2026-08-03"
+verified: "2026-08-05"
 audience: "maintainers and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -36,3 +36,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0019 — normalized zone-change trigger discovery](0019-normalized-zone-trigger-discovery.md)
 - [ADR 0020 — continuous-effect duration and applicability ownership](0020-continuous-effect-duration-and-applicability.md)
 - [ADR 0021 — canonical draw transaction and replacement ownership](0021-canonical-draw-transaction.md)
+- [ADR 0022 — reusable rules-piece inventory](0022-reusable-rules-piece-inventory.md)

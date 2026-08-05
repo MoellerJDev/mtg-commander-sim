@@ -2,7 +2,7 @@
 title: "Rules completeness implementation status"
 status: "current"
 authoritative_source: "pinned rules and generated coverage artifacts"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "rules, compiler, and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -32,7 +32,7 @@ server, provider, and pilot success never promote rules fidelity by themselves.
 
 - A pinned Comprehensive Rules corpus, Oracle snapshot, and rulings snapshot
   support deterministic inventories and reproducible source references.
-- Oracle IR v25 provides source-spanned partial compilation and material
+- The current pinned Oracle IR compiler provides source-spanned partial compilation and material
   residuals. Generated and reviewed abilities aggregate into deterministic
   CardProgram V2 artifacts with source, capability, trust, and replay
   fingerprints. Compilation remains partial and interleaved.
@@ -135,8 +135,9 @@ continuations, fixed limits, instruction doubling, prospective-drawer optional
 legality, iterative large-count coordination, and Oracle IR v27 compiler path
 are now represented. Continuous-handler identity consumes complete typed query
 and modifier descriptors, qualified-creature grammar is registry-closed, and
-the typed Aura/protection/granted-ability boundary is now implemented by Oracle
-IR v29. CR 121.6c/121.7 draw-result action and nested ordering remain the next
+the typed Aura/protection/granted-ability boundary is represented, and the
+current compiler also lowers the closed fixed-damage families documented in
+generated status. CR 121.6c/121.7 draw-result action and nested ordering remain the next
 draw semantics boundary after these trust corrections.
 
 Do not add a card-name branch to the core engine. A genuinely exceptional card
@@ -151,10 +152,12 @@ Use the generated reports instead of hand-copying counts:
 ```bash
 python scripts/update_architecture_audit.py --check
 python scripts/update_rules_scheduler.py --check
+python scripts/update_reusable_piece_matrix.py --check
 python simctl.py rules verify
 python simctl.py rules coverage
 python simctl.py rules queue
 python simctl.py rules next
+python simctl.py pieces next
 ```
 
 When a coverage artifact changes intentionally, regenerate the corresponding

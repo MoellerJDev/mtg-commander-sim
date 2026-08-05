@@ -111,6 +111,11 @@ def build_plan(
             "scripts/update_card_unlock_frontier.py",
             "--check",
         ),
+        "reusable-pieces": (
+            python,
+            "scripts/update_reusable_piece_matrix.py",
+            "--check",
+        ),
         "ci-escape-report": (
             python,
             "scripts/update_ci_escape_report.py",

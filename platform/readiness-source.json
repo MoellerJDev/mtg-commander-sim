@@ -972,6 +972,12 @@
       "evidence": "PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks. Public exact-head run 31043382697 passed every required Linux, generated, package, Windows, and headless-browser job; merge commit 28e5d48 preserves feature provenance on main. Post-merge smoke 31043864091 passed all 29 integration tests before correctly rejecting the stale active-candidate label corrected by the immediate reconciliation change."
     },
     {
+      "id": "reusable_rules_piece_inventory",
+      "name": "Reusable rules-piece matrix and durable program baseline",
+      "status": "implemented_repository_artifact",
+      "evidence": "The repository generates a versioned Commander-scoped ontology, complete material-ability card relation index, registered capability/mechanic/compiler/runtime inventory, pairwise interaction index, complex-card composition benchmark, durable accelerator-adoption baseline, and current delta. Independent compiler, runtime, assurance, corpus, and interaction axes remain fail-closed; source fingerprints, canonical compression, joins, and generated Markdown are freshness-checked. Card-text-shaped residual clusters remain exact frontier drill-down data but collapse to their shared missing compiler-grammar boundary rather than becoming fake reusable rules. The CLI inspects pieces and cards from the generated indexes without compiling Oracle or touching live game state."
+    },
+    {
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
@@ -1002,6 +1008,7 @@
     "hidden_information": "implemented_projected_protocol",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
     "ai_dependency": "none_for_core_tests_or_runtime"
+    ,"reusable_piece_inventory": "implemented_versioned_generated_matrix_card_index_interaction_index_complex_card_benchmark_durable_baseline_delta_and_cli_with_zero_unclassified_material_spans"
   },
   "validation": {
     "ci": {
@@ -1047,5 +1054,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Verify the PR 102 post-merge status reconciliation, remove audited stale remote branches, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective."
+  "next_task": "Use the reusable-piece matrix and card-unlock frontier together to select and implement the next dependency-ready high-impact reusable rules family, preserving current trust, replay, privacy, interaction, and architecture gates."
 }

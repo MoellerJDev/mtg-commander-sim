@@ -400,7 +400,7 @@ generated documentation fixtures with bearer capabilities redacted. See
   fail-closed material residuals
 - automatic deck-time generic compilation into provisional, arbiter-gated
   semantic programs
-- Oracle IR v25 simple self-trigger, unconditional-entry, counter, pump, basic
+- current pinned Oracle IR simple self-trigger, unconditional-entry, counter, pump, basic
   creature-token, fixed-mana combat-declaration cost, and exact combat-
   declaration restriction/evasion/battlefield-condition/composition and
   source-controller target-scope templates with reviewed-handler precedence,
@@ -755,7 +755,7 @@ to the exact physical and logical relation, so detaching, phasing, departure,
 or leave-and-return ends the old effect without a printed-name branch. Fixed
 ordinary-mana Equip abilities are payable controller-scoped creature
 activations at sorcery speed and resolve through the ordinary stack and one
-reciprocal attachment owner. Oracle IR v25 adds the closed `Enchant artifact`,
+reciprocal attachment owner. The pinned compiler adds the closed `Enchant artifact`,
 `battle`, `creature`, `enchantment`, `land`, `planeswalker`, `permanent`, and
 `nonland permanent` keyword family, including `you control` and `an opponent
 controls`. Those Auras require a legal cast target, attach during resolution,
@@ -872,6 +872,16 @@ python simctl.py oracle coverage \
 python scripts/update_card_unlock_frontier.py --write \
   --db data/scryfall-current.sqlite3
 python scripts/update_card_unlock_frontier.py --check
+
+# Inspect the reusable semantic inventory and one card's composition.
+python simctl.py pieces coverage
+python simctl.py pieces next
+python simctl.py card pieces "Lightning Bolt"
+
+# Regenerate or verify the matrix and durable-baseline delta.
+python scripts/update_reusable_piece_matrix.py --write \
+  --db data/scryfall-current.sqlite3
+python scripts/update_reusable_piece_matrix.py --check
 ```
 
 CardProgram V2 is the canonical deterministic runtime artifact. It combines
@@ -891,25 +901,20 @@ and ranks bounded one-, two-, and three-family implementation bundles by exact
 card gain. Its compressed JSON companion is an offline development and CI
 artifact; the server and browser never load it. The frontier is conservative evidence for
 choosing reusable rules work, not a claim of Comprehensive Rules or Oracle
-completeness. The first measured harvest adds generic Vigilance declaration
-behavior and promotes 35 Commander-legal CardPrograms to exact; exact two-face
-positional binding also removes the former Tithing Blade construction failure.
-The fixed-output activated-mana harvest compiles target-free, nonloyalty
-abilities with completely represented mandatory costs and output modes into one
-source-spanned typed descriptor. It promotes 173 Commander-legal CardPrograms,
-reduces material residuals by 1,314, and deliberately leaves dynamic,
-conditional, restricted, triggered, side-effecting, and parenthesized
-basic-land reminder wording outside this capability. Basic land types continue
-to grant their separate intrinsic mana abilities through the existing CR 305.6
-owner rather than through executable reminder text.
+completeness. The reusable-piece matrix in
+[`coverage/reusable-piece-matrix.md`](coverage/reusable-piece-matrix.md) joins
+that frontier with rules, capabilities, mechanics, compiler templates,
+CardPrograms, runtime handlers/components, and assurance evidence. Its card and
+interaction indexes plus durable baseline delta support rules-family selection
+without becoming a second runtime or trust authority. Exact current gains and
+residuals live only in generated reports.
 
-Printed Flash is also a source-spanned CardProgram V2 cast-permission family.
-Offer generation and command validation consume the same immutable, face-pinned
-permission; neither path reparses Oracle text at runtime. The first generic
-harvest promotes 52 Commander-legal CardPrograms and removes 592 material
-residuals. Conditional, granted, removed, and player-wide as-though-Flash
-wording remains explicit residual work, as do independent priority and zone
-permissions.
+Current generic harvests include effective Vigilance, Haste, Flying and Reach,
+fixed-output activated mana, face-pinned printed Flash, and closed fixed-damage
+instructions. Their unsupported conditional, dynamic, restricted, granted,
+removed, side-effecting, and open target/cost variants remain explicit
+source-spanned residuals. Basic land types continue to grant separate intrinsic
+mana abilities through the CR 305.6 owner rather than executable reminder text.
 
 The typed semantic-handler migration moved its first executable effect
 families into `mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an

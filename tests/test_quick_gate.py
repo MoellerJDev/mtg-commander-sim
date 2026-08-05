@@ -35,6 +35,12 @@ class QuickGatePlanTests(unittest.TestCase):
         plan = build_plan(("mtg_commander_sim/compiler/oracle_parser.py",))
         names = [step.name for step in plan["steps"]]
         self.assertIn("card-unlock-frontier", names)
+        self.assertIn("reusable-pieces", names)
+
+    def test_reusable_piece_change_checks_inventory(self):
+        plan = build_plan(("mtg_commander_sim/reusable_pieces/generation.py",))
+        names = [step.name for step in plan["steps"]]
+        self.assertIn("reusable-pieces", names)
 
 
 if __name__ == "__main__":

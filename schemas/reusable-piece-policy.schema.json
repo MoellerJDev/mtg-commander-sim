@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/mtg-commander-sim/reusable-piece-policy.schema.json",
+  "title": "Reusable rules piece generation policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "ontology_version",
+    "profile",
+    "classes",
+    "relation_types",
+    "status_axes",
+    "residual_family_classes",
+    "capability_prefix_classes",
+    "runtime_family_classes",
+    "universal_system_classes",
+    "high_risk_class_pairs",
+    "complex_card_weights",
+    "complex_card_sentinels"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "ontology_version": {"type": "string", "minLength": 1},
+    "profile": {"const": "commander_review"},
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "label": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "relation_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+    },
+    "status_axes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {"type": "string", "minLength": 1}
+      }
+    },
+    "residual_family_classes": {"$ref": "#/$defs/stringMap"},
+    "capability_prefix_classes": {"$ref": "#/$defs/prefixMap"},
+    "runtime_family_classes": {"$ref": "#/$defs/prefixMap"},
+    "universal_system_classes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {"type": "string", "minLength": 1}
+      }
+    },
+    "high_risk_class_pairs": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "prefixItems": [{"type": "string"}, {"type": "string"}],
+        "items": false,
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "complex_card_weights": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "integer", "minimum": 0}
+    },
+    "complex_card_sentinels": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  },
+  "$defs": {
+    "stringMap": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "prefixMap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["prefix", "class_id"],
+        "properties": {
+          "prefix": {"type": "string", "minLength": 1},
+          "class_id": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

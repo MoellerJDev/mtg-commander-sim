@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "5029c62c98bdad72549625af9a7c3dde5e333ef9",
+  "baseline_commit": "ff5973728476d66406179a2bc6b5113bd8483aaf",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -765,7 +765,7 @@
     "mtg_commander_sim/record.py": 11
   },
   "engine": {
-    "logical_lines": 13308,
+    "logical_lines": 13017,
     "methods": [
       {
         "kind": "method",
@@ -1444,11 +1444,6 @@
       },
       {
         "kind": "method",
-        "name": "_has_conservative_response",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
         "name": "_has_world_supertype",
         "visibility": "private"
       },
@@ -1475,11 +1470,6 @@
       {
         "kind": "method",
         "name": "_is_main_phase",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_is_summoning_sick",
         "visibility": "private"
       },
       {
@@ -1780,11 +1770,6 @@
       {
         "kind": "method",
         "name": "_program_can_auto_resolve",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
-        "name": "_protection_colors",
         "visibility": "private"
       },
       {
@@ -2333,12 +2318,12 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 14078
+    "physical_lines": 13781
   },
   "exception_binding": {
-    "adr": "docs/adr/0021-canonical-draw-transaction.md",
-    "allowance_fingerprint": "cc239a1be1360786a5249ae281371778b76a74a1e1b16a522089f3cd0e4ec8a8",
-    "exception_id": "ARCH-EXC-0006"
+    "adr": "docs/adr/0022-reusable-rules-piece-inventory.md",
+    "allowance_fingerprint": "4bb66d0a72381204c63a604ba7752098e8780345450257710be34c26f85667b4",
+    "exception_id": "ARCH-EXC-0007"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2348,15 +2333,6 @@
     "sylvan_library_settle"
   ],
   "oracle_id_literals": [
-    {
-      "column": 16,
-      "file": "mtg_commander_sim/engine.py",
-      "in_condition": false,
-      "line": 5264,
-      "oracle_id": "dae4815e-9025-4993-ab46-52a3f1a7219e",
-      "symbol": "_semantic_key_for_ability",
-      "value": "dae4815e-9025-4993-ab46-52a3f1a7219e:granted:damage"
-    },
     {
       "column": 13,
       "file": "mtg_commander_sim/shortcuts.py",
@@ -2426,12 +2402,12 @@
     },
     {
       "file": "mtg_commander_sim/cli.py",
-      "logical_lines": 369,
+      "logical_lines": 337,
       "symbol": "build_parser"
     },
     {
       "file": "mtg_commander_sim/cli.py",
-      "logical_lines": 594,
+      "logical_lines": 583,
       "symbol": "main"
     },
     {
@@ -2456,7 +2432,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 173,
+      "logical_lines": 170,
       "symbol": "CommanderEngine._complete_attackers"
     },
     {
@@ -2476,11 +2452,6 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 159,
-      "symbol": "CommanderEngine._dispatch_zone_change_events"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
       "logical_lines": 194,
       "symbol": "CommanderEngine._effective_card_data"
     },
@@ -2491,7 +2462,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 315,
+      "logical_lines": 301,
       "symbol": "CommanderEngine._prepare_stack_resolution"
     },
     {
@@ -2501,7 +2472,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 238,
+      "logical_lines": 236,
       "symbol": "CommanderEngine._target_row_matches"
     },
     {
@@ -2511,7 +2482,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 343,
+      "logical_lines": 341,
       "symbol": "CommanderEngine.move_card"
     },
     {
@@ -2526,22 +2497,22 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 523,
+      "logical_lines": 441,
       "symbol": "_compile_face"
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 459,
+      "logical_lines": 429,
       "symbol": "_effect_template"
     },
     {
       "file": "mtg_commander_sim/preflight.py",
-      "logical_lines": 304,
+      "logical_lines": 302,
       "symbol": "card_semantic_status"
     },
     {
       "file": "mtg_commander_sim/preflight.py",
-      "logical_lines": 192,
+      "logical_lines": 161,
       "symbol": "semantic_preflight"
     },
     {
@@ -2570,11 +2541,6 @@
       "symbol": "verify_rules_corpus"
     },
     {
-      "file": "mtg_commander_sim/runtime.py",
-      "logical_lines": 155,
-      "symbol": "GameActor._run"
-    },
-    {
       "file": "mtg_commander_sim/service.py",
       "logical_lines": 169,
       "symbol": "GameService.command"
@@ -2586,7 +2552,7 @@
     },
     {
       "file": "server/app.py",
-      "logical_lines": 724,
+      "logical_lines": 718,
       "symbol": "create_app"
     }
   ],
@@ -2597,11 +2563,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 13308
-    },
-    {
-      "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 1541
+      "logical_lines": 13017
     },
     {
       "file": "mtg_commander_sim/record.py",
@@ -2609,11 +2571,11 @@
     },
     {
       "file": "mtg_commander_sim/report.py",
-      "logical_lines": 1813
+      "logical_lines": 1782
     },
     {
       "file": "web/src/App.tsx",
-      "logical_lines": 1825
+      "logical_lines": 1728
     }
   ],
   "purpose": "Phase 1 non-growth allowances; removals remain allowed.",
@@ -2739,6 +2701,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "808157056f7a703da9ae7fb80205e27ea76510a2a5fbeda0920eeda4302d4451"
+    "printed_name_allowances_sha256": "2d83b22889d5b2411a4b99f33764f69b399171810ce91a9054d3e8774918685b"
   }
 }

@@ -175,6 +175,7 @@
       "test_property_budget",
       "test_python_runtime",
       "test_quick_gate",
+      "test_reusable_pieces",
       "test_rule_conformance",
       "test_rule_conformance_inventory",
       "test_rules_authority",
