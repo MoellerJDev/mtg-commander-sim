@@ -4,6 +4,7 @@ from typing import Any, Mapping, Protocol, Sequence
 
 from .abilities import ActivatedAbility
 from .errors import GameRuleError
+from .haste import summoning_sickness_prohibits_tap_or_untap_cost
 from .mana import ManaMode, extract_effective_mana_modes
 from .mana_undo import (
     clear_mana_undo_stack,
@@ -48,7 +49,9 @@ class ManaActivationHost(Protocol):
 
     def _type_parts(self, type_line: str) -> tuple[set[str], set[str], set[str]]: ...
 
-    def _is_summoning_sick(self, card: Any) -> bool: ...
+    def _may_activate_creature_as_haste(
+        self, seat: str, card: Any
+    ) -> bool: ...
 
     def _controller_has_oracle_text(self, seat: str, text: str) -> bool: ...
 
@@ -369,8 +372,13 @@ def complete_mana_plan_activations(
         card_types = host._type_parts(str(data.get("type_line") or ""))[0]
         if (
             "creature" in card_types
-            and host._is_summoning_sick(card)
-            and "Haste" not in data.get("keywords", [])
+            and summoning_sickness_prohibits_tap_or_untap_cost(
+                host,
+                card,
+                as_though_haste=host._may_activate_creature_as_haste(
+                    seat, card
+                ),
+            )
         ):
             raise GameRuleError(f"{card.ref} is summoning sick")
         bundle = normalize_mana_bundle(activation.get("bundle"))

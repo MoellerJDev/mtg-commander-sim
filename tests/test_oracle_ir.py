@@ -130,6 +130,7 @@ class MechanicContractTests(unittest.TestCase):
                 "first-strike",
                 "flying",
                 "goad",
+                "haste",
                 "infect",
                 "lifelink",
                 "menace",
@@ -1529,6 +1530,52 @@ class OracleIRTests(unittest.TestCase):
         self.assertEqual("trusted", programs[0].trust_level)
         self.assertEqual(
             ["combat.attack.vigilance"],
+            programs[0].capability_dependencies,
+        )
+
+    def test_haste_keyword_uses_attack_and_activation_capabilities(self):
+        record = replace(
+            self.db.lookup("Wight of the Reliquary"),
+            oracle_text="Haste",
+            keywords=("Haste",),
+        )
+        capabilities = load_default_capability_registry()
+
+        ir = compile_oracle_card(
+            record,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+
+        self.assertEqual("exact", ir.status)
+        self.assertEqual(0, len(ir.material_residuals))
+        node = ir.faces[0].nodes[0]
+        self.assertEqual(("haste",), node.mechanics)
+        self.assertEqual(
+            "Haste",
+            record.oracle_text[node.span.start : node.span.end],
+        )
+        self.assertEqual(
+            (
+                "activation.tap_untap_cost.haste",
+                "combat.attack.haste",
+            ),
+            node.capability_dependencies,
+        )
+        programs = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual(1, len(programs))
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertEqual(
+            [
+                "activation.tap_untap_cost.haste",
+                "combat.attack.haste",
+            ],
             programs[0].capability_dependencies,
         )
 

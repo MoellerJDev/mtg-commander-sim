@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -11,6 +12,7 @@ from mtg_commander_sim.abilities import (
 )
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.record import checkpoint_envelope, replay_record
 
 
 class ActivatingAbilityRuleTests(unittest.TestCase):
@@ -134,11 +136,143 @@ class ActivatingAbilityRuleTests(unittest.TestCase):
             ("unavailable", "summoning_sickness"),
             engine._ability_availability("A", creature, ability),
         )
-        creature.temporary_keywords.append("Haste")
+        creature.temporary_keywords.extend(("haste", "HASTE"))
         self.assertEqual(
             ("payable", None),
             engine._ability_availability("A", creature, ability),
         )
+
+    def test_sick_mana_creature_requires_haste_or_as_though_permission(self):
+        engine = self.make_engine(60214)
+        creature = self.card(engine, "B", "Elves of Deep Shadow")
+        engine.move_card(
+            creature.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+
+        self.assertNotIn(
+            creature.object_id,
+            {
+                source.object_id
+                for source in engine.available_mana_sources("B")
+            },
+        )
+        creature.temporary_keywords.append("haste")
+        self.assertIn(
+            creature.object_id,
+            {
+                source.object_id
+                for source in engine.available_mana_sources("B")
+            },
+        )
+
+        creature.temporary_keywords.clear()
+        with patch.object(
+            engine,
+            "_may_activate_creature_as_haste",
+            return_value=True,
+        ):
+            self.assertIn(
+                creature.object_id,
+                {
+                    source.object_id
+                    for source in engine.available_mana_sources("B")
+                },
+            )
+
+    def test_haste_activation_is_seat_local_in_four_player_game(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=4,
+            seed=60215,
+        )
+        keep_all(session)
+        engine = session.engine
+        creature = self.card(engine, "B", "Elves of Deep Shadow")
+        engine.move_card(
+            creature.object_id,
+            "battlefield",
+            controller="B",
+            tapped=True,
+            log=False,
+        )
+        ability = ActivatedAbility(
+            ability_id="ab-four-player-untap",
+            line_index=0,
+            oracle_line="{Q}: Add {B}.",
+            cost_text="{Q}",
+            effect_text="Add {B}.",
+            zones=("battlefield",),
+            mana={},
+            untap_source=True,
+        )
+
+        self.assertEqual(
+            ("unavailable", "summoning_sickness"),
+            engine._ability_availability("B", creature, ability),
+        )
+        creature.temporary_keywords.append("haste")
+        self.assertEqual(
+            ("payable", None),
+            engine._ability_availability("B", creature, ability),
+        )
+
+    def test_haste_mana_activation_replays_exactly(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=60216,
+        )
+        keep_all(session)
+        engine = session.engine
+        creature = self.card(engine, "B", "Elves of Deep Shadow")
+        engine.move_card(
+            creature.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+        creature.temporary_keywords.append("haste")
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        engine._grant_priority("B")
+        engine.pump()
+        ability = next(
+            row
+            for row in session.packet("pilot:B")["decision"]["ctx"][
+                "legal"
+            ]["mana_abilities"]
+            if row["s"] == creature.ref
+        )
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        result = session.act(
+            "pilot:B",
+            {
+                "a": "x",
+                "source": creature.ref,
+                "ability": ability["a"],
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertTrue(creature.tapped)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "haste-mana-replay"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
 
     def test_once_per_turn_restriction_survives_control_change(self):
         engine = self.make_engine(60202)

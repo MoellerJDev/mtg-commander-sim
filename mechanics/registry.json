@@ -1,5 +1,5 @@
 {
-  "contract_count": 64,
+  "contract_count": 65,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -216,6 +216,12 @@
       "path": "mechanics/contracts/handling-triggered-abilities.json",
       "sha256": "7a32cbba88a369f965a170dc56110a0f76015af9fa3dd20cbc6e3958421d8428",
       "version": 4
+    },
+    {
+      "mechanic_id": "haste",
+      "path": "mechanics/contracts/haste.json",
+      "sha256": "b2daa74366864dc833bdc141b61645fc2d02de15daf8b7bfa7b5e04d6c6d006c",
+      "version": 1
     },
     {
       "mechanic_id": "infect",
@@ -2079,20 +2085,33 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/haste.json",
+      "contract_sha256": "b2daa74366864dc833bdc141b61645fc2d02de15daf8b7bfa7b5e04d6c6d006c",
+      "contract_version": 1,
+      "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.haste",
+      "implementation_version": "haste-summoning-sickness-v1",
       "kind": "keyword_ability",
+      "known_blockers": [],
       "mechanic_id": "haste",
       "official_name": "Haste",
       "rule_references": [
         "702.10"
       ],
-      "test_ids": [],
-      "trust_level": "untrusted"
+      "test_ids": [
+        "test_current_effective_haste_is_case_insensitive_and_redundant",
+        "test_control_timestamp_restricts_only_current_creatures",
+        "test_as_though_haste_applies_only_to_activation_cost_boundary",
+        "test_haste_attack_permission_uses_current_effective_keywords",
+        "test_untap_symbol_obeys_summoning_sickness_and_haste",
+        "test_sick_mana_creature_requires_haste_or_as_though_permission",
+        "test_haste_activation_is_seat_local_in_four_player_game",
+        "test_haste_mana_activation_replays_exactly"
+      ],
+      "trust_level": "trusted"
     },
     {
       "category": "additional_rules",
@@ -9927,5 +9946,5 @@
       "taxonomy_id": "cr-905-conspiracy-draft"
     }
   ],
-  "trusted_mechanic_count": 1
+  "trusted_mechanic_count": 2
 }

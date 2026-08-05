@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Protocol
 
 from ...abilities import ActivatedAbility, reduced_requirements
+from ...haste import summoning_sickness_prohibits_tap_or_untap_cost
 
 
 class ActivationAvailabilityHost(Protocol):
@@ -15,8 +16,6 @@ class ActivationAvailabilityHost(Protocol):
     ) -> tuple[str, str | None]: ...
 
     def _loyalty_cost_modifier_present(self) -> bool: ...
-
-    def _is_summoning_sick(self, card: Any) -> bool: ...
 
     def _effective_card_data(self, card: Any) -> dict[str, Any]: ...
 
@@ -151,9 +150,11 @@ def _source_cost_availability(
     if (
         (ability.tap_source or ability.untap_source)
         and zone == "battlefield"
-        and host._is_summoning_sick(card)
-        and "Haste" not in host._effective_card_data(card).get("keywords", [])
-        and not host._may_activate_creature_as_haste(seat, card)
+        and summoning_sickness_prohibits_tap_or_untap_cost(
+            host,
+            card,
+            as_though_haste=host._may_activate_creature_as_haste(seat, card),
+        )
     ):
         return "unavailable", "summoning_sickness"
     if ability.discard_source and zone != "hand":

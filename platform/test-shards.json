@@ -111,7 +111,8 @@
       "test_declare_attackers_rules",
       "test_declare_blockers_rules",
       "test_end_of_combat_rules",
-      "test_goad_rules"
+      "test_goad_rules",
+      "test_haste_rules"
     ],
     "multiplayer-commander": [
       "test_ante_rules",

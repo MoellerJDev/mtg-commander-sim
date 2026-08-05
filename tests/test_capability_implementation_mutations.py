@@ -8,11 +8,13 @@ from common import keep_all, load_assets, make_session
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
+from mtg_commander_sim import haste as haste_module
 from mtg_commander_sim import trigger_batches as trigger_batches_module
 from mtg_commander_sim import zone_trigger_events as zone_trigger_events_module
 from mtg_commander_sim.rules.activation import resolution as activation_resolution
 from mtg_commander_sim.rules.casting import proposal as casting_proposal
 from mtg_commander_sim.aura import SimpleEnchantSpec
+from mtg_commander_sim.abilities import ActivatedAbility
 from mtg_commander_sim import protection as protection_module
 from mtg_commander_sim.ability_fragments import (
     ProtectionQualityKind,
@@ -1142,6 +1144,55 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_vigilance_prevents_declaration_tap()
+
+    def test_haste_attack_and_activation_mutant_is_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=7021010,
+        )
+        keep_all(session)
+        engine = session.engine
+        ref = engine.create_token(
+            "A",
+            name="Haste Mutation Witness",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "1",
+            },
+            temporary_keywords=("Haste",),
+        )[0]
+        card = engine._resolve_object("A", ref, zones={"battlefield"})
+        ability = ActivatedAbility(
+            ability_id="ab-haste-mutation",
+            line_index=0,
+            oracle_line="{T}: Add {G}.",
+            cost_text="{T}",
+            effect_text="Add {G}.",
+            zones=("battlefield",),
+            mana={},
+            tap_source=True,
+        )
+
+        def assert_haste_exceptions_apply() -> None:
+            card.tapped = False
+            self.assertIsNone(engine._attack_declaration_error(card, "A"))
+            self.assertEqual(
+                ("payable", None),
+                engine._ability_availability("A", card, ability),
+            )
+
+        assert_haste_exceptions_apply()
+        with patch.object(
+            haste_module,
+            "HASTE_KEYWORD",
+            "mutated-haste",
+        ):
+            with self.assertRaises(AssertionError):
+                assert_haste_exceptions_apply()
 
     def test_replacement_nested_order_mutant_is_killed(self):
         child = replacement_effects.ReplaceableEvent(

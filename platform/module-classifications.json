@@ -1299,6 +1299,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/haste.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/life_change.py",
       "layer": "rules",
       "owning_subsystem": "life_state",
@@ -3140,5 +3154,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "79974176efc88a9fe157b8119dcc2bae3fa4a43204fb0027d596075f0fe23255"
+  "fingerprint": "718a1e0d5f83cf766cea40e843046a05393a874d4146da7eab988032658b7d0d"
 }
