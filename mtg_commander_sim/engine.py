@@ -45,13 +45,17 @@ from .combat import (
     LIFELINK,
     MENACE,
     TRAMPLE,
-    CreatureDamageState,
-    DamageAssignment,
     assigns_in_damage_step,
     first_strike_step_required,
     normalized_keywords,
     ordinary_second_step_combatants,
-    trample_assignment_error,
+)
+from .combat_damage_assignment import (
+    CombatDamageAssignmentError,
+    CombatDamageAssignmentProposal,
+    CombatDamageSourceSpec,
+    CreatureDamageState,
+    TrampleDamageSpec,
 )
 from .continuous_effects import (
     ContinuousEffect,
@@ -12173,165 +12177,26 @@ class CommanderEngine(
         seat: str,
         submitted: Sequence[Mapping[str, Any]],
     ) -> list[dict[str, Any]]:
-        if (
-            not isinstance(submitted, Sequence)
-            or isinstance(submitted, (str, bytes, Mapping))
-        ):
-            raise GameRuleError(
-                "Combat-damage assignments must be an array"
-            )
-        source_options = self._combat_damage_source_options(seat)
-        source_targets = {
-            source: set(option["targets"])
-            for source, option in source_options.items()
-        }
-        source_power = {
-            source: int(option["power"])
-            for source, option in source_options.items()
-        }
-
-        # These options are also projected to the assigning seat. Keep all
-        # target and total validation authoritative here; the browser uses
-        # them only to render controls and useful defaults.
-
-        totals: dict[str, int] = {}
-        canonical: list[dict[str, Any]] = []
-        seen_pairs: set[tuple[str, str]] = set()
-        for raw in submitted:
-            if not isinstance(raw, Mapping):
-                raise GameRuleError(
-                    "Each combat-damage assignment must be an object"
-                )
-            if set(raw) != {"source", "target", "amount"}:
-                raise GameRuleError(
-                    "Combat-damage assignment requires exactly source, "
-                    "target, and amount"
-                )
-            if not isinstance(raw["source"], str):
-                raise GameRuleError(
-                    "Combat-damage assignment source must be a string"
-                )
-            if not isinstance(raw["target"], str):
-                raise GameRuleError(
-                    "Combat-damage assignment target must be a string"
-                )
-            source_ref = raw["source"]
-            if source_ref not in source_targets:
-                raise GameRuleError(
-                    f"{source_ref or 'Object'} is not assigning combat damage"
-                )
-            if source_power[source_ref] <= 0:
-                raise GameRuleError(
-                    f"{source_ref} does not assign combat damage because "
-                    "its power is 0 or less"
-                )
-            target_ref = raw["target"]
-            if target_ref not in source_targets[source_ref]:
-                raise GameRuleError(
-                    f"{target_ref or 'Object'} is an illegal combat-damage "
-                    f"target for {source_ref}"
-                )
-            value = raw["amount"]
-            if not isinstance(value, int) or isinstance(value, bool):
-                raise GameRuleError("Combat damage must be an integer")
-            amount = value
-            if amount < 0:
-                raise GameRuleError("Damage cannot be negative")
-            pair = (source_ref, target_ref)
-            if pair in seen_pairs:
-                raise GameRuleError(
-                    "A combat-damage source/target pair may appear only once"
-                )
-            seen_pairs.add(pair)
-            totals[source_ref] = totals.get(source_ref, 0) + amount
-            canonical.append(
-                {
-                    "source": source_ref,
-                    "target": target_ref,
-                    "amount": amount,
-                }
-            )
-
-        for source_ref, power in source_power.items():
-            required = power if source_targets.get(source_ref) else 0
-            assigned = totals.get(source_ref, 0)
-            if assigned != required:
-                raise GameRuleError(
-                    f"{source_ref} must assign exactly {required} combat "
-                    f"damage, not {assigned}"
-                )
-
-        typed_assignments = [
-            DamageAssignment(
-                source=str(item["source"]),
-                target=str(item["target"]),
-                amount=int(item["amount"]),
-            )
-            for item in canonical
-        ]
-        attacking_cards = [
-            self.state.cards[object_id]
-            for object_id in self.state.combat.attackers
-            if object_id in self.state.cards
-            and self.state.cards[object_id].zone == "battlefield"
-            and self.state.cards[object_id].controller == seat
-            and self.state.cards[object_id].ref in source_targets
-        ]
-        attacking_source_refs = frozenset(
-            card.ref for card in attacking_cards
-        )
-        deathtouch_source_refs = frozenset(
-            card.ref
-            for card in attacking_cards
-            if DEATHTOUCH in self._combat_keywords(card)
-        )
-        for attacker in attacking_cards:
-            if (
-                TRAMPLE not in self._combat_keywords(attacker)
-                or attacker.object_id not in self.state.combat.blockers
-            ):
-                continue
-            spill_target = str(
-                self.state.combat.attackers[attacker.object_id]
-            )
-            blocker_refs: list[str] = []
-            blocker_state: dict[str, CreatureDamageState] = {}
-            for blocker_id in self.state.combat.blockers.get(
-                attacker.object_id, []
-            ):
-                blocker = self.state.cards.get(blocker_id)
-                if (
-                    blocker is None
-                    or blocker.zone != "battlefield"
-                    or blocker.phased_out
-                ):
-                    continue
-                blocker_refs.append(blocker.ref)
-                blocker_state[blocker.ref] = CreatureDamageState(
-                    toughness=self._numeric_stat(
-                        blocker.object_id,
-                        "toughness",
-                    ),
-                    marked_damage=blocker.marked_damage,
-                )
-            error = trample_assignment_error(
-                attacker_ref=attacker.ref,
-                spill_target=spill_target,
-                blocker_refs=blocker_refs,
-                assignments=typed_assignments,
-                attacking_source_refs=attacking_source_refs,
-                deathtouch_source_refs=deathtouch_source_refs,
-                blocker_state=blocker_state,
-            )
-            if error is not None:
-                raise GameRuleError(error)
-        return canonical
+        proposal = self._combat_damage_assignment_proposal(seat)
+        try:
+            assignments = proposal.validate(submitted)
+        except CombatDamageAssignmentError as exc:
+            raise GameRuleError(str(exc)) from exc
+        return [assignment.to_dict() for assignment in assignments]
 
     def _combat_damage_source_options(
         self, seat: str
     ) -> dict[str, dict[str, Any]]:
+        return self._combat_damage_assignment_proposal(
+            seat
+        ).projected_options()
+
+    def _combat_damage_assignment_proposal(
+        self, seat: str
+    ) -> CombatDamageAssignmentProposal:
         source_targets: dict[str, set[str]] = {}
         source_power: dict[str, int] = {}
+        attacking_cards: list[CardInstance] = []
         for attacker_id, defender in self.state.combat.attackers.items():
             attacker = self.state.cards.get(attacker_id)
             if (
@@ -12394,6 +12259,7 @@ class CommanderEngine(
                 0,
                 self._numeric_stat(attacker.object_id, "power"),
             )
+            attacking_cards.append(attacker)
 
         blocker_attackers: dict[str, set[str]] = {}
         for attacker_id, blocker_ids in self.state.combat.blockers.items():
@@ -12428,13 +12294,63 @@ class CommanderEngine(
                     self._numeric_stat(blocker.object_id, "power"),
                 )
         source_targets.update(blocker_attackers)
-        return {
-            source: {
-                "power": source_power[source],
-                "targets": sorted(targets),
-            }
-            for source, targets in source_targets.items()
-        }
+        attacking_source_refs = frozenset(
+            card.ref for card in attacking_cards
+        )
+        deathtouch_source_refs = frozenset(
+            card.ref
+            for card in attacking_cards
+            if DEATHTOUCH in self._combat_keywords(card)
+        )
+        trample_sources: list[TrampleDamageSpec] = []
+        for attacker in attacking_cards:
+            if (
+                TRAMPLE not in self._combat_keywords(attacker)
+                or attacker.object_id not in self.state.combat.blockers
+            ):
+                continue
+            blocker_states: list[tuple[str, CreatureDamageState]] = []
+            current_targets = source_targets.get(attacker.ref, set())
+            for blocker_id in self.state.combat.blockers.get(
+                attacker.object_id, []
+            ):
+                blocker = self.state.cards.get(blocker_id)
+                if blocker is None or blocker.ref not in current_targets:
+                    continue
+                blocker_states.append(
+                    (
+                        blocker.ref,
+                        CreatureDamageState(
+                            toughness=self._numeric_stat(
+                                blocker.object_id,
+                                "toughness",
+                            ),
+                            marked_damage=blocker.marked_damage,
+                        ),
+                    )
+                )
+            trample_sources.append(
+                TrampleDamageSpec(
+                    attacker=attacker.ref,
+                    spill_target=str(
+                        self.state.combat.attackers[attacker.object_id]
+                    ),
+                    blockers=tuple(blocker_states),
+                )
+            )
+        return CombatDamageAssignmentProposal(
+            sources=tuple(
+                CombatDamageSourceSpec(
+                    source=source,
+                    power=source_power[source],
+                    targets=tuple(sorted(targets)),
+                )
+                for source, targets in sorted(source_targets.items())
+            ),
+            attacking_sources=attacking_source_refs,
+            deathtouch_sources=deathtouch_source_refs,
+            trample_sources=tuple(trample_sources),
+        )
 
     def _combat_damage_target_exists(
         self,

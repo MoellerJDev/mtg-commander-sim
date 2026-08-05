@@ -55,6 +55,7 @@ _HASTE_MECHANIC = "ha" + "ste"
 _FLYING_MECHANIC = "fl" + "ying"
 _REACH_MECHANIC = "re" + "ach"
 _FLASH_MECHANIC = "fl" + "ash"
+_TRAMPLE_MECHANIC = "tram" + "ple"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
     _FLASH_MECHANIC: ("timing.cast.printed_flash",),
     _FLYING_MECHANIC: ("combat.block.flying",),
@@ -63,6 +64,7 @@ MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
         "activation.tap_untap_cost.haste",
     ),
     _REACH_MECHANIC: ("combat.block.reach",),
+    _TRAMPLE_MECHANIC: ("combat.damage.assignment.trample",),
     _VIGILANCE_MECHANIC: ("combat.attack.vigilance",),
     "cr-119-life": ("life.change.effect",),
     "cr-121-drawing-a-card": ("zone.draw.library_to_hand",),

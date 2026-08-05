@@ -6,6 +6,9 @@ from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim import aerial_blocking as aerial_blocking_module
+from mtg_commander_sim import (
+    combat_damage_assignment as combat_assignment_module,
+)
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
@@ -1265,6 +1268,53 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_reach_can_block_flying()
+
+    def test_trample_lethal_assignment_mutant_is_killed(self):
+        proposal = combat_assignment_module.CombatDamageAssignmentProposal(
+            sources=(
+                combat_assignment_module.CombatDamageSourceSpec(
+                    source="attacker",
+                    power=4,
+                    targets=("blocker", "B"),
+                ),
+            ),
+            attacking_sources=frozenset({"attacker"}),
+            deathtouch_sources=frozenset(),
+            trample_sources=(
+                combat_assignment_module.TrampleDamageSpec(
+                    attacker="attacker",
+                    spill_target="B",
+                    blockers=(
+                        (
+                            "blocker",
+                            combat_assignment_module.CreatureDamageState(
+                                toughness=3,
+                                marked_damage=0,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        early_spill = [
+            {"source": "attacker", "target": "blocker", "amount": 2},
+            {"source": "attacker", "target": "B", "amount": 2},
+        ]
+
+        def assert_early_spill_is_rejected() -> None:
+            with self.assertRaises(
+                combat_assignment_module.CombatDamageAssignmentError
+            ):
+                proposal.validate(early_spill)
+
+        assert_early_spill_is_rejected()
+        with patch.object(
+            combat_assignment_module,
+            "trample_assignment_error",
+            return_value=None,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_early_spill_is_rejected()
 
     def test_replacement_nested_order_mutant_is_killed(self):
         child = replacement_effects.ReplaceableEvent(

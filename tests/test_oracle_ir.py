@@ -1685,6 +1685,49 @@ class OracleIRTests(unittest.TestCase):
                         programs[0].capability_closure["reachable"],
                     )
 
+    def test_trample_uses_source_spanned_assignment_capability(self):
+        base = self.db.lookup("Wight of the Reliquary")
+        record = replace(
+            base,
+            oracle_id="fixture-trample",
+            name="Fixture Trample",
+            oracle_text="Trample",
+            keywords=("Trample",),
+        )
+        capabilities = load_default_capability_registry()
+
+        ir = compile_oracle_card(
+            record,
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+
+        self.assertEqual("exact", ir.status)
+        self.assertEqual(0, len(ir.material_residuals))
+        node = ir.faces[0].nodes[0]
+        self.assertEqual(("trample",), node.mechanics)
+        self.assertEqual(
+            "Trample",
+            record.oracle_text[node.span.start : node.span.end],
+        )
+        self.assertEqual(
+            ("combat.damage.assignment.trample",),
+            node.capability_dependencies,
+        )
+        programs = generated_programs(
+            self.db,
+            record,
+            trust_level="trusted",
+            capability_registry=capabilities,
+            capability_profile="commander_review",
+        )
+        self.assertEqual(1, len(programs))
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertEqual(
+            ["combat.damage.assignment.trample"],
+            programs[0].capability_dependencies,
+        )
+
     def test_material_unknowns_fail_closed_with_specific_residuals(self):
         rest = compile_oracle_card(self.db.lookup("Rest in Peace"))
         self.assertEqual("unresolved", rest.status)

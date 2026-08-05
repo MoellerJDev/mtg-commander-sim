@@ -3755,14 +3755,14 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/trample.json",
-      "contract_sha256": "7af7b55470f9a0e31a415b99735fc8a825865e03640a7910db53bc40a4925d42",
-      "contract_version": 1,
-      "coverage_status": "partial",
+      "contract_sha256": "b2fc62ad32d0b89b22c14f1c173d0ad4e0d0be33f45058c58d12b5c12835fa44",
+      "contract_version": 2,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat and CommanderEngine combat-damage assignment validation",
-      "implementation_version": "combat-keywords-v2",
+      "implementation_component": "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal",
+      "implementation_version": "ordinary-trample-assignment-v1",
       "kind": "keyword_ability",
       "known_blockers": [
         "trample over planeswalkers is not implemented",
@@ -3775,11 +3775,17 @@
         "702.19"
       ],
       "test_ids": [
+        "test_projected_options_and_validation_share_one_proposal",
+        "test_malformed_and_noncanonical_assignments_fail_closed",
         "test_trample_rejects_spill_before_lethal_atomically",
         "test_trample_accepts_lethal_then_spill",
         "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
         "test_lifelink_counts_only_damage_not_prevented_by_protection",
         "test_trample_deals_to_defender_after_all_blockers_leave",
+        "test_trample_to_attacked_permanent_never_spills_to_controller",
+        "test_four_player_trample_task_is_seat_scoped_and_replays",
+        "test_double_strike_trample_recomputes_after_blocker_leaves",
+        "test_trample_lethal_assignment_mutant_is_killed",
         "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"
