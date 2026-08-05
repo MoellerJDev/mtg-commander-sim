@@ -297,6 +297,7 @@ class CiPipelineTests(unittest.TestCase):
         windows_full = pr.split("\n  windows_full:", 1)[1].split("\n  windows_package:", 1)[0]
         self.assertIn("MTG_CARD_DB: data/test-ci.sqlite3", generated)
         self.assertIn("scripts/build_test_database.py build", generated)
+        self.assertIn("scripts/update_reusable_piece_matrix.py --check", generated)
         self.assertIn("python -m pip install -e .", package)
         self.assertIn("max-parallel: 5", windows_full)
         self.assertIn('python scripts/test_shards.py run "${{ matrix.shard }}"', windows_full)

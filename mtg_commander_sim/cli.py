@@ -36,6 +36,7 @@ from .record import (
     replay_record,
     verify_record_integrity,
 )
+from .reusable_pieces import execute_reusable_piece_operation
 from .report import review_markdown
 from .review_artifacts import write_review_artifacts
 from .rules_corpus import (
@@ -404,6 +405,112 @@ def _run_oracle_command(args: argparse.Namespace) -> int:
     return 0
 
 
+def _configure_reusable_piece_parsers(sub: Any) -> None:
+    card_program = sub.add_parser(
+        "card",
+        help="Compile and audit canonical CardProgram V2 artifacts",
+    )
+    card_program_sub = card_program.add_subparsers(
+        dest="card_cmd",
+        required=True,
+    )
+    for operation in sorted({*CARD_PROGRAM_OPERATIONS, "pieces"}):
+        child = card_program_sub.add_parser(operation)
+        if operation == "pieces":
+            child.add_argument("card")
+            child.add_argument("--root", default=".")
+            continue
+        if operation in {
+            "compile",
+            "explain",
+            "audit",
+            "diff",
+            "trust-closure",
+        }:
+            child.add_argument("card")
+        child.add_argument(
+            "--db",
+            default="data/scryfall-20260728-compact.sqlite3",
+        )
+        child.add_argument(
+            "--profile",
+            choices=("traditional", "commander_duel", "commander_review"),
+            default="traditional",
+        )
+        if operation == "diff":
+            child.add_argument("--against", required=True)
+        if operation == "coverage":
+            child.add_argument("--commander-legal-only", action="store_true")
+            child.add_argument("--limit", type=int)
+        child.add_argument("--output")
+
+    pieces = sub.add_parser(
+        "pieces",
+        help="Inspect the pinned reusable rules-piece inventory",
+    )
+    pieces_sub = pieces.add_subparsers(
+        dest="pieces_cmd",
+        required=True,
+    )
+    for operation in (
+        "inventory",
+        "coverage",
+        "show",
+        "cards",
+        "blockers",
+        "interactions",
+        "diff",
+        "next",
+    ):
+        child = pieces_sub.add_parser(operation)
+        if operation in {"show", "cards", "blockers", "interactions"}:
+            child.add_argument("piece_id")
+        if operation == "diff":
+            child.add_argument("--against")
+        child.add_argument("--root", default=".")
+        child.add_argument("--limit", type=int, default=20)
+
+
+def _run_reusable_piece_command(args: argparse.Namespace) -> int | None:
+    if args.cmd not in {"pieces", "card"}:
+        return None
+    if args.cmd == "card" and args.card_cmd != "pieces":
+        return None
+    operation = args.pieces_cmd if args.cmd == "pieces" else "card"
+    try:
+        value = execute_reusable_piece_operation(
+            operation,
+            root=args.root,
+            piece_id=getattr(args, "piece_id", None),
+            card=getattr(args, "card", None),
+            against=getattr(args, "against", None),
+            limit=getattr(args, "limit", 20),
+        )
+    except (KeyError, ValueError) as exc:
+        raise SystemExit(str(exc)) from exc
+    print(stable_json(value))
+    return 0
+
+
+def _run_semantic_preflight_command(args: argparse.Namespace) -> int | None:
+    if args.cmd != "semantics" or args.semantics_cmd != "preflight":
+        return None
+    db = CardDatabase(args.db)
+    try:
+        result = semantic_preflight(
+            db,
+            args.deck,
+            cache_dir=args.cache_dir,
+            force_refresh=args.refresh_decks,
+        )
+        if args.output:
+            Path(args.output).write_text(stable_json(result), encoding="utf-8")
+        print(stable_json(result))
+    finally:
+        db.close()
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="mtg-commander-sim")
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -536,39 +643,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _configure_oracle_subcommands(oracle_sub)
 
-    card_program = sub.add_parser(
-        "card",
-        help="Compile and audit canonical CardProgram V2 artifacts",
-    )
-    card_program_sub = card_program.add_subparsers(
-        dest="card_cmd",
-        required=True,
-    )
-    for operation in sorted(CARD_PROGRAM_OPERATIONS):
-        child = card_program_sub.add_parser(operation)
-        if operation in {
-            "compile",
-            "explain",
-            "audit",
-            "diff",
-            "trust-closure",
-        }:
-            child.add_argument("card")
-        child.add_argument(
-            "--db",
-            default="data/scryfall-20260728-compact.sqlite3",
-        )
-        child.add_argument(
-            "--profile",
-            choices=("traditional", "commander_duel", "commander_review"),
-            default="traditional",
-        )
-        if operation == "diff":
-            child.add_argument("--against", required=True)
-        if operation == "coverage":
-            child.add_argument("--commander-legal-only", action="store_true")
-            child.add_argument("--limit", type=int)
-        child.add_argument("--output")
+    _configure_reusable_piece_parsers(sub)
 
     pilot_run = sub.add_parser(
         "pilot-run", help="Create or resume a provider-piloted native v3 run"
@@ -1055,25 +1130,14 @@ def main(argv: list[str] | None = None) -> int:
         finally:
             db.close()
         return 0
-    if args.cmd == "semantics" and args.semantics_cmd == "preflight":
-        db = CardDatabase(args.db)
-        try:
-            result = semantic_preflight(
-                db,
-                args.deck,
-                cache_dir=args.cache_dir,
-                force_refresh=args.refresh_decks,
-            )
-            if args.output:
-                Path(args.output).write_text(
-                    stable_json(result), encoding="utf-8"
-                )
-            print(stable_json(result))
-        finally:
-            db.close()
-        return 0
+    semantic_preflight_result = _run_semantic_preflight_command(args)
+    if semantic_preflight_result is not None:
+        return semantic_preflight_result
     if args.cmd == "oracle":
         return _run_oracle_command(args)
+    reusable_piece_result = _run_reusable_piece_command(args)
+    if reusable_piece_result is not None:
+        return reusable_piece_result
     if args.cmd == "card":
         try:
             value = execute_card_operation(

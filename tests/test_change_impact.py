@@ -21,6 +21,7 @@ class ChangeImpactTests(unittest.TestCase):
         self.assertIn("compiler-cardprogram", plan.test_suites)
         self.assertIn("capability-evidence", plan.checks)
         self.assertIn("card-unlock-frontier", plan.checks)
+        self.assertIn("reusable-pieces", plan.checks)
         self.assertFalse(plan.browser_full)
 
     def test_policy_is_versioned_and_fingerprinted(self):

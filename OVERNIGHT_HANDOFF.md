@@ -68,9 +68,14 @@ impacted quick gate pass, as do the regenerated frontier, architecture,
 documentation, repository, and shard checks. Public exact-head certification
 is green.
 
-After those two checkpoints, the next substantive foundation is the generated
-reusable-rules-piece matrix plus durable program baseline. Do not create a
-second capability registry, mechanic registry, or card scheduler.
+The active `compiler/reusable-piece-coverage-matrix` branch implements the next
+substantive foundation without creating a second capability registry, mechanic
+registry, or card scheduler. It derives a versioned reusable-piece ontology,
+complete material-ability/card relation index, pairwise interaction inventory,
+complex-card composition benchmark, and durable adoption baseline from the
+existing compiler, capability, runtime, rules, and card-frontier authorities.
+The generated matrix and CLI expose shared blockers for later rules batches;
+they do not promote cards or claim new gameplay behavior by themselves.
 
 ## Working method
 
@@ -90,8 +95,9 @@ all browser automation isolated and headless, with reports configured never to
 open.
 
 The full operating procedure is the
-[CI pipeline guide](docs/development/ci-pipeline.md). Merge the bounded PR 102
-status reconciliation, verify `main`, remove the audited stale remote branches,
-and then prepare the reusable-piece matrix foundation from current `main`. Do
-not force-push published history or select the coarse continuous-layers/
-dependencies frontier row as one batch.
+[CI pipeline guide](docs/development/ci-pipeline.md). Complete and certify the
+active reusable-piece inventory as one substantive branch, merge it, verify the
+new `main`, and remove only local or remote topic branches proven fully merged.
+Use the resulting matrix with the card-unlock frontier to choose the next
+bounded rules family. Do not force-push published history or select the coarse
+continuous-layers/dependencies frontier row as one batch.

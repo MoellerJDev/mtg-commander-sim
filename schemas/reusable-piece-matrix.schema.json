@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/mtg-commander-sim/reusable-piece-matrix.schema.json",
+  "title": "Reusable rules-piece matrix",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "algorithm_version",
+    "ontology_version",
+    "profile",
+    "commander_legal_only",
+    "classification_boundary",
+    "ruling_evidence_boundary",
+    "snapshot",
+    "input_fingerprints",
+    "classes",
+    "relation_types",
+    "status_axes",
+    "summary",
+    "universal_systems",
+    "rule_index",
+    "pieces",
+    "complete_snapshot_claimed",
+    "fingerprint"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "algorithm_version": {"const": "reusable-piece-matrix-v1"},
+    "ontology_version": {"type": "string", "minLength": 1},
+    "profile": {"const": "commander_review"},
+    "commander_legal_only": {"const": true},
+    "classification_boundary": {"type": "string", "minLength": 1},
+    "ruling_evidence_boundary": {"type": "string", "minLength": 1},
+    "snapshot": {"type": "object"},
+    "input_fingerprints": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/fingerprint"}
+    },
+    "classes": {"type": "array", "minItems": 1},
+    "relation_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "status_axes": {"type": "object"},
+    "summary": {"type": "object"},
+    "universal_systems": {"type": "object"},
+    "rule_index": {"type": "object"},
+    "pieces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/reusable_piece"}
+    },
+    "complete_snapshot_claimed": {"const": false},
+    "fingerprint": {"$ref": "#/$defs/fingerprint"}
+  },
+  "$defs": {
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "string_array": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string"}
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inventory",
+        "compiler",
+        "runtime",
+        "assurance",
+        "corpus",
+        "interaction"
+      ],
+      "properties": {
+        "inventory": {"enum": ["absent", "inventoried"]},
+        "compiler": {
+          "enum": [
+            "unrecognized",
+            "segmented",
+            "parsed",
+            "bound",
+            "typed",
+            "lowered",
+            "validated"
+          ]
+        },
+        "runtime": {
+          "enum": [
+            "absent",
+            "represented",
+            "compositional",
+            "foundation_trusted",
+            "snapshot_complete"
+          ]
+        },
+        "assurance": {
+          "enum": ["untested", "tested", "interaction_tested", "trusted"]
+        },
+        "corpus": {
+          "enum": ["unused", "exact_ability_use", "residual_use", "mixed"]
+        },
+        "interaction": {
+          "enum": [
+            "unknown",
+            "pairwise_covered",
+            "high_risk_covered",
+            "snapshot_complete"
+          ]
+        }
+      }
+    },
+    "reusable_piece": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "piece_id",
+        "class_id",
+        "label",
+        "source_kinds",
+        "source_ids",
+        "rule_ids",
+        "implementation_components",
+        "test_ids",
+        "interaction_test_ids",
+        "blockers",
+        "status",
+        "relation_counts",
+        "counts",
+        "frontier",
+        "fingerprint"
+      ],
+      "properties": {
+        "piece_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9._:-]*$"
+        },
+        "class_id": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "source_kinds": {"$ref": "#/$defs/string_array"},
+        "source_ids": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/string_array"}
+        },
+        "rule_ids": {"$ref": "#/$defs/string_array"},
+        "implementation_components": {"$ref": "#/$defs/string_array"},
+        "test_ids": {"$ref": "#/$defs/string_array"},
+        "interaction_test_ids": {"$ref": "#/$defs/string_array"},
+        "blockers": {"$ref": "#/$defs/string_array"},
+        "status": {"$ref": "#/$defs/status"},
+        "relation_counts": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 0}
+        },
+        "counts": {"type": "object"},
+        "frontier": {"type": "object"},
+        "fingerprint": {"$ref": "#/$defs/fingerprint"}
+      }
+    }
+  }
+}

@@ -19,7 +19,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "67e30bd23f7da957ec408e0a4f4f076936a0cdd851918d544bfa1d1ab89c49e9",
+    "evaluated_source_tree_hash": "2f83b2de258b54524390fb7008000136ea02ce64e37b97192d6b24922f6fe7bf",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -238,6 +238,12 @@
       "status": "integrated_on_certified_main"
     },
     {
+      "evidence": "The repository generates a versioned Commander-scoped ontology, complete material-ability card relation index, registered capability/mechanic/compiler/runtime inventory, pairwise interaction index, complex-card composition benchmark, durable accelerator-adoption baseline, and current delta. Independent compiler, runtime, assurance, corpus, and interaction axes remain fail-closed; source fingerprints, canonical compression, joins, and generated Markdown are freshness-checked. Card-text-shaped residual clusters remain exact frontier drill-down data but collapse to their shared missing compiler-grammar boundary rather than becoming fake reusable rules. The CLI inspects pieces and cards from the generated indexes without compiling Oracle or touching live game state.",
+      "id": "reusable_rules_piece_inventory",
+      "name": "Reusable rules-piece matrix and durable program baseline",
+      "status": "implemented_repository_artifact"
+    },
+    {
       "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
@@ -250,7 +256,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Verify the PR 102 post-merge status reconciliation, remove audited stale remote branches, then begin the reusable-piece matrix and durable program baseline required by the active accelerator objective.",
+  "next_task": "Use the reusable-piece matrix and card-unlock frontier together to select and implement the next dependency-ready high-impact reusable rules family, preserving current trust, replay, privacy, interaction, and architecture gates.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -269,6 +275,7 @@
     "hidden_information": "implemented_projected_protocol",
     "http_websocket_server": "implemented_single_process_managed_data_static_browser_restart_terminal_lifecycle_spectator_public_log_and_rules_boundary_recovery",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
+    "reusable_piece_inventory": "implemented_versioned_generated_matrix_card_index_interaction_index_complex_card_benchmark_durable_baseline_delta_and_cli_with_zero_unclassified_material_spans",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
     "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality fixed_mana_ability and cast_permission owners",
@@ -349,9 +356,9 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4856,
+    "deterministic_cases_discovered": 4864,
     "migration_files": 1,
-    "schema_files": 16,
+    "schema_files": 18,
     "server_files": 5,
     "web_files": 32
   },

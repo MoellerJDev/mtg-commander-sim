@@ -8,7 +8,7 @@
       }
     ],
     "debt_trend": {
-      "baseline_commit": "5029c62c98bdad72549625af9a7c3dde5e333ef9",
+      "baseline_commit": "ff5973728476d66406179a2bc6b5113bd8483aaf",
       "dimensions": {
         "card_named_helpers": {
           "baseline": 1,
@@ -21,9 +21,9 @@
           "delta": 0
         },
         "engine_logical_lines": {
-          "baseline": 13308,
+          "baseline": 13017,
           "current": 13017,
-          "delta": -291
+          "delta": 0
         },
         "legacy_card_specific_operations": {
           "baseline": 5,
@@ -31,24 +31,24 @@
           "delta": 0
         },
         "oracle_id_literals": {
-          "baseline": 6,
+          "baseline": 5,
           "current": 5,
-          "delta": -1
+          "delta": 0
         },
         "oversized_functions_and_methods": {
-          "baseline": 37,
+          "baseline": 35,
           "current": 35,
-          "delta": -2
+          "delta": 0
         },
         "oversized_modules": {
-          "baseline": 6,
+          "baseline": 5,
           "current": 5,
-          "delta": -1
+          "delta": 0
         },
         "printed_name_literals": {
-          "baseline": 693,
-          "current": 655,
-          "delta": -38
+          "baseline": 691,
+          "current": 691,
+          "delta": 0
         }
       },
       "guard": "python scripts/validate_architecture.py --check",
@@ -1642,7 +1642,7 @@
     "imports": {
       "highest_fan_in": [
         {
-          "fan_in": 49,
+          "fan_in": 50,
           "fan_out": 0,
           "module": "mtg_commander_sim.util"
         },
@@ -1740,7 +1740,7 @@
         },
         {
           "fan_in": 2,
-          "fan_out": 15,
+          "fan_out": 16,
           "module": "mtg_commander_sim.cli"
         },
         {
@@ -1794,7 +1794,7 @@
           "module": "mtg_commander_sim.damage_prevention_aftermath"
         }
       ],
-      "internal_edges": 845,
+      "internal_edges": 850,
       "modules": [
         {
           "fan_in": 2,
@@ -1948,7 +1948,7 @@
         },
         {
           "fan_in": 2,
-          "fan_out": 15,
+          "fan_out": 16,
           "module": "mtg_commander_sim.cli"
         },
         {
@@ -2472,6 +2472,21 @@
           "module": "mtg_commander_sim.report"
         },
         {
+          "fan_in": 1,
+          "fan_out": 2,
+          "module": "mtg_commander_sim.reusable_pieces"
+        },
+        {
+          "fan_in": 2,
+          "fan_out": 1,
+          "module": "mtg_commander_sim.reusable_pieces.generation"
+        },
+        {
+          "fan_in": 1,
+          "fan_out": 1,
+          "module": "mtg_commander_sim.reusable_pieces.reporting"
+        },
+        {
           "fan_in": 4,
           "fan_out": 3,
           "module": "mtg_commander_sim.review_artifacts"
@@ -2887,7 +2902,7 @@
           "module": "mtg_commander_sim.trigger_targeting"
         },
         {
-          "fan_in": 49,
+          "fan_in": 50,
           "fan_out": 0,
           "module": "mtg_commander_sim.util"
         },
@@ -2995,22 +3010,22 @@
       ]
     },
     "printed_name_literals": {
-      "baseline_entry_count": 693,
-      "conditional_entry_count": 96,
+      "baseline_entry_count": 691,
+      "conditional_entry_count": 98,
       "database_snapshot": {
-        "card_count": "38485",
-        "oracle_source_sha256": "47be914ae0e54bbf63b285c065b4eb823a5f42927dcff6a404c0023ca870fba0",
-        "scryfall_oracle_updated_at": "2026-08-02T09:02:31.886+00:00"
+        "card_count": "38542",
+        "oracle_source_sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+        "scryfall_oracle_updated_at": "2026-08-04T09:02:45.219+00:00"
       },
-      "entry_count": 655,
+      "entry_count": 691,
       "limitations": "Exact full printed-name literals only. Card-named helpers and semantic operations are separately reviewed in architecture-audit-source.json.",
       "new_unreviewed_literals": [],
       "no_unreviewed_growth": true,
-      "removed_baseline_occurrences": 38,
+      "removed_baseline_occurrences": 0,
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 244,
+      "file_count": 247,
       "largest_functions_and_methods": [
         {
           "end_line": 1645,
@@ -3046,13 +3061,13 @@
           "visibility": "public"
         },
         {
-          "end_line": 1405,
+          "end_line": 1469,
           "file": "mtg_commander_sim/cli.py",
           "kind": "function",
-          "line": 802,
-          "logical_lines": 594,
+          "line": 877,
+          "logical_lines": 583,
           "name": "main",
-          "physical_lines": 604,
+          "physical_lines": 593,
           "symbol": "main",
           "visibility": "public"
         },
@@ -3077,17 +3092,6 @@
           "physical_lines": 430,
           "symbol": "_effect_template",
           "visibility": "private"
-        },
-        {
-          "end_line": 799,
-          "file": "mtg_commander_sim/cli.py",
-          "kind": "function",
-          "line": 407,
-          "logical_lines": 369,
-          "name": "build_parser",
-          "physical_lines": 393,
-          "symbol": "build_parser",
-          "visibility": "public"
         },
         {
           "end_line": 914,
@@ -3120,6 +3124,17 @@
           "name": "move_card",
           "physical_lines": 347,
           "symbol": "CommanderEngine.move_card",
+          "visibility": "public"
+        },
+        {
+          "end_line": 874,
+          "file": "mtg_commander_sim/cli.py",
+          "kind": "function",
+          "line": 514,
+          "logical_lines": 337,
+          "name": "build_parser",
+          "physical_lines": 361,
+          "symbol": "build_parser",
           "visibility": "public"
         },
         {
@@ -3156,10 +3171,10 @@
           "visibility": "private"
         },
         {
-          "end_line": 340,
+          "end_line": 341,
           "file": "mtg_commander_sim/cli.py",
           "kind": "function",
-          "line": 73,
+          "line": 74,
           "logical_lines": 266,
           "name": "_scripted_choice",
           "physical_lines": 268,
@@ -3343,12 +3358,12 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 94766,
+      "logical_lines": 97187,
       "methods": {
         "dunder": 205,
         "private": 629,
-        "public": 902,
-        "total": 1736
+        "public": 905,
+        "total": 1739
       },
       "modules": [
         {
@@ -3387,6 +3402,13 @@
           "physical_lines": 1706
         },
         {
+          "file": "mtg_commander_sim/reusable_pieces/generation.py",
+          "functions_and_methods": 42,
+          "language": "python",
+          "logical_lines": 1490,
+          "physical_lines": 1583
+        },
+        {
           "file": "mtg_commander_sim/rules_corpus.py",
           "functions_and_methods": 38,
           "language": "python",
@@ -3409,10 +3431,10 @@
         },
         {
           "file": "mtg_commander_sim/cli.py",
-          "functions_and_methods": 9,
+          "functions_and_methods": 12,
           "language": "python",
-          "logical_lines": 1351,
-          "physical_lines": 1409
+          "logical_lines": 1408,
+          "physical_lines": 1473
         },
         {
           "file": "server/app.py",
@@ -3490,6 +3512,13 @@
           "language": "python",
           "logical_lines": 837,
           "physical_lines": 867
+        },
+        {
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "functions_and_methods": 20,
+          "language": "python",
+          "logical_lines": 822,
+          "physical_lines": 864
         },
         {
           "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
@@ -4794,6 +4823,13 @@
           "physical_lines": 62
         },
         {
+          "file": "mtg_commander_sim/reusable_pieces/__init__.py",
+          "functions_and_methods": 0,
+          "language": "python",
+          "logical_lines": 52,
+          "physical_lines": 53
+        },
+        {
           "file": "mtg_commander_sim/aerial_blocking.py",
           "functions_and_methods": 2,
           "language": "python",
@@ -5096,13 +5132,13 @@
           "visibility": "public"
         },
         {
-          "end_line": 1405,
+          "end_line": 1469,
           "file": "mtg_commander_sim/cli.py",
           "kind": "function",
-          "line": 802,
-          "logical_lines": 594,
+          "line": 877,
+          "logical_lines": 583,
           "name": "main",
-          "physical_lines": 604,
+          "physical_lines": 593,
           "symbol": "main",
           "visibility": "public"
         },
@@ -5127,17 +5163,6 @@
           "physical_lines": 430,
           "symbol": "_effect_template",
           "visibility": "private"
-        },
-        {
-          "end_line": 799,
-          "file": "mtg_commander_sim/cli.py",
-          "kind": "function",
-          "line": 407,
-          "logical_lines": 369,
-          "name": "build_parser",
-          "physical_lines": 393,
-          "symbol": "build_parser",
-          "visibility": "public"
         },
         {
           "end_line": 914,
@@ -5170,6 +5195,17 @@
           "name": "move_card",
           "physical_lines": 347,
           "symbol": "CommanderEngine.move_card",
+          "visibility": "public"
+        },
+        {
+          "end_line": 874,
+          "file": "mtg_commander_sim/cli.py",
+          "kind": "function",
+          "line": 514,
+          "logical_lines": 337,
+          "name": "build_parser",
+          "physical_lines": 361,
+          "symbol": "build_parser",
           "visibility": "public"
         },
         {
@@ -5206,10 +5242,10 @@
           "visibility": "private"
         },
         {
-          "end_line": 340,
+          "end_line": 341,
           "file": "mtg_commander_sim/cli.py",
           "kind": "function",
-          "line": 73,
+          "line": 74,
           "logical_lines": 266,
           "name": "_scripted_choice",
           "physical_lines": 268,
@@ -5486,8 +5522,8 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 103392,
-      "python_file_count": 228,
+      "physical_lines": 105956,
+      "python_file_count": 231,
       "review_thresholds": {
         "function_logical_lines_review": 150,
         "module_logical_lines_review": 1500
@@ -5504,7 +5540,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1194,
+      "top_level_functions": 1256,
       "web_file_count": 16
     },
     "semantic_handlers": {
@@ -6916,7 +6952,7 @@
       "card_specific_operation_branch_occurrences": {
         "remora_tax": 1
       },
-      "count": 160,
+      "count": 172,
       "limitations": "AST heuristic covers if/match conditions whose source names op or operation.",
       "locations": [
         {
@@ -7090,7 +7126,7 @@
         {
           "condition": "context.get(\"operation\") == \"choose_mana\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 147,
+          "line": 148,
           "string_literals": [
             "choose_mana",
             "operation"
@@ -7100,7 +7136,7 @@
         {
           "condition": "context.get(\"operation\") == \"choose_card_name\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 149,
+          "line": 150,
           "string_literals": [
             "choose_card_name",
             "operation"
@@ -7110,7 +7146,7 @@
         {
           "condition": "context.get(\"operation\") in { \"counter_unless_pay\", \"pay_or_lose\", }",
           "file": "mtg_commander_sim/cli.py",
-          "line": 151,
+          "line": 152,
           "string_literals": [
             "counter_unless_pay",
             "operation",
@@ -7121,7 +7157,7 @@
         {
           "condition": "context.get(\"operation\") == \"proliferate\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 156,
+          "line": 157,
           "string_literals": [
             "operation",
             "proliferate"
@@ -7129,9 +7165,18 @@
           "symbol": "_scripted_choice"
         },
         {
+          "condition": "operation == \"pieces\"",
+          "file": "mtg_commander_sim/cli.py",
+          "line": 419,
+          "string_literals": [
+            "pieces"
+          ],
+          "symbol": "_configure_reusable_piece_parsers"
+        },
+        {
           "condition": "operation in { \"compile\", \"explain\", \"audit\", \"diff\", \"trust-closure\", }",
           "file": "mtg_commander_sim/cli.py",
-          "line": 549,
+          "line": 423,
           "string_literals": [
             "audit",
             "compile",
@@ -7139,30 +7184,51 @@
             "explain",
             "trust-closure"
           ],
-          "symbol": "build_parser"
+          "symbol": "_configure_reusable_piece_parsers"
         },
         {
           "condition": "operation == \"diff\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 566,
+          "line": 440,
           "string_literals": [
             "diff"
           ],
-          "symbol": "build_parser"
+          "symbol": "_configure_reusable_piece_parsers"
         },
         {
           "condition": "operation == \"coverage\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 568,
+          "line": 442,
           "string_literals": [
             "coverage"
           ],
-          "symbol": "build_parser"
+          "symbol": "_configure_reusable_piece_parsers"
+        },
+        {
+          "condition": "operation in {\"show\", \"cards\", \"blockers\", \"interactions\"}",
+          "file": "mtg_commander_sim/cli.py",
+          "line": 466,
+          "string_literals": [
+            "blockers",
+            "cards",
+            "interactions",
+            "show"
+          ],
+          "symbol": "_configure_reusable_piece_parsers"
+        },
+        {
+          "condition": "operation == \"diff\"",
+          "file": "mtg_commander_sim/cli.py",
+          "line": 468,
+          "string_literals": [
+            "diff"
+          ],
+          "symbol": "_configure_reusable_piece_parsers"
         },
         {
           "condition": "args.operation == \"get-task\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 858,
+          "line": 933,
           "string_literals": [
             "get-task"
           ],
@@ -7171,7 +7237,7 @@
         {
           "condition": "args.operation == \"submit-action\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 860,
+          "line": 935,
           "string_literals": [
             "submit-action"
           ],
@@ -7180,7 +7246,7 @@
         {
           "condition": "args.operation == \"get-rules\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 871,
+          "line": 946,
           "string_literals": [
             "get-rules"
           ],
@@ -7189,7 +7255,7 @@
         {
           "condition": "args.operation == \"get-profile\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 873,
+          "line": 948,
           "string_literals": [
             "get-profile"
           ],
@@ -7198,7 +7264,7 @@
         {
           "condition": "args.operation == \"get-memory\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 875,
+          "line": 950,
           "string_literals": [
             "get-memory"
           ],
@@ -7207,7 +7273,7 @@
         {
           "condition": "args.operation == \"status\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 1040,
+          "line": 1115,
           "string_literals": [
             "status"
           ],
@@ -7216,7 +7282,7 @@
         {
           "condition": "args.operation == \"get-arbiter-task\"",
           "file": "mtg_commander_sim/cli.py",
-          "line": 1044,
+          "line": 1119,
           "string_literals": [
             "get-arbiter-task"
           ],
@@ -7968,6 +8034,87 @@
           "symbol": "operation_from_dict"
         },
         {
+          "condition": "operation == \"inventory\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 816,
+          "string_literals": [
+            "inventory"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"coverage\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 827,
+          "string_literals": [
+            "coverage"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"show\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 836,
+          "string_literals": [
+            "show"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"cards\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 840,
+          "string_literals": [
+            "cards"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"blockers\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 844,
+          "string_literals": [
+            "blockers"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"interactions\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 848,
+          "string_literals": [
+            "interactions"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"diff\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 852,
+          "string_literals": [
+            "diff"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"next\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 858,
+          "string_literals": [
+            "next"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
+          "condition": "operation == \"card\"",
+          "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+          "line": 860,
+          "string_literals": [
+            "card"
+          ],
+          "symbol": "execute_reusable_piece_operation"
+        },
+        {
           "condition": "isinstance(operation, str) and operation",
           "file": "mtg_commander_sim/rules/capabilities.py",
           "line": 659,
@@ -8362,7 +8509,10 @@
         "animate_dead_reanimate": 1,
         "append": 1,
         "audit": 2,
+        "blockers": 2,
         "cap_result_life_loss": 1,
+        "card": 1,
+        "cards": 2,
         "choose_card_name": 1,
         "choose_cards_apnap": 1,
         "choose_mana": 1,
@@ -8375,7 +8525,7 @@
         "copy_values": 2,
         "count": 1,
         "counter_unless_pay": 1,
-        "coverage": 3,
+        "coverage": 4,
         "cr-115-targets": 1,
         "create_damage_prevention_shield": 1,
         "create_daretti_emblem": 1,
@@ -8386,7 +8536,7 @@
         "demonic_junker_resolve": 1,
         "destroy": 1,
         "destroy_all": 1,
-        "diff": 3,
+        "diff": 5,
         "dredge_draw": 1,
         "eq": 1,
         "explain": 3,
@@ -8404,14 +8554,15 @@
         "gt": 1,
         "gte": 1,
         "in": 1,
-        "inventory": 1,
+        "interactions": 2,
+        "inventory": 2,
         "lt": 1,
         "lte": 1,
         "modify_power_toughness": 2,
         "multiply": 2,
         "ne": 1,
         "nested_event": 1,
-        "next": 1,
+        "next": 2,
         "not_in": 1,
         "op": 15,
         "operation": 4,
@@ -8419,6 +8570,7 @@
         "parse": 1,
         "pay": 1,
         "pay_or_lose": 1,
+        "pieces": 1,
         "player": 1,
         "prevent": 1,
         "prevent_draw": 1,
@@ -8447,6 +8599,7 @@
         "set_controller": 2,
         "set_power_toughness": 2,
         "set_types": 4,
+        "show": 2,
         "source": 2,
         "stage": 1,
         "status": 1,
@@ -8658,11 +8811,11 @@
     ]
   },
   "audit": {
-    "baseline_main_commit": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9",
+    "baseline_main_commit": "ff5973728476d66406179a2bc6b5113bd8483aaf",
     "baseline_worktree_clean": true,
-    "phase": "draw_limits_optional_choice_and_instruction_replacement",
-    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, measurable corpus gains, and iterative large-count/event-batch coordination while extracting fixed-count parsing from the oversized Oracle coordinator.",
-    "verified_at": "2026-08-04"
+    "phase": "reusable_piece_coverage_matrix",
+    "scope_note": "Certified main through PR 102 includes the reusable generic damage-effect clause family and its post-merge status reconciliation. The current focused branch adds the versioned reusable-rules-piece ontology, per-card relation index, interaction matrix, durable program baseline and delta, complex-card composition benchmark, CLI drill-down, freshness gates, and current documentation needed to select later rules families from measured shared blockers.",
+    "verified_at": "2026-08-05"
   },
   "compiler": {
     "card_program": {
@@ -9084,7 +9237,7 @@
     ]
   },
   "coordinates": {
-    "baseline_main_commit": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9",
+    "baseline_main_commit": "ff5973728476d66406179a2bc6b5113bd8483aaf",
     "baseline_worktree_clean": true,
     "ci": {
       "local_observed": {
@@ -9096,9 +9249,9 @@
       "python_versions": [
         "3.12"
       ],
-      "run_id": 30892105590,
+      "run_id": 31047020917,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590",
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31047020917",
       "workflow": "CI"
     },
     "default_branch": "main",
@@ -9116,7 +9269,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Documentation map",
-          "verified": "1eb40f99b7269870c7e419aa75ea3e997e7aff0e"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9215,6 +9368,20 @@
           "status": "current",
           "title": "CardProgram runtime components",
           "verified": "2026-08-04"
+        },
+        "metadata_complete": true,
+        "missing_metadata": [],
+        "present": true
+      },
+      {
+        "file": "docs/architecture/reusable-rules-pieces.md",
+        "metadata": {
+          "audience": "compiler, rules, assurance, and architecture contributors",
+          "authoritative_source": "platform/reusable-piece-policy.json and mtg_commander_sim/reusable_pieces",
+          "maintenance": "hand-maintained",
+          "status": "current",
+          "title": "Reusable rules-piece inventory",
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9494,7 +9661,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "67e30bd23f7da957ec408e0a4f4f076936a0cdd851918d544bfa1d1ab89c49e9"
+          "verified": "2f83b2de258b54524390fb7008000136ea02ce64e37b97192d6b24922f6fe7bf"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9508,7 +9675,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Rules completeness implementation status",
-          "verified": "2026-08-02"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9522,7 +9689,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Compiler coverage status",
-          "verified": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9"
+          "verified": "ff5973728476d66406179a2bc6b5113bd8483aaf"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9536,7 +9703,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Architecture debt status",
-          "verified": "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9"
+          "verified": "ff5973728476d66406179a2bc6b5113bd8483aaf"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9557,7 +9724,7 @@
         "present": true
       }
     ],
-    "metadata_complete_count": 32,
+    "metadata_complete_count": 33,
     "metadata_drift": [],
     "missing_count": 0,
     "missing_documents": [],
@@ -9569,13 +9736,13 @@
       "stale_claims_enforced": true,
       "validator": "python scripts/validate_documentation.py --check"
     },
-    "present_count": 32,
-    "required_count": 32
+    "present_count": 33,
+    "required_count": 33
   },
   "generated": {
     "card_specificity_source": "platform/card-specificity-baseline.json",
     "generator": "scripts/update_architecture_audit.py",
-    "scope_note": "Certified main through PR 86 includes the canonical CR 121 draw transaction, replacement-aware individual events, private continuations, APNAP batches, and fixed draw/Dredge compilation. The current focused branch adds immutable live draw permissions, generic no-draw and maximum-one restrictions, canonical prohibited results, fixed instruction doubling, prospective-drawer optional-choice legality, Oracle IR v27 templates, measurable corpus gains, and iterative large-count/event-batch coordination while extracting fixed-count parsing from the oversized Oracle coordinator.",
+    "scope_note": "Certified main through PR 102 includes the reusable generic damage-effect clause family and its post-merge status reconciliation. The current focused branch adds the versioned reusable-rules-piece ontology, per-card relation index, interaction matrix, durable program baseline and delta, complex-card composition benchmark, CLI drill-down, freshness gates, and current documentation needed to select later rules families from measured shared blockers.",
     "source": "platform/architecture-audit-source.json",
     "stale_check": "python scripts/update_architecture_audit.py --check"
   },
@@ -9933,18 +10100,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1556,
-      "discovered_total": 4856,
+      "conventional_ast_cases": 1564,
+      "discovered_total": 4864,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
-        "compiler_named": 44,
+        "compiler_named": 45,
         "fuzz_named": 1,
         "privacy_or_projection_named": 21,
         "replay_named": 92,
         "server_named": 25
       },
       "reconciles": true,
-      "test_files": 159
+      "test_files": 160
     }
   }
 }

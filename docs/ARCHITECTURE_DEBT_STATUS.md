@@ -2,7 +2,7 @@
 title: "Architecture debt status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "b5e5caa77f0420759e4aad2088c14fe73e7bb1f9"
+verified: "ff5973728476d66406179a2bc6b5113bd8483aaf"
 audience: "maintainers and rules contributors"
 maintenance: "generated"
 ---
@@ -13,10 +13,10 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Baseline coordinates
 
-- Main commit: `b5e5caa77f0420759e4aad2088c14fe73e7bb1f9`
+- Main commit: `ff5973728476d66406179a2bc6b5113bd8483aaf`
 - Package: `0.8.0`
-- CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 244 files, 103,392 physical lines, 94,766 logical lines
+- CI run: [31047020917](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31047020917) — `pass`
+- Production scope: 247 files, 105,956 physical lines, 97,187 logical lines
 
 ## Central engine debt
 
@@ -24,12 +24,12 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Methods: 28 public, 281 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 135 locations
-- Semantic-operation branches: 160
+- Semantic-operation branches: 172
 - Registered typed semantic handlers: 84 across 84 operations
 - Registered typed runtime components: 20
 - Remaining legacy `apply_effect` branches: 0
 - Registered operations still intercepted by engine string dispatch: 0
-- Exact printed-name literals in configured core files: 655 (96 conditional)
+- Exact printed-name literals in configured core files: 691 (98 conditional)
 - Oracle-ID literals in Python production code: 5
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 5
@@ -38,18 +38,18 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 
 ## Enforced debt trend
 
-Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/validate_architecture.py --check`.
+Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/validate_architecture.py --check`.
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 13,308 | 13,017 | -291 |
+| `engine_logical_lines` | 13,017 | 13,017 | +0 |
 | `direct_game_state_writes` | 135 | 135 | +0 |
-| `printed_name_literals` | 693 | 655 | -38 |
-| `oracle_id_literals` | 6 | 5 | -1 |
+| `printed_name_literals` | 691 | 691 | +0 |
+| `oracle_id_literals` | 5 | 5 | +0 |
 | `legacy_card_specific_operations` | 5 | 5 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
-| `oversized_modules` | 6 | 5 | -1 |
-| `oversized_functions_and_methods` | 37 | 35 | -2 |
+| `oversized_modules` | 5 | 5 | +0 |
+| `oversized_functions_and_methods` | 35 | 35 | +0 |
 
 ## Largest production modules
 
@@ -60,16 +60,16 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | `web/src/App.tsx` | web | 1,784 | 1,728 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
+| `mtg_commander_sim/reusable_pieces/generation.py` | python | 1,583 | 1,490 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
 | `mtg_commander_sim/damage.py` | python | 1,586 | 1,456 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,498 | 1,449 |
-| `mtg_commander_sim/cli.py` | python | 1,409 | 1,351 |
+| `mtg_commander_sim/cli.py` | python | 1,473 | 1,408 |
 | `server/app.py` | python | 1,348 | 1,206 |
 | `mtg_commander_sim/damage_results.py` | python | 1,308 | 1,202 |
 | `mtg_commander_sim/damage_modifier_state.py` | python | 1,241 | 1,160 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
 | `mtg_commander_sim/session.py` | python | 1,194 | 1,148 |
-| `mtg_commander_sim/effect_runtime/zones_and_attachments.py` | python | 1,117 | 1,054 |
 
 ## Largest functions and methods
 
@@ -78,17 +78,17 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | `derive_review` | `mtg_commander_sim/report.py:557` | 1085 | 1089 |
 | `parse_declaration_restriction_line` | `mtg_commander_sim/declaration_restrictions.py:892` | 881 | 942 |
 | `create_app` | `server/app.py:585` | 718 | 764 |
-| `main` | `mtg_commander_sim/cli.py:802` | 594 | 604 |
+| `main` | `mtg_commander_sim/cli.py:877` | 583 | 593 |
 | `_compile_face` | `mtg_commander_sim/oracle_ir.py:913` | 441 | 450 |
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:122` | 429 | 430 |
-| `build_parser` | `mtg_commander_sim/cli.py:407` | 369 | 393 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:549` | 362 | 366 |
 | `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:13023` | 342 | 354 |
 | `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1552` | 341 | 347 |
+| `build_parser` | `mtg_commander_sim/cli.py:514` | 337 | 361 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:447` | 302 | 302 |
 | `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:7921` | 301 | 304 |
 | `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2944` | 285 | 319 |
-| `_scripted_choice` | `mtg_commander_sim/cli.py:73` | 266 | 268 |
+| `_scripted_choice` | `mtg_commander_sim/cli.py:74` | 266 | 268 |
 | `parse_declaration_cost_line` | `mtg_commander_sim/declaration_costs.py:219` | 249 | 258 |
 
 ## Engine responsibility spread
@@ -114,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,856
-- Conventional Python cases: 1,556
+- Python discovered: 4,864
+- Conventional Python cases: 1,564
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 9
 - Browser unit cases: 22
@@ -127,10 +127,10 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Documentation drift
 
-- Required: 32
-- Present after generated Phase 0 outputs: 32
+- Required: 33
+- Present after generated Phase 0 outputs: 33
 - Missing: 0
-- Metadata complete: 32
+- Metadata complete: 33
 
 The authoritative index, metadata, internal-link, stale-claim, and ADR policies are enforced by `scripts/validate_documentation.py`. Detailed document records remain in `coverage/architecture-audit.json`.
 

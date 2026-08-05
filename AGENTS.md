@@ -2,7 +2,7 @@
 title: "Codex project instructions"
 status: "current"
 authoritative_source: "repository contribution and architecture policy"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "Codex agents and contributors"
 maintenance: "hand-maintained"
 ---
@@ -79,53 +79,21 @@ rewrite.
   damage results, durable prevention/redirection state, and focused token,
   zone, counter, life, and damage mutation owners. Generated reports, rather
   than branch chronology, are the source of current counts.
-- Merged main through PR 80 includes the bounded
-  `rules/damage-prevention-continuations-and-aftermath` slice: typed dynamic,
-  divided, and per-object shields; seat-scoped source selection with
-  physical/LKI pinning; transactional prevention-dependent life/counter
-  aftermath; same-chooser ordering; mana-payment continuation; and the narrow
-  damage-modifier and life runtime families. The generic Oracle IR v20
-  correction preserves fixed independent post-prevention instructions as
-  ordered siblings and routes immediate life through the canonical
-  replacement-capable owner; one strict ObjectQuerySpec now owns represented
-  chosen-source validation from compiler through replay and damage-time recheck.
-- Certified main also represents closed CR 615.13 results as
-  immutable waiting trigger occurrences with exact prevented-amount aggregation,
-  source/controller LKI, ordinary APNAP stack placement, represented target
-  choice, and exact replay. Nested triggered damage reenters the canonical
-  transaction through a narrow typed port. Keep explicit-target or mixed
-  immediate aftermath, broader conditional trigger results, and unsupported
-  recursive loops fail-closed.
-- Certified main through PR 84 includes one immutable versioned ordinary
-  occurrence/APNAP/placement owner plus normalized enter/leave/dies event
-  binding, canonical fixed life results, fixed-query and locked-set continuous
-  effects, and fixed ordinary-mana Equip. Preserve explicit historical Game
-  Record v3 batch and continuation compatibility; this is not complete trigger
-  event grammar, state/reflexive trigger, or delayed-creation coverage.
-- Certified main includes a focused immutable CR 303 boundary for the closed
-  simple battlefield-object Enchant grammar. Keep mandatory cast targets,
-  nonspell entry choices, token preflight, resolution attachment, and live CR
-  704 legality on that shared predicate. Do not broaden its trust to qualities,
-  players, other zones, multiple restrictions, or Aura creatures.
-- Keep complete CR 609.7a source categories, permanent-spell continuity,
-  broader source-property predicates, general replacement-capable life gain,
-  life-gain prevention, remaining prevention-aftermath wording,
-  partial/attached redirection,
-  non-damage transformations, unresolved dynamic Toxic values, and broader CR
-  614/615/616 closure explicitly blocked until their complete dependencies and
-  evidence exist.
-- The merged infrastructure phase establishes a two-slot development pipeline,
-  deterministic change-impact quick gates, balanced PR shards, a stable
-  certification context, compact `main` smoke, and deep nightly assurance.
-  Certified main includes the canonical draw transaction, iterative draw
-  coordinator, fixed draw/Dredge closure, draw limits, instruction doubling,
-  prospective-drawer optional legality, and face-pinned printed Flash through
-  one typed cast-permission owner shared by advertisement and command
-  validation. Keep conditional, granted, removed, player-wide as-though,
-  zone-permission, and land-timing variants fail-closed. Preserve the current
-  fixed-damage effect-clause checkpoint; after it reaches certification, build
-  the generated reusable-piece matrix and durable program baseline rather than
-  resuming numerical rule traversal or creating a competing scheduler.
+- Certified main includes typed prevention continuations and aftermath,
+  normalized ordinary trigger occurrence/APNAP placement, canonical draw and
+  life transactions, iterative large draw coordination, pinned Aura and
+  protection descriptors, typed granted abilities, fixed-query and locked-set
+  continuous effects, typed mana abilities, shared cast permissions, effective
+  Flying/Reach/Haste/Vigilance legality, and closed fixed-damage CardPrograms.
+  These are bounded families; unsupported source categories, conditions,
+  qualities, durations, dynamic values, and broader replacement/layer/trigger
+  grammar remain fail-closed as recorded in generated residuals.
+- The reusable-piece matrix joins the existing rules, capability, mechanic,
+  compiler, CardProgram, runtime, assurance, frontier, and corpus authorities.
+  It is reporting infrastructure, not a competing scheduler or trust owner.
+  Every new rules family must update it through normal registry/compiler inputs,
+  preserve zero unclassified material spans, and report interaction gaps and
+  program-baseline deltas honestly.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
