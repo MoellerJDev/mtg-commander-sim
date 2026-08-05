@@ -78,10 +78,6 @@ class CardRecord:
         )
 
     @property
-    def has_flash(self) -> bool:
-        return "Flash" in self.keywords or self.oracle_text.startswith("Flash")
-
-    @property
     def has_haste(self) -> bool:
         return "Haste" in self.keywords
 

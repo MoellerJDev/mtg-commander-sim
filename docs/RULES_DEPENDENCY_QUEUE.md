@@ -14,12 +14,12 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,032
-- Reviewed behavioral blockers: 372
-- Behavioral classification/review required: 2,660
-- Passing behavioral rules: 152
+- Queued rules: 3,030
+- Reviewed behavioral blockers: 373
+- Behavioral classification/review required: 2,657
+- Passing behavioral rules: 153
 - Subsystems: 21
-- Queue fingerprint: `1c1a4e083ae907602def093a1832f2c82e1a2477bfbdd5ece03b13f2e4372925`
+- Queue fingerprint: `498e58d3d1cb97404d70b1564dfb9c71a220653de8cc0cc8b6090afd6c65ebc8`
 
 ## Selected next batch
 
@@ -58,7 +58,7 @@ Exit criteria:
 | 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 33 | 33 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 4 | 512 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 745 | 1 | 744 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 743 | 2 | 741 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 18 | `alternate-card-forms` | `card-types`, `zones`, `casting-activation`, `continuous-effects`, `replacement-prevention`, `game-actions-state` | 249 | 0 | 249 | `oracle_normalization`, `oracle_parser`, `card_program_faces`, `card_program_zone_permissions`, `mechanic_contracts` |
 | 19 | `designations-variants` | `turn-structure`, `combat`, `triggered-static-linked` | 9 | 0 | 9 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 20 | `multiplayer` | `core-game`, `turn-structure`, `combat` | 182 | 0 | 182 | `runtime_contracts`, `mechanic_contracts` |

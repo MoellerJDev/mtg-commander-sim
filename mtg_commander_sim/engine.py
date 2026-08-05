@@ -3960,14 +3960,6 @@ class CommanderEngine(
     def _yield_stopped(self, seat: str) -> bool:
         return self._yield_stop_reason(seat) is not None
 
-    def _has_conservative_response(self, seat: str) -> bool:
-        player = self.state.players[seat]
-        for object_id in player.zones["hand"]:
-            record = self.card_record(object_id)
-            if record and (record.is_instant or record.has_flash):
-                return True
-        return bool(self._priority_action_hints(seat)["abilities"])
-
     def _can_auto_pass(
         self,
         seat: str,

@@ -35607,14 +35607,17 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_casting_spells_rules.CastingSpellRuleTests.test_sorcery_timing_rejects_nonactive_cast_without_mutation"
+        "tests.test_casting_spells_rules.CastingSpellRuleTests.test_sorcery_timing_rejects_nonactive_cast_without_mutation",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_offer_and_cast_use_same_compiled_permission",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_permission_is_face_pinned"
       ],
       "implementation_components": [
-        "CommanderEngine._cast",
-        "CardRecord.has_flash"
+        "mtg_commander_sim.cast_timing.cast_timing_is_legal",
+        "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
+        "mtg_commander_sim.rules.casting.proposal.build_cast_proposal"
       ],
       "notes": [
-        "Printed or represented flash is supported; proposal-dependent as-though timing is not generic."
+        "Face-pinned printed Flash is compiled before runtime and uses the same verdict for offers and proposals; proposal-dependent as-though timing is not generic."
       ],
       "required_scenarios": [
         "positive",
@@ -35950,8 +35953,9 @@
         "tests.test_casting_spells_rules.CastingSpellRuleTests.test_contract_traces_every_cr_601_rule"
       ],
       "implementation_components": [
-        "CommanderEngine._cast",
-        "CardRecord.has_flash"
+        "mtg_commander_sim.cast_timing.cast_timing_is_legal",
+        "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
+        "mtg_commander_sim.rules.casting.proposal.build_cast_proposal"
       ],
       "notes": [
         "No complete conditional-flash persistence claim is made."
@@ -58587,23 +58591,28 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.8",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_permission_is_face_pinned"
+      ],
+      "implementation_components": [
+        "oracle_ir._keyword_nodes",
+        "card_programs.adapters.compile_card_program"
+      ],
+      "notes": [
+        "Keyword heading; the behavioral timing permission and redundancy rule are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.8",
       "rule_text_sha256": "f3577cb543db90ce388e8461dd0e5f65b7d5b2f9ae4c4e497b104f4dc72539dd",
       "schema_version": 1,
@@ -58612,26 +58621,56 @@
         "end_line": 3956,
         "start_line": 3955
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "conditional Flash, ability-removal, and Flash granted by continuous effects are not lowered to this face-pinned permission",
+        "player-wide as-though-Flash permissions and proposal-dependent prohibitions remain unsupported"
       ],
       "case_id": "cr-702.8a",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "702.8"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_offer_and_cast_use_same_compiled_permission",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_raw_flash_keyword_without_compiled_permission_fails_closed",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_permission_is_face_pinned",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_cast_is_seat_local_in_four_player_game",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_offer_preserves_private_hand_projection",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_cast_replays_exactly"
+      ],
+      "implementation_components": [
+        "cast_timing.cast_timing_is_legal",
+        "compiled_cast_timing.compiled_cast_timing_permissions",
+        "semantic_runtime.cast_permissions.FlashCastPermissionHandler",
+        "rules.casting.proposal.build_cast_offer",
+        "rules.casting.proposal.build_cast_proposal"
+      ],
+      "notes": [
+        "Exact printed Flash on the selected face is compiled before the game and consulted from every otherwise authorized cast zone; no runtime Oracle parsing is used."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "702.8a",
       "rule_text_sha256": "71b4d874fefb05a40bd6467dbb10ae6b2f693414efe6cd4efca4a3312314d34e",
       "schema_version": 1,
@@ -58640,26 +58679,34 @@
         "end_line": 3958,
         "start_line": 3957
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.8b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive"
+      ],
       "dependency_rule_ids": [
         "702.8"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_multiple_flash_instances_are_redundant"
+      ],
+      "implementation_components": [
+        "cast_timing.canonical_cast_timing_permissions"
+      ],
+      "notes": [
+        "Equivalent face-pinned Flash descriptors canonicalize to one instant-timing permission."
+      ],
+      "required_scenarios": [
+        "positive"
+      ],
+      "reviewed": true,
       "rule_id": "702.8b",
       "rule_text_sha256": "fe6f5f076191e3991b02ca09794755c5ede6397b38e156705b2effc65d355781",
       "schema_version": 1,
@@ -58668,7 +58715,7 @@
         "end_line": 3960,
         "start_line": 3959
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",

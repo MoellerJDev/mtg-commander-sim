@@ -83,6 +83,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/semantics.py",
         "mtg_commander_sim/ability_fragment_host.py",
         "mtg_commander_sim/compiled_ability_fragments.py",
+        "mtg_commander_sim/compiled_cast_timing.py",
         "mtg_commander_sim/compiled_mana_abilities.py",
     }:
         return "semantics"
@@ -110,6 +111,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_constraints.py",
         "mtg_commander_sim/commander.py",
+        "mtg_commander_sim/cast_timing.py",
         "mtg_commander_sim/continuous_effects.py",
         "mtg_commander_sim/counter_placement.py",
         "mtg_commander_sim/counter_state.py",
@@ -180,6 +182,11 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/compiled_ability_fragments.py",
     }:
         return "ability_fragments"
+    if relative in {
+        "mtg_commander_sim/cast_timing.py",
+        "mtg_commander_sim/compiled_cast_timing.py",
+    }:
+        return "cast_timing"
     if relative == "mtg_commander_sim/enchant_spec.py":
         return "aura_rules"
     if relative == "mtg_commander_sim/protection.py":

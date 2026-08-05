@@ -7,6 +7,11 @@ from typing import Any, Iterable, Mapping, Sequence
 
 from .aura import keyword_target_schema
 from .carddb import CardDatabase, CardRecord
+from .cast_timing import (
+    CAST_PERMISSION_ACTIVE_ZONE,
+    CAST_PERMISSION_EVENT,
+    PRINTED_FLASH_MECHANIC,
+)
 from .compiler.corpus_reporting import (
     execute_oracle_operation,
     explain_oracle_ir,
@@ -51,7 +56,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v31"
+ORACLE_COMPILER_VERSION = "oracle-ir-v32"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
@@ -607,21 +612,18 @@ def _reviewed_effect_template(
     return prevention or _effect_template(text, card_name=card_name)
 
 
-def _keyword_node(
+def _keyword_node_for_mechanics(
     *,
     node_id: str,
     line: str,
     material_line: str,
     span: SourceSpan,
-    keywords: Sequence[str],
+    mechanics: tuple[str, ...],
     trusted_mechanics: frozenset[str],
     capability_registry: CapabilityRegistry | None,
     capability_profile: str,
     residuals: list[OracleResidual],
-) -> OracleNode | None:
-    mechanics = keyword_mechanics(material_line, keywords)
-    if mechanics is None:
-        return None
+) -> OracleNode:
     gate = keyword_dependency_gate(
         material_line=material_line,
         mechanics=mechanics,
@@ -668,16 +670,23 @@ def _keyword_node(
         residual_ids=residual_ids,
     ):
         return dredge
+    flash = mechanics == (PRINTED_FLASH_MECHANIC,)
     return OracleNode(
         node_id=node_id,
         kind="keyword_ability",
         text=line,
         span=span,
-        active_zone="battlefield",
-        event="continuous",
+        active_zone=(
+            CAST_PERMISSION_ACTIVE_ZONE if flash else "battlefield"
+        ),
+        event=CAST_PERMISSION_EVENT if flash else "continuous",
         lowerable=True,
         exact=not residual_ids,
-        template_id="printed-keyword-list-v1",
+        template_id=(
+            "printed-flash-cast-permission-v1"
+            if flash
+            else "printed-keyword-list-v1"
+        ),
         handlers=fragment_lowering.handlers,
         target_schema=enchant_target_schema,
         mechanics=mechanics,
@@ -693,6 +702,56 @@ def _keyword_node(
             gate.closure.fingerprint if gate.closure is not None else None
         ),
     )
+
+
+def _keyword_nodes(
+    *,
+    node_id: str,
+    line: str,
+    material_line: str,
+    span: SourceSpan,
+    keywords: Sequence[str],
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+) -> tuple[OracleNode, ...]:
+    """Compile one keyword line without conflating Flash's active zone."""
+
+    mechanics = keyword_mechanics(material_line, keywords)
+    if mechanics is None:
+        return ()
+
+    def build(
+        selected: tuple[str, ...], *, selected_node_id: str
+    ) -> OracleNode:
+        return _keyword_node_for_mechanics(
+            node_id=selected_node_id,
+            line=line,
+            material_line=material_line,
+            span=span,
+            mechanics=selected,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            residuals=residuals,
+        )
+
+    if PRINTED_FLASH_MECHANIC not in mechanics:
+        return (build(mechanics, selected_node_id=node_id),)
+
+    result = [
+        build(
+            (PRINTED_FLASH_MECHANIC,),
+            selected_node_id=f"{node_id}:{PRINTED_FLASH_MECHANIC}",
+        )
+    ]
+    remaining = tuple(
+        mechanic for mechanic in mechanics if mechanic != PRINTED_FLASH_MECHANIC
+    )
+    if remaining:
+        result.append(build(remaining, selected_node_id=node_id))
+    return tuple(result)
 
 
 def _runtime_handler_node(
@@ -921,7 +980,7 @@ def _compile_face(
     for index, (line, span) in enumerate(_source_lines(oracle_text), 1):
         node_id = f"{face_id}:n{index}"
         material_line = _without_parenthetical_reminder(line)
-        keyword_node = _keyword_node(
+        keyword_nodes = _keyword_nodes(
             node_id=node_id,
             line=line,
             material_line=material_line,
@@ -932,8 +991,8 @@ def _compile_face(
             capability_profile=capability_profile,
             residuals=residuals,
         )
-        if keyword_node is not None:
-            nodes.append(keyword_node)
+        if keyword_nodes:
+            nodes.extend(keyword_nodes)
             continue
 
         activated_node = activated_oracle_node(

@@ -5,6 +5,7 @@ from typing import Any, Iterable, Mapping
 
 from ..util import stable_json
 from .ability_fragments import default_ability_fragment_registry
+from .cast_permissions import default_cast_permission_registry
 from .context import SemanticNodeError
 from .counter_replacements import (
     default_counter_placement_replacement_registry,
@@ -27,6 +28,7 @@ from .zone_replacements import default_zone_change_replacement_registry
 def runtime_component_registries() -> tuple[Any, ...]:
     return (
         default_ability_fragment_registry(),
+        default_cast_permission_registry(),
         default_continuous_effect_component_registry(),
         default_counter_placement_replacement_registry(),
         default_damage_replacement_registry(),

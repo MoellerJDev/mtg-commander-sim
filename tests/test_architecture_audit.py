@@ -69,7 +69,7 @@ class ArchitectureAuditTests(unittest.TestCase):
         )
         self.assertEqual(0, handlers["legacy_apply_effect_branch_count"])
         self.assertEqual(3, handlers["engine_string_dispatch_branch_count"])
-        self.assertEqual(19, handlers["registered_runtime_handler_count"])
+        self.assertEqual(20, handlers["registered_runtime_handler_count"])
         self.assertEqual(
             handlers["registered_runtime_handler_count"],
             len(handlers["runtime_handlers"]),
@@ -83,6 +83,13 @@ class ArchitectureAuditTests(unittest.TestCase):
         )
         self.assertIn(
             "replacement.draw.dredge.v1",
+            {
+                handler["handler_id"]
+                for handler in handlers["runtime_handlers"]
+            },
+        )
+        self.assertIn(
+            "ability.static.flash.v1",
             {
                 handler["handler_id"]
                 for handler in handlers["runtime_handlers"]

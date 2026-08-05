@@ -901,6 +901,14 @@ basic-land reminder wording outside this capability. Basic land types continue
 to grant their separate intrinsic mana abilities through the existing CR 305.6
 owner rather than through executable reminder text.
 
+Printed Flash is also a source-spanned CardProgram V2 cast-permission family.
+Offer generation and command validation consume the same immutable, face-pinned
+permission; neither path reparses Oracle text at runtime. The first generic
+harvest promotes 52 Commander-legal CardPrograms and removes 592 material
+residuals. Conditional, granted, removed, and player-wide as-though-Flash
+wording remains explicit residual work, as do independent priority and zone
+permissions.
+
 The typed semantic-handler migration moved its first executable effect
 families into `mtg_commander_sim/semantic_runtime/`. Registered handlers receive only an
 immutable seat/order query, produce typed intents, and declare bounded rule

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "flash",
+  "official_name": "Flash",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+  "glossary_references": ["flash"],
+  "dependencies": [],
+  "coverage_status": "trusted",
+  "trust_level": "trusted",
+  "behavior": {
+    "zones": ["any zone from which the exact selected face is otherwise authorized to be cast"],
+    "objects": ["nonland card face carrying the precompiled printed Flash ability"],
+    "events": ["cast offer generation", "cast proposal validation"],
+    "state_reads": ["priority already granted to the caster", "active player", "phase", "stack emptiness", "selected face identity", "trusted CardProgram V2 timing descriptor"],
+    "state_writes": [],
+    "costs": [],
+    "timing": ["the selected spell may be cast whenever its controller could cast an instant"],
+    "targets": [],
+    "choices": [],
+    "hidden_information": ["a hand card remains visible only to its owner until it is cast"],
+    "apnap": [],
+    "layers": ["only printed Flash compiled for the selected face is represented; granted, removed, and conditional abilities remain unsupported"],
+    "replacement_effects": [],
+    "copy": ["this contract does not grant Flash to spell copies or copied cards without a face-pinned compiled permission"],
+    "control_change": [],
+    "zone_change": ["Flash changes timing but never grants permission to cast from a zone"],
+    "source_leaves": []
+  },
+  "variants": ["multiple printed instances are redundant", "Flash does not allow a land to be played on another player's turn", "conditional and as-though-Flash wording remains residual"],
+  "witness_cards": [
+    {
+      "name": "Pouncing Cheetah",
+      "oracle_id": "1d5e32b1-1a2d-4b3d-80f2-f8c688b90587"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_flash_offer_and_cast_use_same_compiled_permission",
+    "test_raw_flash_keyword_without_compiled_permission_fails_closed",
+    "test_flash_permission_is_face_pinned",
+    "test_multiple_flash_instances_are_redundant",
+    "test_flash_cast_is_seat_local_in_four_player_game",
+    "test_flash_offer_preserves_private_hand_projection",
+    "test_flash_cast_replays_exactly"
+  ],
+  "implementation": {
+    "component": "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
+    "version": "printed-flash-cast-timing-v1"
+  },
+  "known_blockers": [],
+  "review_status": "reviewed"
+}

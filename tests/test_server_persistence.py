@@ -66,6 +66,8 @@ class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
                     .splitlines()
                 ),
             )
+            self.assertFalse((record_dir / "review.json").exists())
+            self.assertFalse((record_dir / "review.md").exists())
             await manager.close()
 
             restored = persistence.load(self.db, session.state.game_id)
@@ -81,6 +83,41 @@ class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(replayed.ok)
             self.assertTrue(replayed.replayed)
             self.assertEqual(1, len(restored.session.commands))
+
+    async def test_live_save_defers_review_until_terminal_state(self):
+        session = self.make_session(33004)
+        with tempfile.TemporaryDirectory() as tmp:
+            persistence = DirectoryGamePersistence(Path(tmp) / "games")
+            service = GameService(session)
+            persistence.save(service)
+            record_dir = persistence.game_directory(session.state.game_id)
+
+            self.assertTrue((record_dir / "manifest.json").exists())
+            self.assertFalse((record_dir / "review.json").exists())
+            self.assertFalse((record_dir / "review.md").exists())
+
+            session.pause(
+                {
+                    "kind": "administrative_stop",
+                    "label": "Focused persistence test",
+                }
+            )
+            persistence.save(service)
+            self.assertTrue((record_dir / "review.json").exists())
+            self.assertTrue((record_dir / "review.md").exists())
+
+            session.resume()
+            persistence.save(service)
+            self.assertFalse((record_dir / "review.json").exists())
+            self.assertFalse((record_dir / "review.md").exists())
+
+            session.state.game_over = True
+            session.state.winner = "A"
+            session.record_status = "complete"
+            persistence.save(service)
+
+            self.assertTrue((record_dir / "review.json").exists())
+            self.assertTrue((record_dir / "review.md").exists())
 
     async def test_sqlite_idempotency_survives_service_restart_without_token(self):
         session = self.make_session(33002)

@@ -22,6 +22,12 @@ from .components import (
     runtime_component_registry_fingerprint,
     validate_runtime_handler_descriptors,
 )
+from .cast_permissions import (
+    CastPermissionRegistry,
+    default_cast_permission_registry,
+    FLASH_CAST_PERMISSION_HANDLER_ID,
+    FlashCastPermissionHandler,
+)
 from .continuous_components import (
     AddBasicLandTypeHandler,
     AddBasicLandTypeNode,
@@ -241,6 +247,7 @@ __all__ = [
     "ContinuousEffectComponentRegistry",
     "ContinuousEffectSourceContext",
     "CounterPlacementEventSpec",
+    "CastPermissionRegistry",
     "CounterPlacementReplacementRegistry",
     "CounterPlacementReplacementResolution",
     "CounterQuantityReplacementHandler",
@@ -273,6 +280,8 @@ __all__ = [
     "FixedPowerToughnessAnthemNode",
     "FixedQueryPowerToughnessAnthemHandler",
     "FixedQueryPowerToughnessAnthemNode",
+    "FLASH_CAST_PERMISSION_HANDLER_ID",
+    "FlashCastPermissionHandler",
     "FixedDamagePreventionHandler",
     "FixedDamagePreventionNode",
     "StaticDamageRedirectionHandler",
@@ -325,6 +334,7 @@ __all__ = [
     "ZoneDestinationReplacementNode",
     "default_token_creation_replacement_registry",
     "default_continuous_effect_component_registry",
+    "default_cast_permission_registry",
     "default_ability_fragment_registry",
     "default_counter_placement_replacement_registry",
     "default_damage_replacement_registry",

@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "timing.cast.printed_flash": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_flash_cast_timing_mutant_is_killed"
+    ),
     "activation.tap_untap_cost.haste": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

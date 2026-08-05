@@ -156,6 +156,44 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             with self.assertRaises(AssertionError):
                 assert_hidden_target_rejected()
 
+    def test_flash_cast_timing_mutant_is_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=7020899,
+        )
+        keep_all(session)
+        engine = session.engine
+        endurance = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B" and card.printed_name == "Endurance"
+        )
+        engine.move_card(endurance.object_id, "hand", log=False)
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine.state.stack.clear()
+        engine.state.priority_player = "B"
+        engine.state.players["B"].mana_pool.update({"C": 1, "G": 2})
+
+        def assert_flash_offer() -> None:
+            result = casting_proposal.build_cast_offer(
+                engine, "B", endurance
+            )
+            self.assertEqual("payable", result.status)
+
+        assert_flash_offer()
+        with patch.object(
+            casting_proposal,
+            "compiled_cast_timing_permissions",
+            return_value=(),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_flash_offer()
+
     def test_aura_cast_targeting_mutant_is_killed(self):
         def assert_mandatory_aura_target() -> None:
             schema = casting_proposal._aura_spell_target_schema(

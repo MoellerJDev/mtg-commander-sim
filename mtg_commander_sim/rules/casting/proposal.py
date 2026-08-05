@@ -6,6 +6,8 @@ from dataclasses import replace
 from typing import Any, Protocol
 
 from ...aura import EnchantSpec, enchant_spec_to_dict, is_aura_type_line
+from ...cast_timing import cast_timing_is_legal, type_line_has_card_type
+from ...compiled_cast_timing import compiled_cast_timing_permissions
 from ..action_proposals import (
     ActionOffer,
     CastCostOption,
@@ -254,18 +256,29 @@ def _cast_program_and_cost(
     response = request.response()
     type_line = str(face.get("type_line") or "") if face else record.type_line
     mana_cost = str(face.get("mana_cost") or "") if face else record.mana_cost
+    face_name = str(face.get("name") or "") if face else None
     if response.get("protector") is not None:
         raise CastProposalError(
             "A Battle protector is chosen as the Battle enters, not while its spell is cast",
             reason="battle_protector_timing",
         )
-    if (
-        not request.ignore_timing
-        and host.state.config.strict_timing
-        and "instant" not in type_line.casefold()
-        and not record.has_flash
+    if type_line_has_card_type(type_line, "land"):
+        raise CastProposalError(
+            "A land card cannot be cast as a spell",
+            reason="land_not_spell",
+        )
+    if not request.ignore_timing and not cast_timing_is_legal(
+        host.state,
+        request.actor,
+        type_line,
+        compiled_cast_timing_permissions(
+            host,
+            card,
+            face_name=face_name,
+        ),
     ):
         host._sorcery_timing(request.actor)
+        raise CastProposalError("Illegal cast timing", reason="timing")
     commander_tax = (
         2
         * host.state.players[request.actor].commander_casts.get(card.oracle_id, 0)
@@ -547,14 +560,19 @@ def build_cast_offer(
         return CastProposalResult("unavailable", "custom_token")
     front = record.faces[0] if record.faces else None
     type_line = str(front.get("type_line") or "") if front else record.type_line
-    if "land" in type_line.casefold():
+    if type_line_has_card_type(type_line, "land"):
         return CastProposalResult("unavailable", "land_not_spell")
-    main_timing = (
-        seat == host.state.active_player
-        and not host.state.stack
-        and host.state.phase in {"precombat_main", "postcombat_main"}
-    )
-    if not ("instant" in type_line.casefold() or record.has_flash or main_timing):
+    face_name = str(front.get("name") or "") if front else None
+    if not cast_timing_is_legal(
+        host.state,
+        seat,
+        type_line,
+        compiled_cast_timing_permissions(
+            host,
+            card,
+            face_name=face_name,
+        ),
+    ):
         return CastProposalResult("unavailable", "timing")
     semantic_key = f"{record.oracle_id}:spell:front"
     program = host.semantics.get(semantic_key)

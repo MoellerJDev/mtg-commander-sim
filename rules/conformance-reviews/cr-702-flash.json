@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702.8 — Flash",
+  "cases": [
+    {
+      "rule_id": "702.8",
+      "rule_text_sha256": "f3577cb543db90ce388e8461dd0e5f65b7d5b2f9ae4c4e497b104f4dc72539dd",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "oracle_ir._keyword_nodes",
+        "card_programs.adapters.compile_card_program"
+      ],
+      "executable_test_ids": [
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_permission_is_face_pinned"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Keyword heading; the behavioral timing permission and redundancy rule are reviewed in the subrules."
+      ]
+    },
+    {
+      "rule_id": "702.8a",
+      "rule_text_sha256": "71b4d874fefb05a40bd6467dbb10ae6b2f693414efe6cd4efca4a3312314d34e",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "cast_timing.cast_timing_is_legal",
+        "compiled_cast_timing.compiled_cast_timing_permissions",
+        "semantic_runtime.cast_permissions.FlashCastPermissionHandler",
+        "rules.casting.proposal.build_cast_offer",
+        "rules.casting.proposal.build_cast_proposal"
+      ],
+      "executable_test_ids": [
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_offer_and_cast_use_same_compiled_permission",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_raw_flash_keyword_without_compiled_permission_fails_closed",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_permission_is_face_pinned",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_cast_is_seat_local_in_four_player_game",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_offer_preserves_private_hand_projection",
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_cast_replays_exactly"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "blockers": [
+        "conditional Flash, ability-removal, and Flash granted by continuous effects are not lowered to this face-pinned permission",
+        "player-wide as-though-Flash permissions and proposal-dependent prohibitions remain unsupported"
+      ],
+      "notes": [
+        "Exact printed Flash on the selected face is compiled before the game and consulted from every otherwise authorized cast zone; no runtime Oracle parsing is used."
+      ]
+    },
+    {
+      "rule_id": "702.8b",
+      "rule_text_sha256": "fe6f5f076191e3991b02ca09794755c5ede6397b38e156705b2effc65d355781",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "cast_timing.canonical_cast_timing_permissions"
+      ],
+      "executable_test_ids": [
+        "tests.test_flash_cast_timing.FlashCastTimingTests.test_multiple_flash_instances_are_redundant"
+      ],
+      "required_scenarios": ["positive"],
+      "covered_scenarios": ["positive"],
+      "blockers": [],
+      "notes": [
+        "Equivalent face-pinned Flash descriptors canonicalize to one instant-timing permission."
+      ]
+    }
+  ]
+}
