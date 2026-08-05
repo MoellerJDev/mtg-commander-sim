@@ -857,7 +857,7 @@ test("a duel declares an attacker in the browser and applies commander combat da
   // This journey crosses several auto-pass windows and persists each real
   // command. Preserve assertion-driven waits while leaving hosted runners
   // enough time for durability writes and context cleanup under serial load.
-  test.setTimeout(420_000);
+  test.setTimeout(600_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -929,8 +929,12 @@ test("a duel declares an attacker in the browser and applies commander combat da
     await attackerChoice.selectOption("B");
     await submitOpenChoice(host);
 
-    await expect(host.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
-    await expect(opponent.getByTestId("player-B").getByLabel("37 life")).toBeVisible();
+    // Declaring no blockers is followed by multiple independently persisted
+    // priority passes before combat damage. Wait for the projected result,
+    // rather than assuming those durable transitions fit the suite-wide
+    // assertion budget on a loaded filesystem.
+    await expect(host.getByTestId("player-B").getByLabel("37 life")).toBeVisible({ timeout: 90_000 });
+    await expect(opponent.getByTestId("player-B").getByLabel("37 life")).toBeVisible({ timeout: 90_000 });
     await host.getByTestId("open-public-log").click();
     await expect(host.getByTestId("public-game-log")).toContainText("attacked with 1 creature");
     await expect(host.getByTestId("public-game-log")).toContainText("Combat damage was dealt");
@@ -943,7 +947,7 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
   // This intentionally natural game persists more than one hundred real
   // commands. It completes near five minutes alone and can take longer after
   // the preceding serial journeys, especially on Windows or hosted CI.
-  test.setTimeout(900_000);
+  test.setTimeout(1_800_000);
   const hostContext = await browser.newContext();
   const opponentContext = await browser.newContext();
   const host = await hostContext.newPage();
@@ -1014,7 +1018,12 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
           .click();
         await expect(host.getByTestId("choice-dialog")).toContainText("Cast Yargle and Multani");
         await submitOpenChoice(host);
-        await expect(host.getByTestId("own-battlefield")).toContainText("Yargle and Multani");
+        // The accepted cast still crosses stack priority and durability writes
+        // before the permanent appears in the projected battlefield.
+        await expect(host.getByTestId("own-battlefield")).toContainText(
+          "Yargle and Multani",
+          { timeout: 90_000 },
+        );
       }
       await playLand(opponent);
       if (turn === requiredMana.length - 1) {
