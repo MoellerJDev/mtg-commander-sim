@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "f3f9f7c9c108415b641475f067e743fcb6c2f4675320f12f0054f446b5afa883"
+verified: "273682a6a8f282050a28c0e8923ee45dcea024b3c51a4a2ec95eac45ead24f9f"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,7 +15,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `f3f9f7c9c108415b641475f067e743fcb6c2f4675320f12f0054f446b5afa883` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `273682a6a8f282050a28c0e8923ee45dcea024b3c51a4a2ec95eac45ead24f9f` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `19648f22c1cc8b8ad3c9eb84abf5a5779a18d331`
 - Certified exact head: `19648f22c1cc8b8ad3c9eb84abf5a5779a18d331`
 - Generation timestamp: `2026-08-05T23:35:58Z`
@@ -36,8 +36,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=373, definition_only=96, passing=174, total=3300, unreviewed=2657
 - Mechanics: status_counts={'partial': 61, 'tested': 1, 'trusted': 5, 'unclassified': 358}, total=425, trusted=5
-- Oracle coverage: material_residuals=59464, status_counts={'exact': 4191, 'partial': 15070, 'unresolved': 19281}, total=38542
-- Commander-legal Oracle coverage: material_residuals=51520, status_counts={'exact': 1351, 'partial': 13850, 'unresolved': 16422}, total=31623
+- Oracle coverage: material_residuals=58452, status_counts={'exact': 4288, 'partial': 14973, 'unresolved': 19281}, total=38542
+- Commander-legal Oracle coverage: material_residuals=50613, status_counts={'exact': 1413, 'partial': 13788, 'unresolved': 16422}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -78,6 +78,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Focused browser impact and repository-truth status | `integrated_on_certified_main` | PR 101 keeps an authoritative four-context lifecycle smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw journeys for typed rules owners, and replaces Playwright file sharding with deterministic nonempty lifecycle, rules, and natural-winner soak groups using isolated databases, runtimes, and ports. A shared progress driver reports decision, phase, revision, event, queue, and persistence state and fails after 90 seconds without real progress; terminal metrics now query an absent decision panel without Playwright auto-wait. Durable saves run off the event loop while command acknowledgement still waits for the authoritative write; derived review publication is independently timed, atomic, concurrent-writer safe, and no longer blocks ordinary live saves. Full Windows coverage derives all eleven primary shards from the exact manifest partition and runs them in isolated processes and runners with a five-worker ceiling; focused compatibility is mode-exclusive, the wheel builds exactly once, and fail-closed Windows certification verifies job mode, manifest completeness, nonempty result artifacts, and package success. Public exact-head run 31037993447 passed all 4,842 Windows tests, every Linux, generated, package, and isolated headless-browser job, and both certification aggregators. The measured Windows critical path was 667 seconds versus the 2,265.245-second pre-sharding baseline, observed concurrency was five, the longest shard used 372.399 test seconds, and the Windows wheel verification used 18 seconds. Merge commit d2ae5f4 is on main. Post-merge smoke 31038955981 passed all 29 integration tests and failed only because the deleted squash branch left its intermediate feature commit unreachable; PR 102 reconciles that generated provenance with merged repository truth. |
 | Generic fixed-damage effect-clause harvest | `integrated_on_certified_main` | PR 102 is a coherent foundation-plus-harvest slice for closed positive fixed-quantity damage instructions across spell, triggered, and activated contexts. Oracle IR v33 lowers exact source-spanned CardProgram V2 nodes for represented creature, creature-or-planeswalker, player, opponent, player-or-planeswalker, opponent-or-planeswalker, any-target, and each-opponent domains. Advertisement and command acceptance share the same compiled target schema; execution uses the canonical typed damage transaction, simultaneous four-player each-opponent processing, exact replay, privacy projection, and rollback paths without printed-name behavior or runtime Oracle parsing. The Commander census promotes exactly 83 cards from residual to trusted/capability-closed, increases exact Oracle objects from 1,268 to 1,351, and removes 213 material residuals with no demotions or construction failures. Representative promotions include Goblin Bombardment, Shivan Hellkite, Prodigal Sorcerer, Lava Axe, Flame Slash, Shivan Gorge, and Stensia Bloodhall. Dynamic, divided, conditional, prevention-rider, excess-damage, combat-only, and unsupported recipient forms remain explicit residuals. Focused compiler, offer/command parity, runtime, multiplayer, malformed-input, rollback, replay, privacy, dependency fail-closed, and killed-mutation tests pass. The deterministic impacted quick gate passes all 3,844 selected tests plus architecture, capability, frontier, documentation, repository, and shard checks. Public exact-head run 31043382697 passed every required Linux, generated, package, Windows, and headless-browser job; merge commit 28e5d48 preserves feature provenance on main. Post-merge smoke 31043864091 passed all 29 integration tests before correctly rejecting the stale active-candidate label corrected by the immediate reconciliation change. |
 | Reusable rules-piece matrix and durable program baseline | `integrated_on_certified_main` | PR 105 integrates the versioned Commander-scoped reusable-piece ontology, complete material-ability card relation index, capability/mechanic/compiler/runtime inventory, pairwise interaction index, complex-card composition benchmark, durable adoption baseline, current delta, and CLI drill-down. Independent compiler, runtime, assurance, corpus, and interaction axes remain fail-closed. Public exact-head run 31053278703 passed every required job for feature head 19648f22c1cc8b8ad3c9eb84abf5a5779a18d331; merge commit 0c229ab9543ae2cb631c9b17326fa15a869f6d97 is on main and post-merge smoke 31054011153 passed. |
+| Typed ordinary-Trample assignment and generic harvest | `implemented_current_source_tree` | The current source tree extracts ordinary CR 510/702.19 combat-damage division into one immutable typed proposal shared by projected choices and accepted commands. Exact-power totals, current recipients, marked damage, simultaneous attackers, deathtouch, player/planeswalker/Battle targets, departed targets, double strike, atomic rejection, four-player seat projection, replay, property-grid, and killed-mutation evidence are covered. The Commander census promotes 62 exact/trusted/capability-closed cards and removes 907 material residuals with no construction failures or demotions. Trample over planeswalkers, banding assignment control, and unsupported characteristic producers remain explicit blockers. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -93,8 +94,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - `rooms_and_lobbies`: `implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch`
 - `replay`: `implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance`
 - `card_programs`: `implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning`
-- `semantic_handlers`: `implemented_registered read-only typed-intent handlers plus twenty bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality fixed_mana_ability and cast_permission owners`
-- `capability_evidence`: `implemented_registry_v30_with_50_records_40_trusted_and_399_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation`
+- `semantic_handlers`: `implemented_registered read-only typed-intent handlers plus twenty bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_assignment damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality fixed_mana_ability and cast_permission owners`
+- `capability_evidence`: `implemented_registry_v31_with_51_records_41_trusted_and_411_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation`
 - `architecture_governance`: `implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting`
 - `continuous_effect_performance`: `implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency`
 - `hidden_information`: `implemented_projected_protocol`
@@ -104,7 +105,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4864
+- Tests discovered: 4881
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31053278703](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31053278703) — `pass`
 - Compile: `pass`
@@ -116,12 +117,13 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Replay: `pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner`
 - Privacy: `pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner`
 - Semantic preflight: `reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory`
-- Commander CardProgram census: `cards_considered=31623, material_residuals=51520, status_counts={'residual': 30272, 'trusted': 1351}, trust_basis_counts={'capability_closed': 1347, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 30272}`
+- Commander CardProgram census: `cards_considered=31623, material_residuals=50613, status_counts={'residual': 30210, 'trusted': 1413}, trust_basis_counts={'capability_closed': 1409, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 30210}`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
 
 ## Current blockers
 
+- ordinary Trample combat-damage assignment now uses one typed offer/validation proposal with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, double-strike, and player/planeswalker/Battle boundaries; trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked
 - damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented
 - generic Vigilance, Haste, Flying, and Reach consume current represented effective keywords through canonical attack, tap-state, activation, mana-payment, and block-legality owners; unsupported ability-changing and copy producers, conditional haste acquisition, other evasion and declaration requirements or costs, and complete effective-characteristic closure remain explicit blockers
 - fixed-output target-free nonloyalty activated mana abilities now compile to one typed offer, command, payment, replay, and immediate-resolution contract; dynamic, conditional, restricted, triggered, side-effecting, arbitrary nested-payment, and parenthesized basic-land reminder variants remain explicit blockers
