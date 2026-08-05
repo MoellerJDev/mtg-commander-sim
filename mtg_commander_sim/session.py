@@ -122,7 +122,7 @@ class CommanderSession:
             capability_profile=game_config.review_profile,
             promote_exact_runtime_handlers=True,
             promote_exact_trigger_programs=True,
-            promote_exact_effect_programs=True,
+            promote_exact_fixed_damage_programs=True,
             promote_exact_capability_declarations=True,
         )
         engine = CommanderEngine.create(

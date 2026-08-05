@@ -415,14 +415,17 @@ class FixedDamageEffectCompilerTests(unittest.TestCase):
             (self.db.lookup("Flame Slash"), self.db.lookup("Blood Cultist")),
             capability_registry=self.capabilities,
             capability_profile="commander_review",
-            promote_exact_effect_programs=True,
+            promote_exact_fixed_damage_programs=True,
         )
         effect_programs = [
             program
             for program in registry.programs()
             if program.effects
         ]
-        self.assertEqual(2, result["exact_effect_programs_promoted"])
+        self.assertEqual(
+            2,
+            result["exact_fixed_damage_programs_promoted"],
+        )
         self.assertEqual(
             {"trusted"},
             {program.trust_level for program in effect_programs},
@@ -439,13 +442,44 @@ class FixedDamageEffectCompilerTests(unittest.TestCase):
             (self.db.lookup("Resupply"),),
             capability_registry=self.capabilities,
             capability_profile="commander_review",
-            promote_exact_effect_programs=True,
+            promote_exact_fixed_damage_programs=True,
         )
-        self.assertEqual(0, duplicate["exact_effect_programs_promoted"])
+        self.assertEqual(
+            0,
+            duplicate["exact_fixed_damage_programs_promoted"],
+        )
         duplicate_programs = duplicate_registry.programs()
         self.assertEqual(1, len(duplicate_programs))
         self.assertEqual("provisional", duplicate_programs[0].trust_level)
         self.assertTrue(duplicate_programs[0].requires_arbiter)
+
+        unrelated_record = replace(
+            self.base,
+            name="Unrelated Fixture",
+            oracle_text="Destroy target creature.",
+            type_line="Instant",
+            keywords=(),
+        )
+        unrelated_registry = SemanticRegistry(include_builtin_packs=False)
+        unrelated = register_generated_programs(
+            self.db,
+            unrelated_registry,
+            (unrelated_record,),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            promote_exact_fixed_damage_programs=True,
+        )
+        self.assertEqual(
+            0,
+            unrelated["exact_fixed_damage_programs_promoted"],
+        )
+        self.assertEqual(
+            {"provisional"},
+            {
+                program.trust_level
+                for program in unrelated_registry.programs()
+            },
+        )
 
 
 class FixedDamageEffectRuntimeTests(unittest.TestCase):

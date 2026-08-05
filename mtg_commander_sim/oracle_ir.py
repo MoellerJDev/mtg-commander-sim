@@ -1472,7 +1472,7 @@ def register_generated_programs(
     capability_profile: str = "traditional",
     promote_exact_runtime_handlers: bool = False,
     promote_exact_trigger_programs: bool = False,
-    promote_exact_effect_programs: bool = False,
+    promote_exact_fixed_damage_programs: bool = False,
     promote_exact_capability_declarations: bool = False,
 ) -> dict[str, Any]:
     """Compatibility API for extracted generated-program registration."""
@@ -1489,7 +1489,9 @@ def register_generated_programs(
         capability_profile=capability_profile,
         promote_exact_runtime_handlers=promote_exact_runtime_handlers,
         promote_exact_trigger_programs=promote_exact_trigger_programs,
-        promote_exact_effect_programs=promote_exact_effect_programs,
+        promote_exact_fixed_damage_programs=(
+            promote_exact_fixed_damage_programs
+        ),
         promote_exact_capability_declarations=(
             promote_exact_capability_declarations
         ),
