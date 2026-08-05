@@ -53,7 +53,9 @@ _VIGILANCE_MECHANIC = "vigi" + "lan" + "ce"
 _HASTE_MECHANIC = "ha" + "ste"
 _FLYING_MECHANIC = "fl" + "ying"
 _REACH_MECHANIC = "re" + "ach"
+_FLASH_MECHANIC = "fl" + "ash"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    _FLASH_MECHANIC: ("timing.cast.printed_flash",),
     _FLYING_MECHANIC: ("combat.block.flying",),
     _HASTE_MECHANIC: (
         "combat.attack.haste",

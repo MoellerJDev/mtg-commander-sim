@@ -1,5 +1,5 @@
 {
-  "contract_count": 66,
+  "contract_count": 67,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -179,6 +179,12 @@
       "mechanic_id": "first-strike",
       "path": "mechanics/contracts/first-strike.json",
       "sha256": "ef3070188940785b894f5c26952521c2e87610aa290f347ca6ecf7528e3c1899",
+      "version": 1
+    },
+    {
+      "mechanic_id": "flash",
+      "path": "mechanics/contracts/flash.json",
+      "sha256": "cd972f70971eb100f8c398b2297cbc101acb89bda271c1fc02eb77b7d9a46c27",
       "version": 1
     },
     {
@@ -1742,20 +1748,32 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/flash.json",
+      "contract_sha256": "cd972f70971eb100f8c398b2297cbc101acb89bda271c1fc02eb77b7d9a46c27",
+      "contract_version": 1,
+      "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
+      "implementation_version": "printed-flash-cast-timing-v1",
       "kind": "keyword_ability",
+      "known_blockers": [],
       "mechanic_id": "flash",
       "official_name": "Flash",
       "rule_references": [
         "702.8"
       ],
-      "test_ids": [],
-      "trust_level": "untrusted"
+      "test_ids": [
+        "test_flash_offer_and_cast_use_same_compiled_permission",
+        "test_raw_flash_keyword_without_compiled_permission_fails_closed",
+        "test_flash_permission_is_face_pinned",
+        "test_multiple_flash_instances_are_redundant",
+        "test_flash_cast_is_seat_local_in_four_player_game",
+        "test_flash_offer_preserves_private_hand_projection",
+        "test_flash_cast_replays_exactly"
+      ],
+      "trust_level": "trusted"
     },
     {
       "category": "additional_rules",
@@ -9973,5 +9991,5 @@
       "taxonomy_id": "cr-905-conspiracy-draft"
     }
   ],
-  "trusted_mechanic_count": 4
+  "trusted_mechanic_count": 5
 }

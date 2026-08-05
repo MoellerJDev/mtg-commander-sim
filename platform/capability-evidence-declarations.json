@@ -4212,6 +4212,86 @@
       "applicability_note": "Revalidate a selected public target's logical object and target restrictions immediately before resolution."
     },
     {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_permission_is_face_pinned",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Split Flash from sibling keyword abilities and apply it only to the exact selected face and source span."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_multiple_flash_instances_are_redundant",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Canonicalize redundant printed Flash permissions to the same single instant-timing result."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_cast_is_seat_local_in_four_player_game",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose the private Flash spell only in its owner's four-player action catalog."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_flash_cast_timing_mutant_is_killed",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a mutation that removes the compiled Flash permission from the shared casting timing boundary."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "negative",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_handler_rejects_malformed_descriptors",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject unknown fields, versions, events, permission shapes, and non-face scopes before runtime."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "negative",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_raw_flash_keyword_without_compiled_permission_fails_closed",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Prove Scryfall keyword metadata and live Oracle text cannot substitute for the trusted compiled timing descriptor."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "positive",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_offer_and_cast_use_same_compiled_permission",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose and accept the same off-turn cast using the selected face's trusted compiled printed-Flash descriptor."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_offer_preserves_private_hand_projection",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep the hand card and its cast offer out of an opposing seat's projection before casting."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "replay",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_cast_replays_exactly",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the off-turn Flash cast from an exact checkpoint and pinned semantic registry."
+    },
+    {
+      "capability_id": "timing.cast.printed_flash",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_flash_cast_timing.FlashCastTimingTests.test_failed_flash_cast_rolls_back",
+      "official_rule_ids": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject an underpayment after the Flash timing check without consuming the card or mutating state."
+    },
+    {
       "capability_id": "token.creation.additional_replacement",
       "evidence_class": "interaction",
       "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_does_not_inherit_original_entry_modifiers",

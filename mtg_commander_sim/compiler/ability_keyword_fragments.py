@@ -8,6 +8,7 @@ from ..ability_fragments import (
     parse_protection_line,
 )
 from ..aura import parse_simple_enchant_line
+from ..cast_timing import CastTimingPermission, PRINTED_FLASH_MECHANIC
 
 
 @dataclass(frozen=True, slots=True)
@@ -23,6 +24,18 @@ def lower_ability_keyword_fragments(
     mechanics: tuple[str, ...],
 ) -> AbilityKeywordFragmentLowering:
     """Lower closed Enchant/protection grammar to typed runtime fragments."""
+
+    if mechanics == (PRINTED_FLASH_MECHANIC,):
+        return AbilityKeywordFragmentLowering(
+            handlers=(
+                {
+                    "handler_id": "ability.static.flash.v1",
+                    "schema_version": 1,
+                    "event": "cast.permission",
+                    "permission": CastTimingPermission().to_dict(),
+                },
+            )
+        )
 
     if mechanics == ("enchant",):
         enchant_spec = parse_simple_enchant_line(material_line)

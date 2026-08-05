@@ -128,6 +128,7 @@ class MechanicContractTests(unittest.TestCase):
                 "defender",
                 "double-strike",
                 "first-strike",
+                "flash",
                 "flying",
                 "goad",
                 "haste",
@@ -597,15 +598,25 @@ class OracleIRTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            [f"{record.oracle_id}:static:front:n2"],
+            [
+                f"{record.oracle_id}:static:front:n1:flash",
+                f"{record.oracle_id}:static:front:n2",
+            ],
             [program.key for program in programs],
         )
-        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertTrue(
+            all(program.trust_level == "trusted" for program in programs)
+        )
         self.assertEqual(
-            ["combat.block.flying"],
+            ["timing.cast.printed_flash"],
             programs[0].capability_dependencies,
         )
-        self.assertEqual(2, programs[0].provenance["source_span"]["line"])
+        self.assertEqual(1, programs[0].provenance["source_span"]["line"])
+        self.assertEqual(
+            ["combat.block.flying"],
+            programs[1].capability_dependencies,
+        )
+        self.assertEqual(2, programs[1].provenance["source_span"]["line"])
 
     def test_dynamic_and_aftermath_prevention_compile_generically(self):
         base = self.db.lookup("Lightning Bolt")
@@ -1518,11 +1529,24 @@ class OracleIRTests(unittest.TestCase):
             active_zone="battlefield",
             event="continuous",
         )
-        self.assertEqual(1, generation["runtime_handlers_promoted"])
+        self.assertEqual(2, generation["runtime_handlers_promoted"])
         self.assertEqual(1, len(programs))
         self.assertEqual("trusted", programs[0].trust_level)
         self.assertIn("protection", programs[0].coverage)
         self.assertIn("flying", programs[0].coverage)
+        flash_programs = registry.runtime_handler_programs_for_oracle(
+            record.oracle_id,
+            active_zone="playable",
+            event="cast.permission",
+        )
+        self.assertEqual(1, len(flash_programs))
+        self.assertEqual(
+            ["ability.static.flash.v1"],
+            [
+                handler["handler_id"]
+                for handler in flash_programs[0].handlers
+            ],
+        )
 
     def test_vigilance_keyword_uses_the_bounded_combat_capability(self):
         # Keep this grammar unit independent of the full Scryfall database.

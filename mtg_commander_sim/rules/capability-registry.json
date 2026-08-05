@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 29,
+  "registry_version": 30,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -536,6 +536,33 @@
       "dependency_fail_closed_rationale": "This bounded cost eligibility query consumes the authoritative current characteristic and control snapshots plus one represented permission and has no optional capability dependency.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_haste_attack_and_activation_mutant_is_killed changes the recognized current keyword and the activation availability assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "timing.cast.printed_flash",
+      "version": 1,
+      "official_rules": ["117.1a", "304.5", "307.5", "702.8", "702.8a", "702.8b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Allow a spell to use instant timing when its exact selected card face carries the trusted precompiled printed Flash permission.",
+        "inputs": ["current priority window", "selected cast face", "face-pinned trusted CardProgram V2 timing descriptor", "current active player, phase, and stack state"],
+        "outputs": ["one shared timing verdict for advertised cast offers and accepted cast proposals", "ordinary instant-timing permission for the selected nonland face"],
+        "exclusions": ["conditional Flash", "Flash granted to or removed from a card", "player-wide as-though-Flash permissions", "land play timing", "casting without priority", "zone-casting permission", "prohibitions and timing restrictions imposed by other effects"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.cast_timing.cast_timing_is_legal", "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions", "mtg_commander_sim.semantic_runtime.cast_permissions.FlashCastPermissionHandler", "mtg_commander_sim.rules.casting.proposal.build_cast_offer"],
+      "positive_tests": ["test_flash_offer_and_cast_use_same_compiled_permission"],
+      "negative_tests": ["test_raw_flash_keyword_without_compiled_permission_fails_closed", "test_flash_handler_rejects_malformed_descriptors", "test_flash_permission_is_face_pinned"],
+      "interaction_tests": ["test_flash_offer_and_cast_use_same_compiled_permission", "test_multiple_flash_instances_are_redundant"],
+      "multiplayer_tests": ["test_flash_cast_is_seat_local_in_four_player_game"],
+      "privacy_tests": ["test_flash_offer_preserves_private_hand_projection"],
+      "replay_tests": ["test_flash_cast_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The bounded printed-Flash timing permission has no capability dependencies; priority and zone permission remain independently authoritative.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_flash_cast_timing_mutant_is_killed removes the compiled Flash timing permission and the off-turn cast-offer assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

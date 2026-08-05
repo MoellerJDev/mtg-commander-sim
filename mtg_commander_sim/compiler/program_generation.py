@@ -113,6 +113,7 @@ def _generated_ability_id(
     face_id: str,
     line: int,
     static_declaration: bool,
+    node_id: str | None = None,
 ) -> str | None:
     if kind == "spell_ability":
         return f"spell:{face_id}"
@@ -121,6 +122,8 @@ def _generated_ability_id(
     if kind == "triggered_ability":
         return f"trigger:{face_id}:n{line}"
     if static_declaration:
+        if str(node_id or "").endswith(":flash"):
+            return f"static:{face_id}:n{line}:flash"
         return f"static:{face_id}:n{line}"
     return None
 
@@ -165,6 +168,7 @@ def _validate_generated_program_trust(
                     and node.capability_dependencies
                 )
             ),
+            node_id=node.node_id,
         )
         is not None
     )
@@ -261,6 +265,7 @@ def generated_programs(
                 static_declaration=(
                     keyword_declaration or runtime_handler_declaration
                 ),
+                node_id=node.node_id,
             )
             if ability_id is None:
                 continue
