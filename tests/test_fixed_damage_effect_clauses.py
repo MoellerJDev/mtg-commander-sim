@@ -632,6 +632,74 @@ class FixedDamageEffectRuntimeTests(unittest.TestCase):
         )
         self.assert_replays(session)
 
+    def test_compiled_activation_offer_executes_and_replays(self):
+        session = self.session_with_card(
+            "Blood Cultist",
+            players=2,
+            seed=12011504,
+        )
+        engine = session.engine
+        source = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "A" and card.printed_name == "Blood Cultist"
+        )
+        target = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B"
+            and (
+                record := engine.card_record(card)
+            ) is not None
+            and "creature" in record.type_line.casefold()
+        )
+        engine.move_card(
+            source.object_id,
+            "battlefield",
+            controller="A",
+            tapped=False,
+            log=False,
+        )
+        engine.move_card(
+            target.object_id,
+            "battlefield",
+            controller="B",
+            tapped=False,
+            log=False,
+        )
+        target.counters["+1/+1"] = 10
+        engine.state.players["A"].turns_begun = 1
+        source.acquired_control_turn_count = 0
+        engine._grant_priority("A")
+        engine.pump()
+        packet = session.packet("pilot:A", full=True)
+        action = next(
+            row
+            for row in packet["decision"]["ctx"]["legal"]["actions"]
+            if row["id"] == f"activate:{source.ref}:ab1"
+        )
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        self.assertIn(target.ref, action["target_schema"]["legal_refs"])
+        self.assertNotIn("B", action["target_schema"]["legal_refs"])
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": action["id"],
+                "targets": [target.ref],
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertTrue(source.tapped)
+        self.assertEqual(source.object_id, engine.state.stack[-1].source_object_id)
+
+        self.pass_stack(session)
+
+        self.assertEqual(1, target.marked_damage)
+        self.assert_replays(session)
+
     def test_opponent_or_planeswalker_relation_is_multiplayer_exact(self):
         session = self.session_with_card(
             "Burning Fields",
