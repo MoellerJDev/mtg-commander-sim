@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `b5e5caa77f0420759e4aad2088c14fe73e7bb1f9`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 242 files, 102,645 physical lines, 94,095 logical lines
+- Production scope: 242 files, 102,670 physical lines, 94,115 logical lines
 
 ## Central engine debt
 
@@ -57,7 +57,7 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 |---|---:|---:|---:|
 | `mtg_commander_sim/engine.py` | python | 13,781 | 13,017 |
 | `mtg_commander_sim/report.py` | python | 1,853 | 1,813 |
-| `web/src/App.tsx` | web | 1,761 | 1,705 |
+| `web/src/App.tsx` | web | 1,767 | 1,711 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,532 | 1,481 |
@@ -68,7 +68,7 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | `server/app.py` | python | 1,305 | 1,171 |
 | `mtg_commander_sim/damage_modifier_state.py` | python | 1,241 | 1,160 |
 | `mtg_commander_sim/codex_cli.py` | python | 1,214 | 1,154 |
-| `mtg_commander_sim/session.py` | python | 1,171 | 1,128 |
+| `mtg_commander_sim/session.py` | python | 1,183 | 1,137 |
 | `mtg_commander_sim/effect_runtime/zones_and_attachments.py` | python | 1,117 | 1,054 |
 
 ## Largest functions and methods
@@ -114,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,819
-- Conventional Python cases: 1,519
+- Python discovered: 4,820
+- Conventional Python cases: 1,520
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 8
 - Browser unit cases: 22

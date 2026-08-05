@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "f00770de2dd155c2bcfb5aaec871cada660c3c9f01ea029bfc6564da6390e9c1"
+verified: "db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,10 +15,10 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `f00770de2dd155c2bcfb5aaec871cada660c3c9f01ea029bfc6564da6390e9c1` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `7dc4c44c8ff3455dac29807e4ca6155780d2a88d`
 - Certified exact head: `2aa1b6d6ff8f75ab219665618a247b315b7fc411`
-- Generation timestamp: `2026-08-05T12:38:37Z`
+- Generation timestamp: `2026-08-05T14:38:35Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
 - Active future phase: `generic_compiled_flash_cast_timing_certification`
@@ -73,7 +73,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Generic Haste and summoning-sickness harvest | `integrated_on_certified_main` | PR 94 routes current represented effective Haste through one typed read-only CR 302.6/702.10 owner shared by attack, activated-ability, mana-source, payment, and as-though-Haste legality. Source-spanned CardProgram capabilities promoted exactly 32 Commander-legal cards and reduced Commander material residuals by 367 without printed-name behavior. Exact-head run 30965130610 passed every required job before merge commit b3f9846; post-merge main-smoke run 30965839654 is green. |
 | Generic Flying and Reach block-legality harvest | `integrated_on_certified_main` | PR 95 extracts the intrinsic CR 702.9/702.17 Flying and Reach pair into a typed read-only aerial block owner consuming one canonical current effective-characteristic snapshot. Advertisement and command acceptance share CommanderEngine._can_block; unsupported ability-changing and copy producers remain fail-closed through their own capability closure. Separate source-spanned capabilities promoted exactly 229 Commander-legal cards and reduced Commander material residuals by 3,171. Exact-head run 30994307938 passed, merge commit 057082c is on main, and post-merge main-smoke run 30997313657 is green. |
 | Fixed-output activated-mana foundation and harvest | `integrated_on_certified_main` | PR 98 takes a bounded foundation-plus-harvest slice from CR 605: target-free, nonloyalty activated mana abilities with closed fixed output and represented fixed mandatory costs. One immutable source-spanned CardProgram V2 descriptor supplies advertised modes, accepted commands, immediate stackless resolution, payment-window use, replay identity, and canonical tap, sacrifice, life, and mana-cost commits. It promoted 173 Commander-legal cards, reduced material residuals by 1,314, and shrank CommanderEngine by 180 logical lines with no direct-write growth. Exact-head run 30998710908 passed, merge commit 9a03e46 is on main, and post-merge main-smoke run 31002324390 is green. |
-| Generic compiled Flash cast timing | `development_local_certification_pending` | The active branch is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. |
+| Full-history nightly provenance | `integrated_on_certified_main` | PR 99 replaced shallow-checkout ancestry guesses with full-history merge-base provenance and fail-closed shallow-history validation. Nightly assurance run 31008277066 executed on exact main SHA 2aa1b6d6ff8f75ab219665618a247b315b7fc411 and passed the Ubuntu and Windows complete deterministic suites, full isolated headless browser suite, current Oracle census, mutation/soak, property, dependency, and security jobs. This corrects the prior historical shallow-provenance failure; the old failure is not current repository state. |
+| Generic compiled Flash cast timing | `development_local_certification_pending` | The active branch is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. While repairing the exact-head browser gate, the branch also moved derived review generation off ordinary live command acknowledgements while retaining durable replay inputs and review generation at pause, terminal, and explicit-save boundaries. The previously timing-out natural-winner journey passes locally in 6.7 minutes with machine-readable decision-ID synchronization. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -99,7 +100,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4819
+- Tests discovered: 4820
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31005825457](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31005825457) — `pass`
 - Compile: `pass`

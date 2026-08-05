@@ -705,6 +705,13 @@
         "number": 99,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/99"
+      },
+      {
+        "base": "main",
+        "head": "rules/generic-flash-cast-timing",
+        "number": 100,
+        "state": "open",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/100"
       }
     ],
     "tags": [
@@ -721,7 +728,7 @@
   "provenance": {
     "feature_head_sha": "7dc4c44c8ff3455dac29807e4ca6155780d2a88d",
     "certified_head_sha": "2aa1b6d6ff8f75ab219665618a247b315b7fc411",
-    "generation_timestamp": "2026-08-05T12:38:37Z"
+    "generation_timestamp": "2026-08-05T14:38:35Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -918,10 +925,16 @@
       "evidence": "PR 98 takes a bounded foundation-plus-harvest slice from CR 605: target-free, nonloyalty activated mana abilities with closed fixed output and represented fixed mandatory costs. One immutable source-spanned CardProgram V2 descriptor supplies advertised modes, accepted commands, immediate stackless resolution, payment-window use, replay identity, and canonical tap, sacrifice, life, and mana-cost commits. It promoted 173 Commander-legal cards, reduced material residuals by 1,314, and shrank CommanderEngine by 180 logical lines with no direct-write growth. Exact-head run 30998710908 passed, merge commit 9a03e46 is on main, and post-merge main-smoke run 31002324390 is green."
     },
     {
+      "id": "full_history_nightly_provenance",
+      "name": "Full-history nightly provenance",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 99 replaced shallow-checkout ancestry guesses with full-history merge-base provenance and fail-closed shallow-history validation. Nightly assurance run 31008277066 executed on exact main SHA 2aa1b6d6ff8f75ab219665618a247b315b7fc411 and passed the Ubuntu and Windows complete deterministic suites, full isolated headless browser suite, current Oracle census, mutation/soak, property, dependency, and security jobs. This corrects the prior historical shallow-provenance failure; the old failure is not current repository state."
+    },
+    {
       "id": "generic_compiled_flash_cast_timing_harvest",
       "name": "Generic compiled Flash cast timing",
       "status": "development_local_certification_pending",
-      "evidence": "The active branch is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86."
+      "evidence": "The active branch is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. While repairing the exact-head browser gate, the branch also moved derived review generation off ordinary live command acknowledgements while retaining durable replay inputs and review generation at pause, terminal, and explicit-save boundaries. The previously timing-out natural-winner journey passes locally in 6.7 minutes with machine-readable decision-ID synchronization."
     },
     {
       "id": "rules_snapshot",

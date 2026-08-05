@@ -931,7 +931,12 @@ class CommanderSession:
             format=format,
         )
 
-    def save(self, directory: str | Path) -> None:
+    def save(
+        self,
+        directory: str | Path,
+        *,
+        include_review: bool = True,
+    ) -> None:
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
         if not self.initial_checkpoint:
@@ -979,12 +984,19 @@ class CommanderSession:
             json.dumps(self.plans, indent=2, sort_keys=True),
             encoding="utf-8",
         )
-        write_review_artifacts(
-            directory,
-            self.engine,
-            decisions=self.decisions,
-            manifest=manifest,
-        )
+        if include_review:
+            write_review_artifacts(
+                directory,
+                self.engine,
+                decisions=self.decisions,
+                manifest=manifest,
+            )
+        else:
+            # Reviews are derived analyst artifacts, not part of the durable
+            # command commit.  Remove an older paused/final review after a
+            # resumed live save rather than leaving a misleading snapshot.
+            for name in ("review.json", "review.md"):
+                (directory / name).unlink(missing_ok=True)
 
     def pause(
         self,

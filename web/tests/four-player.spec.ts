@@ -130,6 +130,15 @@ async function ensureFullControl(page: Page) {
   await expect(toggle).toContainText("Hold every priority");
 }
 
+async function ensureAutoPass(page: Page) {
+  const toggle = page.getByTestId("auto-pass-toggle");
+  if (await toggle.getAttribute("aria-pressed") === "false") {
+    await toggle.click();
+  }
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await expect(toggle).toContainText("Auto-pass enabled");
+}
+
 async function actionIsReady(action: Locator): Promise<boolean> {
   // Priority can advance between the visibility and enabled checks. A vanished
   // capability is a normal projection transition, not a test failure.
@@ -140,8 +149,7 @@ async function actionIsReady(action: Locator): Promise<boolean> {
 const submittedPassDecision = new WeakMap<Page, string>();
 
 async function currentDecisionId(page: Page): Promise<string | null> {
-  const copy = await page.getByTestId("decision-panel").textContent();
-  return copy?.match(/YOUR DECISION · (D\d+)/)?.[1] ?? null;
+  return await page.getByTestId("decision-panel").getAttribute("data-decision-id") || null;
 }
 
 async function authorizedPassIsReady(page: Page): Promise<boolean> {
@@ -1147,9 +1155,20 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
           { timeout: durableTransitionTimeout },
         );
       }
+      if (turn === requiredMana.length - 1) {
+        // The sixth land creates a meaningful commander offer. Hold the
+        // defender's priority before the land command is acknowledged so
+        // Auto-pass cannot consume that newly strategic main phase before the
+        // exact decision-ID helper observes it.
+        await ensureFullControl(opponent);
+      }
       await playLand(opponent);
       if (turn === requiredMana.length - 1) {
         await declineCommanderDevelopment(opponent);
+        // Full Control was needed only to preserve the two strategic commander
+        // offers. Return this seat to safe pass-only automation before combat
+        // creates routine response windows.
+        await ensureAutoPass(opponent);
       }
     }
 
@@ -1191,8 +1210,10 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       );
     }
     await submitFormAction(host, "pass");
+    await ensureFullControl(opponent);
     await playLand(opponent);
     await declineCommanderDevelopment(opponent);
+    await ensureAutoPass(opponent);
 
     await attackWithCommander();
     await passUntilProjection([host, opponent], async () => {

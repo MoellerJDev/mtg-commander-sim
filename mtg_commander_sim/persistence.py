@@ -201,7 +201,9 @@ class DirectoryGamePersistence:
 
     Each game is stored below a fixed server-owned root.  The repository never
     accepts a filesystem path from a client, and a game ID must pass the public
-    identifier grammar before it is resolved.
+    identifier grammar before it is resolved.  Live command acknowledgements
+    persist the replayable core only; derived review artifacts are generated
+    for terminal or paused records and by explicit direct/finalization saves.
     """
 
     def __init__(self, root: str | Path) -> None:
@@ -217,8 +219,13 @@ class DirectoryGamePersistence:
         return target
 
     def save(self, service: GameService) -> None:
+        session = service.session
         service.session.save(
-            self.game_directory(service.session.state.game_id)
+            self.game_directory(session.state.game_id),
+            include_review=(
+                session.state.game_over
+                or session.record_status not in {"created", "in_progress"}
+            ),
         )
 
     def exists(self, game_id: str) -> bool:

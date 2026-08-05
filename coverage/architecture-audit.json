@@ -3333,7 +3333,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 94095,
+      "logical_lines": 94115,
       "methods": {
         "dunder": 204,
         "private": 627,
@@ -3359,8 +3359,8 @@
           "file": "web/src/App.tsx",
           "functions_and_methods": null,
           "language": "web",
-          "logical_lines": 1705,
-          "physical_lines": 1761
+          "logical_lines": 1711,
+          "physical_lines": 1767
         },
         {
           "file": "mtg_commander_sim/declaration_restrictions.py",
@@ -3436,8 +3436,8 @@
           "file": "mtg_commander_sim/session.py",
           "functions_and_methods": 21,
           "language": "python",
-          "logical_lines": 1128,
-          "physical_lines": 1171
+          "logical_lines": 1137,
+          "physical_lines": 1183
         },
         {
           "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
@@ -4441,6 +4441,13 @@
           "physical_lines": 184
         },
         {
+          "file": "mtg_commander_sim/persistence.py",
+          "functions_and_methods": 10,
+          "language": "python",
+          "logical_lines": 142,
+          "physical_lines": 258
+        },
+        {
           "file": "mtg_commander_sim/rules/activation/availability.py",
           "functions_and_methods": 15,
           "language": "python",
@@ -4453,13 +4460,6 @@
           "language": "python",
           "logical_lines": 141,
           "physical_lines": 159
-        },
-        {
-          "file": "mtg_commander_sim/persistence.py",
-          "functions_and_methods": 10,
-          "language": "python",
-          "logical_lines": 137,
-          "physical_lines": 251
         },
         {
           "file": "mtg_commander_sim/shortcuts.py",
@@ -5455,8 +5455,8 @@
           "file": "web/src/App.tsx",
           "functions_and_methods": null,
           "language": "web",
-          "logical_lines": 1705,
-          "physical_lines": 1761
+          "logical_lines": 1711,
+          "physical_lines": 1767
         },
         {
           "file": "mtg_commander_sim/declaration_restrictions.py",
@@ -5473,7 +5473,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 102645,
+      "physical_lines": 102670,
       "python_file_count": 226,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -9192,7 +9192,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Server runtime",
-          "verified": "a3ea421d021c45002048909073eeef69e6c113d9"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9444,7 +9444,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "f00770de2dd155c2bcfb5aaec871cada660c3c9f01ea029bfc6564da6390e9c1"
+          "verified": "db1cc9dc5a9b2348623cf6bc07774e9f60ce09131f07e0c7d6a185fa5e8a1111"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9883,8 +9883,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1519,
-      "discovered_total": 4819,
+      "conventional_ast_cases": 1520,
+      "discovered_total": 4820,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 43,

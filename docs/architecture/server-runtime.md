@@ -2,7 +2,7 @@
 title: "Server runtime"
 status: "current"
 authoritative_source: "server package and GameService"
-verified: "a3ea421d021c45002048909073eeef69e6c113d9"
+verified: "2026-08-05"
 audience: "server contributors and local operators"
 maintenance: "hand-maintained"
 ---
@@ -20,6 +20,14 @@ Scryfall snapshots, card images, and static browser assets.
 idempotency, and record locations. Each loaded game has one `GameActor` mailbox;
 only that actor invokes state-changing `GameService` operations. The runtime
 persists the Game Record before acknowledging an accepted command.
+
+That acknowledgement boundary contains the authoritative checkpoint, command,
+event, decision and opportunity journals, manifest, semantic snapshot, and
+idempotency receipt. `review.json` and `review.md` are derived analyst outputs,
+so ordinary in-progress commands do not repeatedly regenerate them. A paused,
+aborted, terminal, explicit direct, or finalization save writes a current
+review; resuming a live record removes the now-stale derived review until the
+next such boundary. This changes no Game Record v3 replay input.
 
 ## Trust boundary
 

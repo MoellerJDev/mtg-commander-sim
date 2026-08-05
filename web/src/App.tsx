@@ -1501,7 +1501,13 @@ function GameView({ gameId, onExit }: { gameId: string; onExit: () => void }) {
           onSelect={chooseAction}
         />
       )}
-      {lifecycle?.status !== "complete" && <section id="decision-tray" className="decision-panel" data-testid="decision-panel" aria-live="polite">
+      {lifecycle?.status !== "complete" && <section
+        id="decision-tray"
+        className="decision-panel"
+        data-testid="decision-panel"
+        data-decision-id={view.decision?.id ?? ""}
+        aria-live="polite"
+      >
         {lifecycle?.status === "paused" ? (
           <div className="waiting-decision" data-testid="paused-decision"><span className="status-dot muted" /><div><strong>Match paused</strong><p>No player action or priority pass is pending while this boundary is reviewed.</p></div></div>
         ) : isSpectator ? (
