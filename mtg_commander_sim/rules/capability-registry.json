@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 27,
+  "registry_version": 28,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -428,6 +428,60 @@
       "dependency_fail_closed_rationale": "This bounded resolution-created characteristic effect has no capability dependencies beyond the shared typed continuous-effect evaluator.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_resolution_continuous_effect_commit_mutant_is_killed removes the canonical journal commit and the characteristic result assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.attack.haste",
+      "version": 1,
+      "official_rules": ["302.6", "508.1a", "702.10", "702.10a", "702.10b", "702.10d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Evaluate the continuous-control attack restriction for a current creature from its controller turn timestamp and current represented effective keywords, with one or more haste instances supplying the CR 702.10b exception.",
+        "inputs": ["current effective creature type", "current effective keyword state", "current controller", "controller turns-begun count", "control-acquisition turn count"],
+        "outputs": ["ordinary newly controlled creature prohibited from attacking", "hasty newly controlled creature eligible for the remaining declaration checks", "case-insensitive redundant haste result"],
+        "exclusions": ["other attack restrictions, requirements, and declaration costs", "effects that put a creature onto the battlefield attacking", "unrepresented continuous-effect, copy, face-down, or control-history semantics", "attack permissions that say as though a creature had haste"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.haste.is_summoning_sick", "mtg_commander_sim.haste.summoning_sickness_prohibits_attack", "CommanderEngine._attack_declaration_error"],
+      "positive_tests": ["test_haste_attack_permission_uses_current_effective_keywords"],
+      "negative_tests": ["test_only_currently_eligible_creatures_are_offered", "test_malformed_effective_keywords_fail_closed"],
+      "interaction_tests": ["test_control_timestamp_restricts_only_current_creatures", "test_haste_attack_permission_uses_current_effective_keywords"],
+      "multiplayer_tests": ["test_vigilance_is_defender_independent_in_four_player_combat"],
+      "privacy_tests": [],
+      "replay_tests": ["test_attackers_tap_except_vigilance_then_active_player_gets_priority"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded attack eligibility query consumes the authoritative current characteristic and control snapshots and has no optional capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_haste_attack_and_activation_mutant_is_killed changes the recognized current keyword and the attack eligibility assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "activation.tap_untap_cost.haste",
+      "version": 1,
+      "official_rules": ["302.6", "602.2b", "702.10", "702.10a", "702.10c", "702.10d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Evaluate the continuous-control restriction for a current creature's activated ability whose cost contains the tap or untap symbol, with current haste or a represented as-though-haste activation permission supplying the CR 702.10c exception.",
+        "inputs": ["current effective creature type", "current effective keyword state", "current controller and control timestamp", "typed source tap or untap cost", "represented as-though-haste activation permission"],
+        "outputs": ["consistent ordinary-ability availability and proposal validation", "consistent mana-source discovery and payment validation", "case-insensitive redundant haste result"],
+        "exclusions": ["tap or untap instructions that are not activation costs", "costs that tap other creatures", "attack permissions", "unrepresented continuous-effect, copy, face-down, or control-history semantics", "uncompiled activation costs"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.haste.is_summoning_sick", "mtg_commander_sim.haste.summoning_sickness_prohibits_tap_or_untap_cost", "mtg_commander_sim.rules.activation.availability._source_cost_availability", "mtg_commander_sim.rules.activation.proposal._validate_activation_timing_costs", "mtg_commander_sim.mana_activation.complete_mana_plan_activations", "CommanderEngine.available_mana_sources"],
+      "positive_tests": ["test_untap_symbol_obeys_summoning_sickness_and_haste", "test_sick_mana_creature_requires_haste_or_as_though_permission"],
+      "negative_tests": ["test_untap_symbol_obeys_summoning_sickness_and_haste", "test_malformed_control_snapshot_fails_closed"],
+      "interaction_tests": ["test_sick_mana_creature_requires_haste_or_as_though_permission"],
+      "multiplayer_tests": ["test_haste_activation_is_seat_local_in_four_player_game"],
+      "privacy_tests": [],
+      "replay_tests": ["test_haste_mana_activation_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded cost eligibility query consumes the authoritative current characteristic and control snapshots plus one represented permission and has no optional capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_haste_attack_and_activation_mutant_is_killed changes the recognized current keyword and the activation availability assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

@@ -136,6 +136,7 @@ from .zone_trigger_processing import (
 from .life_state import (
     pay_life_cost,
 )
+from . import haste
 from .errors import GameRuleError, StateInvariantError
 from .deck import DeckDefinition
 from .mana import (
@@ -4559,8 +4560,13 @@ class CommanderEngine(
             )
             if (
                 "creature" in card_types
-                and self._is_summoning_sick(card)
-                and "Haste" not in data.get("keywords", [])
+                and haste.summoning_sickness_prohibits_tap_or_untap_cost(
+                    self,
+                    card,
+                    as_though_haste=self._may_activate_creature_as_haste(
+                        seat, card
+                    ),
+                )
             ):
                 continue
             granted_token_mana = bool(
@@ -10181,11 +10187,6 @@ class CommanderEngine(
     # ------------------------------------------------------------------
     # Combat with multiple defenders
     # ------------------------------------------------------------------
-    def _is_summoning_sick(self, card: CardInstance) -> bool:
-        if "creature" not in str(self._effective_card_data(card).get("type_line") or "").casefold():
-            return False
-        return self.state.players[card.controller].turns_begun <= card.acquired_control_turn_count
-
     def _attack_declaration_error(
         self,
         card: CardInstance,
@@ -10205,10 +10206,7 @@ class CommanderEngine(
             return f"{card.ref} cannot attack because it is a Battle"
         if card.tapped:
             return f"{card.ref} is tapped"
-        if (
-            self._is_summoning_sick(card)
-            and "Haste" not in data.get("keywords", [])
-        ):
+        if haste.summoning_sickness_prohibits_attack(self, card):
             return f"{card.ref} is summoning sick"
         if DEFENDER in normalized_keywords(data.get("keywords", [])):
             return f"{card.ref} has defender and cannot attack"
@@ -11531,8 +11529,8 @@ class CommanderEngine(
                 candidate_by_ref[card.ref] = {
                     "id": card.ref,
                     "name": self.display_name(oid),
-                    "sick": self._is_summoning_sick(card),
-                    "haste": "Haste" in data.get("keywords", []),
+                    "sick": haste.is_summoning_sick(self, card),
+                    "haste": haste.has_effective_haste(self, card),
                 }
         problem, costs, unresolved = self._attack_declaration_components(
             active

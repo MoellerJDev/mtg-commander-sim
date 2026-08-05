@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "haste",
+  "official_name": "Haste",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["302.6", "508.1a", "602.2b", "702.10", "702.10a", "702.10b", "702.10c", "702.10d"],
+  "glossary_references": ["haste"],
+  "dependencies": [],
+  "coverage_status": "trusted",
+  "trust_level": "trusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": ["current creature"],
+    "events": ["declare attackers", "activate an ability with the tap or untap symbol in its source cost"],
+    "state_reads": ["current effective creature type", "current effective keyword state", "current controller", "controller turns-begun count", "control-acquisition turn count", "represented as-though-haste activation permission"],
+    "state_writes": [],
+    "costs": ["the source's tap symbol", "the source's untap symbol"],
+    "timing": ["attack declaration eligibility", "activated-ability offer and proposal validation", "mana-source discovery and payment validation"],
+    "targets": [],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["consume the current represented layer-4 creature type and layer-6 keyword result rather than printed Oracle text"],
+    "replacement_effects": [],
+    "copy": ["a copy receives the exception only when haste is present in its current represented effective keyword state"],
+    "control_change": ["a new controller receives the restriction until that player's next turn begins unless a represented exception applies"],
+    "zone_change": ["a new battlefield incarnation receives a new control timestamp"],
+    "source_leaves": []
+  },
+  "variants": ["multiple instances are redundant", "keyword comparison is case-insensitive", "as-though-haste activation permission does not grant attack permission"],
+  "witness_cards": [
+    {
+      "name": "Raging Goblin",
+      "oracle_id": "30997b43-fc13-41d3-8064-1ccc2cb6fd2b"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_current_effective_haste_is_case_insensitive_and_redundant",
+    "test_control_timestamp_restricts_only_current_creatures",
+    "test_as_though_haste_applies_only_to_activation_cost_boundary",
+    "test_haste_attack_permission_uses_current_effective_keywords",
+    "test_untap_symbol_obeys_summoning_sickness_and_haste",
+    "test_sick_mana_creature_requires_haste_or_as_though_permission",
+    "test_haste_activation_is_seat_local_in_four_player_game",
+    "test_haste_mana_activation_replays_exactly"
+  ],
+  "implementation": {
+    "component": "mtg_commander_sim.haste",
+    "version": "haste-summoning-sickness-v1"
+  },
+  "known_blockers": [],
+  "review_status": "reviewed"
+}

@@ -38,6 +38,16 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "activation.tap_untap_cost.haste": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_haste_attack_and_activation_mutant_is_killed"
+    ),
+    "combat.attack.haste": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_haste_attack_and_activation_mutant_is_killed"
+    ),
     "combat.attack.vigilance": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

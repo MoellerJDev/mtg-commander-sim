@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "3e8ce7ef8dae4c5d0c72b6d9be55574fa90aa43c5f18b12c4d668813ff809ec6"
+verified: "d550819f22998a1d5378d119f95282d13a5a1c278fe4f65e1cf521bbe4243037"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,13 +15,13 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `3e8ce7ef8dae4c5d0c72b6d9be55574fa90aa43c5f18b12c4d668813ff809ec6` (`tracked-git-clean-blobs-sha256-v3`)
-- Feature head: `f0a5f93c2b52b29b1f70df9e93bdfd5ad3a92595`
-- Certified exact head: `8450b762b45bff1f2a7d4bf6d61f05f4d2b85037`
-- Generation timestamp: `2026-08-05T03:15:00Z`
+- Evaluated source tree: `d550819f22998a1d5378d119f95282d13a5a1c278fe4f65e1cf521bbe4243037` (`tracked-git-clean-blobs-sha256-v3`)
+- Feature head: `bad0b4bd01ce4f23a29b9c3f9a03df7177f52006`
+- Certified exact head: `9a94b82f8744df29757e056b24c3b29e29ad5553`
+- Generation timestamp: `2026-08-05T00:57:33Z`
 - Runtime Git SHA: resolved dynamically and intentionally not persisted in this tracked report
 - Current merged main: resolved dynamically and intentionally not persisted in this tracked report
-- Active future phase: `card_unlock_frontier_and_vigilance_harvest_certification`
+- Active future phase: `generic_haste_summoning_sickness_certification`
 - Package version: `0.8.0`
 
 Historical integration chronology belongs in `CHANGELOG.md`; this current report intentionally does not reproduce a pull-request ledger.
@@ -35,9 +35,9 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=372, definition_only=95, passing=173, total=3300, unreviewed=2660
-- Mechanics: status_counts={'partial': 62, 'tested': 1, 'trusted': 1, 'unclassified': 361}, total=425, trusted=1
-- Oracle coverage: material_residuals=65692, status_counts={'exact': 3463, 'partial': 16015, 'unresolved': 19064}, total=38542
-- Commander-legal Oracle coverage: material_residuals=57177, status_counts={'exact': 782, 'partial': 14585, 'unresolved': 16256}, total=31623
+- Mechanics: status_counts={'partial': 62, 'tested': 1, 'trusted': 2, 'unclassified': 360}, total=425, trusted=2
+- Oracle coverage: material_residuals=65263, status_counts={'exact': 3508, 'partial': 15970, 'unresolved': 19064}, total=38542
+- Commander-legal Oracle coverage: material_residuals=56810, status_counts={'exact': 814, 'partial': 14553, 'unresolved': 16256}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -69,6 +69,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Duel turn-state correctness and browser table clarity | `integrated_on_certified_main` | PR 90 separates active seat, priority holder, exact step, and a read-only phase rail; preserves explicit Full Control and terminal-state behavior; projects seat-safe unavailable land explanations; and adds bounded saved table preferences without duplicating rules in React. Deterministic coverage proves that only the starting player in a two-player game skips the opening draw action, the second player draws, and multiplayer starting players draw. Exact-head run 30945744299, merge commit e3899a0, and main-smoke run 30946667928 are green. |
 | Player-count-authoritative turn-one draws | `integrated_on_certified_main` | PR 91 makes player count authoritative so stale duel metadata or an explicit false override cannot suppress the starting player's draw in a three- or four-player game. The ordinary two-player starting-player skip remains, and the second player always draws. Twenty-nine focused tests and 145 change-selected tests passed locally; exact-head public run 30950855428 passed every required shard, package, Windows, generated, browser, and certification job before merge commit 9f378ff, and main-smoke run 30951218714 is green. |
 | Explicit CI impact policy and escape accounting | `integrated_on_certified_main` | PR 92 replaces broad action/choice substring routing with a versioned, fingerprinted many-to-many path policy consumed by CI planning and the local quick gate. Browser-facing paths remain explicit; internal rules action and choice modules no longer force full browser journeys; full Playwright work is split across two isolated shards; and protection/attachment sources select compiler, replacement, targeting, and state-action owners. A strict generated escape ledger records five observed deterministic failures plus honestly unavailable push and Slot B measurements. Exact-head run 30954270578 passed every required Python, generated, package, Windows, browser, certification, and metrics job before merge commit 8450b76. Main-smoke run 30956434838 passed all 29 smoke tests and then correctly rejected this milestone's stale feature-head label; the current substantive branch reconciles that generated-status drift. |
+| Card-unlock frontier and generic Vigilance harvest | `integrated_on_certified_main` | PR 93 adds a deterministic Commander-legal card-unlock frontier with sole-, paired-, and three-family blocker analysis; evaluates both lowerable residuals and capability-closure failures; and rejects stale, internally inconsistent, or inflated gain projections. The first direct harvest routes current effective Vigilance through the canonical attack declaration and tap-state owner, promoting exactly 35 Commander-legal cards and reducing material residuals by 35 without printed-name behavior. Exact-head run 30959180040 passed every required Python, generated, package, Windows, browser, certification, and metrics job before merge commit 9a94b82; post-merge main-smoke run 30961096927 is green. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -84,8 +85,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - `rooms_and_lobbies`: `implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch`
 - `replay`: `implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance`
 - `card_programs`: `implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning`
-- `semantic_handlers`: `implemented_six_registered_read_only_typed_intent_handlers_plus_eighteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_aura_entry_draw_and_typed_ability_fragment_owners`
-- `capability_evidence`: `implemented_registry_v27_with_44_records_34_trusted_and_343_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation`
+- `semantic_handlers`: `implemented_six_registered_read_only_typed_intent_handlers_plus_eighteen_bounded_runtime_components_and_six_closed_effect_runtime_families_with_strict_binding_and_focused_tap_token_counter_damage_damage_result_life_player_counter_continuous_effect_attachment_aura_entry_draw_typed_ability_fragment_and_haste_eligibility_owners`
+- `capability_evidence`: `implemented_registry_v28_with_46_records_36_trusted_and_359_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation`
 - `architecture_governance`: `implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting`
 - `continuous_effect_performance`: `implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency`
 - `hidden_information`: `implemented_projected_protocol`
@@ -94,11 +95,11 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4769
+- Tests discovered: 4780
 - Python matrix: Python 3.12 on Ubuntu and Windows
-- Baseline CI: [30954270578](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30954270578) — `pass`
+- Baseline CI: [30959180040](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30959180040) — `pass`
 - Compile: `pass`
-- Deterministic tests: `certified_main_through_pr92_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_card_unlock_frontier_card_program_vigilance_capability_evidence_architecture_and_ci_routing_tests_pass`
+- Deterministic tests: `certified_main_through_pr93_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_generic_haste_summoning_sickness_card_program_capability_evidence_architecture_replay_and_mutation_tests_pass`
 - Deterministic four-player full game: `pass_micro_pool_natural_winner_exact_replay`
 - Four-player protocol demo: `pass`
 - Repository/history/security audit: `pass`
@@ -112,7 +113,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 ## Current blockers
 
 - damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented
-- generic vigilance attack declaration now consumes current effective keywords through the canonical tap-state owner; effect-driven tap and untap capabilities remain blocked on complete prohibitions, universal replacement participation beyond represented stun and runtime-component events, and complete effective-characteristic closure
+- generic Vigilance and Haste now consume current effective keywords through canonical attack, tap-state, activation, and mana-payment owners; conditional haste acquisition, additional attack or activation prohibitions, universal replacement participation beyond represented stun/runtime-component events, and complete effective-characteristic closure remain explicit blockers
 - traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed
 - most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted
 - represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics; simple battlefield-object Auras now cast, revalidate, enter, attach, and fail closed generically, but player/graveyard/quality/subtype/compound/multiple Enchant grammar, Aura creatures, complete phasing, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally
@@ -126,7 +127,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 
 ## Exact next task
 
-After exact-head certification of the card-unlock frontier and generic Vigilance harvest, select the next dependency-ready high-gain family from the refreshed frontier, prioritizing complete reusable closure over a raw occurrence score.
+After exact-head certification of the generic Haste and summoning-sickness foundation-plus-harvest, begin one dependency-ready reusable family from the refreshed frontier in Slot B; ordinary mana-ability capability closure is the leading bounded candidate, while the coarse continuous-layers frontier remains explicitly split by ownership boundary.
 
 ## Regeneration
 

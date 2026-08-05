@@ -5,6 +5,7 @@ from dataclasses import replace
 from typing import Any, Protocol
 
 from ...abilities import ActivatedAbility, choose_ability, reduced_requirements
+from ...haste import summoning_sickness_prohibits_tap_or_untap_cost
 from ...replacement.immutable import thaw_value
 from ..action_proposals import ActionOffer, ActivationProposal, freeze_json
 from .model import (
@@ -60,8 +61,6 @@ class ActivationProposalHost(Protocol):
     def _fetch_context(
         self, seat: str, ability: ActivatedAbility, response: Mapping[str, Any]
     ) -> dict[str, Any]: ...
-
-    def _is_summoning_sick(self, source: Any) -> bool: ...
 
     def _effective_card_data(self, card: Any) -> Mapping[str, Any]: ...
 
@@ -180,9 +179,13 @@ def _validate_activation_timing_costs(
     if (
         (ability.tap_source or ability.untap_source)
         and source.zone == "battlefield"
-        and host._is_summoning_sick(source)
-        and "Haste" not in host._effective_card_data(source).get("keywords", [])
-        and not host._may_activate_creature_as_haste(request.actor, source)
+        and summoning_sickness_prohibits_tap_or_untap_cost(
+            host,
+            source,
+            as_though_haste=host._may_activate_creature_as_haste(
+                request.actor, source
+            ),
+        )
     ):
         raise ActivationProposalError(
             f"{source.ref} is summoning sick",

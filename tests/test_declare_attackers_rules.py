@@ -167,6 +167,33 @@ class DeclareAttackersRuleTests(unittest.TestCase):
         self.assertNotIn(sick.ref, candidates)
         self.assertNotIn(battle.ref, candidates)
 
+    def test_haste_attack_permission_uses_current_effective_keywords(self):
+        session = self.make_session(50824)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "Current Haste Attacker",
+            keywords=("haste", "HASTE"),
+        )
+
+        engine._issue_attackers()
+        candidate = next(
+            row
+            for row in engine.state.pending_decision.payload_by_actor["A"][
+                "candidates"
+            ]
+            if row["id"] == attacker.ref
+        )
+        self.assertTrue(candidate["sick"])
+        self.assertTrue(candidate["haste"])
+
+        engine.state.pending_decision = None
+        attacker.temporary_keywords.clear()
+        self.assertEqual(
+            f"{attacker.ref} is summoning sick",
+            engine._attack_declaration_error(attacker, "A"),
+        )
+
     def test_attackers_tap_except_vigilance_then_active_player_gets_priority(self):
         session = self.make_session(50802)
         engine = session.engine
