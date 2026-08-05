@@ -891,26 +891,26 @@ test("@browser-rules @mana-action a duel stabilizes land ETBs, permits a stack r
     await expect(host.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
     await expect(opponent.getByTestId("player-B").getByLabel("39 life")).toBeVisible();
 
-    const island = opponent
-      .getByTestId("own-hand")
-      .locator(".hand-card")
-      .filter({ has: opponent.locator(".card-copy strong", { hasText: /^Island$/ }) })
-      .first();
-    await passUntilDraggable([host, opponent], island, testInfo);
-    const beforeIsland = await viewRevision(opponent);
-    await island.click();
-    await opponent.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Island$/ }).click();
-    await expect.poll(() => viewRevision(opponent)).toBeGreaterThan(beforeIsland);
-    const swamp = host
-      .getByTestId("own-hand")
-      .locator(".hand-card")
-      .filter({ has: host.locator(".card-copy strong", { hasText: /^Swamp$/ }) })
-      .first();
-    await passUntilDraggable([host, opponent], swamp, testInfo);
-    const beforeSwamp = await viewRevision(host);
-    await swamp.click();
-    await host.getByTestId("selected-card-actions").getByRole("button", { name: /^Play Swamp$/ }).click();
-    await expect.poll(() => viewRevision(host)).toBeGreaterThan(beforeSwamp);
+    async function playBasicLand(page: Page, name: "Island" | "Swamp") {
+      const cards = page.getByTestId("own-hand").locator(".hand-card");
+      const land = cards
+        .filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) })
+        .first();
+      const landRef = await land.getAttribute("data-card-ref");
+      expect(landRef).toBeTruthy();
+      const battlefieldCards = page
+        .getByTestId("own-battlefield")
+        .locator(".card-tile");
+      const battlefieldCount = await battlefieldCards.count();
+      const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      await advanceToActionReady([host, opponent], playAction, testInfo);
+      await playAction.click();
+      await expect(cards.locator(`[data-card-ref="${landRef}"]`)).toHaveCount(0);
+      await expect(battlefieldCards).toHaveCount(battlefieldCount + 1);
+    }
+
+    await playBasicLand(opponent, "Island");
+    await playBasicLand(host, "Swamp");
 
     await host.getByTestId("auto-mana-toggle").click();
     await expect(host.getByTestId("auto-mana-toggle")).toContainText("Manual mana on");
@@ -1022,14 +1022,27 @@ test("@browser-rules @combat a duel declares an attacker in the browser and appl
       const land = name
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
-      await passUntilDraggable([host, opponent], land, testInfo);
-      // Advancing to this seat's main phase may include that turn's draw.
-      // Snapshot the projected hand only after the card is currently playable.
-      const handCount = await cards.count();
-      const revision = await viewRevision(page);
-      await land.dragTo(page.getByTestId("own-battlefield"));
-      await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
-      await expect(cards).toHaveCount(handCount - 1, { timeout: 90_000 });
+      const landRef = await land.getAttribute("data-card-ref");
+      expect(landRef).toBeTruthy();
+      const battlefieldCards = page
+        .getByTestId("own-battlefield")
+        .locator(".card-tile");
+      const battlefieldCount = await battlefieldCards.count();
+      const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      await advanceToActionReady([host, opponent], playAction, testInfo, 90_000);
+      await playAction.click();
+      const dialog = page.getByTestId("choice-dialog");
+      await expect.poll(async () =>
+        (await dialog.isVisible())
+        || (await battlefieldCards.count()) > battlefieldCount,
+      ).toBe(true);
+      if (await dialog.isVisible()) await submitOpenChoice(page);
+      await expect(cards.locator(`[data-card-ref="${landRef}"]`)).toHaveCount(0, {
+        timeout: 90_000,
+      });
+      await expect(battlefieldCards).toHaveCount(battlefieldCount + 1, {
+        timeout: 90_000,
+      });
     }
 
     await playLand(host, "Forest");
