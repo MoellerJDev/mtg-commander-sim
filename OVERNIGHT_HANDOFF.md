@@ -16,12 +16,13 @@ or provider-session data.
 ## Integration coordinate
 
 The public repository is `MoellerJDev/mtg-commander-sim`; `main` is the only
-default branch. PR 97's durable headless-browser synchronization is merged at
-`6033efe107a9c0451c3a2616a8fa6b6ae646a390`. PR 95's generic Flying and Reach
-block-legality family passed every protected exact-head gate and is merged at
-`057082cb81c77f3381895d71af503e19479b5193`. The active Slot B implementation
-branch is `rules/ordinary-mana-abilities`, integrated with that fresh protected
-`main` rather than rebased or force-pushed.
+default branch. PR 98's fixed-output mana family is merged at
+`9a03e4688b61d29ae10fd338ad7db2aeebe74336`. PR 99's full-history nightly
+provenance repair is merged at
+`2aa1b6d6ff8f75ab219665618a247b315b7fc411`, with exact-head certification and
+post-merge main smoke green. The active implementation branch is
+`rules/generic-flash-cast-timing`, merged locally with that protected main
+rather than rebased or force-pushed.
 
 Always re-read the live branch, pull request, exact-head CI, worktree, and
 generated status before acting:
@@ -43,42 +44,34 @@ into this handoff.
 
 ## Active rules slice
 
-The ordinary-mana branch is a coherent foundation-plus-harvest slice, not a
-claim to complete CR 605. Its typed capability covers target-free, nonloyalty
-activated mana abilities only when the entire fixed output and every mandatory
-activation cost are represented. One immutable source-spanned CardProgram V2
-descriptor supplies action advertisement, command validation, payment-window
-discovery, immediate stackless resolution, exact replay identity, and the
-canonical tap, sacrifice, life, and mana-cost commit owners. No printed name,
-collector number, set code, or Oracle ID selects behavior, and the engine does
-not gain another state-write owner.
+The Flash branch is a coherent foundation-plus-harvest slice for face-pinned
+printed Flash, not a claim to complete cast timing or CR 702.8. One immutable
+typed permission and one registered runtime component supply action
+advertisement and command validation from the same legality function.
+CardProgram V2 lowering emits exact source spans and selected-face identities;
+no runtime Oracle parsing, printed name, collector number, set code, or Oracle
+ID selects behavior, and the engine gains no state-write owner.
 
-The selection was made from the post-PR-95 card-unlock frontier. The coarse
-`mechanic_dependency:cr-605-mana-abilities` row carried high interaction risk
-and activation, casting, cost-payment, loyalty, mana-pool, priority, stack,
-target, trigger, reentrancy, nested-payment, output-grammar, and replacement
-prerequisites. Exact selection and harvest figures live only in the generated
-[card-unlock frontier](coverage/card-unlock-frontier.md).
+The selection came from frontier family `keyword_dependency:flash`: 591
+affected Commander cards, 52 sole-blocker cards, 125 one-additional-blocker
+opportunities, 592 expected exact abilities, 52 expected exact cards, and 592
+expected residual removals. It had no capability prerequisites and medium
+interaction risk. This is a universal typed timing foundation plus its direct
+generic keyword harvest.
 
-This branch intentionally takes only the dependency-closed fixed-output subset.
-The one final regeneration matched its predicted promotions and residual
-reduction. The partial-to-unresolved movement is an honest correction:
-parenthesized basic-land reminder nodes and unsupported dynamic or conditional
-variants are no longer treated as executable lowerable mana abilities. There
-are no exact-card demotions. Representative promotions include Sol Ring,
-Llanowar Elves, Gilded Lotus, Lotus Petal, the Signets, and the Pathway lands.
+The one final regeneration matched the prediction exactly. Commander exact and
+trusted CardPrograms rise from 1,216 to 1,268, capability-closed programs rise
+from 1,212 to 1,264, partial cards fall from 13,883 to 13,831, unresolved cards
+remain 16,524, failures remain zero, and material residuals fall from 52,325 to
+51,733. `CommanderEngine` shrinks by seven logical lines and direct GameState
+writes remain 135. Exact current architecture and corpus figures live in the
+generated [architecture debt report](docs/ARCHITECTURE_DEBT_STATUS.md) and
+[compiler coverage report](docs/COMPILER_COVERAGE_STATUS.md).
 
-The new typed owners account for the positive production delta while
-`CommanderEngine` shrinks, direct GameState-write identities and card-specific
-heuristics do not grow, and `oracle_ir.py` falls below its production-module
-review threshold. Exact architecture and line deltas live only in the generated
-[architecture debt report](docs/ARCHITECTURE_DEBT_STATUS.md).
-
-Dynamic, conditional, restricted, triggered, side-effecting, arbitrary
-resolving-effect payment, target, loyalty, and mana-production replacement or
-trigger variants remain explicit residuals. Basic land types grant distinct
-intrinsic abilities through the existing CR 305.6 owner; reminder text does not
-execute.
+Conditional, granted, removed, and player-wide as-though Flash remain explicit
+residuals. Priority, zone permission, land-play timing, other cast
+prohibitions, costs, and targets keep their existing independent owners. Raw
+keyword metadata without the trusted compiled permission fails closed.
 
 `main` protection is active, strict, and requires `PR / Certification` with
 administrator enforcement. Enable auto-merge only after the PR exists and let
@@ -102,10 +95,10 @@ all browser automation isolated and headless, with reports configured never to
 open.
 
 The full operating procedure is the
-[CI pipeline guide](docs/development/ci-pipeline.md). PR 95 is merged and this
-ordinary-mana successor now contains its protected merge commit. Publish this
-branch without rebasing or force-pushing. It does not change a browser-facing
-schema; Playwright shard balancing remains separate. Select the next
-dependency-ready typed family from the refreshed frontier only after this
-branch is certified, and do not select the complete
-continuous-layers/dependencies row.
+[CI pipeline guide](docs/development/ci-pipeline.md). PR 99 is merged and this
+Flash successor now contains its protected merge commit. Publish this branch
+without rebasing or force-pushing. It does not change a browser-facing schema;
+Playwright shard balancing remains separate. While exact-head CI runs, select
+the next dependency-ready typed family from refreshed frontier fingerprint
+`411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86`, and do
+not select the complete continuous-layers/dependencies row.

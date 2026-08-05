@@ -213,6 +213,16 @@ def _generated_node_is_independently_exact(node: Any) -> bool:
     )
 
 
+def _generated_static_declaration(node: Any) -> bool:
+    return bool(
+        node.handlers
+        or (
+            node.kind == "keyword_ability"
+            and node.capability_dependencies
+        )
+    )
+
+
 def generated_programs(
     db: CardDatabase,
     record: CardRecord,
@@ -247,14 +257,10 @@ def generated_programs(
                 # provisional registration pass still retains that sibling,
                 # so whole-card trust cannot be inferred from this filtering.
                 continue
-            keyword_declaration = (
-                node.kind == "keyword_ability"
-                and bool(node.capability_dependencies)
-            )
             runtime_handler_declaration = bool(node.handlers)
             if not node.lowerable or (
                 not node.effects
-                and not keyword_declaration
+                and not _generated_static_declaration(node)
                 and not runtime_handler_declaration
             ):
                 continue
@@ -262,9 +268,7 @@ def generated_programs(
                 kind=node.kind,
                 face_id=face.face_id,
                 line=node.span.line,
-                static_declaration=(
-                    keyword_declaration or runtime_handler_declaration
-                ),
+                static_declaration=_generated_static_declaration(node),
                 node_id=node.node_id,
             )
             if ability_id is None:

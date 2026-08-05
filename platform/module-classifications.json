@@ -402,11 +402,9 @@
     },
     {
       "file": "mtg_commander_sim/cast_timing.py",
-      "layer": "application",
-      "owning_subsystem": "legacy_application",
+      "layer": "rules",
+      "owning_subsystem": "cast_timing",
       "allowed_dependency_layers": [
-        "adapter",
-        "application",
         "domain",
         "rules",
         "semantics"
@@ -552,11 +550,10 @@
     },
     {
       "file": "mtg_commander_sim/compiled_cast_timing.py",
-      "layer": "application",
-      "owning_subsystem": "legacy_application",
+      "layer": "semantics",
+      "owning_subsystem": "cast_timing",
       "allowed_dependency_layers": [
         "adapter",
-        "application",
         "domain",
         "rules",
         "semantics"
@@ -3302,5 +3299,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "8bd58e846768d5c26df470bd787b8194022d692f474736e93c88f369ec19d627"
+  "fingerprint": "10aa0f0a5374e68a4ed47205ae3d1132641d5653993d35d5811551e47a739559"
 }

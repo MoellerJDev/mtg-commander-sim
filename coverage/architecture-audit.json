@@ -37,8 +37,8 @@
         },
         "oversized_functions_and_methods": {
           "baseline": 37,
-          "current": 37,
-          "delta": 0
+          "current": 36,
+          "delta": -1
         },
         "oversized_modules": {
           "baseline": 6,
@@ -3333,7 +3333,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 94093,
+      "logical_lines": 94095,
       "methods": {
         "dunder": 204,
         "private": 627,
@@ -3776,18 +3776,18 @@
           "physical_lines": 509
         },
         {
+          "file": "mtg_commander_sim/compiler/program_generation.py",
+          "functions_and_methods": 13,
+          "language": "python",
+          "logical_lines": 464,
+          "physical_lines": 517
+        },
+        {
           "file": "mtg_commander_sim/replacement/application.py",
           "functions_and_methods": 7,
           "language": "python",
           "logical_lines": 464,
           "physical_lines": 485
-        },
-        {
-          "file": "mtg_commander_sim/compiler/program_generation.py",
-          "functions_and_methods": 12,
-          "language": "python",
-          "logical_lines": 462,
-          "physical_lines": 513
         },
         {
           "file": "mtg_commander_sim/card_programs/commands.py",
@@ -5036,7 +5036,7 @@
           "physical_lines": 1
         }
       ],
-      "oversized_function_and_method_count": 37,
+      "oversized_function_and_method_count": 36,
       "oversized_functions_and_methods": [
         {
           "end_line": 1653,
@@ -5424,17 +5424,6 @@
           "visibility": "private"
         },
         {
-          "end_line": 376,
-          "file": "mtg_commander_sim/compiler/program_generation.py",
-          "kind": "function",
-          "line": 216,
-          "logical_lines": 151,
-          "name": "generated_programs",
-          "physical_lines": 161,
-          "symbol": "generated_programs",
-          "visibility": "public"
-        },
-        {
           "end_line": 12328,
           "file": "mtg_commander_sim/engine.py",
           "kind": "method",
@@ -5484,7 +5473,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 102641,
+      "physical_lines": 102645,
       "python_file_count": 226,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -5502,7 +5491,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1179,
+      "top_level_functions": 1180,
       "web_file_count": 16
     },
     "semantic_handlers": {
@@ -8950,7 +8939,7 @@
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:216",
+            "mtg_commander_sim/compiler/program_generation.py:226",
             "mtg_commander_sim/oracle_ir.py:1479"
           ]
         },
@@ -8982,7 +8971,7 @@
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:216",
+            "mtg_commander_sim/compiler/program_generation.py:226",
             "mtg_commander_sim/oracle_ir.py:1479"
           ]
         },
@@ -9029,7 +9018,7 @@
             "mtg_commander_sim/engine.py:31"
           ],
           "register_generated_programs": [
-            "mtg_commander_sim/compiler/program_generation.py:379",
+            "mtg_commander_sim/compiler/program_generation.py:383",
             "mtg_commander_sim/oracle_ir.py:1502",
             "mtg_commander_sim/preflight.py:16",
             "mtg_commander_sim/session.py:13"
@@ -9455,7 +9444,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "56f5737fb4e5edee378dddfbe36817a7ed6cdf0708bee981001e3c8472bc9c81"
+          "verified": "f00770de2dd155c2bcfb5aaec871cada660c3c9f01ea029bfc6564da6390e9c1"
         },
         "metadata_complete": true,
         "missing_metadata": [],

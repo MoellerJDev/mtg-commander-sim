@@ -102,11 +102,11 @@ rewrite.
   effects, and fixed ordinary-mana Equip. Preserve explicit historical Game
   Record v3 batch and continuation compatibility; this is not complete trigger
   event grammar, state/reflexive trigger, or delayed-creation coverage.
-- The active Aura branch introduces a focused immutable CR 303 boundary for
-  the closed simple battlefield-object Enchant grammar. Keep mandatory cast
-  targets, nonspell entry choices, token preflight, resolution attachment, and
-  live CR 704 legality on that shared predicate. Do not broaden its trust to
-  qualities, players, other zones, multiple restrictions, or Aura creatures.
+- Certified main includes a focused immutable CR 303 boundary for the closed
+  simple battlefield-object Enchant grammar. Keep mandatory cast targets,
+  nonspell entry choices, token preflight, resolution attachment, and live CR
+  704 legality on that shared predicate. Do not broaden its trust to qualities,
+  players, other zones, multiple restrictions, or Aura creatures.
 - Keep complete CR 609.7a source categories, permanent-spell continuity,
   broader source-property predicates, general replacement-capable life gain,
   life-gain prevention, remaining prevention-aftermath wording,
@@ -117,11 +117,13 @@ rewrite.
 - The merged infrastructure phase establishes a two-slot development pipeline,
   deterministic change-impact quick gates, balanced PR shards, a stable
   certification context, compact `main` smoke, and deep nightly assurance.
-  Certified main through PR 86 includes the canonical draw transaction and
-  fixed draw/Dredge closure. The active family adds fixed draw limits,
-  instruction doubling, and prospective-drawer optional legality; the selected
-  successor is CR 121.6c/121.7 draw-result actions and nested ordering. Do not
-  resume numerical rule traversal or open a status-only follow-up.
+  Certified main includes the canonical draw transaction, iterative draw
+  coordinator, fixed draw/Dredge closure, draw limits, instruction doubling,
+  and prospective-drawer optional legality. The active rules family compiles
+  face-pinned printed Flash into one typed cast-permission owner shared by
+  advertisement and command validation. Keep conditional, granted, removed,
+  player-wide as-though, zone-permission, and land-timing variants fail-closed.
+  Do not resume numerical rule traversal or open a status-only follow-up.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic

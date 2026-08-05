@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `b5e5caa77f0420759e4aad2088c14fe73e7bb1f9`
 - Package: `0.8.0`
 - CI run: [30892105590](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30892105590) — `pass`
-- Production scope: 242 files, 102,641 physical lines, 94,093 logical lines
+- Production scope: 242 files, 102,645 physical lines, 94,095 logical lines
 
 ## Central engine debt
 
@@ -33,7 +33,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Oracle-ID literals in Python production code: 5
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 5
-- Functions/methods above the 150-logical-line review threshold: 37
+- Functions/methods above the 150-logical-line review threshold: 36
 - Printed-name matching is deliberately over-inclusive: ordinary words that are also printed card names remain baseline candidates for Phase 1 review.
 
 ## Enforced debt trend
@@ -49,7 +49,7 @@ Baseline: `5029c62c98bdad72549625af9a7c3dde5e333ef9`. Guard: `python scripts/val
 | `legacy_card_specific_operations` | 5 | 5 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
 | `oversized_modules` | 6 | 5 | -1 |
-| `oversized_functions_and_methods` | 37 | 37 | +0 |
+| `oversized_functions_and_methods` | 37 | 36 | -1 |
 
 ## Largest production modules
 
