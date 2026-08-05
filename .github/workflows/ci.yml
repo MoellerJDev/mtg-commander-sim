@@ -148,7 +148,7 @@ jobs:
     runs-on: windows-latest
     env:
       MTG_CARD_DB: data/test-ci-windows-compat.sqlite3
-      MTG_SERVER_DATA: ${{ runner.temp }}\mtg-windows-compat
+      MTG_SERVER_DATA: local/windows-runtime-compatibility
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -192,7 +192,7 @@ jobs:
       matrix: ${{ fromJSON(needs.plan.outputs.windows_matrix) }}
     env:
       MTG_CARD_DB: data/test-ci-windows-${{ matrix.shard }}.sqlite3
-      MTG_SERVER_DATA: ${{ runner.temp }}\mtg-windows-${{ matrix.shard }}
+      MTG_SERVER_DATA: local/windows-runtime-${{ matrix.shard }}
     steps:
       - uses: actions/checkout@v4
         with:
