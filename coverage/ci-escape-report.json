@@ -106,6 +106,23 @@
       "resolution": "The journey now accepts either a form-backed choice or an authoritative immediate-action revision while preserving forced form submission when needed.",
       "run_id": 30952062448,
       "summary": "The natural-winner browser journey assumed a late pass always opened a form even though the same legal pass can complete as an immediate priority action."
+    },
+    {
+      "category": "flaky_test",
+      "deterministic": false,
+      "failed_surfaces": [
+        "browser-full"
+      ],
+      "head_sha": "d8e27cb861ce89ca28aaeb3c08c61d9becc4b3df",
+      "id": "ci-20260805-07",
+      "impact_edge_status": "not_applicable",
+      "regressions": [
+        "four-player.spec.ts: commander combat damage",
+        "four-player.spec.ts: natural commander-damage winner"
+      ],
+      "resolution": "The journeys now wait for authoritative projected results across persisted transitions and retain bounded whole-test budgets; both focused witnesses pass headlessly against the CI compact database.",
+      "run_id": 30974377805,
+      "summary": "Two durability-heavy browser journeys twice exceeded fixed timing assumptions while accepted combat and cast commands continued through persisted auto-pass transitions."
     }
   ],
   "known_flaky_tests": [],
@@ -113,7 +130,7 @@
     "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
     "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
   },
-  "observed_at": "2026-08-04T21:53:07Z",
+  "observed_at": "2026-08-05T05:33:19Z",
   "recent_pull_requests": [
     {
       "critical_path_seconds": 1488.0,
@@ -158,24 +175,25 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "d0288d76a314ee9cce6316af30ddf1b93cc038a65434866da4cba98d98d4a4f0",
+  "source_fingerprint": "4d7f8326a53cedf7a60e7567c6fc507d8f8cfce158e5f4493a4d8362b72306a6",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,
     "average_slot_b_inactive_seconds": null,
     "category_counts": {
       "browser_integration": 1,
-      "flaky_test": 1,
+      "flaky_test": 2,
       "generated_artifact_drift": 1,
       "missing_affected_test": 1,
       "source_correctness": 2
     },
     "current_missing_impact_edges": [],
     "deterministic_escape_count": 5,
-    "escape_count": 6,
+    "escape_count": 7,
     "exact_head_pass_rate": 1.0,
     "known_flaky_test_count": 0,
     "repeated_failure_categories": [
+      "flaky_test",
       "source_correctness"
     ]
   }
