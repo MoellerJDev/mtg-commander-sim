@@ -137,19 +137,39 @@ async function actionIsReady(action: Locator): Promise<boolean> {
   return action.isEnabled({ timeout: 250 }).catch(() => false);
 }
 
+const submittedPassDecision = new WeakMap<Page, string>();
+
+async function currentDecisionId(page: Page): Promise<string | null> {
+  const copy = await page.getByTestId("decision-panel").textContent();
+  return copy?.match(/YOUR DECISION · (D\d+)/)?.[1] ?? null;
+}
+
+async function authorizedPassIsReady(page: Page): Promise<boolean> {
+  const decisionId = await currentDecisionId(page);
+  if (!decisionId || submittedPassDecision.get(page) === decisionId) return false;
+  return actionIsReady(page.getByTestId("action-pass"));
+}
+
 async function submitAuthorizedPass(page: Page): Promise<"submitted" | "raced" | "unavailable"> {
   const pass = page.getByTestId("action-pass");
-  if (!(await actionIsReady(pass))) return "unavailable";
+  const decisionId = await currentDecisionId(page);
+  if (!decisionId || submittedPassDecision.get(page) === decisionId
+    || !(await actionIsReady(pass))) return "unavailable";
   const revision = await viewRevision(page);
   try {
     await submitMaybeFormAction(page, "pass", 2_000);
+    submittedPassDecision.set(page, decisionId);
     return "submitted";
   } catch (error) {
     // A safe Auto-pass or another accepted command may consume the observed
     // capability before Chromium reaches it. Preserve a real failure only
     // while the exact same pass remains executable.
     if (await actionIsReady(pass)) throw error;
-    return (await viewRevision(page)) > revision ? "submitted" : "raced";
+    if ((await viewRevision(page)) > revision) {
+      submittedPassDecision.set(page, decisionId);
+      return "submitted";
+    }
+    return "raced";
   }
 }
 
@@ -164,7 +184,7 @@ async function advanceToDecision(
     await expect.poll(async () => {
       if ((await panel.textContent())?.includes(expectedText)) return "decision";
       for (let index = 0; index < pages.length; index += 1) {
-        if (await actionIsReady(pages[index].getByTestId("action-pass"))) {
+        if (await authorizedPassIsReady(pages[index])) {
           return `pass-${index}`;
         }
       }
@@ -182,22 +202,29 @@ async function declineSeatOpportunity(
   pages: readonly Page[],
   seatPage: Page,
   opportunity: Locator,
+  expectedStep: "Main Phase 1" | "Main Phase 2",
   durabilityTimeout = 90_000,
 ) {
   const seatPass = seatPage.getByTestId("action-pass");
+  const step = seatPage.getByTestId("exact-step-label");
   for (let attempts = 0; attempts < 24; attempts += 1) {
     await expect.poll(async () => {
-      if (await actionIsReady(seatPass) && await actionIsReady(opportunity)) {
-        return "seat-opportunity";
+      const seatReady = await authorizedPassIsReady(seatPage);
+      if (seatReady && await step.textContent() === expectedStep) {
+        return await actionIsReady(opportunity)
+          ? "seat-opportunity"
+          : "missing-opportunity";
       }
       for (let index = 0; index < pages.length; index += 1) {
-        if (await actionIsReady(pages[index].getByTestId("action-pass"))) {
+        if (await authorizedPassIsReady(pages[index])) {
           return `pass-${index}`;
         }
       }
       return "waiting";
     }, { timeout: durabilityTimeout }).not.toBe("waiting");
-    if (await actionIsReady(seatPass) && await actionIsReady(opportunity)) {
+    if (await authorizedPassIsReady(seatPage)
+      && await step.textContent() === expectedStep) {
+      expect(await actionIsReady(opportunity)).toBe(true);
       const result = await submitAuthorizedPass(seatPage);
       if (result === "submitted") return;
       continue;
@@ -219,7 +246,7 @@ async function passUntilProjection(
     await expect.poll(async () => {
       if (await projected()) return "projected";
       for (let index = 0; index < pages.length; index += 1) {
-        if (await actionIsReady(pages[index].getByTestId("action-pass"))) {
+        if (await authorizedPassIsReady(pages[index])) {
           return `pass-${index}`;
         }
       }
@@ -965,9 +992,13 @@ test("a duel declares an attacker in the browser and applies commander combat da
         ? cards.filter({ has: page.locator(".card-copy strong", { hasText: new RegExp(`^${name}$`) }) }).first()
         : cards.first();
       await passUntilDraggable([host, opponent], land);
+      // Advancing to this seat's main phase may include that turn's draw.
+      // Snapshot the projected hand only after the card is currently playable.
+      const handCount = await cards.count();
       const revision = await viewRevision(page);
       await land.dragTo(page.getByTestId("own-battlefield"));
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
+      await expect(cards).toHaveCount(handCount - 1, { timeout: 90_000 });
     }
 
     await playLand(host, "Forest");
@@ -1063,9 +1094,15 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       // journeys in its serial shard. A single accepted command can take more
       // than the shared helper's normal budget while prior records flush.
       await passUntilDraggable([host, opponent], land, 90_000);
+      // Advancing to this seat's main phase may include that turn's draw.
+      // Snapshot the projected hand only after the card is currently playable.
+      const handCount = await cards.count();
       const revision = await viewRevision(page);
       await land.dragTo(page.getByTestId("own-battlefield"));
       await expect.poll(() => viewRevision(page)).toBeGreaterThan(revision);
+      await expect(cards).toHaveCount(handCount - 1, {
+        timeout: durableTransitionTimeout,
+      });
     }
 
     async function declineCommanderDevelopment(page: Page) {
@@ -1078,10 +1115,12 @@ test("a trusted browser duel reaches a natural commander-damage winner", async (
       const commanderOffer = page.getByTestId("decision-panel")
         .getByRole("button", { name: /Cast Yargle and Multani/ });
       await declineSeatOpportunity(
-        [host, opponent], page, commanderOffer, durableTransitionTimeout,
+        [host, opponent], page, commanderOffer, "Main Phase 1",
+        durableTransitionTimeout,
       );
       await declineSeatOpportunity(
-        [host, opponent], page, commanderOffer, durableTransitionTimeout,
+        [host, opponent], page, commanderOffer, "Main Phase 2",
+        durableTransitionTimeout,
       );
     }
 

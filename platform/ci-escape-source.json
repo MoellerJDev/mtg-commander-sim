@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-08-05T05:33:19Z",
+  "observed_at": "2026-08-05T09:39:44Z",
   "repository": "MoellerJDev/mtg-commander-sim",
   "escapes": [
     {
@@ -118,6 +118,18 @@
       ],
       "impact_edge_status": "not_applicable",
       "resolution": "One shared coordinator now advances only the currently authorized server pass until a strategic decision, seat-qualified opportunity, or projected result is reached; the two witnesses pass together in one headless worker against the CI compact database."
+    },
+    {
+      "id": "ci-20260805-09",
+      "run_id": 30988263099,
+      "head_sha": "2e2ec285d481ac5081532122754a4d6cd7700f6b",
+      "category": "flaky_test",
+      "deterministic": false,
+      "summary": "The natural-winner journey reused a projected pass around a slow land transition and could count the pre-draw hand before the next seat's playable main-phase decision.",
+      "failed_surfaces": ["browser-full"],
+      "regressions": ["four-player.spec.ts: natural commander-damage winner"],
+      "impact_edge_status": "not_applicable",
+      "resolution": "Authorized pass submissions are now keyed by decision ID, land confirmation snapshots the hand only after the card is currently playable, and the witness verifies distinct precombat and postcombat main-phase commander offers; both focused journeys passed together headlessly in 27.9 minutes against the CI compact database."
     }
   ],
   "recent_pull_requests": [

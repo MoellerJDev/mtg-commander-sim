@@ -140,6 +140,22 @@
       "resolution": "One shared coordinator now advances only the currently authorized server pass until a strategic decision, seat-qualified opportunity, or projected result is reached; the two witnesses pass together in one headless worker against the CI compact database.",
       "run_id": 30982463835,
       "summary": "The same durability-heavy browser journeys exposed two remaining one-seat capability assumptions: a fixed host-only attackers wait and a Seat B pass clicked after its projected capability transitioned."
+    },
+    {
+      "category": "flaky_test",
+      "deterministic": false,
+      "failed_surfaces": [
+        "browser-full"
+      ],
+      "head_sha": "2e2ec285d481ac5081532122754a4d6cd7700f6b",
+      "id": "ci-20260805-09",
+      "impact_edge_status": "not_applicable",
+      "regressions": [
+        "four-player.spec.ts: natural commander-damage winner"
+      ],
+      "resolution": "Authorized pass submissions are now keyed by decision ID, land confirmation snapshots the hand only after the card is currently playable, and the witness verifies distinct precombat and postcombat main-phase commander offers; both focused journeys passed together headlessly in 27.9 minutes against the CI compact database.",
+      "run_id": 30988263099,
+      "summary": "The natural-winner journey reused a projected pass around a slow land transition and could count the pre-draw hand before the next seat's playable main-phase decision."
     }
   ],
   "known_flaky_tests": [],
@@ -147,7 +163,7 @@
     "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
     "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
   },
-  "observed_at": "2026-08-05T05:33:19Z",
+  "observed_at": "2026-08-05T09:39:44Z",
   "recent_pull_requests": [
     {
       "critical_path_seconds": 1488.0,
@@ -192,21 +208,21 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "c5dfdb70a2466b76b283f1d774c61947d3a8868f58ba4f5e6d201e55cefd2472",
+  "source_fingerprint": "24710b1b29390387cd56a87d8e60b4a44e6f49ba01d983a57d4f3db6292b9f5e",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,
     "average_slot_b_inactive_seconds": null,
     "category_counts": {
       "browser_integration": 1,
-      "flaky_test": 3,
+      "flaky_test": 4,
       "generated_artifact_drift": 1,
       "missing_affected_test": 1,
       "source_correctness": 2
     },
     "current_missing_impact_edges": [],
     "deterministic_escape_count": 5,
-    "escape_count": 8,
+    "escape_count": 9,
     "exact_head_pass_rate": 1.0,
     "known_flaky_test_count": 0,
     "repeated_failure_categories": [
