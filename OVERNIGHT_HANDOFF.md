@@ -49,8 +49,9 @@ into this handoff.
 ## Active checkpoints
 
 The CI candidate introduces one versioned machine-readable impact policy for
-compact smoke, focused mana/action, combat, and turn/draw journeys, and the
-complete isolated Playwright shards. Browser, server, protocol, projection,
+authoritative four-context lifecycle smoke, focused mana/action, combat, and
+turn/draw journeys, and deterministic nonempty lifecycle, rules, and
+natural-winner soak groups. Browser, server, protocol, projection,
 persistence, lifecycle, reconnect, room, WebSocket, workflow, and
 browser-facing schema paths remain complete-E2E triggers. Python hunk ownership
 also makes the priority, yield, and action-opportunity methods still housed in
@@ -58,6 +59,12 @@ also makes the priority, yield, and action-opportunity methods still housed in
 engine edit into a full browser run. The same branch makes platform-status
 generation reject stale ancestry and mismatched open/merged pull-request facts
 and derives current test/CardProgram baselines from authoritative artifacts.
+Long journeys use one shared 90-second no-progress diagnostic across decisions,
+turn state, revisions, events, actor queues, and durability. Game persistence
+runs off the event loop without acknowledging commands before the authoritative
+write, and CI retains measured journey, retry, revision, command, and
+persistence timing. The exact local smoke passed in 30.4 seconds; GitHub exact-
+head measurements remain pending until PR 101 completes.
 
 The fixed-damage checkpoint is a shared effect-clause family, not a card
 override. It recognizes a closed fixed-quantity damage grammar across spell,

@@ -6,11 +6,15 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": null,
+    "active_phase": {
+      "id": "focused_browser_impact_and_status_truth",
+      "pull_request": 101,
+      "head": "ci/focused-browser-impact-and-status-truth"
+    },
     "branch": "ci/focused-browser-impact-and-status-truth",
     "branch_ancestry": {
       "focused_branch_base": "76c6bf154bfc62e5eae4cb10e391033413349050",
-      "focused_branch_unique_commits_over_main": 5
+      "focused_branch_unique_commits_over_main": 8
     },
     "pull_requests": [
       {
@@ -712,6 +716,13 @@
         "number": 100,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/100"
+      },
+      {
+        "base": "main",
+        "head": "ci/focused-browser-impact-and-status-truth",
+        "number": 101,
+        "state": "open",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/101"
       }
     ],
     "tags": [
@@ -726,11 +737,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "2eea337bbc76ee1e3ddc46ce51089bcef1809143",
+    "feature_head_sha": "5df48da393931c29fa314e835fa8e252d2544dfd",
     "feature_head_classification": "active_candidate",
     "certified_head_sha": "76c6bf154bfc62e5eae4cb10e391033413349050",
     "certified_head_classification": "current_main",
-    "generation_timestamp": "2026-08-05T15:21:50Z"
+    "generation_timestamp": "2026-08-05T16:22:08Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -942,7 +953,7 @@
       "id": "focused_browser_impact_and_status_truth",
       "name": "Focused browser impact and repository-truth status",
       "status": "implemented_at_feature_head",
-      "evidence": "Change-impact policy v3 keeps compact four-context seat-isolation smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw Playwright journeys for their typed rules owners, and retains complete isolated Playwright shards for browser, server, protocol, projection, persistence, lifecycle, reconnect, room, WebSocket, workflow, and browser-facing schema changes. Current and base Python AST ownership makes priority, yield, and action-opportunity changes inside the legacy engine select complete browser E2E without making unrelated engine/compiler edits pay that cost. Platform status derives current test and CardProgram baselines and fails closed on stale feature/certification ancestry, mismatched open pull-request coordinates, or merged work described as pending. The compact headless smoke passed locally in 7.3 seconds; public exact-head critical-path timing remains to be measured on this feature head."
+      "evidence": "PR 101 keeps an authoritative four-context lifecycle smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw journeys for typed rules owners, and replaces Playwright file sharding with deterministic nonempty lifecycle, rules, and natural-winner soak groups using isolated databases, runtimes, and ports. A shared progress driver reports decision, phase, revision, event, queue, and persistence state and fails after 90 seconds without real progress. Durable saves run off the event loop while command acknowledgement still waits for the authoritative write; derived review publication is independently timed, atomic, concurrent-writer safe, and no longer blocks ordinary live saves. CI metrics retain observed job-step and per-journey timing, retries, failure class, command/revision counts, and persistence timing without estimating unavailable values. Platform status derives current baselines and fails closed on stale Git/GitHub coordinates. The exact authoritative smoke passed locally in 30.4 seconds with four contexts, four accepted commands, exact retry, pause/resume, reconnect, and observed persistence metrics; public exact-head critical-path timing remains to be measured on this feature head."
     },
     {
       "id": "rules_snapshot",
@@ -987,11 +998,11 @@
       "compile": "pass",
       "deterministic_tests": "certified_main_through_pr100_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31019542461_pass",
       "focused_rules_tests": "pass_flash_source_spans_strict_immutable_permission_offer_command_parity_face_pinning_malformed_input_atomic_rollback_four_player_seat_isolation_privacy_exact_replay_dependency_fail_closed_redundancy_killed_mutation_and_oracle_card_program_closure",
-      "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_status_git_and_github_truth_derivation_and_workflow_structure",
+      "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_groups_metrics_parsing_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
-      "browser_typecheck_and_production_build": "pass_typecheck_and_focused_headless_journey",
+      "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "server_process_restart_recovery": "pass_fresh_capability_idempotency_lifecycle_continuation_completed_concession_and_exact_replay",

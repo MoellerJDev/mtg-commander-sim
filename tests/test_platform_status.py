@@ -120,6 +120,7 @@ class PlatformStatusTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        source["integration"]["active_phase"] = None
         source["integration"]["pull_requests"] = []
         source["milestones"][0]["status"] = "implemented_at_feature_head"
         with mock.patch(
@@ -134,6 +135,7 @@ class PlatformStatusTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        source["integration"]["active_phase"] = None
         source["integration"]["pull_requests"] = []
         source["provenance"]["feature_head_classification"] = (
             "historical_integrated"
@@ -207,6 +209,7 @@ class PlatformStatusTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        source["integration"]["active_phase"] = None
         source["integration"]["pull_requests"] = [
             {
                 "base": "main",
@@ -236,6 +239,7 @@ class PlatformStatusTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        source["integration"]["active_phase"] = None
         source["integration"]["pull_requests"] = [
             {
                 "base": "main",
