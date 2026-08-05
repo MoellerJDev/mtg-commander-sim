@@ -214,6 +214,27 @@ class FixedManaCompilerTests(unittest.TestCase):
                 self.assertTrue(ir.material_residuals)
                 self.assertFalse(any(node.handlers for node in ir.faces[0].nodes))
 
+    def test_parenthesized_basic_land_reminder_is_not_an_executable_program(self):
+        card = replace(
+            record("({T}: Add {B} or {R}.)", name="Typed Dual"),
+            mana_cost="",
+            type_line="Land — Swamp Mountain",
+            produced_mana=("B", "R"),
+        )
+        ir = compile_oracle_card(
+            card,
+            capability_registry=load_default_capability_registry(),
+        )
+
+        self.assertNotEqual("exact", ir.status)
+        self.assertFalse(any(node.handlers for node in ir.faces[0].nodes))
+        self.assertTrue(
+            any(
+                "intrinsic basic-land-type ability owner" in residual.reason
+                for residual in ir.material_residuals
+            )
+        )
+
     def test_fixed_output_mana_mode_mutants_are_killed(self):
         def assert_exact_modes() -> None:
             ability = replace(

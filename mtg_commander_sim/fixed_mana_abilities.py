@@ -315,6 +315,12 @@ def compile_fixed_activated_mana_ability(
 ) -> FixedActivatedManaAbilitySpec | None:
     """Lower one parsed ability when this family's entire contract closes."""
 
+    oracle_line = str(ability.oracle_line).strip()
+    if oracle_line.startswith("(") and oracle_line.endswith(")"):
+        # Parenthesized Oracle text is reminder text, not an executable printed
+        # ability. Basic land types grant their intrinsic abilities through a
+        # separate rules owner and must not be promoted by this family.
+        return None
     modes = fixed_mana_modes_from_effect(str(ability.effect_text))
     if modes is None:
         return None

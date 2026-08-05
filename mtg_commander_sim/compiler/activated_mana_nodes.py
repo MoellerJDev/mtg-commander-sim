@@ -35,7 +35,15 @@ def fixed_activated_mana_node(
         ability_id=f"ab{span.line}",
         line_index=span.line - 1,
     )
-    spec = compile_fixed_activated_mana_ability(ability)
+    reminder_line = line.strip()
+    reminder_only = (
+        reminder_line.startswith("(") and reminder_line.endswith(")")
+    )
+    spec = (
+        None
+        if reminder_only
+        else compile_fixed_activated_mana_ability(ability)
+    )
     if spec is None:
         return ability, None
     gate = explicit_capability_gate(
@@ -87,17 +95,33 @@ def fixed_activated_mana_node(
 
 
 def unresolved_activated_mana_residual(
-    ability: Any, span: SourceSpan, residuals: list[OracleResidual]
+    ability: Any,
+    span: SourceSpan,
+    residuals: list[OracleResidual],
+    *,
+    source_line: str | None = None,
 ) -> str:
+    reminder_text = str(source_line or ability.oracle_line).strip()
+    reminder_only = (
+        reminder_text.startswith("(") and reminder_text.endswith(")")
+    )
     return append_residual(
         residuals,
         kind="mana_ability",
         text=ability.effect_text,
         span=span,
         reason=(
-            "activated mana ability is outside the typed fixed-output grammar"
+            "parenthesized mana reminder text requires the separate intrinsic "
+            "basic-land-type ability owner"
+            if reminder_only
+            else "activated mana ability is outside the typed fixed-output grammar"
         ),
         blockers=(
+            *(
+                ("intrinsic basic-land-type mana capability",)
+                if reminder_only
+                else ()
+            ),
             "dynamic or conditional mana output",
             "restricted mana or effect-clause side effects",
             "unrepresented activation-cost variant",
@@ -169,7 +193,9 @@ def activated_oracle_node(
         )
     if ability.mana_ability:
         residual_ids.append(
-            unresolved_activated_mana_residual(ability, span, residuals)
+            unresolved_activated_mana_residual(
+                ability, span, residuals, source_line=line
+            )
         )
     lowerable = not residual_ids and (
         template is not None or ability.mana_ability

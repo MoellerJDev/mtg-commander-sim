@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "80ef16839c62622d423b5aa43d6006593706164933560d2616143abfd277461c",
-  "declaration_source_fingerprint": "595b8f03e62fdd14b3a65534075383534049b4590c1f388808b919b6fb28918f",
+  "registry_fingerprint": "63c0db1e175a297110d85c17e3c12641484a90f821e7d234cf70923360ac247b",
+  "declaration_source_fingerprint": "73a560bca33ac9717948cc9783e06d5b03d6864a20a70be535c80b4ec84a9a1e",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -5138,6 +5138,25 @@
     {
       "capability_id": "mana.activated.fixed_output",
       "evidence_class": "negative",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaCompilerTests.test_parenthesized_basic_land_reminder_is_not_an_executable_program",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep nonexecuting parenthesized mana reminder text residual until the separate intrinsic basic-land-type ability capability is represented in CardProgram closure."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "negative",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana",
       "official_rule_ids": [
         "106.1",
@@ -7389,5 +7408,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "c858c18a6ce40cc23c8fbd05158ba9af4c7ce6da2c92372a3c7b5205c4cdf366"
+  "fingerprint": "dfe9b495fdad4c393f6bfa1859ffeab50da69cdacb2428b44ea5a4793dbbacae"
 }

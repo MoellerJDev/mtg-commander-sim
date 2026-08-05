@@ -3363,6 +3363,14 @@
     {
       "capability_id": "mana.activated.fixed_output",
       "evidence_class": "negative",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaCompilerTests.test_parenthesized_basic_land_reminder_is_not_an_executable_program",
+      "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep nonexecuting parenthesized mana reminder text residual until the separate intrinsic basic-land-type ability capability is represented in CardProgram closure."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "negative",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana",
       "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
