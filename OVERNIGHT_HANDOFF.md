@@ -2,7 +2,7 @@
 title: "Integration handoff"
 status: "current"
 authoritative_source: "git main and generated status artifacts"
-verified: "2026-08-04"
+verified: "2026-08-05"
 audience: "maintainers continuing the migration"
 maintenance: "hand-maintained"
 ---
@@ -16,12 +16,12 @@ or provider-session data.
 ## Integration coordinate
 
 The public repository is `MoellerJDev/mtg-commander-sim`; `main` is the only
-default branch. PR 96's isolated durable-browser time budgets are merged on
-`main` at `44c418f3050c26c8a8f9b976bc6be44fa692d0ce`. PR 95's active exact head is
-`d8e27cb861ce89ca28aaeb3c08c61d9becc4b3df`; every completed Python,
-generated, package, Windows, and browser shard is green while its long browser
-shard finishes under auto-merge. The active Slot B implementation branch is
-`rules/ordinary-mana-abilities`, rebased directly onto that exact PR 95 head.
+default branch. PR 97's durable headless-browser synchronization is merged at
+`6033efe107a9c0451c3a2616a8fa6b6ae646a390`. PR 95's generic Flying and Reach
+block-legality family passed every protected exact-head gate and is merged at
+`057082cb81c77f3381895d71af503e19479b5193`. The active Slot B implementation
+branch is `rules/ordinary-mana-abilities`, integrated with that fresh protected
+`main` rather than rebased or force-pushed.
 
 Always re-read the live branch, pull request, exact-head CI, worktree, and
 generated status before acting:
@@ -111,9 +111,10 @@ all browser automation isolated and headless, with reports configured never to
 open.
 
 The full operating procedure is the
-[CI pipeline guide](docs/development/ci-pipeline.md). Let PR 95's protected
-exact-head context decide its merge, then publish the ordinary-mana successor
-from fresh `main`. This branch does not change a browser-facing schema;
-Playwright shard balancing remains separate. Select the next dependency-ready
-typed family from the refreshed frontier only after this branch is certified,
-and do not select the complete continuous-layers/dependencies row.
+[CI pipeline guide](docs/development/ci-pipeline.md). PR 95 is merged and this
+ordinary-mana successor now contains its protected merge commit. Publish this
+branch without rebasing or force-pushing. It does not change a browser-facing
+schema; Playwright shard balancing remains separate. Select the next
+dependency-ready typed family from the refreshed frontier only after this
+branch is certified, and do not select the complete
+continuous-layers/dependencies row.

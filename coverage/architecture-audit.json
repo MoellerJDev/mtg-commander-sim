@@ -9392,7 +9392,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "745790df156cf076bb9dad334332c3ced3599392417b0860c1064a62f759af62"
+          "verified": "8860e38e389795923b34d22de338b432dfb0689fb0f4bffb93ca2f1ee45267c6"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9448,7 +9448,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Integration handoff",
-          "verified": "2026-08-04"
+          "verified": "2026-08-05"
         },
         "metadata_complete": true,
         "missing_metadata": [],
