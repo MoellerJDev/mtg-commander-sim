@@ -16,6 +16,7 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
         self,
         *,
         power: int = 5,
+        blocker_toughness: int = 3,
         marked_damage: int = 0,
         deathtouch_sources: frozenset[str] = frozenset(),
         extra_sources: tuple[CombatDamageSourceSpec, ...] = (),
@@ -41,7 +42,7 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
                         (
                             "blocker",
                             CreatureDamageState(
-                                toughness=3,
+                                toughness=blocker_toughness,
                                 marked_damage=marked_damage,
                             ),
                         ),
@@ -102,6 +103,62 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
         )
 
         self.assertEqual(sum(item.amount for item in assignments), 5)
+
+    def test_lethal_then_spill_holds_across_power_and_damage_grid(self) -> None:
+        for toughness in range(1, 7):
+            for marked_damage in range(toughness + 1):
+                lethal = max(0, toughness - marked_damage)
+                power = lethal + 2
+                with self.subTest(
+                    toughness=toughness,
+                    marked_damage=marked_damage,
+                    power=power,
+                ):
+                    proposal = self.proposal(
+                        power=power,
+                        blocker_toughness=toughness,
+                        marked_damage=marked_damage,
+                    )
+                    accepted = []
+                    if lethal:
+                        accepted.append(
+                            {
+                                "source": "attacker",
+                                "target": "blocker",
+                                "amount": lethal,
+                            }
+                        )
+                    accepted.append(
+                        {
+                            "source": "attacker",
+                            "target": "B",
+                            "amount": power - lethal,
+                        }
+                    )
+                    self.assertEqual(
+                        power,
+                        sum(
+                            item.amount
+                            for item in proposal.validate(accepted)
+                        ),
+                    )
+
+                    if lethal:
+                        with self.assertRaises(CombatDamageAssignmentError):
+                            proposal.validate(
+                                [
+                                    {
+                                        "source": "attacker",
+                                        "target": "blocker",
+                                        "amount": lethal - 1,
+                                    },
+                                    {
+                                        "source": "attacker",
+                                        "target": "B",
+                                        "amount": power - lethal + 1,
+                                    },
+                                ]
+                            )
 
     def test_deathtouch_damage_from_another_attacker_is_lethal(self) -> None:
         helper = CombatDamageSourceSpec(

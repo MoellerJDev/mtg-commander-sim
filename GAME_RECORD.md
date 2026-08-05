@@ -166,6 +166,10 @@ one-based damage-step number and whether the split step exists.
 Sequential combat-damage choices remain ordinary v3 decision continuations.
 The continuation records the fixed APNAP assignment order, current cursor, and
 already announced public assignments; it contains no hidden card identity.
+Projected damage-source options and accepted assignments are derived from the
+same immutable typed proposal. The proposal itself is not a new record format:
+accepted commands retain the existing canonical `source`, `target`, and
+integer `amount` shape, preserving historical Game Record v3 replay.
 Forced assignments create public `combat.damage.assigned` events without a
 client command. The final `combat.damage` event journals normalized assigned,
 dealt, and prevented source-recipient results. Pending semantic trigger batches

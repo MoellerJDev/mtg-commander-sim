@@ -5,6 +5,9 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session, pass_current
+from mtg_commander_sim.combat_damage_assignment import (
+    CombatDamageAssignmentError,
+)
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -308,6 +311,108 @@ class TrampleAssignmentIntegrationTests(unittest.TestCase):
             ],
         )
         self.assert_replay(session, "four-player-trample", 1)
+
+    def test_trample_does_not_change_a_blockers_damage_recipient(self) -> None:
+        session = self.session(70219005)
+        engine = session.engine
+        attacker = self.creature(
+            engine, "A", "Ordinary Attacker", power=4, toughness=4
+        )
+        blocker = self.creature(
+            engine,
+            "B",
+            "Trampling Blocker",
+            power=3,
+            toughness=3,
+            keywords=("Trample",),
+        )
+        attacker.attacking = "B"
+        blocker.blocking = attacker.object_id
+        self.combat(
+            engine,
+            {attacker.object_id: "B"},
+            {attacker.object_id: [blocker.object_id]},
+        )
+
+        proposal = engine._combat_damage_assignment_proposal("B")
+
+        self.assertEqual(
+            {blocker.ref: {"power": 3, "targets": [attacker.ref]}},
+            proposal.projected_options(),
+        )
+        self.assertEqual((), proposal.trample_sources)
+
+    def test_removed_attack_target_is_not_replaced_by_controller(self) -> None:
+        session = self.session(70219006, players=3)
+        engine = session.engine
+        attacker = self.creature(
+            engine,
+            "A",
+            "Stranded Trampler",
+            power=5,
+            toughness=5,
+            keywords=("Trample",),
+        )
+        blocker = self.creature(
+            engine, "B", "Remaining Blocker", power=1, toughness=2
+        )
+        target_ref = engine.create_token(
+            "B",
+            name="Departing Walker",
+            characteristics={
+                "type_line": "Token Planeswalker — Test",
+                "loyalty": "5",
+            },
+        )[0]
+        target = engine._resolve_object("A", target_ref, zones={"battlefield"})
+        attacker.attacking = target.ref
+        blocker.blocking = attacker.object_id
+        self.combat(
+            engine,
+            {attacker.object_id: target.ref},
+            {attacker.object_id: [blocker.object_id]},
+            target_context={
+                attacker.object_id: {
+                    "target": target.ref,
+                    "kind": "planeswalker",
+                    "defending_player": "B",
+                }
+            },
+        )
+        engine.move_card(target.object_id, "graveyard")
+
+        proposal = engine._combat_damage_assignment_proposal("A")
+
+        self.assertEqual(
+            {attacker.ref: {"power": 5, "targets": [blocker.ref]}},
+            proposal.projected_options(),
+        )
+        self.assertEqual(
+            5,
+            proposal.validate(
+                [
+                    {
+                        "source": attacker.ref,
+                        "target": blocker.ref,
+                        "amount": 5,
+                    }
+                ]
+            )[0].amount,
+        )
+        with self.assertRaisesRegex(
+            CombatDamageAssignmentError,
+            "illegal combat-damage target",
+        ):
+            proposal.validate(
+                [
+                    {
+                        "source": attacker.ref,
+                        "target": blocker.ref,
+                        "amount": 2,
+                    },
+                    {"source": attacker.ref, "target": "B", "amount": 3},
+                ]
+            )
 
     def test_double_strike_trample_recomputes_after_blocker_leaves(self) -> None:
         session = self.session(70219004)
