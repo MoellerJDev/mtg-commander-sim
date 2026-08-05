@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-08-04T21:53:07Z",
+  "observed_at": "2026-08-05T05:33:19Z",
   "repository": "MoellerJDev/mtg-commander-sim",
   "escapes": [
     {
@@ -88,6 +88,21 @@
       "regressions": ["four-player.spec.ts: natural commander-damage winner"],
       "impact_edge_status": "not_applicable",
       "resolution": "The journey now accepts either a form-backed choice or an authoritative immediate-action revision while preserving forced form submission when needed."
+    },
+    {
+      "id": "ci-20260805-07",
+      "run_id": 30974377805,
+      "head_sha": "d8e27cb861ce89ca28aaeb3c08c61d9becc4b3df",
+      "category": "flaky_test",
+      "deterministic": false,
+      "summary": "Two durability-heavy browser journeys twice exceeded fixed timing assumptions while accepted combat and cast commands continued through persisted auto-pass transitions.",
+      "failed_surfaces": ["browser-full"],
+      "regressions": [
+        "four-player.spec.ts: commander combat damage",
+        "four-player.spec.ts: natural commander-damage winner"
+      ],
+      "impact_edge_status": "not_applicable",
+      "resolution": "The journeys now wait for authoritative projected results across persisted transitions and retain bounded whole-test budgets; both focused witnesses pass headlessly against the CI compact database."
     }
   ],
   "recent_pull_requests": [

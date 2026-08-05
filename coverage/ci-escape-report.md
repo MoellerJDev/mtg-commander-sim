@@ -2,7 +2,7 @@
 title: "CI escape report"
 status: "generated"
 authoritative_source: "platform/ci-escape-source.json"
-verified: "d0288d76a314ee9cce6316af30ddf1b93cc038a65434866da4cba98d98d4a4f0"
+verified: "4d7f8326a53cedf7a60e7567c6fc507d8f8cfce158e5f4493a4d8362b72306a6"
 audience: "maintainers and contributors"
 maintenance: "generated"
 ---
@@ -13,7 +13,7 @@ This report classifies observed deterministic failures that escaped the local qu
 
 ## Summary
 
-- Escapes: 6
+- Escapes: 7
 - Deterministic escapes: 5
 - Current missing impact edges: 0
 - Known flaky tests: 0
@@ -32,6 +32,7 @@ This report classifies observed deterministic failures that escaped the local qu
 | `ci-20260804-04` | [30931679921](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30931679921) | `source_correctness` | `added` | The exact protection consumers are covered by both replacement and damage shards in the machine-readable policy. |
 | `ci-20260804-05` | [30940720886](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30940720886) | `browser_integration` | `not_applicable` | The production auto-pass race was fixed and the public full-browser gate remains authoritative for headless journeys. |
 | `ci-20260804-06` | [30952062448](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30952062448) | `flaky_test` | `not_applicable` | The journey now accepts either a form-backed choice or an authoritative immediate-action revision while preserving forced form submission when needed. |
+| `ci-20260805-07` | [30974377805](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30974377805) | `flaky_test` | `not_applicable` | The journeys now wait for authoritative projected results across persisted transitions and retain bounded whole-test budgets; both focused witnesses pass headlessly against the CI compact database. |
 
 ## Measurement limitations
 
