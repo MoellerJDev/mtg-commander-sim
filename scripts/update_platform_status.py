@@ -325,10 +325,7 @@ def _validate_provenance(source: dict) -> None:
         raise ValueError(
             "card_program_census must be derived from authoritative coverage artifacts"
         )
-    merged_main_ref = current_main
-    if _git_is_ancestor(
-        provenance["certified_head_sha"], merged_main_ref
-    ):
+    if feature_on_main:
         stale = [
             str(row.get("id") or "")
             for row in source.get("milestones", ())

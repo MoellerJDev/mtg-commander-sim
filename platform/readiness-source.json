@@ -7,10 +7,10 @@
   },
   "integration": {
     "active_phase": null,
-    "branch": "rules/generic-flash-cast-timing",
+    "branch": "ci/focused-browser-impact-and-status-truth",
     "branch_ancestry": {
-      "focused_branch_base": "2aa1b6d6ff8f75ab219665618a247b315b7fc411",
-      "focused_branch_unique_commits_over_main": 2
+      "focused_branch_base": "76c6bf154bfc62e5eae4cb10e391033413349050",
+      "focused_branch_unique_commits_over_main": 5
     },
     "pull_requests": [
       {
@@ -710,7 +710,7 @@
         "base": "main",
         "head": "rules/generic-flash-cast-timing",
         "number": 100,
-        "state": "open",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/100"
       }
     ],
@@ -726,11 +726,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "7dc4c44c8ff3455dac29807e4ca6155780d2a88d",
-    "feature_head_classification": "historical_integrated",
-    "certified_head_sha": "2aa1b6d6ff8f75ab219665618a247b315b7fc411",
-    "certified_head_classification": "historical_certified",
-    "generation_timestamp": "2026-08-05T14:38:35Z"
+    "feature_head_sha": "2eea337bbc76ee1e3ddc46ce51089bcef1809143",
+    "feature_head_classification": "active_candidate",
+    "certified_head_sha": "76c6bf154bfc62e5eae4cb10e391033413349050",
+    "certified_head_classification": "current_main",
+    "generation_timestamp": "2026-08-05T15:21:50Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -935,8 +935,14 @@
     {
       "id": "generic_compiled_flash_cast_timing_harvest",
       "name": "Generic compiled Flash cast timing",
-      "status": "development_local_certification_pending",
-      "evidence": "The active branch is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. While repairing the exact-head browser gate, the branch also moved derived review generation off ordinary live command acknowledgements while retaining durable replay inputs and review generation at pause, terminal, and explicit-save boundaries. The previously timing-out natural-winner journey passes locally in 6.7 minutes with machine-readable decision-ID synchronization."
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 100 is a coherent foundation-plus-harvest slice for face-pinned printed Flash under CR 117.1a, 304.5, 307.5, and 702.8. CardProgram V2 lowers exact source-spanned cast-permission nodes; one immutable typed permission and registered runtime component feed both action advertisement and proposal acceptance without runtime Oracle parsing. The selected frontier predicted 591 affected cards, 52 sole-blocker promotions, 125 paired opportunities, and 592 residual removals. The final Commander census matches exactly: exact/trusted rises 1,216 to 1,268, capability-closed rises 1,212 to 1,264, partial falls 13,883 to 13,831, unresolved remains 16,524, failures remain zero, and material residuals fall 52,325 to 51,733. Conditional, granted, removed, and player-wide as-though Flash remain explicit residuals. CommanderEngine shrinks by seven logical lines, direct writes remain 135, and the refreshed frontier fingerprint is 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. The branch also moved derived review generation off ordinary live command acknowledgements while retaining durable replay inputs and review generation at pause, terminal, and explicit-save boundaries. Exact-head run 31016464622 passed every required Linux, generated, package, Windows, and browser job; merge commit 76c6bf1 is on main and post-merge main-smoke run 31019542461 is green."
+    },
+    {
+      "id": "focused_browser_impact_and_status_truth",
+      "name": "Focused browser impact and repository-truth status",
+      "status": "implemented_at_feature_head",
+      "evidence": "Change-impact policy v3 keeps compact four-context seat-isolation smoke on every substantive pull request, selects closed mana/action, combat, and turn/draw Playwright journeys for their typed rules owners, and retains complete isolated Playwright shards for browser, server, protocol, projection, persistence, lifecycle, reconnect, room, WebSocket, workflow, and browser-facing schema changes. Current and base Python AST ownership makes priority, yield, and action-opportunity changes inside the legacy engine select complete browser E2E without making unrelated engine/compiler edits pay that cost. Platform status derives current test and CardProgram baselines and fails closed on stale feature/certification ancestry, mismatched open pull-request coordinates, or merged work described as pending. The compact headless smoke passed locally in 7.3 seconds; public exact-head critical-path timing remains to be measured on this feature head."
     },
     {
       "id": "rules_snapshot",
@@ -973,14 +979,15 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31005825457,
+      "run_id": 31016464622,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31005825457"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31016464622"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr99_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; active_flash_capability_evidence_replay_privacy_rollback_multiplayer_and_mutation_tests_pass",
+      "deterministic_tests": "certified_main_through_pr100_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31019542461_pass",
       "focused_rules_tests": "pass_flash_source_spans_strict_immutable_permission_offer_command_parity_face_pinning_malformed_input_atomic_rollback_four_player_seat_isolation_privacy_exact_replay_dependency_fail_closed_redundancy_killed_mutation_and_oracle_card_program_closure",
+      "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_status_git_and_github_truth_derivation_and_workflow_structure",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
       "server_protocol_persistence_integration": "pass",
@@ -1013,5 +1020,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Publish and exact-head certify the generic compiled Flash foundation-plus-harvest against frontier fingerprint 411fba39984c31b6d4e611a5467cc594d5eb685e90952e90b5cd88a16c3f8e86. While CI runs, select the next bounded dependency-ready typed family; do not select the coarse continuous-layers row and preserve conditional, granted, removed, and player-wide as-though Flash as explicit residuals."
+  "next_task": "Exact-head certify the focused browser-impact and repository-truth status branch. Then integrate and certify the preserved fixed-damage effect-clause family before beginning the reusable-piece matrix and durable program baseline required by the active accelerator objective."
 }

@@ -119,11 +119,13 @@ rewrite.
   certification context, compact `main` smoke, and deep nightly assurance.
   Certified main includes the canonical draw transaction, iterative draw
   coordinator, fixed draw/Dredge closure, draw limits, instruction doubling,
-  and prospective-drawer optional legality. The active rules family compiles
-  face-pinned printed Flash into one typed cast-permission owner shared by
-  advertisement and command validation. Keep conditional, granted, removed,
-  player-wide as-though, zone-permission, and land-timing variants fail-closed.
-  Do not resume numerical rule traversal or open a status-only follow-up.
+  prospective-drawer optional legality, and face-pinned printed Flash through
+  one typed cast-permission owner shared by advertisement and command
+  validation. Keep conditional, granted, removed, player-wide as-though,
+  zone-permission, and land-timing variants fail-closed. Preserve the current
+  fixed-damage effect-clause checkpoint; after it reaches certification, build
+  the generated reusable-piece matrix and durable program baseline rather than
+  resuming numerical rule traversal or creating a competing scheduler.
 - Preserve Game Record v3 commands, exact replay, principal projections, and
   fail-closed semantics during every extraction.
 - Do not add printed-card-name or Oracle-ID conditionals, card-named semantic
@@ -160,8 +162,14 @@ locally.
 
 The public pull-request workflow is the normal certification authority. It
 runs ten balanced Linux functional shards plus generated/architecture,
-package, Windows-compatibility, and isolated headless-browser jobs. Every
-required dependency feeds the stable `PR / Certification` result; protect
+package, focused Windows compatibility, and isolated headless-browser jobs.
+Every substantive PR runs compact browser smoke; typed rules owners select
+focused mana/action, combat, or turn/draw journeys, while browser, protocol,
+projection, persistence, lifecycle, reconnect, room, WebSocket, workflow, and
+browser-facing schema changes run the complete isolated Playwright shards.
+Changed-symbol ownership keeps priority and yield changes inside the legacy
+engine on the complete browser path without charging unrelated compiler work.
+Every required dependency feeds the stable `PR / Certification` result; protect
 `main` with that exact context. Do not enable auto-merge until the protection
 is confirmed, because GitHub otherwise treats the merge as immediately
 eligible.

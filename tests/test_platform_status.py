@@ -104,7 +104,7 @@ class PlatformStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "commit_reference"):
             _validate_provenance(source)
 
-    def test_provenance_rejects_pending_or_stale_merged_feature_status(self):
+    def test_provenance_rejects_pending_certification_language(self):
         source = json.loads(
             (ROOT / "platform" / "readiness-source.json").read_text(
                 encoding="utf-8"
@@ -114,16 +114,36 @@ class PlatformStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "certification pending"):
             _validate_provenance(source)
 
-        source["integration"].pop("description")
+    def test_active_candidate_may_have_feature_head_milestone(self):
+        source = json.loads(
+            (ROOT / "platform" / "readiness-source.json").read_text(
+                encoding="utf-8"
+            )
+        )
         source["integration"]["pull_requests"] = []
         source["milestones"][0]["status"] = "implemented_at_feature_head"
         with mock.patch(
             "scripts.update_platform_status._git_is_ancestor",
-            return_value=True,
+            side_effect=(False, True),
         ):
-            with self.assertRaisesRegex(
-                ValueError, "cannot remain at feature head"
-            ):
+            _validate_provenance(source)
+
+    def test_integrated_feature_cannot_retain_feature_head_milestone(self):
+        source = json.loads(
+            (ROOT / "platform" / "readiness-source.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        source["integration"]["pull_requests"] = []
+        source["provenance"]["feature_head_classification"] = (
+            "historical_integrated"
+        )
+        source["milestones"][0]["status"] = "implemented_at_feature_head"
+        with mock.patch(
+            "scripts.update_platform_status._git_is_ancestor",
+            side_effect=(True, True),
+        ):
+            with self.assertRaisesRegex(ValueError, "cannot remain at feature head"):
                 _validate_provenance(source)
 
     def test_active_phase_rejects_a_feature_already_on_main(self):
@@ -244,9 +264,11 @@ class PlatformStatusTests(unittest.TestCase):
             )
         )
         source["integration"]["pull_requests"] = []
-        source["provenance"]["certified_head_sha"] = source["provenance"][
-            "feature_head_sha"
-        ]
+        source["provenance"]["certified_head_sha"] = subprocess.check_output(
+            ["git", "rev-parse", "origin/main^"],
+            cwd=ROOT,
+            text=True,
+        ).strip()
         source["provenance"]["certified_head_classification"] = (
             "current_main"
         )
