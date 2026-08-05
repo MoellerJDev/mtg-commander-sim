@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "536b8fc9e7f92cd5c19218944eec9ca3387e39e8656652975813a27a69ff6e74",
-  "declaration_source_fingerprint": "16b1cd6b51c72f885b71bff642e2421581d60fe38275e285402036f0a803825f",
+  "registry_fingerprint": "0e47ece3bdf2dda1f400c8a0b483d35f93b77c6516cf083b2901cbaf6e2582ec",
+  "declaration_source_fingerprint": "6cbc8a0595da0c0809345c5e201257b879e22a693dd6b3051f5c562e820fbea7",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -5138,6 +5138,25 @@
     {
       "capability_id": "mana.activated.fixed_output",
       "evidence_class": "negative",
+      "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a stale source-pinned fixed-output descriptor without reparsing changed executable Oracle text at runtime."
+    },
+    {
+      "capability_id": "mana.activated.fixed_output",
+      "evidence_class": "negative",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_invalid_compiled_mana_mode_rolls_back",
       "official_rule_ids": [
         "106.1",
@@ -7275,5 +7294,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "5ca81169776f4d657ba83e136ebf7d988a29b6006b99cd4061a6613fbfc177fe"
+  "fingerprint": "8877fb508c463686db5801952f1fbd74927af4eb1d6cbc0d3928fd6d23a97f2b"
 }

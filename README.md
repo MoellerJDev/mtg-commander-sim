@@ -433,7 +433,11 @@ generated documentation fixtures with bearer capabilities redacted. See
   loyalty costs
 - source-reviewed CR 605 mana abilities with corrected target/loyalty
   exclusions, immediate activated-mana resolution, payment-path witnesses,
-  and explicit blockers for generic triggered mana abilities
+  and source-spanned CardProgram V2 lowering for target-free nonloyalty
+  activated abilities whose fixed outputs and mandatory costs are completely
+  represented. One typed descriptor supplies both the advertised choices and
+  accepted command. Dynamic, conditional, restricted, triggered, side-effecting,
+  and arbitrary nested-payment variants remain explicit residuals.
 - source-reviewed CR 604 static-ability scope with source-leaves and
   moved-attachment witnesses; generic CDA, attachment, stack, zone-permission,
   and current-information/LKI handling remain blocked
@@ -1287,7 +1291,12 @@ container isolation when filesystem-level isolation must also be proven.
   semantic/generated adapters, audit commands, and runtime validation
 - `mtg_commander_sim/semantic_runtime/` — frozen typed effect/runtime-handler
   registries, immutable rules queries, typed intents, and canonical execution
-- `mtg_commander_sim/mana.py` — conservative mana source parsing/planning
+- `mtg_commander_sim/fixed_mana_abilities.py` — immutable fixed-output
+  activated-mana descriptor and closed Oracle grammar
+- `mtg_commander_sim/mana_ability_runtime.py` — advertised/accepted mana-mode
+  owner, with isolated compatibility paths for not-yet-compiled variants
+- `mtg_commander_sim/mana.py` — conservative mana source planning and legacy
+  compatibility extraction
 - `mtg_commander_sim/abilities.py` — explicit Oracle ability/cost extraction and zone authorization
 - `mtg_commander_sim/rules/action_proposals.py` — immutable canonical action
   offers and proposal fingerprints
