@@ -125,6 +125,7 @@
       "test_end_of_combat_rules",
       "test_goad_rules",
       "test_haste_rules",
+      "test_landwalk",
       "test_menace_rules"
     ],
     "multiplayer-commander": [

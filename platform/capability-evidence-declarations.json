@@ -498,6 +498,94 @@
       "applicability_note": "Replay the accepted Reach block from an exact four-player checkpoint."
     },
     {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_urborg_generated_swamp_activates_opposing_swampwalk",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Consume the current layer-4 Swamp subtype supplied to an opposing nonbasic land by Urborg's typed continuous effect."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_landwalk.BasicLandwalkTests.test_landwalk_remains_cumulative_with_shadow_and_flying",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Apply matching Basic Landwalk even when the proposed block satisfies independent Shadow or Flying/Reach restrictions."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_landwalk.BasicLandwalkIntegrationTests.test_legal_nonmatching_block_is_seat_scoped_and_replays",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Permit and replay a nonmatching four-player block only for the attacked seat."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_landwalk.BasicLandwalkIntegrationTests.test_offer_and_command_share_current_landwalk_legality_and_rollback",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Evaluate the attacked player's current controlled lands independently in a four-player combat."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_basic_landwalk_keyword_mapping_mutant_is_killed",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a mutation that removes the Swampwalk-to-Swamp mapping and permits the prohibited block."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "negative",
+      "test_id": "tests.test_landwalk.BasicLandwalkTests.test_malformed_and_unsupported_variants_fail_closed",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject malformed snapshots and nonbasic, legendary, Desert, generic-only, or caller-invented landwalk variants before mutation."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "positive",
+      "test_id": "tests.test_landwalk.BasicLandwalkTests.test_each_basic_variant_uses_current_matching_land_subtype",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject a block for each of the five supported basic-land-type variants exactly when the defender controls the matching subtype."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_landwalk.BasicLandwalkIntegrationTests.test_offer_and_command_share_current_landwalk_legality_and_rollback",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Issue the landwalk-constrained block decision only to the attacked seat using public battlefield characteristics."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "property",
+      "test_id": "tests.test_landwalk.BasicLandwalkTests.test_basic_landwalk_holds_across_the_bounded_keyword_land_grid",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Check every subset of five represented keyword variants against every subset of five current basic land subtypes."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "replay",
+      "test_id": "tests.test_landwalk.BasicLandwalkIntegrationTests.test_legal_nonmatching_block_is_seat_scoped_and_replays",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the exact accepted four-player block from the capability checkpoint."
+    },
+    {
+      "capability_id": "combat.block.landwalk.basic_type",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_landwalk.BasicLandwalkIntegrationTests.test_offer_and_command_share_current_landwalk_legality_and_rollback",
+      "official_rule_ids": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject an injected block through matching Swampwalk without changing the authoritative state hash."
+    },
+    {
       "capability_id": "combat.block.menace",
       "evidence_class": "interaction",
       "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_effective_menace_gain_and_loss_change_the_shared_restriction",

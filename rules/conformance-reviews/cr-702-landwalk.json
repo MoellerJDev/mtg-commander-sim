@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702 — Landwalk",
+  "cases": [
+    {
+      "rule_id": "702.14",
+      "rule_text_sha256": "cbe4a154269e717d17df5cacf32d4e40ee30afadafa9a1d8caf005568bd17d1e",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/landwalk.json"],
+      "executable_test_ids": ["tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; the aggregate mechanic stays untrusted while broader CR 702.14c variants remain unsupported."]
+    },
+    {
+      "rule_id": "702.14a",
+      "rule_text_sha256": "a3ebc80d3c58f0e4861ba8739fb1600afa05dae9b789285c013ef8020e79c824",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES", "mechanics/contracts/landwalk.json"],
+      "executable_test_ids": ["tests.test_card_program_v2.CardProgramV2Tests.test_basic_landwalk_keywords_lower_with_precise_closed_spans"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["The compiler lowers only the five closed basic-land-type keyword names; other grammar forms remain explicit residuals."]
+    },
+    {
+      "rule_id": "702.14b",
+      "rule_text_sha256": "cfcc2d6d49fdcb0ef0d53fce67e952ae06da9fa4ac1c1e3b38fbcce1ca16eb21",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/landwalk.json", "mtg_commander_sim.combat_evasion.combat_evasion_verdict"],
+      "executable_test_ids": ["tests.test_landwalk.BasicLandwalkTests.test_landwalk_remains_cumulative_with_shadow_and_flying"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["The represented basic-type family participates in the shared block-evasion boundary."]
+    },
+    {
+      "rule_id": "702.14c",
+      "rule_text_sha256": "c451df39c9c49626ae0c54b1092de0075055bf4facbcc02de573200487ec0d55",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.landwalk.basic_landwalk_block_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types", "CommanderEngine._can_block"],
+      "executable_test_ids": ["tests.test_landwalk.BasicLandwalkTests.test_each_basic_variant_uses_current_matching_land_subtype", "tests.test_landwalk.BasicLandwalkIntegrationTests.test_offer_and_command_share_current_landwalk_legality_and_rollback", "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_urborg_generated_swamp_activates_opposing_swampwalk"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": ["nonbasic, legendary, Desert, snow compound, type, supertype, negative, and other non-basic-land-type variants are not yet represented"],
+      "notes": ["The fine-grained combat.block.landwalk.basic_type capability is trusted; the complete CR 702.14c grammar is not."]
+    },
+    {
+      "rule_id": "702.14d",
+      "rule_text_sha256": "791c628e27a028201b93bc0919f466c3adb130fe211f21d246feb3bafacbcfe5",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.landwalk.basic_landwalk_block_verdict", "mtg_commander_sim.combat_evasion.combat_evasion_verdict"],
+      "executable_test_ids": ["tests.test_landwalk.BasicLandwalkTests.test_multiple_variants_are_cumulative_and_repeated_instances_redundant", "tests.test_landwalk.BasicLandwalkTests.test_landwalk_remains_cumulative_with_shadow_and_flying"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["Different represented basic-type variants are cumulative and no evasion keyword cancels another."]
+    },
+    {
+      "rule_id": "702.14e",
+      "rule_text_sha256": "cb0fe7eee76eea8a244ba6a9ca6a65619ca23514596ba1f6b723f5325c15070d",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords", "mtg_commander_sim.landwalk.basic_landwalk_block_verdict"],
+      "executable_test_ids": ["tests.test_landwalk.BasicLandwalkTests.test_multiple_variants_are_cumulative_and_repeated_instances_redundant", "tests.test_landwalk.BasicLandwalkIntegrationTests.test_offer_and_command_share_current_landwalk_legality_and_rollback"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["Canonical current keyword sets collapse duplicate instances of each represented variant."]
+    }
+  ]
+}

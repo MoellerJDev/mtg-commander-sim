@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/36`
+- Registry schema/version: `1/37`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `696064eee81a5944e9cbbcffaa230393f8149d94043a010292da1bc8f24bf73e`
-- Evidence fingerprint: `4d3f972fb2687ea88f15ef4de6ef98b5f10382bb9e26b83d5180065f85578380`
-- Explicit evidence declarations: 498
-- Capability records: 60
-- Trusted records: 50
+- Registry fingerprint: `ed0ee738454401b10a350d6205a45fb5700f401ef6c8c757492e0f95ee4b5874`
+- Evidence fingerprint: `89e8e373771f4794380f03428c51a131455a7dc2d69a6acf3369e1a00572135c`
+- Explicit evidence declarations: 509
+- Capability records: 61
+- Trusted records: 51
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 26, "not_run": 3, "passed": 31}`
-- Implementation mutation statuses: `{"killed": 53, "not_run": 7}`
+- Dependency fail-closed statuses: `{"not_applicable": 27, "not_run": 3, "passed": 31}`
+- Implementation mutation statuses: `{"killed": 54, "not_run": 7}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -74,8 +74,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 4,610 | 14,657 | 19,275 | 56,591 | false |
-| Commander legal | 31,623 | 1,680 | 13,526 | 16,417 | 48,967 | false |
+| Full Oracle | 38,542 | 4,678 | 14,589 | 19,275 | 56,465 | false |
+| Commander legal | 31,623 | 1,745 | 13,461 | 16,417 | 48,846 | false |
 
 ## Full-corpus residual kinds
 
@@ -85,7 +85,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `spell_effect` | 11,241 |
 | `static_ability` | 11,143 |
 | `effect` | 7,168 |
-| `dependency_contract` | 6,821 |
+| `dependency_contract` | 6,695 |
 | `cost` | 2,015 |
 | `replacement_effect` | 1,758 |
 | `mana_ability` | 771 |

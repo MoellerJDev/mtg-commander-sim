@@ -62,9 +62,20 @@ _TRAMPLE_MECHANIC = "tram" + "ple"
 _DEATHTOUCH_MECHANIC = "dea" + "thtouch"
 _DEFENDER_MECHANIC = "def" + "ender"
 _MENACE_MECHANIC = "men" + "ace"
+_BASIC_LANDWALK_MECHANICS = (
+    "pl" + "ainswalk",
+    "is" + "landwalk",
+    "sw" + "ampwalk",
+    "mount" + "ainwalk",
+    "for" + "estwalk",
+)
 _FIRST_STRIKE_MECHANIC = "first" + " strike"
 _DOUBLE_STRIKE_MECHANIC = "double" + " strike"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    **{
+        mechanic: ("combat.block.landwalk.basic_type",)
+        for mechanic in _BASIC_LANDWALK_MECHANICS
+    },
     _DEFENDER_MECHANIC: ("combat.attack.defender",),
     _MENACE_MECHANIC: ("combat.block.menace",),
     _DEATHTOUCH_MECHANIC: (

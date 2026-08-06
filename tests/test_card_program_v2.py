@@ -231,6 +231,42 @@ class CardProgramV2Tests(unittest.TestCase):
         )
         self.assertEqual([], program.to_dict()["residuals"])
 
+    def test_basic_landwalk_keywords_lower_with_precise_closed_spans(self):
+        for suffix, keyword in enumerate(
+            (
+                "plainswalk",
+                "islandwalk",
+                "swampwalk",
+                "mountainwalk",
+                "forestwalk",
+            ),
+            start=702_014_001,
+        ):
+            with self.subTest(keyword=keyword):
+                program = compile_card_program(
+                    self.db,
+                    _keyword_card(keyword, keyword.title(), suffix),
+                    capability_registry=self.capabilities,
+                    capability_profile="commander_review",
+                    trust_level="trusted",
+                )
+
+                self.assertEqual(
+                    ("combat.block.landwalk.basic_type",),
+                    program.capability_dependencies,
+                )
+                self.assertEqual(
+                    "capability_closed",
+                    program.trust_closure["trust_basis"],
+                )
+                self.assertTrue(program.trust_closure["trusted"])
+                ability = program.to_dict()["abilities"][0]
+                self.assertEqual(
+                    {"line": 1, "start": 0, "end": len(keyword)},
+                    ability["source_span"],
+                )
+                self.assertEqual([], program.to_dict()["residuals"])
+
     def test_damage_aftermath_card_program_is_capability_closed(self):
         current = compile_card_program(
             self.db,

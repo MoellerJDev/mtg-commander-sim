@@ -24,7 +24,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "53b4875da59187825758de1e39f8a439e4283da11b49b2ec78572c7173ab599a",
+    "evaluated_source_tree_hash": "e55f67b2529fde4c2822968a5952a1d4924346b81f51bb2fd66df104f1fcca24",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -337,10 +337,10 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 48967,
+      "material_residuals": 48846,
       "status_counts": {
-        "exact": 1680,
-        "partial": 13526,
+        "exact": 1745,
+        "partial": 13461,
         "unresolved": 16417
       },
       "total": 31623
@@ -351,28 +351,28 @@
     "mechanics": {
       "status_counts": {
         "partial": 58,
-        "tested": 5,
+        "tested": 6,
         "trusted": 5,
-        "unclassified": 357
+        "unclassified": 356
       },
       "total": 425,
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 56591,
+      "material_residuals": 56465,
       "status_counts": {
-        "exact": 4610,
-        "partial": 14657,
+        "exact": 4678,
+        "partial": 14589,
         "unresolved": 19275
       },
       "total": 38542
     },
     "rules": {
-      "blocked": 372,
-      "definition_only": 102,
-      "passing": 185,
+      "blocked": 373,
+      "definition_only": 105,
+      "passing": 187,
       "total": 3300,
-      "unreviewed": 2641
+      "unreviewed": 2635
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -397,7 +397,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4977,
+    "deterministic_cases_discovered": 4987,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -407,31 +407,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 48967,
+        "material_residuals": 48846,
         "status_counts": {
-          "residual": 29943,
-          "trusted": 1680
+          "residual": 29878,
+          "trusted": 1745
         },
         "trust_basis_counts": {
-          "capability_closed": 1676,
+          "capability_closed": 1741,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 29943
+          "unresolved": 29878
         }
       },
       "full": {
         "cards_considered": 38542,
-        "material_residuals": 56587,
+        "material_residuals": 56461,
         "status_counts": {
           "failed": 2248,
-          "residual": 33929,
-          "trusted": 2365
+          "residual": 33861,
+          "trusted": 2433
         },
         "trust_basis_counts": {
-          "capability_closed": 2361,
+          "capability_closed": 2429,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 33929
+          "unresolved": 33861
         }
       }
     },

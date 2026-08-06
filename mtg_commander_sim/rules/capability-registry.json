@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 36,
+  "registry_version": 37,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -699,6 +699,33 @@
       "dependency_fail_closed_rationale": "This bounded restriction consumes the authoritative current characteristic snapshot and has no optional capability dependency.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_defender_attack_restriction_mutant_is_killed changes the recognized current keyword and the attack-prohibition assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.block.landwalk.basic_type",
+      "version": 1,
+      "official_rules": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Prohibit a block when a current represented attacker has Plainswalk, Islandwalk, Swampwalk, Mountainwalk, or Forestwalk and the defending player controls a current land with the matching effective land subtype.",
+        "inputs": ["fully validated proposed blocker-attacker pair", "attacker current represented effective keywords", "defending player identity", "defender current phased-in battlefield lands", "lands' current represented effective types and subtypes"],
+        "outputs": ["matching basic-land-type landwalk block prohibited", "nonmatching block left to remaining restrictions", "multiple different landwalk abilities applied cumulatively", "multiple instances of one represented variant treated as redundant", "unsupported landwalk variant rejected before mutation"],
+        "exclusions": ["nonbasic landwalk", "legendary landwalk", "Desertwalk and other non-basic-land-type variants", "compound or quality-qualified landwalk predicates", "unsupported continuous-effect, copy, face-down, and ability-changing producers", "block declaration costs and unrelated restrictions or requirements"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.landwalk.basic_landwalk_block_verdict", "mtg_commander_sim.combat_evasion.combat_evasion_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types", "CommanderEngine._can_block"],
+      "positive_tests": ["test_each_basic_variant_uses_current_matching_land_subtype", "test_offer_and_command_share_current_landwalk_legality_and_rollback"],
+      "negative_tests": ["test_malformed_and_unsupported_variants_fail_closed", "test_legal_nonmatching_block_is_seat_scoped_and_replays"],
+      "interaction_tests": ["test_landwalk_remains_cumulative_with_shadow_and_flying", "test_urborg_generated_swamp_activates_opposing_swampwalk"],
+      "multiplayer_tests": ["test_offer_and_command_share_current_landwalk_legality_and_rollback", "test_legal_nonmatching_block_is_seat_scoped_and_replays"],
+      "privacy_tests": ["test_offer_and_command_share_current_landwalk_legality_and_rollback"],
+      "replay_tests": ["test_legal_nonmatching_block_is_seat_scoped_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The bounded basic-type query consumes canonical current keyword and land characteristic snapshots and has no capability dependency; unsupported landwalk variants fail closed.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_basic_landwalk_keyword_mapping_mutant_is_killed removes the Swampwalk mapping and the canonical matching-land rejection assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

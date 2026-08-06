@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "combat.block.landwalk.basic_type": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_basic_landwalk_keyword_mapping_mutant_is_killed"
+    ),
     "timing.cast.printed_flash": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

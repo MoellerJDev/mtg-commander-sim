@@ -14,6 +14,7 @@ from mtg_commander_sim.continuous_effects import (
     evaluate_continuous_effects,
 )
 from mtg_commander_sim.deck import DeckDefinition, DeckEntry
+from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.record import checkpoint_envelope, replay_record
 from mtg_commander_sim.rules.capabilities import (
     load_default_capability_registry,
@@ -351,6 +352,56 @@ class BasicLandTypeManaTests(unittest.TestCase):
         self.assertIn(
             "Swamp", engine._effective_card_data(opposing_land)["type_line"]
         )
+
+    def test_urborg_generated_swamp_activates_opposing_swampwalk(self):
+        session = self.session(3056007)
+        engine = session.engine
+        urborg = self.named(engine, "A", "Urborg, Tomb of Yawgmoth")
+        opposing_land = self.named(engine, "B", "Darksteel Citadel")
+        engine.move_card(urborg.object_id, "battlefield", controller="A")
+        engine.move_card(
+            opposing_land.object_id,
+            "battlefield",
+            controller="B",
+        )
+        attacker_ref = engine.create_token(
+            "A",
+            name="Urborg Swampwalker",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "2",
+                "toughness": "2",
+                "keywords": ["Landwalk", "Swampwalk"],
+            },
+        )[0]
+        blocker_ref = engine.create_token(
+            "B",
+            name="Urborg blocker",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "2",
+                "toughness": "2",
+            },
+        )[0]
+        attacker = engine._resolve_object(
+            "A", attacker_ref, zones={"battlefield"}
+        )
+        blocker = engine._resolve_object(
+            "B", blocker_ref, zones={"battlefield"}
+        )
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+
+        self.assertEqual(
+            (False, "attacker_has_swampwalk"),
+            engine._can_block(attacker, blocker),
+        )
+        engine.move_card(urborg.object_id, "graveyard")
+        self.assertEqual((True, None), engine._can_block(attacker, blocker))
 
     def test_basic_land_type_component_rejects_malformed_descriptors(self):
         descriptor = dict(
