@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,021
+- Queued rules: 3,017
 - Reviewed behavioral blockers: 372
-- Behavioral classification/review required: 2,649
-- Passing behavioral rules: 160
+- Behavioral classification/review required: 2,645
+- Passing behavioral rules: 162
 - Subsystems: 21
-- Queue fingerprint: `4db985b3570c59d00ef80804bc50cd066f9335da6bc94b01f8a63afd03431acf`
+- Queue fingerprint: `69fac1f308b648b54ae14cb677ceb05719b561175acfe37018858dbb4b6f2c95`
 
 ## Selected next batch
 
-- Batch: `defender-attack-restriction-closure`
+- Batch: `menace-block-restriction-closure`
 - Subsystem: `keyword-abilities`
-- Rules: `702.3`, `702.3a`, `702.3b`, `702.3c`
-- Target capabilities: `combat.attack.defender`
-- Rationale: The ordinary attack-declaration, effective-keyword, replay, and multiplayer foundations already expose one legacy Defender restriction without a trusted typed capability owner. The refreshed pinned Commander frontier records 304 affected cards, 42 sole-blocker cards, and 301 material residuals, making bounded ordinary Defender the next dependency-ready medium-risk combat harvest.
+- Rules: `702.111`, `702.111a`, `702.111b`, `702.111c`
+- Target capabilities: `combat.block.menace`
+- Rationale: The current declare-blockers solver, conditional minimum-count restriction, effective-keyword query, replay, and multiplayer foundations already represent ordinary Menace without a trusted typed capability owner. The refreshed pinned Commander frontier records 372 affected cards, 24 sole-blocker cards, and 366 material residuals, making bounded ordinary Menace the next dependency-ready medium-risk combat harvest.
 
 Exit criteria:
 
-- Introduce one typed read-only Defender attack-restriction query shared by advertised attacker candidates and accepted declarations.
-- Evaluate current represented creature type, controller, and effective keyword state without printed-name or runtime Oracle-text behavior.
-- Treat multiple Defender instances as redundant and reject malformed or caller-invented keyword facts before mutation.
-- Preserve exact replay, rollback, four-player seat projection, interaction, property, and killed-mutation evidence.
+- Introduce one typed read-only Menace restriction query shared by projected minimum-blocker constraints and accepted blocker declarations.
+- Evaluate current represented attacker identity, combat participation, and effective keyword state without printed-name or runtime Oracle-text behavior.
+- Treat multiple Menace instances as redundant and reject malformed or caller-invented keyword and relationship facts before mutation.
+- Preserve exact replay, rollback, four-player seat projection, impossible-requirement interaction, property, and killed-mutation evidence.
 - Lower the ordinary keyword generically into CardProgram V2 with precise source spans and capability closure.
-- Keep ability-changing, copy, face-down, attack-permission, and the broader CR 508 restrictions-and-requirements solver explicit residuals.
+- Keep additional-block permissions, unsupported characteristic producers, and the broader CR 509 restrictions-and-requirements solver explicit residuals.
 
 ## Dependency schedule
 
@@ -58,7 +58,7 @@ Exit criteria:
 | 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 33 | 33 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 5 | 511 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 737 | 3 | 734 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 733 | 3 | 730 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 18 | `alternate-card-forms` | `card-types`, `zones`, `casting-activation`, `continuous-effects`, `replacement-prevention`, `game-actions-state` | 249 | 0 | 249 | `oracle_normalization`, `oracle_parser`, `card_program_faces`, `card_program_zone_permissions`, `mechanic_contracts` |
 | 19 | `designations-variants` | `turn-structure`, `combat`, `triggered-static-linked` | 9 | 0 | 9 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 20 | `multiplayer` | `core-game`, `turn-structure`, `combat` | 182 | 0 | 182 | `runtime_contracts`, `mechanic_contracts` |

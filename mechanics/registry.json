@@ -118,8 +118,8 @@
     {
       "mechanic_id": "defender",
       "path": "mechanics/contracts/defender.json",
-      "sha256": "09d1c3715429fc3c373f516f1edeb67af3a17ec2db30971a2ee3477b3a1844c9",
-      "version": 1
+      "sha256": "14ee50461a0cc87af25b654ea0c399360dba5634f45eda36b0a537bc23888545",
+      "version": 2
     },
     {
       "mechanic_id": "cr-210-defense",
@@ -1149,16 +1149,17 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/defender.json",
-      "contract_sha256": "09d1c3715429fc3c373f516f1edeb67af3a17ec2db30971a2ee3477b3a1844c9",
-      "contract_version": 1,
-      "coverage_status": "partial",
+      "contract_sha256": "14ee50461a0cc87af25b654ea0c399360dba5634f45eda36b0a537bc23888545",
+      "contract_version": 2,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat and CommanderEngine._attack_declaration_error",
-      "implementation_version": "combat-keywords-v2",
+      "implementation_component": "mtg_commander_sim.defender.defender_prohibits_attack and CommanderEngine._attack_declaration_error",
+      "implementation_version": "defender-attack-restriction-v1",
       "kind": "keyword_ability",
       "known_blockers": [
+        "permissions that allow a creature with defender to attack are not implemented",
         "the general CR 508.1 restrictions-and-requirements solver remains incomplete",
         "full continuous-effect dependencies and copy/face-down characteristics remain incomplete"
       ],
@@ -1168,7 +1169,14 @@
         "702.3"
       ],
       "test_ids": [
+        "test_current_effective_defender_is_case_insensitive_and_redundant",
+        "test_noncreature_and_nondefender_are_not_restricted",
+        "test_malformed_current_creature_characteristics_fail_closed",
+        "test_defender_verdict_holds_across_bounded_characteristic_grid",
         "test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker",
+        "test_effective_defender_gain_and_loss_change_shared_legality",
+        "test_four_player_defender_restriction_is_seat_scoped_and_replays",
+        "test_defender_attack_restriction_mutant_is_killed",
         "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"

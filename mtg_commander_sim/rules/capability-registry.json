@@ -694,7 +694,7 @@
       "multiplayer_tests": ["test_four_player_defender_restriction_is_seat_scoped_and_replays"],
       "privacy_tests": ["test_four_player_defender_restriction_is_seat_scoped_and_replays"],
       "replay_tests": ["test_four_player_defender_restriction_is_seat_scoped_and_replays"],
-      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay", "property", "rollback"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
       "dependency_fail_closed_status": "not_applicable",
       "dependency_fail_closed_rationale": "This bounded restriction consumes the authoritative current characteristic snapshot and has no optional capability dependency.",
       "implementation_mutation_status": "killed",

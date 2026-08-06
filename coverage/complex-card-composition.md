@@ -2,7 +2,7 @@
 title: "Complex card composition benchmark"
 status: "generated"
 authoritative_source: "coverage/complex-card-composition.json"
-verified: "72da76e2bd7f41e869fb243d0777410945ec23df26857a18cd2a54f1921461b0"
+verified: "7db83f7fd5be13e7c3c4183d8be5e1d0724e761ae46489527ff15317190ec864"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -39,9 +39,9 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Grist, Voracious Larva // Grist, the Plague Swarm | 166 | 21 | 4 | 5 | 10 | 14 | `blocked` |
 | Ojer Taq, Deepest Foundation // Temple of Civilization | 164 | 20 | 7 | 6 | 8 | 2 | `blocked` |
 | Gwen Stacy // Ghost-Spider | 163 | 21 | 5 | 5 | 7 | 13 | `blocked` |
-| Faithbound Judge // Sinner's Judgment | 161 | 21 | 5 | 7 | 9 | 1 | `blocked` |
 | Invasion of Kaladesh // Aetherwing, Golden-Scale Flagship | 161 | 16 | 4 | 5 | 7 | 17 | `blocked` |
 | Devoted Grafkeeper // Departed Soulkeeper | 159 | 19 | 5 | 6 | 7 | 7 | `blocked` |
+| Faithbound Judge // Sinner's Judgment | 159 | 21 | 5 | 7 | 8 | 1 | `blocked` |
 | Invasion of Pyrulea // Gargantuan Slabhorn | 159 | 16 | 4 | 4 | 7 | 18 | `blocked` |
 | Starforged Sword | 157 | 16 | 5 | 4 | 6 | 11 | `blocked` |
 | Invasion of Gobakhan // Lightshield Array | 156 | 12 | 5 | 4 | 8 | 19 | `blocked` |

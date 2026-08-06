@@ -335,25 +335,25 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "defender-attack-restriction-closure",
+    "batch_id": "menace-block-restriction-closure",
     "subsystem_id": "keyword-abilities",
     "rule_ids": [
-      "702.3",
-      "702.3a",
-      "702.3b",
-      "702.3c"
+      "702.111",
+      "702.111a",
+      "702.111b",
+      "702.111c"
     ],
     "target_capability_ids": [
-      "combat.attack.defender"
+      "combat.block.menace"
     ],
-    "rationale": "The ordinary attack-declaration, effective-keyword, replay, and multiplayer foundations already expose one legacy Defender restriction without a trusted typed capability owner. The refreshed pinned Commander frontier records 304 affected cards, 42 sole-blocker cards, and 301 material residuals, making bounded ordinary Defender the next dependency-ready medium-risk combat harvest.",
+    "rationale": "The current declare-blockers solver, conditional minimum-count restriction, effective-keyword query, replay, and multiplayer foundations already represent ordinary Menace without a trusted typed capability owner. The refreshed pinned Commander frontier records 372 affected cards, 24 sole-blocker cards, and 366 material residuals, making bounded ordinary Menace the next dependency-ready medium-risk combat harvest.",
     "exit_criteria": [
-      "Introduce one typed read-only Defender attack-restriction query shared by advertised attacker candidates and accepted declarations.",
-      "Evaluate current represented creature type, controller, and effective keyword state without printed-name or runtime Oracle-text behavior.",
-      "Treat multiple Defender instances as redundant and reject malformed or caller-invented keyword facts before mutation.",
-      "Preserve exact replay, rollback, four-player seat projection, interaction, property, and killed-mutation evidence.",
+      "Introduce one typed read-only Menace restriction query shared by projected minimum-blocker constraints and accepted blocker declarations.",
+      "Evaluate current represented attacker identity, combat participation, and effective keyword state without printed-name or runtime Oracle-text behavior.",
+      "Treat multiple Menace instances as redundant and reject malformed or caller-invented keyword and relationship facts before mutation.",
+      "Preserve exact replay, rollback, four-player seat projection, impossible-requirement interaction, property, and killed-mutation evidence.",
       "Lower the ordinary keyword generically into CardProgram V2 with precise source spans and capability closure.",
-      "Keep ability-changing, copy, face-down, attack-permission, and the broader CR 508 restrictions-and-requirements solver explicit residuals."
+      "Keep additional-block permissions, unsupported characteristic producers, and the broader CR 509 restrictions-and-requirements solver explicit residuals."
     ]
   }
 }

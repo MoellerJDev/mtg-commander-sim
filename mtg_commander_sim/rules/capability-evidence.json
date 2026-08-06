@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "9537e30c205e88cd0131f24a7bba9b7e41522d0eee272236b65492945afed720",
-  "declaration_source_fingerprint": "ca5348c2898027a7b947d5c1bde9290a374a1e9fe9f939fa9209ff9928a8394e",
+  "registry_fingerprint": "4a7aaff91cb6dcd07e93867eb10269cf6b792bcee2f80f71d7a6b8cd7f4d83dc",
+  "declaration_source_fingerprint": "4efb358bae6c630bd51aa49c22786f976ddd8c2a42d5294caa3ba6b6a4a29bf4",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -606,6 +606,215 @@
         "commander_review"
       ],
       "applicability_note": "Replay the attachment command and verify the exact relation result."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_effective_defender_gain_and_loss_change_shared_legality",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Recompute the shared candidate/proposal verdict after the represented current keyword state gains or loses Defender."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_defender_restriction_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exclude the Defender creature while an ordinary attacker selects one of three opponents."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_defender_attack_restriction_mutant_is_killed",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that stops recognizing the current Defender keyword during attack eligibility."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "negative",
+      "test_id": "tests.test_defender_rules.DefenderRuleTests.test_malformed_current_creature_characteristics_fail_closed",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed current type or keyword characteristics before advertising or accepting an attack."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "negative",
+      "test_id": "tests.test_defender_rules.DefenderRuleTests.test_noncreature_and_nondefender_are_not_restricted",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Leave noncreatures and current creatures without Defender to their independent declaration checks."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use the same Defender verdict to omit a candidate and reject an injected declaration atomically."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "positive",
+      "test_id": "tests.test_defender_rules.DefenderRuleTests.test_current_effective_defender_is_case_insensitive_and_redundant",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Treat one or several case-insensitive current Defender instances as the same attack prohibition."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_defender_restriction_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Issue the public attacker decision only to the active seat without creating another seat's pilot payload."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "property",
+      "test_id": "tests.test_defender_rules.DefenderRuleTests.test_defender_verdict_holds_across_bounded_characteristic_grid",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Check creature status and zero-to-three redundant Defender instances across a bounded grid."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_defender_restriction_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact four-player declaration with the prohibited creature absent from the canonical attack."
+    },
+    {
+      "capability_id": "combat.attack.defender",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker",
+      "official_rule_ids": [
+        "508.1a",
+        "508.1c",
+        "702.3",
+        "702.3a",
+        "702.3b",
+        "702.3c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an injected Defender attacker without changing the authoritative state hash."
     },
     {
       "capability_id": "combat.attack.haste",
@@ -9115,5 +9324,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "e97c75bdf48a6ce9aa9dc25cdad8a2368dcf5b67d78c7509aefc24e8377cb6af"
+  "fingerprint": "acc5138b327561d987ba0b65c7cee8e5b4b50aa5fa0a2dc845c6a964468d06ef"
 }
