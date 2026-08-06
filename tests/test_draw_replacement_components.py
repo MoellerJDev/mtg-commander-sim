@@ -127,12 +127,20 @@ class DrawReplacementComponentTests(unittest.TestCase):
             },
             {value["handler_id"] for value in inventory},
         )
-        self.assertTrue(
-            all(
-                value["capability_dependencies"]
-                == ["zone.draw.library_to_hand"]
+        self.assertEqual(
+            {
+                DREDGE_HANDLER_ID: ["zone.draw.library_to_hand"],
+                DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID: [
+                    "zone.draw.library_to_hand"
+                ],
+                DRAW_RESULT_MULTIPLIER_HANDLER_ID: [
+                    "zone.draw.result_generated_ordering"
+                ],
+            },
+            {
+                value["handler_id"]: value["capability_dependencies"]
                 for value in inventory
-            )
+            },
         )
         with self.assertRaisesRegex(SemanticNodeError, "frozen"):
             registry.register(DredgeReplacementHandler())
