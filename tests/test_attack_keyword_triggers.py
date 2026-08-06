@@ -142,7 +142,7 @@ class AttackKeywordTriggerIntegrationTests(unittest.TestCase):
         session = self.make_session(702_083_001, players=2)
         engine = session.engine
         attacker = self.permanent(engine, "Lone attacker")
-        self.permanent(
+        exalted_source = self.permanent(
             engine,
             "Exalted source",
             CombatKeywordTriggerKind.EXALTED,
@@ -153,6 +153,7 @@ class AttackKeywordTriggerIntegrationTests(unittest.TestCase):
         self.assertTrue(result.ok, result.summary)
         self.assertEqual(1, len(session.state.stack))
         self.assertIn("Exalted", session.state.stack[-1].label)
+        engine.move_card(exalted_source.object_id, "graveyard")
 
         for _seat in engine.active_seats:
             pass_current(session)
