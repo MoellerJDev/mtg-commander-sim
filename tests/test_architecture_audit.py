@@ -48,7 +48,7 @@ class ArchitectureAuditTests(unittest.TestCase):
             len(architecture["direct_game_state_write_heuristic"]["locations"]),
         )
         handlers = architecture["semantic_handlers"]
-        self.assertEqual(84, handlers["registered_handler_count"])
+        self.assertEqual(85, handlers["registered_handler_count"])
         self.assertEqual(
             handlers["registered_handler_count"],
             len(handlers["registered_operations"]),
@@ -69,7 +69,7 @@ class ArchitectureAuditTests(unittest.TestCase):
         )
         self.assertEqual(0, handlers["legacy_apply_effect_branch_count"])
         self.assertEqual(3, handlers["engine_string_dispatch_branch_count"])
-        self.assertEqual(20, handlers["registered_runtime_handler_count"])
+        self.assertEqual(21, handlers["registered_runtime_handler_count"])
         self.assertEqual(
             handlers["registered_runtime_handler_count"],
             len(handlers["runtime_handlers"]),

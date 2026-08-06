@@ -9013,20 +9013,14 @@ class CommanderEngine(
                         draw_request.current.count,
                         reason=draw_request.current.reason,
                         private=draw_request.current.private,
-                        post_draw_actions=(
-                            draw_request.current.post_draw_actions
-                        ),
+                        post_draw_actions=draw_request.current.post_draw_actions,
                         continuation={
                             "kind": "semantic_resolution",
                             "stack_ref": stack_ref,
-                            "effects": list(
-                                draw_request.remaining_effects
-                            ),
+                            "effects": list(draw_request.remaining_effects),
                             "destination": destination,
                             "note": note,
-                            "instruction_pointer": (
-                                instruction_pointer + index + 1
-                            ),
+                            "instruction_pointer": instruction_pointer + index + 1,
                         },
                     )
                     return
