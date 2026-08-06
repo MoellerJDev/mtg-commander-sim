@@ -121,6 +121,7 @@
       "test_combat_phase_rules",
       "test_declare_attackers_rules",
       "test_declare_blockers_rules",
+      "test_defender_rules",
       "test_end_of_combat_rules",
       "test_goad_rules",
       "test_haste_rules"

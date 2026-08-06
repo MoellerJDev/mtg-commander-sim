@@ -1700,7 +1700,7 @@
       "highest_fan_out": [
         {
           "fan_in": 7,
-          "fan_out": 64,
+          "fan_out": 65,
           "module": "mtg_commander_sim.engine"
         },
         {
@@ -1774,7 +1774,7 @@
           "module": "mtg_commander_sim.rules.activation.commit"
         }
       ],
-      "internal_edges": 892,
+      "internal_edges": 895,
       "modules": [
         {
           "fan_in": 2,
@@ -1917,7 +1917,7 @@
           "module": "mtg_commander_sim.cast_timing"
         },
         {
-          "fan_in": 4,
+          "fan_in": 5,
           "fan_out": 4,
           "module": "mtg_commander_sim.characteristic_evaluation"
         },
@@ -2203,6 +2203,11 @@
         },
         {
           "fan_in": 1,
+          "fan_out": 2,
+          "module": "mtg_commander_sim.defender"
+        },
+        {
+          "fan_in": 1,
           "fan_out": 1,
           "module": "mtg_commander_sim.delayed_triggers"
         },
@@ -2288,7 +2293,7 @@
         },
         {
           "fan_in": 7,
-          "fan_out": 64,
+          "fan_out": 65,
           "module": "mtg_commander_sim.engine"
         },
         {
@@ -2307,7 +2312,7 @@
           "module": "mtg_commander_sim.haste"
         },
         {
-          "fan_in": 2,
+          "fan_in": 3,
           "fan_out": 0,
           "module": "mtg_commander_sim.keyword_abilities"
         },
@@ -3070,7 +3075,7 @@
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 260,
+      "file_count": 261,
       "largest_functions_and_methods": [
         {
           "end_line": 1645,
@@ -3403,7 +3408,7 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 101114,
+      "logical_lines": 101145,
       "methods": {
         "dunder": 227,
         "private": 630,
@@ -3583,8 +3588,8 @@
           "file": "mtg_commander_sim/rules/capabilities.py",
           "functions_and_methods": 27,
           "language": "python",
-          "logical_lines": 772,
-          "physical_lines": 839
+          "logical_lines": 774,
+          "physical_lines": 841
         },
         {
           "file": "mtg_commander_sim/replacement/ordering.py",
@@ -4896,18 +4901,18 @@
           "physical_lines": 70
         },
         {
-          "file": "mtg_commander_sim/combat.py",
-          "functions_and_methods": 5,
-          "language": "python",
-          "logical_lines": 60,
-          "physical_lines": 81
-        },
-        {
           "file": "mtg_commander_sim/card_programs/validation.py",
           "functions_and_methods": 2,
           "language": "python",
           "logical_lines": 59,
           "physical_lines": 67
+        },
+        {
+          "file": "mtg_commander_sim/combat.py",
+          "functions_and_methods": 5,
+          "language": "python",
+          "logical_lines": 59,
+          "physical_lines": 80
         },
         {
           "file": "mtg_commander_sim/client.py",
@@ -5055,6 +5060,13 @@
           "language": "python",
           "logical_lines": 31,
           "physical_lines": 38
+        },
+        {
+          "file": "mtg_commander_sim/defender.py",
+          "functions_and_methods": 1,
+          "language": "python",
+          "logical_lines": 30,
+          "physical_lines": 46
         },
         {
           "file": "mtg_commander_sim/python_runtime.py",
@@ -5647,8 +5659,8 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 110241,
-      "python_file_count": 244,
+      "physical_lines": 110288,
+      "python_file_count": 245,
       "review_thresholds": {
         "function_logical_lines_review": 150,
         "module_logical_lines_review": 1500
@@ -5665,7 +5677,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1308,
+      "top_level_functions": 1309,
       "web_file_count": 16
     },
     "semantic_handlers": {
@@ -8299,7 +8311,7 @@
         {
           "condition": "isinstance(operation, str) and operation",
           "file": "mtg_commander_sim/rules/capabilities.py",
-          "line": 678,
+          "line": 680,
           "string_literals": [],
           "symbol": "nested_operations"
         },
@@ -9082,13 +9094,13 @@
     "card_program_v2_present": true,
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.051039,
-      "material_residuals": 49634,
+      "exact_fraction": 0.052367,
+      "material_residuals": 49333,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
         "declaration_restriction": 153,
-        "dependency_contract": 7058,
+        "dependency_contract": 6757,
         "effect": 6461,
         "mana_ability": 676,
         "replacement_effect": 1523,
@@ -9108,8 +9120,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 1614,
-        "partial": 13592,
+        "exact": 1656,
+        "partial": 13550,
         "unresolved": 16417
       },
       "template_count": 183,
@@ -9123,13 +9135,13 @@
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.117119,
-      "material_residuals": 57339,
+      "exact_fraction": 0.118572,
+      "material_residuals": 57016,
       "residual_kinds": {
         "cost": 2015,
         "declaration_cost": 11,
         "declaration_restriction": 170,
-        "dependency_contract": 7569,
+        "dependency_contract": 7246,
         "effect": 7168,
         "mana_ability": 771,
         "replacement_effect": 1758,
@@ -9149,8 +9161,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 4514,
-        "partial": 14753,
+        "exact": 4570,
+        "partial": 14697,
         "unresolved": 19275
       },
       "template_count": 183,
@@ -9160,8 +9172,8 @@
     "mechanic_contracts": {
       "current_snapshot_complete": false,
       "status_counts": {
-        "partial": 60,
-        "tested": 3,
+        "partial": 59,
+        "tested": 4,
         "trusted": 5,
         "unclassified": 357
       },
@@ -9235,31 +9247,31 @@
         }
       ],
       "dependency_fail_closed_status_counts": {
-        "not_applicable": 24,
+        "not_applicable": 25,
         "not_run": 3,
         "passed": 31
       },
       "effective_date": "2026-06-19",
       "evidence": {
         "class_counts": {
-          "interaction": 86,
-          "multiplayer": 45,
-          "mutation": 55,
-          "negative": 83,
-          "positive": 97,
-          "privacy": 35,
-          "property": 2,
-          "replay": 65,
-          "rollback": 5
+          "interaction": 87,
+          "multiplayer": 46,
+          "mutation": 56,
+          "negative": 85,
+          "positive": 99,
+          "privacy": 36,
+          "property": 3,
+          "replay": 66,
+          "rollback": 6
         },
-        "declaration_count": 473,
-        "declaration_source_fingerprint": "ca5348c2898027a7b947d5c1bde9290a374a1e9fe9f939fa9209ff9928a8394e",
-        "fingerprint": "e97c75bdf48a6ce9aa9dc25cdad8a2368dcf5b67d78c7509aefc24e8377cb6af",
-        "registry_fingerprint": "9537e30c205e88cd0131f24a7bba9b7e41522d0eee272236b65492945afed720"
+        "declaration_count": 484,
+        "declaration_source_fingerprint": "4efb358bae6c630bd51aa49c22786f976ddd8c2a42d5294caa3ba6b6a4a29bf4",
+        "fingerprint": "acc5138b327561d987ba0b65c7cee8e5b4b50aa5fa0a2dc845c6a964468d06ef",
+        "registry_fingerprint": "4a7aaff91cb6dcd07e93867eb10269cf6b792bcee2f80f71d7a6b8cd7f4d83dc"
       },
-      "fingerprint": "9537e30c205e88cd0131f24a7bba9b7e41522d0eee272236b65492945afed720",
+      "fingerprint": "4a7aaff91cb6dcd07e93867eb10269cf6b792bcee2f80f71d7a6b8cd7f4d83dc",
       "implementation_mutation_status_counts": {
-        "killed": 51,
+        "killed": 52,
         "not_run": 7
       },
       "profiles": [
@@ -9267,15 +9279,15 @@
         "commander_duel",
         "commander_review"
       ],
-      "registry_version": 34,
+      "registry_version": 35,
       "schema_version": 1,
       "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
       "status_counts": {
         "blocked": 4,
         "tested": 6,
-        "trusted": 48
+        "trusted": 49
       },
-      "total": 58
+      "total": 59
     },
     "stages": [
       {
@@ -9417,7 +9429,7 @@
             "mtg_commander_sim/oracle_ir.py:57",
             "mtg_commander_sim/preflight.py:28",
             "mtg_commander_sim/rules/__init__.py:3",
-            "mtg_commander_sim/rules/capabilities.py:257"
+            "mtg_commander_sim/rules/capabilities.py:259"
           ],
           "_dependency_gate": [
             "mtg_commander_sim/oracle_ir.py:29"
@@ -9911,7 +9923,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "b15cf48a557c9ba9ab1e50d3e6698545fffc17827c28848bb9032d3bd5d24c26"
+          "verified": "6a91aaec725831a9767c749e302a19f528570357fae15e2c06db604de95210f6"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -10007,15 +10019,15 @@
     "conformance": {
       "blocked_cases": 372,
       "current_snapshot_complete": false,
-      "definition_only_cases": 98,
-      "semantic_passing_cases": 181,
+      "definition_only_cases": 100,
+      "semantic_passing_cases": 183,
       "total_cases": 3300,
-      "unreviewed_cases": 2649
+      "unreviewed_cases": 2645
     },
     "mechanics": {
       "status_counts": {
-        "partial": 60,
-        "tested": 3,
+        "partial": 59,
+        "tested": 4,
         "trusted": 5,
         "unclassified": 357
       },
@@ -10322,7 +10334,7 @@
       "playwright_e2e_journeys": 9
     },
     "mutation_testing": {
-      "capability_mutation_declarations": 55,
+      "capability_mutation_declarations": 56,
       "configured_tools": [],
       "focused_executable_suite": true,
       "mutation_score": null
@@ -10350,18 +10362,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1659,
-      "discovered_total": 4959,
+      "conventional_ast_cases": 1667,
+      "discovered_total": 4967,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 49,
         "fuzz_named": 1,
         "privacy_or_projection_named": 22,
-        "replay_named": 100,
+        "replay_named": 101,
         "server_named": 25
       },
       "reconciles": true,
-      "test_files": 168
+      "test_files": 169
     }
   }
 }

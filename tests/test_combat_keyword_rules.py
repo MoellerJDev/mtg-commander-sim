@@ -743,7 +743,7 @@ class CombatKeywordRuleTests(unittest.TestCase):
             engine,
             "A",
             "Wall",
-            keywords=("Defender", "Haste"),
+            keywords=("Defender", "DEFENDER", "Haste"),
         )
         ordinary = self.token(
             engine,
@@ -768,6 +768,99 @@ class CombatKeywordRuleTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("defender", result.summary)
         self.assertEqual(before, authoritative_state_hash(session.state))
+
+    def test_effective_defender_gain_and_loss_change_shared_legality(self):
+        session = self.make_session(50841, step="declare_blockers")
+        engine = session.engine
+        engine.state.phase_index = 5
+        engine.state.step = "declare_attackers"
+        attacker = self.token(
+            engine,
+            "A",
+            "Changing Defender",
+            keywords=("Haste",),
+        )
+        ordinary = self.token(
+            engine,
+            "A",
+            "Ordinary companion",
+            keywords=("Haste",),
+        )
+
+        self.assertIsNone(engine._attack_declaration_error(attacker, "A"))
+        attacker.temporary_keywords.append("Defender")
+        self.assertIn(
+            "defender",
+            engine._attack_declaration_error(attacker, "A") or "",
+        )
+        engine._issue_attackers()
+        candidates = {
+            row["id"]
+            for row in engine.state.pending_decision.payload_by_actor["A"][
+                "candidates"
+            ]
+        }
+        self.assertNotIn(attacker.ref, candidates)
+        self.assertIn(ordinary.ref, candidates)
+
+        engine.state.pending_decision = None
+        attacker.temporary_keywords.remove("Defender")
+        engine._issue_attackers()
+        candidates = {
+            row["id"]
+            for row in engine.state.pending_decision.payload_by_actor["A"][
+                "candidates"
+            ]
+        }
+        self.assertIn(attacker.ref, candidates)
+        self.assertIn(ordinary.ref, candidates)
+
+    def test_four_player_defender_restriction_is_seat_scoped_and_replays(self):
+        session = self.make_session(
+            50842,
+            step="declare_blockers",
+            players=4,
+        )
+        engine = session.engine
+        engine.state.phase_index = 5
+        engine.state.step = "declare_attackers"
+        wall = self.token(
+            engine,
+            "A",
+            "Four-player Wall",
+            keywords=("Defender", "Haste"),
+        )
+        attacker = self.token(
+            engine,
+            "A",
+            "Four-player Attacker",
+            keywords=("Haste",),
+        )
+        engine._issue_attackers()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+
+        decision = engine.state.pending_decision
+        self.assertEqual({"A"}, set(decision.payload_by_actor))
+        candidates = {
+            row["id"]
+            for row in decision.payload_by_actor["A"]["candidates"]
+        }
+        self.assertNotIn(wall.ref, candidates)
+        self.assertIn(attacker.ref, candidates)
+
+        accepted = session.act(
+            "pilot:A",
+            {"a": "attack", "atk": {attacker.ref: "C"}},
+        )
+        self.assertTrue(accepted.ok, accepted.summary)
+        self.assertEqual("C", attacker.attacking)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "defender-four-player"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
 
 
 if __name__ == "__main__":

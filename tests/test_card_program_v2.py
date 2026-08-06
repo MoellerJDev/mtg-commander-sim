@@ -178,6 +178,33 @@ class CardProgramV2Tests(unittest.TestCase):
                     ability["source_span"],
                 )
                 self.assertEqual([], program.to_dict()["residuals"])
+
+    def test_defender_keyword_lowers_with_precise_capability_closed_span(self):
+        keyword = "defender"
+        program = compile_card_program(
+            self.db,
+            _keyword_card(keyword, "Defender", 702_003),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+
+        self.assertEqual(
+            ("combat.attack.defender",),
+            program.capability_dependencies,
+        )
+        self.assertEqual(
+            "capability_closed",
+            program.trust_closure["trust_basis"],
+        )
+        self.assertTrue(program.trust_closure["trusted"])
+        ability = program.to_dict()["abilities"][0]
+        self.assertEqual(
+            {"line": 1, "start": 0, "end": len(keyword)},
+            ability["source_span"],
+        )
+        self.assertEqual([], program.to_dict()["residuals"])
+
     def test_damage_aftermath_card_program_is_capability_closed(self):
         current = compile_card_program(
             self.db,

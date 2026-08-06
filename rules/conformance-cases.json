@@ -57966,23 +57966,27 @@
       "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.3",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/defender.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded attack restriction and redundancy rule are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.3",
       "rule_text_sha256": "157ddc59b5e4e7ca9a05ffa09e4fa7cdefe073d8a3ebdf56b70a8446b64ae83f",
       "schema_version": 1,
@@ -57991,26 +57995,30 @@
         "end_line": 3904,
         "start_line": 3903
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.3a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_defender_keyword_lowers_with_precise_capability_closed_span"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
+      ],
+      "notes": [
+        "A printed Defender keyword node requests the fine-grained attack-restriction capability."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.3a",
       "rule_text_sha256": "fc788792e8c2c6e075b517a6c90562a0a39eec6e8f2e36c7df37baa76f96377b",
       "schema_version": 1,
@@ -58019,26 +58027,49 @@
         "end_line": 3906,
         "start_line": 3905
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.3b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "702.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_effective_defender_gain_and_loss_change_shared_legality",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_defender_restriction_is_seat_scoped_and_replays"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.defender.defender_prohibits_attack",
+        "CommanderEngine._attack_declaration_error",
+        "CommanderEngine._attack_declaration_components",
+        "CommanderEngine._complete_attackers"
+      ],
+      "notes": [
+        "The same current-characteristic verdict omits advertised candidates and rejects injected declarations before mutation."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "702.3b",
       "rule_text_sha256": "a7a508f6c1a0aadce6d3dd40a3ad62ab23321a1280403a33573430e2089d52c5",
       "schema_version": 1,
@@ -58047,26 +58078,39 @@
         "end_line": 3908,
         "start_line": 3907
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.3c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.3"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_defender_rules.DefenderRuleTests.test_current_effective_defender_is_case_insensitive_and_redundant",
+        "tests.test_defender_rules.DefenderRuleTests.test_defender_verdict_holds_across_bounded_characteristic_grid"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.defender.defender_prohibits_attack"
+      ],
+      "notes": [
+        "Case-insensitive keyword normalization collapses multiple current Defender instances to one prohibition."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.3c",
       "rule_text_sha256": "ca7eb89e4e09e05455e1f29e34a53ae1c106a80d1f6c5883b9ce7909db00ad3a",
       "schema_version": 1,
@@ -58075,7 +58119,7 @@
         "end_line": 3910,
         "start_line": 3909
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
