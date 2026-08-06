@@ -1,8 +1,8 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/combat.py, combat_relationship_state.py, combat_damage_snapshot.py, combat_damage_values.py, combat_damage_assignment.py, combat_damage_trample.py, combat_damage_sequence.py, combat_damage_engine_adapter.py, combat_damage_projection.py, damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
-verified: "2026-08-05"
+authoritative_source: "mtg_commander_sim/combat.py, combat_relationship_state.py, combat_damage_snapshot.py, combat_damage_values.py, combat_damage_assignment.py, combat_damage_trample.py, combat_damage_sequence.py, combat_damage_engine_adapter.py, combat_damage_projection.py, damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, deathtouch.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, state_based_actions.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
+verified: "2026-08-06"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -57,6 +57,14 @@ Indestructible and prevention do not change ordinary Trample's
 lethal-assignment threshold. Lethal damage is still assigned using toughness,
 marked damage, and deathtouch; indestructible can prohibit the later
 state-based destruction, and protection can prevent the later damage result.
+`deathtouch.py` validates the lethal-assignment contribution and derives the
+result only from the pinned damage-source keyword snapshot. Any positive final
+damage to a creature creates a typed result even when Wither or Infect changes
+the ordinary marked-damage result. The marker survives only through the next
+state-based-action check: a destructible positive-toughness creature is
+destroyed, while an Indestructible survivor consumes the marker and cannot die
+from that old damage after later losing Indestructible. Regeneration remains
+outside this bounded result capability.
 Double Strike creates a second real damage step and rebuilds a fresh snapshot,
 so a blocker that died in the first step is absent while the attacker remains
 historically blocked; ordinary Trample may then use the still-legal attacked
@@ -72,7 +80,7 @@ The transaction has six explicit stages:
 3. Apply forced damage effects or suspend an affected-player/controller choice
    before mutation.
 4. Group every simultaneous life, poison, -1/-1, marked-damage, loyalty,
-   defense, lifelink, toxic, and nested replacement result beneath immutable
+   defense, deathtouch, lifelink, toxic, and nested replacement result beneath immutable
    affected-player or affected-permanent `damage.results` roots. Resolve the
    containing event before its contained result events.
 5. Validate every result and object incarnation, build mutation-only result,
@@ -88,8 +96,9 @@ result per source/controller; fixed total toxic creates additional poison only
 after positive creature combat damage to a player. An unresolved toxic value,
 stale recipient identity, unrepresented source fact, or malformed result leaf
 rejects the batch before any result commits. State-based actions still occur
-after damage; the transaction does not destroy creatures or remove defeated
-players itself.
+after damage; the transaction records Deathtouch's one-check fact but the
+state-based-action owner performs destruction and marker consumption. The
+damage transaction does not remove defeated players itself.
 
 ## Compiled fixed-damage producers
 
@@ -207,12 +216,14 @@ The trusted capabilities are deliberately narrow:
 
 - `combat.damage.participation.strike_steps`
 - `combat.damage.assignment.canonical`
+- `combat.damage.assignment.deathtouch`
 - `combat.damage.assignment.trample`
 - `damage.replacement.static_quantity`
 - `damage.prevention.static_fixed`
 - `damage.prevention.persistent_amount`
 - `damage.prevention.aftermath.damage`
 - `damage.redirection.static_to_source`
+- `damage.result.deathtouch`
 - `damage.result.infect`
 - `damage.result.wither`
 - `damage.result.lifelink`
@@ -234,7 +245,7 @@ remain blocked.
 
 ## Corpus result
 
-The complete pinned census binds Infect, Wither, Lifelink, and fixed Toxic
+The complete pinned census binds Deathtouch, Infect, Wither, Lifelink, and fixed Toxic
 nodes to trusted fine-grained result capabilities. Oracle IR v20 recognizes
 closed whole-line grammar for static double damage, fixed static prevention,
 finite and divided shield creation, chosen-source next-instance/all-damage

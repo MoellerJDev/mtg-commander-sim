@@ -281,12 +281,20 @@ class CardProgramV2Tests(unittest.TestCase):
         self.assertEqual(historical.to_dict(), restored.to_dict())
 
     def test_keyword_programs_declare_exact_damage_result_capabilities(self):
-        for index, (keyword, oracle_text) in enumerate(
+        for index, (keyword, oracle_text, expected) in enumerate(
             (
-                ("infect", "Infect"),
-                ("wither", "Wither"),
-                ("lifelink", "Lifelink"),
-                ("toxic", "Toxic 2"),
+                ("infect", "Infect", ("damage.result.infect",)),
+                ("wither", "Wither", ("damage.result.wither",)),
+                ("lifelink", "Lifelink", ("damage.result.lifelink",)),
+                ("toxic", "Toxic 2", ("damage.result.toxic",)),
+                (
+                    "deathtouch",
+                    "Deathtouch",
+                    (
+                        "combat.damage.assignment.deathtouch",
+                        "damage.result.deathtouch",
+                    ),
+                ),
             ),
             101,
         ):
@@ -299,7 +307,7 @@ class CardProgramV2Tests(unittest.TestCase):
                     trust_level="trusted",
                 )
                 self.assertEqual(
-                    (f"damage.result.{keyword}",),
+                    expected,
                     program.capability_dependencies,
                 )
                 self.assertEqual("capability_closed", program.trust_closure["trust_basis"])

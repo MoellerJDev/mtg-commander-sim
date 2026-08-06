@@ -115,7 +115,7 @@
     "test_battle_damage_and_state_action_replay_exactly"
   ],
   "implementation": {
-    "component": "CharacteristicState, CommanderEngine._initialize_intrinsic_entry_counters, and CommanderEngine._apply_damage_results_to_permanent",
+    "component": "CharacteristicState, CommanderEngine._initialize_intrinsic_entry_counters, and damage.apply_damage_results_to_permanent",
     "version": "defense-v2"
   },
   "known_blockers": [

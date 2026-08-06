@@ -102,10 +102,13 @@ from .declaration_restrictions import (
     parse_declaration_restriction_line,
 )
 from .damage import (
-    apply_damage_results_to_permanent,
     combat_damage_proposals,
     DamageError,
     resolve_damage_batch,
+)
+from .damage_results import (
+    consume_deathtouch_damage_checks,
+    DamageResultError,
 )
 from .damage_prevention import expire_end_of_turn_damage_modifiers
 from .drawing import (
@@ -1535,25 +1538,6 @@ class CommanderEngine(
         if counter == "defense" and before > 0 and after == 0:
             self._queue_siege_defeated_trigger(card)
         return before, after
-
-    def _apply_damage_results_to_permanent(
-        self,
-        card: CardInstance,
-        amount: int,
-        *,
-        deathtouch: bool = False,
-    ) -> dict[str, Any]:
-        """Compatibility adapter for the dedicated damage mutation owner."""
-
-        try:
-            return apply_damage_results_to_permanent(
-                self,
-                card,
-                amount,
-                deathtouch=deathtouch,
-            )
-        except DamageError as exc:
-            raise GameRuleError(str(exc)) from exc
 
     def move_card(
         self,
@@ -12657,6 +12641,13 @@ class CommanderEngine(
                 permanents=self._permanent_sba_snapshots(),
                 objects=self._object_sba_snapshots(),
             )
+            try:
+                consume_deathtouch_damage_checks(
+                    self,
+                    sba_batch.deathtouch_checks,
+                )
+            except DamageResultError as exc:
+                raise GameRuleError(str(exc)) from exc
             ordinary_move_to_grave = unique_preserving_order(
                 [
                     *sba_batch.put_in_graveyard,

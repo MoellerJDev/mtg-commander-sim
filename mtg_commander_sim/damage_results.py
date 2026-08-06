@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal, Mapping, Protocol, Sequence
 
+from . import deathtouch as deathtouch_rules
 from .counter_state import (
     apply_counter_changes,
     CounterChange,
@@ -590,6 +591,11 @@ def _accumulate_permanent_damage(
         target_types=damageable,
     )
     if facts.amount and "creature" in damageable:
+        has_deathtouch = deathtouch_rules.deathtouch_damage_result_applies(
+            amount=facts.amount,
+            source_keywords=facts.source_keywords,
+            target_types=damageable,
+        )
         if facts.source_keywords.intersection({"infect", "wither"}):
             key = (
                 affected.object_id,
@@ -611,9 +617,9 @@ def _accumulate_permanent_damage(
             state.permanent_marks[affected.object_id] = (
                 prior + facts.amount,
                 [*event_ids, facts.event_id],
-                deathtouch or bool(damage_event.payload.get("deathtouch")),
+                deathtouch or has_deathtouch,
             )
-        if bool(damage_event.payload.get("deathtouch")):
+        if has_deathtouch:
             _append_permanent_leaf(
                 accumulator,
                 event_id=f"damage.result:deathtouch:{facts.event_id}",
@@ -1279,6 +1285,8 @@ def plan_damage_result_commit(
             )
         ),
     )
+
+
 def commit_damage_result_plan(
     host: DamageResultHost,
     plan: DamageResultCommitPlan,
@@ -1306,3 +1314,29 @@ def commit_damage_result_plan(
         changed_players=plan.changed_players,
         changed_objects=plan.changed_objects,
     )
+
+
+def consume_deathtouch_damage_checks(
+    host: DamageResultHost,
+    object_ids: Sequence[str],
+) -> tuple[str, ...]:
+    """Consume CR 702.2b markers after one state-based-action check."""
+
+    values = tuple(object_ids)
+    if len(values) != len(set(values)) or any(
+        not isinstance(value, str) or not value for value in values
+    ):
+        raise DamageResultError(
+            "Deathtouch check identities must be unique nonempty strings"
+        )
+    cards = []
+    for object_id in values:
+        card = host.state.cards.get(object_id)
+        if card is None or card.zone != "battlefield" or card.phased_out:
+            raise DamageResultError(
+                "A deathtouch check recipient changed before consumption"
+            )
+        cards.append(card)
+    for card in cards:
+        card.deathtouch_damage = False
+    return values

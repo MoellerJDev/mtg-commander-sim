@@ -258,7 +258,7 @@
       "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
+        "damage.apply_damage_results_to_permanent",
         "CommanderEngine._change_permanent_counter",
         "CommanderEngine._apply_combat_assignments"
       ],

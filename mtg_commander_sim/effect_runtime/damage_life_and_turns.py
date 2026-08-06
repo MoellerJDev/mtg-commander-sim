@@ -79,7 +79,6 @@ def _apply_damage(
             combat=False,
             reason=reason,
             unpreventable=bool(effect.get("unpreventable", False)),
-            deathtouch=bool(effect.get("deathtouch", False)),
             source_override=pinned_source,
         )
         result = resolve_damage_batch(

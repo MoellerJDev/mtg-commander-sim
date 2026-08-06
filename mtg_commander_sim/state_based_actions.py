@@ -127,6 +127,7 @@ class StateBasedActionBatch:
     ] = ()
     cease: tuple[str, ...] = ()
     world_rule: tuple[str, ...] = ()
+    deathtouch_checks: tuple[str, ...] = ()
 
     @property
     def changed(self) -> bool:
@@ -157,6 +158,7 @@ def evaluate_permanent_state_based_actions(
     counter_pairs: dict[str, int] = {}
     counter_maximums: dict[tuple[str, str], int] = {}
     world_permanents: list[PermanentSnapshot] = []
+    deathtouch_checks: set[str] = set()
 
     for permanent in permanents:
         card_types = {
@@ -178,6 +180,8 @@ def evaluate_permanent_state_based_actions(
             world_permanents.append(permanent)
 
         if is_creature and permanent.toughness is not None:
+            if permanent.deathtouch_damage:
+                deathtouch_checks.add(permanent.object_id)
             if permanent.toughness <= 0:
                 put_in_graveyard.add(permanent.object_id)
             elif (
@@ -292,6 +296,7 @@ def evaluate_permanent_state_based_actions(
             )
         ),
         world_rule=tuple(sorted(world_rule)),
+        deathtouch_checks=tuple(sorted(deathtouch_checks)),
     )
 
 
@@ -334,4 +339,5 @@ def evaluate_state_based_actions(
         ),
         cease=tuple(sorted(cease)),
         world_rule=permanent_batch.world_rule,
+        deathtouch_checks=permanent_batch.deathtouch_checks,
     )

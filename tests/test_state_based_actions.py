@@ -19,6 +19,7 @@ from mtg_commander_sim.ability_fragments import (
     ability_fragment_to_dict,
 )
 from mtg_commander_sim.carddb import CardRecord
+from mtg_commander_sim.damage import apply_damage_results_to_permanent
 from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import DecisionGroup, StackItem
 from mtg_commander_sim.projection import StateProjector
@@ -950,7 +951,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
         )[0]
         battle = self.card(engine, battle_ref)
 
-        result = engine._apply_damage_results_to_permanent(
+        result = apply_damage_results_to_permanent(
+            engine,
             battle,
             2,
         )
@@ -975,7 +977,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
             GameRuleError,
             "is not a Battle, creature, or planeswalker",
         ):
-            engine._apply_damage_results_to_permanent(
+            apply_damage_results_to_permanent(
+                engine,
                 artifact,
                 1,
             )
@@ -996,10 +999,11 @@ class StateBasedActionEngineTests(unittest.TestCase):
         before_life = engine.state.players["B"].life
         before_events = len(engine.state.events)
 
-        result = engine._apply_damage_results_to_permanent(
+        result = apply_damage_results_to_permanent(
+            engine,
             creature,
             0,
-            deathtouch=True,
+            source_keywords=("Deathtouch",),
         )
         engine.apply_effect(
             {
@@ -1067,7 +1071,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
             GameRuleError,
             "Damage cannot be negative",
         ):
-            engine._apply_damage_results_to_permanent(
+            apply_damage_results_to_permanent(
+                engine,
                 creature,
                 -1,
             )
@@ -1148,7 +1153,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
         )[0]
         creature = self.card(engine, creature_ref)
 
-        engine._apply_damage_results_to_permanent(
+        apply_damage_results_to_permanent(
+            engine,
             creature,
             2,
         )
@@ -1176,7 +1182,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
         )[0]
         permanent = self.card(engine, permanent_ref)
 
-        result = engine._apply_damage_results_to_permanent(
+        result = apply_damage_results_to_permanent(
+            engine,
             permanent,
             2,
         )
@@ -1200,7 +1207,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
             },
         )[0]
         creature = self.card(engine, creature_ref)
-        engine._apply_damage_results_to_permanent(
+        apply_damage_results_to_permanent(
+            engine,
             creature,
             2,
         )
@@ -1229,7 +1237,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
         walker = self.card(engine, walker_ref)
         self.assertEqual(4, walker.counters["loyalty"])
 
-        result = engine._apply_damage_results_to_permanent(
+        result = apply_damage_results_to_permanent(
+            engine,
             walker,
             2,
         )
@@ -1332,7 +1341,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
             )
         )
 
-        result = engine._apply_damage_results_to_permanent(siege, 2)
+        result = apply_damage_results_to_permanent(engine, siege, 2)
         self.assertEqual(2, result["defense_removed"])
         self.assertFalse(engine._stabilize())
 
