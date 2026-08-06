@@ -33,6 +33,7 @@
       "test_draw_coordinator_iteration",
       "test_draw_replacement_components",
       "test_draw_restrictions",
+      "test_draw_result_ordering",
       "test_draw_transaction_commit",
       "test_draw_transaction_model",
       "test_life_change",

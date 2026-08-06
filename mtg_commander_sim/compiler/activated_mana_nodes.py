@@ -192,6 +192,7 @@ def _activated_effect_dependency_gate(
             "damage_each_opponent",
             "draw",
             "draw_each_player",
+            "draw_with_actions",
             "offer_draw",
         }
     )

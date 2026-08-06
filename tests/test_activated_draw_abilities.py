@@ -75,6 +75,21 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
             "count": 1,
         }
         each_player = ({"op": "draw_each_player", "count": 1},)
+        drawn_card_actions = (
+            {
+                "op": "draw_with_actions",
+                "player": "$controller",
+                "count": 1,
+                "private": True,
+                "post_draw_actions": [
+                    {"action": "reveal", "public": True},
+                    {
+                        "action": "discard_unless_type",
+                        "card_type": "land",
+                    },
+                ],
+            },
+        )
 
         self.assertEqual(
             (DRAW_CAPABILITY,),
@@ -114,6 +129,14 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
                 mechanic_ids=("cr-121-drawing-a-card",),
             ),
         )
+        self.assertEqual(
+            (DRAW_CAPABILITY,),
+            fixed_draw_node_capabilities(
+                effects=drawn_card_actions,
+                target_schema=None,
+                mechanic_ids=("cr-121-drawing-a-card",),
+            ),
+        )
 
         malformed = (
             ({**controller[0], "count": 0},),
@@ -122,6 +145,25 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
             ({**controller[0], "unknown": 1},),
             ({**controller[0], "player": "$target.0"},),
             ({**optional_target[0], "player": "$target.0"},),
+            (
+                {
+                    **drawn_card_actions[0],
+                    "post_draw_actions": list(
+                        reversed(
+                            drawn_card_actions[0]["post_draw_actions"]
+                        )
+                    ),
+                },
+            ),
+            (
+                {
+                    **drawn_card_actions[0],
+                    "post_draw_actions": [
+                        {"action": "reveal", "public": True},
+                    ],
+                },
+            ),
+            ({**drawn_card_actions[0], "count": True},),
         )
         for effects in malformed:
             with self.subTest(effects=effects):
@@ -180,6 +222,36 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
                 node = ir.faces[0].nodes[0]
                 self.assertEqual(template, node.template_id)
                 self.assertEqual(capabilities, set(node.capability_dependencies))
+
+    def test_drawn_card_action_cards_are_exact_and_source_spanned(self):
+        expected_text = (
+            "{T}: Draw a card and reveal it. If it isn't a land card, "
+            "discard it."
+        )
+        for name in ("Fa'adiyah Seer", "Sindbad"):
+            with self.subTest(name=name):
+                record = self.db.lookup(name)
+                ir = compile_oracle_card(
+                    record,
+                    capability_registry=self.capabilities,
+                    capability_profile="commander_review",
+                )
+
+                self.assertEqual("exact", ir.status)
+                self.assertEqual(1, len(ir.faces[0].nodes))
+                node = ir.faces[0].nodes[0]
+                self.assertEqual("activated_ability", node.kind)
+                self.assertEqual(
+                    "draw-reveal-discard-unless-land-controller-v1",
+                    node.template_id,
+                )
+                self.assertEqual(
+                    (DRAW_CAPABILITY,), node.capability_dependencies
+                )
+                self.assertEqual(
+                    expected_text,
+                    record.oracle_text[node.span.start : node.span.end],
+                )
 
     def test_dynamic_and_compound_draw_wording_remains_residual(self):
         for text in (
