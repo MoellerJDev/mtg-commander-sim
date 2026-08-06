@@ -10411,7 +10411,7 @@
     },
     "python": {
       "conventional_ast_cases": 1687,
-      "discovered_total": 4899,
+      "discovered_total": 4987,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 49,
@@ -10420,7 +10420,7 @@
         "replay_named": 103,
         "server_named": 25
       },
-      "reconciles": false,
+      "reconciles": true,
       "test_files": 171
     }
   }

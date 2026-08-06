@@ -110,7 +110,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4899
+- Tests discovered: 4987
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31095367320](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31095367320) — `pass`
 - Compile: `pass`
