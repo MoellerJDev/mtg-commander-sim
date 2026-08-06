@@ -164,13 +164,22 @@ def draw_resolution_batch(plan: IntentPlan) -> DrawResolutionBatch | None:
 def draw_intent_effect(intent: DrawCardsIntent) -> dict[str, Any]:
     """Serialize a queued typed draw without reintroducing untyped defaults."""
 
-    return {
-        "op": "draw",
+    effect = {
+        "op": (
+            "draw_with_actions"
+            if intent.post_draw_actions
+            else "draw"
+        ),
         "player": intent.player,
         "count": intent.count,
         "private": intent.private,
         "reason": intent.reason,
     }
+    if intent.post_draw_actions:
+        effect["post_draw_actions"] = [
+            action.to_dict() for action in intent.post_draw_actions
+        ]
+    return effect
 
 
 def prepare_draw_resolution(

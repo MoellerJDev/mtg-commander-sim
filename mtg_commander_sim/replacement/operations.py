@@ -345,6 +345,25 @@ class PreventDraw:
 
 
 @dataclass(frozen=True, slots=True)
+class CreateResultDraws:
+    """Replace one draw with a new fixed-count draw instruction.
+
+    The application layer binds the affected player and the producing effect
+    identity.  Keeping those runtime facts out of the descriptor prevents a
+    component from forging a chooser or bypassing CR 614.5.
+    """
+
+    count: int
+    schema_version: int = OPERATION_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        _integer(self.count, field="result draw count", minimum=1)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"op": "create_result_draws", "count": self.count}
+
+
+@dataclass(frozen=True, slots=True)
 class DredgeDraw:
     """Replace one draw with the closed CR 702.52 Dredge result."""
 
@@ -393,6 +412,7 @@ ReplacementOperation: TypeAlias = (
     | ReserveZoneChange
     | CapResultLifeLoss
     | PreventDraw
+    | CreateResultDraws
     | DredgeDraw
 )
 
@@ -410,6 +430,7 @@ _TYPED_OPERATION_TYPES = (
     ReserveZoneChange,
     CapResultLifeLoss,
     PreventDraw,
+    CreateResultDraws,
     DredgeDraw,
 )
 
@@ -591,6 +612,11 @@ def operation_from_dict(value: Mapping[str, Any]) -> ReplacementOperation:
     if op == "prevent_draw":
         _exact_fields(value, {"op"}, operation=op)
         return PreventDraw()
+    if op == "create_result_draws":
+        _exact_fields(value, {"op", "count"}, operation=op)
+        return CreateResultDraws(
+            _integer(value["count"], field="result draw count", minimum=1)
+        )
     if op == "dredge_draw":
         return _dredge_draw_from_dict(value, operation=op)
     raise ReplacementOperationError(

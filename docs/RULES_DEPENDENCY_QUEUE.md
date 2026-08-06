@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,030
-- Reviewed behavioral blockers: 373
+- Queued rules: 3,028
+- Reviewed behavioral blockers: 371
 - Behavioral classification/review required: 2,657
-- Passing behavioral rules: 153
+- Passing behavioral rules: 155
 - Subsystems: 21
-- Queue fingerprint: `6cd7b135bc4f868ae12cb3fc052fb56560c0c0f8babedb1ae4595219418b3304`
+- Queue fingerprint: `17462b7e18ec29354daaeb16b48513989c91eb8543017f38b754bfd0016444b7`
 
 ## Selected next batch
 
-- Batch: `draw-result-actions-and-nested-ordering-closure`
+- Batch: `draw-hidden-casting-and-reveal-choice-closure`
 - Subsystem: `resources`
-- Rules: `121.6c`, `121.7`
+- Rules: `121.8`, `121.9`
 - Target capabilities: `zone.draw.library_to_hand`
-- Rationale: Draw instruction replacement, per-turn prohibitions, optional-draw legality, Dredge, APNAP batches, and exact replay are represented. The next dependency-ready CR 121 boundary is ordering additional actions attached to a replaced draw and draws created by replacement or prevention effects after the unreplaced event portions.
+- Rationale: The canonical draw owner now covers result-generated ordering and a closed specifically-drawn-card action family. The next dependency-ready CR 121 boundary is hidden-information handling for cards drawn during casting and optional reveal-as-drawn choices.
 
 Exit criteria:
 
-- Represent typed post-draw actions attached to the specifically drawn card without losing physical identity.
-- Queue draw instructions created by replacement or prevention results after the unreplaced event portions in canonical order.
-- Suspend and resume any required choices with strict replay-pinned continuations.
-- Cover simultaneous and multiplayer ordering without leaking drawn-card identity.
-- Compile at least one reusable Oracle wording family for each implemented result path.
-- Keep casting-process face-down draws, reveal-as-drawn choices, and unrelated replacement-result families explicitly blocked.
+- Hold cards drawn during casting or activation face down until the process completes, including legal reversal when the process fails.
+- Represent optional reveal-as-drawn choices before the card joins the rest of the hand.
+- Keep the pre-reveal identity seat-scoped and publish only an accepted reveal.
+- Suspend and resume choices with exact Game Record v3 replay and rollback.
+- Cover several-card instructions and four-player projection without leaking hidden identities.
+- Compile a reusable Oracle wording family while keeping broader hidden-zone and replacement grammar explicit residuals.
 
 ## Dependency schedule
 
@@ -48,7 +48,7 @@ Exit criteria:
 | 4 | `mana-costs-priority` | `core-game`, `characteristics`, `objects-permanents-tokens` | 175 | 0 | 175 | `oracle_parser`, `card_program_costs`, `card_program_targets`, `mechanic_contracts` |
 | 5 | `card-types` | `characteristics`, `objects-permanents-tokens` | 168 | 17 | 151 | `oracle_normalization`, `card_program_typing`, `mechanic_contracts` |
 | 6 | `zones` | `objects-permanents-tokens`, `card-types` | 39 | 39 | 0 | `card_program_zone_permissions`, `mechanic_contracts` |
-| 7 | `resources` | `mana-costs-priority`, `zones` | 69 | 8 | 61 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 7 | `resources` | `mana-costs-priority`, `zones` | 67 | 6 | 61 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 11 | 11 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 9 | `turn-structure` | `mana-costs-priority`, `zones`, `resources` | 26 | 26 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 10 | `casting-activation` | `mana-costs-priority`, `zones`, `turn-structure` | 46 | 46 | 0 | `oracle_parser`, `card_program_costs`, `card_program_lowering`, `mechanic_contracts` |

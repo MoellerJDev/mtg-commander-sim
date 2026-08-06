@@ -15,14 +15,16 @@ replacement or prohibited result, and pins the affected player, library size,
 reason, and visibility. `drawing/restrictions.py` owns immutable per-player
 permission derived from turn draw history and live fixed restrictions.
 `drawing/transaction.py` is the narrow mutation owner for ordinary top-library-
-to-hand draws, prohibited and empty-library attempts, draw history/events, and
-the represented Dredge mill-and-return result.
+to-hand draws, prohibited and empty-library attempts, draw history/events, the
+represented Dredge mill-and-return result, and closed actions tied to the exact
+ordinarily drawn object.
 
 `drawing/coordinator.py` iteratively drains individual events and queued
 instructions, discovers trusted runtime instruction-count and individual
 replacements, recomputes permission before each individual event, issues a
-private affected-player choice when necessary, and resumes from the exact
-remaining count without growing the Python call stack. The same trampoline
+private affected-player choice when necessary, queues typed draw instructions
+created by replacement results ahead of the unreplaced instruction tail, and
+resumes from the exact remaining count without growing the Python call stack. The same trampoline
 continues an APNAP batch, draw-step entry, or the exact next spell instruction.
 `drawing/continuation.py` owns that strict immutable Game Record v3 value.
 Historical v3 Dredge continuations keep an explicit validated compatibility
@@ -34,18 +36,25 @@ coordinator. Oracle IR v34 also lowers the closed positive fixed-count
 controller, target-player, target-opponent, optional, and each-player grammar
 when it is printed as an ordinary activated ability. The source-spanned node
 must have a fully compiled activation cost and a strict capability-shaped draw
-payload; dynamic counts, compound effects, reveal riders, or ambiguous sibling
-instructions remain material residuals. Setup hands and mulligan redraws are
+payload. The closed activated family also includes the exact “draw and reveal;
+discard it unless it is a land” sentence used by Fa'adiyah Seer and Sindbad.
+Dynamic counts, other compound effects or drawn-card actions, and ambiguous
+sibling instructions remain material residuals. Setup hands and mulligan redraws are
 intentionally enclosing game procedures, not CR 121 draw events. The ordinary
 intent executor rejects a
 `DrawCardsIntent` that has not been routed through the coordinator, preventing
 a future producer from bypassing replacement, replay, or privacy handling.
 
 The current typed replacement vocabulary includes `PreventDraw`, `DredgeDraw`,
-and the fixed instruction-count `MultiplyAmount`. Two unconditional doublers
-compose before the resulting individual events; unsupported material or
-noncommutative instruction choices fail closed. `replacement.draw.dredge.v1`
-is generated from `Dredge N`, is
+legacy fixed instruction-count `MultiplyAmount`, and `CreateResultDraws`.
+Current unconditional controller-doubling programs replace one draw with two
+new draw events. The producing effect is canonically excluded from its results
+under CR 614.5, while another applicable doubler may replace each new draw;
+result draws finish before the unreplaced remainder of the original
+instruction. Historical Game Record v3 instruction-multiplier descriptors keep
+an explicit compatibility handler and are not silently reinterpreted.
+Unsupported material or noncommutative choices fail closed.
+`replacement.draw.dredge.v1` is generated from `Dredge N`, is
 active only for a trusted exact graveyard CardProgram, requires enough cards in
 the library, and pins physical identity plus zone-change counter through the
 choice. A replacement is considered even when the library is empty, and it
@@ -73,17 +82,24 @@ resolution completes, and only the affected seat sees the replacement choice
 or drawn-card identity. Table-wide activated draws use the same APNAP batch as
 other each-player producers.
 
-This boundary certifies only the reviewed passing parts of CR 121. Shared-team
+The represented CR 121.6c family applies a public reveal and then a conditional
+discard to the exact card moved by an ordinary draw. Those actions do not apply
+when that draw is replaced, and public projection retains the revealed card as
+known while it remains in hand. This boundary does not evaluate hidden-zone
+continuous type changes or other specifically-drawn-card actions.
+
+This boundary certifies only the reviewed passing parts of CR 121, now including
+the closed CR 121.6c action family and CR 121.7 result-draw ordering. Shared-team
 ordering, conditional/dynamic draw-limit grammar, complete draw-as-cost
-producers, additional actions tied to the drawn card, result-generated draw
-ordering, casting-process face-down draws, reveal-as-drawn choices, and the
-complete Oracle replacement grammar remain blocked in the contract and
-scheduler.
+producers, broader actions tied to the drawn card, casting-process face-down
+draws, optional reveal-as-drawn choices, and the complete Oracle replacement
+grammar remain blocked in the contract and scheduler.
 
 Primary focused assurance lives in `test_draw_transaction_model.py`,
 `test_draw_transaction_commit.py`, `test_draw_continuation.py`,
 `test_draw_replacement_components.py`, `test_draw_step_rules.py`,
 `test_draw_restrictions.py`, `test_draw_coordinator_iteration.py`,
+`test_draw_result_ordering.py`,
 `test_optional_draw_choices.py`,
 `test_activated_draw_abilities.py`,
 `test_semantic_handlers.py`, and `test_exact_zimone_closure.py`.

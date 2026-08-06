@@ -69,8 +69,8 @@ class _IterationHost:
         self.state.event_sequence += 1
         library = self.state.players[resolution.player].zones["library"]
         if resolution.kind == "draw" and library:
-            return (library.pop(),)
-        return ()
+            library.pop()
+        return SimpleNamespace(result_draws=())
 
     def _complete_draw_step_entry(self, active: str) -> None:
         self.resumed.append(f"turn_draw:{active}")
@@ -104,7 +104,7 @@ class DrawCoordinatorIterationTests(unittest.TestCase):
             ),
             mock.patch.object(
                 coordinator,
-                "commit_prepared_draw",
+                "commit_prepared_draw_result",
                 side_effect=host.commit,
             ),
         )
@@ -174,7 +174,7 @@ class DrawCoordinatorIterationTests(unittest.TestCase):
             label="Replace the midpoint draw",
         )
 
-        def effects(current_host, _seat):
+        def effects(current_host, _seat, _excluded_effect_ids=()):
             library = current_host.state.players["A"].zones["library"]
             return (effect,) if len(library) == 1500 else ()
 

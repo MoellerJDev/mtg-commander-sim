@@ -1,9 +1,18 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Protocol, Sequence
 
+from ..cast_timing import type_line_has_card_type
 from ..model import CardInstance, GameState
-from .model import DrawError, PreparedDrawEvent, validate_prepared_draw
+from .model import (
+    DiscardDrawnCardUnlessType,
+    DrawError,
+    PreparedDrawEvent,
+    QueuedDraw,
+    RevealDrawnCard,
+    validate_prepared_draw,
+)
 
 
 _DREDGE_KIND = "dred" + "ge"
@@ -18,6 +27,8 @@ class DrawCommitHost(Protocol):
     state: GameState
 
     def apnap_order(self) -> list[str]: ...
+
+    def card_record(self, card: CardInstance) -> Any: ...
 
     def move_card(
         self,
@@ -42,6 +53,48 @@ class DrawCommitHost(Protocol):
         context: dict[str, Any],
         **kwargs: Any,
     ) -> Any: ...
+
+
+@dataclass(frozen=True, slots=True)
+class DrawCommitResult:
+    """Canonical outcome of one replacement-resolved draw event."""
+
+    kind: str
+    player: str
+    moved_object_ids: tuple[str, ...] = ()
+    drawn_object_id: str | None = None
+    result_draws: tuple[QueuedDraw, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.kind not in {
+            "draw",
+            "empty",
+            "prevented",
+            "prohibited",
+            "result_draws",
+            _DREDGE_KIND,
+        }:
+            raise DrawError(f"Unsupported committed draw result {self.kind!r}")
+        if type(self.player) is not str or not self.player:
+            raise DrawError("Committed draw result requires a player")
+        if any(
+            type(value) is not str or not value
+            for value in self.moved_object_ids
+        ):
+            raise DrawError("Committed draw object IDs must be nonempty strings")
+        if self.kind == "draw":
+            if (
+                self.drawn_object_id is None
+                or self.moved_object_ids != (self.drawn_object_id,)
+            ):
+                raise DrawError("An ordinary draw must identify its drawn object")
+        elif self.drawn_object_id is not None:
+            raise DrawError("Only an ordinary draw identifies a drawn object")
+        if self.kind == "result_draws":
+            if not self.result_draws:
+                raise DrawError("A result-draw outcome requires queued draws")
+        elif self.result_draws:
+            raise DrawError("Only a result-draw outcome carries queued draws")
 
 
 def _require_current_request(
@@ -130,10 +183,86 @@ def _record_draw(
         )
 
 
+def _drawn_card_type_line(host: DrawCommitHost, card: CardInstance) -> str:
+    record = host.card_record(card)
+    if record is None:
+        raise DrawError(
+            "A drawn-card post-action requires pinned card characteristics"
+        )
+    return (
+        str(record.faces[0].get("type_line") or "")
+        if record.faces
+        else str(record.type_line)
+    )
+
+
+def _apply_drawn_card_actions(
+    host: DrawCommitHost,
+    prepared: PreparedDrawEvent,
+    object_id: str,
+    type_line: str,
+) -> None:
+    """Apply ordered CR 121.6c actions to the exact drawn object."""
+
+    resolution = prepared.resolution
+    if resolution is None:
+        raise DrawError("A pending draw has no post-draw actions")
+    for action in resolution.post_draw_actions:
+        current = host.state.cards.get(object_id)
+        if current is None or current.zone != "hand":
+            raise DrawError(
+                "The specifically drawn card left its hand before its "
+                "post-draw actions completed"
+            )
+        if isinstance(action, RevealDrawnCard):
+            current.revealed_to = sorted(host.state.players)
+            host._log(
+                resolution.player,
+                "card.draw.reveal",
+                f"{resolution.player} revealed {current.printed_name}.",
+                {
+                    "object": current.ref,
+                    "card": current.printed_name,
+                    _REASON_FIELD: resolution.reason,
+                },
+                importance=2,
+                changed_objects=[object_id],
+                changed_players=[resolution.player],
+            )
+            continue
+        if isinstance(action, DiscardDrawnCardUnlessType):
+            if type_line_has_card_type(type_line, action.card_type):
+                continue
+            host.move_card(
+                object_id,
+                "graveyard",
+                reason="discard specifically drawn nonland card",
+                semantic_events=True,
+            )
+            host._log(
+                resolution.player,
+                "card.draw.discard",
+                (
+                    f"{resolution.player} discarded the specifically "
+                    f"drawn {current.printed_name}."
+                ),
+                {
+                    "object": current.ref,
+                    "card": current.printed_name,
+                    _REASON_FIELD: resolution.reason,
+                },
+                importance=2,
+                changed_objects=[object_id],
+                changed_players=[resolution.player],
+            )
+            continue
+        raise DrawError("Unsupported drawn-card post-action")
+
+
 def _commit_ordinary_draw(
     host: DrawCommitHost,
     prepared: PreparedDrawEvent,
-) -> tuple[str, ...]:
+) -> DrawCommitResult:
     resolution = prepared.resolution
     if resolution is None:
         raise DrawError("A pending draw cannot commit")
@@ -148,17 +277,32 @@ def _commit_ordinary_draw(
             importance=2,
             changed_players=[resolution.player],
         )
-        return ()
+        return DrawCommitResult(
+            kind="empty",
+            player=resolution.player,
+        )
     object_id = player.zones[_LIBRARY_ZONE][-1]
+    card = host.state.cards[object_id]
+    type_line = (
+        _drawn_card_type_line(host, card)
+        if resolution.post_draw_actions
+        else ""
+    )
     host.move_card(object_id, "hand", reason=resolution.reason, log=False)
     _record_draw(host, prepared, object_id)
-    return (object_id,)
+    _apply_drawn_card_actions(host, prepared, object_id, type_line)
+    return DrawCommitResult(
+        kind="draw",
+        player=resolution.player,
+        moved_object_ids=(object_id,),
+        drawn_object_id=object_id,
+    )
 
 
 def _commit_dredge(
     host: DrawCommitHost,
     prepared: PreparedDrawEvent,
-) -> tuple[str, ...]:
+) -> DrawCommitResult:
     resolution = prepared.resolution
     if resolution is None or resolution.kind != _DREDGE_KIND:
         raise DrawError("Dredge commit requires a closed Dredge result")
@@ -216,13 +360,17 @@ def _commit_dredge(
         changed_objects=[source.object_id, *milled_ids],
         changed_players=[resolution.player],
     )
-    return (source.object_id,)
+    return DrawCommitResult(
+        kind=_DREDGE_KIND,
+        player=resolution.player,
+        moved_object_ids=(source.object_id,),
+    )
 
 
-def commit_prepared_draw(
+def commit_prepared_draw_result(
     host: DrawCommitHost,
     prepared: PreparedDrawEvent,
-) -> tuple[str, ...]:
+) -> DrawCommitResult:
     """Validate and commit exactly one replacement-resolved draw event."""
 
     validate_prepared_draw(prepared, apnap_order=host.apnap_order())
@@ -241,7 +389,10 @@ def commit_prepared_draw(
             importance=1,
             changed_players=[resolution.player],
         )
-        return ()
+        return DrawCommitResult(
+            kind="prevented",
+            player=resolution.player,
+        )
     if resolution.kind == "prohibited":
         host._log(
             resolution.player,
@@ -254,10 +405,44 @@ def commit_prepared_draw(
             importance=1,
             changed_players=[resolution.player],
         )
-        return ()
+        return DrawCommitResult(
+            kind="prohibited",
+            player=resolution.player,
+        )
+    if resolution.kind == "result_draws":
+        host._log(
+            resolution.player,
+            "card.draw.replaced.result_draws",
+            f"{resolution.player}'s draw was replaced with another draw instruction.",
+            {
+                _REASON_FIELD: resolution.reason,
+                "counts": [draw.count for draw in resolution.result_draws],
+            },
+            importance=1,
+            changed_players=[resolution.player],
+        )
+        return DrawCommitResult(
+            kind="result_draws",
+            player=resolution.player,
+            result_draws=resolution.result_draws,
+        )
     if resolution.kind == _DREDGE_KIND:
         return _commit_dredge(host, prepared)
     raise DrawError(f"Unsupported draw result {resolution.kind!r}")
 
 
-__all__ = ["DrawCommitHost", "commit_prepared_draw"]
+def commit_prepared_draw(
+    host: DrawCommitHost,
+    prepared: PreparedDrawEvent,
+) -> tuple[str, ...]:
+    """Game Record v3-compatible object tuple for existing callers."""
+
+    return commit_prepared_draw_result(host, prepared).moved_object_ids
+
+
+__all__ = [
+    "DrawCommitHost",
+    "DrawCommitResult",
+    "commit_prepared_draw",
+    "commit_prepared_draw_result",
+]

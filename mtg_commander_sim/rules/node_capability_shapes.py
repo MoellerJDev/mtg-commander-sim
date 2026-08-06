@@ -157,6 +157,32 @@ def fixed_draw_node_capabilities(
         return ()
     effect = effects[0]
     operation = effect.get("op")
+    if operation == "draw_with_actions":
+        expected_actions = [
+            {"action": "reveal", "public": True},
+            {
+                "action": "discard_unless_type",
+                "card_type": "land",
+            },
+        ]
+        if (
+            target_schema is None
+            and set(effect)
+            == {
+                "op",
+                "player",
+                "count",
+                "private",
+                "post_draw_actions",
+            }
+            and effect.get("player") == "$controller"
+            and effect.get("count") == 1
+            and type(effect.get("count")) is int
+            and effect.get("private") is True
+            and effect.get("post_draw_actions") == expected_actions
+        ):
+            return ("zone.draw.specifically_drawn_card_actions",)
+        return ()
     if (
         target_schema is None
         and operation == "draw_each_player"

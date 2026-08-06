@@ -113,6 +113,7 @@ from .drawing import (
     begin_draw_sequence,
     commit_unreplaced_draws,
     complete_draw_replacement,
+    DrawnCardAction,
     DrawError,
     QueuedDraw,
     resume_after_draw,
@@ -2293,6 +2294,7 @@ class CommanderEngine(
         reason: str,
         private: bool = False,
         continuation: Mapping[str, Any] | None = None,
+        post_draw_actions: tuple[DrawnCardAction, ...] = (),
     ) -> None:
         """Resolve one draw instruction, then each draw independently."""
 
@@ -2304,6 +2306,7 @@ class CommanderEngine(
                 reason=reason,
                 private=private,
                 continuation=continuation,
+                post_draw_actions=post_draw_actions,
             )
         except DrawError as exc:
             raise GameRuleError(str(exc)) from exc
@@ -9010,17 +9013,14 @@ class CommanderEngine(
                         draw_request.current.count,
                         reason=draw_request.current.reason,
                         private=draw_request.current.private,
+                        post_draw_actions=draw_request.current.post_draw_actions,
                         continuation={
                             "kind": "semantic_resolution",
                             "stack_ref": stack_ref,
-                            "effects": list(
-                                draw_request.remaining_effects
-                            ),
+                            "effects": list(draw_request.remaining_effects),
                             "destination": destination,
                             "note": note,
-                            "instruction_pointer": (
-                                instruction_pointer + index + 1
-                            ),
+                            "instruction_pointer": instruction_pointer + index + 1,
                         },
                     )
                     return
@@ -13220,6 +13220,7 @@ class CommanderEngine(
                             count=intent.count,
                             reason=intent.reason,
                             private=intent.private,
+                            post_draw_actions=intent.post_draw_actions,
                         )
                         for intent in draw_batch.intents
                     ),

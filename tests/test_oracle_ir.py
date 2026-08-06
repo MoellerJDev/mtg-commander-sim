@@ -1166,8 +1166,8 @@ class OracleIRTests(unittest.TestCase):
                 {"maximum_per_turn": 1},
             ),
             "Thought Reflection": (
-                "replacement.draw.instruction.multiply.v1",
-                "draw.instruction",
+                "replacement.draw.result.multiply.v1",
+                "draw",
                 {"factor": 2},
             ),
         }
@@ -1189,9 +1189,13 @@ class OracleIRTests(unittest.TestCase):
                     else "modification"
                 )
                 self.assertEqual(payload, node.handlers[0][field])
+                expected_capability = (
+                    "zone.draw.result_generated_ordering"
+                    if name == "Thought Reflection"
+                    else "zone.draw.library_to_hand"
+                )
                 self.assertEqual(
-                    ("zone.draw.library_to_hand",),
-                    node.capability_dependencies,
+                    (expected_capability,), node.capability_dependencies
                 )
 
         for name in ("Oculus", "Surveilling Sprite", "Aven Fisher"):

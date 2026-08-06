@@ -796,6 +796,13 @@ def capability_covered_mechanics(
         covered.add("cr-115-targets")
     if "target.revalidate_resolution" in supplied:
         covered.add("cr-115-targets")
+    if supplied.intersection(
+        {
+            "zone.draw.result_generated_ordering",
+            "zone.draw.specifically_drawn_card_actions",
+        }
+    ):
+        covered.add("cr-121-drawing-a-card")
     if "attachment.aura.simple_object" in supplied:
         covered.add("enchant")
     if "protection.typed.debt" in supplied:

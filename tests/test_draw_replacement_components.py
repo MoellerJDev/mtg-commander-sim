@@ -11,6 +11,7 @@ from mtg_commander_sim.semantics import SemanticProgram
 from mtg_commander_sim.semantic_runtime import (
     DREDGE_HANDLER_ID,
     DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID,
+    DRAW_RESULT_MULTIPLIER_HANDLER_ID,
     default_draw_replacement_registry,
     DredgeReplacementHandler,
     DrawInstructionMultiplierHandler,
@@ -117,20 +118,29 @@ class DrawReplacementComponentTests(unittest.TestCase):
         registry = default_draw_replacement_registry()
         inventory = registry.inventory()
 
-        self.assertEqual(2, len(inventory))
+        self.assertEqual(3, len(inventory))
         self.assertEqual(
             {
                 DREDGE_HANDLER_ID,
                 DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID,
+                DRAW_RESULT_MULTIPLIER_HANDLER_ID,
             },
             {value["handler_id"] for value in inventory},
         )
-        self.assertTrue(
-            all(
-                value["capability_dependencies"]
-                == ["zone.draw.library_to_hand"]
+        self.assertEqual(
+            {
+                DREDGE_HANDLER_ID: ["zone.draw.library_to_hand"],
+                DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID: [
+                    "zone.draw.library_to_hand"
+                ],
+                DRAW_RESULT_MULTIPLIER_HANDLER_ID: [
+                    "zone.draw.result_generated_ordering"
+                ],
+            },
+            {
+                value["handler_id"]: value["capability_dependencies"]
                 for value in inventory
-            )
+            },
         )
         with self.assertRaisesRegex(SemanticNodeError, "frozen"):
             registry.register(DredgeReplacementHandler())

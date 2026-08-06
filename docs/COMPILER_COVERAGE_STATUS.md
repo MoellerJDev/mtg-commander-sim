@@ -13,7 +13,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v34`
+- Compiler: `oracle-ir-v35`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
 - Compiler module: 1,498 physical / 1,449 logical lines
@@ -50,14 +50,14 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 - Registry schema/version: `1/33`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `17acbe209326d28123d7bd4f4b6ebca048213446f08d9f06232d6b981d9e861f`
-- Evidence fingerprint: `3093cb9cff00dac89d3c5af246caa09b49f95b714f11a908abb339b5c32900a6`
-- Explicit evidence declarations: 433
-- Capability records: 53
-- Trusted records: 43
+- Registry fingerprint: `23a4319f0a1ab1fa423fe99da51779883a426fe63f9563266c5b790eb3eef105`
+- Evidence fingerprint: `1b774d55612e9f9978ed230abccfc5b1e26978898bd424a0e260be5e63b1f6ce`
+- Explicit evidence declarations: 447
+- Capability records: 55
+- Trusted records: 45
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 24, "not_run": 3, "passed": 26}`
-- Implementation mutation statuses: `{"killed": 46, "not_run": 7}`
+- Dependency fail-closed statuses: `{"not_applicable": 24, "not_run": 3, "passed": 28}`
+- Implementation mutation statuses: `{"killed": 48, "not_run": 7}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -74,8 +74,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 4,451 | 14,810 | 19,281 | 57,705 | false |
-| Commander legal | 31,623 | 1,565 | 13,636 | 16,422 | 49,944 | false |
+| Full Oracle | 38,542 | 4,453 | 14,811 | 19,278 | 57,702 | false |
+| Commander legal | 31,623 | 1,567 | 13,636 | 16,420 | 49,942 | false |
 
 ## Full-corpus residual kinds
 
@@ -85,7 +85,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `spell_effect` | 11,241 |
 | `static_ability` | 11,148 |
 | `dependency_contract` | 7,930 |
-| `effect` | 7,171 |
+| `effect` | 7,168 |
 | `cost` | 2,015 |
 | `replacement_effect` | 1,758 |
 | `mana_ability` | 771 |

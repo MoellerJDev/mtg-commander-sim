@@ -3,6 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Literal, Mapping, TypeAlias
 
+from ..drawing.model import (
+    DiscardDrawnCardUnlessType,
+    DrawnCardAction,
+    RevealDrawnCard,
+)
 from ..replacement.immutable import FrozenMap
 
 
@@ -12,6 +17,19 @@ class DrawCardsIntent:
     count: int
     reason: str
     private: bool = False
+    post_draw_actions: tuple[DrawnCardAction, ...] = ()
+
+    def __post_init__(self) -> None:
+        actions = tuple(self.post_draw_actions)
+        if any(
+            not isinstance(
+                action,
+                (RevealDrawnCard, DiscardDrawnCardUnlessType),
+            )
+            for action in actions
+        ):
+            raise TypeError("Draw intents require typed post-draw actions")
+        object.__setattr__(self, "post_draw_actions", actions)
 
 
 @dataclass(frozen=True, slots=True)

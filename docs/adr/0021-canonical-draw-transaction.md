@@ -2,7 +2,7 @@
 title: "ADR 0021: canonical draw transaction and replacement ownership"
 status: "ADR"
 authoritative_source: "this decision record and platform/architecture-policy.json"
-verified: "2026-08-02"
+verified: "2026-08-05"
 audience: "rules, compiler, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 adr_id: "0021"
@@ -56,10 +56,17 @@ Draw permission is a separate immutable query over turn history and live,
 trusted battlefield restrictions. The coordinator recomputes that permission
 before each individual event, so a mandatory multi-draw can occur partially
 while an optional draw or draw cost is legal only when its complete count is
-possible. An empty library is not itself a draw prohibition. Unconditional
-fixed draw doubling modifies the instruction count before individual events;
-the resulting events still receive independent restriction and replacement
-handling.
+possible. An empty library is not itself a draw prohibition. Current
+unconditional fixed draw doubling creates typed result-draw instructions under
+CR 121.7. Those instructions run before the original instruction tail, create
+independently replaceable draw events, and exclude the producing effect under
+CR 614.5. Historical instruction-count multipliers remain readable only as
+explicit Game Record v3 compatibility.
+
+The transaction can pin a closed typed action sequence to the exact physical
+card drawn. The first represented CR 121.6c family publicly reveals that card
+and discards it unless its front face is a land. Prevented, prohibited, Dredge,
+and replacement-result draws do not inherit the original event's actions.
 
 `offer_draw` is the reviewed generic semantic operation for a seat-scoped
 optional draw choice. Its handler records chooser and prospective drawer
@@ -95,11 +102,18 @@ keeps the oversized module ratchet moving downward while preserving callers.
 - Represented draws now share one replacement-aware, replay-pinned mutation
   path, including private choice, empty-library behavior, and iterative large-
   count coordination.
+- Replacement-result draws and specifically-drawn-card actions have separate
+  fine-grained capabilities rather than widening the base draw trust claim.
 - The engine loses draw sequencing and producer-specific mutation branches;
   live draw-limit and optional-draw legality.
-- The compiler gains generic fixed draw, draw-limit, unconditional doubling,
-  optional-draw, and graveyard keyword templates with measurable corpus
-  promotions.
-- Shared-team turns, conditional and dynamic draw-limit grammar, reveal-as-drawn choices,
-  face-down casting-process draws, and complete replacement-result ordering
-  remain explicitly unsupported until their dependencies are implemented.
+- The compiler gains generic fixed draw, draw-limit, result-doubling,
+  optional-draw, graveyard-keyword, and public reveal/discard-unless-land
+  templates with measurable corpus promotions.
+- The architecture specificity scan records the generic `reason` metadata key
+  used by the new typed result and action descriptors. `Reason` is also a card
+  name, but these structural payload keys contain no card dispatch and are not
+  conditional behavior.
+- Shared-team turns, conditional and dynamic draw-limit grammar, broader
+  specifically-drawn-card actions, optional reveal-as-drawn choices,
+  face-down casting-process draws, and wider replacement-result grammar remain
+  explicitly unsupported until their dependencies are implemented.

@@ -30,6 +30,32 @@ def fixed_draw_effect_template(text: str) -> DrawEffectTemplate | None:
     """Lower closed mandatory and optional fixed-count draw instructions."""
 
     normalized = text.strip()
+    if re.fullmatch(
+        r"draw a card and reveal it\. if it isn['’]t a land card, "
+        r"discard it\.?",
+        normalized,
+        re.IGNORECASE,
+    ):
+        return (
+            "draw-reveal-discard-unless-land-controller-v1",
+            (
+                {
+                    "op": "draw_with_actions",
+                    "player": "$controller",
+                    "count": 1,
+                    "private": True,
+                    "post_draw_actions": [
+                        {"action": "reveal", "public": True},
+                        {
+                            "action": "discard_unless_type",
+                            "card_type": "land",
+                        },
+                    ],
+                },
+            ),
+            None,
+            ("cr-121-drawing-a-card",),
+        )
     match = re.fullmatch(
         rf"you may draw (?P<count>{FIXED_COUNT_PATTERN}) cards?\.?",
         normalized,
@@ -197,8 +223,31 @@ def static_draw_instruction_handler(
     )
 
 
+def static_draw_result_handler(
+    text: str,
+) -> tuple[str, Mapping[str, Any], str] | None:
+    """Lower draw-doubling wording to an individual result replacement."""
+
+    if _DRAW_DOUBLE.fullmatch(text) is None:
+        return None
+    return (
+        "draw-result-double-controller-static-v1",
+        {
+            "handler_id": "replacement.draw.result.multiply.v1",
+            "schema_version": 1,
+            "event": "draw",
+            "condition": {
+                "affected_player_relation": "source_controller",
+            },
+            "modification": {"factor": 2},
+        },
+        "zone.draw.result_generated_ordering",
+    )
+
+
 __all__ = [
     "fixed_draw_effect_template",
     "static_draw_instruction_handler",
+    "static_draw_result_handler",
     "static_draw_restriction_handler",
 ]

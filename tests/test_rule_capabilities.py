@@ -210,6 +210,47 @@ class CapabilityRegistryTests(unittest.TestCase):
             )
         )
 
+    def test_draw_subcapabilities_fail_closed_without_base(self):
+        registry = load_default_capability_registry()
+        for capability_id in (
+            "zone.draw.result_generated_ordering",
+            "zone.draw.specifically_drawn_card_actions",
+        ):
+            with self.subTest(capability_id=capability_id):
+                trusted = registry.closure(
+                    [capability_id], profile="commander_review"
+                )
+                self.assertTrue(trusted.trusted)
+                self.assertIn(
+                    "zone.draw.library_to_hand", trusted.reachable
+                )
+
+        value = _registry_value()
+        base = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "zone.draw.library_to_hand"
+        )
+        base["status"] = "blocked"
+        base["blockers"] = ["dependency mutation"]
+        mutated = CapabilityRegistry(value)
+        for capability_id in (
+            "zone.draw.result_generated_ordering",
+            "zone.draw.specifically_drawn_card_actions",
+        ):
+            with self.subTest(mutated=capability_id):
+                closure = mutated.closure(
+                    [capability_id], profile="commander_review"
+                )
+                self.assertFalse(closure.trusted)
+                self.assertTrue(
+                    any(
+                        "status:zone.draw.library_to_hand:blocked"
+                        in blocker
+                        for blocker in closure.blockers
+                    )
+                )
+
     def test_canonical_damage_assignment_fails_closed_without_strike_steps(
         self,
     ):

@@ -5803,6 +5803,118 @@
         "commander_review"
       ],
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
+    },
+    {
+      "capability_id": "zone.draw.result_generated_ordering",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_result_draws_finish_before_the_original_sequence_resumes",
+      "official_rule_ids": ["121.7", "614.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Finish each result-generated draw instruction before resuming the unreplaced remainder of the original multi-draw instruction."
+    },
+    {
+      "capability_id": "zone.draw.result_generated_ordering",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_result_draws_preserve_four_player_apnap_instruction_order",
+      "official_rule_ids": ["121.7", "614.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Resolve an active player's result draws before continuing the four-player APNAP draw batch."
+    },
+    {
+      "capability_id": "zone.draw.result_generated_ordering",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_draw_result_and_post_action_mutants_are_killed",
+      "official_rule_ids": ["121.7", "614.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill replacement of the typed result-draw operation with the obsolete instruction multiplier."
+    },
+    {
+      "capability_id": "zone.draw.result_generated_ordering",
+      "evidence_class": "negative",
+      "test_id": "tests.test_draw_result_ordering.DrawResultModelTests.test_result_draw_operation_is_closed_and_strict",
+      "official_rule_ids": ["121.7", "614.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject booleans, nonpositive counts, unknown fields, and unsupported operation shapes before replacement application."
+    },
+    {
+      "capability_id": "zone.draw.result_generated_ordering",
+      "evidence_class": "positive",
+      "test_id": "tests.test_draw_result_ordering.DrawResultModelTests.test_result_draws_are_typed_and_exclude_the_producing_effect",
+      "official_rule_ids": ["121.7", "614.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Create a typed result instruction and canonically exclude its producing effect from descendant draws."
+    },
+    {
+      "capability_id": "zone.draw.result_generated_ordering",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_replacement_result_draws_do_not_inherit_original_post_actions",
+      "official_rule_ids": ["121.7", "614.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep identities of result-drawn cards private when the replaced draw's public post-actions do not apply."
+    },
+    {
+      "capability_id": "zone.draw.result_generated_ordering",
+      "evidence_class": "replay",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_result_generated_draw_order_replays_exactly",
+      "official_rule_ids": ["121.7", "614.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay a real trusted draw doubler with identical result order and final authoritative state."
+    },
+    {
+      "capability_id": "zone.draw.specifically_drawn_card_actions",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_replacement_result_draws_do_not_inherit_original_post_actions",
+      "official_rule_ids": ["121.6c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Do not apply actions tied to a specifically drawn card when the original draw is replaced by result draws."
+    },
+    {
+      "capability_id": "zone.draw.specifically_drawn_card_actions",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_drawn_land_is_revealed_and_remains_in_hand",
+      "official_rule_ids": ["121.6c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project the exact publicly revealed drawn land to every opponent in a four-player game."
+    },
+    {
+      "capability_id": "zone.draw.specifically_drawn_card_actions",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_draw_result_and_post_action_mutants_are_killed",
+      "official_rule_ids": ["121.6c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill omission of the ordered specifically-drawn-card action commit."
+    },
+    {
+      "capability_id": "zone.draw.specifically_drawn_card_actions",
+      "evidence_class": "negative",
+      "test_id": "tests.test_draw_result_ordering.DrawResultComponentTests.test_compiler_leaves_unrepresented_draw_action_variants_residual",
+      "official_rule_ids": ["121.6c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Leave other card-type conditions, optional reveals, and multi-card reveal actions as precise compiler residuals."
+    },
+    {
+      "capability_id": "zone.draw.specifically_drawn_card_actions",
+      "evidence_class": "positive",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_drawn_nonland_is_revealed_then_that_exact_card_is_discarded",
+      "official_rule_ids": ["121.6c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reveal an ordinarily drawn nonland and then discard that same physical object in printed action order."
+    },
+    {
+      "capability_id": "zone.draw.specifically_drawn_card_actions",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_drawn_land_is_revealed_and_remains_in_hand",
+      "official_rule_ids": ["121.6c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose only the deliberately revealed card as known hand information to all opponents."
+    },
+    {
+      "capability_id": "zone.draw.specifically_drawn_card_actions",
+      "evidence_class": "replay",
+      "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_specifically_drawn_card_actions_replay_exactly",
+      "official_rule_ids": ["121.6c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ]
 }

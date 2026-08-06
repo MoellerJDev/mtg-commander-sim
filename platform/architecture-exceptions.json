@@ -145,6 +145,27 @@
         "tests.test_reusable_pieces.ReusablePieceInventoryTests.test_policy_and_artifact_mutations_fail_closed",
         "tests.test_reusable_pieces.ReusablePieceInventoryTests.test_tracked_matrix_is_valid_and_exposes_honest_boundaries"
       ]
+    },
+    {
+      "exception_id": "ARCH-EXC-0008",
+      "adr": "docs/adr/0021-canonical-draw-transaction.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "3ccbfd4d4105a5e6a8ea182fa0f21de7c51b5298bdfb7ab7904f4642341bcb7c",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after typed draw-result and specifically-drawn-card action closure.",
+      "rationale": "The canonical draw owner gains one closed draw_with_actions operation for typed public reveal and discard-unless-land actions, while result-generated draws remain typed replacement operations. The reviewed specificity additions are structural reason metadata fields, not card dispatch; direct writes and oversized symbols do not grow.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing serialized residual allowances plus the reviewed draw_with_actions operation; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; retain draw_with_actions only while it remains the closed typed action family described by ADR 0021.",
+      "target_milestone": "incremental draw, replacement, choice, and ordinary-effect closure",
+      "replay_implications": "Game Record v3 remains compatible; result draws, specifically-drawn-card actions, replacement continuations, and historical instruction multipliers use explicit deterministic representations.",
+      "privacy_implications": "Ordinary draws remain principal scoped until a typed public reveal action commits; replacement-result draws never inherit the original event's hidden action sequence.",
+      "security_implications": "The reviewed operation accepts only the closed typed reveal and discard-unless-land vocabulary and grants no callback, arbitrary mutation, transport access, or hidden cross-seat authority.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_drawn_nonland_is_revealed_then_that_exact_card_is_discarded",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_replacement_result_draw_does_not_inherit_post_draw_actions"
+      ]
     }
   ]
 }

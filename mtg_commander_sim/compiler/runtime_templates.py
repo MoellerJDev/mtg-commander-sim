@@ -10,7 +10,7 @@ from .continuous_templates import (
 )
 from .damage_templates import static_damage_handler
 from .draw_templates import (
-    static_draw_instruction_handler,
+    static_draw_result_handler,
     static_draw_restriction_handler,
 )
 from .life_templates import static_life_handler
@@ -43,14 +43,14 @@ def static_runtime_template(
                     "generic draw restriction depends on an untrusted rules capability"
                 ),
             )
-        draw_instruction = static_draw_instruction_handler(text)
-        if draw_instruction is not None:
+        draw_result = static_draw_result_handler(text)
+        if draw_result is not None:
             return StaticRuntimeTemplate(
-                compiled=draw_instruction,
+                compiled=draw_result,
                 kind="replacement_effect",
-                event="draw.instruction",
+                event="draw",
                 dependency_reason=(
-                    "generic draw-count replacement depends on an untrusted rules capability"
+                    "generic result-draw replacement depends on an untrusted rules capability"
                 ),
             )
 

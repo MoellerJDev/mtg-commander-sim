@@ -500,6 +500,7 @@ class SemanticChoiceCoordinationMixin:
                 draw_request.current.count,
                 reason=draw_request.current.reason,
                 private=draw_request.current.private,
+                post_draw_actions=draw_request.current.post_draw_actions,
                 continuation={
                     "kind": "semantic_resolution",
                     "stack_ref": item.ref,

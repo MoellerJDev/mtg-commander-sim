@@ -2321,9 +2321,9 @@
     "physical_lines": 13781
   },
   "exception_binding": {
-    "adr": "docs/adr/0022-reusable-rules-piece-inventory.md",
-    "allowance_fingerprint": "4bb66d0a72381204c63a604ba7752098e8780345450257710be34c26f85667b4",
-    "exception_id": "ARCH-EXC-0007"
+    "adr": "docs/adr/0021-canonical-draw-transaction.md",
+    "allowance_fingerprint": "3ccbfd4d4105a5e6a8ea182fa0f21de7c51b5298bdfb7ab7904f4642341bcb7c",
+    "exception_id": "ARCH-EXC-0008"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2635,6 +2635,7 @@
     "drain_opponent",
     "draw",
     "draw_each_player",
+    "draw_with_actions",
     "draw_if_opponent_cast_colors_this_turn",
     "draw_optional_land",
     "end_turn",
@@ -2701,6 +2702,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "2d83b22889d5b2411a4b99f33764f69b399171810ce91a9054d3e8774918685b"
+    "printed_name_allowances_sha256": "73d12bdfdc1ba6a7042e83db7cbe45266433a3681abed5c36569b84fb363b929"
   }
 }
