@@ -9874,7 +9874,7 @@ class CommanderEngine(
             return f"{card.ref} is tapped"
         if haste.summoning_sickness_prohibits_attack(self, card):
             return f"{card.ref} is summoning sick"
-        if defender.defender_prohibits_attack(self, card):
+        if defender.defender_prohibits_attack(data):
             return f"{card.ref} has defender and cannot attack"
         return None
 

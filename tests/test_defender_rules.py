@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import unittest
-from types import SimpleNamespace
 
 from mtg_commander_sim.defender import (
     defender_prohibits_attack,
@@ -9,39 +8,20 @@ from mtg_commander_sim.defender import (
 )
 
 
-class _Host:
-    def __init__(self, data):
-        self.data = data
-
-    def _effective_card_data(self, _card):
-        return self.data
-
-    @staticmethod
-    def _type_parts(type_line: str):
-        before_dash = type_line.casefold().split("—", 1)[0]
-        return set(before_dash.split()), set(), set()
-
-
 class DefenderRuleTests(unittest.TestCase):
     def test_current_effective_defender_is_case_insensitive_and_redundant(self):
-        host = _Host(
-            {
-                "type_line": "Token Creature — Wall",
-                "keywords": ["Defender", "DEFENDER", "Haste"],
-            }
-        )
+        data = {
+            "type_line": "Token Creature — Wall",
+            "keywords": ["Defender", "DEFENDER", "Haste"],
+        }
 
-        self.assertTrue(
-            defender_prohibits_attack(host, SimpleNamespace())
-        )
+        self.assertTrue(defender_prohibits_attack(data))
 
-        host.data = {
+        data = {
             "type_line": "Token Creature — Wall",
             "keywords": ["Haste"],
         }
-        self.assertFalse(
-            defender_prohibits_attack(host, SimpleNamespace())
-        )
+        self.assertFalse(defender_prohibits_attack(data))
 
     def test_noncreature_and_nondefender_are_not_restricted(self):
         for type_line, keywords in (
@@ -51,13 +31,10 @@ class DefenderRuleTests(unittest.TestCase):
             with self.subTest(type_line=type_line, keywords=keywords):
                 self.assertFalse(
                     defender_prohibits_attack(
-                        _Host(
-                            {
-                                "type_line": type_line,
-                                "keywords": keywords,
-                            }
-                        ),
-                        SimpleNamespace(),
+                        {
+                            "type_line": type_line,
+                            "keywords": keywords,
+                        }
                     )
                 )
 
@@ -77,8 +54,7 @@ class DefenderRuleTests(unittest.TestCase):
             with self.subTest(data=data):
                 with self.assertRaisesRegex(DefenderRuleError, pattern):
                     defender_prohibits_attack(
-                        _Host(data),
-                        SimpleNamespace(),
+                        data,
                     )
 
     def test_defender_verdict_holds_across_bounded_characteristic_grid(self):
@@ -89,17 +65,14 @@ class DefenderRuleTests(unittest.TestCase):
                     self.assertEqual(
                         creature and copies > 0,
                         defender_prohibits_attack(
-                            _Host(
-                                {
-                                    "type_line": (
-                                        "Artifact Creature"
-                                        if creature
-                                        else "Artifact"
-                                    ),
-                                    "keywords": keywords,
-                                }
-                            ),
-                            SimpleNamespace(),
+                            {
+                                "type_line": (
+                                    "Artifact Creature"
+                                    if creature
+                                    else "Artifact"
+                                ),
+                                "keywords": keywords,
+                            }
                         ),
                     )
 
