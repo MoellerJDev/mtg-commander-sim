@@ -519,6 +519,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/color_set_mana_abilities.py",
+      "layer": "rules",
+      "owning_subsystem": "mana_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/combat.py",
       "layer": "rules",
       "owning_subsystem": "legacy_rules",
@@ -1735,6 +1749,20 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/mana_source_discovery.py",
+      "layer": "rules",
+      "owning_subsystem": "mana_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
     },
     {
       "file": "mtg_commander_sim/mana_undo.py",
@@ -2972,6 +3000,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/color_set_mana_abilities.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_runtime/component_registry.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_runtime",
@@ -3656,5 +3699,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "8e10744f2af0e01164700107a7f60caea19d05cb850afa2c8f039292312bd524"
+  "fingerprint": "8e9232bd20fd3031c5a680d8ee2e3fdc86c6a40d045b8621a05f9a96db93d30b"
 }

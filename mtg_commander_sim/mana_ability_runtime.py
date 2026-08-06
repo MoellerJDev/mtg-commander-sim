@@ -10,12 +10,17 @@ from dataclasses import replace
 from typing import Any, Mapping, Protocol
 
 from .abilities import ActivatedAbility
+from .color_set_mana_abilities import (
+    ColorSetRelation,
+    ColorSetSelection,
+)
 from .errors import GameRuleError
 from .mana import (
     effective_mana_record,
     extract_mana_modes,
     ManaMode,
 )
+from .object_query import object_query_result, query_objects
 from .util import mana_cost_to_vector, normalize_mana_bundle
 
 
@@ -27,7 +32,71 @@ class ManaAbilityRuntimeHost(Protocol):
 
     def _effective_card_data(self, card: Any) -> Mapping[str, Any]: ...
 
+    def _type_parts(
+        self, type_line: str
+    ) -> tuple[set[str], set[str], set[str]]: ...
+
     def _commander_identity(self, seat: str) -> set[str]: ...
+
+
+def _color_set_mana_modes(
+    host: ManaAbilityRuntimeHost,
+    seat: str,
+    ability: ActivatedAbility,
+) -> tuple[ManaMode, ...]:
+    spec = ability.color_set_mana_output
+    if spec is None:
+        return ()
+    query = replace(
+        spec.query,
+        controller=(
+            seat if spec.relation is ColorSetRelation.CONTROLLER else None
+        ),
+        owner=(seat if spec.relation is ColorSetRelation.OWNER else None),
+    )
+    rows = []
+    for card in host.state.cards.values():
+        if card.zone not in spec.query.zones:
+            continue
+        if (
+            spec.relation is ColorSetRelation.CONTROLLER
+            and card.controller != seat
+        ):
+            continue
+        if spec.relation is ColorSetRelation.OWNER and card.owner != seat:
+            continue
+        effective = host._effective_card_data(card)
+        rows.append(
+            object_query_result(
+                card,
+                effective,
+                type_parts=host._type_parts(
+                    str(effective.get("type_line") or "")
+                ),
+                known_to_actor=True,
+                attached_to_ref=None,
+            )
+        )
+    matches = query_objects(rows, query)
+    colors = tuple(
+        color
+        for color in "WUBRG"
+        if any(color in row.colors for row in matches)
+    )
+    if spec.selection is ColorSetSelection.ONE_EACH:
+        return (
+            ManaMode(
+                normalize_mana_bundle({color: 1 for color in colors})
+            ),
+        )
+    if spec.selection is ColorSetSelection.CHOOSE_ONE:
+        if not colors:
+            return (ManaMode(normalize_mana_bundle(None)),)
+        return tuple(
+            ManaMode(normalize_mana_bundle({color: 1}))
+            for color in colors
+        )
+    raise GameRuleError("Unsupported typed color-set mana selection")
 
 
 def mana_modes_for_ability(
@@ -38,6 +107,8 @@ def mana_modes_for_ability(
 ) -> tuple[ManaMode, ...]:
     """Return the output modes for one selected activated mana ability."""
 
+    if ability.color_set_mana_output is not None:
+        return _color_set_mana_modes(host, seat, ability)
     if ability.fixed_mana_outputs:
         fixed_outputs = tuple(ability.fixed_mana_outputs)
         if all(
@@ -130,6 +201,48 @@ def mana_modes_for_ability(
     )
 
 
+def typed_mana_modes_for_abilities(
+    host: ManaAbilityRuntimeHost,
+    seat: str,
+    source: Any,
+    abilities: tuple[ActivatedAbility, ...] | list[ActivatedAbility],
+) -> tuple[ManaMode, ...]:
+    """Return deduplicated modes owned by typed mana descriptors."""
+
+    result: dict[tuple[tuple[str, int], ...], ManaMode] = {}
+    for ability in abilities:
+        if not (
+            ability.fixed_mana_outputs
+            or ability.color_set_mana_output is not None
+        ):
+            continue
+        for mode in mana_modes_for_ability(host, seat, source, ability):
+            key = tuple(
+                (color, int(mode.bundle.get(color, 0)))
+                for color in "WUBRGC"
+                if int(mode.bundle.get(color, 0))
+            )
+            result.setdefault(key, mode)
+    return tuple(result.values())
+
+
+def payable_mana_modes(
+    *groups: tuple[ManaMode, ...] | list[ManaMode],
+) -> tuple[ManaMode, ...]:
+    """Merge source modes canonically, excluding outputs that cannot pay."""
+
+    result: dict[tuple[tuple[str, int], ...], ManaMode] = {}
+    for mode in (mode for group in groups for mode in group):
+        key = tuple(
+            (color, int(mode.bundle.get(color, 0)))
+            for color in "WUBRGC"
+            if int(mode.bundle.get(color, 0))
+        )
+        if key:
+            result.setdefault(key, mode)
+    return tuple(result.values())
+
+
 def mana_output_for_ability(
     host: ManaAbilityRuntimeHost,
     seat: str,
@@ -140,24 +253,6 @@ def mana_output_for_ability(
     """Validate the submitted output against the advertised mode set."""
 
     effect_lower = ability.effect_text.casefold()
-    if (
-        "for each color among permanents you control, "
-        "add one mana of that color"
-        in effect_lower
-    ):
-        colors = {
-            str(color).upper()
-            for object_id in host.state.players[seat].zones["battlefield"]
-            if host.state.cards[object_id].controller == seat
-            and not host.state.cards[object_id].phased_out
-            for color in host._effective_card_data(object_id).get(
-                "colors", []
-            )
-            if str(color).upper() in "WUBRG"
-        }
-        return normalize_mana_bundle(
-            {color: 1 for color in sorted(colors)}
-        )
     if (
         "one mana of any color that a land an opponent controls "
         "could produce"
@@ -220,7 +315,7 @@ def mana_output_for_ability(
                 for mode in legal_modes
             ):
                 raise GameRuleError(
-                    "Declared mana output is not a recognized Oracle mana mode"
+                    "Declared mana output is not a currently legal mana mode"
                 )
             return declared
         if len(legal_modes) == 1:
@@ -264,4 +359,6 @@ __all__ = [
     "ManaAbilityRuntimeHost",
     "mana_modes_for_ability",
     "mana_output_for_ability",
+    "payable_mana_modes",
+    "typed_mana_modes_for_abilities",
 ]

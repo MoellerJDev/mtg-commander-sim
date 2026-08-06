@@ -1,0 +1,104 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+from functools import lru_cache
+from typing import Any, Mapping
+
+from ..color_set_mana_abilities import (
+    COLOR_SET_MANA_HANDLER_ID,
+    ColorSetActivatedManaAbilitySpec,
+    ColorSetManaAbilityError,
+)
+from ..rules.capabilities import load_default_capability_registry
+from .component_registry import RuntimeComponentRegistry, exact_fields
+from .context import SemanticNodeError
+
+
+@dataclass(frozen=True, slots=True)
+class ColorSetActivatedManaAbilityHandler:
+    handler_id: str = COLOR_SET_MANA_HANDLER_ID
+    schema_version: int = 1
+    family: str = "ability.activated.mana.color-set"
+    event: str = "activate"
+    rule_references: tuple[str, ...] = (
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "mana.activated.color_set",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> ColorSetActivatedManaAbilitySpec:
+        exact_fields(
+            descriptor,
+            {"handler_id", "schema_version", "event", "ability"},
+            field="color-set activated mana handler",
+        )
+        if descriptor["handler_id"] != self.handler_id:
+            raise SemanticNodeError("Color-set activated mana handler ID mismatch")
+        if descriptor["schema_version"] != self.schema_version:
+            raise SemanticNodeError(
+                "Unsupported color-set activated mana handler schema version"
+            )
+        if descriptor["event"] != self.event:
+            raise SemanticNodeError(
+                "Color-set activated mana handler must use the activate event"
+            )
+        ability = descriptor["ability"]
+        if not isinstance(ability, Mapping):
+            raise SemanticNodeError(
+                "Color-set activated mana ability must be an object"
+            )
+        try:
+            return ColorSetActivatedManaAbilitySpec.from_dict(ability)
+        except (ColorSetManaAbilityError, ValueError) as exc:
+            raise SemanticNodeError(str(exc)) from exc
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: object,
+    ) -> tuple[ColorSetActivatedManaAbilitySpec, ...]:
+        del context
+        return (self.validate(descriptor),)
+
+
+class ColorSetManaAbilityRegistry(
+    RuntimeComponentRegistry[object, ColorSetActivatedManaAbilitySpec]
+):
+    pass
+
+
+@lru_cache(maxsize=1)
+def default_color_set_mana_ability_registry() -> ColorSetManaAbilityRegistry:
+    registry = ColorSetManaAbilityRegistry(
+        (ColorSetActivatedManaAbilityHandler(),)
+    )
+    registry.require_registered_capabilities(load_default_capability_registry())
+    return registry.freeze()
+
+
+def color_set_mana_specs_from_descriptors(
+    descriptors: tuple[Mapping[str, Any], ...] | list[Mapping[str, Any]],
+) -> tuple[ColorSetActivatedManaAbilitySpec, ...]:
+    registry = default_color_set_mana_ability_registry()
+    result: list[ColorSetActivatedManaAbilitySpec] = []
+    for descriptor in descriptors:
+        if registry.describe(str(descriptor.get("handler_id") or "")) is None:
+            continue
+        result.extend(registry.lower(descriptor, None))
+    return tuple(result)
+
+
+__all__ = [
+    "ColorSetActivatedManaAbilityHandler",
+    "ColorSetManaAbilityRegistry",
+    "color_set_mana_specs_from_descriptors",
+    "default_color_set_mana_ability_registry",
+]

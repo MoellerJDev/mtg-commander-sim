@@ -6,6 +6,10 @@ from .abilities import ActivatedAbility
 from .errors import GameRuleError
 from .haste import summoning_sickness_prohibits_tap_or_untap_cost
 from .mana import ManaMode, extract_effective_mana_modes
+from .mana_ability_runtime import (
+    payable_mana_modes,
+    typed_mana_modes_for_abilities,
+)
 from .mana_undo import (
     clear_mana_undo_stack,
     push_mana_undo,
@@ -216,8 +220,11 @@ def _mana_plan_modes(
         and "creature tokens you control have" in record.oracle_text.casefold()
     ):
         raise GameRuleError(f"{card.ref} does not itself have that mana ability")
-    return extract_effective_mana_modes(
-        record, data, host._commander_identity(seat)
+    return payable_mana_modes(
+        typed_mana_modes_for_abilities(host, seat, card, mana_abilities),
+        extract_effective_mana_modes(
+            record, data, host._commander_identity(seat)
+        ),
     )
 
 

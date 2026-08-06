@@ -49,6 +49,15 @@ performing a transition.
 - Card names and Oracle IDs are evidence and lookup keys, not generic runtime
   behavior switches.
 
+Activated-mana lowering has separate closed owners for fixed output and
+current color-set output. The color-set grammar represents choosing one color
+among qualifying legendary permanents or legendary creatures and
+planeswalkers, choosing among owned legendary creature cards in a graveyard,
+and adding one mana of each color among controlled permanents. Each form
+lowers an immutable relative `ObjectQuerySpec`. Monocolored-only, linked-exile,
+opponent-relative, additional-condition, restricted, and side-effecting
+variants remain source-spanned residuals.
+
 ## Extending the compiler
 
 Add the smallest reusable grammar production and typed construct. Include

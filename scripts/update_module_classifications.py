@@ -147,8 +147,10 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/landwalk.py",
         "mtg_commander_sim/mana.py",
         "mtg_commander_sim/mana_activation.py",
+        "mtg_commander_sim/color_set_mana_abilities.py",
         "mtg_commander_sim/fixed_mana_abilities.py",
         "mtg_commander_sim/mana_ability_runtime.py",
+        "mtg_commander_sim/mana_source_discovery.py",
         "mtg_commander_sim/mana_undo.py",
         "mtg_commander_sim/mechanic_contracts.py",
         "mtg_commander_sim/menace.py",
@@ -251,12 +253,15 @@ def _owner(relative: str, layer: str) -> str:
     if relative in {
         "mtg_commander_sim/mana.py",
         "mtg_commander_sim/mana_activation.py",
+        "mtg_commander_sim/color_set_mana_abilities.py",
         "mtg_commander_sim/fixed_mana_abilities.py",
         "mtg_commander_sim/mana_ability_runtime.py",
+        "mtg_commander_sim/mana_source_discovery.py",
         "mtg_commander_sim/compiled_mana_abilities.py",
         "mtg_commander_sim/mana_mode_effects.py",
         "mtg_commander_sim/mana_payment_continuations.py",
         "mtg_commander_sim/mana_undo.py",
+        "mtg_commander_sim/semantic_runtime/color_set_mana_abilities.py",
     }:
         return "mana_rules"
     if relative in {

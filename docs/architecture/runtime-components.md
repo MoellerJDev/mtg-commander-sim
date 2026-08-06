@@ -46,6 +46,14 @@ records may use an explicit compatibility adapter, but the adapter cannot
 rewrite the recorded program or silently promote trust. Current records pin
 the descriptor and registry directly.
 
+`ability.activated.mana.color-set.v1` binds a compiler-pinned relative object
+query to the activating seat and reads only matching public battlefield
+objects or that seat's graveyard. It derives colors from current effective
+characteristics, feeds manual offers and automatic payment through the same
+mode set, and treats an empty qualifying set as a legal activation that adds no
+mana. Runtime code does not parse Oracle prose. Wider dynamic or conditional
+mana wording remains residual.
+
 ## Ownership boundaries
 
 Components receive immutable source-authorized facts, never

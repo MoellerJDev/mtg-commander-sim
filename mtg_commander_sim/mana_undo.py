@@ -69,9 +69,9 @@ class ReversibleManaActivation:
             for color in "WUBRGC"
             if normalized[color]
         )
-        if not expected or expected != self.bundle:
+        if expected != self.bundle:
             raise ManaUndoError(
-                "Mana rollback bundle must be canonical and nonempty"
+                "Mana rollback bundle must be canonical"
             )
 
     @classmethod

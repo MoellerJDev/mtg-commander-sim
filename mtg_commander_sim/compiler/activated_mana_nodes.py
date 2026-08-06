@@ -6,6 +6,10 @@ from dataclasses import replace
 from typing import Any, Callable, Mapping, Sequence
 
 from ..abilities import parse_activated_abilities
+from ..color_set_mana_abilities import (
+    color_set_mana_handler_descriptor,
+    compile_color_set_activated_mana_ability,
+)
 from ..fixed_mana_abilities import (
     compile_fixed_activated_mana_ability,
     fixed_mana_handler_descriptor,
@@ -84,6 +88,66 @@ def fixed_activated_mana_node(
         template_id="activated-mana-fixed-output-v1",
         cost=activated_ability_cost(ability),
         handlers=(fixed_mana_handler_descriptor(spec),),
+        residual_ids=residual_ids,
+        capability_dependencies=gate.capabilities,
+        capability_closure=(
+            gate.closure.reachable if gate.closure is not None else ()
+        ),
+        capability_profile=(
+            gate.closure.profile if gate.closure is not None else None
+        ),
+        capability_fingerprint=(
+            gate.closure.fingerprint if gate.closure is not None else None
+        ),
+    )
+
+
+def color_set_activated_mana_node(
+    ability: Any,
+    node_id: str,
+    line: str,
+    span: SourceSpan,
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+) -> OracleNode | None:
+    spec = compile_color_set_activated_mana_ability(ability)
+    if spec is None:
+        return None
+    gate = explicit_capability_gate(
+        "mana.activated.color_set",
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+    residual_ids = (
+        (
+            append_residual(
+                residuals,
+                kind="dependency_contract",
+                text=line,
+                span=span,
+                reason=(
+                    "color-set activated mana ability lacks a trusted "
+                    "capability closure"
+                ),
+                blockers=gate.blockers,
+            ),
+        )
+        if gate.blockers
+        else ()
+    )
+    return OracleNode(
+        node_id=node_id,
+        kind="mana_ability",
+        text=line,
+        span=span,
+        active_zone="battlefield",
+        event="activate",
+        lowerable=True,
+        exact=not gate.blockers,
+        template_id="activated-mana-color-set-v1",
+        cost=activated_ability_cost(ability),
+        handlers=(color_set_mana_handler_descriptor(spec),),
         residual_ids=residual_ids,
         capability_dependencies=gate.capabilities,
         capability_closure=(
@@ -275,6 +339,17 @@ def activated_oracle_node(
     )
     if fixed_mana is not None:
         return fixed_mana
+    color_set_mana = color_set_activated_mana_node(
+        ability,
+        node_id,
+        line,
+        span,
+        capability_registry,
+        capability_profile,
+        residuals,
+    )
+    if color_set_mana is not None:
+        return color_set_mana
     template, effects, target_schema, mechanics = effect_template(
         ability.effect_text,
         card_name=card_name,
