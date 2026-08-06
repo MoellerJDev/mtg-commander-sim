@@ -134,6 +134,7 @@ class MechanicContractTests(unittest.TestCase):
                 "haste",
                 "infect",
                 "indestructible",
+                "landwalk",
                 "lifelink",
                 "menace",
                 "protection",
