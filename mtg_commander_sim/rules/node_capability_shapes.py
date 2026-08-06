@@ -181,7 +181,7 @@ def fixed_draw_node_capabilities(
             and effect.get("private") is True
             and effect.get("post_draw_actions") == expected_actions
         ):
-            return ("zone.draw.library_to_hand",)
+            return ("zone.draw.specifically_drawn_card_actions",)
         return ()
     if (
         target_schema is None

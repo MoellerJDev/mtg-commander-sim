@@ -146,7 +146,7 @@ class DrawResultMultiplierHandler:
         "614.5",
     )
     capability_dependencies: tuple[str, ...] = (
-        "zone.draw.library_to_hand",
+        "zone.draw.result_generated_ordering",
     )
 
     def validate(

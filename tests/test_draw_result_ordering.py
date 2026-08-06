@@ -366,7 +366,7 @@ class DrawResultCoordinatorTests(unittest.TestCase):
         )
 
     def test_drawn_land_is_revealed_and_remains_in_hand(self):
-        session = self.session_without_replacements()
+        session = self.session_without_replacements(players=4)
         engine = session.engine
         object_id = self.put_matching_card_on_top(engine, land=True)
         event_before = engine.state.event_sequence
@@ -388,13 +388,14 @@ class DrawResultCoordinatorTests(unittest.TestCase):
         ]
         self.assertIn("card.draw.reveal", codes)
         self.assertNotIn("card.draw.discard", codes)
-        opponent_view = session.packet("pilot:B", full=True)["state"][
-            "players"
-        ]["A"]
-        self.assertIn(
-            engine.state.cards[object_id].ref,
-            {card["id"] for card in opponent_view["known_hand"]},
-        )
+        for opponent in ("B", "C", "D"):
+            opponent_view = session.packet(
+                f"pilot:{opponent}", full=True
+            )["state"]["players"]["A"]
+            self.assertIn(
+                engine.state.cards[object_id].ref,
+                {card["id"] for card in opponent_view["known_hand"]},
+            )
 
     def test_drawn_nonland_is_revealed_then_that_exact_card_is_discarded(self):
         session = self.session_without_replacements()
@@ -445,6 +446,11 @@ class DrawResultCoordinatorTests(unittest.TestCase):
             hand_before + 2,
             len(engine.state.players["A"].zones["hand"]),
         )
+        opponent = session.packet("pilot:B", full=True)["state"][
+            "players"
+        ]["A"]
+        self.assertNotIn("hand", opponent)
+        self.assertFalse(opponent.get("known_hand", []))
         self.assertFalse(
             any(
                 event.event_id > event_before

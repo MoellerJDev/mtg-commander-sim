@@ -28,6 +28,7 @@ from mtg_commander_sim.semantics import SemanticRegistry
 
 
 DRAW_CAPABILITY = "zone.draw.library_to_hand"
+DRAW_ACTION_CAPABILITY = "zone.draw.specifically_drawn_card_actions"
 
 
 class ActivatedDrawCompilerTests(unittest.TestCase):
@@ -130,7 +131,7 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            (DRAW_CAPABILITY,),
+            (DRAW_ACTION_CAPABILITY,),
             fixed_draw_node_capabilities(
                 effects=drawn_card_actions,
                 target_schema=None,
@@ -177,6 +178,14 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
                 )
                 self.assertNotIn(
                     DRAW_CAPABILITY,
+                    capability_dependencies_for_node(
+                        effects=effects,
+                        target_schema=None,
+                        mechanic_ids=("cr-121-drawing-a-card",),
+                    ),
+                )
+                self.assertNotIn(
+                    DRAW_ACTION_CAPABILITY,
                     capability_dependencies_for_node(
                         effects=effects,
                         target_schema=None,
@@ -246,7 +255,7 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
                     node.template_id,
                 )
                 self.assertEqual(
-                    (DRAW_CAPABILITY,), node.capability_dependencies
+                    (DRAW_ACTION_CAPABILITY,), node.capability_dependencies
                 )
                 self.assertEqual(
                     expected_text,

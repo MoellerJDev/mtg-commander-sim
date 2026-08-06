@@ -13959,26 +13959,44 @@
       "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "generic additional actions tied to the specifically drawn card are not represented through replacement completion"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-121.6c",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "121.6"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_drawn_land_is_revealed_and_remains_in_hand",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_drawn_nonland_is_revealed_then_that_exact_card_is_discarded",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_replacement_result_draws_do_not_inherit_original_post_actions",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_specifically_drawn_card_actions_replay_exactly",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_malformed_post_draw_action_rolls_back_before_draw_mutation"
+      ],
+      "implementation_components": [
+        "drawing.DrawnCardAction",
+        "drawing.commit_prepared_draw_result",
+        "semantic_runtime.DrawWithActionsHandler",
+        "compiler.fixed_draw_effect_template"
+      ],
+      "notes": [
+        "The represented family is deliberately closed to a public reveal followed by discard unless the exact ordinarily drawn card is a land. Replacement results, including Dredge and result-generated draws, do not inherit these actions. Broader specifically-drawn-card action grammar and hidden-zone type-changing effects remain outside the trusted capability."
+      ],
       "required_scenarios": [
         "positive",
         "negative",
         "interaction",
-        "replay"
+        "replay",
+        "hidden_information"
       ],
       "reviewed": true,
       "rule_id": "121.6c",
@@ -13989,31 +14007,47 @@
         "end_line": 1169,
         "start_line": 1168
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "draw results created by replacement or prevention events are not queued after unreplaced portions by a generic runtime producer"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-121.7",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "121"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
+      "executable_test_ids": [
+        "tests.test_draw_result_ordering.DrawResultModelTests.test_result_draws_are_typed_and_exclude_the_producing_effect",
+        "tests.test_draw_result_ordering.DrawResultModelTests.test_result_draws_preserve_ancestor_exclusions",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_result_generated_draw_order_replays_exactly",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_result_draws_preserve_four_player_apnap_instruction_order",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_result_draws_finish_before_the_original_sequence_resumes",
+        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_two_result_doublers_require_one_order_choice_then_draw_four"
+      ],
       "implementation_components": [
-        "replacement.CreateNestedEvent"
+        "replacement.CreateResultDraws",
+        "semantic_runtime.DrawResultMultiplierHandler",
+        "drawing.DrawEventResolution",
+        "drawing.coordinator._draw_batch_resume"
       ],
       "notes": [
-        "Nested replacement events alone are not evidence of CR 121.7 ordering."
+        "A typed replacement result creates a queued draw instruction ahead of the unreplaced remainder. Descendant draws canonically exclude the producing replacement effect under CR 614.5 while other applicable effects remain eligible; suspension and exact command replay preserve that order."
       ],
       "required_scenarios": [
         "positive",
+        "negative",
         "interaction",
+        "multiplayer",
         "replay"
       ],
       "reviewed": true,
@@ -14025,7 +14059,7 @@
         "end_line": 1171,
         "start_line": 1170
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "unsupported_fail_closed",

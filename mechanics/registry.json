@@ -142,8 +142,8 @@
     {
       "mechanic_id": "cr-121-drawing-a-card",
       "path": "mechanics/contracts/drawing-a-card.json",
-      "sha256": "91af7f97eac18a0a5edd54a3d2e399eca16996e01b3a50cb0a3125c6069a92c2",
-      "version": 4
+      "sha256": "3defed542ac9f00fc6fe07cc65180d44c3b27b687ac17effbfe0fbe4f6ed8e92",
+      "version": 5
     },
     {
       "mechanic_id": "cr-609-effects",
@@ -5759,16 +5759,17 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/drawing-a-card.json",
-      "contract_sha256": "91af7f97eac18a0a5edd54a3d2e399eca16996e01b3a50cb0a3125c6069a92c2",
-      "contract_version": 4,
+      "contract_sha256": "3defed542ac9f00fc6fe07cc65180d44c3b27b687ac17effbfe0fbe4f6ed8e92",
+      "contract_version": 5,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "strict fixed-draw compiler shape and CardProgram lowering plus mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
-      "implementation_version": "draw-transaction-v4",
+      "implementation_component": "strict fixed-draw and specifically-drawn-card compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
+      "implementation_version": "draw-transaction-v5",
       "kind": "rules_section",
       "known_blockers": [
         "shared-team turns are not supported",
-        "additional actions on a drawn card and result-generated draw ordering are incomplete",
+        "specifically-drawn-card actions beyond public reveal followed by discard unless land are not represented",
+        "hidden-zone continuous type changes and conditional characteristics are not evaluated for the represented discard-unless-land action",
         "draws during casting or activation are not held face down",
         "optional reveal-as-drawn choices are not implemented",
         "conditional and first-draw count modifiers are not compiled",
@@ -5811,7 +5812,21 @@
         "test_draw_prohibition_does_not_make_activation_illegal",
         "test_empty_library_does_not_remove_the_activated_ability",
         "test_each_player_activation_draws_in_four_player_game",
-        "test_target_player_draw_validates_target_resolves_privately_and_replays"
+        "test_target_player_draw_validates_target_resolves_privately_and_replays",
+        "test_drawn_card_action_cards_are_exact_and_source_spanned",
+        "test_result_draw_operation_is_closed_and_strict",
+        "test_result_draws_are_typed_and_exclude_the_producing_effect",
+        "test_compiler_leaves_unrepresented_draw_action_variants_residual",
+        "test_drawn_land_is_revealed_and_remains_in_hand",
+        "test_drawn_nonland_is_revealed_then_that_exact_card_is_discarded",
+        "test_replacement_result_draws_do_not_inherit_original_post_actions",
+        "test_specifically_drawn_card_actions_replay_exactly",
+        "test_malformed_post_draw_action_rolls_back_before_draw_mutation",
+        "test_result_generated_draw_order_replays_exactly",
+        "test_result_draws_preserve_four_player_apnap_instruction_order",
+        "test_result_draws_finish_before_the_original_sequence_resumes",
+        "test_two_result_doublers_require_one_order_choice_then_draw_four",
+        "test_draw_result_and_post_action_mutants_are_killed"
       ],
       "trust_level": "untrusted"
     },

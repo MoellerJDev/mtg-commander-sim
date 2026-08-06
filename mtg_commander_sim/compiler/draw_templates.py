@@ -241,7 +241,7 @@ def static_draw_result_handler(
             },
             "modification": {"factor": 2},
         },
-        "zone.draw.library_to_hand",
+        "zone.draw.result_generated_ordering",
     )
 
 

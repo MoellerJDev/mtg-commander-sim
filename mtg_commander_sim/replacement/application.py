@@ -238,6 +238,50 @@ def _apply_result_life_floor(
     payload["life_after_without_replacement"] = life_before - resolved_loss + gain_total
 
 
+def _create_result_draw_instruction(
+    event: ReplaceableEvent,
+    payload: dict[str, Any],
+    children: list[ReplaceableEvent],
+    operation: CreateResultDraws,
+    *,
+    effect_id: str,
+) -> None:
+    """Replace one draw with a typed, independently replaceable result queue."""
+
+    if (
+        event.kind != "draw"
+        or event.affected_player is None
+        or payload.get("is_draw") is not True
+    ):
+        raise ReplacementEffectError(
+            "Result draws require one unresolved affected-player draw"
+        )
+    inherited = payload.get("excluded_effect_ids", ())
+    if not isinstance(inherited, (list, tuple)) or any(
+        type(value) is not str or not value for value in inherited
+    ):
+        raise ReplacementEffectError(
+            "Result-draw exclusions must be stable effect IDs"
+        )
+    exclusions = tuple(sorted({*inherited, effect_id}))
+    payload["is_draw"] = False
+    payload["result_kind"] = "result_draws"
+    children.append(
+        ReplaceableEvent(
+            event_id=f"{event.event_id}/result-draw:{len(children)}",
+            kind="draw.result_instruction",
+            affected_player=event.affected_player,
+            payload={
+                "player": event.affected_player,
+                "count": operation.count,
+                "reason": payload.get("reason"),
+                "private": payload.get("private"),
+                "excluded_effect_ids": list(exclusions),
+            },
+        )
+    )
+
+
 def _apply_operation(
     event: ReplaceableEvent,
     payload: dict[str, Any],
@@ -330,39 +374,12 @@ def _apply_operation(
         payload["result_kind"] = "prevented"
         return entry_scope
     if isinstance(operation, CreateResultDraws):
-        if (
-            event.kind != "draw"
-            or event.affected_player is None
-            or payload.get("is_draw") is not True
-        ):
-            raise ReplacementEffectError(
-                "Result draws require one unresolved affected-player draw"
-            )
-        inherited = payload.get("excluded_effect_ids", ())
-        if not isinstance(inherited, (list, tuple)) or any(
-            type(value) is not str or not value for value in inherited
-        ):
-            raise ReplacementEffectError(
-                "Result-draw exclusions must be stable effect IDs"
-            )
-        exclusions = tuple(sorted({*inherited, effect_id}))
-        payload["is_draw"] = False
-        payload["result_kind"] = "result_draws"
-        children.append(
-            ReplaceableEvent(
-                event_id=(
-                    f"{event.event_id}/result-draw:{len(children)}"
-                ),
-                kind="draw.result_instruction",
-                affected_player=event.affected_player,
-                payload={
-                    "player": event.affected_player,
-                    "count": operation.count,
-                    "reason": payload.get("reason"),
-                    "private": payload.get("private"),
-                    "excluded_effect_ids": list(exclusions),
-                },
-            )
+        _create_result_draw_instruction(
+            event,
+            payload,
+            children,
+            operation,
+            effect_id=effect_id,
         )
         return entry_scope
     if isinstance(operation, DredgeDraw):

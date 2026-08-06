@@ -111,9 +111,20 @@ maintenance: "hand-maintained"
   libraries do not erase an otherwise legal activation, costs are paid before
   the draw result, Dredge can replace it, and a sacrificed source does not stop
   its already-activated ability from resolving.
-- Conditional/dynamic limits, complete draw-as-cost producers, shared-team
-  ordering, CR 121.6c/121.7 result actions, reveal-as-drawn, and broader
-  replacement grammar remain explicit blockers.
+- Added two fine-grained trusted draw capabilities for CR 121.6c and 121.7.
+  Replacement effects can now create independently replaceable result draws
+  ahead of the original instruction tail without recursively applying the
+  producing replacement effect, and specifically drawn cards can carry pinned
+  typed public-reveal and conditional-discard actions through suspension,
+  privacy projection, and exact replay.
+- Oracle IR v35 generically lowers the closed Fa'adiyah Seer and Sindbad
+  reveal/discard-unless-land sentence plus unconditional controller draw
+  doublers. Exactly two Commander-legal cards become exact and
+  capability-closed, with two material residuals removed; broader drawn-card
+  actions, conditional/dynamic limits, complete draw-as-cost producers,
+  shared-team ordering, casting-process face-down draws, optional
+  reveal-as-drawn choices, and wider replacement grammar remain explicit
+  blockers.
 
 ### Combat rules family
 

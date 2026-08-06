@@ -335,23 +335,23 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "draw-result-actions-and-nested-ordering-closure",
+    "batch_id": "draw-hidden-casting-and-reveal-choice-closure",
     "subsystem_id": "resources",
     "rule_ids": [
-      "121.6c",
-      "121.7"
+      "121.8",
+      "121.9"
     ],
     "target_capability_ids": [
       "zone.draw.library_to_hand"
     ],
-    "rationale": "Draw instruction replacement, per-turn prohibitions, optional-draw legality, Dredge, APNAP batches, and exact replay are represented. The next dependency-ready CR 121 boundary is ordering additional actions attached to a replaced draw and draws created by replacement or prevention effects after the unreplaced event portions.",
+    "rationale": "The canonical draw owner now covers result-generated ordering and a closed specifically-drawn-card action family. The next dependency-ready CR 121 boundary is hidden-information handling for cards drawn during casting and optional reveal-as-drawn choices.",
     "exit_criteria": [
-      "Represent typed post-draw actions attached to the specifically drawn card without losing physical identity.",
-      "Queue draw instructions created by replacement or prevention results after the unreplaced event portions in canonical order.",
-      "Suspend and resume any required choices with strict replay-pinned continuations.",
-      "Cover simultaneous and multiplayer ordering without leaking drawn-card identity.",
-      "Compile at least one reusable Oracle wording family for each implemented result path.",
-      "Keep casting-process face-down draws, reveal-as-drawn choices, and unrelated replacement-result families explicitly blocked."
+      "Hold cards drawn during casting or activation face down until the process completes, including legal reversal when the process fails.",
+      "Represent optional reveal-as-drawn choices before the card joins the rest of the hand.",
+      "Keep the pre-reveal identity seat-scoped and publish only an accepted reveal.",
+      "Suspend and resume choices with exact Game Record v3 replay and rollback.",
+      "Cover several-card instructions and four-player projection without leaking hidden identities.",
+      "Compile a reusable Oracle wording family while keeping broader hidden-zone and replacement grammar explicit residuals."
     ]
   }
 }

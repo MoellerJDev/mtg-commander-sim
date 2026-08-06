@@ -1000,8 +1000,14 @@
     {
       "id": "canonical_combat_damage_assignment_and_strike_harvest",
       "name": "Canonical combat-damage assignment and strike-step harvest",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 108 builds each combat-damage step through an immutable CombatDamageSnapshot and narrow read-only query, validates strict closed proposals, collects APNAP assignments in a typed sequence, and derives assignment, event, replacement-order, journal, and replay identity from canonical physical and logical participants rather than caller JSON order. Explicit interaction declarations replace incidental test co-citation. Generic source-spanned First Strike and Double Strike lowering adds one fine-grained trusted strike-step capability while the aggregate mechanics remain partial. The Commander census promotes exactly the predicted 69 exact/trusted/capability-closed cards, removes 449 material residuals, leaves unresolved objects and construction failures unchanged, shrinks CommanderEngine by two logical lines, moves two direct combat relationship writes into one typed owner, and adds no oversized module. Unsupported ability-changing, copy, face-down, additional-combat/damage-step, banding, and Trample-over-planeswalkers interactions remain explicit blockers. Public exact-head run 31071869495 passed, merge commit dfab6aa62285eae1c3ec4d2eae469d3a02e298dc is on main, and post-merge main-smoke run 31072255734 passed."
+    },
+    {
+      "id": "draw_result_ordering_and_drawn_card_actions",
+      "name": "Typed draw-result ordering and specifically-drawn-card actions",
       "status": "implemented_current_source_tree",
-      "evidence": "The current source tree builds each combat-damage step through an immutable CombatDamageSnapshot and narrow read-only query, validates strict closed proposals, collects APNAP assignments in a typed sequence, and derives assignment, event, replacement-order, journal, and replay identity from canonical physical and logical participants rather than caller JSON order. Explicit interaction declarations replace incidental test co-citation. Generic source-spanned First Strike and Double Strike lowering adds one fine-grained trusted strike-step capability while the aggregate mechanics remain partial. The Commander census promotes exactly the predicted 69 exact/trusted/capability-closed cards, removes 449 material residuals, leaves unresolved objects and construction failures unchanged, shrinks CommanderEngine by two logical lines, moves two direct combat relationship writes into one typed owner, and adds no oversized module. Unsupported ability-changing, copy, face-down, additional-combat/damage-step, banding, and Trample-over-planeswalkers interactions remain explicit blockers."
+      "evidence": "The current source tree closes bounded CR 121.7 result-generated draw ordering through typed CreateResultDraws operations, independently replaceable nested draw events, producing-effect exclusion under CR 614.5, iterative queueing, suspension/resume, privacy, and exact Game Record v3 replay. A separate fine-grained CR 121.6c capability pins typed public-reveal and discard-unless-land actions to the exact physical card drawn without leaking them onto Dredge, prevented, prohibited, or replacement-result draws. Oracle IR v35 generically lowers the closed Fa'adiyah Seer and Sindbad sentence and current unconditional controller draw doublers. The Commander census promotes exactly two exact/trusted/capability-closed cards and removes two material residuals while broader drawn-card actions, hidden casting-process draws, optional reveal-as-drawn choices, and wider replacement grammar remain explicit blockers."
     },
     {
       "id": "rules_snapshot",
@@ -1028,7 +1034,7 @@
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality fixed_mana_ability and cast_permission owners",
-    "capability_evidence": "implemented_registry_v32_with_53_records_43_trusted_and_424_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "capability_evidence": "implemented_registry_v33_with_55_records_45_trusted_and_447_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -1039,14 +1045,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31061917743,
+      "run_id": 31076588097,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31061917743"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31076588097"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr107_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31062387189_pass",
-      "focused_rules_tests": "pass_targeted_new_canonical_assignment_snapshot_sequence_event_identity_relationship_removal_strike_capability_replay_and_mutation_tests; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
+      "deterministic_tests": "certified_main_through_pr109_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31076921267_pass",
+      "focused_rules_tests": "pass_targeted_draw_result_ordering_specifically_drawn_card_actions_compiler_capability_replay_privacy_and_mutation_tests; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
@@ -1074,7 +1080,7 @@
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
     "represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics; simple battlefield-object Auras now cast, revalidate, enter, attach, and fail closed generically, but player/graveyard/quality/subtype/compound/multiple Enchant grammar, Aura creatures, complete phasing, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally",
-    "represented draws now use one immutable replacement-aware transaction and iterative coordinator for turn, resolution, conditional, optional-follow-up, and APNAP producers, with generic Dredge, fixed draw CardPrograms, fixed per-turn limits, optional-draw legality, and large-count suspension/resume; dynamic limits, complete draw-as-cost production, shared-team turns, additional drawn-card actions, replacement-result ordering, casting-process face-down draws, reveal-as-drawn choices, and the broader replacement corpus remain incomplete",
+    "represented draws now use one immutable replacement-aware transaction and iterative coordinator for turn, resolution, conditional, optional-follow-up, and APNAP producers, with generic Dredge, fixed draw CardPrograms, fixed per-turn limits, optional-draw legality, large-count suspension/resume, typed CR 121.7 replacement-result draws, and one closed CR 121.6c public-reveal/discard-unless-land action family; dynamic limits, complete draw-as-cost production, shared-team turns, broader drawn-card actions, casting-process face-down draws, optional reveal-as-drawn choices, and the wider replacement corpus remain incomplete",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
     "the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction",

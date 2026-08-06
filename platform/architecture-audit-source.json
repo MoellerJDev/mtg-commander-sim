@@ -4,13 +4,13 @@
     "baseline_main_commit": "ff5973728476d66406179a2bc6b5113bd8483aaf",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-05",
-    "phase": "reusable_piece_coverage_matrix",
-    "scope_note": "Certified main through PR 102 includes the reusable generic damage-effect clause family and its post-merge status reconciliation. The current focused branch adds the versioned reusable-rules-piece ontology, per-card relation index, interaction matrix, durable program baseline and delta, complex-card composition benchmark, CLI drill-down, freshness gates, and current documentation needed to select later rules families from measured shared blockers."
+    "phase": "draw_result_ordering_and_drawn_card_actions",
+    "scope_note": "Certified main through PR 109 includes canonical combat-damage snapshots and ordering, First Strike and Double Strike participation, and fixed activated draw effects. The current focused branch adds typed CR 121.7 result-generated draws, typed CR 121.6c specifically-drawn-card actions, two fine-grained capability boundaries, generic compiler harvest, replay and privacy evidence, and current generated status."
   },
   "ci": {
-    "workflow": "CI",
-    "run_id": 31047020917,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31047020917",
+    "workflow": "PR",
+    "run_id": 31076588097,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31076588097",
     "status": "pass",
     "python_versions": [
       "3.12"
