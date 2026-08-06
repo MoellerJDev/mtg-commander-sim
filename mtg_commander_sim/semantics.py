@@ -68,6 +68,7 @@ VALID_EFFECT_OPERATIONS = {
     "drain_each_opponent",
     "draw",
     "draw_each_player",
+    "draw_with_actions",
     "draw_if_opponent_cast_colors_this_turn",
     "draw_optional_land",
     "offer_draw",

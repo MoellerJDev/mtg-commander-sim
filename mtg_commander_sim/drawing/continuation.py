@@ -5,7 +5,15 @@ from typing import Any, Mapping
 
 from ..replacement import FrozenMap, ReplacementEffect, ReplacementEffectError
 from ..replacement.immutable import thaw_value
-from .model import DrawError, DrawEventRequest, QueuedDraw
+from .model import (
+    DrawError,
+    DrawEventRequest,
+    DrawnCardAction,
+    DiscardDrawnCardUnlessType,
+    QueuedDraw,
+    RevealDrawnCard,
+    drawn_card_action_from_dict,
+)
 
 
 _REASON_FIELD = "rea" + "son"
@@ -40,6 +48,7 @@ class DrawResume:
     note: str = ""
     instruction_pointer: int = 0
     draws: tuple[QueuedDraw, ...] = ()
+    after: "DrawResume | None" = None
 
     def __post_init__(self) -> None:
         if self.kind not in {
@@ -58,6 +67,7 @@ class DrawResume:
                 or self.note
                 or self.instruction_pointer
                 or self.draws
+                or self.after is not None
             ):
                 raise DrawError("Empty draw continuation carries extra state")
             return
@@ -70,6 +80,7 @@ class DrawResume:
                 or self.note
                 or self.instruction_pointer
                 or self.draws
+                or self.after is not None
             ):
                 raise DrawError("Turn-draw continuation carries extra state")
             return
@@ -87,6 +98,12 @@ class DrawResume:
                 or self.instruction_pointer
             ):
                 raise DrawError("Draw-batch continuation carries extra state")
+            if self.after is not None and not isinstance(
+                self.after, DrawResume
+            ):
+                raise DrawError(
+                    "Draw-batch continuation requires a typed final resume"
+                )
             return
         _string(self.stack_ref, name="Semantic draw stack reference")
         if self.destination is not None and type(self.destination) is not str:
@@ -98,6 +115,8 @@ class DrawResume:
             raise DrawError("Semantic draw effects must be immutable objects")
         if self.draws:
             raise DrawError("Semantic draw continuation carries queued draws")
+        if self.after is not None:
+            raise DrawError("Semantic draw continuation carries a final resume")
 
     @classmethod
     def none(cls) -> "DrawResume":
@@ -115,7 +134,16 @@ class DrawResume:
             _exact(value, {"kind", "seat"}, name="Turn-draw continuation")
             return cls(kind="turn_draw", seat=_string(value["seat"], name="Turn-draw continuation seat"))
         if kind == "draw_batch":
-            _exact(value, {"kind", "draws"}, name="Draw-batch continuation")
+            fields = set(value)
+            if fields not in (
+                {"kind", "draws"},
+                {"kind", "draws", "after"},
+            ):
+                _exact(
+                    value,
+                    {"kind", "draws", "after"},
+                    name="Draw-batch continuation",
+                )
             draws = value["draws"]
             if not isinstance(draws, (list, tuple)) or any(
                 not isinstance(draw, Mapping) for draw in draws
@@ -124,6 +152,11 @@ class DrawResume:
             return cls(
                 kind="draw_batch",
                 draws=tuple(QueuedDraw.from_dict(draw) for draw in draws),
+                after=(
+                    cls.from_dict(value["after"])
+                    if "after" in value
+                    else None
+                ),
             )
         if kind != "semantic_resolution":
             raise DrawError("Post-draw continuation kind is invalid")
@@ -156,10 +189,13 @@ class DrawResume:
         if self.kind == "turn_draw":
             return {"kind": "turn_draw", "seat": self.seat}
         if self.kind == "draw_batch":
-            return {
+            value = {
                 "kind": "draw_batch",
                 "draws": [draw.to_dict() for draw in self.draws],
             }
+            if self.after is not None:
+                value["after"] = self.after.to_dict()
+            return value
         return {
             "kind": "semantic_resolution",
             "stack_ref": self.stack_ref,
@@ -181,10 +217,12 @@ class DrawDecisionContinuation:
     effects: tuple[ReplacementEffect, ...]
     selections: tuple[str, ...]
     after: DrawResume
-    schema_version: int = 1
+    excluded_effect_ids: tuple[str, ...] = ()
+    post_draw_actions: tuple[DrawnCardAction, ...] = ()
+    schema_version: int = 2
 
     def __post_init__(self) -> None:
-        if self.schema_version != 1:
+        if self.schema_version not in {1, 2}:
             raise DrawError("Unsupported draw continuation schema version")
         _string(self.event_id, name="Draw continuation event ID")
         _string(self.seat, name="Draw continuation seat")
@@ -202,6 +240,31 @@ class DrawDecisionContinuation:
             raise DrawError("Draw continuation requires draw replacement effects")
         if any(type(selection) is not str or not selection for selection in self.selections):
             raise DrawError("Draw continuation selections must be canonical strings")
+        if any(
+            type(effect_id) is not str or not effect_id
+            for effect_id in self.excluded_effect_ids
+        ) or self.excluded_effect_ids != tuple(
+            sorted(set(self.excluded_effect_ids))
+        ):
+            raise DrawError(
+                "Draw continuation exclusions must be unique and canonical"
+            )
+        if self.schema_version == 1 and self.excluded_effect_ids:
+            raise DrawError("Legacy draw continuations cannot carry exclusions")
+        if any(
+            not isinstance(
+                action,
+                (RevealDrawnCard, DiscardDrawnCardUnlessType),
+            )
+            for action in self.post_draw_actions
+        ):
+            raise DrawError(
+                "Draw continuation post-actions must be typed"
+            )
+        if self.schema_version == 1 and self.post_draw_actions:
+            raise DrawError(
+                "Legacy draw continuations cannot carry post-actions"
+            )
         if not isinstance(self.after, DrawResume):
             raise DrawError("Draw continuation requires a typed resume value")
 
@@ -213,15 +276,16 @@ class DrawDecisionContinuation:
             library_size=self.library_size,
             reason=self.reason,
             private=self.private,
+            excluded_effect_ids=self.excluded_effect_ids,
+            post_draw_actions=self.post_draw_actions,
         )
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "DrawDecisionContinuation":
         if not isinstance(value, Mapping):
             raise DrawError("Draw decision continuation must be an object")
-        _exact(
-            value,
-            {
+        schema_version = value.get("schema_version")
+        fields = {
                 "schema_version",
                 "event_id",
                 "seat",
@@ -232,9 +296,11 @@ class DrawDecisionContinuation:
                 "effects",
                 "selections",
                 "after",
-            },
-            name="Draw decision continuation",
-        )
+            }
+        if schema_version == 2:
+            fields.add("excluded_effect_ids")
+            fields.add("post_draw_actions")
+        _exact(value, fields, name="Draw decision continuation")
         effects_value = value["effects"]
         selections_value = value["selections"]
         if not isinstance(effects_value, (list, tuple)) or any(
@@ -243,6 +309,14 @@ class DrawDecisionContinuation:
             raise DrawError("Draw continuation effects must be objects")
         if not isinstance(selections_value, (list, tuple)):
             raise DrawError("Draw continuation selections must be a list")
+        excluded_values = value.get("excluded_effect_ids", ())
+        if not isinstance(excluded_values, (list, tuple)):
+            raise DrawError("Draw continuation exclusions must be a list")
+        post_action_values = value.get("post_draw_actions", ())
+        if not isinstance(post_action_values, (list, tuple)) or any(
+            not isinstance(action, Mapping) for action in post_action_values
+        ):
+            raise DrawError("Draw continuation post-actions must be objects")
         try:
             effects = tuple(
                 ReplacementEffect.from_dict(effect) for effect in effects_value
@@ -250,7 +324,7 @@ class DrawDecisionContinuation:
         except ReplacementEffectError as exc:
             raise DrawError(str(exc)) from exc
         return cls(
-            schema_version=value["schema_version"],
+            schema_version=schema_version,
             event_id=value["event_id"],
             seat=value["seat"],
             remaining_draws=value["remaining_draws"],
@@ -260,10 +334,15 @@ class DrawDecisionContinuation:
             effects=effects,
             selections=tuple(selections_value),
             after=DrawResume.from_dict(value["after"]),
+            excluded_effect_ids=tuple(excluded_values),
+            post_draw_actions=tuple(
+                drawn_card_action_from_dict(action)
+                for action in post_action_values
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        value = {
             "schema_version": self.schema_version,
             "event_id": self.event_id,
             "seat": self.seat,
@@ -275,6 +354,12 @@ class DrawDecisionContinuation:
             "selections": list(self.selections),
             "after": self.after.to_dict(),
         }
+        if self.schema_version == 2:
+            value["excluded_effect_ids"] = list(self.excluded_effect_ids)
+            value["post_draw_actions"] = [
+                action.to_dict() for action in self.post_draw_actions
+            ]
+        return value
 
 
 __all__ = ["DrawDecisionContinuation", "DrawResume"]

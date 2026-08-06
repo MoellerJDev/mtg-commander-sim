@@ -3,6 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from ..drawing.model import (
+    DiscardDrawnCardUnlessType,
+    RevealDrawnCard,
+    drawn_card_action_from_dict,
+)
 from .context import ReadOnlyHandlerContext, SemanticNodeError
 from .intents import (
     BecomeMonarchIntent,
@@ -111,6 +116,80 @@ class DrawEachPlayerHandler:
 
 
 @dataclass(frozen=True, slots=True)
+class DrawWithActionsHandler:
+    """Lower the closed CR 121.6c specifically-drawn-card action family."""
+
+    handler_id: str = "generic.draw-with-actions.v1"
+    schema_version: int = 1
+    family: str = "zone.draw"
+    operation: str = "draw_with_actions"
+    rule_references: tuple[str, ...] = ("121.1", "121.6c")
+    capability_dependencies: tuple[str, ...] = (
+        "zone.draw.library_to_hand",
+    )
+
+    def lower(
+        self,
+        effect: Mapping[str, Any],
+        context: ReadOnlyHandlerContext,
+    ) -> IntentPlan:
+        allowed = {
+            "op",
+            "player",
+            "count",
+            "private",
+            "reason",
+            "post_draw_actions",
+        }
+        if set(effect) - allowed:
+            raise SemanticNodeError(
+                "Draw-with-actions carries unsupported fields"
+            )
+        if _count(effect) != 1:
+            raise SemanticNodeError(
+                "Draw-with-actions requires exactly one draw"
+            )
+        raw_actions = effect.get("post_draw_actions")
+        if not isinstance(raw_actions, (list, tuple)) or any(
+            not isinstance(value, Mapping) for value in raw_actions
+        ):
+            raise SemanticNodeError(
+                "Draw-with-actions requires typed action objects"
+            )
+        try:
+            actions = tuple(
+                drawn_card_action_from_dict(value)
+                for value in raw_actions
+            )
+        except ValueError as exc:
+            raise SemanticNodeError(str(exc)) from exc
+        if actions != (
+            RevealDrawnCard(),
+            DiscardDrawnCardUnlessType(card_type="land"),
+        ):
+            raise SemanticNodeError(
+                "Draw-with-actions supports only public reveal then "
+                "discard-unless-land"
+            )
+        player = context.query.require_known_seat(
+            str(effect.get("player") or context.actor)
+        )
+        return IntentPlan(
+            operation=self.operation,
+            handler_id=self.handler_id,
+            intents=(
+                DrawCardsIntent(
+                    player=player,
+                    count=1,
+                    reason=_reason(effect, context),
+                    private=_private(effect),
+                    post_draw_actions=actions,
+                ),
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class BecomeMonarchHandler:
     handler_id: str = "generic.become-monarch.v1"
     schema_version: int = 1
@@ -147,5 +226,6 @@ class BecomeMonarchHandler:
 GENERIC_HANDLERS = (
     DrawHandler(),
     DrawEachPlayerHandler(),
+    DrawWithActionsHandler(),
     BecomeMonarchHandler(),
 )

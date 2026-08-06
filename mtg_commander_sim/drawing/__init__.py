@@ -10,6 +10,8 @@ from importlib import import_module
 
 from .continuation import DrawDecisionContinuation, DrawResume
 from .model import (
+    DiscardDrawnCardUnlessType,
+    DrawnCardAction,
     DrawError,
     DrawEventRequest,
     DrawEventResolution,
@@ -17,12 +19,19 @@ from .model import (
     PreparedDrawEvent,
     PreparedDrawInstruction,
     QueuedDraw,
+    RevealDrawnCard,
+    drawn_card_action_from_dict,
     prepare_draw_event,
     prepare_draw_instruction,
     prepare_ordinary_draw,
     validate_prepared_draw,
 )
-from .transaction import DrawCommitHost, commit_prepared_draw
+from .transaction import (
+    DrawCommitHost,
+    DrawCommitResult,
+    commit_prepared_draw,
+    commit_prepared_draw_result,
+)
 from .restrictions import (
     DrawPermission,
     DrawRestriction,
@@ -52,6 +61,10 @@ def __getattr__(name: str):
 
 __all__ = [
     "DrawError",
+    "DrawnCardAction",
+    "RevealDrawnCard",
+    "DiscardDrawnCardUnlessType",
+    "drawn_card_action_from_dict",
     "DrawDecisionContinuation",
     "DrawResume",
     "DrawEventRequest",
@@ -67,7 +80,9 @@ __all__ = [
     "prepare_ordinary_draw",
     "validate_prepared_draw",
     "DrawCommitHost",
+    "DrawCommitResult",
     "commit_prepared_draw",
+    "commit_prepared_draw_result",
     "begin_draw_batch",
     "begin_draw_sequence",
     "commit_unreplaced_draws",

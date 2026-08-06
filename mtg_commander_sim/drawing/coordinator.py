@@ -18,13 +18,18 @@ from .model import (
     DrawError,
     DrawEventRequest,
     DrawInstructionRequest,
+    DrawnCardAction,
     PreparedDrawEvent,
     QueuedDraw,
     prepare_draw_event,
     prepare_draw_instruction,
     prepare_ordinary_draw,
 )
-from .transaction import DrawCommitHost, commit_prepared_draw
+from .transaction import (
+    DrawCommitHost,
+    commit_prepared_draw,
+    commit_prepared_draw_result,
+)
 
 
 _DREDGE_REASON_PREFIX = "Dred" + "ge "
@@ -107,6 +112,8 @@ def begin_draw_sequence(
     reason: str,
     private: bool = False,
     continuation: Mapping[str, Any] | None = None,
+    excluded_effect_ids: tuple[str, ...] = (),
+    post_draw_actions: tuple[DrawnCardAction, ...] = (),
 ) -> None:
     """Resolve one draw instruction, then each draw independently."""
 
@@ -125,6 +132,8 @@ def begin_draw_sequence(
         reason=reason,
         private=private,
         resume=resume,
+        excluded_effect_ids=excluded_effect_ids,
+        post_draw_actions=post_draw_actions,
     )
 
 
@@ -155,41 +164,66 @@ def _prepare_runtime_draw_count(
     return instruction.count or 0
 
 
-def _draw_batch_resume(draws: tuple[QueuedDraw, ...]) -> DrawResume:
-    return (
-        DrawResume(kind="draw_batch", draws=draws)
-        if draws
-        else DrawResume.none()
+def _draw_batch_resume(
+    draws: tuple[QueuedDraw, ...],
+    *,
+    after: DrawResume | None = None,
+) -> DrawResume:
+    final = after or DrawResume.none()
+    if final.kind == "draw_batch":
+        draws = (*draws, *final.draws)
+        final = final.after or DrawResume.none()
+    if not draws:
+        return final
+    return DrawResume(
+        kind="draw_batch",
+        draws=draws,
+        after=None if final.kind == "none" else final,
     )
 
 
 def begin_draw_batch(
     host: DrawCoordinatorHost,
     draws: tuple[QueuedDraw, ...],
+    *,
+    continuation: Mapping[str, Any] | None = None,
 ) -> None:
     """Resolve queued instructions in order without bypassing replacements."""
 
     if any(not isinstance(draw, QueuedDraw) for draw in draws):
         raise DrawError("Draw batch requires typed queued draws")
     if not draws:
+        resume_after_draw(
+            host,
+            DrawResume.from_dict(dict(continuation or {"kind": "none"})),
+        )
         return
     current, remaining = draws[0], draws[1:]
+    final = DrawResume.from_dict(dict(continuation or {"kind": "none"}))
     begin_draw_sequence(
         host,
         current.player,
         current.count,
         reason=current.reason,
         private=current.private,
-        continuation=_draw_batch_resume(remaining).to_dict(),
+        continuation=_draw_batch_resume(remaining, after=final).to_dict(),
+        excluded_effect_ids=current.excluded_effect_ids,
+        post_draw_actions=current.post_draw_actions,
     )
 
 
 def _replacement_effects(
     host: DrawCoordinatorHost,
     seat: str,
+    excluded_effect_ids: tuple[str, ...] = (),
 ) -> tuple[Any, ...]:
     try:
-        return collect_draw_replacement_effects(host, seat)
+        excluded = set(excluded_effect_ids)
+        return tuple(
+            effect
+            for effect in collect_draw_replacement_effects(host, seat)
+            if effect.effect_id not in excluded
+        )
     except SemanticNodeError as exc:
         raise DrawError(str(exc)) from exc
 
@@ -249,6 +283,31 @@ def _draw_permission(host: DrawCoordinatorHost, seat: str) -> Any:
         raise DrawError(str(exc)) from exc
 
 
+def _prepare_runtime_draw_event(
+    host: DrawCoordinatorHost,
+    request: DrawEventRequest,
+    effects: tuple[Any, ...],
+) -> tuple[PreparedDrawEvent, tuple[str, ...]]:
+    """Auto-apply forced singleton replacements, preserving real choices."""
+
+    selections: list[str] = []
+    while True:
+        prepared = prepare_draw_event(
+            request,
+            apnap_order=host.apnap_order(),
+            effects=effects,
+            selections=selections,
+            require_all_selections=False,
+        )
+        pending = prepared.pending
+        if pending is None:
+            return prepared, tuple(selections)
+        options = tuple(pending.choice.options)
+        if len(options) != 1 or pending.choice.optional_options:
+            return prepared, tuple(selections)
+        selections.append(options[0])
+
+
 def _continue_draw_sequence(
     host: DrawCoordinatorHost,
     seat: str,
@@ -257,6 +316,8 @@ def _continue_draw_sequence(
     reason: str,
     private: bool,
     resume: DrawResume,
+    excluded_effect_ids: tuple[str, ...] = (),
+    post_draw_actions: tuple[DrawnCardAction, ...] = (),
 ) -> None:
     """Drain draw events and queued instructions without Python recursion."""
 
@@ -270,6 +331,8 @@ def _continue_draw_sequence(
                 ),
                 reason=reason,
                 private=private,
+                excluded_effect_ids=excluded_effect_ids,
+                post_draw_actions=post_draw_actions,
             )
             permission = _draw_permission(host, seat)
             if not permission.allows_individual_draw():
@@ -278,15 +341,16 @@ def _continue_draw_sequence(
                     apnap_order=host.apnap_order(),
                     prohibition_ids=permission.restriction_ids,
                 )
-                commit_prepared_draw(host, prepared)
+                commit_prepared_draw_result(host, prepared)
                 remaining -= 1
                 continue
-            effects = _replacement_effects(host, seat)
-            prepared = prepare_draw_event(
+            effects = _replacement_effects(
+                host, seat, excluded_effect_ids
+            )
+            prepared, automatic_selections = _prepare_runtime_draw_event(
+                host,
                 request,
-                apnap_order=host.apnap_order(),
-                effects=effects,
-                require_all_selections=False,
+                effects,
             )
             if prepared.pending is not None:
                 _issue_draw_replacement_choice(
@@ -299,14 +363,37 @@ def _continue_draw_sequence(
                         reason=reason,
                         private=private,
                         effects=effects,
-                        selections=(),
+                        selections=automatic_selections,
                         after=resume,
+                        excluded_effect_ids=excluded_effect_ids,
+                        post_draw_actions=post_draw_actions,
                     ),
                     prepared,
                 )
                 return
-            commit_prepared_draw(host, prepared)
+            result = commit_prepared_draw_result(host, prepared)
             remaining -= 1
+            if result.result_draws:
+                tail = _draw_batch_resume(
+                    (
+                        QueuedDraw(
+                            player=seat,
+                            count=remaining,
+                            reason=reason,
+                            private=private,
+                            excluded_effect_ids=excluded_effect_ids,
+                            post_draw_actions=post_draw_actions,
+                        ),
+                    )
+                    if remaining
+                    else (),
+                    after=resume,
+                )
+                resume = _draw_batch_resume(
+                    result.result_draws,
+                    after=tail,
+                )
+                remaining = 0
 
         if resume.kind != "draw_batch":
             resume_after_draw(host, resume)
@@ -316,6 +403,8 @@ def _continue_draw_sequence(
         seat = current.player
         reason = current.reason
         private = current.private
+        excluded_effect_ids = current.excluded_effect_ids
+        post_draw_actions = current.post_draw_actions
         remaining = _prepare_runtime_draw_count(
             host,
             seat,
@@ -323,7 +412,10 @@ def _continue_draw_sequence(
             reason=reason,
             private=private,
         )
-        resume = _draw_batch_resume(queued)
+        resume = _draw_batch_resume(
+            queued,
+            after=resume.after or DrawResume.none(),
+        )
 
 
 def _choice_id(effect: Any) -> str:
@@ -416,7 +508,11 @@ def complete_draw_replacement(
     choice = response.get("choice")
     if type(choice) is not str or not choice:
         raise DrawError("Draw replacement choice is required")
-    current_effects = _replacement_effects(host, seat)
+    current_effects = _replacement_effects(
+        host,
+        seat,
+        continuation.excluded_effect_ids,
+    )
     if current_effects != continuation.effects:
         raise DrawError("Draw replacement sources changed before completion")
     current = prepare_draw_event(
@@ -457,14 +553,38 @@ def complete_draw_replacement(
             prepared,
         )
         return
-    commit_prepared_draw(host, prepared)
+    result = commit_prepared_draw_result(host, prepared)
+    remaining = continuation.remaining_draws - 1
+    resume = continuation.after
+    if result.result_draws:
+        tail = _draw_batch_resume(
+            (
+                QueuedDraw(
+                    player=seat,
+                    count=remaining,
+                    reason=continuation.reason,
+                    private=continuation.private,
+                    excluded_effect_ids=(
+                        continuation.excluded_effect_ids
+                    ),
+                    post_draw_actions=continuation.post_draw_actions,
+                ),
+            )
+            if remaining
+            else (),
+            after=resume,
+        )
+        resume = _draw_batch_resume(result.result_draws, after=tail)
+        remaining = 0
     _continue_draw_sequence(
         host,
         seat,
-        continuation.remaining_draws - 1,
+        remaining,
         reason=continuation.reason,
         private=continuation.private,
-        resume=continuation.after,
+        resume=resume,
+        excluded_effect_ids=continuation.excluded_effect_ids,
+        post_draw_actions=continuation.post_draw_actions,
     )
 
 
@@ -609,7 +729,13 @@ def resume_after_draw(
         )
         return
     if resume.kind == "draw_batch":
-        begin_draw_batch(host, resume.draws)
+        begin_draw_batch(
+            host,
+            resume.draws,
+            continuation=(
+                resume.after or DrawResume.none()
+            ).to_dict(),
+        )
         return
     raise DrawError(f"Unsupported post-draw continuation {resume.kind!r}")
 

@@ -40,7 +40,13 @@ from mtg_commander_sim.continuous_effect_model import ContinuousObjectIdentity
 from mtg_commander_sim import damage as damage_module
 from mtg_commander_sim import damage_prevention as damage_prevention_module
 from mtg_commander_sim.drawing import transaction as draw_transaction_module
-from mtg_commander_sim.drawing import DrawEventRequest, prepare_draw_event
+from mtg_commander_sim.drawing import (
+    DiscardDrawnCardUnlessType,
+    DrawCommitResult,
+    DrawEventRequest,
+    RevealDrawnCard,
+    prepare_draw_event,
+)
 from mtg_commander_sim.damage import DamageEvent
 from mtg_commander_sim.damage_prevention import (
     DamageModifierDuration,
@@ -76,6 +82,7 @@ from mtg_commander_sim.semantic_runtime.counter_replacements import (
     resolve_counter_placement_replacements,
 )
 from mtg_commander_sim.semantic_runtime import draw_restrictions as draw_restriction_module
+from mtg_commander_sim.semantic_runtime import draw_replacements as draw_replacement_module
 from mtg_commander_sim.semantic_runtime.continuous_components import (
     AddBasicLandTypeHandler,
     ContinuousEffectSourceContext,
@@ -627,10 +634,92 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         with patch.object(
             draw_transaction_module,
             "_commit_ordinary_draw",
-            lambda *_args, **_kwargs: (),
+            lambda *_args, **_kwargs: DrawCommitResult(
+                kind="prevented", player="A"
+            ),
         ):
             with self.assertRaises(AssertionError):
                 assert_draw_commit()
+
+    def test_draw_result_and_post_action_mutants_are_killed(self):
+        descriptor = {
+            "handler_id": "replacement.draw.result.multiply.v1",
+            "schema_version": 1,
+            "event": "draw",
+            "condition": {
+                "affected_player_relation": "source_controller",
+            },
+            "modification": {"factor": 2},
+        }
+        context = draw_replacement_module.DrawReplacementSourceContext(
+            source_ref="A11",
+            source_object_id="object:A11",
+            source_zone_change_counter=1,
+            source_owner="A",
+            source_controller="A",
+            component_id="mutation",
+        )
+        expected_operation_type = draw_replacement_module.CreateResultDraws
+
+        def assert_result_operation() -> None:
+            effect = draw_replacement_module.DrawResultMultiplierHandler().replacement_effect(
+                descriptor, context
+            )
+            self.assertIsInstance(
+                effect.operations[0], expected_operation_type
+            )
+
+        assert_result_operation()
+        with patch.object(
+            draw_replacement_module,
+            "CreateResultDraws",
+            lambda **_kwargs: replacement_effects.MultiplyAmount(
+                field="count", factor=2
+            ),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_result_operation()
+
+        def assert_post_draw_action() -> None:
+            session = make_session(
+                self.db,
+                self.mishra,
+                self.zimone,
+                players=2,
+                seed=121603,
+            )
+            keep_all(session)
+            engine = session.engine
+            player = engine.state.players["A"]
+            object_id = next(
+                value
+                for value in player.zones["library"]
+                if not engine.card_record(engine.state.cards[value]).is_land
+            )
+            player.zones["library"].remove(object_id)
+            player.zones["library"].append(object_id)
+            engine.permissions.invalidate_current()
+            engine.state.pending_decision = None
+            engine.state.priority_player = None
+            engine._begin_draw_sequence(
+                "A",
+                1,
+                reason="post-action mutation",
+                post_draw_actions=(
+                    RevealDrawnCard(),
+                    DiscardDrawnCardUnlessType(card_type="land"),
+                ),
+            )
+            self.assertIn(object_id, player.zones["graveyard"])
+
+        assert_post_draw_action()
+        with patch.object(
+            draw_transaction_module,
+            "_apply_drawn_card_actions",
+            lambda *_args, **_kwargs: None,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_post_draw_action()
 
     def test_draw_restriction_mutant_is_killed(self):
         session = make_session(

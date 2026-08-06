@@ -29,6 +29,83 @@ def _stable_string(value: Any, *, field: str) -> str:
     return value
 
 
+def _canonical_effect_ids(
+    values: Sequence[str], *, field: str
+) -> tuple[str, ...]:
+    result = tuple(values)
+    if any(type(value) is not str or not value for value in result):
+        raise DrawError(f"{field} must contain nonempty strings")
+    if result != tuple(sorted(set(result))):
+        raise DrawError(f"{field} must be unique and canonical")
+    return result
+
+
+@dataclass(frozen=True, slots=True)
+class RevealDrawnCard:
+    public: bool = True
+
+    def __post_init__(self) -> None:
+        if self.public is not True:
+            raise DrawError(
+                "The represented drawn-card reveal must be public"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {"action": "reveal", "public": True}
+
+
+@dataclass(frozen=True, slots=True)
+class DiscardDrawnCardUnlessType:
+    card_type: str
+
+    def __post_init__(self) -> None:
+        if self.card_type != "land":
+            raise DrawError(
+                "The represented drawn-card condition requires land"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "action": "discard_unless_type",
+            "card_type": self.card_type,
+        }
+
+
+DrawnCardAction = RevealDrawnCard | DiscardDrawnCardUnlessType
+
+
+def drawn_card_action_from_dict(
+    value: Mapping[str, Any],
+) -> DrawnCardAction:
+    if not isinstance(value, Mapping):
+        raise DrawError("Drawn-card actions must be objects")
+    action = value.get("action")
+    if action == "reveal":
+        if set(value) != {"action", "public"}:
+            raise DrawError("Drawn-card reveal fields are invalid")
+        return RevealDrawnCard(public=value["public"])
+    if action == "discard_unless_type":
+        if set(value) != {"action", "card_type"}:
+            raise DrawError("Drawn-card discard fields are invalid")
+        return DiscardDrawnCardUnlessType(card_type=value["card_type"])
+    raise DrawError(f"Unsupported drawn-card action {action!r}")
+
+
+def _drawn_card_actions(
+    values: Sequence[DrawnCardAction], *, field: str
+) -> tuple[DrawnCardAction, ...]:
+    result = tuple(values)
+    if any(
+        not isinstance(
+            value,
+            (RevealDrawnCard, DiscardDrawnCardUnlessType),
+        )
+        for value in result
+    ):
+        raise DrawError(f"{field} must contain typed drawn-card actions")
+    return result
+
+
 @dataclass(frozen=True, slots=True)
 class QueuedDraw:
     """One immutable draw instruction waiting behind another instruction."""
@@ -37,6 +114,8 @@ class QueuedDraw:
     count: int
     reason: str
     private: bool = False
+    excluded_effect_ids: tuple[str, ...] = ()
+    post_draw_actions: tuple[DrawnCardAction, ...] = ()
 
     def __post_init__(self) -> None:
         _stable_string(self.player, field="Queued draw player")
@@ -45,19 +124,55 @@ class QueuedDraw:
             raise DrawError("Queued draw count must be a nonnegative integer")
         if type(self.private) is not bool:
             raise DrawError("Queued draw private flag must be a boolean")
+        object.__setattr__(
+            self,
+            "excluded_effect_ids",
+            _canonical_effect_ids(
+                self.excluded_effect_ids,
+                field="Queued draw exclusions",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "post_draw_actions",
+            _drawn_card_actions(
+                self.post_draw_actions,
+                field="Queued draw post-actions",
+            ),
+        )
 
     @classmethod
     def from_dict(cls, value: Mapping[str, Any]) -> "QueuedDraw":
         if not isinstance(value, Mapping):
             raise DrawError("Queued draw must be an object")
-        expected = {"player", "count", _REASON_FIELD, "private"}
-        if set(value) != expected:
+        legacy = {"player", "count", _REASON_FIELD, "private"}
+        exclusions_only = {*legacy, "excluded_effect_ids"}
+        actions_only = {*legacy, "post_draw_actions"}
+        current = {*exclusions_only, "post_draw_actions"}
+        if frozenset(value) not in {
+            frozenset(legacy),
+            frozenset(exclusions_only),
+            frozenset(actions_only),
+            frozenset(current),
+        }:
             raise DrawError("Queued draw fields are invalid")
+        exclusions = value.get("excluded_effect_ids", ())
+        if not isinstance(exclusions, (list, tuple)):
+            raise DrawError("Queued draw exclusions must be a list")
+        actions = value.get("post_draw_actions", ())
+        if not isinstance(actions, (list, tuple)) or any(
+            not isinstance(action, Mapping) for action in actions
+        ):
+            raise DrawError("Queued draw post-actions must be objects")
         return cls(
             player=value["player"],
             count=value["count"],
             reason=value[_REASON_FIELD],
             private=value["private"],
+            excluded_effect_ids=tuple(exclusions),
+            post_draw_actions=tuple(
+                drawn_card_action_from_dict(action) for action in actions
+            ),
         )
 
     def to_dict(self) -> dict[str, Any]:
@@ -66,6 +181,10 @@ class QueuedDraw:
             "count": self.count,
             _REASON_FIELD: self.reason,
             "private": self.private,
+            "excluded_effect_ids": list(self.excluded_effect_ids),
+            "post_draw_actions": [
+                action.to_dict() for action in self.post_draw_actions
+            ],
         }
 
 
@@ -108,6 +227,8 @@ class DrawEventRequest:
     library_size: int
     reason: str = "draw"
     private: bool = False
+    excluded_effect_ids: tuple[str, ...] = ()
+    post_draw_actions: tuple[DrawnCardAction, ...] = ()
 
     def __post_init__(self) -> None:
         _stable_string(self.event_id, field="Draw event ID")
@@ -119,6 +240,22 @@ class DrawEventRequest:
             )
         if type(self.private) is not bool:
             raise DrawError("Draw event private flag must be a boolean")
+        object.__setattr__(
+            self,
+            "excluded_effect_ids",
+            _canonical_effect_ids(
+                self.excluded_effect_ids,
+                field="Draw event exclusions",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "post_draw_actions",
+            _drawn_card_actions(
+                self.post_draw_actions,
+                field="Draw event post-actions",
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,12 +269,15 @@ class DrawEventResolution:
     dredge_source_zone_change_counter: int | None = None
     dredge_mill_count: int | None = None
     prohibition_ids: tuple[str, ...] = ()
+    result_draws: tuple[QueuedDraw, ...] = ()
+    post_draw_actions: tuple[DrawnCardAction, ...] = ()
 
     def __post_init__(self) -> None:
         if self.kind not in {
             "draw",
             "prevented",
             "prohibited",
+            "result_draws",
             _DREDGE_KIND,
         }:
             raise DrawError(f"Unsupported draw result {self.kind!r}")
@@ -174,6 +314,26 @@ class DrawEventResolution:
             raise DrawError(
                 "Only a prohibited draw may carry prohibition IDs"
             )
+        if self.kind == "result_draws":
+            if not self.result_draws or any(
+                not isinstance(draw, QueuedDraw)
+                for draw in self.result_draws
+            ):
+                raise DrawError(
+                    "A result-draw replacement requires queued draws"
+                )
+        elif self.result_draws:
+            raise DrawError(
+                "Only a result-draw replacement may carry queued draws"
+            )
+        object.__setattr__(
+            self,
+            "post_draw_actions",
+            _drawn_card_actions(
+                self.post_draw_actions,
+                field="Resolved draw post-actions",
+            ),
+        )
         if self.kind != _DREDGE_KIND:
             if any(value is not None for value in dredge_values):
                 raise DrawError(
@@ -255,6 +415,10 @@ def _draw_event(request: DrawEventRequest) -> ReplaceableEvent:
             "library_size": request.library_size,
             _REASON_FIELD: request.reason,
             "private": request.private,
+            "excluded_effect_ids": list(request.excluded_effect_ids),
+            "post_draw_actions": [
+                action.to_dict() for action in request.post_draw_actions
+            ],
         },
     )
 
@@ -342,7 +506,7 @@ def _instruction_count(event: ReplaceableEvent) -> int:
 
 
 def _draw_resolution(event: ReplaceableEvent) -> DrawEventResolution:
-    if event.kind != "draw" or event.affected_player is None or event.children:
+    if event.kind != "draw" or event.affected_player is None:
         raise DrawError("Resolved draw must be one player event")
     payload = event.payload
     player = payload.get("player")
@@ -360,11 +524,50 @@ def _draw_resolution(event: ReplaceableEvent) -> DrawEventResolution:
         raise DrawError("Resolved draw library size is malformed")
     if (kind == "draw") != (is_draw is True):
         raise DrawError("Resolved draw kind and draw flag disagree")
-    if kind in {"prevented", "prohibited", _DREDGE_KIND} and is_draw is not False:
+    if kind in {
+        "prevented",
+        "prohibited",
+        "result_draws",
+        _DREDGE_KIND,
+    } and is_draw is not False:
         raise DrawError("A replaced draw must clear its draw flag")
+    result_draws: list[QueuedDraw] = []
+    if kind == "result_draws":
+        for child in event.children:
+            if (
+                child.kind != "draw.result_instruction"
+                or child.affected_player != event.affected_player
+                or child.affected_object is not None
+                or child.applied_effects
+                or child.children
+                or child.entry_scope is not None
+            ):
+                raise DrawError("Resolved result draw child is malformed")
+            child_payload = dict(child.payload)
+            expected = {
+                "player",
+                "count",
+                _REASON_FIELD,
+                "private",
+                "excluded_effect_ids",
+            }
+            if set(child_payload) != expected:
+                raise DrawError("Resolved result draw fields are invalid")
+            result_draws.append(
+                QueuedDraw.from_dict(child_payload)
+            )
+        if not result_draws:
+            raise DrawError("Resolved result draw is missing its instruction")
+    elif event.children:
+        raise DrawError("Resolved draw carries unsupported nested events")
     prohibition_ids = payload.get("prohibition_ids", ())
     if not isinstance(prohibition_ids, (list, tuple)):
         raise DrawError("Resolved draw prohibition IDs must be a list")
+    post_action_values = payload.get("post_draw_actions", ())
+    if not isinstance(post_action_values, (list, tuple)) or any(
+        not isinstance(action, Mapping) for action in post_action_values
+    ):
+        raise DrawError("Resolved draw post-actions must be objects")
     return DrawEventResolution(
         kind=kind,
         player=player,
@@ -377,6 +580,11 @@ def _draw_resolution(event: ReplaceableEvent) -> DrawEventResolution:
         ),
         dredge_mill_count=payload.get("dredge_mill_count"),
         prohibition_ids=tuple(prohibition_ids),
+        result_draws=tuple(result_draws),
+        post_draw_actions=tuple(
+            drawn_card_action_from_dict(action)
+            for action in post_action_values
+        ),
     )
 
 
@@ -538,12 +746,17 @@ def prepare_ordinary_draw(
 
 
 __all__ = [
+    "DiscardDrawnCardUnlessType",
+    "DrawnCardAction",
     "DrawError",
     "DrawEventRequest",
     "DrawEventResolution",
     "DrawInstructionRequest",
     "PreparedDrawEvent",
     "PreparedDrawInstruction",
+    "QueuedDraw",
+    "RevealDrawnCard",
+    "drawn_card_action_from_dict",
     "prepare_draw_event",
     "prepare_draw_instruction",
     "prepare_ordinary_draw",
