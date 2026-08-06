@@ -27,6 +27,13 @@ departed attacked permanent is not replaced by its controller. The distinct
 trample-over-planeswalkers variant and banding assignment control remain
 unsupported.
 
+Indestructible and prevention do not change ordinary Trample's lethal-assignment
+threshold. Lethal damage is still assigned using toughness, marked damage, and
+deathtouch; indestructible can prohibit the later state-based destruction, and
+protection can prevent the later damage result. Those interactions are certified
+without treating the still-partial Indestructible or Protection mechanics as
+universally supported.
+
 The transaction has six explicit stages:
 
 1. Snapshot the source and recipient identities and relevant characteristics.

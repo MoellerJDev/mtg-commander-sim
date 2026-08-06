@@ -629,7 +629,15 @@ def _attach_mechanic_inventory(
         component = row.get("implementation_component")
         if isinstance(component, str) and component:
             piece.implementation_components.add(component)
-        piece.test_ids.update(str(value) for value in row.get("test_ids", ()))
+        mechanic_tests = {
+            str(value) for value in row.get("test_ids", ())
+        }
+        piece.test_ids.update(mechanic_tests)
+        # A test intentionally cited by both a mechanic contract and another
+        # reusable piece is pairwise interaction evidence, not merely two
+        # unrelated unit-test citations. Coverage still requires the exact
+        # same stable test ID on both sides of an applicable card-level pair.
+        piece.interaction_test_ids.update(mechanic_tests)
         runtime, assurance = _mechanic_statuses(row)
         piece.promote_runtime(runtime)
         piece.promote_assurance(assurance)

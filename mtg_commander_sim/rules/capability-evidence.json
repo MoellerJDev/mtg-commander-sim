@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "a2bc03425e95fa4129ba8871e0fdd227ce2fecee535b1627142c074af5bc3999",
-  "declaration_source_fingerprint": "4b4f15c9613bc6370b3495fbf99c97fbdf0b20ccffa833b948f322294f4a4f41",
+  "registry_fingerprint": "fbf69b3501527f2b6997f5a7b1c3a1ade52aee800e1bfbff0ab92663de0cdaa8",
+  "declaration_source_fingerprint": "f84afed1b6fa0c5e11d25b36394eab62f4fb2286c157f3dbc37ef0ce65520666",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -1186,6 +1186,31 @@
         "commander_review"
       ],
       "applicability_note": "Keep prevention outside the assignment threshold while the damage-result pipeline applies protection and lifelink."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_trample_assigns_lethal_over_indestructible_blocker",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use the ordinary toughness-based lethal assignment threshold even when indestructible prevents the blocker from being destroyed afterward."
     },
     {
       "capability_id": "combat.damage.assignment.trample",
@@ -7898,5 +7923,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "e316e5ac352c0e1a19ae48f526f444b8462dd7b0476fbe319c12d7bb595bf422"
+  "fingerprint": "c7af8a9a0be73f96a6c59a647409f082f4e5efb3e21d2b10a32c7477fa81d16f"
 }

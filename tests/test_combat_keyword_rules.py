@@ -410,6 +410,42 @@ class CombatKeywordRuleTests(unittest.TestCase):
         self.assertEqual(3, by_target["B"]["amount"])
         self.assertEqual(0, by_target["B"]["prevented_amount"])
 
+    def test_trample_assigns_lethal_over_indestructible_blocker(self):
+        session = self.make_session(510421)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Indestructible-checking trampler",
+            power=5,
+            toughness=5,
+            keywords=("Trample",),
+        )
+        blocker = self.token(
+            engine,
+            "B",
+            "Indestructible blocker",
+            power=2,
+            toughness=2,
+            keywords=("Indestructible",),
+        )
+        self.set_combat(engine, attacker, blocker)
+        engine._begin_combat_damage()
+
+        result = self.submit_damage(
+            session,
+            "A",
+            [
+                {"source": attacker.ref, "target": blocker.ref, "amount": 2},
+                {"source": attacker.ref, "target": "B", "amount": 3},
+            ],
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual(37, engine.state.players["B"].life)
+        self.assertEqual("battlefield", blocker.zone)
+        self.assertEqual(2, blocker.marked_damage)
+
     def test_trample_rejects_spill_before_lethal_atomically(self):
         session = self.make_session(51043)
         engine = session.engine

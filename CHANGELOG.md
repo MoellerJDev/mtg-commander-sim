@@ -18,9 +18,14 @@ maintenance: "hand-maintained"
   current recipients, marked damage, simultaneous attacking sources,
   deathtouch, and lethal-before-spill assignment without mutating game state.
 - Added player, planeswalker, Battle, departed-target, double-strike,
-  four-player projection, rollback, replay, property-grid, and focused mutation
-  evidence. Trample while blocking, trample over planeswalkers, and banding do
-  not inherit ordinary attacking-creature spill semantics.
+  indestructible, protection/prevention, four-player projection, rollback,
+  replay, property-grid, and focused mutation evidence. Trample while blocking,
+  trample over planeswalkers, and banding do not inherit ordinary
+  attacking-creature spill semantics.
+- Repaired the reusable-piece generator to consume the reviewed mechanic-contract
+  registry, so shared interaction tests now cover the applicable
+  Trample/Double Strike, Trample/Indestructible, and Trample/Protection pairs
+  without promoting those partial mechanics to universal support.
 - Added source-spanned capability closure and generic CardProgram support for
   ordinary Trample. Current promotions and residual changes are reported by
   the generated compiler and reusable-piece reports.

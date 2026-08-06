@@ -484,6 +484,14 @@
     {
       "capability_id": "combat.damage.assignment.trample",
       "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_trample_assigns_lethal_over_indestructible_blocker",
+      "official_rule_ids": ["510.1", "510.1a", "510.1c", "510.1d", "702.19", "702.19a", "702.19b", "702.19c", "702.19d", "702.19e", "702.19f", "702.19g"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Use the ordinary toughness-based lethal assignment threshold even when indestructible prevents the blocker from being destroyed afterward."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "interaction",
       "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_double_strike_trample_recomputes_after_blocker_leaves",
       "official_rule_ids": ["510.1", "510.1a", "510.1c", "510.1d", "702.19", "702.19a", "702.19b", "702.19c", "702.19d", "702.19e", "702.19f", "702.19g"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],

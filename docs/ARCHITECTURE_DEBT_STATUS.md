@@ -16,7 +16,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `ff5973728476d66406179a2bc6b5113bd8483aaf`
 - Package: `0.8.0`
 - CI run: [31047020917](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31047020917) — `pass`
-- Production scope: 248 files, 106,053 physical lines, 97,275 logical lines
+- Production scope: 248 files, 106,061 physical lines, 97,279 logical lines
 
 ## Central engine debt
 
@@ -60,7 +60,7 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 | `web/src/App.tsx` | web | 1,784 | 1,728 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
-| `mtg_commander_sim/reusable_pieces/generation.py` | python | 1,583 | 1,490 |
+| `mtg_commander_sim/reusable_pieces/generation.py` | python | 1,591 | 1,494 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
 | `mtg_commander_sim/damage.py` | python | 1,586 | 1,456 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,498 | 1,449 |
@@ -114,8 +114,8 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,881
-- Conventional Python cases: 1,581
+- Python discovered: 4,883
+- Conventional Python cases: 1,583
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 9
 - Browser unit cases: 22

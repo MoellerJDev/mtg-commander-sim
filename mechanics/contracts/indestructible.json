@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "indestructible",
+  "official_name": "Indestructible",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["702.12", "702.12a", "702.12b", "702.12c"],
+  "glossary_references": ["indestructible"],
+  "dependencies": ["destroy", "state-based-actions", "damage", "continuous-effects"],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": ["permanent with indestructible"],
+    "events": ["destroy effect", "lethal-damage state-based action", "combat damage assignment"],
+    "state_reads": ["current effective indestructible ability", "current toughness and marked damage"],
+    "state_writes": ["omit prohibited destruction while preserving other state-based actions"],
+    "costs": [],
+    "timing": ["destroy effects and lethal-damage state-based actions", "ordinary trample assignment before damage is dealt"],
+    "targets": [],
+    "choices": [],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["ability-adding and ability-removing effects determine whether indestructible is present"],
+    "replacement_effects": ["indestructible is not prevention and does not change ordinary trample's lethal-assignment threshold"],
+    "copy": ["copiable characteristics may supply indestructible"],
+    "control_change": ["indestructible is independent of controller"],
+    "zone_change": ["a new object does not retain a noncopiable granted instance"],
+    "source_leaves": ["a continuous grant may end when its source leaves"]
+  },
+  "variants": ["lethal marked damage", "deathtouch damage", "zero toughness", "destroy effect", "ordinary trample assignment"],
+  "witness_cards": [],
+  "rulings": [],
+  "test_ids": ["test_snapshot_distinguishes_put_into_graveyard_from_destroy", "test_trample_assigns_lethal_over_indestructible_blocker", "test_keyword_contracts_trace_the_pinned_rules"],
+  "implementation": {
+    "component": "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions",
+    "version": "indestructible-partial-v1"
+  },
+  "known_blockers": ["the universal destroy-event path is not yet a single typed owner", "ability-changing, copy, face-down, and dependency interactions are incomplete", "the contract is partial and does not promote a trusted indestructible capability"],
+  "review_status": "draft"
+}
