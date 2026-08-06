@@ -1052,6 +1052,12 @@
       "evidence": "The current source tree consumes each since-last-check Deathtouch marker at the applicable state-based-action check even if the damaged permanent has ceased to be a creature, is phased out, or survives because it is Indestructible. Later creature or phased-in states cannot reuse old damage. The state action remains simultaneous and stale multi-object consumption still rejects before mutation. Activation-condition counts consume the canonical parsed effective card-type set instead of substring matching, so subtype text cannot satisfy a card-type condition and malformed effective type data fails closed. Focused red/green, replay, rollback, multiplayer, interaction, capability, and killed-mutation checks pass; regeneration and broader characteristic producers remain outside this bounded correction."
     },
     {
+      "id": "color_set_activated_mana_harvest",
+      "name": "Typed current-color-set activated mana abilities",
+      "status": "implemented_current_source_tree",
+      "evidence": "The current source tree gives four closed current-color-set activated mana templates one immutable compiler descriptor, seat-bound object query, shared manual-offer and automatic-payment mode owner, immediate stackless result, rollback boundary, and exact replay path. Mox Amber with no qualifying legendary creature or planeswalker remains legally activatable but advertises no colored output, adds no mana, and cannot pay another action automatically. Bloom Tender and Mox Amber become exact, trusted, capability-closed CardPrograms; Faeburrow Elder and The Grey Havens lose only the resolved mana residuals while retaining their unrelated blockers. The Commander census gains two exact cards, removes five material residuals, and keeps zero construction failures. CommanderEngine shrinks by 122 logical lines with no direct-write or card-specificity growth. Closed negative grammar, current-control/color/phasing, Haste, multiplayer, privacy, rollback, replay, offer-command parity, mutation, and explicit pair evidence pass focused checks; monocolored-only, linked-exile, opponent-relative, restricted, triggered, side-effecting, and wider conditional variants remain residual."
+    },
+    {
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main",
