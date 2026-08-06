@@ -8,7 +8,6 @@ DOUBLE_STRIKE = "double strike"
 DEATHTOUCH = "deathtouch"
 TRAMPLE = "trample"
 LIFELINK = "lifelink"
-MENACE = "menace"
 
 
 def normalized_keywords(values: Iterable[object]) -> frozenset[str]:
@@ -65,16 +64,3 @@ def assigns_in_damage_step(
             or DOUBLE_STRIKE in current_keywords
         )
     return False
-
-
-def menace_block_error(
-    attacker_ref: str,
-    attacker_keywords: frozenset[str],
-    blocker_count: int,
-) -> str | None:
-    if MENACE in attacker_keywords and blocker_count == 1:
-        return (
-            f"{attacker_ref} has menace and must be blocked by zero or "
-            "at least two creatures"
-        )
-    return None

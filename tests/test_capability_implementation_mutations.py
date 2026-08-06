@@ -13,6 +13,7 @@ from mtg_commander_sim import combat as combat_module
 from mtg_commander_sim import combat_damage_trample as trample_module
 from mtg_commander_sim import deathtouch as deathtouch_module
 from mtg_commander_sim import defender as defender_module
+from mtg_commander_sim import menace as menace_module
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
@@ -23,6 +24,7 @@ from mtg_commander_sim.rules.activation import resolution as activation_resoluti
 from mtg_commander_sim.rules.casting import proposal as casting_proposal
 from mtg_commander_sim.aura import SimpleEnchantSpec
 from mtg_commander_sim.abilities import ActivatedAbility
+from mtg_commander_sim.model import CombatState
 from mtg_commander_sim import protection as protection_module
 from mtg_commander_sim.ability_fragments import (
     ProtectionQualityKind,
@@ -1403,6 +1405,61 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_defender_prohibits_attack()
+
+    def test_menace_block_restriction_mutant_is_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=702_111,
+        )
+        keep_all(session)
+        engine = session.engine
+        attacker_ref = engine.create_token(
+            "A",
+            name="Menace Mutation Witness",
+            characteristics={
+                "type_line": "Token Creature — Horror",
+                "power": "2",
+                "toughness": "2",
+                "keywords": ["Menace"],
+            },
+        )[0]
+        blocker_ref = engine.create_token(
+            "B",
+            name="Mutation Blocker",
+            characteristics={
+                "type_line": "Token Creature — Soldier",
+                "power": "2",
+                "toughness": "2",
+                "keywords": [],
+            },
+        )[0]
+        attacker = engine._resolve_object(
+            "A", attacker_ref, zones={"battlefield"}
+        )
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+
+        def assert_single_blocker_is_rejected() -> None:
+            problem = engine._block_declaration_problem("B")
+            self.assertFalse(
+                problem.evaluate({blocker_ref: attacker_ref}).legal
+            )
+
+        assert_single_blocker_is_rejected()
+        with patch.object(
+            menace_module,
+            "MENACE_KEYWORD",
+            "mutated-menace",
+        ):
+            with self.assertRaises(AssertionError):
+                assert_single_blocker_is_rejected()
 
     def test_aerial_blocking_flying_and_reach_mutants_are_killed(self):
         def assert_ground_cannot_block_flying() -> None:

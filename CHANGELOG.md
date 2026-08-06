@@ -11,6 +11,21 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Typed ordinary-Menace block restriction
+
+- Replaced independent solver and UI keyword reads with one immutable Menace
+  restriction value derived from the current attacking creature snapshot. The
+  same value supplies the generic complete-declaration constraint and projected
+  minimum-blocker form; accepted commands recompute it from current state.
+- Added explicit zero, one, two, and larger blocker-count behavior; malformed
+  identity, characteristic, participation, and quantity rejection; current
+  gain/loss, must-block, cost, four-player privacy, replay, property, rollback,
+  and focused mutation evidence.
+- Printed Menace now requests a fine-grained source-spanned CardProgram
+  capability. Additional-block permissions, the broader CR 509 solver, and
+  unsupported ability-changing, copy, and face-down producers remain explicit
+  aggregate-mechanic blockers.
+
 ### Typed ordinary-Defender attack restriction
 
 - Replaced the legacy keyword check with one read-only Defender rules owner

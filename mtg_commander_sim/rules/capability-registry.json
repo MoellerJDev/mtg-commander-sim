@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 35,
+  "registry_version": 36,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -699,6 +699,33 @@
       "dependency_fail_closed_rationale": "This bounded restriction consumes the authoritative current characteristic snapshot and has no optional capability dependency.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_defender_attack_restriction_mutant_is_killed changes the recognized current keyword and the attack-prohibition assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.block.menace",
+      "version": 1,
+      "official_rules": ["509.1c", "702.111", "702.111a", "702.111b", "702.111c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Require zero or at least two blockers for one current represented attacking creature with one or more Menace instances, using one typed value for the declaration solver and projected minimum.",
+        "inputs": ["current effective creature type", "current represented effective keyword state", "current combat participation", "authoritative attacker reference", "complete simultaneous blocker declaration"],
+        "outputs": ["ordinary non-Menace attacker left to remaining declaration checks", "unblocked Menace attacker legal", "single-blocker Menace declaration prohibited", "two-or-more-blocker Menace declaration left to remaining checks", "malformed characteristic or relationship rejection before mutation"],
+        "exclusions": ["creatures allowed to block additional attackers", "the broader CR 509 restrictions-and-requirements solver", "unrepresented continuous-effect, copy, face-down, and ability-changing producers"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.menace.current_menace_restriction", "mtg_commander_sim.menace.MenaceBlockRestriction", "CommanderEngine._block_declaration_components", "CommanderEngine._issue_next_blocker", "CommanderEngine._complete_blockers"],
+      "positive_tests": ["test_current_attacking_creature_has_one_redundant_restriction", "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum"],
+      "negative_tests": ["test_nonattacker_noncreature_and_nonmenace_have_no_restriction", "test_malformed_current_characteristics_and_identity_fail_closed"],
+      "interaction_tests": ["test_effective_menace_gain_and_loss_change_the_shared_restriction", "test_menace_can_make_a_block_requirement_impossible", "test_two_blockers_satisfy_menace_and_the_block_requirement"],
+      "multiplayer_tests": ["test_four_player_menace_is_seat_scoped_and_replays"],
+      "privacy_tests": ["test_four_player_menace_is_seat_scoped_and_replays"],
+      "replay_tests": ["test_menace_requires_zero_or_two_blockers_and_projects_the_minimum", "test_four_player_menace_is_seat_scoped_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded restriction lowers to the existing complete-declaration solver from one authoritative current characteristic and combat snapshot and has no optional capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_menace_block_restriction_mutant_is_killed changes the recognized current keyword and the solver no longer rejects a single blocker.",
       "blockers": [],
       "status": "trusted"
     },

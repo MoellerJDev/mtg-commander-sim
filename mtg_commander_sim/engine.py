@@ -41,13 +41,13 @@ from .characteristic_evaluation import (
 )
 from .combat import (
     LIFELINK,
-    MENACE,
     assigns_in_damage_step,
     first_strike_step_required,
     normalized_keywords,
     ordinary_second_step_combatants,
 )
 from . import defender
+from . import menace
 from .combat_damage_assignment import CombatDamageAssignmentError
 from .combat_damage_engine_adapter import EngineCombatDamageQuery
 from .combat_damage_projection import project_combat_damage_assignment
@@ -11026,6 +11026,7 @@ class CommanderEngine(
         DeclarationProblem,
         tuple[DeclarationCost, ...],
         tuple[tuple[CardInstance, str, str], ...],
+        tuple[menace.MenaceBlockRestriction, ...],
     ]:
         attacker_cards = [
             card
@@ -11081,6 +11082,7 @@ class CommanderEngine(
                 )
 
         restrictions: list[DeclarationRestriction] = []
+        menace_restrictions: list[menace.MenaceBlockRestriction] = []
         for attacker in attacker_cards:
             oracle = self._combat_oracle_text(attacker)
             if "this creature must be blocked if able" in oracle:
@@ -11114,19 +11116,17 @@ class CommanderEngine(
                             ),
                         )
                     )
-            if MENACE in self._combat_keywords(attacker):
+            current_menace = menace.current_menace_restriction(
+                self._effective_card_data(attacker),
+                attacker.ref,
+                is_attacking=(
+                    attacker.object_id in self.state.combat.attackers
+                ),
+            )
+            if current_menace is not None:
+                menace_restrictions.append(current_menace)
                 restrictions.append(
-                    DeclarationRestriction(
-                        restriction_id=f"block:{attacker.ref}:menace",
-                        kind="minimum_option_uses",
-                        option=attacker.ref,
-                        count=2,
-                        when_used=True,
-                        label=(
-                            f"{attacker.ref} has menace and must be blocked "
-                            "by zero or at least two creatures"
-                        ),
-                    )
+                    current_menace.declaration_restriction()
                 )
         domains, static_restrictions, restriction_gaps = (
             self._declaration_restrictions("block", domains)
@@ -11148,7 +11148,7 @@ class CommanderEngine(
         ) + tuple(
             (source, line, "cost") for source, line in cost_gaps
         )
-        return problem, costs, gaps
+        return problem, costs, gaps, tuple(menace_restrictions)
 
     def _block_declaration_problem(
         self,
@@ -11659,14 +11659,13 @@ class CommanderEngine(
             == defender
         ]
         attackers = [card.ref for card in attacker_cards]
-        minimum_blockers = {
-            card.ref: 2
-            for card in attacker_cards
-            if MENACE in self._combat_keywords(card)
-        }
-        problem, costs, unresolved = self._block_declaration_components(
-            defender
+        problem, costs, unresolved, menace_restrictions = (
+            self._block_declaration_components(defender)
         )
+        minimum_blockers = {
+            restriction.attacker_ref: restriction.minimum_blockers
+            for restriction in menace_restrictions
+        }
         if unresolved:
             source, line, category = unresolved[0]
             self._pause_for_unsupported_semantic(
@@ -11771,7 +11770,7 @@ class CommanderEngine(
             canonical[blocker.ref] = attacker.ref
             used_blockers.add(blocker.object_id)
 
-        problem, costs, unresolved = self._block_declaration_components(
+        problem, costs, unresolved, _ = self._block_declaration_components(
             defender
         )
         if unresolved:
