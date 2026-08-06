@@ -30,8 +30,14 @@ path and are not silently reinterpreted.
 
 Turn draws, fixed resolving-effect draws, conditional opponent-cast-color
 draws, optional-follow-up draws, and draw-each-player effects converge on this
-coordinator. Setup hands and mulligan redraws are intentionally enclosing game
-procedures, not CR 121 draw events. The ordinary intent executor rejects a
+coordinator. Oracle IR v34 also lowers the closed positive fixed-count
+controller, target-player, target-opponent, optional, and each-player grammar
+when it is printed as an ordinary activated ability. The source-spanned node
+must have a fully compiled activation cost and a strict capability-shaped draw
+payload; dynamic counts, compound effects, reveal riders, or ambiguous sibling
+instructions remain material residuals. Setup hands and mulligan redraws are
+intentionally enclosing game procedures, not CR 121 draw events. The ordinary
+intent executor rejects a
 `DrawCardsIntent` that has not been routed through the coordinator, preventing
 a future producer from bypassing replacement, replay, or privacy handling.
 
@@ -58,6 +64,15 @@ consume a maximum-one allowance. An empty library is not itself a prohibition.
 The seat-scoped `offer_draw` handler validates the prospective drawer both
 before issuing a task and when the chooser accepts it.
 
+Activation legality and draw outcome remain separate. A fixed draw ability is
+still activatable when a live effect will prohibit the eventual draw or the
+library is empty. Its mana, tap, and sacrifice costs are paid first; its stack
+object then resolves through the same replacement coordinator even if the
+physical source has left the battlefield. Dredge can replace that draw before
+resolution completes, and only the affected seat sees the replacement choice
+or drawn-card identity. Table-wide activated draws use the same APNAP batch as
+other each-player producers.
+
 This boundary certifies only the reviewed passing parts of CR 121. Shared-team
 ordering, conditional/dynamic draw-limit grammar, complete draw-as-cost
 producers, additional actions tied to the drawn card, result-generated draw
@@ -70,4 +85,5 @@ Primary focused assurance lives in `test_draw_transaction_model.py`,
 `test_draw_replacement_components.py`, `test_draw_step_rules.py`,
 `test_draw_restrictions.py`, `test_draw_coordinator_iteration.py`,
 `test_optional_draw_choices.py`,
+`test_activated_draw_abilities.py`,
 `test_semantic_handlers.py`, and `test_exact_zimone_closure.py`.

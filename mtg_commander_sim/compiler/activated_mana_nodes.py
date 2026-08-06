@@ -184,12 +184,18 @@ def _activated_effect_dependency_gate(
     capability_registry: CapabilityRegistry | None,
     capability_profile: str,
 ) -> DependencyGate:
-    fixed_damage = (
+    capability_shaped_effect = (
         len(effects) == 1
         and str(effects[0].get("op") or "")
-        in {"damage", "damage_each_opponent"}
+        in {
+            "damage",
+            "damage_each_opponent",
+            "draw",
+            "draw_each_player",
+            "offer_draw",
+        }
     )
-    if fixed_damage and capability_registry is not None:
+    if capability_shaped_effect and capability_registry is not None:
         return dependency_gate(
             mechanics=mechanics,
             effects=effects,

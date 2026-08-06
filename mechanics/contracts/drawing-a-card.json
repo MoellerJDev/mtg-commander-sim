@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-121-drawing-a-card",
   "official_name": "Drawing a Card",
   "effective_date": "2026-06-19",
@@ -21,6 +21,7 @@
     "zones": ["library", "hand", "graveyard"],
     "objects": ["top library card", "draw instruction", "individual draw event", "replacement source"],
     "events": [
+      "closed fixed-count spell, trigger, and activated draw producers",
       "draw-count instruction replacement", "one individual draw at a time",
       "iterative large-instruction coordination",
       "live draw permission and prohibition", "ordinary library-to-hand draw",
@@ -42,6 +43,7 @@
     "timing": [
       "a multiple-card instruction is considered before its individual draws",
       "individual events and queued instructions are drained iteratively rather than through the Python call stack",
+      "an activated ability pays its costs and exists independently on the stack before its draw instruction is processed",
       "each represented draw replacement completes before the sequence resumes",
       "a draw does not use the stack"
     ],
@@ -73,7 +75,8 @@
     ],
     "source_leaves": [
       "Dredge pins physical source identity and zone-change counter through the private choice",
-      "a departed or phased-out battlefield restriction source stops applying before the next draw"
+      "a departed or phased-out battlefield restriction source stops applying before the next draw",
+      "a sacrificed activated-ability source does not stop its already-activated fixed draw from resolving"
     ]
   },
   "variants": [
@@ -81,14 +84,17 @@
     "empty-library ordinary, prevented, prohibited, and optional draws", "Dredge",
     "fixed no-draw and maximum-one restrictions", "unconditional draw doubling",
     "large replacement-free, prevented, over-library, and suspended instructions",
-    "draw-step and resolving-effect producers", "conditional resolving-effect draw"
+    "draw-step and resolving-effect producers", "conditional resolving-effect draw",
+    "closed controller, target-player, optional, and each-player activated draws"
   ],
   "witness_cards": [
     {"name": "Life from the Loam", "oracle_id": "ac8fba34-512c-4f24-999a-ab72f1ce4acb"},
     {"name": "Veil of Summer", "oracle_id": "002965be-a36f-4a09-9ce0-c6535bca1703"},
     {"name": "Spirit of the Labyrinth", "oracle_id": "1463795b-ec0c-44d6-ae1a-55f78d9843ec"},
     {"name": "Thought Reflection", "oracle_id": "692a6833-3014-42f6-b1ad-333bb3292c65"},
-    {"name": "Oculus", "oracle_id": "e793ede9-044a-44e9-bc9c-99b0034503eb"}
+    {"name": "Oculus", "oracle_id": "e793ede9-044a-44e9-bc9c-99b0034503eb"},
+    {"name": "Mind Stone", "oracle_id": "c97361b5-af16-4a7b-af85-a429dbaf4ad2"},
+    {"name": "Temple Bell", "oracle_id": "fc8032e9-c83a-4cf9-92e1-b1d2d9642695"}
   ],
   "rulings": [],
   "test_ids": [
@@ -113,11 +119,20 @@
     "test_large_sequence_suspends_and_resumes_from_remaining_count",
     "test_large_zero_count_batch_is_trampolined",
     "test_draw_past_library_records_each_empty_attempt",
-    "test_resumed_multi_draw_sequence_is_private_and_replays_exactly"
+    "test_resumed_multi_draw_sequence_is_private_and_replays_exactly",
+    "test_ordinary_activated_draw_is_exact_and_source_spanned",
+    "test_fixed_draw_shapes_are_strict_and_capability_scoped",
+    "test_sacrifice_draw_activation_is_offered_resolves_and_replays",
+    "test_unpayable_draw_activation_is_not_offered_and_rejects_atomically",
+    "test_draw_replacement_completes_after_cost_and_before_resolution",
+    "test_draw_prohibition_does_not_make_activation_illegal",
+    "test_empty_library_does_not_remove_the_activated_ability",
+    "test_each_player_activation_draws_in_four_player_game",
+    "test_target_player_draw_validates_target_resolves_privately_and_replays"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
-    "version": "draw-transaction-v3"
+    "component": "strict fixed-draw compiler shape and CardProgram lowering plus mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
+    "version": "draw-transaction-v4"
   },
   "known_blockers": [
     "shared-team turns are not supported",

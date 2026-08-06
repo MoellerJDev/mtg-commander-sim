@@ -7,6 +7,7 @@ from .model import (
 )
 from .commit import commit_activation
 from .availability import activation_availability
+from .conditions import activation_condition_status
 from .proposal import build_activation_offer, build_activation_proposal
 from .query import activated_abilities
 from .resolution import (
@@ -19,6 +20,7 @@ __all__ = [
     "ActivationProposalRequest",
     "ActivationProposalResult",
     "activation_availability",
+    "activation_condition_status",
     "activated_abilities",
     "build_activation_offer",
     "build_activation_proposal",

@@ -140,7 +140,6 @@ def fixed_draw_effect_template(text: str) -> DrawEffectTemplate | None:
             None,
             (
                 "cr-121-drawing-a-card",
-                "cr-101-the-magic-golden-rules",
             ),
         )
     return None

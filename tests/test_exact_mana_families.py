@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.rules.activation import activation_condition_status
 
 
 class ExactManaFamilyTests(unittest.TestCase):
@@ -153,7 +154,7 @@ class ExactManaFamilyTests(unittest.TestCase):
         )
         self.assertEqual(
             "unavailable",
-            engine._activation_condition_status("A", ability)[0],
+            activation_condition_status(engine, "A", ability)[0],
         )
         engine.move_card(
             artifact.object_id,
@@ -163,7 +164,7 @@ class ExactManaFamilyTests(unittest.TestCase):
         )
         self.assertEqual(
             "payable",
-            engine._activation_condition_status("A", ability)[0],
+            activation_condition_status(engine, "A", ability)[0],
         )
         before_life = engine.state.players["A"].life
         engine.state.priority_player = "A"

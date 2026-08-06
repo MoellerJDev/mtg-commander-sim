@@ -13,7 +13,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v33`
+- Compiler: `oracle-ir-v34`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
 - Compiler module: 1,498 physical / 1,449 logical lines
@@ -48,11 +48,11 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/32`
+- Registry schema/version: `1/33`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `5ff8b76800cd06bf89c143fbfb7c6ce61d6ec850a25bdb4f256917a76f49f205`
-- Evidence fingerprint: `2c96e119f2f147bdec3411bd8ed18ece63c9132e98b90969c21a8fe1e8ea6ed2`
-- Explicit evidence declarations: 424
+- Registry fingerprint: `17acbe209326d28123d7bd4f4b6ebca048213446f08d9f06232d6b981d9e861f`
+- Evidence fingerprint: `3093cb9cff00dac89d3c5af246caa09b49f95b714f11a908abb339b5c32900a6`
+- Explicit evidence declarations: 433
 - Capability records: 53
 - Trusted records: 43
 - Blocked records: 4
@@ -74,8 +74,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 4,288 | 14,973 | 19,281 | 58,452 | false |
-| Commander legal | 31,623 | 1,482 | 13,719 | 16,422 | 50,164 | false |
+| Full Oracle | 38,542 | 4,451 | 14,810 | 19,281 | 57,705 | false |
+| Commander legal | 31,623 | 1,565 | 13,636 | 16,422 | 49,944 | false |
 
 ## Full-corpus residual kinds
 
@@ -84,7 +84,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `trigger` | 15,274 |
 | `spell_effect` | 11,241 |
 | `static_ability` | 11,148 |
-| `dependency_contract` | 8,677 |
+| `dependency_contract` | 7,930 |
 | `effect` | 7,171 |
 | `cost` | 2,015 |
 | `replacement_effect` | 1,758 |

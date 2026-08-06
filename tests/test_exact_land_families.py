@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.rules.activation import activation_condition_status
 
 
 class ExactLandFamilyTests(unittest.TestCase):
@@ -253,12 +254,12 @@ class ExactLandFamilyTests(unittest.TestCase):
         engine.state.active_player = "B"
         self.assertEqual(
             "unavailable",
-            engine._activation_condition_status("B", ability)[0],
+            activation_condition_status(engine, "B", ability)[0],
         )
         engine.state.active_player = "A"
         self.assertEqual(
             "payable",
-            engine._activation_condition_status("B", ability)[0],
+            activation_condition_status(engine, "B", ability)[0],
         )
 
         engine.state.priority_player = "B"
