@@ -142,8 +142,8 @@
     {
       "mechanic_id": "cr-121-drawing-a-card",
       "path": "mechanics/contracts/drawing-a-card.json",
-      "sha256": "f038a4c08f5f03d8405744524db998bf5266b0e3ce8cec262b295b6f8d6e2334",
-      "version": 3
+      "sha256": "91af7f97eac18a0a5edd54a3d2e399eca16996e01b3a50cb0a3125c6069a92c2",
+      "version": 4
     },
     {
       "mechanic_id": "cr-609-effects",
@@ -5759,12 +5759,12 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/drawing-a-card.json",
-      "contract_sha256": "f038a4c08f5f03d8405744524db998bf5266b0e3ce8cec262b295b6f8d6e2334",
-      "contract_version": 3,
+      "contract_sha256": "91af7f97eac18a0a5edd54a3d2e399eca16996e01b3a50cb0a3125c6069a92c2",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
-      "implementation_version": "draw-transaction-v3",
+      "implementation_component": "strict fixed-draw compiler shape and CardProgram lowering plus mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
+      "implementation_version": "draw-transaction-v4",
       "kind": "rules_section",
       "known_blockers": [
         "shared-team turns are not supported",
@@ -5802,7 +5802,16 @@
         "test_large_sequence_suspends_and_resumes_from_remaining_count",
         "test_large_zero_count_batch_is_trampolined",
         "test_draw_past_library_records_each_empty_attempt",
-        "test_resumed_multi_draw_sequence_is_private_and_replays_exactly"
+        "test_resumed_multi_draw_sequence_is_private_and_replays_exactly",
+        "test_ordinary_activated_draw_is_exact_and_source_spanned",
+        "test_fixed_draw_shapes_are_strict_and_capability_scoped",
+        "test_sacrifice_draw_activation_is_offered_resolves_and_replays",
+        "test_unpayable_draw_activation_is_not_offered_and_rejects_atomically",
+        "test_draw_replacement_completes_after_cost_and_before_resolution",
+        "test_draw_prohibition_does_not_make_activation_illegal",
+        "test_empty_library_does_not_remove_the_activated_ability",
+        "test_each_player_activation_draws_in_four_player_game",
+        "test_target_player_draw_validates_target_resolves_privately_and_replays"
       ],
       "trust_level": "untrusted"
     },
