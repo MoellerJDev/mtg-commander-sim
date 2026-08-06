@@ -522,6 +522,70 @@
       "applicability_note": "Replay either JSON assignment permutation to the same canonical final state."
     },
     {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_damage_assignment.CombatDamageAssignmentProposalTests.test_deathtouch_damage_from_another_attacker_is_lethal",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Include another attacker's simultaneous positive deathtouch assignment in the lethal threshold."
+    },
+    {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Collect the assigning controllers' deathtouch combat proposals in a four-player game."
+    },
+    {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_deathtouch_assignment_and_result_mutants_are_killed",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill omission of deathtouch's positive-assignment lethal contribution."
+    },
+    {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_damage_assignment.CombatDamageAssignmentProposalTests.test_zero_deathtouch_assignment_is_not_lethal",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject zero as a lethal deathtouch assignment contribution."
+    },
+    {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Treat one positive assignment from the current deathtouch source as lethal before Trample spill."
+    },
+    {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project the public assignment decision only to its current assigning seat."
+    },
+    {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "property",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_assignment_and_result_predicates_hold_across_bounded_grid",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Check the exact positive-assignment predicate across a bounded source and amount grid."
+    },
+    {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
+      "official_rule_ids": ["510.1c", "702.2", "702.2a", "702.2c", "702.2f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the APNAP assignments and resulting deathtouch destruction exactly."
+    },
+    {
       "capability_id": "combat.damage.assignment.trample",
       "evidence_class": "interaction",
       "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
@@ -2334,6 +2398,94 @@
         "commander_review"
       ],
       "applicability_note": "Mark represented positive damage on a creature without destroying it before state-based actions."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_indestructible_consumes_deathtouch_at_the_first_sba_check",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Let indestructible prevent destruction while consuming the since-last-check deathtouch marker."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Apply the simultaneous result and state action at a four-player table."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_deathtouch_assignment_and_result_mutants_are_killed",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill omission of the source-derived deathtouch damage-result leaf."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "negative",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_legacy_event_flag_cannot_grant_deathtouch",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Ignore the historical display flag and derive Deathtouch only from the pinned source keyword snapshot."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "negative",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_persisted_marker_and_check_collection_fail_closed",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject malformed persisted marker values and noncollection state-based-action check inputs."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "negative",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_result_requires_positive_damage_to_a_creature",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Do not create a deathtouch result for zero damage or a noncreature recipient."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "positive",
+      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Create the deathtouch result from the pinned source snapshot after the source leaves."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose only public combat and destruction facts to nonassigning seats."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "property",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_assignment_and_result_predicates_hold_across_bounded_grid",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Check positive-damage, source-keyword, and creature-recipient closure across a bounded result grid."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the source-derived result, destruction, and one-check marker consumption exactly."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_stale_check_batch_rolls_back_without_consuming_any_marker",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject a stale multi-object state-based-action check before consuming any deathtouch result marker."
     },
     {
       "capability_id": "damage.result.infect",
@@ -5971,158 +6123,6 @@
       "official_rule_ids": ["121.6c"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "positive",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Treat one positive assignment from the current deathtouch source as lethal before Trample spill."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "negative",
-      "test_id": "tests.test_combat_damage_assignment.CombatDamageAssignmentProposalTests.test_zero_deathtouch_assignment_is_not_lethal",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Reject zero as a lethal deathtouch assignment contribution."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "interaction",
-      "test_id": "tests.test_combat_damage_assignment.CombatDamageAssignmentProposalTests.test_deathtouch_damage_from_another_attacker_is_lethal",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Include another attacker's simultaneous positive deathtouch assignment in the lethal threshold."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "multiplayer",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Collect the assigning controllers' deathtouch combat proposals in a four-player game."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "privacy",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Project the public assignment decision only to its current assigning seat."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "replay",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Replay the APNAP assignments and resulting deathtouch destruction exactly."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "mutation",
-      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_deathtouch_assignment_and_result_mutants_are_killed",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Kill omission of deathtouch's positive-assignment lethal contribution."
-    },
-    {
-      "capability_id": "combat.damage.assignment.deathtouch",
-      "evidence_class": "property",
-      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_assignment_and_result_predicates_hold_across_bounded_grid",
-      "official_rule_ids": ["510.1c", "702.2c"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Check the exact positive-assignment predicate across a bounded source and amount grid."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "positive",
-      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki",
-      "official_rule_ids": ["702.2b", "702.2d", "702.2e", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Create the deathtouch result from the pinned source snapshot after the source leaves."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "negative",
-      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_result_requires_positive_damage_to_a_creature",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Do not create a deathtouch result for zero damage or a noncreature recipient."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "negative",
-      "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_legacy_event_flag_cannot_grant_deathtouch",
-      "official_rule_ids": ["702.2b", "702.2e"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Ignore the historical display flag and derive Deathtouch only from the pinned source keyword snapshot."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "negative",
-      "test_id": "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_persisted_marker_and_check_collection_fail_closed",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Reject malformed persisted marker values and noncollection state-based-action check inputs."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "rollback",
-      "test_id": "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_stale_check_batch_rolls_back_without_consuming_any_marker",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Reject a stale multi-object state-based-action check before consuming any deathtouch result marker."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "interaction",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_indestructible_consumes_deathtouch_at_the_first_sba_check",
-      "official_rule_ids": ["702.2b", "702.12b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Let indestructible prevent destruction while consuming the since-last-check deathtouch marker."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "multiplayer",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Apply the simultaneous result and state action at a four-player table."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "privacy",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Expose only public combat and destruction facts to nonassigning seats."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "replay",
-      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Replay the source-derived result, destruction, and one-check marker consumption exactly."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "mutation",
-      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_deathtouch_assignment_and_result_mutants_are_killed",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Kill omission of the source-derived deathtouch damage-result leaf."
-    },
-    {
-      "capability_id": "damage.result.deathtouch",
-      "evidence_class": "property",
-      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_assignment_and_result_predicates_hold_across_bounded_grid",
-      "official_rule_ids": ["702.2b", "704.5h"],
-      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
-      "applicability_note": "Check positive-damage, source-keyword, and creature-recipient closure across a bounded result grid."
     }
   ]
 }

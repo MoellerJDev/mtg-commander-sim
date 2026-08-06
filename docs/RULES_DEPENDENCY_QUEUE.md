@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,027
-- Reviewed behavioral blockers: 370
-- Behavioral classification/review required: 2,657
-- Passing behavioral rules: 156
+- Queued rules: 3,021
+- Reviewed behavioral blockers: 372
+- Behavioral classification/review required: 2,649
+- Passing behavioral rules: 160
 - Subsystems: 21
-- Queue fingerprint: `8fe358ef9bb353faf55d61644e6f0e8fd1309d820efa27ab84c7775148fa4267`
+- Queue fingerprint: `4db985b3570c59d00ef80804bc50cd066f9335da6bc94b01f8a63afd03431acf`
 
 ## Selected next batch
 
-- Batch: `deathtouch-assignment-and-result-closure`
+- Batch: `defender-attack-restriction-closure`
 - Subsystem: `keyword-abilities`
-- Rules: `702.2`, `702.2a`, `702.2b`, `702.2c`, `702.2d`, `702.2e`, `702.2f`
-- Target capabilities: `combat.damage.assignment.canonical`, `damage.amount.positive`, `damage.result.deathtouch`
-- Rationale: CR 121.9 is now closed while CR 121.8 remains blocked on casting-process and side-effecting mana-ability prerequisites. The immutable combat snapshot, canonical assignment owner, typed damage results, prevention boundary, and strike-step participation foundation make ordinary Deathtouch the next dependency-ready medium-risk harvest. The pinned Commander frontier records 333 affected cards and 45 sole-blocker cards.
+- Rules: `702.3`, `702.3a`, `702.3b`, `702.3c`
+- Target capabilities: `combat.attack.defender`
+- Rationale: The ordinary attack-declaration, effective-keyword, replay, and multiplayer foundations already expose one legacy Defender restriction without a trusted typed capability owner. The refreshed pinned Commander frontier records 304 affected cards, 42 sole-blocker cards, and 301 material residuals, making bounded ordinary Defender the next dependency-ready medium-risk combat harvest.
 
 Exit criteria:
 
-- Represent Deathtouch lethal assignment and actual positive damage dealt as distinct typed facts.
-- Use the source snapshot or required last-known information so source departure and control changes cannot erase or invent Deathtouch.
-- Ensure prevented or replaced-away damage does not create the Deathtouch state-based-action result.
-- Treat multiple Deathtouch instances as redundant and reject pilot-supplied keyword claims.
-- Route the linked CR 704.5h state-based destruction result through the canonical stabilization owner with exact replay, rollback, multiplayer, interaction, and mutation evidence.
-- Lower the ordinary keyword generically into CardProgram V2 and keep unsupported ability-changing, copy, face-down, and assignment-modifier interactions explicit residuals.
+- Introduce one typed read-only Defender attack-restriction query shared by advertised attacker candidates and accepted declarations.
+- Evaluate current represented creature type, controller, and effective keyword state without printed-name or runtime Oracle-text behavior.
+- Treat multiple Defender instances as redundant and reject malformed or caller-invented keyword facts before mutation.
+- Preserve exact replay, rollback, four-player seat projection, interaction, property, and killed-mutation evidence.
+- Lower the ordinary keyword generically into CardProgram V2 with precise source spans and capability closure.
+- Keep ability-changing, copy, face-down, attack-permission, and the broader CR 508 restrictions-and-requirements solver explicit residuals.
 
 ## Dependency schedule
 
@@ -57,8 +57,8 @@ Exit criteria:
 | 13 | `continuous-effects` | `characteristics`, `objects-permanents-tokens`, `triggered-static-linked`, `resolution-effects` | 64 | 12 | 52 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 33 | 33 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
-| 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 4 | 512 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 743 | 2 | 741 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 5 | 511 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 737 | 3 | 734 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 18 | `alternate-card-forms` | `card-types`, `zones`, `casting-activation`, `continuous-effects`, `replacement-prevention`, `game-actions-state` | 249 | 0 | 249 | `oracle_normalization`, `oracle_parser`, `card_program_faces`, `card_program_zone_permissions`, `mechanic_contracts` |
 | 19 | `designations-variants` | `turn-structure`, `combat`, `triggered-static-linked` | 9 | 0 | 9 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 20 | `multiplayer` | `core-game`, `turn-structure`, `combat` | 182 | 0 | 182 | `runtime_contracts`, `mechanic_contracts` |

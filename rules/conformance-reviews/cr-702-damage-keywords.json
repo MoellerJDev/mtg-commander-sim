@@ -69,8 +69,8 @@
       "reviewed": true,
       "implementation_components": ["mtg_commander_sim.damage_source.DamageSourceSnapshot", "mtg_commander_sim.deathtouch.deathtouch_damage_result_applies"],
       "executable_test_ids": ["tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"],
-      "required_scenarios": ["positive", "zone_change"],
-      "covered_scenarios": ["positive", "zone_change"],
+      "required_scenarios": ["positive", "interaction"],
+      "covered_scenarios": ["positive", "interaction"],
       "blockers": [],
       "notes": ["Every represented source zone uses the same pinned source keyword snapshot."]
     },
@@ -83,8 +83,8 @@
       "reviewed": true,
       "implementation_components": ["mtg_commander_sim.damage_source.DamageSourceSnapshot", "mtg_commander_sim.damage_results.materialize_damage_results"],
       "executable_test_ids": ["tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"],
-      "required_scenarios": ["positive", "zone_change"],
-      "covered_scenarios": ["positive", "zone_change"],
+      "required_scenarios": ["positive", "interaction"],
+      "covered_scenarios": ["positive", "interaction"],
       "blockers": [],
       "notes": ["The prepared event retains deathtouch when the physical source leaves before commit."]
     },

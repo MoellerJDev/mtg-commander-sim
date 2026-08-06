@@ -30,10 +30,7 @@ from .damage_values import (
     DamageRecipientSnapshot,
     DamageSourceSnapshot,
 )
-from .deathtouch import (
-    deathtouch_damage_result_applies,
-    DeathtouchError,
-)
+from .deathtouch import DeathtouchError, deathtouch_damage_result_applies
 from .commander import CommanderIdentityError, commander_damage_key
 from .combat_damage_events import (
     canonical_combat_assignment_values,

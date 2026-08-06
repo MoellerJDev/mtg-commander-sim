@@ -5,8 +5,8 @@
   "schema_version": 1,
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "status_counts": {
-    "partial": 61,
-    "tested": 2,
+    "partial": 60,
+    "tested": 3,
     "trusted": 5,
     "unclassified": 357
   },

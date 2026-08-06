@@ -50,19 +50,19 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 - Registry schema/version: `1/34`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `1b53ebdb58aff34451db46bc5c491bea727ca01357564c901a233dd9d551302c`
-- Evidence fingerprint: `4a959ea6db490ef26f9046cc1bf2705170c5dd0df03ffc2358ded34ae18a49d0`
-- Explicit evidence declarations: 454
-- Capability records: 56
-- Trusted records: 46
+- Registry fingerprint: `9537e30c205e88cd0131f24a7bba9b7e41522d0eee272236b65492945afed720`
+- Evidence fingerprint: `e97c75bdf48a6ce9aa9dc25cdad8a2368dcf5b67d78c7509aefc24e8377cb6af`
+- Explicit evidence declarations: 473
+- Capability records: 58
+- Trusted records: 48
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 24, "not_run": 3, "passed": 29}`
-- Implementation mutation statuses: `{"killed": 49, "not_run": 7}`
+- Dependency fail-closed statuses: `{"not_applicable": 24, "not_run": 3, "passed": 31}`
+- Implementation mutation statuses: `{"killed": 51, "not_run": 7}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
 | `cr-121-drawing-a-card` | 1 | true | none |
-| `cr-120-damage` | 18 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.trigger.noncombat` |
+| `cr-120-damage` | 19 | false | `damage.combat.excess`, `damage.prevention.order`, `damage.replacement.order`, `damage.trigger.noncombat` |
 | `cr-725-the-monarch` | 1 | false | `variant.monarch.designate` |
 | `cr-903-commander` | 1 | true | none |
 | `cr-111-tokens` | 1 | false | `token.creation.additional_replacement` |
@@ -74,8 +74,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 4,455 | 14,812 | 19,275 | 57,700 | false |
-| Commander legal | 31,623 | 1,569 | 13,637 | 16,417 | 49,940 | false |
+| Full Oracle | 38,542 | 4,514 | 14,753 | 19,275 | 57,339 | false |
+| Commander legal | 31,623 | 1,614 | 13,592 | 16,417 | 49,634 | false |
 
 ## Full-corpus residual kinds
 
@@ -84,7 +84,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `trigger` | 15,277 |
 | `spell_effect` | 11,241 |
 | `static_ability` | 11,143 |
-| `dependency_contract` | 7,930 |
+| `dependency_contract` | 7,569 |
 | `effect` | 7,168 |
 | `cost` | 2,015 |
 | `replacement_effect` | 1,758 |

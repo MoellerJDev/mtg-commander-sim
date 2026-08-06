@@ -12290,7 +12290,7 @@
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"
       ],
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
+        "damage.apply_damage_results_to_permanent",
         "CommanderEngine._type_parts"
       ],
       "notes": [
@@ -13124,7 +13124,7 @@
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly"
       ],
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
+        "damage.apply_damage_results_to_permanent",
         "evaluate_permanent_state_based_actions",
         "CommanderEngine._stabilize"
       ],
@@ -13348,7 +13348,7 @@
       ],
       "implementation_components": [
         "CommanderEngine._numeric_stat",
-        "CommanderEngine._apply_damage_results_to_permanent"
+        "damage.apply_damage_results_to_permanent"
       ],
       "notes": [
         "The engine applies multi-type damage results but does not infer that excess damage was dealt."
@@ -22881,7 +22881,7 @@
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_damage_and_state_action_replay_exactly"
       ],
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
+        "damage.apply_damage_results_to_permanent",
         "CommanderEngine._change_permanent_counter",
         "CommanderEngine._apply_combat_assignments"
       ],
@@ -57695,23 +57695,27 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.2",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/deathtouch.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded assignment and damage-result capabilities are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.2",
       "rule_text_sha256": "344d4bec5f4050f7acd8e796cc64a31760610909ba3070b1b70f36a77aeb7afc",
       "schema_version": 1,
@@ -57720,26 +57724,30 @@
         "end_line": 3890,
         "start_line": 3889
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.2a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_keyword_programs_declare_exact_damage_result_capabilities"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
+      ],
+      "notes": [
+        "A printed Deathtouch keyword node requests the fine-grained assignment and result capabilities."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.2a",
       "rule_text_sha256": "a65ac7d0ff5cc27ea1f61ccd59fcac3e927e7119bf44ec7d771e52ccb86bfcdc",
       "schema_version": 1,
@@ -57748,26 +57756,45 @@
         "end_line": 3892,
         "start_line": 3891
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "regeneration replacement of the destruction event is not implemented"
       ],
       "case_id": "cr-702.2b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "702.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_indestructible_consumes_deathtouch_at_the_first_sba_check",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.damage_results.materialize_damage_results",
+        "mtg_commander_sim.damage_results.consume_deathtouch_damage_checks",
+        "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions"
+      ],
+      "notes": [
+        "Positive damage creates a source-derived marker consumed after exactly one state-based-action check; indestructible prevents destruction without preserving the marker."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "702.2b",
       "rule_text_sha256": "82fa0617476c17df52558faf0732fe4d1615270078de14b903f0f44eee8647cc",
       "schema_version": 1,
@@ -57776,26 +57803,40 @@
         "end_line": 3894,
         "start_line": 3893
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.2c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+        "tests.test_combat_damage_assignment.CombatDamageAssignmentProposalTests.test_zero_deathtouch_assignment_is_not_lethal"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.deathtouch.deathtouch_assignment_is_lethal",
+        "mtg_commander_sim.combat_damage_trample.trample_assignment_error"
+      ],
+      "notes": [
+        "Only a positive assignment from a current represented deathtouch source supplies the lethal-assignment contribution."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.2c",
       "rule_text_sha256": "3660c5fd73b70d3afbe3877b92acbe074add63e3ba623c432d9798f556f2337c",
       "schema_version": 1,
@@ -57804,26 +57845,37 @@
         "end_line": 3896,
         "start_line": 3895
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.2d",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.damage_source.DamageSourceSnapshot",
+        "mtg_commander_sim.deathtouch.deathtouch_damage_result_applies"
+      ],
+      "notes": [
+        "Every represented source zone uses the same pinned source keyword snapshot."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.2d",
       "rule_text_sha256": "8bd794d86577d97ce99d435035feafccc3981d458142467bc95820e830181701",
       "schema_version": 1,
@@ -57832,26 +57884,37 @@
         "end_line": 3898,
         "start_line": 3897
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.2e",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.damage_source.DamageSourceSnapshot",
+        "mtg_commander_sim.damage_results.materialize_damage_results"
+      ],
+      "notes": [
+        "The prepared event retains deathtouch when the physical source leaves before commit."
+      ],
+      "required_scenarios": [
+        "positive",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.2e",
       "rule_text_sha256": "546d22286182fa0efebe73735184f12679a8777e4438ee7714681e42d73e158a",
       "schema_version": 1,
@@ -57860,26 +57923,38 @@
         "end_line": 3900,
         "start_line": 3899
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.2f",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "702.2"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_deathtouch_rules.DeathtouchValueTests.test_nonzero_assignment_is_lethal_and_instances_are_redundant",
+        "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.deathtouch.source_has_deathtouch",
+        "mtg_commander_sim.deathtouch.deathtouch_damage_result_applies"
+      ],
+      "notes": [
+        "Normalized keyword sets make duplicate instances redundant for both assignment and damage results."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "reviewed": true,
       "rule_id": "702.2f",
       "rule_text_sha256": "ad8df825803ba3f2d6f4134578bbfb0405e68d096f30ddee77c1fd470425ffc3",
       "schema_version": 1,
@@ -57888,7 +57963,7 @@
         "end_line": 3902,
         "start_line": 3901
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -80312,23 +80387,44 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "regeneration replacement of the destruction event is not implemented"
       ],
       "case_id": "cr-704.5h",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "704.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_check_destroys_only_destructible_positive_toughness_creature",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_indestructible_consumes_deathtouch_at_the_first_sba_check",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions",
+        "mtg_commander_sim.damage_results.consume_deathtouch_damage_checks"
+      ],
+      "notes": [
+        "Destructible positive-toughness creatures are destroyed; indestructible creatures survive and the since-last-check marker is consumed atomically."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "704.5h",
       "rule_text_sha256": "adcb9cf8f4b64e7901e57a88f1f9c5901552b0aad784ac2007fce453cd5e5eca",
       "schema_version": 1,
@@ -80337,7 +80433,7 @@
         "end_line": 5507,
         "start_line": 5506
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "inventory_only",
