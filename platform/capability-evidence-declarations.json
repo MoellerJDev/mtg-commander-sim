@@ -4467,6 +4467,14 @@
     {
       "capability_id": "mana.activated.color_set",
       "evidence_class": "interaction",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_actual_mox_offer_and_command_share_current_color_modes",
+      "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Drive the projected color choices and accepted activation from the same source-pinned typed descriptor and current mode query."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "interaction",
       "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_color_set_mana_respects_haste_cost_dependency",
       "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],

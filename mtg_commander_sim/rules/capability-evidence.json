@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "736301e7939502629d3b96e027b82208ca569b21f5276089d16673940e12a9eb",
-  "declaration_source_fingerprint": "ddcd33a4732d2dcc34d27f506cf63fa705e0dbc64849cac28b764053f3ab3db2",
+  "registry_fingerprint": "bbdf4957929881bf9a1d0b24d6cdcdc8c59e724e2ac3beb67e7c3596107d8884",
+  "declaration_source_fingerprint": "8c18f336f55e57083a9aa8f83f9e81664e0f0ffcf814cf511970b0df71484fae",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -7848,6 +7848,25 @@
     {
       "capability_id": "mana.activated.color_set",
       "evidence_class": "interaction",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_actual_mox_offer_and_command_share_current_color_modes",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Drive the projected color choices and accepted activation from the same source-pinned typed descriptor and current mode query."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "interaction",
       "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_color_set_mana_respects_haste_cost_dependency",
       "official_rule_ids": [
         "106.1",
@@ -11277,5 +11296,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "4499451be84a5f2ec5f391fe5efd61dcc180d7c2f17bc04d85236ab7a2a2efca"
+  "fingerprint": "085e893512d22120d1cd0c91b389cc3e9912dc4f2a02d3c1a4ff48e84e9b61e4"
 }
