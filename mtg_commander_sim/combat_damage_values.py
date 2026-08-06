@@ -38,6 +38,8 @@ class DamageAssignment:
     def __post_init__(self) -> None:
         assignment_identity(self.source, label="Damage source")
         assignment_identity(self.target, label="Damage recipient")
+        if type(self.amount) is int and self.amount < 0:
+            raise CombatDamageAssignmentError("Damage cannot be negative")
         exact_assignment_integer(self.amount, label="Damage amount")
 
     def to_dict(self) -> dict[str, Any]:

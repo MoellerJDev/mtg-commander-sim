@@ -3,6 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import load_assets, make_session
+from mtg_commander_sim.errors import GameRuleError
 from mtg_commander_sim.targets import TargetGroup
 
 
@@ -154,15 +155,23 @@ class ExactCombatKeywordTests(unittest.TestCase):
             },
         )[0]
 
+        with self.assertRaisesRegex(
+            GameRuleError,
+            "Combat damage assignments are malformed",
+        ):
+            engine._apply_combat_assignments(
+                [
+                    {
+                        "source": snake_ref,
+                        "target": target.ref,
+                        "amount": 1,
+                        "deathtouch": False,
+                    }
+                ]
+            )
+
         engine._apply_combat_assignments(
-            [
-                {
-                    "source": snake_ref,
-                    "target": target.ref,
-                    "amount": 1,
-                    "deathtouch": False,
-                }
-            ]
+            [{"source": snake_ref, "target": target.ref, "amount": 1}]
         )
 
         self.assertEqual("graveyard", target.zone)

@@ -3366,13 +3366,6 @@ class CommanderEngine(
         ):
             return False
 
-        changed_objects = [card.object_id]
-        for blocker_id in removal.unlinked_blocker_object_ids:
-            blocker = self.state.cards.get(blocker_id)
-            if blocker is None or blocker.blocking != card.object_id:
-                continue
-            blocker.blocking = None
-            changed_objects.append(blocker_id)
         card.attacking = None
         card.blocking = None
         self._log(
@@ -3386,7 +3379,7 @@ class CommanderEngine(
                 "reason": reason,
             },
             importance=1,
-            changed_objects=changed_objects,
+            changed_objects=[card.object_id],
             changed_players=[card.controller],
         )
         return True

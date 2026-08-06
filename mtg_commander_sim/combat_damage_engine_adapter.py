@@ -48,11 +48,8 @@ class EngineCombatDamageQuery:
     def participant_object_ids(self) -> Sequence[str]:
         combat = self._engine.state.combat
         object_ids = set(combat.attackers)
-        object_ids.update(
-            blocker_id
-            for blocker_ids in combat.blockers.values()
-            for blocker_id in blocker_ids
-        )
+        for attacker_id in combat.attackers:
+            object_ids.update(combat.blockers.get(attacker_id, ()))
         return tuple(sorted(object_ids))
 
     def participant(self, object_id: str) -> CombatDamageParticipant:

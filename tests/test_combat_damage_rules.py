@@ -763,6 +763,31 @@ class CombatDamageRuleTests(unittest.TestCase):
         )
         self.assertEqual([], event.details["declared_assignments"])
 
+    def test_blocker_remains_blocking_after_attacker_leaves_without_assigning(self):
+        session = self.make_session(51009)
+        engine = session.engine
+        attacker = self.token(engine, "A", "Departing Attacker", 4)
+        blocker = self.token(engine, "B", "Historical Blocker", 2)
+        attacker.attacking = "B"
+        blocker.blocking = attacker.object_id
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            blockers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+            blockers={attacker.object_id: [blocker.object_id]},
+        )
+
+        engine.move_card(attacker.object_id, "graveyard")
+
+        self.assertEqual(attacker.object_id, blocker.blocking)
+        self.assertEqual(
+            (),
+            EngineCombatDamageQuery(engine).participant_object_ids(),
+        )
+        engine._begin_combat_damage()
+        self.assertEqual([], engine.state.combat.damage_assignments)
+
     def test_first_strike_creates_the_initial_combat_damage_step(self):
         session = self.make_session(51005)
         engine = session.engine

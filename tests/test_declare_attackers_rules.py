@@ -487,6 +487,7 @@ class DeclareAttackersRuleTests(unittest.TestCase):
                 "target": walker.ref,
                 "kind": "planeswalker",
                 "defending_player": "B",
+                "logical_object_id": walker.logical_object_id,
             },
             engine.state.combat.attack_target_context[attacker.object_id],
         )

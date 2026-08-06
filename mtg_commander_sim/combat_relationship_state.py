@@ -13,14 +13,13 @@ class CombatRelationshipStateError(ValueError):
 class CombatRelationshipRemoval:
     was_attacker: bool
     removed_as_blocker: bool
-    unlinked_blocker_object_ids: tuple[str, ...]
 
 
 def remove_combat_relationships(
     combat: CombatState,
     object_id: str,
 ) -> CombatRelationshipRemoval:
-    """Remove one object and all incident edges from represented combat."""
+    """Remove one current combat role while preserving CR 506.4 history."""
 
     if not isinstance(combat, CombatState):
         raise CombatRelationshipStateError(
@@ -43,16 +42,17 @@ def remove_combat_relationships(
         ]
         removed_as_blocker = True
 
-    unlinked_blockers: tuple[str, ...] = ()
     if was_attacker:
-        unlinked_blockers = tuple(combat.blockers.pop(object_id, ()))
+        # CR 506.4 removes the attacker from combat but does not remove the
+        # creatures that blocked it. Preserve that historical relationship so
+        # those creatures remain blocking, while current-damage snapshots omit
+        # relationships whose attacker is no longer in combat.
         combat.attackers.pop(object_id, None)
         combat.attack_target_context.pop(object_id, None)
 
     return CombatRelationshipRemoval(
         was_attacker=was_attacker,
         removed_as_blocker=removed_as_blocker,
-        unlinked_blocker_object_ids=unlinked_blockers,
     )
 
 

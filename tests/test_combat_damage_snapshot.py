@@ -212,7 +212,7 @@ class CombatDamageSnapshotTests(unittest.TestCase):
         self.assertNotIn("damage_sequence_id", serialized)
         self.assertEqual(serialized, CombatState.from_dict(serialized).to_dict())
 
-    def test_relationship_owner_removes_every_incident_attacker_edge(self):
+    def test_relationship_owner_preserves_blockers_of_removed_attacker(self):
         combat = CombatState(
             attackers={"attacker": "B"},
             blockers={"attacker": ["first", "second"]},
@@ -228,12 +228,11 @@ class CombatDamageSnapshotTests(unittest.TestCase):
         removal = remove_combat_relationships(combat, "attacker")
 
         self.assertTrue(removal.was_attacker)
-        self.assertEqual(
-            ("first", "second"),
-            removal.unlinked_blocker_object_ids,
-        )
         self.assertEqual({}, combat.attackers)
-        self.assertEqual({}, combat.blockers)
+        self.assertEqual(
+            {"attacker": ["first", "second"]},
+            combat.blockers,
+        )
         self.assertEqual({}, combat.attack_target_context)
 
 
