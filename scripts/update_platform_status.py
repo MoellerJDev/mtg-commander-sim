@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import difflib
 import hashlib
 import json
 import os
@@ -754,6 +755,23 @@ def main() -> int:
             + ", ".join(stale),
             file=sys.stderr,
         )
+        if JSON_OUTPUT.relative_to(ROOT).as_posix() in stale:
+            actual = (
+                JSON_OUTPUT.read_text(encoding="utf-8").splitlines()
+                if JSON_OUTPUT.is_file()
+                else []
+            )
+            expected = _serialize_json(report).splitlines()
+            diagnostic = list(
+                difflib.unified_diff(
+                    actual,
+                    expected,
+                    fromfile="tracked platform status",
+                    tofile="expected platform status",
+                    lineterm="",
+                )
+            )
+            print("\n".join(diagnostic[:80]), file=sys.stderr)
         return 1
     print(json.dumps({"ok": True, "stale_outputs": []}, indent=2))
     return 0
