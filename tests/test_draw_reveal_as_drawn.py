@@ -379,6 +379,12 @@ class DrawRevealCoordinatorTests(unittest.TestCase):
             ),
         ]
 
+    @staticmethod
+    def trigger_source_object_id(item):
+        if isinstance(item, dict):
+            return item["source_object_id"]
+        return item.source_object_id
+
     def test_mandatory_first_draw_reveals_and_dispatches_only_its_linked_trigger(self):
         session, sources = self.session_with_sources(
             qualifier="basic land", seed=121901
@@ -414,7 +420,10 @@ class DrawRevealCoordinatorTests(unittest.TestCase):
         self.assertEqual(sorted(engine.seats), engine.state.cards[object_id].revealed_to)
         triggers = self.trigger_items(engine)
         self.assertEqual(1, len(triggers))
-        self.assertEqual(sources[0].object_id, triggers[0]["source_object_id"])
+        self.assertEqual(
+            sources[0].object_id,
+            self.trigger_source_object_id(triggers[0]),
+        )
 
     def test_second_draw_and_non_draw_replacement_do_not_apply_reveal(self):
         session, _ = self.session_with_sources(seed=121902)
@@ -536,7 +545,10 @@ class DrawRevealCoordinatorTests(unittest.TestCase):
         triggers = self.trigger_items(engine)
         self.assertEqual(1, len(triggers))
         source = next(card for card in engine.state.cards.values() if card.ref == first_source_ref)
-        self.assertEqual(source.object_id, triggers[0]["source_object_id"])
+        self.assertEqual(
+            source.object_id,
+            self.trigger_source_object_id(triggers[0]),
+        )
 
     def test_source_change_rejects_choice_before_draw_mutation(self):
         session, sources = self.session_with_sources(
