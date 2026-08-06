@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 33,
+  "registry_version": 34,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -197,7 +197,7 @@
         "summary": "Lower closed fixed-count spell, trigger, and activated draw producers into the canonical draw boundary; resolve represented draw-count replacements before individual draws; iteratively drain legally large instructions; re-evaluate prohibitions before every draw; and commit each allowed draw through immutable replacement events and canonical draw state.",
         "inputs": ["strict capability-shaped fixed draw producer", "prospective drawer and chooser", "nonnegative mandatory draw count", "positive optional or cost draw count", "draw reason and visibility", "trusted typed instruction and individual-draw replacements", "live battlefield draw restrictions", "canonical affected-player selections"],
         "outputs": ["immutable draw instruction and event results", "iterative remaining-draw continuation", "replacement and prohibition journal facts", "drawn object ids and private identity event", "partial mandatory multi-draw result", "optional-draw legality", "draw-cost feasibility", "empty-library draw attempts", "represented Dredge mill and graveyard-to-hand result"],
-        "exclusions": ["shared-team turn ordering", "draw effects with unresolved dynamic counts", "conditional or first-draw count multipliers", "uncompiled draw replacement wording other than represented Dredge and unconditional controller doubling", "effects that move a library card to hand without drawing it", "complete skip-draw and draw-step replacement grammar", "casting-process face-down draws and reveal-as-drawn choices", "no current Oracle producer pays a draw-as-cost through the exposed feasibility boundary"]
+        "exclusions": ["shared-team turn ordering", "draw effects with unresolved dynamic counts", "conditional or first-draw count multipliers", "uncompiled draw replacement wording other than represented Dredge and unconditional controller doubling", "effects that move a library card to hand without drawing it", "complete skip-draw and draw-step replacement grammar", "casting-process face-down draws", "no current Oracle producer pays a draw-as-cost through the exposed feasibility boundary"]
       },
       "dependencies": [],
       "implementation_components": ["mtg_commander_sim.rules.node_capability_shapes.fixed_draw_node_capabilities", "mtg_commander_sim.compiler.activated_mana_nodes.activated_oracle_node", "mtg_commander_sim.compiler.program_generation.register_generated_programs", "mtg_commander_sim.drawing.model.prepare_draw_instruction", "mtg_commander_sim.drawing.model.prepare_draw_event", "mtg_commander_sim.drawing.restrictions.DrawPermission", "mtg_commander_sim.drawing.transaction.commit_prepared_draw", "mtg_commander_sim.drawing.coordinator.begin_draw_sequence", "mtg_commander_sim.drawing.coordinator.begin_draw_batch", "mtg_commander_sim.semantic_runtime.draw_replacements.DrawInstructionMultiplierHandler", "mtg_commander_sim.semantic_runtime.draw_replacements.DredgeReplacementHandler", "mtg_commander_sim.semantic_runtime.draw_restrictions.DrawMaximumHandler", "mtg_commander_sim.semantic_choices.optional_draw.OptionalDrawHandler", "mtg_commander_sim.semantic_choices.conditional_draw.OpponentCastColorDrawHandler"],
@@ -266,6 +266,33 @@
       "dependency_fail_closed_rationale": "The action capability depends on an ordinary canonical draw; test_draw_subcapabilities_fail_closed_without_base proves the closure is unavailable when that draw owner is blocked.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_draw_result_and_post_action_mutants_are_killed removes the ordered specifically-drawn-card action commit and the reveal/discard assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "zone.draw.reveal_as_drawn",
+      "version": 1,
+      "official_rules": ["121.9"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "For a permanent controller's first draw of the turn, apply one typed mandatory or seat-scoped optional public reveal policy and dispatch only the source-linked typed trigger for that physical reveal source.",
+        "inputs": ["one unresolved ordinary draw", "current draw ordinal", "live phased-in battlefield source identity", "mandatory or optional first-draw reveal policy", "pinned drawn-card type line"],
+        "outputs": ["seat-scoped private reveal choice when optional", "public known-hand reveal when chosen or mandatory", "source-linked normalized reveal event", "typed basic-land or creature rider trigger", "replay-stable continuation"],
+        "exclusions": ["draws replaced by non-draw results", "reveal policies after the first draw each turn", "qualities other than basic land and creature for linked draw riders", "copy-and-cast, token-creation, damage, and multi-rider reveal triggers", "shared-team turn draw ordinals", "hidden-zone continuous type changes"]
+      },
+      "dependencies": ["zone.draw.library_to_hand"],
+      "implementation_components": ["mtg_commander_sim.compiler.draw_templates.static_draw_reveal_handler", "mtg_commander_sim.compiler.draw_templates.linked_draw_reveal_condition", "mtg_commander_sim.semantic_runtime.draw_reveals.DrawRevealFirstHandler", "mtg_commander_sim.drawing.continuation.DrawRevealDecisionContinuation", "mtg_commander_sim.drawing.coordinator.complete_draw_reveal", "mtg_commander_sim.drawing.transaction.commit_prepared_draw_result"],
+      "positive_tests": ["test_mandatory_first_draw_reveals_and_dispatches_only_its_linked_trigger"],
+      "negative_tests": ["test_second_draw_and_non_draw_replacement_do_not_apply_reveal"],
+      "interaction_tests": ["test_optional_sources_are_chosen_sequentially_and_linked_by_physical_source"],
+      "multiplayer_tests": ["test_optional_reveal_is_seat_scoped_and_public_only_after_acceptance"],
+      "privacy_tests": ["test_optional_reveal_is_seat_scoped_and_public_only_after_acceptance"],
+      "replay_tests": ["test_optional_reveal_choice_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The reveal policy depends on the canonical ordinary draw owner; the capability closure is blocked when zone.draw.library_to_hand is unavailable, and replacement results bypass reveal-policy collection.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_draw_reveal_policy_mutant_is_killed mutates the first-draw ordinal guard so every draw qualifies, and the second-draw assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

@@ -112,7 +112,7 @@ from .drawing import (
     begin_draw_batch,
     begin_draw_sequence,
     commit_unreplaced_draws,
-    complete_draw_replacement,
+    complete_draw_decision,
     DrawnCardAction,
     DrawError,
     QueuedDraw,
@@ -2313,7 +2313,7 @@ class CommanderEngine(
 
     def _complete_draw_replacement(self, decision: Any) -> None:
         try:
-            complete_draw_replacement(self, decision)
+            complete_draw_decision(self, decision)
         except DrawError as exc:
             raise GameRuleError(str(exc)) from exc
 
@@ -2453,7 +2453,7 @@ class CommanderEngine(
             self._complete_semantic_search(decision)
         elif kind == "semantic.storm":
             self._complete_storm_choice(decision)
-        elif kind == "draw.replacement":
+        elif kind in {"draw.replacement", "draw.reveal"}:
             self._complete_draw_replacement(decision)
         else:
             raise GameRuleError(f"Unsupported completed decision {kind}")

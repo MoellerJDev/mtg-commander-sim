@@ -125,6 +125,13 @@ maintenance: "hand-maintained"
   shared-team ordering, casting-process face-down draws, optional
   reveal-as-drawn choices, and wider replacement grammar remain explicit
   blockers.
+- Added a typed CR 121.9 reveal-as-drawn boundary. Mandatory and seat-scoped
+  optional first-draw policies pin the exact top card and physical battlefield
+  source, reveal before the card enters hand, preserve private identity until
+  acceptance, dispatch source-linked events, and replay exactly.
+- Oracle IR v36 closes the shared Rowen and Primitive Etchings wording and
+  promotes both Commander-legal cards without treating Keranos, God-Eternal
+  Kefnet, Inquisitor Eisenhorn, or other compound reveal riders as exact.
 
 ### Combat rules family
 

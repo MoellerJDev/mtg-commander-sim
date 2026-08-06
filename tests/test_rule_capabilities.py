@@ -213,6 +213,7 @@ class CapabilityRegistryTests(unittest.TestCase):
     def test_draw_subcapabilities_fail_closed_without_base(self):
         registry = load_default_capability_registry()
         for capability_id in (
+            "zone.draw.reveal_as_drawn",
             "zone.draw.result_generated_ordering",
             "zone.draw.specifically_drawn_card_actions",
         ):
@@ -235,6 +236,7 @@ class CapabilityRegistryTests(unittest.TestCase):
         base["blockers"] = ["dependency mutation"]
         mutated = CapabilityRegistry(value)
         for capability_id in (
+            "zone.draw.reveal_as_drawn",
             "zone.draw.result_generated_ordering",
             "zone.draw.specifically_drawn_card_actions",
         ):

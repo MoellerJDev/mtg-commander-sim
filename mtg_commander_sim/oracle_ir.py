@@ -31,7 +31,10 @@ from .compiler.dependency_gate import (
     explicit_capability_gate as _explicit_capability_gate,
     keyword_dependency_gate,
 )
-from .compiler.draw_templates import fixed_draw_effect_template
+from .compiler.draw_templates import (
+    draw_reveal_or_trigger_nodes,
+    fixed_draw_effect_template,
+)
 from .compiler.damage_templates import fixed_damage_effect_template
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
@@ -57,7 +60,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v35"
+ORACLE_COMPILER_VERSION = "oracle-ir-v36"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
@@ -969,18 +972,18 @@ def _compile_face(
             nodes.append(activated_node)
             continue
 
-        trigger_node = _trigger_node(
-            node_id=node_id,
-            line=line,
-            span=span,
+        event_nodes = draw_reveal_or_trigger_nodes(
+            permanent=permanent, node_id=node_id,
+            line=line, span=span,
             card_name=face_name or record.name,
             trusted_mechanics=trusted_mechanics,
-            capability_registry=capability_registry,
-            capability_profile=capability_profile,
+            capability_registry=capability_registry, capability_profile=capability_profile,
             residuals=residuals,
+            runtime_handler_node=_runtime_handler_node, trigger_node=_trigger_node,
+            append_residual=_residual,
         )
-        if trigger_node is not None:
-            nodes.append(trigger_node)
+        if event_nodes is not None:
+            nodes.extend(event_nodes)
             continue
 
         enters_tapped = re.fullmatch(

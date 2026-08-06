@@ -55,6 +55,38 @@ class RevealDrawnCard:
 
 
 @dataclass(frozen=True, slots=True)
+class RevealDrawnCardBySource:
+    source_object_id: str
+    source_ref: str
+    source_logical_object_id: str
+    source_zone_change_counter: int
+
+    def __post_init__(self) -> None:
+        for field_name, value in (
+            ("source_object_id", self.source_object_id),
+            ("source_ref", self.source_ref),
+            ("source_logical_object_id", self.source_logical_object_id),
+        ):
+            _stable_string(value, field=f"Drawn-card reveal {field_name}")
+        if (
+            type(self.source_zone_change_counter) is not int
+            or self.source_zone_change_counter < 0
+        ):
+            raise DrawError(
+                "Drawn-card reveal source incarnation must be nonnegative"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "action": "reveal_by_source",
+            "source_object_id": self.source_object_id,
+            "source_ref": self.source_ref,
+            "source_logical_object_id": self.source_logical_object_id,
+            "source_zone_change_counter": self.source_zone_change_counter,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class DiscardDrawnCardUnlessType:
     card_type: str
 
@@ -71,7 +103,11 @@ class DiscardDrawnCardUnlessType:
         }
 
 
-DrawnCardAction = RevealDrawnCard | DiscardDrawnCardUnlessType
+DrawnCardAction = (
+    RevealDrawnCard
+    | RevealDrawnCardBySource
+    | DiscardDrawnCardUnlessType
+)
 
 
 def drawn_card_action_from_dict(
@@ -84,6 +120,26 @@ def drawn_card_action_from_dict(
         if set(value) != {"action", "public"}:
             raise DrawError("Drawn-card reveal fields are invalid")
         return RevealDrawnCard(public=value["public"])
+    if action == "reveal_by_source":
+        expected = {
+            "action",
+            "source_object_id",
+            "source_ref",
+            "source_logical_object_id",
+            "source_zone_change_counter",
+        }
+        if set(value) != expected:
+            raise DrawError(
+                "Source-linked drawn-card reveal fields are invalid"
+            )
+        return RevealDrawnCardBySource(
+            source_object_id=value["source_object_id"],
+            source_ref=value["source_ref"],
+            source_logical_object_id=value["source_logical_object_id"],
+            source_zone_change_counter=value[
+                "source_zone_change_counter"
+            ],
+        )
     if action == "discard_unless_type":
         if set(value) != {"action", "card_type"}:
             raise DrawError("Drawn-card discard fields are invalid")
@@ -98,7 +154,11 @@ def _drawn_card_actions(
     if any(
         not isinstance(
             value,
-            (RevealDrawnCard, DiscardDrawnCardUnlessType),
+            (
+                RevealDrawnCard,
+                RevealDrawnCardBySource,
+                DiscardDrawnCardUnlessType,
+            ),
         )
         for value in result
     ):
@@ -756,6 +816,7 @@ __all__ = [
     "PreparedDrawInstruction",
     "QueuedDraw",
     "RevealDrawnCard",
+    "RevealDrawnCardBySource",
     "drawn_card_action_from_dict",
     "prepare_draw_event",
     "prepare_draw_instruction",

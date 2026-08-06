@@ -142,8 +142,8 @@
     {
       "mechanic_id": "cr-121-drawing-a-card",
       "path": "mechanics/contracts/drawing-a-card.json",
-      "sha256": "3defed542ac9f00fc6fe07cc65180d44c3b27b687ac17effbfe0fbe4f6ed8e92",
-      "version": 5
+      "sha256": "69f89bdbc27e0d5ede0a99db4f5bd1231cdce0365f5543222b25eda584f3cfee",
+      "version": 6
     },
     {
       "mechanic_id": "cr-609-effects",
@@ -5759,19 +5759,19 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/drawing-a-card.json",
-      "contract_sha256": "3defed542ac9f00fc6fe07cc65180d44c3b27b687ac17effbfe0fbe4f6ed8e92",
-      "contract_version": 5,
+      "contract_sha256": "69f89bdbc27e0d5ede0a99db4f5bd1231cdce0365f5543222b25eda584f3cfee",
+      "contract_version": 6,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "strict fixed-draw and specifically-drawn-card compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
-      "implementation_version": "draw-transaction-v5",
+      "implementation_component": "strict fixed-draw, specifically-drawn-card, and reveal-as-drawn compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement/reveal components, and optional-choice handlers",
+      "implementation_version": "draw-transaction-v6",
       "kind": "rules_section",
       "known_blockers": [
         "shared-team turns are not supported",
         "specifically-drawn-card actions beyond public reveal followed by discard unless land are not represented",
         "hidden-zone continuous type changes and conditional characteristics are not evaluated for the represented discard-unless-land action",
         "draws during casting or activation are not held face down",
-        "optional reveal-as-drawn choices are not implemented",
+        "reveal-as-drawn trigger riders beyond the closed basic-land and creature draw families remain residual",
         "conditional and first-draw count modifiers are not compiled",
         "draw-as-cost feasibility has no current Oracle producer",
         "the complete draw replacement and prevention Oracle grammar is not compiled"
@@ -5826,7 +5826,13 @@
         "test_result_draws_preserve_four_player_apnap_instruction_order",
         "test_result_draws_finish_before_the_original_sequence_resumes",
         "test_two_result_doublers_require_one_order_choice_then_draw_four",
-        "test_draw_result_and_post_action_mutants_are_killed"
+        "test_draw_result_and_post_action_mutants_are_killed",
+        "test_mandatory_first_draw_reveals_and_dispatches_only_its_linked_trigger",
+        "test_second_draw_and_non_draw_replacement_do_not_apply_reveal",
+        "test_optional_reveal_is_seat_scoped_and_public_only_after_acceptance",
+        "test_optional_sources_are_chosen_sequentially_and_linked_by_physical_source",
+        "test_optional_reveal_choice_replays_exactly",
+        "test_draw_reveal_policy_mutant_is_killed"
       ],
       "trust_level": "untrusted"
     },

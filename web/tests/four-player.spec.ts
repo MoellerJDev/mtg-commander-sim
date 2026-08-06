@@ -207,24 +207,6 @@ async function passUntilProjection(
   });
 }
 
-async function passUntilDraggable(
-  pages: readonly Page[],
-  card: Locator,
-  testInfo: TestInfo,
-  durabilityTimeout = 45_000,
-) {
-  // A Windows Game Record durability save may briefly keep the accepted
-  // action disabled while its review artifacts are written. Wait for the
-  // authoritative acknowledgement; never manufacture another pass.
-  await passUntilProjection(
-    pages,
-    async () => await card.getAttribute("draggable") === "true",
-    testInfo,
-    durabilityTimeout,
-  );
-  await expect(card).toHaveAttribute("draggable", "true");
-}
-
 async function advanceToActionReady(
   pages: readonly Page[],
   action: Locator,
@@ -731,6 +713,9 @@ test("@browser-rules @turn-draw an isolated-context duel presents exact turn sta
       .locator(".hand-card")
       .filter({ has: host.locator(".card-copy strong", { hasText: /^Spire Garden$/ }) });
     await expect(spire).toHaveCount(1);
+    const spireRef = await spire.getAttribute("data-card-ref");
+    expect(spireRef).toBeTruthy();
+    const playSpire = host.getByTestId(`action-play-land:${spireRef}`);
     await spire.click();
     await expect(host.getByTestId("selected-card-actions")).toContainText(
       "Lands may be played only during your own main phase while the stack is empty",
@@ -743,7 +728,8 @@ test("@browser-rules @turn-draw an isolated-context duel presents exact turn sta
       await expect(page.getByTestId("exact-step-label")).toHaveText("Upkeep");
     }
 
-    await passUntilDraggable([host, opponent], spire, testInfo);
+    await advanceToActionReady([host, opponent], playSpire, testInfo, 45_000);
+    await expect(spire).toHaveAttribute("draggable", "true");
     await expect(host.getByTestId("active-turn-label")).toHaveText("Seat A's Turn · Turn 1");
     await expect(host.getByTestId("priority-label")).toContainText("Priority: Seat A");
     await expect(host.getByTestId("exact-step-label")).toHaveText("Main Phase 1");
