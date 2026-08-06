@@ -98,6 +98,11 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_life_effect_commit_mutant_is_killed"
     ),
+    "zone.draw.library_to_hand": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_fixed_activated_draw_capability_gate_mutant_is_killed"
+    ),
     "trigger.event.normalized_zone_change": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

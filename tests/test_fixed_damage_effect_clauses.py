@@ -415,7 +415,7 @@ class FixedDamageEffectCompilerTests(unittest.TestCase):
             (self.db.lookup("Flame Slash"), self.db.lookup("Blood Cultist")),
             capability_registry=self.capabilities,
             capability_profile="commander_review",
-            promote_exact_fixed_damage_programs=True,
+            promote_exact_effect_programs=True,
         )
         effect_programs = [
             program
@@ -442,7 +442,7 @@ class FixedDamageEffectCompilerTests(unittest.TestCase):
             (self.db.lookup("Resupply"),),
             capability_registry=self.capabilities,
             capability_profile="commander_review",
-            promote_exact_fixed_damage_programs=True,
+            promote_exact_effect_programs=True,
         )
         self.assertEqual(
             0,
@@ -467,7 +467,7 @@ class FixedDamageEffectCompilerTests(unittest.TestCase):
             (unrelated_record,),
             capability_registry=self.capabilities,
             capability_profile="commander_review",
-            promote_exact_fixed_damage_programs=True,
+            promote_exact_effect_programs=True,
         )
         self.assertEqual(
             0,

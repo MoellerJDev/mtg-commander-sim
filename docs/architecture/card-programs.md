@@ -103,6 +103,12 @@ fail closed.
   player or planeswalker, opponent or planeswalker, and each opponent. Dynamic,
   divided, conditional, mass, rider-bearing, and open-ended target restrictions
   remain source-spanned residuals rather than approximate executable effects.
+- Oracle IR v34 applies the same capability-shaped promotion rule to closed
+  fixed-count draw effects in spell and activated contexts. Controller,
+  target-player, target-opponent, optional, and each-player payloads must match
+  the strict typed shape and depend on `zone.draw.library_to_hand`; arbitrary
+  CR 121 labels no longer grant that capability. Whole-key uniqueness prevents
+  promotion of only the draw half of a compound spell or ability.
 
 ## Execution ownership
 

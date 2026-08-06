@@ -195,6 +195,14 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_target_player_draw_validates_target_resolves_privately_and_replays",
+      "piece_ids": ["capability.target.revalidate_resolution", "capability.zone.draw.library_to_hand"],
+      "capability_ids": ["target.revalidate_resolution", "zone.draw.library_to_hand"],
+      "interaction_order": 2,
+      "assertion": "A targeted activated draw revalidates its selected player before the canonical draw transaction commits private identity and replay state."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_self_pump_and_basic_token_creation_lower_generically",
       "piece_ids": ["mechanic.cr-111-tokens", "mechanic.cr-122-counters", "mechanic.cr-611-continuous-effects"],
       "capability_ids": [],

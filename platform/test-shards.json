@@ -47,6 +47,7 @@
     "casting-costs-mana": [
       "test_action_proposals",
       "test_activated_abilities",
+      "test_activated_draw_abilities",
       "test_activating_abilities_rules",
       "test_basic_land_type_mana",
       "test_casting_activation_proposal_equivalence",

@@ -100,6 +100,17 @@ maintenance: "hand-maintained"
   iterative trampoline. Replacement-free and prevented counts of 2,000,
   midpoint suspension/resume, over-library attempts, private continuation, and
   exact replay now have focused regressions.
+- Oracle IR v34 harvests the trusted draw transaction for closed fixed-count
+  activated abilities and promotes only unique, whole effect programs. Mind
+  Stone-style sacrifice draws, target-player draws, and Temple Bell-style
+  table draws share the same activation, stack, replacement, privacy, and
+  replay owners; malformed, dynamic, compound, and reveal-bearing variants
+  remain residuals.
+- Activation conditions now have a dedicated read-only owner outside
+  `CommanderEngine`. Focused interactions prove that prohibitions and empty
+  libraries do not erase an otherwise legal activation, costs are paid before
+  the draw result, Dredge can replace it, and a sacrificed source does not stop
+  its already-activated ability from resolving.
 - Conditional/dynamic limits, complete draw-as-cost producers, shared-team
   ordering, CR 121.6c/121.7 result actions, reveal-as-drawn, and broader
   replacement grammar remain explicit blockers.

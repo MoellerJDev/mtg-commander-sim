@@ -4,16 +4,13 @@ from typing import Any, Protocol
 
 from ...abilities import ActivatedAbility, reduced_requirements
 from ...haste import summoning_sickness_prohibits_tap_or_untap_cost
+from .conditions import activation_condition_status
 
 
 class ActivationAvailabilityHost(Protocol):
     state: Any
 
     def _nonmana_ability_prohibited_by_name(self, card: Any) -> bool: ...
-
-    def _activation_condition_status(
-        self, seat: str, ability: ActivatedAbility, card: Any
-    ) -> tuple[str, str | None]: ...
 
     def _loyalty_cost_modifier_present(self) -> bool: ...
 
@@ -58,7 +55,8 @@ def activation_availability(
         return "unresolved", "unresolved_cost_semantics"
     if not ability.mana_ability and host._nonmana_ability_prohibited_by_name(card):
         return "unavailable", "named_ability_prohibition"
-    condition_status, condition_reason = host._activation_condition_status(
+    condition_status, condition_reason = activation_condition_status(
+        host,
         seat, ability, card
     )
     if condition_status != "payable":

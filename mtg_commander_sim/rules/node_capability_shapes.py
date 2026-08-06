@@ -68,6 +68,21 @@ _PERMANENT_DAMAGE_DOMAINS = frozenset(
     }
 )
 
+_DRAW_TARGET_SCHEMAS: tuple[Mapping[str, Any], ...] = (
+    {
+        "zones": ["player"],
+        "categories": ["player"],
+        "player_relation": "any",
+        "count": 1,
+    },
+    {
+        "zones": ["player"],
+        "categories": ["player"],
+        "player_relation": "opponent",
+        "count": 1,
+    },
+)
+
 
 def _positive_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value > 0
@@ -129,4 +144,64 @@ def fixed_damage_node_capabilities(
     return tuple(sorted(dependencies))
 
 
-__all__ = ["fixed_damage_node_capabilities"]
+def fixed_draw_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return the draw capability only for the closed fixed-count grammar."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if "cr-121-drawing-a-card" not in mechanics or len(effects) != 1:
+        return ()
+    effect = effects[0]
+    operation = effect.get("op")
+    if (
+        target_schema is None
+        and operation == "draw_each_player"
+        and set(effect) == {"op", "count"}
+        and _positive_int(effect.get("count"))
+    ):
+        return ("zone.draw.library_to_hand",)
+    if operation not in {"draw", "offer_draw"}:
+        return ()
+    expected_fields = (
+        {"op", "player", "count", "private"}
+        if operation == "draw"
+        else {"op", "player", "drawer", "count", "private"}
+    )
+    if (
+        set(effect) != expected_fields
+        or not _positive_int(effect.get("count"))
+        or effect.get("private") is not True
+    ):
+        return ()
+    player = effect.get("player")
+    drawer = effect.get("drawer", player)
+    if player == "$controller" and drawer == "$controller":
+        return (
+            ("zone.draw.library_to_hand",)
+            if target_schema is None
+            else ()
+        )
+    if (
+        (
+            (operation == "draw" and player == "$target.0")
+            or (operation == "offer_draw" and player == "$controller")
+        )
+        and drawer == "$target.0"
+        and dict(target_schema or {}) in _DRAW_TARGET_SCHEMAS
+        and "cr-115-targets" in mechanics
+    ):
+        return (
+            "target.revalidate_resolution",
+            "zone.draw.library_to_hand",
+        )
+    return ()
+
+
+__all__ = [
+    "fixed_damage_node_capabilities",
+    "fixed_draw_node_capabilities",
+]

@@ -2274,6 +2274,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/rules/activation/conditions.py",
+      "layer": "rules",
+      "owning_subsystem": "rules_capabilities",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/rules/activation/model.py",
       "layer": "rules",
       "owning_subsystem": "rules_capabilities",
@@ -3515,5 +3529,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "cc4ecf33cb111d2110869fbaf8166b254f0095b5ba42330df4117c3532696271"
+  "fingerprint": "92fc1a40e9aa92e790e6bc054ad26f28b25a5985fcd64f24c45f7f89b050584f"
 }

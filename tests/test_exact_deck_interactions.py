@@ -5,6 +5,7 @@ import unittest
 
 from common import keep_all, load_assets, make_session
 from mtg_commander_sim.model import StackItem
+from mtg_commander_sim.rules.activation import activation_condition_status
 
 
 class ExactDeckInteractionFamilyTests(unittest.TestCase):
@@ -287,7 +288,7 @@ class ExactDeckInteractionFamilyTests(unittest.TestCase):
         )
         self.assertEqual(
             "unavailable",
-            engine._activation_condition_status("A", draw_ability)[0],
+            activation_condition_status(engine, "A", draw_ability)[0],
         )
 
         engine.create_token(
@@ -302,7 +303,7 @@ class ExactDeckInteractionFamilyTests(unittest.TestCase):
         )
         self.assertEqual(
             "payable",
-            engine._activation_condition_status("A", draw_ability)[0],
+            activation_condition_status(engine, "A", draw_ability)[0],
         )
         before_draws = len(engine.state.players["A"].draw_history)
         engine.state.priority_player = "A"

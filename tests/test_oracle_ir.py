@@ -602,6 +602,7 @@ class OracleIRTests(unittest.TestCase):
             [
                 f"{record.oracle_id}:static:front:n1:flash",
                 f"{record.oracle_id}:static:front:n2",
+                f"{record.oracle_id}:ability:ab4",
             ],
             [program.key for program in programs],
         )
@@ -618,6 +619,11 @@ class OracleIRTests(unittest.TestCase):
             programs[1].capability_dependencies,
         )
         self.assertEqual(2, programs[1].provenance["source_span"]["line"])
+        self.assertEqual(
+            ["zone.draw.library_to_hand"],
+            programs[2].capability_dependencies,
+        )
+        self.assertEqual(4, programs[2].provenance["source_span"]["line"])
 
     def test_dynamic_and_aftermath_prevention_compile_generically(self):
         base = self.db.lookup("Lightning Bolt")

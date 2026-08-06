@@ -62,6 +62,10 @@ from mtg_commander_sim.prevention_triggers import (
 )
 from mtg_commander_sim.engine import CommanderEngine
 from mtg_commander_sim import oracle_ir as oracle_ir_module
+from mtg_commander_sim.rules import capabilities as capabilities_module
+from mtg_commander_sim.rules.capabilities import (
+    load_default_capability_registry,
+)
 from mtg_commander_sim import object_predicate as object_predicate_module
 from mtg_commander_sim import object_query as object_query_module
 from mtg_commander_sim.object_query import ObjectQueryError, ObjectQuerySpec
@@ -692,6 +696,40 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             ):
                 with self.assertRaises(AssertionError):
                     assert_prohibition_collected()
+
+    def test_fixed_activated_draw_capability_gate_mutant_is_killed(self):
+        record = self.db.lookup("Mind Stone")
+        registry = load_default_capability_registry()
+
+        def assert_draw_ability_is_capability_closed() -> None:
+            ir = oracle_ir_module.compile_oracle_card(
+                record,
+                capability_registry=registry,
+                capability_profile="commander_review",
+            )
+            draw = next(
+                node
+                for node in ir.faces[0].nodes
+                if node.kind == "activated_ability"
+                and any(
+                    effect.get("op") == "draw"
+                    for effect in node.effects
+                )
+            )
+            self.assertTrue(draw.exact)
+            self.assertEqual(
+                ("zone.draw.library_to_hand",),
+                draw.capability_dependencies,
+            )
+
+        assert_draw_ability_is_capability_closed()
+        with patch.object(
+            capabilities_module,
+            "fixed_draw_node_capabilities",
+            return_value=(),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_draw_ability_is_capability_closed()
 
     def test_zone_trigger_detection_mutant_is_killed(self):
         value = ZoneChangeOccurrence(

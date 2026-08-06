@@ -210,6 +210,7 @@ from .rules.casting import (
 from .rules.activation import (
     ActivationProposalError,
     ActivationProposalRequest,
+    activation_condition_status,
     activation_availability,
     activated_abilities,
     build_activation_proposal,
@@ -4605,7 +4606,8 @@ class CommanderEngine(
             ):
                 continue
             if mana_abilities and not any(
-                self._activation_condition_status(
+                activation_condition_status(
+                    self,
                     seat,
                     ability,
                     card,
@@ -5332,8 +5334,8 @@ class CommanderEngine(
                 or ability.life_payment
                 or ability.energy_payment
                 or ability.loyalty_delta is not None
-                or self._activation_condition_status(
-                    seat, ability, source
+                or activation_condition_status(
+                    self, seat, ability, source
                 )[0]
                 != "payable"
             ):
@@ -5646,124 +5648,9 @@ class CommanderEngine(
         ability: ActivatedAbility,
         source: CardInstance | None = None,
     ) -> tuple[str, str | None]:
-        """Evaluate the small compiled activation-condition grammar.
+        """Compatibility port for the extracted read-only condition owner."""
 
-        Conditions outside this grammar are unresolved rather than guessed.
-        This deliberately covers Metalcraft-style minimum-permanent checks
-        without claiming general Oracle condition support.
-        """
-
-        effect = ability.effect_text.casefold()
-        if (
-            "activate only during your turn" in effect
-            and self.state.active_player != seat
-        ):
-            return "unavailable", "only_during_your_turn"
-        if "only once each turn" in effect:
-            if source is None:
-                return "unresolved", "activation_source_required"
-            activations_once = dict(
-                source.annotations.get(
-                    "once_per_turn_activations",
-                    {},
-                )
-            )
-            if (
-                activations_once.get(ability.ability_id)
-                == self.state.turn_sequence
-            ):
-                return "unavailable", "already_activated_this_turn"
-        if "activate only if" not in effect:
-            return "payable", None
-        if "created a token this turn" in effect:
-            created = int(
-                self.state.players[seat].stats.get(
-                    "tokens_created_by_turn", {}
-                ).get(str(self.state.turn_sequence), 0)
-            )
-            if created <= 0:
-                return "unavailable", "requires_token_created_this_turn"
-            return "payable", None
-        if "activate only if it's not your turn" in effect:
-            if self.state.active_player == seat:
-                return "unavailable", "only_during_another_players_turn"
-            return "payable", None
-        if "activate only if you control an artifact" in effect:
-            controls_artifact = any(
-                self.state.cards[object_id].controller == seat
-                and not self.state.cards[object_id].phased_out
-                and "artifact"
-                in self._type_parts(
-                    str(
-                        self._effective_card_data(object_id).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )[0]
-                for object_id in self.state.players[seat].zones[
-                    "battlefield"
-                ]
-            )
-            if not controls_artifact:
-                return "unavailable", "requires_controlled_artifact"
-            return "payable", None
-        if (
-            "activate only if there are four or more card types among "
-            "cards in your graveyard"
-        ) in effect:
-            card_types: set[str] = set()
-            for object_id in self.state.players[seat].zones["graveyard"]:
-                card_types.update(
-                    self._type_parts(
-                        str(
-                            self._effective_card_data(object_id).get(
-                                "type_line"
-                            )
-                            or ""
-                        )
-                    )[0]
-                )
-            if len(card_types) < 4:
-                return "unavailable", "requires_delirium"
-            return "payable", None
-        match = re.search(
-            r"activate only if you control "
-            r"(?P<count>\d+|one|two|three|four|five|six|seven|eight|nine|ten) "
-            r"or more (?P<kind>artifacts?|creatures?|lands?)",
-            effect,
-        )
-        if not match:
-            return "unresolved", "unresolved_activation_condition"
-        words = {
-            "one": 1,
-            "two": 2,
-            "three": 3,
-            "four": 4,
-            "five": 5,
-            "six": 6,
-            "seven": 7,
-            "eight": 8,
-            "nine": 9,
-            "ten": 10,
-        }
-        raw_count = match.group("count")
-        required = int(raw_count) if raw_count.isdigit() else words[raw_count]
-        kind = match.group("kind").removesuffix("s")
-        controlled = 0
-        for object_id in self.state.players[seat].zones["battlefield"]:
-            permanent = self.state.cards[object_id]
-            if permanent.controller != seat or permanent.phased_out:
-                continue
-            type_line = str(
-                self._effective_card_data(permanent).get("type_line") or ""
-            ).casefold()
-            if kind in type_line:
-                controlled += 1
-        if controlled < required:
-            return "unavailable", f"requires_{required}_{kind}s"
-        return "payable", None
-
+        return activation_condition_status(self, seat, ability, source)
 
     def _cost_is_affordable(
         self,

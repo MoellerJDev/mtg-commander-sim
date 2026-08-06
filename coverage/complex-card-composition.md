@@ -2,7 +2,7 @@
 title: "Complex card composition benchmark"
 status: "generated"
 authoritative_source: "coverage/complex-card-composition.json"
-verified: "89b1b1d5c858eaa4b76fc031bb92af089cc456d4a4cc4fa0359c4cbdfe010fcc"
+verified: "96cb35b76ae8d6c23d9afef55a7149ba18c0bc71e03daa1b4a5273db3f91dcc6"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -28,9 +28,9 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Jin-Gitaxias // The Great Synthesis | 177 | 19 | 5 | 7 | 11 | 6 | `blocked` |
 | Urabrask // The Great Work | 176 | 19 | 6 | 7 | 10 | 4 | `blocked` |
 | Ojer Axonil, Deepest Might // Temple of Power | 172 | 20 | 7 | 6 | 8 | 6 | `blocked` |
+| Conqueror's Galleon // Conqueror's Foothold | 171 | 20 | 5 | 7 | 7 | 14 | `blocked` |
 | Twists and Turns // Mycoid Maze | 171 | 18 | 6 | 6 | 8 | 7 | `blocked` |
 | Sorin of House Markov // Sorin, Ravenous Neonate | 170 | 18 | 3 | 7 | 10 | 19 | `blocked` |
-| Conqueror's Galleon // Conqueror's Foothold | 168 | 20 | 4 | 7 | 8 | 14 | `blocked` |
 | Invasion of Kaldheim // Pyre of the World Tree | 168 | 16 | 5 | 4 | 5 | 22 | `blocked` |
 | Stay Hidden, Stay Silent | 168 | 15 | 6 | 4 | 5 | 17 | `blocked` |
 | Flamewar, Brash Veteran // Flamewar, Streetwise Operative | 167 | 19 | 4 | 6 | 10 | 15 | `blocked` |
@@ -59,8 +59,8 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Primeval Spawn | 151 | 18 | 6 | 3 | 5 | 10 | `blocked` |
 | Invasion of Ergamon // Truga Cliffcharger | 150 | 14 | 5 | 4 | 5 | 16 | `blocked` |
 | Path of Mettle // Metzali, Tower of Triumph | 150 | 15 | 5 | 6 | 6 | 10 | `blocked` |
+| Emeritus of Ideation // Ancestral Recall | 149 | 18 | 5 | 4 | 4 | 15 | `blocked` |
 | Emet-Selch, Unsundered // Hades, Sorcerer of Eld | 149 | 14 | 4 | 6 | 6 | 13 | `blocked` |
 | Invasion of Tarkir // Defiant Thundermaw | 149 | 14 | 4 | 4 | 5 | 18 | `blocked` |
 | Covert Cutpurse // Covetous Geist | 148 | 18 | 5 | 4 | 7 | 7 | `blocked` |
-| Dorothea, Vengeful Victim // Dorothea's Retribution | 147 | 16 | 5 | 6 | 6 | 2 | `blocked` |
 | Animate Dead | 108 | 14 | 4 | 3 | 4 | 5 | `blocked` |
