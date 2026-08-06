@@ -1,115 +1,128 @@
 ---
 title: "Typed Oracle IR"
 status: "current"
-authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, and mtg_commander_sim/rules/capabilities.py"
-verified: "2026-08-05"
-audience: "compiler and semantic contributors"
+authoritative_source: "Oracle compiler implementation, CardProgram schema, and pinned corpus reports"
+verified: "2026-08-06"
+audience: "compiler, rules, and CardProgram contributors"
 maintenance: "hand-maintained"
+concern: "oracle-ir"
 ---
 
 # Typed Oracle IR
 
-## Purpose
+Typed Oracle IR is the deterministic compiler representation between pinned
+Oracle/rulings input and canonical CardProgram abilities. It classifies source
+text without giving Oracle prose runtime authority. The compiler and
+[CardProgram schema](../../schemas/card-program-v2.schema.json) define the exact
+node shapes; generated [compiler status](../COMPILER_COVERAGE_STATUS.md) owns
+current counts and residual inventories.
 
-The Oracle compiler is the scaling path for decks that were not known when
-the engine was written. It turns every pinned Oracle face into source-spanned
-typed nodes. Common wording lowers to reusable effect operations; it does not
-create a new engine branch for each printed card.
+## Compiler result
 
-The compiler is conservative:
+For each Oracle face and material ability, compilation records:
 
-- a template must match the whole material ability
-- costs and effects are represented separately
-- every node records face, line, character offsets, template, mechanics,
-  targets, and residual IDs
-- every card records Oracle, compiler, and semantic hashes
-- any unparsed material text is a residual
-- a lowerable node is not exact until its legacy mechanic dependencies or its
-  reviewed fine-grained capability closure are trusted
+- Oracle ID, face identity, stable ability key, and active zones;
+- exact normalized source span and source-text hash;
+- typed costs, timing, modes, targets, choices, effects, triggers, static
+  descriptors, replacements, prevention, and continuations where recognized;
+- fine-grained capability and runtime-component requirements;
+- applicable Comprehensive Rules and ruling provenance;
+- compiler/template identity and deterministic semantic fingerprint; and
+- every unmatched material span as a classified residual.
+
+The CardProgram groups these abilities with card-level source hashes,
+provenance, trust basis, closure, residuals, and one deterministic artifact
+fingerprint. An omitted family means the artifact does not declare it; it is not
+evidence of universal support.
+
+## Stages
+
+```text
+pinned Oracle face and rulings
+        |
+normalization and source spans
+        |
+declaration and clause parsing
+        |
+typed IR nodes + material residuals
+        |
+CardProgram lowering and validation
+        |
+capability, interaction, and profile closure
+```
+
+Normalization selects faces and preserves written instruction order. Parsing
+recognizes closed grammar and retains exact spans. Lowering produces versioned
+typed constructs. Trust validation checks the complete materially reachable
+program; it never treats a syntactic match as implemented behavior.
 
 ## Status meanings
 
-- `exact`: every material span is compiled and every dependency supplied to
-  the compiler is trusted
-- `partial`: at least one node is lowerable, but a material residual or
-  untrusted dependency remains
-- `unresolved`: no material node can currently be lowered safely
+- `exact`: every material span is represented by validated typed constructs for
+  the compiler claim.
+- `partial`: at least one material span lowers, while another remains residual
+  or a runtime dependency is unresolved.
+- `unresolved`: no safe executable representation exists for material text.
+- `intentionally_ignored`: the span is reviewed as immaterial to the declared
+  operation/profile and carries explicit provenance.
 
-Textless cards can be exact without a semantic program. A recognized Flying
-line is currently partial because its contract still lists layer/copy
-blockers. A simple Lightning Bolt template is lowerable. Under the legacy gate
-it remains partial; a capability-aware compile can prove its narrower public
-target and base CR 120.3 result closure without promoting the blocked broad
-damage aggregate.
+Compiler exactness, CardProgram construction, capability closure, supported
+profile closure, and trusted execution are separate claims. A card can parse
+exactly while remaining unavailable because a target, replacement, layer,
+copy, multiplayer, privacy, or runtime dependency is not trusted.
 
-## Runtime behavior
+## Provenance and identity
 
-`CommanderSession.create` scans unique cards in all loaded decks. Lowerable
-spell, activated-ability, and simple self-trigger nodes are registered under
-stable keys alongside hand-authored semantics. Existing reviewed programs win
-on key collision or equivalent trigger event ownership.
+Compilation is deterministic for the same Oracle/rulings snapshot, compiler,
+templates, capability registry, and policy. Source hashes and spans distinguish
+changed wording from an implementation change. Stable ability identity must be
+unique within its card; ambiguous keys fail closed instead of selecting a node
+by iteration order.
 
-Generated spell, activated-ability, and simple self-trigger programs are
-currently:
+The complete CardProgram and trust fingerprints are pinned in new Game Records.
+Historical records deserialize their pinned artifact. A current compiler
+correction changes the relevant compiler/template and artifact fingerprints;
+it does not rewrite an old record.
 
-- `trust_level = provisional`
-- `requires_arbiter = true`
-- pinned to Oracle and rulings hashes
-- annotated with compiler, template, source span, semantic hash, and
-  dependency status
+## Runtime boundary
 
-The normal session path deliberately keeps generated programs provisional. A
-compiler audit may explicitly supply the packaged capability registry and a
-supported profile. For a reviewed node mapping, the resulting program records
-direct capability IDs, the transitive closure, registry and closure
-fingerprints, and the profile. It can be promoted only when that exact closure
-is trusted. Unmapped node shapes retain the broad mechanic fallback.
+`CommanderSession` registers validated generated and reviewed abilities under
+stable identities. A reviewed compatibility ability may supersede only the same
+key; conflicting face or source identity fails loading. Exact executable nodes
+enter registered typed semantic handlers or runtime components. Unsupported or
+untrusted nodes remain unavailable in strict play or reach an explicit
+development-only arbitration boundary.
 
-Reviewed event handlers shadow equivalent generated triggers. This prevents a
-reviewed card from triggering twice merely because its reviewed ability key
-uses a different author-defined name. Simple unconditional "enters tapped"
-text is applied by the authoritative zone-move path rather than by a pilot or
-generated effect.
+No running game parses Oracle prose. The runtime consumes only validated,
+fingerprinted CardPrograms, registered descriptors, and typed rules owners.
 
-Every generated ability can now be aggregated into CardProgram V2 with its
-face identity, source span, typed behavior families, residuals, exact trust
-closure, semantic hash, and deterministic fingerprint. Reviewed semantic-pack
-abilities overlay only the same stable key. The older `oracle` commands remain
-IR diagnostics; `simctl card compile|explain|audit|diff|overrides|coverage`
-inspects the canonical runtime artifact.
+## Residual and override policy
 
-Thus an unfamiliar deck can be parsed and partially compiled automatically,
-but an unreviewed match cannot silently execute guessed rules. A
-`trusted_only` arena stops or withholds the action; an arbitration-enabled run
-routes it to the neutral arbiter.
+A residual identifies the smallest unsupported material span, compiler stage,
+reason, and expected dependency. Repeated wording gaps should become one generic
+grammar production and reusable runtime family. Do not add a card name,
+collector number, set code, or Oracle ID branch to the generic runtime.
+
+A genuinely irreducible reviewed override is compiled data. It pins Oracle ID,
+face/ability, Oracle and rulings hashes, residual classification, rules and
+capabilities, authoring/review provenance, and deterministic assurance. See the
+[override guide](../extension/card-override.md).
 
 ## Commands
 
-```bash
-simctl oracle parse "Lightning Bolt" --db data/scryfall-current.sqlite3
-simctl oracle explain "Rest in Peace" --db data/scryfall-current.sqlite3
-simctl oracle residuals --db data/scryfall-current.sqlite3
-simctl oracle coverage --db data/scryfall-current.sqlite3
-simctl oracle coverage --commander-legal-only \
+```powershell
+.\.venv\Scripts\python.exe simctl.py oracle parse "<card>" `
+  --db data/scryfall-current.sqlite3
+.\.venv\Scripts\python.exe simctl.py oracle explain "<card>" `
+  --db data/scryfall-current.sqlite3
+.\.venv\Scripts\python.exe simctl.py card compile "<card>" `
+  --db data/scryfall-current.sqlite3
+.\.venv\Scripts\python.exe simctl.py card audit "<card>" `
+  --db data/scryfall-current.sqlite3
+.\.venv\Scripts\python.exe simctl.py card coverage `
   --db data/scryfall-current.sqlite3
 ```
 
-Coverage output measures the complete pinned corpus. Tracked examples omit
-Oracle prose and retain identity, source span, reason, blocker, and text hash.
-
-## Card-specific exceptions
-
-Some cards have linked abilities, unusual copy rules, or intentionally unique
-instructions that a general grammar cannot safely express. Those may use a
-reviewed semantic override. The override must pin:
-
-- Oracle ID and face/ability
-- Oracle and rulings hashes
-- compiler residual/failure category
-- CR/mechanic dependencies
-- reviewer and implementation version
-- deterministic positive, negative, interaction, and replay tests
-
-This is compiled data for an exception, not permission to add a printed-name
-condition to the turn, cost, target, layer, replacement, zone, or combat
-kernel.
+Use [compiler architecture](../architecture/compiler.md),
+[CardProgram architecture](../architecture/card-programs.md), and
+[rules assurance](../rules/assurance-model.md) when extending the pipeline.

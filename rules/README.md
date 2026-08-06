@@ -17,7 +17,7 @@ coverage fields, and reviewed-summary placeholders—not the rules prose.
 
 `conformance-cases.json` contains one stable, source-pinned work item per rule.
 Its default inventory-only status proves neither implementation nor rules
-correctness. See `RULE_CONFORMANCE.md` and
+correctness. See the [rules assurance model](../docs/rules/assurance-model.md) and
 `coverage/rules-conformance.json`.
 
 `platform/rules-subsystems.json` is the hand-maintained, prose-free subsystem
@@ -29,4 +29,4 @@ until review proves that they are structural or definition-only.
 
 Run `simctl rules verify --root .` after regeneration. A successful structural
 verification is not a completeness claim; see `coverage/rules-coverage.json`
-and `RULES_COMPLETENESS.md`.
+and the [current rules claim boundary](../docs/RULES_COMPLETENESS_STATUS.md).

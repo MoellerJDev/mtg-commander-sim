@@ -1,140 +1,166 @@
 ---
-title: "Rules completeness program"
+title: "Rules assurance model"
 status: "current"
-authoritative_source: "pinned rules corpus, compiler, capability registry, CardPrograms, and generated coverage"
-verified: "2026-08-05"
-audience: "rules, compiler, and engine contributors"
+authoritative_source: "pinned rules corpus, conformance records, capability registry, CardPrograms, and generated coverage"
+verified: "2026-08-06"
+audience: "rules, compiler, engine, and assurance contributors"
 maintenance: "hand-maintained"
+concern: "rules-assurance"
 ---
 
-# Rules completeness program
+# Rules assurance model
 
-The goal is reproducible rules and card support for a pinned Comprehensive
-Rules, Oracle and rulings snapshot. The simulator does not claim complete Magic
-support while material grammar, capabilities or interactions remain unresolved.
+The rules program links a pinned Comprehensive Rules paragraph and Oracle/ruling
+snapshot to reusable implemented behavior and executable evidence. It controls
+claims; it is not a checklist whose completion can be inferred from a parser
+match, witness card, test name, or generated row.
 
-Current implementation, compiler and architecture status is generated in:
+MTG Commander Sim is a partial, snapshot-scoped implementation. Current states,
+counts, fingerprints, and blockers are generated in
+[rules status](../RULES_COMPLETENESS_STATUS.md),
+[compiler status](../COMPILER_COVERAGE_STATUS.md),
+[rules coverage](../../coverage/rules-coverage.md),
+[conformance coverage](../../coverage/rules-conformance.md), and the
+[dependency queue](../RULES_DEPENDENCY_QUEUE.md).
 
-- [`docs/RULES_COMPLETENESS_STATUS.md`](docs/RULES_COMPLETENESS_STATUS.md)
-- [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md)
-- [`coverage/card-unlock-frontier.md`](coverage/card-unlock-frontier.md)
-- [`coverage/reusable-piece-matrix.md`](coverage/reusable-piece-matrix.md)
-- [`docs/RULES_DEPENDENCY_QUEUE.md`](docs/RULES_DEPENDENCY_QUEUE.md)
+## Source precedence
 
-## Generic support for new decks
+Use this order when evidence disagrees:
 
-A new deck does not require one branch per card. Deck loading resolves cards
-against the pinned local Scryfall database, compiles each Oracle face into
-source-spanned CardProgram V2 nodes, declares fine-grained capabilities, and
-checks the complete materially reachable program.
+1. pinned source text and implemented executable behavior;
+2. versioned schemas, machine-readable policy, and source manifests;
+3. executable tests and mutation results tied to exact components;
+4. generated coverage and dependency reports;
+5. current explanatory documentation;
+6. ADRs and the changelog as historical rationale.
 
-The normal path is:
+The official downloaded rules prose and full card-data exports remain ignored
+local inputs. Tracked indexes retain source IDs, hashes, spans, classification,
+dependencies, and reviewed summaries rather than redistributing the prose.
+
+## Assurance artifacts
+
+- `rules/manifest.json` pins derived rules and card-data source identity.
+- `rules/rule-index.json`, `glossary-index.json`, and `mechanic-index.json`
+  inventory source-linked records without rules prose.
+- `rules/conformance-cases.json` stores one stable claim record per reviewed
+  rules unit.
+- `rules/conformance-reviews/` stores subsystem reviews and evidence mappings.
+- `rules/dependency-graph.json` and `platform/rules-subsystems.json` describe
+  dependency and ownership scheduling.
+- `mtg_commander_sim/rules/capability-registry.json` and generated evidence
+  define fine-grained executable trust.
+- CardPrograms bind Oracle spans to required capabilities and runtime
+  descriptors.
+- `coverage/*.json` and compressed JSON own complete measured inventories;
+  generated Markdown is a navigation and top-state view.
+
+Derived records never replace source meaning. A successful structural validator
+proves internal consistency, not rules completeness.
+
+## Classification model
+
+A conformance record distinguishes:
+
+- `unreviewed`: inventoried but not behaviorally assessed;
+- `definition_only`: terminology or structure with no independent transition;
+- `blocked`: required behavior or dependency is missing;
+- `partial`: a bounded represented slice has evidence while the broader claim
+  remains open; and
+- `passing`: every declared in-scope behavior and dependency has current
+  executable evidence for the supported profiles.
+
+Parser statuses such as exact, partial, and unresolved describe Oracle
+representation, not rule conformance. Capability-closed and trusted CardProgram
+are stronger but separate card/runtime claims. A broad rule remains blocked
+when an applicable interaction or dependency is unresolved even if one
+subsection or card works.
+
+## Generic card-support path
 
 ```text
-pinned Oracle and rulings
-          |
-   typed Oracle IR
-          |
-  CardProgram V2 nodes
-          |
-capability and interaction closure
-          |
-typed runtime queries, proposals, coordinators and mutation owners
+pinned rules + Oracle + rulings
+             |
+       typed Oracle IR
+             |
+    source-spanned CardPrograms
+             |
+capability + interaction + profile closure
+             |
+typed queries, proposals, coordinators, and mutation owners
 ```
 
-Supported wording automatically benefits every equivalent card. Unsupported
-wording remains a precise residual and fails trusted preflight. Card-specific
-reviewed overrides are compatibility exceptions, not the scaling model; repeated
-shapes must become a generic compiler production.
+Equivalent supported wording benefits every card. Unsupported wording remains
+a precise residual and fails strict preflight. Reviewed card overrides are
+compatibility exceptions; repeated descriptors must become a generic compiler
+production and rules family.
 
-## Pinned inputs
+## Trust requirements
 
-`rules/source-manifest.json` pins the Comprehensive Rules source. The managed
-card-data service pins Oracle and rulings exports in the local database.
-Compiler, capability, mechanic-contract, runtime-component and semantic hashes
-complete the executable identity stored with Game Record v3.
+Every behavioral claim declares the applicable evidence classes:
 
-Refreshing Scryfall data can introduce new wording or change a deck fingerprint.
-The new snapshot is compiled and validated independently. It never changes the
-meaning of an in-progress or historical game.
+- positive behavior and negative/unavailable behavior;
+- malformed-input rejection and transactional rollback;
+- multiplayer, APNAP, affected-player/controller, and simultaneous choices;
+- exact replay, canonical hashes, and save/load for persistent state;
+- privacy/projection for hidden information and private choices;
+- replacement, prevention, copy, layers, zone identity, and Commander
+  interactions where reachable;
+- dependency and unsupported-variant fail-closed behavior;
+- bounded property or fuzz exploration for meaningful state spaces; and
+- a focused killed implementation mutation.
 
-## Completeness dimensions
+An omitted applicable class requires a reviewed not-applicable rationale.
+Evidence IDs must resolve to current tests and implementation components.
+Missing dependencies, surviving critical mutations, source drift, or stale
+generated data block trust.
 
-Card and rules support is evaluated across separate dimensions:
+## Rules-family acceptance
 
-- syntax: every material Oracle span is classified;
-- lowering: recognized syntax becomes typed nodes with exact source spans;
-- capability: every node declares the behavior it requires;
-- implementation: each required capability resolves to one canonical owner;
-- interaction: materially reachable cross-card behavior is represented or
-  explicitly blocked;
-- format/profile: Commander and multiplayer dependencies close for the selected
-  game profile;
-- assurance: positive, negative, replay, rollback, multiplayer, privacy,
-  property and mutation evidence passes where applicable.
+A coherent rules family:
 
-“Parsed,” “lowerable,” “exact Oracle IR,” “capability-closed,” and “trusted
-CardProgram” are intentionally different claims.
-
-## Family acceptance
-
-A rules-family change is complete only when it:
-
-1. implements one reusable behavioral family with a typed owner;
+1. implements reusable Comprehensive Rules behavior through one typed owner;
 2. routes every represented producer through that owner;
-3. shares legal-action advertisement and command validation;
-4. removes the competing legacy implementation;
+3. shares advertisement and command validation;
+4. removes the competing legacy path;
 5. lowers applicable Oracle grammar without runtime text parsing;
-6. declares precise capability and ambient interaction dependencies;
+6. declares precise capabilities and ambient interactions;
 7. rejects unsupported variants before mutation;
-8. adds the applicable conformance and trust evidence;
-9. improves or holds measured architecture debt;
-10. regenerates the corpus, card frontier and reusable-piece matrix at the final
-    exact head.
+8. preserves record, replay, projection, and compatibility contracts;
+9. improves or holds measured ownership, direct-write, and specificity debt;
+10. regenerates affected rules/card reports once at the final exact head.
 
-A dataclass, witness card, test-count increase or generated report is not a
-rules-family implementation by itself.
+Do not select work one numbered rule at a time or preserve a false positive to
+avoid a measured demotion. Prefer a subsystem-sized family that removes a
+shared blocker and has one reviewable mutation boundary.
 
-## Trust and overrides
+## Invalidation and replay
 
-Trusted capabilities require a resolvable implementation, current official rule
-references, supported profile coverage, no blockers and the mandatory evidence
-set enforced by the registry. Dependencies fail closed. Capability authors
-cannot waive the minimum by declaring an empty evidence list.
-
-A genuinely irreducible override pins Oracle, rulings, rule, compiler and test
-identity and documents why generic lowering is unavailable. It remains visible
-in specificity and trust reports. Do not add printed-name or Oracle-ID behavior
-to the universal engine.
+Rules, Oracle, rulings, compiler, capability, interaction, semantic, and
+implementation fingerprints form one trust chain. Changing a source or owner
+invalidates dependent evidence until regeneration and tests pass. Game replay
+uses the identity pinned at creation; an old record is never reinterpreted as
+if it used current rules or card data.
 
 ## Commands
 
-Use the project interpreter and managed current database:
-
 ```powershell
-.\.venv\Scripts\python.exe simctl.py rules verify
+.\.venv\Scripts\python.exe simctl.py rules verify --root .
 .\.venv\Scripts\python.exe simctl.py rules coverage
 .\.venv\Scripts\python.exe simctl.py rules queue
 .\.venv\Scripts\python.exe simctl.py rules next
 .\.venv\Scripts\python.exe simctl.py pieces next
-.\.venv\Scripts\python.exe scripts\update_card_unlock_frontier.py --check `
-  --db data/scryfall-current.sqlite3
-.\.venv\Scripts\python.exe scripts\update_reusable_piece_matrix.py --check `
-  --db data/scryfall-current.sqlite3
+.\.venv\Scripts\python.exe scripts\update_rules_scheduler.py --check
 ```
 
-Run focused tests during implementation and the change-impact quick gate before
-publishing. Regenerate expensive full-corpus artifacts once at the final exact
-head, then require public CI for that same SHA.
+Run focused evidence during implementation, regenerate full-corpus artifacts at
+the final head, and require normal exact-head CI before merging behavioral or
+generator changes.
 
-## Selecting the next family
+## Claim boundary
 
-Use the refreshed dependency queue, card-unlock frontier and reusable-piece
-matrix. Prefer a bounded family that removes a shared blocker, reduces engine
-responsibility and unlocks multiple cards. Do not use a stale hand-written
-roadmap or traverse rules numerically.
-
-Reports must state implemented and blocked rule IDs, capability changes,
-producers migrated, architecture deltas, card/residual deltas, assurance results
-and known limitations. If measured support falls after a correctness fix, report
-the demotion rather than preserving a false positive.
+Never describe the project as complete Magic or Commander rules support.
+Generated status states exactly which snapshot-scoped records, CardPrograms,
+capabilities, and profiles close and which blockers remain. Matchup or deck
+claims require separate terminal replay, privacy, legal-action exposure,
+provider, and sample-methodology gates beyond rules conformance.
