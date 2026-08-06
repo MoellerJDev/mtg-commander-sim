@@ -29,7 +29,7 @@
     "zone_change": ["new objects lose prior continuous protection effects"],
     "source_leaves": ["continuous grants may end when their source leaves"]
   },
-  "variants": ["protection from colors", "protection from card types", "protection from everything"],
+  "variants": ["protection from colors", "protection from card types", "protection from everything", "trample assignment before protected damage prevention"],
   "witness_cards": [
     {
       "name": "Mother of Runes",
@@ -39,7 +39,8 @@
   "rulings": [],
   "test_ids": [
     "test_protection_removes_colored_source_from_target_candidates",
-    "test_shadow_and_protection_restrict_blocking"
+    "test_shadow_and_protection_restrict_blocking",
+    "test_lifelink_counts_only_damage_not_prevented_by_protection"
   ],
   "implementation": {
     "component": "CommanderEngine protection target, damage, and blocking checks",

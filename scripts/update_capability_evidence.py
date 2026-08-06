@@ -63,6 +63,11 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_aerial_blocking_flying_and_reach_mutants_are_killed"
     ),
+    "combat.damage.assignment.trample": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_trample_lethal_assignment_mutant_is_killed"
+    ),
     "combat.attack.vigilance": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

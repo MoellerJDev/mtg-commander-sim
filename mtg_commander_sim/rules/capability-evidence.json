@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "c3c1c2d4368ceaf949993728a21ed8fa11a247938609eeac46da87a82f1dd9b4",
-  "declaration_source_fingerprint": "62a84a9f40bcd43c1b58f607f8cfaf7f80f1e3d8768c821552d38e29d7074caf",
+  "registry_fingerprint": "da7aac27bf92f4bc920d33cb74f0b6eb6a625e75ac9bc39813aad2bee96ebcf3",
+  "declaration_source_fingerprint": "f84afed1b6fa0c5e11d25b36394eab62f4fb2286c157f3dbc37ef0ce65520666",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -1136,6 +1136,331 @@
         "commander_review"
       ],
       "applicability_note": "Replay the accepted Reach block and exact combat relation."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use positive deathtouch assignment and marked damage in the ordinary trample lethal threshold."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_lifelink_counts_only_damage_not_prevented_by_protection",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep prevention outside the assignment threshold while the damage-result pipeline applies protection and lifelink."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_trample_assigns_lethal_over_indestructible_blocker",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use the ordinary toughness-based lethal assignment threshold even when indestructible prevents the blocker from being destroyed afterward."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_double_strike_trample_recomputes_after_blocker_leaves",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Recompute ordinary trample recipients in the second combat-damage step after the first-step blocker leaves."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_four_player_trample_task_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Assign ordinary trample damage to two defending players in one four-player APNAP batch."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_trample_lethal_assignment_mutant_is_killed",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that removes ordinary trample lethal-before-spill validation."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_damage_assignment.CombatDamageAssignmentProposalTests.test_malformed_and_noncanonical_assignments_fail_closed",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed, duplicate, noninteger, negative, unknown-source, and unknown-target assignments."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_trample_rejects_spill_before_lethal_atomically",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject early spill and preserve the complete authoritative state atomically."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_trample_accepts_lethal_then_spill",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Accept a full-power ordinary trample division that assigns lethal damage before player spill."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "positive",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_trample_to_attacked_permanent_never_spills_to_controller",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Offer the attacked planeswalker or battle after lethal assignment without offering its defending player."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_four_player_trample_task_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the trample division task only to its assigning seat while later APNAP assignments remain unavailable."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "replay",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_four_player_trample_task_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the four-player trample assignment and resulting state hash exactly."
+    },
+    {
+      "capability_id": "combat.damage.assignment.trample",
+      "evidence_class": "replay",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_trample_to_attacked_permanent_never_spills_to_controller",
+      "official_rule_ids": [
+        "510.1",
+        "510.1a",
+        "510.1c",
+        "510.1d",
+        "702.19",
+        "702.19a",
+        "702.19b",
+        "702.19c",
+        "702.19d",
+        "702.19e",
+        "702.19f",
+        "702.19g"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay legal and rejected attacked-permanent trample divisions exactly."
     },
     {
       "capability_id": "continuous.attached.fixed_characteristics",
@@ -7598,5 +7923,5 @@
       "applicability_note": "Execute an already-authorized nonnegative draw instruction through the canonical library-to-hand path for one or each active player."
     }
   ],
-  "fingerprint": "d20250890bdfff4157893d7566dd02f7e06b7ac76466f87b560a26ae1b669995"
+  "fingerprint": "f5e9c7bc1044399dc6805d2be473b701b88351fef2187e1b4a4820465b6b5c0c"
 }

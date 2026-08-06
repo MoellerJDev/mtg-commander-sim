@@ -11,6 +11,26 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Typed ordinary-Trample assignment
+
+- Extracted combat-damage state projection and division from `CommanderEngine`
+  into a read-only projector and one immutable typed proposal shared by
+  projected choices and accepted commands. It validates exact-power totals,
+  current recipients, marked damage, simultaneous attacking sources,
+  deathtouch, and lethal-before-spill assignment without mutating game state.
+- Added player, planeswalker, Battle, departed-target, double-strike,
+  indestructible, protection/prevention, four-player projection, rollback,
+  replay, property-grid, and focused mutation evidence. Trample while blocking,
+  trample over planeswalkers, and banding do not inherit ordinary
+  attacking-creature spill semantics.
+- Repaired the reusable-piece generator to consume the reviewed mechanic-contract
+  registry, so shared interaction tests now cover the applicable
+  Trample/Double Strike, Trample/Indestructible, and Trample/Protection pairs
+  without promoting those partial mechanics to universal support.
+- Added source-spanned capability closure and generic CardProgram support for
+  ordinary Trample. Current promotions and residual changes are reported by
+  the generated compiler and reusable-piece reports.
+
 ### Current-state documentation system
 
 - Adopted a repository-wide docs-as-code standard based on Diátaxis, stable

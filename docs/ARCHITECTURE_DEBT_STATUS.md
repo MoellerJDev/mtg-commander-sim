@@ -16,11 +16,11 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `ff5973728476d66406179a2bc6b5113bd8483aaf`
 - Package: `0.8.0`
 - CI run: [31047020917](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31047020917) — `pass`
-- Production scope: 247 files, 105,956 physical lines, 97,187 logical lines
+- Production scope: 249 files, 106,136 physical lines, 97,335 logical lines
 
 ## Central engine debt
 
-- `engine.py`: 13,781 physical / 13,017 logical lines
+- `engine.py`: 13,531 physical / 12,775 logical lines
 - Methods: 28 public, 281 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
 - Direct GameState-write heuristic: 135 locations
@@ -33,7 +33,7 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Oracle-ID literals in Python production code: 5
 - Card-named helpers: 1
 - Modules above the 1,500-logical-line review threshold: 5
-- Functions/methods above the 150-logical-line review threshold: 35
+- Functions/methods above the 150-logical-line review threshold: 34
 - Printed-name matching is deliberately over-inclusive: ordinary words that are also printed card names remain baseline candidates for Phase 1 review.
 
 ## Enforced debt trend
@@ -42,25 +42,25 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 13,017 | 13,017 | +0 |
+| `engine_logical_lines` | 13,017 | 12,775 | -242 |
 | `direct_game_state_writes` | 135 | 135 | +0 |
 | `printed_name_literals` | 691 | 691 | +0 |
 | `oracle_id_literals` | 5 | 5 | +0 |
 | `legacy_card_specific_operations` | 5 | 5 | +0 |
 | `card_named_helpers` | 1 | 1 | +0 |
 | `oversized_modules` | 5 | 5 | +0 |
-| `oversized_functions_and_methods` | 35 | 35 | +0 |
+| `oversized_functions_and_methods` | 35 | 34 | -1 |
 
 ## Largest production modules
 
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
-| `mtg_commander_sim/engine.py` | python | 13,781 | 13,017 |
+| `mtg_commander_sim/engine.py` | python | 13,531 | 12,775 |
 | `mtg_commander_sim/report.py` | python | 1,818 | 1,782 |
 | `web/src/App.tsx` | web | 1,784 | 1,728 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
-| `mtg_commander_sim/reusable_pieces/generation.py` | python | 1,583 | 1,490 |
+| `mtg_commander_sim/reusable_pieces/generation.py` | python | 1,591 | 1,494 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
 | `mtg_commander_sim/damage.py` | python | 1,586 | 1,456 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,498 | 1,449 |
@@ -82,12 +82,12 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 | `_compile_face` | `mtg_commander_sim/oracle_ir.py:913` | 441 | 450 |
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:122` | 429 | 430 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:549` | 362 | 366 |
-| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:13023` | 342 | 354 |
-| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1552` | 341 | 347 |
+| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:12773` | 342 | 354 |
+| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1551` | 341 | 347 |
 | `build_parser` | `mtg_commander_sim/cli.py:514` | 337 | 361 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:447` | 302 | 302 |
-| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:7921` | 301 | 304 |
-| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2944` | 285 | 319 |
+| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:7920` | 301 | 304 |
+| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2943` | 285 | 319 |
 | `_scripted_choice` | `mtg_commander_sim/cli.py:74` | 266 | 268 |
 | `parse_declaration_cost_line` | `mtg_commander_sim/declaration_costs.py:219` | 249 | 258 |
 
@@ -114,15 +114,15 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,864
-- Conventional Python cases: 1,564
+- Python discovered: 4,884
+- Conventional Python cases: 1,584
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 9
 - Browser unit cases: 22
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true
-- Capability mutation declarations: 46
+- Capability mutation declarations: 47
 - Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift

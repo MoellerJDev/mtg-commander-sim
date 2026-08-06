@@ -279,6 +279,18 @@ class ReusablePieceInventoryTests(unittest.TestCase):
             ],
         )
 
+    def test_shared_mechanic_test_is_pairwise_interaction_evidence(self) -> None:
+        interactions = _artifacts()["interactions"]["pairs"]
+        pair = next(
+            row
+            for row in interactions
+            if set(row["piece_ids"])
+            == {"capability.combat.block.flying", "mechanic.flying"}
+        )
+
+        self.assertTrue(pair["covered"])
+        self.assertEqual(["test_flying_reach"], pair["evidence_test_ids"])
+
     def test_baseline_is_snapshot_pinned_and_delta_starts_at_zero(self) -> None:
         artifacts = _artifacts()
         self.assertEqual(set(artifacts["delta"]["deltas"].values()), {0})
@@ -327,6 +339,34 @@ class ReusablePieceInventoryTests(unittest.TestCase):
             artifacts["interactions"]["summary"]["applicable_high_risk_pairs"],
             0,
         )
+        interaction_by_pair = {
+            frozenset(row["piece_ids"]): row
+            for row in artifacts["interactions"]["pairs"]
+        }
+        for mechanic_id, test_id in (
+            (
+                "mechanic.indestructible",
+                "test_trample_assigns_lethal_over_indestructible_blocker",
+            ),
+            (
+                "mechanic.protection",
+                "test_lifelink_counts_only_damage_not_prevented_by_protection",
+            ),
+            (
+                "mechanic.double-strike",
+                "test_double_strike_trample_recomputes_after_blocker_leaves",
+            ),
+        ):
+            pair = interaction_by_pair[
+                frozenset(
+                    {
+                        "capability.combat.damage.assignment.trample",
+                        mechanic_id,
+                    }
+                )
+            ]
+            self.assertTrue(pair["covered"])
+            self.assertIn(test_id, pair["evidence_test_ids"])
         matrix_schema = json.loads(
             (ROOT / "schemas" / "reusable-piece-matrix.schema.json").read_text(
                 encoding="utf-8"

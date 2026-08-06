@@ -1,5 +1,5 @@
 {
-  "contract_count": 67,
+  "contract_count": 68,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -130,7 +130,7 @@
     {
       "mechanic_id": "double-strike",
       "path": "mechanics/contracts/double-strike.json",
-      "sha256": "399c38643a7c3b14049528f9987ab7b13e88fd3310da4e70d1df4ac6b8ba3aff",
+      "sha256": "fcaff2d9f60eb840cf1eb3060392d74791325f182e885bf77d2aac32bd8e8701",
       "version": 1
     },
     {
@@ -230,6 +230,12 @@
       "version": 1
     },
     {
+      "mechanic_id": "indestructible",
+      "path": "mechanics/contracts/indestructible.json",
+      "sha256": "fc1453174fb7763f76ced9ea75963a2cd9c0538cfd0f85770be21cefc2ebb974",
+      "version": 1
+    },
+    {
       "mechanic_id": "infect",
       "path": "mechanics/contracts/infect.json",
       "sha256": "dc529cfa4f57a97aa16d86fd62d079e1dc2c90a6e502bba000b44db69a6ca0c8",
@@ -304,7 +310,7 @@
     {
       "mechanic_id": "protection",
       "path": "mechanics/contracts/protection.json",
-      "sha256": "c686682ab64c723b4f1bf53c4b18687fbefeed612229a9469847f89f789bf337",
+      "sha256": "54be5784f632d1ad4626b4a519b879d43b884612e88d826a4c438a6de17af71d",
       "version": 1
     },
     {
@@ -364,8 +370,8 @@
     {
       "mechanic_id": "trample",
       "path": "mechanics/contracts/trample.json",
-      "sha256": "7af7b55470f9a0e31a415b99735fc8a825865e03640a7910db53bc40a4925d42",
-      "version": 1
+      "sha256": "6201811a0383c0cf2702af4376a496cb468d7280d21a1f4fca0d0d882c67e96f",
+      "version": 2
     },
     {
       "mechanic_id": "cr-500-general",
@@ -1281,7 +1287,7 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/double-strike.json",
-      "contract_sha256": "399c38643a7c3b14049528f9987ab7b13e88fd3310da4e70d1df4ac6b8ba3aff",
+      "contract_sha256": "fcaff2d9f60eb840cf1eb3060392d74791325f182e885bf77d2aac32bd8e8701",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [
@@ -1304,6 +1310,7 @@
         "test_second_step_uses_the_first_step_snapshot_and_current_double_strike",
         "test_double_strike_creates_two_real_damage_steps_and_replays",
         "test_double_strike_does_not_hit_player_after_its_blocker_dies",
+        "test_double_strike_trample_recomputes_after_blocker_leaves",
         "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"
@@ -2291,19 +2298,31 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/indestructible.json",
+      "contract_sha256": "fc1453174fb7763f76ced9ea75963a2cd9c0538cfd0f85770be21cefc2ebb974",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions",
+      "implementation_version": "indestructible-partial-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "the universal destroy-event path is not yet a single typed owner",
+        "ability-changing, copy, face-down, and dependency interactions are incomplete",
+        "the contract is partial and does not promote a trusted indestructible capability"
+      ],
       "mechanic_id": "indestructible",
       "official_name": "Indestructible",
       "rule_references": [
         "702.12"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_snapshot_distinguishes_put_into_graveyard_from_destroy",
+        "test_trample_assigns_lethal_over_indestructible_blocker",
+        "test_keyword_contracts_trace_the_pinned_rules"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -2992,7 +3011,7 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/protection.json",
-      "contract_sha256": "c686682ab64c723b4f1bf53c4b18687fbefeed612229a9469847f89f789bf337",
+      "contract_sha256": "54be5784f632d1ad4626b4a519b879d43b884612e88d826a4c438a6de17af71d",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [
@@ -3013,7 +3032,8 @@
       ],
       "test_ids": [
         "test_protection_removes_colored_source_from_target_candidates",
-        "test_shadow_and_protection_restrict_blocking"
+        "test_shadow_and_protection_restrict_blocking",
+        "test_lifelink_counts_only_damage_not_prevented_by_protection"
       ],
       "trust_level": "untrusted"
     },
@@ -3755,14 +3775,14 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/trample.json",
-      "contract_sha256": "7af7b55470f9a0e31a415b99735fc8a825865e03640a7910db53bc40a4925d42",
-      "contract_version": 1,
-      "coverage_status": "partial",
+      "contract_sha256": "6201811a0383c0cf2702af4376a496cb468d7280d21a1f4fca0d0d882c67e96f",
+      "contract_version": 2,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat and CommanderEngine combat-damage assignment validation",
-      "implementation_version": "combat-keywords-v2",
+      "implementation_component": "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal",
+      "implementation_version": "ordinary-trample-assignment-v1",
       "kind": "keyword_ability",
       "known_blockers": [
         "trample over planeswalkers is not implemented",
@@ -3775,11 +3795,18 @@
         "702.19"
       ],
       "test_ids": [
+        "test_projected_options_and_validation_share_one_proposal",
+        "test_malformed_and_noncanonical_assignments_fail_closed",
         "test_trample_rejects_spill_before_lethal_atomically",
         "test_trample_accepts_lethal_then_spill",
         "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+        "test_trample_assigns_lethal_over_indestructible_blocker",
         "test_lifelink_counts_only_damage_not_prevented_by_protection",
         "test_trample_deals_to_defender_after_all_blockers_leave",
+        "test_trample_to_attacked_permanent_never_spills_to_controller",
+        "test_four_player_trample_task_is_seat_scoped_and_replays",
+        "test_double_strike_trample_recomputes_after_blocker_leaves",
+        "test_trample_lethal_assignment_mutant_is_killed",
         "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"

@@ -50,7 +50,7 @@ FRONTIER_INPUT = ROOT / "coverage" / "card-unlock-frontier.json.gz"
 CAPABILITY_INPUT = (
     ROOT / "mtg_commander_sim" / "rules" / "capability-registry.json"
 )
-MECHANICS_INPUT = ROOT / "rules" / "mechanic-index.json"
+MECHANICS_INPUT = ROOT / "mechanics" / "registry.json"
 RULES_INPUT = ROOT / "rules" / "rule-index.json"
 ORACLE_INPUT = ROOT / "coverage" / "oracle-coverage-commander.json"
 PROGRAM_INPUT = (

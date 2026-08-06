@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 30,
+  "registry_version": 31,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -36,6 +36,12 @@
         "damage.result.wither",
         "life.gain.replacement.static_multiplier",
         "damage.trigger.noncombat"
+      ]
+    },
+    {
+      "mechanic_id": "trample",
+      "capabilities": [
+        "combat.damage.assignment.trample"
       ]
     },
     {
@@ -482,6 +488,33 @@
       "dependency_fail_closed_rationale": "Capability-closure tests demote Flying when the coupled reach exception capability is blocked.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_aerial_blocking_flying_and_reach_mutants_are_killed changes the recognized Flying keyword and the ground-block rejection assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.damage.assignment.trample",
+      "version": 1,
+      "official_rules": ["510.1", "510.1a", "510.1c", "510.1d", "702.19", "702.19a", "702.19b", "702.19c", "702.19d", "702.19e", "702.19f", "702.19g"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Offer and validate ordinary trample combat-damage division from current represented characteristics, requiring lethal assignment to every current blocker before damage may be assigned to the attacked player, planeswalker, or battle.",
+        "inputs": ["current attacking and blocking combatants", "current represented power, toughness, marked damage, and keywords", "other attacking creatures' simultaneous assignments", "current attacked player or permanent"],
+        "outputs": ["seat-scoped canonical assignment options", "exact full-power assignment validation", "lethal-before-spill validation", "atomic rejection without mutation", "deterministic assignment journal"],
+        "exclusions": ["trample over planeswalkers", "banding and effects that change who assigns combat damage", "damage assignment modifiers other than ordinary deathtouch and marked damage", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "mtg_commander_sim.combat_damage_assignment.build_combat_damage_assignment_proposal", "mtg_commander_sim.combat_damage_assignment.trample_assignment_error", "mtg_commander_sim.combat_damage_projection.project_combat_damage_assignment"],
+      "positive_tests": ["test_trample_accepts_lethal_then_spill", "test_trample_to_attacked_permanent_never_spills_to_controller"],
+      "negative_tests": ["test_trample_rejects_spill_before_lethal_atomically", "test_malformed_and_noncanonical_assignments_fail_closed"],
+      "interaction_tests": ["test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_trample_assigns_lethal_over_indestructible_blocker", "test_lifelink_counts_only_damage_not_prevented_by_protection", "test_double_strike_trample_recomputes_after_blocker_leaves"],
+      "multiplayer_tests": ["test_four_player_trample_task_is_seat_scoped_and_replays"],
+      "privacy_tests": ["test_four_player_trample_task_is_seat_scoped_and_replays"],
+      "replay_tests": ["test_four_player_trample_task_is_seat_scoped_and_replays", "test_trample_to_attacked_permanent_never_spills_to_controller"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The bounded ordinary-trample assignment owner consumes authoritative current combat and characteristic snapshots and has no optional capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_trample_lethal_assignment_mutant_is_killed removes lethal-before-spill enforcement and the canonical invalid assignment rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

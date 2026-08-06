@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "trample",
   "official_name": "Trample",
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "rule_references": ["702.19", "702.19a", "702.19b", "702.19c", "702.19d", "702.19e", "702.19f", "702.19g"],
   "glossary_references": ["trample"],
-  "dependencies": ["combat-damage-step", "deathtouch", "damage", "continuous-effects", "illegal-actions"],
-  "coverage_status": "partial",
+  "dependencies": ["combat-damage-step", "deathtouch", "indestructible", "damage", "continuous-effects", "illegal-actions"],
+  "coverage_status": "tested",
   "trust_level": "untrusted",
   "behavior": {
     "zones": ["battlefield"],
@@ -29,11 +29,11 @@
     "zone_change": ["a blocked trampler with no remaining blockers may assign to its attacked player or object when the rule permits"],
     "source_leaves": ["a departed source assigns no combat damage"]
   },
-  "variants": ["ordinary lethal then spill", "illegal early spill", "deathtouch lethal", "marked damage", "prevented blocker damage", "no remaining blocker", "multiple instances are redundant"],
+  "variants": ["ordinary lethal then spill", "illegal early spill", "deathtouch lethal", "marked damage", "indestructible blocker", "prevented blocker damage", "no remaining blocker", "multiple instances are redundant"],
   "witness_cards": [{"name": "Aang, Swift Savior // Aang and La, Ocean's Fury", "oracle_id": "cbf09050-39d0-463b-96db-9e22011ae0d8"}],
   "rulings": [],
-  "test_ids": ["test_trample_rejects_spill_before_lethal_atomically", "test_trample_accepts_lethal_then_spill", "test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_lifelink_counts_only_damage_not_prevented_by_protection", "test_trample_deals_to_defender_after_all_blockers_leave", "test_keyword_contracts_trace_the_pinned_rules"],
-  "implementation": {"component": "mtg_commander_sim.combat and CommanderEngine combat-damage assignment validation", "version": "combat-keywords-v2"},
+  "test_ids": ["test_projected_options_and_validation_share_one_proposal", "test_malformed_and_noncanonical_assignments_fail_closed", "test_trample_rejects_spill_before_lethal_atomically", "test_trample_accepts_lethal_then_spill", "test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_trample_assigns_lethal_over_indestructible_blocker", "test_lifelink_counts_only_damage_not_prevented_by_protection", "test_trample_deals_to_defender_after_all_blockers_leave", "test_trample_to_attacked_permanent_never_spills_to_controller", "test_four_player_trample_task_is_seat_scoped_and_replays", "test_double_strike_trample_recomputes_after_blocker_leaves", "test_trample_lethal_assignment_mutant_is_killed", "test_keyword_contracts_trace_the_pinned_rules"],
+  "implementation": {"component": "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "version": "ordinary-trample-assignment-v1"},
   "known_blockers": ["trample over planeswalkers is not implemented", "banding and controller-substitution assignment exceptions are not implemented", "full continuous-effect dependencies and the universal replacement/prevention pipeline remain incomplete"],
-  "review_status": "draft"
+  "review_status": "reviewed"
 }
