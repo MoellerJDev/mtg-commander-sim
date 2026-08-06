@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "observed_at": "2026-08-05T11:46:31Z",
+  "observed_at": "2026-08-06T12:06:17Z",
   "repository": "MoellerJDev/mtg-commander-sim",
   "escapes": [
     {
@@ -159,6 +159,18 @@
       ],
       "impact_edge_status": "not_applicable",
       "resolution": "The provenance-validating nightly mutation-and-soak job now fetches complete history, and the workflow policy test ratchets that exact job boundary."
+    },
+    {
+      "id": "ci-20260806-12",
+      "run_id": 31099433278,
+      "head_sha": "b36e9da646090aa76a241c2dedf51c737ab29b9b",
+      "category": "flaky_test",
+      "deterministic": false,
+      "summary": "The natural-winner journey observed the expected main-phase projection before React made its commander offer actionable, then its own progress helper submitted the phase pass it was intended to verify.",
+      "failed_surfaces": ["browser-soak"],
+      "regressions": ["four-player.spec.ts: natural commander-damage winner"],
+      "impact_edge_status": "not_applicable",
+      "resolution": "The seat-opportunity helper now holds the exact expected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation."
     }
   ],
   "recent_pull_requests": [

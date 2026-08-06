@@ -186,6 +186,15 @@ async function declineSeatOpportunity(
     {
       label: `expose ${expectedStep} seat opportunity`,
       noProgressMs: durabilityTimeout,
+      advance: async () => {
+        if ((await step.textContent()) !== expectedStep) return false;
+        // The phase projection can arrive before React has made the exact
+        // strategic offer actionable. Hold this phase instead of submitting
+        // the pass that the helper is meant to verify only after the offer is
+        // visible and enabled.
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return true;
+      },
     },
   );
   expect(await actionIsReady(opportunity)).toBe(true);
