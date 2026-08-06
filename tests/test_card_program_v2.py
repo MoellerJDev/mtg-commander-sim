@@ -151,6 +151,33 @@ class CardProgramV2Tests(unittest.TestCase):
         restored = CardProgram.from_dict(first.to_dict())
         self.assertEqual(first.to_dict(), restored.to_dict())
 
+    def test_strike_keywords_lower_with_precise_capability_closed_spans(self):
+        for keyword, suffix in (("first strike", 510401), ("double strike", 510402)):
+            with self.subTest(keyword=keyword):
+                record = _keyword_card(keyword, keyword.title(), suffix)
+                program = compile_card_program(
+                    self.db,
+                    record,
+                    capability_registry=self.capabilities,
+                    capability_profile="commander_review",
+                    trust_level="trusted",
+                )
+
+                self.assertEqual(
+                    ("combat.damage.participation.strike_steps",),
+                    program.capability_dependencies,
+                )
+                self.assertEqual(
+                    "capability_closed",
+                    program.trust_closure["trust_basis"],
+                )
+                self.assertTrue(program.trust_closure["trusted"])
+                ability = program.to_dict()["abilities"][0]
+                self.assertEqual(
+                    {"line": 1, "start": 0, "end": len(keyword)},
+                    ability["source_span"],
+                )
+                self.assertEqual([], program.to_dict()["residuals"])
     def test_damage_aftermath_card_program_is_capability_closed(self):
         current = compile_card_program(
             self.db,

@@ -137,6 +137,19 @@ class CapabilityRegistryTests(unittest.TestCase):
             )
         )
 
+    def test_bounded_combat_capabilities_are_not_broad_mechanic_aggregates(self):
+        registry = load_default_capability_registry()
+        for mechanic_id in ("trample", "first-strike", "double-strike"):
+            with self.subTest(mechanic_id):
+                with self.assertRaisesRegex(
+                    CapabilityRegistryError,
+                    "Unknown mechanic aggregate",
+                ):
+                    registry.aggregate_closure(
+                        mechanic_id,
+                        profile="commander_duel",
+                    )
+
     def test_untap_all_dependency_fails_closed(self):
         value = _registry_value()
         single = next(
@@ -193,6 +206,32 @@ class CapabilityRegistryTests(unittest.TestCase):
         self.assertTrue(
             any(
                 "status:combat.block.reach:blocked" in blocker
+                for blocker in closure.blockers
+            )
+        )
+
+    def test_canonical_damage_assignment_fails_closed_without_strike_steps(
+        self,
+    ):
+        value = _registry_value()
+        strike_steps = next(
+            row
+            for row in value["capabilities"]
+            if row["id"] == "combat.damage.participation.strike_steps"
+        )
+        strike_steps["status"] = "blocked"
+        strike_steps["blockers"] = ["dependency mutation"]
+
+        closure = CapabilityRegistry(value).closure(
+            ["combat.damage.assignment.canonical"],
+            profile="commander_review",
+        )
+
+        self.assertFalse(closure.trusted)
+        self.assertTrue(
+            any(
+                "status:combat.damage.participation.strike_steps:blocked"
+                in blocker
                 for blocker in closure.blockers
             )
         )

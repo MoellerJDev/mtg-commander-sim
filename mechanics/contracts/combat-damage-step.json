@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 4,
+  "contract_version": 5,
   "mechanic_id": "cr-510-combat-damage-step",
   "official_name": "Combat Damage Step",
   "effective_date": "2026-06-19",
@@ -46,7 +46,9 @@
     ],
     "events": [
       "combat damage is assigned",
+      "current participants and relationships are captured in one immutable typed snapshot",
       "the complete assignment is validated",
+      "positive assignments are canonicalized independently of client array order",
       "combat damage is dealt simultaneously",
       "final dealt source-recipient results emit normalized damage.dealt events",
       "state-based actions and triggers stabilize",
@@ -54,8 +56,10 @@
     ],
     "state_reads": [
       "effective power",
+      "stable combat-sequence and damage-step identity",
       "current attacking and blocking relationships",
       "current attack target",
+      "current controller and logical object identities",
       "first strike, double strike, trample, deathtouch, and lifelink"
     ],
     "state_writes": [
@@ -63,7 +67,7 @@
       "life",
       "loyalty and defense counters",
       "commander damage",
-      "combat damage journal",
+      "canonical APNAP announcement and combat damage journals",
       "pending APNAP trigger batch"
     ],
     "costs": [],
@@ -96,7 +100,7 @@
       "effective power is read through the shared derived-characteristics path"
     ],
     "replacement_effects": [
-      "the complete simultaneous replacement/prevention event batch remains blocked"
+      "represented damage replacement and prevention consume stable source-recipient event identities; unsupported producers remain fail-closed"
     ],
     "copy": [
       "copies use their effective combat characteristics"
@@ -154,13 +158,17 @@
     "test_lethal_planeswalker_combat_damage_applies_state_action",
     "test_unblocked_attacker_damages_battle_defense",
     "test_departed_planeswalker_keeps_defender_but_not_damage_target"
+    ,"test_snapshot_and_proposal_have_one_canonical_relationship_order"
+    ,"test_permuted_combat_assignment_has_identical_replacement_replay"
+    ,"test_malformed_snapshot_fails_before_a_damage_decision"
+    ,"test_damage_step_identity_is_stable_and_distinguishes_extra_combats"
   ],
   "implementation": {
-    "component": "CommanderEngine APNAP combat assignment, typed damage-event, trigger-batch, and damage application paths",
-    "version": "combat-damage-step-v4"
+    "component": "CombatDamageSnapshot, CombatDamageAssignmentProposal, CombatDamageAssignmentSequence, and typed damage transaction",
+    "version": "combat-damage-step-v5"
   },
   "known_blockers": [
-    "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",
+    "the separate Trample over planeswalkers keyword, banding assignment control, and complete combat assignment exceptions are not implemented",
     "lifelink outside the combat damage path and source last-known information are incomplete",
     "a blocker blocking several attackers is not produced by the declaration system",
     "simultaneous damage replacement and prevention require the universal typed event pipeline",

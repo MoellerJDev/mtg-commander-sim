@@ -58,6 +58,9 @@ PROGRAM_INPUT = (
 )
 ARCHITECTURE_INPUT = ROOT / "coverage" / "architecture-audit.json"
 PLATFORM_INPUT = ROOT / "coverage" / "platform-readiness.json"
+INTERACTION_EVIDENCE_INPUT = (
+    ROOT / "platform" / "reusable-piece-interaction-evidence.json"
+)
 
 
 def _canonical_gzip(payload: bytes) -> bytes:
@@ -119,6 +122,7 @@ def _build(
         architecture_audit=load_json(ARCHITECTURE_INPUT),
         platform_status=load_json(PLATFORM_INPUT),
         policy=load_reusable_piece_policy(ROOT),
+        interaction_evidence=load_json(INTERACTION_EVIDENCE_INPUT),
         baseline=baseline,
         ruling_counts=_ruling_counts(db_path),
     )

@@ -161,6 +161,7 @@
       ,"mtg_commander_sim/rules/casting/commit.py": "typed spell-casting transaction owner behind CommanderEngine"
       ,"mtg_commander_sim/rules/activation/commit.py": "typed activated-ability transaction owner behind CommanderEngine"
       ,"mtg_commander_sim/drawing/transaction.py": "canonical replacement-aware draw mutation owner behind CommanderEngine"
+      ,"mtg_commander_sim/combat_relationship_state.py": "typed combat participation and relationship mutation owner behind CommanderEngine"
     },
     "read_only_consumers": {
       "mtg_commander_sim/projection.py": "principal-scoped projection",

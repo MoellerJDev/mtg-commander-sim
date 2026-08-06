@@ -67,9 +67,13 @@ An empty class is inventoried, not complete.
 Generation consumes the pinned Commander card-unlock frontier, capability
 registry and evidence fingerprints, mechanic index, runtime handler/component
 inventory, rule index, Oracle and CardProgram coverage, architecture audit,
-platform snapshots, and ontology policy. Official ruling counts join by Oracle
-ID from the pinned local database. Ruling prose is not yet behaviorally
-classified, so ruling presence is composition evidence, not coverage.
+platform snapshots, ontology policy, and the closed declarations in
+`platform/reusable-piece-interaction-evidence.json`. Each declaration names an
+evidence class, exact test, exact pair or higher-order piece tuple, exact
+capability IDs, and the asserted interaction. Sharing a general contract test
+does not cover a pair. Official ruling counts join by Oracle ID from the pinned
+local database. Ruling prose is not yet behaviorally classified, so ruling
+presence is composition evidence, not coverage.
 
 The outputs are a compact matrix, per-card relation index, pairwise interaction
 index, complex-card benchmark, durable baseline, and current delta. Every JSON

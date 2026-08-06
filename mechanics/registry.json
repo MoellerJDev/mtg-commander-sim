@@ -64,8 +64,8 @@
     {
       "mechanic_id": "cr-510-combat-damage-step",
       "path": "mechanics/contracts/combat-damage-step.json",
-      "sha256": "efa5ce2c61463962804108189beb02cb2ae2e662805244c7ed2fe600b35e5d28",
-      "version": 4
+      "sha256": "d971c1e292db29ba9633976d2aa156737079a3708f85dd9af6c698844396797b",
+      "version": 5
     },
     {
       "mechanic_id": "cr-506-combat-phase",
@@ -130,8 +130,8 @@
     {
       "mechanic_id": "double-strike",
       "path": "mechanics/contracts/double-strike.json",
-      "sha256": "fcaff2d9f60eb840cf1eb3060392d74791325f182e885bf77d2aac32bd8e8701",
-      "version": 1
+      "sha256": "bc901e82b63c66ba8341dcb9afaebef443572bebff09e30c41ce7b7b2dee0a66",
+      "version": 2
     },
     {
       "mechanic_id": "cr-504-draw-step",
@@ -178,8 +178,8 @@
     {
       "mechanic_id": "first-strike",
       "path": "mechanics/contracts/first-strike.json",
-      "sha256": "ef3070188940785b894f5c26952521c2e87610aa290f347ca6ecf7528e3c1899",
-      "version": 1
+      "sha256": "d3aceae406047544a03da280e6ac410114007a92844b88f62dd459b071c41f58",
+      "version": 2
     },
     {
       "mechanic_id": "flash",
@@ -370,8 +370,8 @@
     {
       "mechanic_id": "trample",
       "path": "mechanics/contracts/trample.json",
-      "sha256": "6201811a0383c0cf2702af4376a496cb468d7280d21a1f4fca0d0d882c67e96f",
-      "version": 2
+      "sha256": "45b414c073ebcf04cba44a6e03f0c1d69588be1c07afd405ca25d76b3d2f9fe5",
+      "version": 3
     },
     {
       "mechanic_id": "cr-500-general",
@@ -1287,14 +1287,14 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/double-strike.json",
-      "contract_sha256": "fcaff2d9f60eb840cf1eb3060392d74791325f182e885bf77d2aac32bd8e8701",
-      "contract_version": 1,
+      "contract_sha256": "bc901e82b63c66ba8341dcb9afaebef443572bebff09e30c41ce7b7b2dee0a66",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat and CommanderEngine combat-damage step state machine",
-      "implementation_version": "combat-keywords-v2",
+      "implementation_component": "mtg_commander_sim.combat.assigns_in_damage_step",
+      "implementation_version": "strike-step-participation-v1",
       "kind": "keyword_ability",
       "known_blockers": [
         "full continuous-effect dependencies, copy, and face-down characteristic evaluation remain incomplete",
@@ -1311,6 +1311,9 @@
         "test_double_strike_creates_two_real_damage_steps_and_replays",
         "test_double_strike_does_not_hit_player_after_its_blocker_dies",
         "test_double_strike_trample_recomputes_after_blocker_leaves",
+        "test_damage_step_identity_is_stable_and_distinguishes_extra_combats",
+        "test_strike_step_participation_mutant_is_killed",
+        "test_first_and_double_strike_keywords_lower_with_precise_capabilities",
         "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"
@@ -1709,14 +1712,14 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/first-strike.json",
-      "contract_sha256": "ef3070188940785b894f5c26952521c2e87610aa290f347ca6ecf7528e3c1899",
-      "contract_version": 1,
+      "contract_sha256": "d3aceae406047544a03da280e6ac410114007a92844b88f62dd459b071c41f58",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat and CommanderEngine combat-damage step state machine",
-      "implementation_version": "combat-keywords-v2",
+      "implementation_component": "mtg_commander_sim.combat.assigns_in_damage_step",
+      "implementation_version": "strike-step-participation-v1",
       "kind": "keyword_ability",
       "known_blockers": [
         "full continuous-effect dependencies, copy, and face-down characteristic evaluation remain incomplete",
@@ -1732,6 +1735,9 @@
         "test_second_step_uses_the_first_step_snapshot_and_current_double_strike",
         "test_first_strike_destroys_blocker_before_ordinary_damage",
         "test_first_strike_creates_the_initial_combat_damage_step",
+        "test_damage_step_identity_is_stable_and_distinguishes_extra_combats",
+        "test_strike_step_participation_mutant_is_killed",
+        "test_first_and_double_strike_keywords_lower_with_precise_capabilities",
         "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"
@@ -3775,19 +3781,19 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/trample.json",
-      "contract_sha256": "6201811a0383c0cf2702af4376a496cb468d7280d21a1f4fca0d0d882c67e96f",
-      "contract_version": 2,
+      "contract_sha256": "45b414c073ebcf04cba44a6e03f0c1d69588be1c07afd405ca25d76b3d2f9fe5",
+      "contract_version": 3,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
       "implementation_component": "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal",
-      "implementation_version": "ordinary-trample-assignment-v1",
+      "implementation_version": "ordinary-trample-assignment-v2",
       "kind": "keyword_ability",
       "known_blockers": [
-        "trample over planeswalkers is not implemented",
+        "the separate Trample over planeswalkers keyword is not implemented",
         "banding and controller-substitution assignment exceptions are not implemented",
-        "full continuous-effect dependencies and the universal replacement/prevention pipeline remain incomplete"
+        "unsupported continuous-effect, copy, face-down, ability-changing, replacement, and prevention producers remain fail-closed"
       ],
       "mechanic_id": "trample",
       "official_name": "Trample",
@@ -3795,6 +3801,8 @@
         "702.19"
       ],
       "test_ids": [
+        "test_snapshot_and_proposal_have_one_canonical_relationship_order",
+        "test_permuted_combat_assignment_has_identical_replacement_replay",
         "test_projected_options_and_validation_share_one_proposal",
         "test_malformed_and_noncanonical_assignments_fail_closed",
         "test_trample_rejects_spill_before_lethal_atomically",
@@ -7155,15 +7163,15 @@
     {
       "category": "turn_structure",
       "contract_path": "mechanics/contracts/combat-damage-step.json",
-      "contract_sha256": "efa5ce2c61463962804108189beb02cb2ae2e662805244c7ed2fe600b35e5d28",
-      "contract_version": 4,
+      "contract_sha256": "d971c1e292db29ba9633976d2aa156737079a3708f85dd9af6c698844396797b",
+      "contract_version": 5,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine APNAP combat assignment, typed damage-event, trigger-batch, and damage application paths",
-      "implementation_version": "combat-damage-step-v4",
+      "implementation_component": "CombatDamageSnapshot, CombatDamageAssignmentProposal, CombatDamageAssignmentSequence, and typed damage transaction",
+      "implementation_version": "combat-damage-step-v5",
       "kind": "rules_section",
       "known_blockers": [
-        "trample over planeswalkers, banding assignment control, and complete combat assignment exceptions are not implemented",
+        "the separate Trample over planeswalkers keyword, banding assignment control, and complete combat assignment exceptions are not implemented",
         "lifelink outside the combat damage path and source last-known information are incomplete",
         "a blocker blocking several attackers is not produced by the declaration system",
         "simultaneous damage replacement and prevention require the universal typed event pipeline",
@@ -7199,7 +7207,11 @@
         "test_unblocked_attacker_damages_planeswalker_loyalty",
         "test_lethal_planeswalker_combat_damage_applies_state_action",
         "test_unblocked_attacker_damages_battle_defense",
-        "test_departed_planeswalker_keeps_defender_but_not_damage_target"
+        "test_departed_planeswalker_keeps_defender_but_not_damage_target",
+        "test_snapshot_and_proposal_have_one_canonical_relationship_order",
+        "test_permuted_combat_assignment_has_identical_replacement_replay",
+        "test_malformed_snapshot_fails_before_a_damage_decision",
+        "test_damage_step_identity_is_stable_and_distinguishes_extra_combats"
       ],
       "trust_level": "untrusted"
     },

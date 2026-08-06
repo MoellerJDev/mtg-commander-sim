@@ -31,6 +31,14 @@ Card-specific overrides live in a separate reviewed registry and must explain
 why the typed generic compiler is insufficient. Do not add printed-name
 branches to core engine modules.
 
+Reusable-piece interaction coverage is stricter than a contract's general
+`test_ids`. A test counts as interaction evidence only when
+`platform/reusable-piece-interaction-evidence.json` declares its evidence
+class, exact test ID, exact pair or higher-order piece tuple, capability IDs,
+and the interaction asserted. Two contracts merely citing the same broad test
+does not cover their pair. The generated matrix demotes such incidental
+co-citations rather than preserving optimistic historical coverage.
+
 Contracts use `mechanics/contract.schema.json` plus cross-field validation in
 `mechanic_contracts.py`. A trusted contract must be reviewed, have witness
 cards and tests, and have no known blockers. A partial contract links evidence
@@ -101,10 +109,14 @@ CR 507 traces the beginning-of-combat defending-player, trigger, priority, and
 declare-attackers handoff. Supported Commander profiles establish all active
 opponents as defending players without a choice, while multiplayer variants
 that require choosing one defender remain rejected and explicitly blocked.
-CR 510 traces combat-damage assignment authority, legal recipients, exact
-power totals, atomic rollback, and ordinary simultaneous dealing. First/double
-strike, trample, lifelink, APNAP damage triggers, and the universal simultaneous
-replacement/prevention batch remain blocked.
+CR 510 traces immutable participant snapshots, canonical source/recipient
+order, stable proposal/event identity, assignment authority, legal recipients,
+exact power totals, atomic rollback, APNAP announcements, and represented
+simultaneous damage/replacement dealing. Fine-grained capabilities own ordinary
+First Strike/Double Strike participation and ordinary Trample assignment, but
+their aggregate mechanic contracts remain partial while documented variants,
+ambient characteristic producers, assignment-controller exceptions, and the
+universal replacement/prevention corpus remain incomplete.
 CR 508 traces ordinary attacker eligibility, opponent and Battle routing,
 authoritative revalidation, atomic rollback, vigilance, attacking-state
 lifetime, active-player priority, and empty-combat step skipping. Planeswalker

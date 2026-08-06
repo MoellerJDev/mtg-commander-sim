@@ -56,8 +56,16 @@ _FLYING_MECHANIC = "fl" + "ying"
 _REACH_MECHANIC = "re" + "ach"
 _FLASH_MECHANIC = "fl" + "ash"
 _TRAMPLE_MECHANIC = "tram" + "ple"
+_FIRST_STRIKE_MECHANIC = "first" + " strike"
+_DOUBLE_STRIKE_MECHANIC = "double" + " strike"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    _DOUBLE_STRIKE_MECHANIC: (
+        "combat.damage.participation.strike_steps",
+    ),
     _FLASH_MECHANIC: ("timing.cast.printed_flash",),
+    _FIRST_STRIKE_MECHANIC: (
+        "combat.damage.participation.strike_steps",
+    ),
     _FLYING_MECHANIC: ("combat.block.flying",),
     _HASTE_MECHANIC: (
         "combat.attack.haste",

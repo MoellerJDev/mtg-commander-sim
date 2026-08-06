@@ -1,7 +1,7 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/combat_damage_assignment.py, combat_damage_projection.py, damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
+authoritative_source: "mtg_commander_sim/combat.py, combat_relationship_state.py, combat_damage_snapshot.py, combat_damage_values.py, combat_damage_assignment.py, combat_damage_trample.py, combat_damage_sequence.py, combat_damage_engine_adapter.py, combat_damage_projection.py, damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
 verified: "2026-08-05"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -16,25 +16,53 @@ and authoritative result mutation. Combat, semantic single-target damage,
 semantic each-opponent damage, and damage produced by represented mana
 abilities use the same transaction.
 
-`combat_damage_projection.py` is the read-only state adapter that produces
-immutable typed combatant snapshots. `combat_damage_assignment.py` consumes
-only those values and owns the offer/validation proposal for ordinary
-combat-damage division. It derives exact current recipients and power, then
-validates exact totals and ordinary Trample's lethal-before-spill rule using
-marked damage, simultaneous attacking sources, and represented deathtouch. The
-proposal has no `GameState` access or mutation authority.
+`combat_damage_engine_adapter.py` is the only compatibility layer allowed to
+read `CommanderEngine` internals. It implements the narrow read-only
+`CombatDamageQuery` protocol. `combat_damage_snapshot.py` deep-freezes that
+view into one closed `CombatDamageSnapshot`: stable combat/damage-step
+identity, first-strike state, active player, canonical participants, current
+effective power/toughness/abilities/marked damage/controllers, attacked
+recipients, blocker relationships, historical was-blocked state, and physical
+plus logical identities. Malformed or dangling relationships fail before a
+pilot decision can be issued.
+
+`combat_damage_assignment.py` consumes only the snapshot and owns the exact
+offer/validation proposal. Source order is the canonical participant order;
+recipient order is the source specification's blocker order followed by its
+legal spill recipient. Client JSON order has no authority. Boolean or loose
+numeric amounts, duplicate source-recipient pairs, illegal relationships, and
+incorrect totals fail atomically; zero assignments are removed. A proposal ID
+binds the damage-step identity and complete source specifications.
+`combat_damage_sequence.py` then owns immutable APNAP collection and canonical
+public announcements. `combat_damage_events.py` validates the closed event
+batch, and `damage.py` derives each replacement-event identity from the stable
+damage step, amount, and source and recipient logical incarnations, so
+permuting an equivalent submission cannot change replacement choice order,
+event journals, replay, or the final state hash. A later additional combat has
+a new serialized combat-sequence ID; its first damage step cannot collide with
+an earlier combat in the same turn. Historical Game Record v3 combat states
+without that additive identity retain their legacy serialization.
+The narrow `combat_relationship_state.py` mutation owner removes every incident
+attack/block edge together. If an attacker leaves combat, its former blockers'
+public blocking markers are cleared before another damage snapshot can be
+built; stale relationships cannot survive merely to satisfy projection.
 Trample applies only to an attacking source; it never changes a blocker's
-recipient. An attacked planeswalker or Battle remains the spill target, and a
-departed attacked permanent is not replaced by its controller. The distinct
+recipient. An attacked planeswalker or Battle is pinned to its declaration-
+time logical incarnation, remains the spill target, and is not replaced by its
+controller after leaving or returning. The distinct
 trample-over-planeswalkers variant and banding assignment control remain
 unsupported.
 
-Indestructible and prevention do not change ordinary Trample's lethal-assignment
-threshold. Lethal damage is still assigned using toughness, marked damage, and
-deathtouch; indestructible can prohibit the later state-based destruction, and
-protection can prevent the later damage result. Those interactions are certified
-without treating the still-partial Indestructible or Protection mechanics as
-universally supported.
+Indestructible and prevention do not change ordinary Trample's
+lethal-assignment threshold. Lethal damage is still assigned using toughness,
+marked damage, and deathtouch; indestructible can prohibit the later
+state-based destruction, and protection can prevent the later damage result.
+Double Strike creates a second real damage step and rebuilds a fresh snapshot,
+so a blocker that died in the first step is absent while the attacker remains
+historically blocked; ordinary Trample may then use the still-legal attacked
+recipient. These explicit interactions are certified without treating the
+still-partial aggregate Indestructible, Protection, First Strike, Double
+Strike, or Trample mechanic contracts as universally complete.
 
 The transaction has six explicit stages:
 
@@ -177,6 +205,9 @@ hash invalidated.
 
 The trusted capabilities are deliberately narrow:
 
+- `combat.damage.participation.strike_steps`
+- `combat.damage.assignment.canonical`
+- `combat.damage.assignment.trample`
 - `damage.replacement.static_quantity`
 - `damage.prevention.static_fixed`
 - `damage.prevention.persistent_amount`

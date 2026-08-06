@@ -9,6 +9,7 @@ from mtg_commander_sim import aerial_blocking as aerial_blocking_module
 from mtg_commander_sim import (
     combat_damage_assignment as combat_assignment_module,
 )
+from mtg_commander_sim import combat as combat_module
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
@@ -1271,9 +1272,13 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
 
     def test_trample_lethal_assignment_mutant_is_killed(self):
         proposal = combat_assignment_module.CombatDamageAssignmentProposal(
+            damage_step_id="combat-damage:1:0:0",
+            actor="A",
             sources=(
                 combat_assignment_module.CombatDamageSourceSpec(
                     source="attacker",
+                    controller="A",
+                    logical_object_id="attacker@1",
                     power=4,
                     targets=("blocker", "B"),
                 ),
@@ -1315,6 +1320,71 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_early_spill_is_rejected()
+
+    def test_canonical_assignment_order_mutant_is_killed(self):
+        proposal = combat_assignment_module.CombatDamageAssignmentProposal(
+            damage_step_id="combat-damage:1:0:0",
+            actor="A",
+            sources=(
+                combat_assignment_module.CombatDamageSourceSpec(
+                    source="attacker",
+                    controller="A",
+                    logical_object_id="attacker@1",
+                    power=4,
+                    targets=("blocker", "B"),
+                ),
+            ),
+            attacking_sources=frozenset({"attacker"}),
+            deathtouch_sources=frozenset(),
+            trample_sources=(),
+        )
+        submitted = [
+            {"source": "attacker", "target": "B", "amount": 1},
+            {"source": "attacker", "target": "blocker", "amount": 3},
+        ]
+        original = combat_assignment_module.CombatDamageAssignmentProposal.validate
+
+        def assert_proposal_order_wins() -> None:
+            accepted = proposal.validate(submitted)
+            self.assertEqual(
+                ["blocker", "B"],
+                [value.target for value in accepted],
+            )
+
+        assert_proposal_order_wins()
+
+        def reversed_result(self, values):
+            return tuple(reversed(original(self, values)))
+
+        with patch.object(
+            combat_assignment_module.CombatDamageAssignmentProposal,
+            "validate",
+            reversed_result,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_proposal_order_wins()
+
+    def test_strike_step_participation_mutant_is_killed(self):
+        def assert_double_strike_participates_twice() -> None:
+            self.assertTrue(
+                combat_module.first_strike_step_required(
+                    {"source": frozenset({"double strike"})}
+                )
+            )
+            self.assertTrue(
+                combat_module.assigns_in_damage_step(
+                    object_id="source",
+                    current_keywords=frozenset({"double strike"}),
+                    step_index=1,
+                    first_strike_step=True,
+                    ordinary_second_step=frozenset(),
+                )
+            )
+
+        assert_double_strike_participates_twice()
+        with patch.object(combat_module, "DOUBLE_STRIKE", "mutated strike"):
+            with self.assertRaises(AssertionError):
+                assert_double_strike_participates_twice()
 
     def test_replacement_nested_order_mutant_is_killed(self):
         child = replacement_effects.ReplaceableEvent(

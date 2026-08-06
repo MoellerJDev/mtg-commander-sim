@@ -112,18 +112,22 @@ Use the worktree-local CPython 3.12 environment, never a global `python` alias.
 Keep one substantive branch under certification and at most one independent
 next-batch worktree. Do not mix their changes.
 
-During development, run new and adjacent impacted tests. Before publishing an
-ordinary change, inspect and run the deterministic quick gate:
+As the default development policy, do not run broad suites or gates locally.
+When local feedback is materially useful, run only the exact new test and the
+smallest adjacent impacted test selection. Inspect the deterministic impact
+plan without executing it:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\quick_gate.py --dry-run
-.\.venv\Scripts\python.exe scripts\quick_gate.py
 ```
 
-Public exact-head pull-request CI is the normal merge authority. The full local
-merge gate is for releases and unusually high-risk persistence, replay, privacy
-or packaging changes. Browser automation remains headless. The complete
-workflow and recovery commands are in
+Push the coherent exact head and let public pull-request CI run the broad
+Python, generated, package, platform and headless-browser checks. Use that CI
+window for independent Slot B work instead of repeating the same suite
+locally. A broader local gate is exceptional: use it only when the user asks or
+when diagnosing a CI-only/release-critical persistence, replay, privacy or
+packaging failure. Browser automation remains headless. The complete workflow
+and recovery commands are in
 [`docs/development/ci-pipeline.md`](docs/development/ci-pipeline.md).
 
 Never stage `run/`, `local/`, SQLite databases, Scryfall archives, image or deck

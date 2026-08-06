@@ -1,6 +1,7 @@
 {
   "blockers": [
-    "ordinary Trample combat-damage assignment now uses one typed offer/validation proposal with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; applicable shared interaction tests are indexed without promoting partial mechanics, while trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
+    "ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
+    "generic face-pinned First Strike and Double Strike now close the represented strike-step participation capability and harvest its sole-blocker cards, but the aggregate mechanics remain partial while ability-changing, copy, face-down, additional-combat or damage-step, and other unsupported participation producers remain reachable",
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "generic Vigilance, Haste, Flying, and Reach consume current represented effective keywords through canonical attack, tap-state, activation, mana-payment, and block-legality owners; unsupported ability-changing and copy producers, conditional haste acquisition, other evasion and declaration requirements or costs, and complete effective-characteristic closure remain explicit blockers",
     "fixed-output target-free nonloyalty activated mana abilities now compile to one typed offer, command, payment, replay, and immediate-resolution contract; dynamic, conditional, restricted, triggered, side-effecting, arbitrary nested-payment, and parenthesized basic-land reminder variants remain explicit blockers",
@@ -20,7 +21,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "1360204515633be319a27edf61a6fb6102d05097c5af6226162d6dbee0421bc7",
+    "evaluated_source_tree_hash": "d033b650bb00a694e590df13b7f91f0d1c59caec38bfe28d550de9d288e0725c",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -245,9 +246,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The current source tree extracts ordinary CR 510/702.19 combat-damage state projection and division from CommanderEngine into one read-only projector and immutable typed proposal shared by projected choices and accepted commands. Exact-power totals, current recipients, marked damage, simultaneous attackers, deathtouch, indestructible, protection/prevention, player/planeswalker/Battle targets, departed targets, double strike, atomic rejection, four-player seat projection, replay, property-grid, and killed-mutation evidence are covered. CommanderEngine falls from 13,017 to 12,775 logical lines while direct authoritative writes remain 135. The Commander census promotes 62 exact/trusted/capability-closed cards and removes 907 material residuals with no construction failures or demotions. Shared interaction tests cover the applicable Trample/Double Strike, Trample/Indestructible, and Trample/Protection reusable-piece pairs without promoting the partial mechanics. Trample over planeswalkers, banding assignment control, and unsupported characteristic producers remain explicit blockers.",
+      "evidence": "PR 107 extracts ordinary CR 510/702.19 combat-damage state projection and division from CommanderEngine into one read-only projector and immutable typed proposal shared by projected choices and accepted commands. Exact-power totals, current recipients, marked damage, simultaneous attackers, deathtouch, indestructible, protection/prevention, player/planeswalker/Battle targets, departed targets, double strike, atomic rejection, four-player seat projection, replay, property-grid, and killed-mutation evidence are covered. CommanderEngine fell from 13,017 to 12,775 logical lines while direct authoritative writes remained 135. The Commander census promoted 62 exact/trusted/capability-closed cards and removed 907 material residuals with no construction failures or demotions. Aggregate Trample remains partial: Trample over planeswalkers, banding assignment control, and unsupported characteristic producers are explicit blockers. Public exact-head run 31061917743 passed, merge commit ce0d9586b0649bb4111976f5d11aa1c6ee94523e is on main, and post-merge main-smoke run 31062387189 passed.",
       "id": "generic_ordinary_trample_assignment_harvest",
       "name": "Typed ordinary-Trample assignment and generic harvest",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The current source tree builds each combat-damage step through an immutable CombatDamageSnapshot and narrow read-only query, validates strict closed proposals, collects APNAP assignments in a typed sequence, and derives assignment, event, replacement-order, journal, and replay identity from canonical physical and logical participants rather than caller JSON order. Explicit interaction declarations replace incidental test co-citation. Generic source-spanned First Strike and Double Strike lowering adds one fine-grained trusted strike-step capability while the aggregate mechanics remain partial. The Commander census promotes exactly the predicted 69 exact/trusted/capability-closed cards, removes 449 material residuals, leaves unresolved objects and construction failures unchanged, shrinks CommanderEngine by two logical lines, moves two direct combat relationship writes into one typed owner, and adds no oversized module. Unsupported ability-changing, copy, face-down, additional-combat/damage-step, banding, and Trample-over-planeswalkers interactions remain explicit blockers.",
+      "id": "canonical_combat_damage_assignment_and_strike_harvest",
+      "name": "Canonical combat-damage assignment and strike-step harvest",
       "status": "implemented_current_source_tree"
     },
     {
@@ -274,7 +281,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v31_with_51_records_41_trusted_and_412_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "capability_evidence": "implemented_registry_v32_with_53_records_43_trusted_and_424_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -285,15 +292,15 @@
     "reusable_piece_inventory": "implemented_versioned_generated_matrix_card_index_interaction_index_complex_card_benchmark_durable_baseline_delta_and_cli_with_zero_unclassified_material_spans",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_assignment damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality fixed_mana_ability and cast_permission owners",
+    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality fixed_mana_ability and cast_permission owners",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
     "certified_head_classification": "historical_certified",
-    "certified_head_sha": "19648f22c1cc8b8ad3c9eb84abf5a5779a18d331",
+    "certified_head_sha": "ce0d9586b0649bb4111976f5d11aa1c6ee94523e",
     "feature_head_classification": "historical_integrated",
-    "feature_head_sha": "19648f22c1cc8b8ad3c9eb84abf5a5779a18d331",
+    "feature_head_sha": "35f116bd858f4f5f87cefad5793f9b2cf2cb8e1c",
     "generation_timestamp": "2026-08-05T23:35:58Z"
   },
   "repository": {
@@ -303,10 +310,10 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 50613,
+      "material_residuals": 50164,
       "status_counts": {
-        "exact": 1413,
-        "partial": 13788,
+        "exact": 1482,
+        "partial": 13719,
         "unresolved": 16422
       },
       "total": 31623
@@ -363,7 +370,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4884,
+    "deterministic_cases_discovered": 4902,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -373,16 +380,16 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 50613,
+        "material_residuals": 50164,
         "status_counts": {
-          "residual": 30210,
-          "trusted": 1413
+          "residual": 30141,
+          "trusted": 1482
         },
         "trust_basis_counts": {
-          "capability_closed": 1409,
+          "capability_closed": 1478,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 30210
+          "unresolved": 30141
         }
       },
       "full": {
@@ -403,9 +410,9 @@
     },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31053278703,
+      "run_id": 31061917743,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31053278703"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31061917743"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -413,9 +420,9 @@
       "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr105_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31054011153_pass",
+      "deterministic_tests": "certified_main_through_pr107_exact_head_sharded_public_ubuntu_windows_package_generated_and_headless_browser_pass; post_merge_main_smoke_31062387189_pass",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
-      "focused_rules_tests": "pass_ordinary_trample_typed_offer_command_parity_exact_power_lethal_assignment_marked_damage_deathtouch_indestructible_protection_prevention_double_strike_player_planeswalker_battle_departed_target_blocker_negative_property_grid_malformed_input_atomic_rollback_four_player_privacy_exact_replay_and_killed_mutation",
+      "focused_rules_tests": "pass_targeted_new_canonical_assignment_snapshot_sequence_event_identity_relationship_removal_strike_capability_replay_and_mutation_tests; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

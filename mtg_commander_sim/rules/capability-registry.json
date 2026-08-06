@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 31,
+  "registry_version": 32,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -36,12 +36,6 @@
         "damage.result.wither",
         "life.gain.replacement.static_multiplier",
         "damage.trigger.noncombat"
-      ]
-    },
-    {
-      "mechanic_id": "trample",
-      "capabilities": [
-        "combat.damage.assignment.trample"
       ]
     },
     {
@@ -492,6 +486,60 @@
       "status": "trusted"
     },
     {
+      "id": "combat.damage.participation.strike_steps",
+      "version": 1,
+      "official_rules": ["510.4", "702.4", "702.4a", "702.4b", "702.4c", "702.4d", "702.7", "702.7a", "702.7b", "702.7c", "702.7d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Determine whether combat has one or two damage steps and which current attacking or blocking creatures assign in each step for ordinary First Strike and Double Strike.",
+        "inputs": ["current represented First Strike and Double Strike abilities", "the first-step ordinary-combatant snapshot", "current combat participation", "current damage-step index"],
+        "outputs": ["first-damage-step creation", "typed per-step assignment eligibility", "current Double Strike participation in both steps", "ordinary-combatant participation in the second step"],
+        "exclusions": ["effects that add combat damage steps outside First Strike and Double Strike", "banding and assignment-controller substitution", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.combat.first_strike_step_required", "mtg_commander_sim.combat.ordinary_second_step_combatants", "mtg_commander_sim.combat.assigns_in_damage_step"],
+      "positive_tests": ["test_first_strike_creates_the_initial_combat_damage_step"],
+      "negative_tests": ["test_second_step_uses_the_first_step_snapshot_and_current_double_strike"],
+      "interaction_tests": ["test_double_strike_trample_recomputes_after_blocker_leaves"],
+      "multiplayer_tests": [],
+      "privacy_tests": [],
+      "replay_tests": ["test_double_strike_creates_two_real_damage_steps_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded participation owner consumes current public combat characteristics and has no optional capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_strike_step_participation_mutant_is_killed changes the recognized Double Strike identity and both first-step creation and second-step participation assertions reject the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.damage.assignment.canonical",
+      "version": 1,
+      "official_rules": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Snapshot current combat-damage participants and legal recipients, validate each APNAP proposal, canonicalize every announcement, and materialize one deterministic simultaneous damage batch.",
+        "inputs": ["typed strike-step participation", "current effective power, toughness, abilities, marked damage, controllers, and logical identities", "deathtouch lethal-assignment contribution", "declaration-time attacked recipient and current recipient validity", "current blocker relationships and historical was-blocked state"],
+        "outputs": ["immutable closed CombatDamageSnapshot", "seat-scoped proposal-order assignments", "zero-free canonical announcements", "stable proposal and damage-event identities", "deterministic APNAP replacement-choice and event journals", "one canonical damage-batch commitment"],
+        "exclusions": ["banding and effects that change who assigns combat damage", "damage assignment modifiers other than represented deathtouch and Trample", "unsupported combat recipient kinds", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
+      },
+      "dependencies": ["combat.damage.participation.strike_steps"],
+      "implementation_components": ["mtg_commander_sim.combat_damage_snapshot.CombatDamageSnapshot", "mtg_commander_sim.combat_damage_snapshot.build_combat_damage_snapshot", "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "mtg_commander_sim.combat_damage_sequence.CombatDamageAssignmentSequence", "mtg_commander_sim.damage.combat_damage_proposals"],
+      "positive_tests": ["test_snapshot_and_proposal_have_one_canonical_relationship_order"],
+      "negative_tests": ["test_malformed_internal_relationships_fail_before_projection"],
+      "interaction_tests": ["test_permuted_combat_assignment_has_identical_replacement_replay"],
+      "multiplayer_tests": ["test_discretionary_assignments_are_collected_in_apnap_order_and_replay"],
+      "privacy_tests": ["test_four_player_trample_task_is_seat_scoped_and_replays"],
+      "replay_tests": ["test_permuted_combat_assignment_has_identical_replacement_replay"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Capability closure reaches the typed strike-step owner and fails closed if that participation dependency is unavailable.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_canonical_assignment_order_mutant_is_killed reverses canonical output order and the proposal-order assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
       "id": "combat.damage.assignment.trample",
       "version": 1,
       "official_rules": ["510.1", "510.1a", "510.1c", "510.1d", "702.19", "702.19a", "702.19b", "702.19c", "702.19d", "702.19e", "702.19f", "702.19g"],
@@ -500,10 +548,10 @@
         "summary": "Offer and validate ordinary trample combat-damage division from current represented characteristics, requiring lethal assignment to every current blocker before damage may be assigned to the attacked player, planeswalker, or battle.",
         "inputs": ["current attacking and blocking combatants", "current represented power, toughness, marked damage, and keywords", "other attacking creatures' simultaneous assignments", "current attacked player or permanent"],
         "outputs": ["seat-scoped canonical assignment options", "exact full-power assignment validation", "lethal-before-spill validation", "atomic rejection without mutation", "deterministic assignment journal"],
-        "exclusions": ["trample over planeswalkers", "banding and effects that change who assigns combat damage", "damage assignment modifiers other than ordinary deathtouch and marked damage", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
+        "exclusions": ["the separate Trample over planeswalkers keyword", "banding and effects that change who assigns combat damage", "damage assignment modifiers other than ordinary deathtouch and marked damage", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
-      "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "mtg_commander_sim.combat_damage_assignment.build_combat_damage_assignment_proposal", "mtg_commander_sim.combat_damage_assignment.trample_assignment_error", "mtg_commander_sim.combat_damage_projection.project_combat_damage_assignment"],
+      "dependencies": ["combat.damage.assignment.canonical"],
+      "implementation_components": ["mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "mtg_commander_sim.combat_damage_assignment.build_combat_damage_assignment_proposal", "mtg_commander_sim.combat_damage_assignment.trample_assignment_error", "mtg_commander_sim.combat_damage_snapshot.CombatDamageSnapshot", "mtg_commander_sim.combat_damage_projection.project_combat_damage_assignment"],
       "positive_tests": ["test_trample_accepts_lethal_then_spill", "test_trample_to_attacked_permanent_never_spills_to_controller"],
       "negative_tests": ["test_trample_rejects_spill_before_lethal_atomically", "test_malformed_and_noncanonical_assignments_fail_closed"],
       "interaction_tests": ["test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_trample_assigns_lethal_over_indestructible_blocker", "test_lifelink_counts_only_damage_not_prevented_by_protection", "test_double_strike_trample_recomputes_after_blocker_leaves"],
@@ -511,8 +559,8 @@
       "privacy_tests": ["test_four_player_trample_task_is_seat_scoped_and_replays"],
       "replay_tests": ["test_four_player_trample_task_is_seat_scoped_and_replays", "test_trample_to_attacked_permanent_never_spills_to_controller"],
       "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
-      "dependency_fail_closed_status": "not_applicable",
-      "dependency_fail_closed_rationale": "The bounded ordinary-trample assignment owner consumes authoritative current combat and characteristic snapshots and has no optional capability dependency.",
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Capability closure reaches the canonical combat snapshot, recipient, APNAP announcement, and damage-batch owner and fails closed if that dependency is unavailable.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_trample_lethal_assignment_mutant_is_killed removes lethal-before-spill enforcement and the canonical invalid assignment rejects the survivor.",
       "blockers": [],

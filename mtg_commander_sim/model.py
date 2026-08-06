@@ -427,6 +427,10 @@ class CombatState:
     blocker_cursor: int = 0
     blockers: dict[str, list[str]] = field(default_factory=dict)  # attacker -> blocker object ids
     damage_assignments: list[dict[str, Any]] = field(default_factory=list)
+    # Allocated once when this combat's first damage step is initialized.  The
+    # same identity covers both first-strike and ordinary damage steps while a
+    # later additional combat receives a distinct identity.
+    damage_sequence_id: str | None = None
     damage_step_index: int = 0
     damage_step_initialized: bool = False
     first_strike_step: bool = False
@@ -435,7 +439,12 @@ class CombatState:
     )
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        # Historical Game Record v3 checkpoints predate this additive field.
+        # Omitting the empty value preserves their canonical serialization.
+        if self.damage_sequence_id is None:
+            payload.pop("damage_sequence_id")
+        return payload
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "CombatState":

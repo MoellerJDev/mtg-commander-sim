@@ -19,7 +19,7 @@ from mtg_commander_sim.damage import (
 )
 from mtg_commander_sim.mana_mode_effects import apply_mana_mode_effects
 from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.model import CardInstance, StackItem
+from mtg_commander_sim.model import CardInstance, CombatState, StackItem
 from mtg_commander_sim.projection import StateProjector
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -38,6 +38,7 @@ from mtg_commander_sim.semantic_runtime import (
     default_damage_replacement_registry,
 )
 from mtg_commander_sim.semantics import SemanticProgram
+from mtg_commander_sim.session import CommanderSession
 
 
 from damage_replacement_support import (
@@ -358,6 +359,127 @@ class DamageReplacementIntegrationTests(DamageReplacementPipelineBase):
             replay = replay_record(record_dir, self.db, verify=True)
         self.assertTrue(replay["ok"], replay)
         self.assertEqual(expected_hash, replay["final_state_hash"])
+
+    def test_permuted_combat_assignment_has_identical_replacement_replay(self):
+        session = self.session(120461516)
+        engine = session.engine
+        _furnace, defender, _ordinary_source = self.stage_sources(engine)
+        attacker_ref = engine.create_token(
+            "A",
+            name="Canonical Trampler",
+            characteristics={
+                "type_line": "Token Creature — Beast",
+                "power": "5",
+                "toughness": "5",
+                "keywords": ["Trample"],
+            },
+        )[0]
+        attacker = engine._resolve_object(
+            "A", attacker_ref, zones={"battlefield"}
+        )
+        attacker.attacking = "B"
+        defender.blocking = attacker.object_id
+        defender.marked_damage = max(
+            0, engine._numeric_stat(defender.object_id, "toughness") - 1
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "combat"
+        engine.state.step = "combat_damage"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            blockers_declared=True,
+            attackers={attacker.object_id: "B"},
+            attack_target_context={
+                attacker.object_id: {
+                    "target": "B",
+                    "kind": "player",
+                    "defending_player": "B",
+                }
+            },
+            defending_players=["B"],
+            blockers={attacker.object_id: [defender.object_id]},
+        )
+        engine._begin_combat_damage()
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        assignments = [
+            {
+                "source": attacker.ref,
+                "target": defender.ref,
+                "amount": 1,
+            },
+            {"source": attacker.ref, "target": "B", "amount": 4},
+        ]
+
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary) / "canonical-base"
+            session.save(base)
+            outcomes = []
+            for index, submitted in enumerate(
+                (assignments, list(reversed(assignments)))
+            ):
+                candidate = CommanderSession.load(self.db, base)
+                accepted = candidate.act(
+                    "pilot:A",
+                    {"a": "dmg", "assignments": submitted},
+                )
+                self.assertTrue(accepted.ok, accepted.summary)
+                decision = candidate.state.pending_decision
+                self.assertIsNotNone(decision)
+                self.assertEqual("replacement.order", decision.kind)
+                projected = StateProjector(self.db, candidate.state)._decision(
+                    "pilot:B"
+                )
+                selected = next(
+                    option["id"]
+                    for option in projected["ctx"]["options"]
+                    if "fixed" in option["id"]
+                )
+                replacement_shape = json.dumps(
+                    {
+                        "kind": decision.kind,
+                        "actors": decision.actors,
+                        "continuation": decision.continuation,
+                        "options": projected["ctx"]["options"],
+                    },
+                    sort_keys=True,
+                )
+                chosen = candidate.act(
+                    "pilot:B",
+                    {
+                        "action_id": "choose",
+                        "choices": {"replacement": selected},
+                    },
+                )
+                self.assertTrue(chosen.ok, chosen.summary)
+                assigned_event = next(
+                    value
+                    for value in candidate.state.events
+                    if value.code == "combat.damage.assigned"
+                )
+                damage_event = next(
+                    value
+                    for value in candidate.state.events
+                    if value.code == "combat.damage"
+                )
+                record_dir = Path(temporary) / f"canonical-{index}"
+                candidate.save(record_dir)
+                replay = replay_record(record_dir, self.db, verify=True)
+                self.assertTrue(replay["ok"], replay)
+                outcomes.append(
+                    {
+                        "canonical": assigned_event.details["assignments"],
+                        "proposal_id": assigned_event.details["proposal_id"],
+                        "replacement": replacement_shape,
+                        "damage_events": damage_event.details["damage_events"],
+                        "state_hash": authoritative_state_hash(candidate.state),
+                        "replay_hash": replay["final_state_hash"],
+                    }
+                )
+
+        self.assertEqual(outcomes[0], outcomes[1])
 
 
     def test_semantic_damage_replacement_choice_replays_exactly(self):

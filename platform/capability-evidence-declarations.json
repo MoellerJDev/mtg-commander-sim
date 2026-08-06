@@ -466,6 +466,62 @@
       "applicability_note": "Replay the accepted Reach block and exact combat relation."
     },
     {
+      "capability_id": "combat.damage.assignment.canonical",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_permuted_combat_assignment_has_identical_replacement_replay",
+      "official_rule_ids": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Prove canonical assignment order fixes replacement ordering, event identity, journals, final state, and replay."
+    },
+    {
+      "capability_id": "combat.damage.assignment.canonical",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_damage_rules.CombatDamageRuleTests.test_discretionary_assignments_are_collected_in_apnap_order_and_replay",
+      "official_rule_ids": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Collect each controller's canonical public announcement in exact APNAP order."
+    },
+    {
+      "capability_id": "combat.damage.assignment.canonical",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_canonical_assignment_order_mutant_is_killed",
+      "official_rule_ids": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a mutation that reverses proposal-order canonical assignments."
+    },
+    {
+      "capability_id": "combat.damage.assignment.canonical",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_damage_snapshot.CombatDamageSnapshotTests.test_malformed_internal_relationships_fail_before_projection",
+      "official_rule_ids": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject missing participants, duplicate sources, and incorrect controllers before issuing a decision."
+    },
+    {
+      "capability_id": "combat.damage.assignment.canonical",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_damage_snapshot.CombatDamageSnapshotTests.test_snapshot_and_proposal_have_one_canonical_relationship_order",
+      "official_rule_ids": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Build one immutable closed snapshot and canonicalize source and recipient order from it."
+    },
+    {
+      "capability_id": "combat.damage.assignment.canonical",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_four_player_trample_task_is_seat_scoped_and_replays",
+      "official_rule_ids": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project only the current assigning seat's private decision while retaining public prior announcements."
+    },
+    {
+      "capability_id": "combat.damage.assignment.canonical",
+      "evidence_class": "replay",
+      "test_id": "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_permuted_combat_assignment_has_identical_replacement_replay",
+      "official_rule_ids": ["510.1", "510.1a", "510.1b", "510.1c", "510.1d", "510.1e", "510.4", "616.1", "802.5"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay either JSON assignment permutation to the same canonical final state."
+    },
+    {
       "capability_id": "combat.damage.assignment.trample",
       "evidence_class": "interaction",
       "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
@@ -568,6 +624,46 @@
       "official_rule_ids": ["510.1", "510.1a", "510.1c", "510.1d", "702.19", "702.19a", "702.19b", "702.19c", "702.19d", "702.19e", "702.19f", "702.19g"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Replay legal and rejected attacked-permanent trample divisions exactly."
+    },
+    {
+      "capability_id": "combat.damage.participation.strike_steps",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_trample_assignment_integration.TrampleAssignmentIntegrationTests.test_double_strike_trample_recomputes_after_blocker_leaves",
+      "official_rule_ids": ["510.4", "702.4", "702.4a", "702.4b", "702.4c", "702.4d", "702.7", "702.7a", "702.7b", "702.7c", "702.7d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Recompute the current Trample assignment after a Double Strike first step removes the blocker."
+    },
+    {
+      "capability_id": "combat.damage.participation.strike_steps",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_strike_step_participation_mutant_is_killed",
+      "official_rule_ids": ["510.4", "702.4", "702.4a", "702.4b", "702.4c", "702.4d", "702.7", "702.7a", "702.7b", "702.7c", "702.7d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a mutation that stops recognizing Double Strike for first-step creation and second-step participation."
+    },
+    {
+      "capability_id": "combat.damage.participation.strike_steps",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_second_step_uses_the_first_step_snapshot_and_current_double_strike",
+      "official_rule_ids": ["510.4", "702.4", "702.4a", "702.4b", "702.4c", "702.4d", "702.7", "702.7a", "702.7b", "702.7c", "702.7d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Exclude creatures outside the first-step snapshot unless current Double Strike makes them eligible in the second step."
+    },
+    {
+      "capability_id": "combat.damage.participation.strike_steps",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_damage_rules.CombatDamageRuleTests.test_first_strike_creates_the_initial_combat_damage_step",
+      "official_rule_ids": ["510.4", "702.4", "702.4a", "702.4b", "702.4c", "702.4d", "702.7", "702.7a", "702.7b", "702.7c", "702.7d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Create the restricted first combat-damage step and expose only currently eligible participants."
+    },
+    {
+      "capability_id": "combat.damage.participation.strike_steps",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_double_strike_creates_two_real_damage_steps_and_replays",
+      "official_rule_ids": ["510.4", "702.4", "702.4a", "702.4b", "702.4c", "702.4d", "702.7", "702.7a", "702.7b", "702.7c", "702.7d"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay both real combat-damage steps and their intervening priority window exactly."
     },
     {
       "capability_id": "continuous.attached.fixed_characteristics",

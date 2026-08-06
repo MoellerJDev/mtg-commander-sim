@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "declarations": [
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_sick_mana_creature_requires_haste_or_as_though_permission",
+      "piece_ids": ["capability.activation.tap_untap_cost.haste", "mechanic.haste"],
+      "capability_ids": ["activation.tap_untap_cost.haste"],
+      "interaction_order": 2,
+      "assertion": "A mana ability's tap cost consumes the current Haste exception to summoning sickness."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_live_generic_equipment_effect_moves_detaches_and_tracks_control",
+      "piece_ids": ["capability.attachment.equip.fixed_mana", "capability.continuous.attached.fixed_characteristics"],
+      "capability_ids": ["attachment.equip.fixed_mana", "continuous.attached.fixed_characteristics"],
+      "interaction_order": 2,
+      "assertion": "Equip attachment changes drive the attached permanent's live continuous characteristics."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_haste_attack_permission_uses_current_effective_keywords",
+      "piece_ids": ["capability.combat.attack.haste", "mechanic.haste"],
+      "capability_ids": ["combat.attack.haste"],
+      "interaction_order": 2,
+      "assertion": "Attack eligibility consumes the current represented Haste ability."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_vigilance_tap_owner_uses_current_effective_keywords",
+      "piece_ids": ["capability.combat.attack.vigilance", "mechanic.vigilance"],
+      "capability_ids": ["combat.attack.vigilance"],
+      "interaction_order": 2,
+      "assertion": "The declare-attackers tap owner consumes the current represented Vigilance ability."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_current_flying_and_reach_share_offer_and_command_legality",
+      "piece_ids": ["capability.combat.block.flying", "capability.combat.block.reach", "mechanic.flying", "mechanic.reach"],
+      "capability_ids": ["combat.block.flying", "combat.block.reach"],
+      "interaction_order": 4,
+      "assertion": "Flying's block restriction and Reach's exception share the same offer and command legality boundary."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_double_strike_trample_recomputes_after_blocker_leaves",
+      "piece_ids": ["capability.combat.damage.assignment.trample", "capability.combat.damage.participation.strike_steps", "mechanic.double-strike", "mechanic.trample"],
+      "capability_ids": ["combat.damage.assignment.trample", "combat.damage.participation.strike_steps"],
+      "interaction_order": 4,
+      "assertion": "Ordinary Trample assignment is recomputed from the current blocker set in Double Strike's second damage step."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_trample_assigns_lethal_over_indestructible_blocker",
+      "piece_ids": ["capability.combat.damage.assignment.trample", "mechanic.indestructible", "mechanic.trample"],
+      "capability_ids": ["combat.damage.assignment.trample"],
+      "interaction_order": 3,
+      "assertion": "Indestructible does not change the lethal-damage amount ordinary Trample must assign before spill."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_permuted_combat_assignment_has_identical_replacement_replay",
+      "piece_ids": ["capability.combat.damage.assignment.canonical", "capability.combat.damage.assignment.trample", "mechanic.trample"],
+      "capability_ids": ["combat.damage.assignment.canonical", "combat.damage.assignment.trample"],
+      "interaction_order": 3,
+      "assertion": "Ordinary Trample consumes the canonical assignment, replacement-order, event-identity, and replay boundary."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_first_strike_creates_the_initial_combat_damage_step",
+      "piece_ids": ["capability.combat.damage.participation.strike_steps", "mechanic.first-strike"],
+      "capability_ids": ["combat.damage.participation.strike_steps"],
+      "interaction_order": 2,
+      "assertion": "The First Strike keyword consumes the typed strike-step participant owner."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_double_strike_creates_two_real_damage_steps_and_replays",
+      "piece_ids": ["capability.combat.damage.participation.strike_steps", "mechanic.double-strike"],
+      "capability_ids": ["combat.damage.participation.strike_steps"],
+      "interaction_order": 2,
+      "assertion": "The Double Strike keyword consumes the typed strike-step owner in both real damage steps."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_lifelink_counts_only_damage_not_prevented_by_protection",
+      "piece_ids": ["capability.combat.damage.assignment.trample", "capability.damage.result.player_life", "mechanic.cr-120-damage", "mechanic.lifelink", "mechanic.protection", "mechanic.trample"],
+      "capability_ids": ["combat.damage.assignment.trample", "damage.result.player_life"],
+      "interaction_order": 6,
+      "assertion": "A Trample batch through Protection credits Lifelink only for final damage actually dealt."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+      "piece_ids": ["capability.combat.damage.assignment.trample", "mechanic.deathtouch", "mechanic.trample"],
+      "capability_ids": ["combat.damage.assignment.trample"],
+      "interaction_order": 3,
+      "assertion": "Deathtouch changes ordinary Trample's lethal-assignment threshold while marked damage remains part of that threshold."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_counter_aftermath_reuses_counter_replacement_pipeline",
+      "piece_ids": ["capability.counter.placement.quantity_replacement", "capability.damage.prevention.persistent_amount"],
+      "capability_ids": ["counter.placement.quantity_replacement", "damage.prevention.persistent_amount"],
+      "interaction_order": 2,
+      "assertion": "Prevention aftermath counter placement reuses the canonical counter replacement pipeline."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_counter_replacements_apply_in_affected_players_chosen_order",
+      "piece_ids": ["capability.counter.placement.quantity_replacement", "mechanic.cr-122-counters"],
+      "capability_ids": ["counter.placement.quantity_replacement"],
+      "interaction_order": 2,
+      "assertion": "Counter quantity replacements participate in the affected player's CR 122 counter event."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",
+      "piece_ids": ["capability.damage.amount.positive", "mechanic.cr-508-declare-attackers-step"],
+      "capability_ids": ["damage.amount.positive"],
+      "interaction_order": 2,
+      "assertion": "Only positive damage, not life loss or fully prevented damage, satisfies the tested attack permission."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_infect_and_wither_use_minus_counters_only_on_creatures",
+      "piece_ids": ["capability.damage.result.infect", "mechanic.cr-120-damage", "mechanic.infect"],
+      "capability_ids": ["damage.result.infect"],
+      "interaction_order": 3,
+      "assertion": "Infect replaces the ordinary CR 120 player or creature result with the correct counter result."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_boon_reflection_doubles_lifelink_result",
+      "piece_ids": ["capability.damage.result.lifelink", "mechanic.lifelink"],
+      "capability_ids": ["damage.result.lifelink"],
+      "interaction_order": 2,
+      "assertion": "The Lifelink damage result enters the canonical replaceable life-gain path."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_damage_to_battle_creature_applies_both_results",
+      "piece_ids": ["capability.damage.result.multitype_permanent", "mechanic.cr-120-damage"],
+      "capability_ids": ["damage.result.multitype_permanent"],
+      "interaction_order": 2,
+      "assertion": "A multitype permanent receives each applicable CR 120 damage result in one transaction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_source_pinned_keyword_witnesses_follow_damage_results",
+      "piece_ids": ["capability.damage.result.toxic", "mechanic.toxic"],
+      "capability_ids": ["damage.result.toxic"],
+      "interaction_order": 2,
+      "assertion": "The represented Toxic keyword produces its typed player-counter result after combat damage."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_wither_damage_still_records_deathtouch_result",
+      "piece_ids": ["capability.damage.result.wither", "mechanic.wither"],
+      "capability_ids": ["damage.result.wither"],
+      "interaction_order": 2,
+      "assertion": "Wither changes the creature result to counters without erasing the deathtouch damage fact."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_flash_offer_and_cast_use_same_compiled_permission",
+      "piece_ids": ["capability.timing.cast.printed_flash", "mechanic.flash"],
+      "capability_ids": ["timing.cast.printed_flash"],
+      "interaction_order": 2,
+      "assertion": "Printed Flash lowering drives both the advertised and accepted cast-timing permission."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_self_dies_trigger_uses_last_known_controller",
+      "piece_ids": ["capability.trigger.event.normalized_zone_change", "mechanic.cr-603-handling-triggered-abilities"],
+      "capability_ids": ["trigger.event.normalized_zone_change"],
+      "interaction_order": 2,
+      "assertion": "A normalized zone-change occurrence supplies last-known controller data to trigger discovery."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_damage_and_resulting_death_triggers_share_one_order_batch",
+      "piece_ids": ["capability.trigger.placement.apnap", "mechanic.cr-120-damage", "mechanic.cr-603-handling-triggered-abilities"],
+      "capability_ids": ["trigger.placement.apnap"],
+      "interaction_order": 3,
+      "assertion": "Damage and state-based deaths feed their triggers into one APNAP placement batch."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_large_sequence_suspends_and_resumes_from_remaining_count",
+      "piece_ids": ["capability.zone.draw.library_to_hand", "mechanic.cr-121-drawing-a-card"],
+      "capability_ids": ["zone.draw.library_to_hand"],
+      "interaction_order": 2,
+      "assertion": "The typed draw owner preserves individually replaceable CR 121 events across suspension and resume."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_self_pump_and_basic_token_creation_lower_generically",
+      "piece_ids": ["mechanic.cr-111-tokens", "mechanic.cr-122-counters", "mechanic.cr-611-continuous-effects"],
+      "capability_ids": [],
+      "interaction_order": 3,
+      "assertion": "One generic program composes token creation, counter placement, and a temporary continuous effect."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_daretti_ruling_does_not_follow_a_reentered_card",
+      "piece_ids": ["mechanic.cr-400-general", "mechanic.cr-603-handling-triggered-abilities"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "Zone-change identity prevents a delayed trigger from following a reentered card object."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_multiple_defenders_block_sequentially",
+      "piece_ids": ["mechanic.cr-508-declare-attackers-step", "mechanic.cr-509-declare-blockers-step"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "Multiplayer attack declarations determine the sequential defending-player block decisions."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_attackers_tap_except_vigilance_then_active_player_gets_priority",
+      "piece_ids": ["mechanic.cr-508-declare-attackers-step", "mechanic.vigilance"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "Vigilance changes the declare-attackers turn-based tap result without changing priority sequencing."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+      "piece_ids": ["mechanic.cr-509-declare-blockers-step", "mechanic.menace"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "Menace contributes its minimum-blocker restriction to block offer and validation."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_unconditional_entry_tapped_is_engine_derived",
+      "piece_ids": ["mechanic.cr-603-handling-triggered-abilities", "mechanic.cr-614-replacement-effects"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "An entry replacement changes the zone event directly and does not create a triggered ability."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_second_step_uses_the_first_step_snapshot_and_current_double_strike",
+      "piece_ids": ["mechanic.double-strike", "mechanic.first-strike"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "First Strike's initial participant snapshot and current Double Strike jointly determine second-step participation."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_flying_attacker_requires_flying_or_reach_blocker",
+      "piece_ids": ["mechanic.flying", "mechanic.reach"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "Reach is tested as the explicit exception to Flying's block restriction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_lifelink_counts_only_damage_not_prevented_by_protection",
+      "piece_ids": ["mechanic.lifelink", "mechanic.protection"],
+      "capability_ids": [],
+      "interaction_order": 2,
+      "assertion": "Protection prevention reduces the final amount used by Lifelink."
+    }
+  ]
+}

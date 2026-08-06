@@ -15,6 +15,7 @@ from mtg_commander_sim.reusable_pieces import (
     load_tracked_reusable_piece_artifacts,
     render_reusable_piece_delta_markdown,
     validate_reusable_piece_artifacts,
+    validate_interaction_evidence,
     validate_reusable_piece_matrix,
     validate_reusable_piece_policy,
 )
@@ -232,6 +233,25 @@ def _inputs() -> dict:
             },
         },
         "policy": load_reusable_piece_policy(ROOT),
+        "interaction_evidence": {
+            "schema_version": 1,
+            "declarations": [
+                {
+                    "evidence_class": "interaction",
+                    "test_id": "test_flying_reach",
+                    "piece_ids": [
+                        "capability.combat.block.flying",
+                        "mechanic.flying",
+                    ],
+                    "capability_ids": ["combat.block.flying"],
+                    "interaction_order": 2,
+                    "assertion": (
+                        "The test exercises compiled Flying through the "
+                        "capability-owned block restriction."
+                    ),
+                }
+            ],
+        },
         "ruling_counts": {"oracle-exact": 2},
     }
 
@@ -241,6 +261,22 @@ def _artifacts() -> dict:
 
 
 class ReusablePieceInventoryTests(unittest.TestCase):
+    def test_interaction_evidence_has_closed_explicit_semantics(self) -> None:
+        evidence = _inputs()["interaction_evidence"]
+        validate_interaction_evidence(evidence)
+
+        for mutation in (
+            {"evidence_class": "positive"},
+            {"piece_ids": ["mechanic.flying"]},
+            {"interaction_order": True},
+            {"capability_ids": ["combat.block.reach"]},
+        ):
+            invalid = copy.deepcopy(evidence)
+            invalid["declarations"][0].update(mutation)
+            with self.subTest(mutation=mutation):
+                with self.assertRaises(ValueError):
+                    validate_interaction_evidence(invalid)
+
     def test_reusable_piece_inventory_classifies_every_material_ability(self) -> None:
         artifacts = _artifacts()
         validate_reusable_piece_artifacts(
@@ -279,7 +315,7 @@ class ReusablePieceInventoryTests(unittest.TestCase):
             ],
         )
 
-    def test_shared_mechanic_test_is_pairwise_interaction_evidence(self) -> None:
+    def test_explicit_declaration_is_pairwise_interaction_evidence(self) -> None:
         interactions = _artifacts()["interactions"]["pairs"]
         pair = next(
             row
@@ -290,6 +326,23 @@ class ReusablePieceInventoryTests(unittest.TestCase):
 
         self.assertTrue(pair["covered"])
         self.assertEqual(["test_flying_reach"], pair["evidence_test_ids"])
+
+        incidental = _inputs()
+        incidental["interaction_evidence"] = {
+            "schema_version": 1,
+            "declarations": [],
+        }
+        uncovered = build_reusable_piece_artifacts(**incidental)[
+            "interactions"
+        ]["pairs"]
+        pair = next(
+            row
+            for row in uncovered
+            if set(row["piece_ids"])
+            == {"capability.combat.block.flying", "mechanic.flying"}
+        )
+        self.assertFalse(pair["covered"])
+        self.assertEqual([], pair["evidence_test_ids"])
 
     def test_baseline_is_snapshot_pinned_and_delta_starts_at_zero(self) -> None:
         artifacts = _artifacts()
