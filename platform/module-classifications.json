@@ -534,27 +534,23 @@
     },
     {
       "file": "mtg_commander_sim/combat_damage_engine_adapter.py",
-      "layer": "application",
+      "layer": "rules",
       "owning_subsystem": "combat_damage",
       "allowed_dependency_layers": [
-        "adapter",
-        "application",
         "domain",
         "rules",
         "semantics"
       ],
-      "game_state_access": "none",
+      "game_state_access": "read_only",
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/combat_damage_events.py",
-      "layer": "application",
+      "layer": "rules",
       "owning_subsystem": "combat_damage",
       "allowed_dependency_layers": [
-        "adapter",
-        "application",
         "domain",
         "rules",
         "semantics"
@@ -3519,5 +3515,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "13e012175e4f9bbccf37d8067df6bc605423ab0d9180ef8f31cdeb7758955b1c"
+  "fingerprint": "cc4ecf33cb111d2110869fbaf8166b254f0095b5ba42330df4117c3532696271"
 }

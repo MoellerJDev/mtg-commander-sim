@@ -2961,19 +2961,11 @@ class CommanderEngine(
             raise StateInvariantError("A turn has no active player")
 
         if step == "beginning_combat":
-            # The supported Commander multiplayer profile uses the attack-
-            # multiple-players option (CR 802.2), so every active opponent
-            # is a defending player as combat begins. Two-player Commander
-            # has the same result with its single nonactive player. Variants
-            # that require the CR 507.1 defending-player choice are rejected
-            # at the profile boundary rather than guessed here.
+            # CR 802.2 uses the attack-multiple-players option for the supported
+            # Commander profile. Unsupported CR 507.1 variants fail at setup.
             self.state.combat = CombatState(
                 damage_sequence_id=self._next_ref("CD"),
-                defending_players=[
-                    seat
-                    for seat in self.active_seats
-                    if seat != active
-                ]
+                defending_players=[s for s in self.active_seats if s != active],
             )
 
         if step == "untap":

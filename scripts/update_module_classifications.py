@@ -111,6 +111,8 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_damage_assignment.py",
+        "mtg_commander_sim/combat_damage_engine_adapter.py",
+        "mtg_commander_sim/combat_damage_events.py",
         "mtg_commander_sim/combat_damage_projection.py",
         "mtg_commander_sim/combat_damage_sequence.py",
         "mtg_commander_sim/combat_damage_snapshot.py",

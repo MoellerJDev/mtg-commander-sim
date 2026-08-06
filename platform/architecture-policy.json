@@ -190,6 +190,7 @@
       ,"mtg_commander_sim/rules/activation/query.py": "read-only activated-ability compiler query"
       ,"mtg_commander_sim/drawing/coordinator.py": "replacement-aware draw orchestration delegating mutation to the canonical draw owner"
       ,"mtg_commander_sim/semantic_runtime/draw_replacements.py": "read-only trusted draw-replacement discovery and lowering"
+      ,"mtg_commander_sim/combat_damage_engine_adapter.py": "narrow read-only CommanderEngine compatibility query for immutable combat-damage snapshots"
     },
     "model_definition": "mtg_commander_sim/model.py"
   },
