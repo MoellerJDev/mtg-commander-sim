@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from typing import Protocol
 
 
@@ -17,7 +17,10 @@ def _normalized_strings(
     *,
     label: str,
 ) -> frozenset[str]:
-    if isinstance(values, (str, bytes)):
+    if (
+        not isinstance(values, Iterable)
+        or isinstance(values, (str, bytes, Mapping))
+    ):
         raise DeathtouchError(f"{label} must be a collection")
     result: set[str] = set()
     for value in values:
@@ -34,7 +37,10 @@ def _identity_strings(
     *,
     label: str,
 ) -> frozenset[str]:
-    if isinstance(values, (str, bytes)):
+    if (
+        not isinstance(values, Iterable)
+        or isinstance(values, (str, bytes, Mapping))
+    ):
         raise DeathtouchError(f"{label} must be a collection")
     result: set[str] = set()
     for value in values:

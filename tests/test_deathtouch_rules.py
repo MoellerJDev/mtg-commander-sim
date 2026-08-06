@@ -63,6 +63,18 @@ class DeathtouchValueTests(unittest.TestCase):
                 source_keywords=("Deathtouch", ""),
                 target_types=("Creature",),
             )
+        with self.assertRaisesRegex(DeathtouchError, "must be a collection"):
+            deathtouch_assignment_is_lethal(
+                source="snake",
+                amount=1,
+                deathtouch_sources=None,
+            )
+        with self.assertRaisesRegex(DeathtouchError, "must be a collection"):
+            deathtouch_damage_result_applies(
+                amount=1,
+                source_keywords={"Deathtouch": True},
+                target_types=("Creature",),
+            )
 
     def test_result_requires_positive_damage_to_a_creature(self):
         self.assertTrue(
