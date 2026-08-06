@@ -67,5 +67,4 @@ compatibility bases remain visibly distinct.
 Do not add printed-name behavior to the core engine, infer support from a deck
 fixture, or preserve a coverage promotion disproved by a correctness fix. Rules
 work follows the family acceptance process in
-[`RULES_COMPLETENESS.md`](../RULES_COMPLETENESS.md) and the evidence policy in
-[`RULE_CONFORMANCE.md`](../RULE_CONFORMANCE.md).
+the [rules assurance model](rules/assurance-model.md).

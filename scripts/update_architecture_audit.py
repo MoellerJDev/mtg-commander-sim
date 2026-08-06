@@ -1805,11 +1805,157 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _machine_report_fingerprint(report: Mapping[str, Any]) -> str:
+    return hashlib.sha256(_serialize_json(report).encode("utf-8")).hexdigest()
+
+
+def render_compact_architecture_status(report: Mapping[str, Any]) -> str:
+    architecture = report["architecture"]
+    engine = architecture["engine"]
+    production = architecture["production"]
+    fingerprint = _machine_report_fingerprint(report)
+    command = (
+        r".\.venv\Scripts\python.exe scripts\update_architecture_audit.py "
+        r"--write --card-db data\scryfall-current.sqlite3"
+    )
+    blockers = [
+        *(f"Missing dedicated owner: `{owner}`." for owner in architecture["missing_dedicated_owners"]),
+    ]
+    intercepted = architecture["semantic_handlers"][
+        "registered_operations_still_in_legacy_dispatch"
+    ]
+    if intercepted:
+        blockers.append(
+            "Registered operations remain in legacy dispatch: "
+            + ", ".join(f"`{item}`" for item in intercepted[:5])
+            + "."
+        )
+    if not blockers:
+        blockers.append("None detected by the configured architecture policy.")
+    lines = [
+        "---",
+        'title: "Architecture debt status"',
+        'status: "generated"',
+        'authoritative_source: "coverage/architecture-audit.json"',
+        f'verified: "{fingerprint}"',
+        'audience: "maintainers and rules contributors"',
+        'maintenance: "generated"',
+        'generated_source: "coverage/architecture-audit.json"',
+        f'generation_command: "{command}"',
+        "---",
+        "",
+        "# Architecture debt status",
+        "",
+        f"Source fingerprint: `{fingerprint}`",
+        "",
+        "## Current top-level state",
+        "",
+        f"- Production logical lines: `{production['logical_lines']}`",
+        f"- Engine logical lines: `{engine['logical_lines']}`",
+        "- Direct GameState-write heuristic: "
+        f"`{architecture['direct_game_state_write_heuristic']['count']}`",
+        "- Registered typed semantic handlers: "
+        f"`{architecture['semantic_handlers']['registered_handler_count']}`",
+        "- Registered runtime components: "
+        f"`{architecture['semantic_handlers']['registered_runtime_handler_count']}`",
+        f"- Oversized production modules: `{production['oversized_module_count']}`",
+        "",
+        "## Top blockers",
+        "",
+        *(f"- {item}" for item in blockers[:5]),
+        "",
+        "Complete module, symbol, ownership, test, and documentation inventories are in "
+        "the [machine-readable architecture audit](../coverage/architecture-audit.json).",
+        "",
+        "Exact generation command:",
+        "",
+        "```powershell",
+        command,
+        "```",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+def render_compact_compiler_status(report: Mapping[str, Any]) -> str:
+    compiler = report["compiler"]
+    commander = compiler["commander_legal_oracle"]
+    capabilities = compiler["rule_capabilities"]
+    fingerprint = _machine_report_fingerprint(report)
+    command = (
+        r".\.venv\Scripts\python.exe scripts\update_architecture_audit.py "
+        r"--write --card-db data\scryfall-current.sqlite3"
+    )
+    blockers: list[str] = []
+    if not commander["current_snapshot_complete"]:
+        blockers.append("The pinned Commander Oracle snapshot is not capability-complete.")
+    if commander["material_residuals"]:
+        blockers.append(
+            f"Material compiler residuals remain: `{commander['material_residuals']}`."
+        )
+    blocked_capabilities = capabilities["status_counts"].get("blocked", 0)
+    if blocked_capabilities:
+        blockers.append(f"Blocked capability records remain: `{blocked_capabilities}`.")
+    incomplete_stages = [
+        stage["id"]
+        for stage in compiler["stages"]
+        if not stage["all_configured_evidence_present"]
+    ]
+    if incomplete_stages:
+        blockers.append(
+            "Configured evidence is incomplete for: "
+            + ", ".join(f"`{stage}`" for stage in incomplete_stages[:5])
+            + "."
+        )
+    if not blockers:
+        blockers.append("None detected by the configured compiler audit.")
+    lines = [
+        "---",
+        'title: "Compiler coverage status"',
+        'status: "generated"',
+        'authoritative_source: "coverage/architecture-audit.json"',
+        f'verified: "{fingerprint}"',
+        'audience: "compiler and rules contributors"',
+        'maintenance: "generated"',
+        'generated_source: "coverage/architecture-audit.json"',
+        f'generation_command: "{command}"',
+        "---",
+        "",
+        "# Compiler coverage status",
+        "",
+        f"Source fingerprint: `{fingerprint}`",
+        "",
+        "## Current top-level state",
+        "",
+        f"- Compiler version: `{compiler['compiler_version']}`",
+        f"- Runtime IR: `{compiler['current_ir']}`",
+        f"- CardProgram schema version: `{compiler['card_program']['schema_version']}`",
+        f"- Commander Oracle objects: `{commander['total_oracle_ids']}`",
+        f"- Exact fraction: `{commander['exact_fraction']}`",
+        f"- Capability records: `{capabilities['total']}`",
+        "",
+        "## Top blockers",
+        "",
+        *(f"- {item}" for item in blockers[:5]),
+        "",
+        "Complete corpus, residual, stage, capability, and CardProgram inventories are "
+        "in the [machine-readable architecture audit](../coverage/architecture-audit.json).",
+        "",
+        "Exact generation command:",
+        "",
+        "```powershell",
+        command,
+        "```",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def _outputs(report: Mapping[str, Any]) -> dict[Path, str]:
     return {
         JSON_OUTPUT: _serialize_json(report),
-        ARCHITECTURE_STATUS: render_architecture_status(report),
-        COMPILER_STATUS: render_compiler_status(report),
+        ARCHITECTURE_STATUS: render_compact_architecture_status(report),
+        COMPILER_STATUS: render_compact_compiler_status(report),
     }
 
 

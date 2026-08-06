@@ -1,22 +1,73 @@
 ---
 title: "Contributing"
 status: "current"
-authoritative_source: "repository merge, test, and review policy"
-verified: "2026-08-05"
-audience: "contributors"
+authoritative_source: "repository contribution, architecture, test, and review policy"
+verified: "2026-08-06"
+audience: "human contributors"
 maintenance: "hand-maintained"
+concern: "contributor-contract"
 ---
 
 # Contributing
 
-This is a public experimental repository. Coordinate scope before beginning a
-large rules or protocol change, and do not publish live game artifacts or
-security-sensitive reproductions in issues or pull requests.
+Thank you for helping improve MTG Commander Sim. This document is the human
+contributor contract: it explains which work the project supports, how to keep
+changes reviewable, and what evidence maintainers need before merging them.
 
-## Development setup
+The project is public and experimental. Its primary supported profile is
+four-player Free-for-All Commander, with bounded support for other documented
+profiles. It is not a complete implementation of the Comprehensive Rules, has
+not received an independent security audit, and is not ready for unreviewed
+public deployment. Check the generated [platform](docs/PLATFORM_IMPLEMENTATION_STATUS.md),
+[rules](docs/RULES_COMPLETENESS_STATUS.md), and
+[compiler](docs/COMPILER_COVERAGE_STATUS.md) status before relying on a
+capability or selecting work.
 
-Use CPython 3.12.x exactly. Python 3.11 and 3.13+ are unsupported. On Windows,
-run `scripts/bootstrap_windows.ps1`, or use the exact project interpreter:
+## Sources of authority
+
+When sources disagree, use this order:
+
+1. implemented code, versioned schemas, and executable tests;
+2. machine-readable policy, source manifests, and pinned snapshots;
+3. generated reports produced from those inputs;
+4. current hand-maintained documentation;
+5. ADRs and the changelog as historical explanations.
+
+[`rules/manifest.json`](rules/manifest.json) identifies the pinned
+Comprehensive Rules and card-data snapshot used by generated evidence. The
+worktree's configured SQLite database owns its exact Oracle and rulings
+content. Do not silently substitute current web text, memory, or a different
+Scryfall export. Generated totals and fingerprints belong in generated reports,
+not this document or a pull-request narrative.
+
+## Choose and scope work
+
+Search existing issues and pull requests before starting. Prefer an existing,
+well-bounded issue; otherwise open the relevant issue form with a sanitized
+reproduction and the governing source. Coordinate before beginning a protocol,
+persistence, replay, schema, privacy, or broad rules change.
+
+A change should be one coherent subsystem-sized unit. It may include the
+implementation, removal of the superseded path, focused tests, generated
+artifacts, and the smallest documentation update needed to make that unit
+complete. Split unrelated cleanup, formatting, opportunistic refactors, and
+independent rules families into separate branches. Avoid both one-card patches
+that bypass generic ownership and broad rewrites that cross several owners at
+once.
+
+Branch names should use a short category and outcome, such as `fix/`,
+`rules/`, `docs/`, `test/`, or `chore/`. Start from the requested base and do
+not reuse a worktree that contains another change. Commits should be focused,
+imperative, and explain the durable outcome. Conventional prefixes such as
+`fix:`, `feat:`, `docs:`, `test:`, and `chore:` are preferred. Do not merge,
+rebase, force-push, or rewrite another contributor's branch without explicit
+coordination.
+
+## Set up the local environment
+
+Use CPython 3.12.x exactly. Python 3.11 and 3.13 or newer are unsupported. On
+Windows, run `scripts/bootstrap_windows.ps1`, or create the environment
+directly:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -31,60 +82,141 @@ npm run typecheck --prefix web
 npm run build --prefix web
 ```
 
-Set `MTG_CARD_DB=data/test-ci.sqlite3` for focused tests that use card data.
-Before commit, inspect and run the deterministic quick gate:
+Set `MTG_CARD_DB=data/test-ci.sqlite3` for focused tests that require card data.
+Keep environments, databases, downloaded snapshots, caches, and build output in
+ignored paths.
+
+## Test the change
+
+Start with the smallest regression that proves the defect or missing behavior.
+Run that test red before the implementation when practical, then green at the
+final diff. Run the affected focused module and directly relevant interaction
+tests. Inspect the deterministic local quick-gate plan before executing it:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/quick_gate.py --dry-run
 .\.venv\Scripts\python.exe scripts/quick_gate.py
 ```
 
-Documentation changes must keep [`docs/index.md`](docs/index.md) complete and
-pass `.\.venv\Scripts\python.exe scripts/validate_documentation.py --check`.
-Put current metrics in machine-readable sources and generated reports rather
-than prose.
+The evidence must match the risk of the change. Record `N/A` with a reason when
+a class truly does not apply.
 
-Public pull-request CI is the ordinary exact-head merge authority. Require the
-stable `PR / Certification` context, which depends on all Linux shards,
-generated and architecture checks, packaging, Windows compatibility, and the
-isolated headless browser job. Use the full `scripts/local_merge_gate.py` only
-for releases and unusually high-risk persistence, replay, privacy, or packaging
-changes. See the [CI pipeline guide](docs/development/ci-pipeline.md) for the
-two-slot workflow, shard ownership, nightly depth, and recovery commands.
+- Rules and engine changes need positive, negative, malformed-input, rollback,
+  multiplayer/APNAP, offer-versus-command parity, replay, privacy, bounded
+  property, and focused mutation evidence where applicable.
+- Replay or persistence changes need byte, canonical JSON, hash, save/load,
+  compatibility, and exact command-replay evidence.
+- Projection or identity changes need adversarial seat-privacy and capability
+  tests. Never put private hands, library order, checkpoints, credentials, or
+  live records in fixtures or reports.
+- Browser, room, authentication, WebSocket, reconnect, or visible-state changes
+  need isolated headless browser evidence. Automated work must not open or
+  navigate a visible browser.
+- Compiler and CardProgram changes need parser/lowering stage tests, source-span
+  and residual assertions, typed construct validation, construction and
+  capability-closure evidence, and corpus deltas against the pinned snapshot.
+- Architecture changes need dependency, ownership, direct-write,
+  card-specificity, module-classification, and generated architecture checks.
 
-## Change boundaries
+Public exact-head pull-request CI is the ordinary merge authority. Do not
+weaken, bypass, rename, or make required checks optional when the service is
+unavailable. Hold behavioral, replay, browser, persistence, compiler, rules,
+and schema changes until normal certification returns. See the
+[CI pipeline guide](docs/development/ci-pipeline.md) for the complete workflow.
 
-- Keep `CommanderEngine` authoritative and preserve fixed-seat projection.
-- Follow the executable dependency, mutation, specificity, documentation, and
-  ADR policies; reviewed exceptions require the documented decision path.
-- Keep FastAPI/Uvicorn/HTTP/WebSocket imports out of `mtg_commander_sim`; the
-  `server` adapter may depend inward on the transport-neutral package.
-- Let CI run the isolated four-context headless Playwright test for room,
-  authentication, WebSocket, reconnect, projection, or browser decision
-  changes. Never open or navigate a visible browser during automated work.
-- Add deterministic tests for rules, target, permission, or protocol changes.
-- Fail closed when semantics are unresolved.
-- Preserve Game Record v3 and exact command replay.
-- Do not commit live records, checkpoints, database files, deck caches,
-  capabilities, pilot memory, or model reasoning.
-- Do not represent duplicated pods or insufficient samples as matchup evidence.
+## Preserve architecture and rules ownership
 
-Use focused commits. Versioned feature work should update the changelog,
-architecture documentation, fidelity reporting, and replay tests together.
+`CommanderEngine` and its typed rules subsystems are authoritative. Clients,
+pilots, transports, and generated programs propose actions; they do not mutate
+zones, life, mana, the stack, counters, choices, or effects.
 
-## Repository and documentation hygiene
+Rules work must follow the [dependency and mutation policy](docs/architecture/dependency-rules.md)
+and accepted [ADRs](docs/adr/index.md):
 
-The repository contains source, schemas, public fixtures, generated reports and
-sanitized examples. It must not contain live Game Records, checkpoints, private
-zones, raw capabilities, credentials, pilot memory, SQLite databases, Scryfall
-archives, image/deck caches, build output or local virtual environments.
-`scripts/validate_repository.py` checks tracked files and reachable history;
-tests create private records only in temporary directories from sanitized
-recipes.
+- model a reusable Comprehensive Rules behavior with immutable typed queries,
+  proposals, transactions, and a narrow declared mutation owner;
+- share the same legality, cost, target, and capability path between advertised
+  actions and accepted commands;
+- fail closed for unknown Oracle semantics, unsupported grammar, malformed
+  persisted state, and untrusted dependencies;
+- lower Oracle text to source-spanned typed CardProgram constructs at build or
+  compile time; never parse Oracle prose during a game transition;
+- never add card-name, collector-number, set-code, or Oracle-ID behavior to the
+  generic runtime;
+- never write `GameState` directly outside its declared owners, or add a second
+  registry, scheduler, compiler, or mutation path to avoid an existing owner;
+- preserve deterministic hashes, transactional rollback, fixed-seat privacy,
+  protocol versions, and the Game Record replay contract.
 
-Use the documentation standard in [`docs/index.md`](docs/index.md). Describe
-current behavior in present tense, keep changing measurements in generated
-reports, and remove superseded guidance in the same pull request. Do not add a
-branch handoff, progress diary, archived status page or duplicate architecture
-overview. Add an ADR only for a durable decision whose alternatives and
-consequences matter after the implementation has changed.
+Do not move code solely to reduce a line count. A decomposition must transfer a
+coherent behavior, remove the previous path, and narrow ownership or dependency
+direction.
+
+## Own generated artifacts
+
+Machine-readable policy and source manifests own changing facts. Generator
+scripts own generated Markdown, JSON, compressed JSON, schemas, and browser
+types. Never hand-edit an output to make a check pass.
+
+When source changes affect generated artifacts, run the owning generator once
+at the final exact head, inspect every output, and commit the source and outputs
+together. Use each generator's `--check` mode to prove freshness. If ownership
+is unclear, find the file in the generated status or architecture checks before
+editing it. A documentation-only change must not refresh unrelated metrics.
+
+## Update documentation deliberately
+
+Follow the [documentation map and standard](docs/index.md). Update the one
+current document that owns the concern and remove superseded guidance in the
+same pull request. Current prose uses present tense and links to generated
+status instead of copying changing counts, branch names, run IDs, or milestones.
+
+Create an ADR only for a durable architecture decision whose alternatives and
+consequences will matter after the implementation changes. Do not rewrite an
+accepted ADR; supersede it with a new decision. Historical narrative belongs
+only in ADRs, [CHANGELOG.md](CHANGELOG.md), and `docs/history/`.
+
+Documentation changes must pass:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\validate_documentation.py --check
+.\.venv\Scripts\python.exe scripts\update_platform_status.py --check
+.\.venv\Scripts\python.exe scripts\update_architecture_audit.py --check
+```
+
+## Respect content, privacy, and security boundaries
+
+Contributions must comply with the [legal and third-party content boundary](docs/LEGAL_CONTENT_BOUNDARY.md).
+Do not add Scryfall bulk archives, full Oracle exports, Comprehensive Rules
+prose, card scans, artwork, official frames, set symbols, Wizards branding, or
+private deck/game data. Small public facts in deterministic fixtures must be
+necessary for the test and properly attributed.
+
+Do not commit live Game Records, checkpoints, hidden zones, library order, raw
+capabilities, guest tokens, invite codes, provider memory or reasoning,
+credentials, SQLite databases, image/deck caches, or retained downloads. Use
+temporary directories and sanitized initial-state recipes.
+
+Report vulnerabilities privately as directed by [SECURITY.md](SECURITY.md).
+Do not disclose a security defect or sensitive reproduction in a public issue
+or pull request. Community-conduct reports follow the private process in the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Open a pull request
+
+Use the pull-request template and make the description reviewable without
+requiring archaeology. Identify the change class, supported profile and source
+authority; ownership before and after; duplicate paths removed; runtime,
+direct-write and card-specificity deltas; compiler and CardProgram effects;
+tests by class; generated artifacts; documentation or ADR changes; exact
+remaining limitations; privacy and rollback considerations; and rollback plan.
+Use `N/A` with a concrete reason for sections that do not apply, especially for
+documentation-only changes.
+
+Keep the branch coherent and wait for normal required exact-head checks. Resolve
+review comments in focused commits, then regenerate affected evidence at the
+final head if the implementation changed.
+
+Automated coding agents have additional operational guardrails in
+[`AGENTS.md`](AGENTS.md). Human contributors are welcome to read them, but they
+are not required human onboarding.

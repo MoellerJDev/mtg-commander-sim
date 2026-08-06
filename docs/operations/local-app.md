@@ -2,14 +2,15 @@
 title: "Local application operations"
 status: "current"
 authoritative_source: "server launcher, settings, managed data service, and browser build"
-verified: "2026-08-05"
+verified: "2026-08-06"
 audience: "local users and contributors"
 maintenance: "hand-maintained"
+concern: "local-operations"
 ---
 
 # Local application operations
 
-## Start
+## Start and stop
 
 From the repository root in PowerShell:
 
@@ -18,21 +19,16 @@ From the repository root in PowerShell:
 .\.venv\Scripts\python.exe -m server
 ```
 
-The application requires CPython 3.12.x exactly. The bootstrap script never
-changes global `PATH`, removes another Python, elevates itself, or opens a
-browser. If 3.12 is missing it prints a safe per-user `winget` command and
-stops. Manual setup uses `py -3.12 -m venv .venv` and the resulting
-`.\.venv\Scripts\python.exe` for every project command.
+The project requires CPython 3.12.x. Bootstrap creates a local environment,
+installs project and browser dependencies, and validates the runtime without
+changing global `PATH`, elevating, or removing another Python. The server builds
+the browser when needed, prepares card data, serves same-origin HTTP/WebSocket
+and static assets, and prints the local URL.
 
-The one process installs/builds the browser when needed, checks the Scryfall
-bulk manifest, creates or activates the local card/rulings SQLite snapshot,
-serves local card images on demand, starts HTTP/WebSocket endpoints, and prints
-the local URL. It does not open or focus a browser unless you explicitly add
-`--open`. First setup can remain on the progress screen while data builds.
-
-Use `Ctrl+C` for a clean stop and the same command to resume. Do not run two
-local servers against the same data root; on Windows, an older process can hold
-the active SQLite file open and delay pending-snapshot activation.
+The default never opens or focuses a browser. Open the printed URL yourself or
+use `--open` as an explicit opt-in. Stop with `Ctrl+C`. Do not run two servers
+against the same data root; on Windows an older process can keep the active
+SQLite snapshot locked.
 
 ## Useful modes
 
@@ -43,16 +39,73 @@ $env:MTG_CARD_DB = "data/test-ci.sqlite3"
 .\.venv\Scripts\python.exe -m server --offline
 ```
 
-`--open` opts into automatic browser launch. The legacy `--no-open` flag is
-still accepted but is now equivalent to the safe default. `--offline` requires
-a usable existing database. Runtime records, databases,
-bulk archives, images, logs, and capabilities are ignored local data. Do not
-commit them.
+`--offline` requires an existing usable database. `--no-build-browser` skips
+the production client build. The legacy `--no-open` flag is a compatibility
+alias for the safe default.
+
+## Managed card data
+
+Without `MTG_CARD_DB`, startup checks the Scryfall Oracle and rulings bulk
+manifest, downloads the required archives to ignored storage, builds a pending
+SQLite database, and activates it before the runtime becomes ready. A later
+refresh never replaces the database underneath an active game. Records pin the
+snapshot metadata hash; referenced old databases remain in the ignored snapshot
+directory until no local record needs them.
+
+A network failure falls back to a usable existing database with a warning. A
+first-run failure remains visible and can be retried. When Windows locks an
+activation target, stop other server processes and restart. If no current
+database exists, activation fails closed.
+
+The browser receives projected card fields and constrained image routes, never
+the bulk export. Archives, databases, retained snapshots, images, records, and
+caches are local runtime data and must not be committed.
+
+## Environment settings
+
+| Setting | Purpose |
+| --- | --- |
+| `MTG_SERVER_DATA` | Control-plane database and Game Record root |
+| `MTG_CARD_DB` | Use an explicit existing card database |
+| `MTG_DATA_ROOT` | Managed card-data root |
+| `MTG_BULK_DIR` | Managed bulk-download directory |
+| `MTG_CARD_SNAPSHOT_DIR` | Record-pinned database retention directory |
+| `MTG_IMAGE_CACHE` | Local image-cache directory |
+| `MTG_WEB_DIST` | Built browser asset directory |
+| `MTG_AUTO_UPDATE_CARDS` | Enable or disable managed refresh |
+| `MTG_CARD_UPDATE_SECONDS` | Manifest-check interval |
+| `MTG_ALLOWED_ORIGINS` | Additional development/deployment browser origins |
+| `MTG_SECURE_COOKIES` | Require secure cookies behind HTTPS |
+
+The server's own HTTP origin is accepted automatically for WebSocket upgrades;
+do not repeat it in `MTG_ALLOWED_ORIGINS`. Restrict additional origins exactly.
 
 ## Inspect and recover
 
-The setup/system panel reports card-data readiness and pending activation.
-Room/game pages expose only seat-safe lifecycle and record inspection. A rules
-boundary requires code/semantic work or a fresh compatible game; administrative
-resume cannot clear it. See [server/browser details](../../SERVER_BROWSER.md)
-and the [local content boundary](../LEGAL_CONTENT_BOUNDARY.md).
+The setup panel reports readiness, warnings, and pending activation. Room and
+game pages expose seat-safe lifecycle inspection. An owner administrative stop
+is restart-safe and resumes the same pending decision. A rules, semantic,
+fidelity, corruption, abort, or terminal boundary cannot be cleared through the
+browser; update the implementation or create a compatible new game.
+
+If an accepted request loses its response, retry the byte-equivalent command
+with the same client command ID. If an actor fails during ambiguous persistence,
+restart and let durable recovery recreate it. Do not edit checkpoints, SQLite
+rows, journals, or manifests by hand.
+
+## Validate browser changes
+
+Use the repository's generated types and headless checks:
+
+```powershell
+npm ci --prefix web
+npm run generate:types --prefix web
+npm run typecheck --prefix web
+npm run build --prefix web
+npx playwright install chromium --with-deps
+npm run e2e --prefix web
+```
+
+Automation must keep browsers isolated and headless and must stop processes it
+starts. See the [CI guide](../development/ci-pipeline.md) for exact-head
+certification and [hosted boundary](hosted.md) before considering deployment.

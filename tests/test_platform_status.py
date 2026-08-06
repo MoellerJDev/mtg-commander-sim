@@ -58,13 +58,15 @@ class PlatformStatusTests(unittest.TestCase):
         self.assertNotIn("### Pull requests", status)
         self.assertNotIn("/pull/", status)
         self.assertNotIn("Current commit:", status)
-        self.assertIn("Evaluated source-tree fingerprint:", status)
-        self.assertIn("Current feature head (", status)
-        self.assertIn("Certified exact head (", status)
-        self.assertIn("Current runtime head:", status)
-        self.assertIn("Current merged main head:", status)
-        self.assertIn("Active next system:", status)
-        self.assertIn("Active next system |", readiness)
+        self.assertIn("Source fingerprint:", status)
+        self.assertIn("## Current top-level state", status)
+        self.assertIn("## Top blockers", status)
+        self.assertIn("coverage/platform-readiness.json", status)
+        self.assertIn("scripts\\update_platform_status.py --write", status)
+        self.assertNotIn("Current feature head", status)
+        self.assertNotIn("Certified exact head", status)
+        self.assertNotIn("Active next system", status)
+        self.assertIn("## Current top-level state", readiness)
 
     def test_source_tree_fingerprint_excludes_generated_reports_only(self):
         self.assertTrue(

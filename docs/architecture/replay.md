@@ -39,5 +39,5 @@ trust/runtime fields keep their existing semantic-registry verification.
 Projected delivery packets are transport evidence, not alternative authority.
 
 Capabilities are never persisted in raw form. Private record artifacts remain
-ignored local data and must not be committed. See [Game Record v3](../../GAME_RECORD.md)
+ignored local data and must not be committed. See the [Game Record contract](../reference/game-record.md)
 and the [replay testing guide](../testing/replay.md).
