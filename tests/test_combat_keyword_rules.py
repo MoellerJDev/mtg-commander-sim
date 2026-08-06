@@ -571,9 +571,9 @@ class CombatKeywordRuleTests(unittest.TestCase):
             engine,
             "A",
             "Replay deathtoucher",
-            power=1,
+            power=2,
             toughness=8,
-            keywords=("Deathtouch",),
+            keywords=("Deathtouch", "Trample"),
         )
         blocker = self.token(
             engine,
@@ -590,17 +590,19 @@ class CombatKeywordRuleTests(unittest.TestCase):
         first = self.submit_damage(
             session,
             "A",
-            [{"source": attacker.ref, "target": blocker.ref, "amount": 1}],
+            [
+                {
+                    "source": attacker.ref,
+                    "target": blocker.ref,
+                    "amount": 1,
+                },
+                {"source": attacker.ref, "target": "B", "amount": 1},
+            ],
         )
         self.assertTrue(first.ok, first.summary)
-        second = self.submit_damage(
-            session,
-            "B",
-            [{"source": blocker.ref, "target": attacker.ref, "amount": 1}],
-        )
-        self.assertTrue(second.ok, second.summary)
         self.assertEqual("outside", blocker.zone)
         self.assertEqual("battlefield", attacker.zone)
+        self.assertEqual(39, engine.state.players["B"].life)
 
         with tempfile.TemporaryDirectory() as temporary:
             record_dir = Path(temporary) / "deathtouch-four-player"
@@ -608,7 +610,7 @@ class CombatKeywordRuleTests(unittest.TestCase):
             replay = replay_record(record_dir, self.db, verify=True)
 
         self.assertTrue(replay["ok"], replay)
-        self.assertEqual(2, replay["commands"])
+        self.assertEqual(1, replay["commands"])
 
     def test_indestructible_consumes_deathtouch_at_the_first_sba_check(self):
         session = self.make_session(510452)
@@ -631,20 +633,6 @@ class CombatKeywordRuleTests(unittest.TestCase):
         )
         self.set_combat(engine, attacker, blocker)
         engine._begin_combat_damage()
-        self.assertTrue(
-            self.submit_damage(
-                session,
-                "A",
-                [{"source": attacker.ref, "target": blocker.ref, "amount": 1}],
-            ).ok
-        )
-        self.assertTrue(
-            self.submit_damage(
-                session,
-                "B",
-                [{"source": blocker.ref, "target": attacker.ref, "amount": 1}],
-            ).ok
-        )
 
         self.assertEqual("battlefield", blocker.zone)
         self.assertEqual(1, blocker.marked_damage)

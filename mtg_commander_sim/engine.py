@@ -279,6 +279,7 @@ from .semantic_choices.intent_host import SemanticChoiceIntentHostMixin
 from .state_based_actions import (
     ObjectSnapshot,
     PermanentSnapshot,
+    StateBasedActionBatch,
     counter_maximums_from_oracle,
     evaluate_state_based_actions,
     player_loss_seats,
@@ -12617,6 +12618,20 @@ class CommanderEngine(
                 return "waiting"
         return None
 
+    def _evaluate_state_based_action_batch(self) -> StateBasedActionBatch:
+        batch = evaluate_state_based_actions(
+            permanents=self._permanent_sba_snapshots(),
+            objects=self._object_sba_snapshots(),
+        )
+        try:
+            consume_deathtouch_damage_checks(
+                self,
+                batch.deathtouch_checks,
+            )
+        except DamageResultError as exc:
+            raise GameRuleError(str(exc)) from exc
+        return batch
+
     def _stabilize(self) -> bool:
         """Perform state-based actions until stable.
 
@@ -12637,17 +12652,7 @@ class CommanderEngine(
                 continue
 
             self._synchronize_world_supertype_timestamps()
-            sba_batch = evaluate_state_based_actions(
-                permanents=self._permanent_sba_snapshots(),
-                objects=self._object_sba_snapshots(),
-            )
-            try:
-                consume_deathtouch_damage_checks(
-                    self,
-                    sba_batch.deathtouch_checks,
-                )
-            except DamageResultError as exc:
-                raise GameRuleError(str(exc)) from exc
+            sba_batch = self._evaluate_state_based_action_batch()
             ordinary_move_to_grave = unique_preserving_order(
                 [
                     *sba_batch.put_in_graveyard,

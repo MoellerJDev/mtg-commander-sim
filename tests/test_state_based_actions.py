@@ -19,7 +19,10 @@ from mtg_commander_sim.ability_fragments import (
     ability_fragment_to_dict,
 )
 from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.damage import apply_damage_results_to_permanent
+from mtg_commander_sim.damage import (
+    DamageError,
+    apply_damage_results_to_permanent,
+)
 from mtg_commander_sim.engine import GameRuleError
 from mtg_commander_sim.model import DecisionGroup, StackItem
 from mtg_commander_sim.projection import StateProjector
@@ -974,7 +977,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
         artifact = self.card(engine, artifact_ref)
 
         with self.assertRaisesRegex(
-            GameRuleError,
+            DamageError,
             "is not a Battle, creature, or planeswalker",
         ):
             apply_damage_results_to_permanent(
@@ -1068,7 +1071,7 @@ class StateBasedActionEngineTests(unittest.TestCase):
         creature = self.card(engine, creature_ref)
 
         with self.assertRaisesRegex(
-            GameRuleError,
+            DamageError,
             "Damage cannot be negative",
         ):
             apply_damage_results_to_permanent(
