@@ -1,7 +1,7 @@
 {
   "blockers": [
     "ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
-    "ordinary Deathtouch now has separate typed positive-assignment and final-damage-result capabilities with immutable source snapshots, one-check state-based-action markers, canonical rollback, multiplayer replay, and generic CardProgram lowering; regeneration, unsupported ability-changing/copy/face-down characteristic producers, and broader damage-assignment modifiers remain blocked, so the aggregate mechanic is not trusted",
+    "ordinary Deathtouch now has separate typed positive-assignment and final-damage-result capabilities with immutable source snapshots, one-check marker consumption even when the permanent ceases to be a creature, phases out, or survives because it is Indestructible, canonical rollback, multiplayer replay, and generic CardProgram lowering; regeneration, unsupported ability-changing/copy/face-down characteristic producers, and broader damage-assignment modifiers remain blocked, so the aggregate mechanic is not trusted",
     "ordinary Defender now has one typed current-characteristic attack restriction shared by advertised candidates and accepted declarations plus generic CardProgram lowering; permissions that allow Defender creatures to attack, put-attacking effects, unsupported ability-changing/copy/face-down producers, and the broader CR 508 restrictions-and-requirements solver remain blocked, so the aggregate mechanic is not trusted",
     "ordinary Menace now has one typed current-characteristic conditional blocker minimum shared by projected constraints and accepted declarations plus generic CardProgram lowering; additional-block permissions, unsupported ability-changing/copy/face-down producers, and the broader CR 509 restrictions-and-requirements solver remain blocked, so the aggregate mechanic is not trusted",
     "ordinary Basic Landwalk, Fear, Horsemanship, Intimidate, Shadow, and Skulk now consume one shared typed current-characteristics block-legality boundary, while nonbasic or qualified landwalk, conditional or rules-text-equivalent evasion, unresolved variable power, additional-block permissions, and unsupported characteristic producers remain explicit blockers",
@@ -26,7 +26,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "a67cf26579ca3487acb3094f535a8b54b42d27a6dcd664de21f532ec911eff5f",
+    "evaluated_source_tree_hash": "f721abe509dff61ff54f6e04390ffccee3d6a703245df09b8de978efde162443",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -299,9 +299,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The current source tree seals one immutable canonical block-transition event only after every defending player completes declarations, derives independent ordinary triggers for every printed Flanking and positive-integer Bushido instance, and places all occurrences in one APNAP batch before priority. Flanking excludes blockers with current Flanking and retains source last-known identity; Bushido applies only to the same source logical object. Resolution uses the canonical identity-pinned layer 7c until-end-of-turn owner. Oracle IR v37 promotes 17 Commander cards to exact/trusted/capability-closed, moves eight more from unresolved to partial, reduces unresolved cards by 25, and removes 62 material residuals with zero Commander construction failures. The existing relationship mutation moves out of CommanderEngine, reducing the direct-write heuristic from 133 to 132 and shrinking the engine by six logical lines. Exact replay, rollback, four-player privacy, source departure, bounded property, explicit interaction, malformed-input, and killed-mutation evidence pass focused checks. Conditional, variable, granted, copied, face-down, trigger-doubling, and multi-attacker-blocking variants remain explicit residuals; broad certification is delegated to exact-head public CI.",
+      "evidence": "PR 117 seals one immutable canonical block-transition event only after every defending player completes declarations, derives independent ordinary triggers for every printed Flanking and positive-integer Bushido instance, and places all occurrences in one APNAP batch before priority. Flanking excludes blockers with current Flanking and retains source last-known identity; Bushido applies only to the same source logical object. Resolution uses the canonical identity-pinned layer 7c until-end-of-turn owner. Oracle IR v37 promotes 17 Commander cards to exact/trusted/capability-closed, moves eight more from unresolved to partial, reduces unresolved cards by 25, and removes 62 material residuals with zero Commander construction failures. The existing relationship mutation moves out of CommanderEngine, reducing the direct-write heuristic from 133 to 132 and shrinking the engine by six logical lines. Exact replay, rollback, four-player privacy, source departure, bounded property, explicit interaction, malformed-input, and killed-mutation evidence passed exact-head run 31114243343. Conditional, variable, granted, copied, face-down, trigger-doubling, and multi-attacker-blocking variants remain explicit residuals. Squash commit bce3266 is on main and post-merge main-smoke run 31116075484 passed.",
       "id": "block_transition_flanking_bushido_harvest",
       "name": "Typed block-transition Flanking and Bushido triggers",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The current source tree consumes each since-last-check Deathtouch marker at the applicable state-based-action check even if the damaged permanent has ceased to be a creature, is phased out, or survives because it is Indestructible. Later creature or phased-in states cannot reuse old damage. The state action remains simultaneous and stale multi-object consumption still rejects before mutation. Activation-condition counts consume the canonical parsed effective card-type set instead of substring matching, so subtype text cannot satisfy a card-type condition and malformed effective type data fails closed. Focused red/green, replay, rollback, multiplayer, interaction, capability, and killed-mutation checks pass; regeneration and broader characteristic producers remain outside this bounded correction.",
+      "id": "deathtouch_marker_and_activation_type_hardening",
+      "name": "Deathtouch marker lifetime and activation type hardening",
       "status": "implemented_current_source_tree"
     },
     {
@@ -328,7 +334,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v39_with_68_records_58_trusted_and_570_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "capability_evidence": "implemented_registry_v40_with_68_records_58_trusted_and_571_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -345,10 +351,10 @@
   },
   "provenance": {
     "certified_head_classification": "historical_certified",
-    "certified_head_sha": "ce0d9586b0649bb4111976f5d11aa1c6ee94523e",
-    "feature_head_classification": "historical_integrated",
-    "feature_head_sha": "35f116bd858f4f5f87cefad5793f9b2cf2cb8e1c",
-    "generation_timestamp": "2026-08-05T23:35:58Z"
+    "certified_head_sha": "bce3266b86e2b4e63cd89340aa3e02632ba9da14",
+    "feature_head_classification": "active_candidate",
+    "feature_head_sha": "a84a42af7ec40527754fd1410797963b710c88bb",
+    "generation_timestamp": "2026-08-06T15:30:17Z"
   },
   "repository": {
     "default_branch": "main",
@@ -417,7 +423,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5022,
+    "deterministic_cases_discovered": 5027,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -457,9 +463,9 @@
     },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31110687197,
+      "run_id": 31116075484,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31110687197"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31116075484"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -467,9 +473,9 @@
       "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr116_exact_head_31110687197_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31111270873_pass",
+      "deterministic_tests": "certified_main_through_pr117_exact_head_31114243343_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31116075484_pass",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
-      "focused_rules_tests": "flanking_bushido_typed_fragments_canonical_multiplayer_block_transition_apnap_stack_resolution_source_departure_rollback_replay_privacy_property_interaction_and_mutation_evidence_pass; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
+      "focused_rules_tests": "deathtouch_noncreature_phased_and_indestructible_one_check_marker_consumption_activation_exact_card_type_matching_malformed_fail_closed_canonical_proposal_identity_rollback_multiplayer_replay_capability_and_mutation_evidence_pass; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",
