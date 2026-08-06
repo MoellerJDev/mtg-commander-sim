@@ -1336,7 +1336,7 @@ def consume_deathtouch_damage_checks(
     cards = []
     for object_id in values:
         card = host.state.cards.get(object_id)
-        if card is None or card.zone != "battlefield" or card.phased_out:
+        if card is None or card.zone != "battlefield":
             raise DamageResultError(
                 "A deathtouch check recipient changed before consumption"
             )

@@ -51,6 +51,7 @@
       "test_activated_abilities",
       "test_activated_draw_abilities",
       "test_activating_abilities_rules",
+      "test_activation_conditions",
       "test_basic_land_type_mana",
       "test_casting_activation_proposal_equivalence",
       "test_casting_spells_rules",

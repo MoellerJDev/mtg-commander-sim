@@ -63,8 +63,10 @@ damage to a creature creates a typed result even when Wither or Infect changes
 the ordinary marked-damage result. The marker survives only through the next
 state-based-action check: a destructible positive-toughness creature is
 destroyed, while an Indestructible survivor consumes the marker and cannot die
-from that old damage after later losing Indestructible. Regeneration remains
-outside this bounded result capability.
+from that old damage after later losing Indestructible. The same check consumes
+the temporal marker if the permanent has ceased to be a creature or is phased
+out; becoming a creature again or phasing in cannot reuse damage from an older
+check. Regeneration remains outside this bounded result capability.
 Double Strike creates a second real damage step and rebuilds a fresh snapshot,
 so a blocker that died in the first step is absent while the attacker remains
 historically blocked; ordinary Trample may then use the still-legal attacked

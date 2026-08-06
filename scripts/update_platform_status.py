@@ -518,11 +518,13 @@ def render_readiness(report: dict) -> str:
         "| Dimension | Current value |",
         "|---|---|",
         f"| Package | `{report['package']['version']}` |",
-        f"| Evaluated source tree | `{generated['evaluated_source_tree_hash']}` |",
-        f"| Feature head | `{provenance['feature_head_sha']}` |",
-        f"| Certified exact head | `{provenance['certified_head_sha']}` |",
-        "| Current merged main at runtime | resolved dynamically; not persisted |",
-        f"| Active future phase | `{_active_phase_label(report['integration']['active_phase'])}` |",
+        f"| Evaluated source-tree fingerprint | `{generated['evaluated_source_tree_hash']}` |",
+        f"| Current feature head ({provenance['feature_head_classification']}) | `{provenance['feature_head_sha']}` |",
+        f"| Certified exact head ({provenance['certified_head_classification']}) | `{provenance['certified_head_sha']}` |",
+        "| Current runtime head | resolved dynamically; not persisted |",
+        "| Current merged main head | resolved dynamically; not persisted |",
+        f"| Active next system | {report['next_task']} |",
+        f"| Active pull-request phase | `{_active_phase_label(report['integration']['active_phase'])}` |",
         f"| Deterministic tests discovered | {report['tests']['deterministic_cases_discovered']} |",
         f"| Authoritative kernel | `{report['platform']['authoritative_kernel']}` |",
         f"| Server runtime | `{report['platform']['http_websocket_server']}` |",
@@ -587,15 +589,20 @@ def render_status(report: dict) -> str:
         f"- Repository: {report['repository']['visibility']} "
         f"`{report['repository']['name']}`",
         f"- Default branch: `{report['repository']['default_branch']}`",
-        f"- Evaluated source tree: `{generated['evaluated_source_tree_hash']}` "
+        f"- Evaluated source-tree fingerprint: `{generated['evaluated_source_tree_hash']}` "
         f"(`{generated['source_tree_fingerprint_algorithm']}`)",
-        f"- Feature head: `{provenance['feature_head_sha']}`",
-        f"- Certified exact head: `{provenance['certified_head_sha']}`",
+        f"- Current feature head ({provenance['feature_head_classification']}): "
+        f"`{provenance['feature_head_sha']}`",
+        f"- Certified exact head ({provenance['certified_head_classification']}): "
+        f"`{provenance['certified_head_sha']}`",
         f"- Generation timestamp: `{provenance['generation_timestamp']}`",
-        "- Runtime Git SHA: resolved dynamically and intentionally not persisted "
+        "- Current runtime head: resolved dynamically and intentionally not persisted "
         "in this tracked report",
-        "- Current merged main: resolved dynamically and intentionally not "
+        "- Current merged main head: resolved dynamically and intentionally not "
         "persisted in this tracked report",
+        f"- Active next system: {report['next_task']}",
+        "- Active pull-request phase: "
+        f"`{_active_phase_label(report['integration']['active_phase'])}`",
         f"- Active future phase: `{_active_phase_label(integration['active_phase'])}`",
         f"- Package version: `{report['package']['version']}`",
         "",

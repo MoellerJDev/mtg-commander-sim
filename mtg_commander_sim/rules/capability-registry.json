@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 39,
+  "registry_version": 40,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -1352,7 +1352,7 @@
     },
     {
       "id": "damage.result.deathtouch",
-      "version": 1,
+      "version": 2,
       "official_rules": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability": {
@@ -1365,7 +1365,7 @@
       "implementation_components": ["mtg_commander_sim.deathtouch.deathtouch_damage_result_applies", "mtg_commander_sim.damage_source.DamageSourceSnapshot", "mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.consume_deathtouch_damage_checks", "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions"],
       "positive_tests": ["test_noncombat_deathtouch_uses_pinned_source_lki", "test_four_player_deathtouch_result_is_source_derived_and_replays"],
       "negative_tests": ["test_result_requires_positive_damage_to_a_creature", "test_malformed_amounts_and_keyword_values_fail_closed", "test_legacy_event_flag_cannot_grant_deathtouch", "test_stale_check_batch_rolls_back_without_consuming_any_marker"],
-      "interaction_tests": ["test_wither_damage_still_records_deathtouch_result", "test_indestructible_consumes_deathtouch_at_the_first_sba_check"],
+      "interaction_tests": ["test_wither_damage_still_records_deathtouch_result", "test_indestructible_consumes_deathtouch_at_the_first_sba_check", "test_old_deathtouch_marker_cannot_apply_after_type_or_phase_returns"],
       "multiplayer_tests": ["test_four_player_deathtouch_result_is_source_derived_and_replays"],
       "privacy_tests": ["test_four_player_deathtouch_result_is_source_derived_and_replays"],
       "replay_tests": ["test_four_player_deathtouch_result_is_source_derived_and_replays"],

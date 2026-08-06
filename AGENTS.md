@@ -113,9 +113,11 @@ Keep one substantive branch under certification and at most one independent
 next-batch worktree. Do not mix their changes.
 
 As the default development policy, do not run broad suites or gates locally.
-When local feedback is materially useful, run only the exact new test and the
-smallest adjacent impacted test selection. Inspect the deterministic impact
-plan without executing it:
+Every ordinary rules change must nevertheless run the exact regression red
+and green, the affected focused test module, directly relevant interaction and
+replay tests, compilation for changed production modules, and the applicable
+generated checks. Keep those selections narrow. Inspect the deterministic
+impact plan without executing the broad gate:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\quick_gate.py --dry-run
