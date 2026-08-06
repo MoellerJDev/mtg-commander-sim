@@ -37,6 +37,7 @@ class _PermissionSink:
 
 class _IterationHost:
     def __init__(self, library_size: int = 0) -> None:
+        self.active_seats = ["A"]
         self.state = SimpleNamespace(
             game_id="draw-iteration",
             turn_sequence=1,
@@ -50,6 +51,9 @@ class _IterationHost:
         self.permissions = _PermissionSink()
         self.committed_kinds: list[str] = []
         self.resumed: list[str] = []
+
+    def _semantic_event_sources(self, *, zones=None):
+        return []
 
     def _require_seat(self, seat: str, *, in_game: bool = False):
         if seat not in self.state.players:

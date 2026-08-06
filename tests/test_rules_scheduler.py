@@ -62,7 +62,7 @@ class RulesSchedulerTests(unittest.TestCase):
             for subsystem in self.queue["subsystems"]
             for rule in subsystem["rules"]
         ]
-        self.assertEqual(3028, len(queued))
+        self.assertEqual(3027, len(queued))
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
@@ -125,26 +125,30 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "draw-hidden-casting-and-reveal-choice-closure",
+            "deathtouch-assignment-and-result-closure",
             selected["batch_id"],
         )
         self.assertEqual(
-            "resources", selected["subsystem_id"]
+            "keyword-abilities", selected["subsystem_id"]
         )
         self.assertEqual(
             {
-                "121.8",
-                "121.9",
+                "702.2",
+                "702.2a",
+                "702.2b",
+                "702.2c",
+                "702.2d",
+                "702.2e",
+                "702.2f",
             },
             set(selected["rule_ids"]),
         )
         self.assertTrue(
             all(
-                rule["reviewed"]
-                and rule["classification"] == "behavioral"
-                and rule["conformance_status"] == "blocked"
-                and rule["work_state"]
-                in {"reviewed_behavioral_blocked", "blocked_by_queued_rule"}
+                not rule["reviewed"]
+                and rule["classification"] == "unclassified"
+                and rule["conformance_status"] == "unreviewed"
+                and rule["work_state"] == "behavioral_review_required"
                 for rule in selected["rules"]
             )
         )

@@ -2311,7 +2311,7 @@ class CommanderEngine(
         except DrawError as exc:
             raise GameRuleError(str(exc)) from exc
 
-    def _complete_draw_decision(self, decision: Any) -> None:
+    def _complete_draw_replacement(self, decision: Any) -> None:
         try:
             complete_draw_decision(self, decision)
         except DrawError as exc:
@@ -2454,7 +2454,7 @@ class CommanderEngine(
         elif kind == "semantic.storm":
             self._complete_storm_choice(decision)
         elif kind in {"draw.replacement", "draw.reveal"}:
-            self._complete_draw_decision(decision)
+            self._complete_draw_replacement(decision)
         else:
             raise GameRuleError(f"Unsupported completed decision {kind}")
 

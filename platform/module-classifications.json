@@ -2995,6 +2995,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/draw_reveals.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_runtime/effect_handlers.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_runtime",
@@ -3529,5 +3544,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "92fc1a40e9aa92e790e6bc054ad26f28b25a5985fcd64f24c45f7f89b050584f"
+  "fingerprint": "c1857da26ae3749119adaad36fc86ae6cfa94560b60f00df09970477f806b435"
 }

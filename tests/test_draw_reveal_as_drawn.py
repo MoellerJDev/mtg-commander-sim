@@ -278,6 +278,7 @@ class DrawRevealCoordinatorTests(unittest.TestCase):
                 key=f"test:draw-reveal:{seed}",
                 label="Reveal the first drawn card",
                 oracle_id=oracle_id,
+                ability_id="static:front:draw-reveal",
                 active_zone="battlefield",
                 event="draw.reveal_as_drawn",
                 handlers=[reveal_descriptor(optional=optional)],
@@ -325,6 +326,7 @@ class DrawRevealCoordinatorTests(unittest.TestCase):
                 key=f"test:draw-reveal-rider:{seed}",
                 label="Draw for the source-linked reveal",
                 oracle_id=oracle_id,
+                ability_id="trigger:front:draw-reveal-rider",
                 active_zone="battlefield",
                 event="card.draw.revealed_by_source",
                 effects=[

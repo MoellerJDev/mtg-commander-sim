@@ -29,14 +29,11 @@ from .compiler.ability_keyword_fragments import (
 from .compiler.dependency_gate import (
     dependency_gate as _dependency_gate,
     explicit_capability_gate as _explicit_capability_gate,
-    explicit_capabilities_gate as _explicit_capabilities_gate,
     keyword_dependency_gate,
 )
 from .compiler.draw_templates import (
-    draw_reveal_line_parts,
+    draw_reveal_or_trigger_nodes,
     fixed_draw_effect_template,
-    linked_draw_reveal_condition,
-    static_draw_reveal_handler,
 )
 from .compiler.damage_templates import fixed_damage_effect_template
 from .compiler.fixed_numbers import fixed_number as _number
@@ -916,181 +913,6 @@ def _trigger_node(
     )
 
 
-def _draw_reveal_nodes(
-    *,
-    node_id: str,
-    line: str,
-    span: SourceSpan,
-    card_name: str,
-    trusted_mechanics: frozenset[str],
-    capability_registry: CapabilityRegistry | None,
-    capability_profile: str,
-    residuals: list[OracleResidual],
-) -> tuple[OracleNode, ...] | None:
-    """Split the closed CR 121.9 policy from its source-linked rider."""
-
-    parts = draw_reveal_line_parts(line)
-    if parts is None:
-        return None
-    reveal_text, remainder = parts
-    compiled = static_draw_reveal_handler(reveal_text)
-    if compiled is None:
-        return None
-    reveal_span = SourceSpan(
-        start=span.start,
-        end=span.start + len(reveal_text),
-        line=span.line,
-    )
-    result = [
-        _runtime_handler_node(
-            node_id=f"{node_id}:reveal",
-            line=reveal_text,
-            span=reveal_span,
-            compiled=compiled,
-            kind="static_ability",
-            event="draw.reveal_as_drawn",
-            dependency_reason=(
-                "generic draw reveal depends on an untrusted rules capability"
-            ),
-            capability_registry=capability_registry,
-            capability_profile=capability_profile,
-            residuals=residuals,
-        )
-    ]
-    if not remainder:
-        return tuple(result)
-    remainder_offset = line.find(remainder, len(reveal_text))
-    if remainder_offset < 0:
-        raise ValueError("Draw reveal rider is not source-spanned")
-    remainder_span = SourceSpan(
-        start=span.start + remainder_offset,
-        end=span.start + remainder_offset + len(remainder),
-        line=span.line,
-    )
-    linked = linked_draw_reveal_condition(remainder)
-    if linked is None:
-        unresolved = _trigger_node(
-            node_id=f"{node_id}:rider",
-            line=remainder,
-            span=remainder_span,
-            card_name=card_name,
-            trusted_mechanics=trusted_mechanics,
-            capability_registry=capability_registry,
-            capability_profile=capability_profile,
-            residuals=residuals,
-        )
-        if unresolved is not None:
-            result.append(unresolved)
-            return tuple(result)
-        residual_id = _residual(
-            residuals,
-            kind="trigger",
-            text=remainder,
-            span=remainder_span,
-            reason="draw reveal rider has no exact generic template",
-            blockers=("source-linked draw reveal trigger grammar",),
-        )
-        result.append(
-            OracleNode(
-                node_id=f"{node_id}:rider",
-                kind="triggered_ability",
-                text=remainder,
-                span=remainder_span,
-                active_zone="battlefield",
-                event="unresolved",
-                lowerable=False,
-                exact=False,
-                residual_ids=(residual_id,),
-            )
-        )
-        return tuple(result)
-
-    quality, condition = linked
-    trigger_mechanic = "cr-603-handling-triggered-abilities"
-    effects = (
-        {
-            "op": "draw",
-            "player": "$controller",
-            "count": 1,
-            "private": True,
-        },
-    )
-    inferred_gate = _dependency_gate(
-        mechanics=(trigger_mechanic, "cr-121-drawing-a-card"),
-        effects=effects,
-        target_schema=None,
-        trusted_mechanics=trusted_mechanics,
-        capability_registry=capability_registry,
-        capability_profile=capability_profile,
-    )
-    gate = _explicit_capabilities_gate(
-        (*inferred_gate.capabilities, "zone.draw.reveal_as_drawn"),
-        capability_registry=capability_registry,
-        capability_profile=capability_profile,
-    )
-    blockers = tuple(
-        dict.fromkeys(
-            (
-                *gate.blockers,
-                *(
-                    blocker
-                    for blocker in inferred_gate.blockers
-                    if blocker.startswith("mechanic:")
-                ),
-            )
-        )
-    )
-    residual_ids = (
-        (
-            _residual(
-                residuals,
-                kind="dependency_contract",
-                text=remainder,
-                span=remainder_span,
-                reason=(
-                    "source-linked draw reveal trigger depends on untrusted "
-                    "rules capabilities"
-                ),
-                blockers=blockers,
-            ),
-        )
-        if blockers
-        else ()
-    )
-    closure = gate.closure
-    result.append(
-        OracleNode(
-            node_id=f"{node_id}:rider",
-            kind="triggered_ability",
-            text=remainder,
-            span=remainder_span,
-            active_zone="battlefield",
-            event="card.draw.revealed_by_source",
-            lowerable=True,
-            exact=not blockers,
-            template_id=f"draw-after-reveal-{quality}-v1",
-            effects=effects,
-            event_condition=condition,
-            mechanics=(
-                trigger_mechanic,
-                "cr-121-drawing-a-card",
-            ),
-            residual_ids=residual_ids,
-            capability_dependencies=gate.capabilities,
-            capability_closure=(
-                closure.reachable if closure is not None else ()
-            ),
-            capability_profile=(
-                closure.profile if closure is not None else None
-            ),
-            capability_fingerprint=(
-                closure.fingerprint if closure is not None else None
-            ),
-        )
-    )
-    return tuple(result)
-
-
 def _compile_face(
     record: CardRecord,
     *,
@@ -1150,36 +972,18 @@ def _compile_face(
             nodes.append(activated_node)
             continue
 
-        draw_reveal_nodes = (
-            _draw_reveal_nodes(
-                node_id=node_id,
-                line=line,
-                span=span,
-                card_name=face_name or record.name,
-                trusted_mechanics=trusted_mechanics,
-                capability_registry=capability_registry,
-                capability_profile=capability_profile,
-                residuals=residuals,
-            )
-            if permanent
-            else None
-        )
-        if draw_reveal_nodes is not None:
-            nodes.extend(draw_reveal_nodes)
-            continue
-
-        trigger_node = _trigger_node(
-            node_id=node_id,
-            line=line,
-            span=span,
+        event_nodes = draw_reveal_or_trigger_nodes(
+            permanent=permanent, node_id=node_id,
+            line=line, span=span,
             card_name=face_name or record.name,
             trusted_mechanics=trusted_mechanics,
-            capability_registry=capability_registry,
-            capability_profile=capability_profile,
+            capability_registry=capability_registry, capability_profile=capability_profile,
             residuals=residuals,
+            runtime_handler_node=_runtime_handler_node, trigger_node=_trigger_node,
+            append_residual=_residual,
         )
-        if trigger_node is not None:
-            nodes.append(trigger_node)
+        if event_nodes is not None:
+            nodes.extend(event_nodes)
             continue
 
         enters_tapped = re.fullmatch(

@@ -358,7 +358,17 @@ def _commit_ordinary_draw(
         else ""
     )
     _apply_source_linked_reveals(host, prepared, card, type_line)
-    host.move_card(object_id, "hand", reason=resolution.reason, log=False)
+    source_linked_reveal = any(
+        isinstance(action, RevealDrawnCardBySource)
+        for action in resolution.post_draw_actions
+    )
+    host.move_card(
+        object_id,
+        "hand",
+        reason=resolution.reason,
+        log=False,
+        reveal_to=(sorted(host.state.players) if source_linked_reveal else None),
+    )
     _record_draw(host, prepared, object_id)
     _apply_drawn_card_actions(host, prepared, object_id, type_line)
     return DrawCommitResult(

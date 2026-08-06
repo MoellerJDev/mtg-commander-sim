@@ -16,7 +16,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 - Compiler: `oracle-ir-v36`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
-- Compiler module: 1,697 physical / 1,643 logical lines
+- Compiler module: 1,501 physical / 1,452 logical lines
 
 ## Canonical CardProgram
 

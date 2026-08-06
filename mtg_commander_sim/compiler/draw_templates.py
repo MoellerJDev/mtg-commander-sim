@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
+from ..rules.capabilities import CapabilityRegistry
+from .dependency_gate import dependency_gate, explicit_capabilities_gate
 from .fixed_numbers import FIXED_COUNT_PATTERN, fixed_number
+from .ir_model import OracleNode, OracleResidual, SourceSpan
 
 
 DrawEffectTemplate = tuple[
@@ -343,7 +346,254 @@ def linked_draw_reveal_condition(
     return quality.replace(" ", "-"), {"all": conditions}
 
 
+def _draw_reveal_rider_node(
+    *,
+    node_id: str,
+    remainder: str,
+    span: SourceSpan,
+    card_name: str,
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+    trigger_node: Callable[..., OracleNode | None],
+    append_residual: Callable[..., str],
+) -> OracleNode:
+    linked = linked_draw_reveal_condition(remainder)
+    if linked is None:
+        unresolved = trigger_node(
+            node_id=node_id,
+            line=remainder,
+            span=span,
+            card_name=card_name,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            residuals=residuals,
+        )
+        if unresolved is not None:
+            return unresolved
+        residual_id = append_residual(
+            residuals,
+            kind="trigger",
+            text=remainder,
+            span=span,
+            reason="draw reveal rider has no exact generic template",
+            blockers=("source-linked draw reveal trigger grammar",),
+        )
+        return OracleNode(
+            node_id=node_id,
+            kind="triggered_ability",
+            text=remainder,
+            span=span,
+            active_zone="battlefield",
+            event="unresolved",
+            lowerable=False,
+            exact=False,
+            residual_ids=(residual_id,),
+        )
+
+    quality, condition = linked
+    trigger_mechanic = "cr-603-handling-triggered-abilities"
+    effects = (
+        {
+            "op": "draw",
+            "player": "$controller",
+            "count": 1,
+            "private": True,
+        },
+    )
+    inferred_gate = dependency_gate(
+        mechanics=(trigger_mechanic, "cr-121-drawing-a-card"),
+        effects=effects,
+        target_schema=None,
+        trusted_mechanics=trusted_mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+    gate = explicit_capabilities_gate(
+        (*inferred_gate.capabilities, "zone.draw.reveal_as_drawn"),
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+    blockers = tuple(
+        dict.fromkeys(
+            (
+                *gate.blockers,
+                *(
+                    blocker
+                    for blocker in inferred_gate.blockers
+                    if blocker.startswith("mechanic:")
+                ),
+            )
+        )
+    )
+    residual_ids = (
+        (
+            append_residual(
+                residuals,
+                kind="dependency_contract",
+                text=remainder,
+                span=span,
+                reason=(
+                    "source-linked draw reveal trigger depends on untrusted "
+                    "rules capabilities"
+                ),
+                blockers=blockers,
+            ),
+        )
+        if blockers
+        else ()
+    )
+    closure = gate.closure
+    return OracleNode(
+        node_id=node_id,
+        kind="triggered_ability",
+        text=remainder,
+        span=span,
+        active_zone="battlefield",
+        event="card.draw.revealed_by_source",
+        lowerable=True,
+        exact=not blockers,
+        template_id=f"draw-after-reveal-{quality}-v1",
+        effects=effects,
+        event_condition=condition,
+        mechanics=(trigger_mechanic, "cr-121-drawing-a-card"),
+        residual_ids=residual_ids,
+        capability_dependencies=gate.capabilities,
+        capability_closure=(
+            closure.reachable if closure is not None else ()
+        ),
+        capability_profile=(
+            closure.profile if closure is not None else None
+        ),
+        capability_fingerprint=(
+            closure.fingerprint if closure is not None else None
+        ),
+    )
+
+
+def draw_reveal_nodes(
+    *,
+    node_id: str,
+    line: str,
+    span: SourceSpan,
+    card_name: str,
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+    runtime_handler_node: Callable[..., OracleNode],
+    trigger_node: Callable[..., OracleNode | None],
+    append_residual: Callable[..., str],
+) -> tuple[OracleNode, ...] | None:
+    """Lower a closed CR 121.9 policy and its source-linked rider."""
+
+    parts = draw_reveal_line_parts(line)
+    if parts is None:
+        return None
+    reveal_text, remainder = parts
+    compiled = static_draw_reveal_handler(reveal_text)
+    if compiled is None:
+        return None
+    reveal_span = SourceSpan(
+        start=span.start,
+        end=span.start + len(reveal_text),
+        line=span.line,
+    )
+    result = [
+        runtime_handler_node(
+            node_id=f"{node_id}:reveal",
+            line=reveal_text,
+            span=reveal_span,
+            compiled=compiled,
+            kind="static_ability",
+            event="draw.reveal_as_drawn",
+            dependency_reason=(
+                "generic draw reveal depends on an untrusted rules capability"
+            ),
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            residuals=residuals,
+        )
+    ]
+    if remainder:
+        remainder_offset = line.find(remainder, len(reveal_text))
+        if remainder_offset < 0:
+            raise ValueError("Draw reveal rider is not source-spanned")
+        result.append(
+            _draw_reveal_rider_node(
+                node_id=f"{node_id}:rider",
+                remainder=remainder,
+                span=SourceSpan(
+                    start=span.start + remainder_offset,
+                    end=span.start + remainder_offset + len(remainder),
+                    line=span.line,
+                ),
+                card_name=card_name,
+                trusted_mechanics=trusted_mechanics,
+                capability_registry=capability_registry,
+                capability_profile=capability_profile,
+                residuals=residuals,
+                trigger_node=trigger_node,
+                append_residual=append_residual,
+            )
+        )
+    return tuple(result)
+
+
+def draw_reveal_or_trigger_nodes(
+    *,
+    permanent: bool,
+    node_id: str,
+    line: str,
+    span: SourceSpan,
+    card_name: str,
+    trusted_mechanics: frozenset[str],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+    runtime_handler_node: Callable[..., OracleNode],
+    trigger_node: Callable[..., OracleNode | None],
+    append_residual: Callable[..., str],
+) -> tuple[OracleNode, ...] | None:
+    """Prefer the closed draw-reveal grammar, then ordinary triggers."""
+
+    reveal_nodes = (
+        draw_reveal_nodes(
+            node_id=node_id,
+            line=line,
+            span=span,
+            card_name=card_name,
+            trusted_mechanics=trusted_mechanics,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            residuals=residuals,
+            runtime_handler_node=runtime_handler_node,
+            trigger_node=trigger_node,
+            append_residual=append_residual,
+        )
+        if permanent
+        else None
+    )
+    if reveal_nodes is not None:
+        return reveal_nodes
+    ordinary = trigger_node(
+        node_id=node_id,
+        line=line,
+        span=span,
+        card_name=card_name,
+        trusted_mechanics=trusted_mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+        residuals=residuals,
+    )
+    return (ordinary,) if ordinary is not None else None
+
+
 __all__ = [
+    "draw_reveal_nodes",
+    "draw_reveal_or_trigger_nodes",
     "draw_reveal_line_parts",
     "fixed_draw_effect_template",
     "linked_draw_reveal_condition",
