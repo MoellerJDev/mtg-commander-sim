@@ -13,6 +13,7 @@ from .counter_replacements import (
 from .damage_replacements import default_damage_replacement_registry
 from .damage_results import default_damage_result_replacement_registry
 from .draw_replacements import default_draw_replacement_registry
+from .draw_reveals import default_draw_reveal_registry
 from .draw_restrictions import default_draw_restriction_registry
 from .life_replacements import default_life_replacement_registry
 from .mana_abilities import default_fixed_mana_ability_registry
@@ -34,6 +35,7 @@ def runtime_component_registries() -> tuple[Any, ...]:
         default_damage_replacement_registry(),
         default_damage_result_replacement_registry(),
         default_draw_replacement_registry(),
+        default_draw_reveal_registry(),
         default_draw_restriction_registry(),
         default_life_replacement_registry(),
         default_fixed_mana_ability_registry(),

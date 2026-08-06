@@ -10,6 +10,7 @@ from .continuous_templates import (
 )
 from .damage_templates import static_damage_handler
 from .draw_templates import (
+    static_draw_reveal_handler,
     static_draw_result_handler,
     static_draw_restriction_handler,
 )
@@ -33,6 +34,16 @@ def static_runtime_template(
     """Select one closed static runtime production for an Oracle line."""
 
     if source_permanent:
+        draw_reveal = static_draw_reveal_handler(text)
+        if draw_reveal is not None:
+            return StaticRuntimeTemplate(
+                compiled=draw_reveal,
+                kind="static_ability",
+                event="draw.reveal_as_drawn",
+                dependency_reason=(
+                    "generic draw reveal depends on an untrusted rules capability"
+                ),
+            )
         draw_restriction = static_draw_restriction_handler(text)
         if draw_restriction is not None:
             return StaticRuntimeTemplate(

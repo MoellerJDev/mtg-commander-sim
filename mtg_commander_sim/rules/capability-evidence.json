@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "23a4319f0a1ab1fa423fe99da51779883a426fe63f9563266c5b790eb3eef105",
-  "declaration_source_fingerprint": "22498f627b9aad40b97894c9394dd6e9134095345bd2fe99e9fa1b4ffa7ff411",
+  "registry_fingerprint": "1b53ebdb58aff34451db46bc5c491bea727ca01357564c901a233dd9d551302c",
+  "declaration_source_fingerprint": "e9f657fcced3c848204d5a761fead37d9887b10a46c523046de2350743475a43",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -8533,6 +8533,104 @@
       "applicability_note": "Replay a real trusted draw doubler with identical result order and final authoritative state."
     },
     {
+      "capability_id": "zone.draw.reveal_as_drawn",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_optional_sources_are_chosen_sequentially_and_linked_by_physical_source",
+      "official_rule_ids": [
+        "121.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Collect multiple optional reveal policies sequentially and bind each accepted reveal event to its exact physical source."
+    },
+    {
+      "capability_id": "zone.draw.reveal_as_drawn",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_optional_reveal_is_seat_scoped_and_public_only_after_acceptance",
+      "official_rule_ids": [
+        "121.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Issue the optional choice only to the affected player in four-player order and project the accepted reveal to every opponent."
+    },
+    {
+      "capability_id": "zone.draw.reveal_as_drawn",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_draw_reveal_as_drawn.DrawRevealModelTests.test_draw_reveal_policy_mutant_is_killed",
+      "official_rule_ids": [
+        "121.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutant that removes the first-draw ordinal guard and incorrectly applies the reveal policy to later draws."
+    },
+    {
+      "capability_id": "zone.draw.reveal_as_drawn",
+      "evidence_class": "negative",
+      "test_id": "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_second_draw_and_non_draw_replacement_do_not_apply_reveal",
+      "official_rule_ids": [
+        "121.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Do not reveal a later draw in the turn or a library card when the prospective draw resolves to a non-draw replacement result."
+    },
+    {
+      "capability_id": "zone.draw.reveal_as_drawn",
+      "evidence_class": "positive",
+      "test_id": "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_mandatory_first_draw_reveals_and_dispatches_only_its_linked_trigger",
+      "official_rule_ids": [
+        "121.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reveal the exact first card from the library before it enters hand and dispatch only the trigger linked to the physical reveal source."
+    },
+    {
+      "capability_id": "zone.draw.reveal_as_drawn",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_optional_reveal_is_seat_scoped_and_public_only_after_acceptance",
+      "official_rule_ids": [
+        "121.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Expose the private top-card identity only to the prospective drawer until that player accepts the public reveal."
+    },
+    {
+      "capability_id": "zone.draw.reveal_as_drawn",
+      "evidence_class": "replay",
+      "test_id": "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_optional_reveal_choice_replays_exactly",
+      "official_rule_ids": [
+        "121.9"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the seat-scoped reveal decision with the same source identity, public knowledge, trigger, and final authoritative state."
+    },
+    {
       "capability_id": "zone.draw.specifically_drawn_card_actions",
       "evidence_class": "interaction",
       "test_id": "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_replacement_result_draws_do_not_inherit_original_post_actions",
@@ -8631,5 +8729,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "1b774d55612e9f9978ed230abccfc5b1e26978898bd424a0e260be5e63b1f6ce"
+  "fingerprint": "4a959ea6db490ef26f9046cc1bf2705170c5dd0df03ffc2358ded34ae18a49d0"
 }

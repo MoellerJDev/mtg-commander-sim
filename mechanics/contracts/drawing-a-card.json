@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 5,
+  "contract_version": 6,
   "mechanic_id": "cr-121-drawing-a-card",
   "official_name": "Drawing a Card",
   "effective_date": "2026-06-19",
@@ -27,6 +27,8 @@
       "live draw permission and prohibition", "ordinary library-to-hand draw",
       "prevented or prohibited draw", "Dredge replacement",
       "result-generated draw instruction", "ordered specifically-drawn-card actions",
+      "mandatory or optional first-draw reveal-as-drawn policy",
+      "source-linked reveal trigger",
       "empty-library draw attempt", "draw and second-draw trigger facts"
     ],
     "state_reads": [
@@ -37,7 +39,8 @@
     "state_writes": [
       "library and hand zones", "draw history", "empty-library attempt marker",
       "Dredge mill and source return", "private and public draw events",
-      "public reveal and conditional discard of the exact ordinarily drawn object"
+      "public reveal and conditional discard of the exact ordinarily drawn object",
+      "public reveal of the exact top object before it enters hand"
     ],
     "costs": [
       "complete draw-as-cost feasibility is exposed, but no current Oracle producer pays such a cost"
@@ -47,6 +50,7 @@
       "individual events and queued instructions are drained iteratively rather than through the Python call stack",
       "draw instructions created by replacement results finish before the unreplaced remainder of the original instruction",
       "actions tied to the specifically drawn card occur only after an ordinary draw and in printed order",
+      "a CR 121.9 source-linked reveal occurs while the exact top card is being drawn and before it enters hand",
       "an activated ability pays its costs and exists independently on the stack before its draw instruction is processed",
       "each represented draw replacement completes before the sequence resumes",
       "a draw does not use the stack"
@@ -54,13 +58,15 @@
     "targets": ["a represented draw names one affected player"],
     "choices": [
       "the affected player privately chooses among applicable optional replacements",
+      "the prospective drawer privately accepts or declines each optional first-draw reveal policy in canonical source order",
       "an optional multi-draw is offered only when the prospective drawer can complete every draw",
       "an empty library does not by itself make an optional draw illegal"
     ],
     "hidden_information": [
       "ordinary drawn-card identity is owner-only plus analyst",
       "public draw events disclose count and reason, not card identity",
-      "a represented reveal action publishes the exact drawn object and preserves that known-hand identity"
+      "a represented reveal action publishes the exact drawn object and preserves that known-hand identity",
+      "an optional reveal-as-drawn choice exposes the top-card identity only to the prospective drawer until acceptance"
     ],
     "apnap": [
       "when several players draw, the active player completes all draws first, followed in turn order"
@@ -82,6 +88,7 @@
     ],
     "source_leaves": [
       "Dredge pins physical source identity and zone-change counter through the private choice",
+      "a reveal-as-drawn policy pins the physical source and rejects a stale optional choice before draw mutation",
       "a departed or phased-out battlefield restriction source stops applying before the next draw",
       "a sacrificed activated-ability source does not stop its already-activated fixed draw from resolving"
     ]
@@ -92,6 +99,7 @@
     "fixed no-draw and maximum-one restrictions", "unconditional draw doubling",
     "result-generated draw ordering and producing-effect exclusion",
     "public reveal then discard unless the specifically drawn card is a land",
+    "mandatory and optional first-draw reveal-as-drawn policies with source-linked basic-land or creature draw riders",
     "large replacement-free, prevented, over-library, and suspended instructions",
     "draw-step and resolving-effect producers", "conditional resolving-effect draw",
     "closed controller, target-player, optional, and each-player activated draws"
@@ -105,7 +113,9 @@
     {"name": "Mind Stone", "oracle_id": "c97361b5-af16-4a7b-af85-a429dbaf4ad2"},
     {"name": "Temple Bell", "oracle_id": "fc8032e9-c83a-4cf9-92e1-b1d2d9642695"},
     {"name": "Fa'adiyah Seer", "oracle_id": "8ba2f559-f9bd-48ef-9fef-6dffe768f4ed"},
-    {"name": "Sindbad", "oracle_id": "dc81069b-b2cf-44b3-98fc-45bb24b815cb"}
+    {"name": "Sindbad", "oracle_id": "dc81069b-b2cf-44b3-98fc-45bb24b815cb"},
+    {"name": "Rowen", "oracle_id": "eb44f5eb-1c6a-49f0-9751-23d167bf8288"},
+    {"name": "Primitive Etchings", "oracle_id": "dddda9a2-dc59-446d-bfc4-3240d12a3654"}
   ],
   "rulings": [],
   "test_ids": [
@@ -153,18 +163,24 @@
     "test_result_draws_preserve_four_player_apnap_instruction_order",
     "test_result_draws_finish_before_the_original_sequence_resumes",
     "test_two_result_doublers_require_one_order_choice_then_draw_four",
-    "test_draw_result_and_post_action_mutants_are_killed"
+    "test_draw_result_and_post_action_mutants_are_killed",
+    "test_mandatory_first_draw_reveals_and_dispatches_only_its_linked_trigger",
+    "test_second_draw_and_non_draw_replacement_do_not_apply_reveal",
+    "test_optional_reveal_is_seat_scoped_and_public_only_after_acceptance",
+    "test_optional_sources_are_chosen_sequentially_and_linked_by_physical_source",
+    "test_optional_reveal_choice_replays_exactly",
+    "test_draw_reveal_policy_mutant_is_killed"
   ],
   "implementation": {
-    "component": "strict fixed-draw and specifically-drawn-card compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement components, and optional-choice handler",
-    "version": "draw-transaction-v5"
+    "component": "strict fixed-draw, specifically-drawn-card, and reveal-as-drawn compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement/reveal components, and optional-choice handlers",
+    "version": "draw-transaction-v6"
   },
   "known_blockers": [
     "shared-team turns are not supported",
     "specifically-drawn-card actions beyond public reveal followed by discard unless land are not represented",
     "hidden-zone continuous type changes and conditional characteristics are not evaluated for the represented discard-unless-land action",
     "draws during casting or activation are not held face down",
-    "optional reveal-as-drawn choices are not implemented",
+    "reveal-as-drawn trigger riders beyond the closed basic-land and creature draw families remain residual",
     "conditional and first-draw count modifiers are not compiled",
     "draw-as-cost feasibility has no current Oracle producer",
     "the complete draw replacement and prevention Oracle grammar is not compiled"

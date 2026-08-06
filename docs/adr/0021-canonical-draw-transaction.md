@@ -2,7 +2,7 @@
 title: "ADR 0021: canonical draw transaction and replacement ownership"
 status: "ADR"
 authoritative_source: "this decision record and platform/architecture-policy.json"
-verified: "2026-08-05"
+verified: "2026-08-06"
 audience: "rules, compiler, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 adr_id: "0021"
@@ -68,6 +68,13 @@ card drawn. The first represented CR 121.6c family publicly reveals that card
 and discards it unless its front face is a land. Prevented, prohibited, Dredge,
 and replacement-result draws do not inherit the original event's actions.
 
+CR 121.9 reveal-as-drawn policies are a separate typed pre-hand stage. The
+coordinator evaluates them only after replacement resolution leaves an ordinary
+draw, pins the physical battlefield source and current top-library object,
+keeps optional identity private to the prospective drawer, and dispatches a
+source-linked event before the object enters hand. Compound reveal riders do
+not widen this boundary.
+
 `offer_draw` is the reviewed generic semantic operation for a seat-scoped
 optional draw choice. Its handler records chooser and prospective drawer
 separately, validates the prospective drawer before issuing and completing the
@@ -102,18 +109,15 @@ keeps the oversized module ratchet moving downward while preserving callers.
 - Represented draws now share one replacement-aware, replay-pinned mutation
   path, including private choice, empty-library behavior, and iterative large-
   count coordination.
-- Replacement-result draws and specifically-drawn-card actions have separate
-  fine-grained capabilities rather than widening the base draw trust claim.
-- The engine loses draw sequencing and producer-specific mutation branches;
-  live draw-limit and optional-draw legality.
+- Replacement-result draws, specifically-drawn-card actions, and
+  reveal-as-drawn policies have separate fine-grained capabilities rather than
+  widening the base draw trust claim.
+- The engine delegates draw sequencing, live draw-limit legality, optional
+  draw/reveal choices, and producer-specific mutation to typed draw owners.
 - The compiler gains generic fixed draw, draw-limit, result-doubling,
-  optional-draw, graveyard-keyword, and public reveal/discard-unless-land
-  templates with measurable corpus promotions.
-- The architecture specificity scan records the generic `reason` metadata key
-  used by the new typed result and action descriptors. `Reason` is also a card
-  name, but these structural payload keys contain no card dispatch and are not
-  conditional behavior.
+  optional-draw, graveyard-keyword, public reveal/discard-unless-land, and
+  first-draw reveal templates with measurable corpus promotions.
 - Shared-team turns, conditional and dynamic draw-limit grammar, broader
-  specifically-drawn-card actions, optional reveal-as-drawn choices,
-  face-down casting-process draws, and wider replacement-result grammar remain
-  explicitly unsupported until their dependencies are implemented.
+  specifically-drawn-card actions, compound reveal-as-drawn riders, face-down
+  casting-process draws, and wider replacement-result grammar remain explicitly
+  unsupported until their dependencies are implemented.

@@ -8,7 +8,11 @@ two independently testable layers into an import cycle.
 
 from importlib import import_module
 
-from .continuation import DrawDecisionContinuation, DrawResume
+from .continuation import (
+    DrawDecisionContinuation,
+    DrawResume,
+    DrawRevealDecisionContinuation,
+)
 from .model import (
     DiscardDrawnCardUnlessType,
     DrawnCardAction,
@@ -20,6 +24,7 @@ from .model import (
     PreparedDrawInstruction,
     QueuedDraw,
     RevealDrawnCard,
+    RevealDrawnCardBySource,
     drawn_card_action_from_dict,
     prepare_draw_event,
     prepare_draw_instruction,
@@ -45,6 +50,8 @@ _COORDINATOR_EXPORTS = {
     "begin_draw_batch",
     "begin_draw_sequence",
     "commit_unreplaced_draws",
+    "complete_draw_decision",
+    "complete_draw_reveal",
     "complete_draw_replacement",
     "DrawCoordinatorHost",
     "draw_event_id",
@@ -63,10 +70,12 @@ __all__ = [
     "DrawError",
     "DrawnCardAction",
     "RevealDrawnCard",
+    "RevealDrawnCardBySource",
     "DiscardDrawnCardUnlessType",
     "drawn_card_action_from_dict",
     "DrawDecisionContinuation",
     "DrawResume",
+    "DrawRevealDecisionContinuation",
     "DrawEventRequest",
     "DrawEventResolution",
     "DrawInstructionRequest",
@@ -86,6 +95,8 @@ __all__ = [
     "begin_draw_batch",
     "begin_draw_sequence",
     "commit_unreplaced_draws",
+    "complete_draw_decision",
+    "complete_draw_reveal",
     "complete_draw_replacement",
     "DrawCoordinatorHost",
     "draw_event_id",

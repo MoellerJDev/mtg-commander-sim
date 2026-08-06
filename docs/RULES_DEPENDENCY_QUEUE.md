@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,028
-- Reviewed behavioral blockers: 371
+- Queued rules: 3,027
+- Reviewed behavioral blockers: 370
 - Behavioral classification/review required: 2,657
-- Passing behavioral rules: 155
+- Passing behavioral rules: 156
 - Subsystems: 21
-- Queue fingerprint: `17462b7e18ec29354daaeb16b48513989c91eb8543017f38b754bfd0016444b7`
+- Queue fingerprint: `8fe358ef9bb353faf55d61644e6f0e8fd1309d820efa27ab84c7775148fa4267`
 
 ## Selected next batch
 
-- Batch: `draw-hidden-casting-and-reveal-choice-closure`
-- Subsystem: `resources`
-- Rules: `121.8`, `121.9`
-- Target capabilities: `zone.draw.library_to_hand`
-- Rationale: The canonical draw owner now covers result-generated ordering and a closed specifically-drawn-card action family. The next dependency-ready CR 121 boundary is hidden-information handling for cards drawn during casting and optional reveal-as-drawn choices.
+- Batch: `deathtouch-assignment-and-result-closure`
+- Subsystem: `keyword-abilities`
+- Rules: `702.2`, `702.2a`, `702.2b`, `702.2c`, `702.2d`, `702.2e`, `702.2f`
+- Target capabilities: `combat.damage.assignment.canonical`, `damage.amount.positive`, `damage.result.deathtouch`
+- Rationale: CR 121.9 is now closed while CR 121.8 remains blocked on casting-process and side-effecting mana-ability prerequisites. The immutable combat snapshot, canonical assignment owner, typed damage results, prevention boundary, and strike-step participation foundation make ordinary Deathtouch the next dependency-ready medium-risk harvest. The pinned Commander frontier records 333 affected cards and 45 sole-blocker cards.
 
 Exit criteria:
 
-- Hold cards drawn during casting or activation face down until the process completes, including legal reversal when the process fails.
-- Represent optional reveal-as-drawn choices before the card joins the rest of the hand.
-- Keep the pre-reveal identity seat-scoped and publish only an accepted reveal.
-- Suspend and resume choices with exact Game Record v3 replay and rollback.
-- Cover several-card instructions and four-player projection without leaking hidden identities.
-- Compile a reusable Oracle wording family while keeping broader hidden-zone and replacement grammar explicit residuals.
+- Represent Deathtouch lethal assignment and actual positive damage dealt as distinct typed facts.
+- Use the source snapshot or required last-known information so source departure and control changes cannot erase or invent Deathtouch.
+- Ensure prevented or replaced-away damage does not create the Deathtouch state-based-action result.
+- Treat multiple Deathtouch instances as redundant and reject pilot-supplied keyword claims.
+- Route the linked CR 704.5h state-based destruction result through the canonical stabilization owner with exact replay, rollback, multiplayer, interaction, and mutation evidence.
+- Lower the ordinary keyword generically into CardProgram V2 and keep unsupported ability-changing, copy, face-down, and assignment-modifier interactions explicit residuals.
 
 ## Dependency schedule
 
@@ -48,7 +48,7 @@ Exit criteria:
 | 4 | `mana-costs-priority` | `core-game`, `characteristics`, `objects-permanents-tokens` | 175 | 0 | 175 | `oracle_parser`, `card_program_costs`, `card_program_targets`, `mechanic_contracts` |
 | 5 | `card-types` | `characteristics`, `objects-permanents-tokens` | 168 | 17 | 151 | `oracle_normalization`, `card_program_typing`, `mechanic_contracts` |
 | 6 | `zones` | `objects-permanents-tokens`, `card-types` | 39 | 39 | 0 | `card_program_zone_permissions`, `mechanic_contracts` |
-| 7 | `resources` | `mana-costs-priority`, `zones` | 67 | 6 | 61 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 7 | `resources` | `mana-costs-priority`, `zones` | 66 | 5 | 61 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 8 | `damage` | `characteristics`, `objects-permanents-tokens`, `resources` | 11 | 11 | 0 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 9 | `turn-structure` | `mana-costs-priority`, `zones`, `resources` | 26 | 26 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 10 | `casting-activation` | `mana-costs-priority`, `zones`, `turn-structure` | 46 | 46 | 0 | `oracle_parser`, `card_program_costs`, `card_program_lowering`, `mechanic_contracts` |

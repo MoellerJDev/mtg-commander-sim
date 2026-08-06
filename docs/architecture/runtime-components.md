@@ -2,7 +2,7 @@
 title: "CardProgram runtime components"
 status: "current"
 authoritative_source: "mtg_commander_sim/semantic_runtime component registries, mtg_commander_sim/drawing, and ADRs 0007/0010/0011/0012"
-verified: "2026-08-05"
+verified: "2026-08-06"
 audience: "rules, compiler, runtime, replay, and extension contributors"
 maintenance: "hand-maintained"
 ---
@@ -99,7 +99,16 @@ instructions resume. The companion draw registries lower unconditional fixed
 instruction doubling and live fixed no-draw/maximum-one battlefield
 restrictions. These components have no mutable-state access and do not imply
 conditional/dynamic limits, complete draw-as-cost production, shared-team
-ordering, reveal-as-drawn, or the complete replacement corpus.
+ordering, or the complete replacement corpus.
+
+`action.draw.reveal-first.v1` discovers mandatory or optional first-draw
+policies from live phased-in battlefield sources. The component returns an
+immutable physical-source policy; the draw coordinator owns private choice,
+ordinal revalidation, non-draw replacement exclusion, and exact resume, while
+the draw transaction reveals before the card enters hand. The normalized event
+retains source identity so only that source's closed basic-land or creature
+draw rider triggers. Other qualities and compound reveal riders remain outside
+the component rather than being interpreted from Oracle text at runtime.
 
 `continuous.anthem.power_toughness.v1` supports a fixed same-controller subtype
 anthem in layer 7c. The source must be represented, on the battlefield, and not
@@ -171,7 +180,8 @@ changes. `drawing/model.py`, `drawing/continuation.py`,
 `drawing/coordinator.py`, and `drawing/transaction.py` own the draw boundary;
 `semantic_runtime/draw_replacements.py` owns Dredge and fixed instruction-
 quantity lowering, while `semantic_runtime/draw_restrictions.py` owns live
-permission restrictions.
+permission restrictions and `semantic_runtime/draw_reveals.py` owns CR 121.9
+source-policy discovery.
 Runtime components remain pure participants.
 
 Primary tests are `test_replacement_event_tree.py`,
@@ -189,6 +199,7 @@ Primary tests are `test_replacement_event_tree.py`,
 `test_continuous_effect_components.py`, `test_continuous_effect_duration.py`,
 `test_draw_replacement_components.py`, `test_draw_transaction_model.py`,
 `test_draw_transaction_commit.py`, `test_draw_continuation.py`,
+`test_draw_reveal_as_drawn.py`,
 `test_card_program_trust.py`, and
 `test_continuous_effect_performance.py`. See the
 [extension guide](../extension/runtime-component.md) and

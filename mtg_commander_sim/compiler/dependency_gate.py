@@ -65,19 +65,35 @@ def explicit_capability_gate(
     capability_registry: CapabilityRegistry | None,
     capability_profile: str,
 ) -> DependencyGate:
+    return explicit_capabilities_gate(
+        (capability,),
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+
+
+def explicit_capabilities_gate(
+    capabilities: Iterable[str],
+    *,
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+) -> DependencyGate:
+    required = tuple(sorted(set(capabilities)))
+    if not required:
+        return DependencyGate(blockers=())
     if capability_registry is None:
         return DependencyGate(
-            blockers=(f"capability:{capability}",),
-            capabilities=(capability,),
+            blockers=tuple(f"capability:{value}" for value in required),
+            capabilities=required,
         )
     closure = capability_registry.closure(
-        (capability,), profile=capability_profile
+        required, profile=capability_profile
     )
     return DependencyGate(
         blockers=tuple(
             f"capability:{blocker}" for blocker in closure.blockers
         ),
-        capabilities=(capability,),
+        capabilities=required,
         closure=closure,
     )
 
@@ -167,6 +183,7 @@ def keyword_dependency_gate(
 __all__ = [
     "DependencyGate",
     "dependency_gate",
+    "explicit_capabilities_gate",
     "explicit_capability_gate",
     "keyword_dependency_gate",
 ]

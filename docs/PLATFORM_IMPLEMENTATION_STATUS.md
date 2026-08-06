@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "bdb84ba094e929d99b1e49612d1ce84e39c53bbd589920d14d42cd84e502de80"
+verified: "dcfc5d75600538641201b0969e5a2ffd30ee94c5ec2ec1aac935e72bc2a00a33"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,7 +15,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `bdb84ba094e929d99b1e49612d1ce84e39c53bbd589920d14d42cd84e502de80` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `dcfc5d75600538641201b0969e5a2ffd30ee94c5ec2ec1aac935e72bc2a00a33` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `35f116bd858f4f5f87cefad5793f9b2cf2cb8e1c`
 - Certified exact head: `ce0d9586b0649bb4111976f5d11aa1c6ee94523e`
 - Generation timestamp: `2026-08-05T23:35:58Z`
@@ -34,10 +34,10 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=371, definition_only=96, passing=176, total=3300, unreviewed=2657
+- Rules cases: blocked=370, definition_only=96, passing=177, total=3300, unreviewed=2657
 - Mechanics: status_counts={'partial': 61, 'tested': 2, 'trusted': 5, 'unclassified': 357}, total=425, trusted=5
-- Oracle coverage: material_residuals=57702, status_counts={'exact': 4453, 'partial': 14811, 'unresolved': 19278}, total=38542
-- Commander-legal Oracle coverage: material_residuals=49942, status_counts={'exact': 1567, 'partial': 13636, 'unresolved': 16420}, total=31623
+- Oracle coverage: material_residuals=57700, status_counts={'exact': 4455, 'partial': 14812, 'unresolved': 19275}, total=38542
+- Commander-legal Oracle coverage: material_residuals=49940, status_counts={'exact': 1569, 'partial': 13637, 'unresolved': 16417}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -80,7 +80,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 | Reusable rules-piece matrix and durable program baseline | `integrated_on_certified_main` | PR 105 integrates the versioned Commander-scoped reusable-piece ontology, complete material-ability card relation index, capability/mechanic/compiler/runtime inventory, pairwise interaction index, complex-card composition benchmark, durable adoption baseline, current delta, and CLI drill-down. Independent compiler, runtime, assurance, corpus, and interaction axes remain fail-closed. Public exact-head run 31053278703 passed every required job for feature head 19648f22c1cc8b8ad3c9eb84abf5a5779a18d331; merge commit 0c229ab9543ae2cb631c9b17326fa15a869f6d97 is on main and post-merge smoke 31054011153 passed. |
 | Typed ordinary-Trample assignment and generic harvest | `integrated_on_certified_main` | PR 107 extracts ordinary CR 510/702.19 combat-damage state projection and division from CommanderEngine into one read-only projector and immutable typed proposal shared by projected choices and accepted commands. Exact-power totals, current recipients, marked damage, simultaneous attackers, deathtouch, indestructible, protection/prevention, player/planeswalker/Battle targets, departed targets, double strike, atomic rejection, four-player seat projection, replay, property-grid, and killed-mutation evidence are covered. CommanderEngine fell from 13,017 to 12,775 logical lines while direct authoritative writes remained 135. The Commander census promoted 62 exact/trusted/capability-closed cards and removed 907 material residuals with no construction failures or demotions. Aggregate Trample remains partial: Trample over planeswalkers, banding assignment control, and unsupported characteristic producers are explicit blockers. Public exact-head run 31061917743 passed, merge commit ce0d9586b0649bb4111976f5d11aa1c6ee94523e is on main, and post-merge main-smoke run 31062387189 passed. |
 | Canonical combat-damage assignment and strike-step harvest | `integrated_on_certified_main` | PR 108 builds each combat-damage step through an immutable CombatDamageSnapshot and narrow read-only query, validates strict closed proposals, collects APNAP assignments in a typed sequence, and derives assignment, event, replacement-order, journal, and replay identity from canonical physical and logical participants rather than caller JSON order. Explicit interaction declarations replace incidental test co-citation. Generic source-spanned First Strike and Double Strike lowering adds one fine-grained trusted strike-step capability while the aggregate mechanics remain partial. The Commander census promotes exactly the predicted 69 exact/trusted/capability-closed cards, removes 449 material residuals, leaves unresolved objects and construction failures unchanged, shrinks CommanderEngine by two logical lines, moves two direct combat relationship writes into one typed owner, and adds no oversized module. Unsupported ability-changing, copy, face-down, additional-combat/damage-step, banding, and Trample-over-planeswalkers interactions remain explicit blockers. Public exact-head run 31071869495 passed, merge commit dfab6aa62285eae1c3ec4d2eae469d3a02e298dc is on main, and post-merge main-smoke run 31072255734 passed. |
-| Typed draw-result ordering and specifically-drawn-card actions | `implemented_current_source_tree` | The current source tree closes bounded CR 121.7 result-generated draw ordering through typed CreateResultDraws operations, independently replaceable nested draw events, producing-effect exclusion under CR 614.5, iterative queueing, suspension/resume, privacy, and exact Game Record v3 replay. A separate fine-grained CR 121.6c capability pins typed public-reveal and discard-unless-land actions to the exact physical card drawn without leaking them onto Dredge, prevented, prohibited, or replacement-result draws. Oracle IR v35 generically lowers the closed Fa'adiyah Seer and Sindbad sentence and current unconditional controller draw doublers. The Commander census promotes exactly two exact/trusted/capability-closed cards and removes two material residuals while broader drawn-card actions, hidden casting-process draws, optional reveal-as-drawn choices, and wider replacement grammar remain explicit blockers. |
+| Typed draw-result ordering, drawn-card actions, and reveal-as-drawn | `implemented_current_source_tree` | The current source tree closes bounded CR 121.7 result-generated draw ordering through typed CreateResultDraws operations, independently replaceable nested draw events, producing-effect exclusion under CR 614.5, iterative queueing, suspension/resume, privacy, and exact Game Record v3 replay. Fine-grained CR 121.6c and CR 121.9 capabilities pin post-draw actions and pre-hand-entry mandatory or seat-scoped optional reveals to the exact physical drawn card and live physical source without leaking them onto Dredge, prevented, prohibited, or replacement-result draws. Source-linked reveal riders use ordinary typed APNAP trigger placement. Oracle IR v36 generically lowers Fa'adiyah Seer, Sindbad, Rowen, Primitive Etchings, and current unconditional controller draw doublers. Relative to certified main before these two draw slices, the Commander census promotes exactly four exact/trusted/capability-closed cards and removes four material residuals. Broader drawn-card actions, casting-process face-down draws, reveal qualities and riders outside the closed basic-land/creature draw family, shared-team draw ordinals, hidden-zone type-changing effects, and wider replacement grammar remain explicit blockers. |
 | Active Comprehensive Rules snapshot | `active_on_main` | The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed. |
 | Current Oracle snapshot | `partial` | Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed. |
 
@@ -107,7 +107,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4936
+- Tests discovered: 4947
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31076588097](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31076588097) — `pass`
 - Compile: `pass`
@@ -119,7 +119,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Replay: `pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner`
 - Privacy: `pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner`
 - Semantic preflight: `reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory`
-- Commander CardProgram census: `cards_considered=31623, material_residuals=49942, status_counts={'residual': 30056, 'trusted': 1567}, trust_basis_counts={'capability_closed': 1563, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 30056}`
+- Commander CardProgram census: `cards_considered=31623, material_residuals=49940, status_counts={'residual': 30054, 'trusted': 1569}, trust_basis_counts={'capability_closed': 1565, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 30054}`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
 
@@ -134,7 +134,7 @@ AI/Codex pilot runs are optional client experiments. They are not product, rules
 - traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed
 - most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted
 - represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics; simple battlefield-object Auras now cast, revalidate, enter, attach, and fail closed generically, but player/graveyard/quality/subtype/compound/multiple Enchant grammar, Aura creatures, complete phasing, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally
-- represented draws now use one immutable replacement-aware transaction and iterative coordinator for turn, resolution, conditional, optional-follow-up, and APNAP producers, with generic Dredge, fixed draw CardPrograms, fixed per-turn limits, optional-draw legality, large-count suspension/resume, typed CR 121.7 replacement-result draws, and one closed CR 121.6c public-reveal/discard-unless-land action family; dynamic limits, complete draw-as-cost production, shared-team turns, broader drawn-card actions, casting-process face-down draws, optional reveal-as-drawn choices, and the wider replacement corpus remain incomplete
+- represented draws now use one immutable replacement-aware transaction and iterative coordinator for turn, resolution, conditional, optional-follow-up, and APNAP producers, with generic Dredge, fixed draw CardPrograms, fixed per-turn limits, optional-draw legality, large-count suspension/resume, typed CR 121.7 replacement-result draws, one closed CR 121.6c public-reveal/discard-unless-land action family, and typed CR 121.9 first-draw reveal policies with physical source-linked basic-land or creature draw riders; dynamic limits, complete draw-as-cost production, shared-team turns, broader drawn-card actions, casting-process face-down draws, wider reveal qualities and riders, hidden-zone type-changing effects, and the wider replacement corpus remain incomplete
 - a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence
 - saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit
 - the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction

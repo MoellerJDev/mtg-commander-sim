@@ -11,6 +11,7 @@ from .model import (
     PreparedDrawEvent,
     QueuedDraw,
     RevealDrawnCard,
+    RevealDrawnCardBySource,
     validate_prepared_draw,
 )
 
@@ -29,6 +30,10 @@ class DrawCommitHost(Protocol):
     def apnap_order(self) -> list[str]: ...
 
     def card_record(self, card: CardInstance) -> Any: ...
+
+    def _type_parts(
+        self, type_line: str
+    ) -> tuple[set[str], set[str], set[str]]: ...
 
     def move_card(
         self,
@@ -196,6 +201,67 @@ def _drawn_card_type_line(host: DrawCommitHost, card: CardInstance) -> str:
     )
 
 
+def _apply_source_linked_reveals(
+    host: DrawCommitHost,
+    prepared: PreparedDrawEvent,
+    card: CardInstance,
+    type_line: str,
+) -> None:
+    """Apply CR 121.9 reveals before the drawn card enters its hand."""
+
+    resolution = prepared.resolution
+    if resolution is None:
+        raise DrawError("A pending draw has no reveal-as-drawn actions")
+    for action in resolution.post_draw_actions:
+        if not isinstance(action, RevealDrawnCardBySource):
+            continue
+        source = host.state.cards.get(action.source_object_id)
+        if (
+            source is None
+            or source.ref != action.source_ref
+            or source.logical_object_id != action.source_logical_object_id
+            or source.zone_change_counter
+            != action.source_zone_change_counter
+            or source.zone != "battlefield"
+            or source.phased_out
+        ):
+            raise DrawError(
+                "The source-linked draw reveal changed before commit"
+            )
+        card.revealed_to = sorted(host.state.players)
+        card_types, subtypes, supertypes = host._type_parts(type_line)
+        host._log(
+            resolution.player,
+            "card.draw.reveal",
+            f"{resolution.player} revealed {card.printed_name}.",
+            {
+                "object": card.ref,
+                "card": card.printed_name,
+                "source": source.ref,
+                _REASON_FIELD: resolution.reason,
+            },
+            importance=2,
+            changed_objects=[card.object_id, source.object_id],
+            changed_players=[resolution.player],
+        )
+        host._dispatch_semantic_event(
+            "card.draw.revealed_by_source",
+            {
+                "player": resolution.player,
+                "object": card.ref,
+                "source": source.ref,
+                "reveal_source_object_id": source.object_id,
+                "reveal_source_logical_object_id": (
+                    source.logical_object_id
+                ),
+                "revealed_card_types": sorted(card_types),
+                "revealed_card_subtypes": sorted(subtypes),
+                "revealed_card_supertypes": sorted(supertypes),
+                _REASON_FIELD: resolution.reason,
+            },
+        )
+
+
 def _apply_drawn_card_actions(
     host: DrawCommitHost,
     prepared: PreparedDrawEvent,
@@ -229,6 +295,9 @@ def _apply_drawn_card_actions(
                 changed_objects=[object_id],
                 changed_players=[resolution.player],
             )
+            continue
+        if isinstance(action, RevealDrawnCardBySource):
+            # CR 121.9 actions were applied before the card entered the hand.
             continue
         if isinstance(action, DiscardDrawnCardUnlessType):
             if type_line_has_card_type(type_line, action.card_type):
@@ -288,6 +357,7 @@ def _commit_ordinary_draw(
         if resolution.post_draw_actions
         else ""
     )
+    _apply_source_linked_reveals(host, prepared, card, type_line)
     host.move_card(object_id, "hand", reason=resolution.reason, log=False)
     _record_draw(host, prepared, object_id)
     _apply_drawn_card_actions(host, prepared, object_id, type_line)

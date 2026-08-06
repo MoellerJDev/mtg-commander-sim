@@ -24,6 +24,19 @@ _DRAW_DOUBLE = re.compile(
     r"^If you would draw a card, draw two cards instead\.?$",
     re.IGNORECASE,
 )
+_DRAW_REVEAL_FIRST = re.compile(
+    r"^(?P<sentence>"
+    r"(?:Reveal the first card you draw each turn|"
+    r"Reveal the first card you draw on each of your turns|"
+    r"You may reveal the first card you draw each turn as you draw it)"
+    r"\.)(?:\s+(?P<remainder>.+))?$",
+    re.IGNORECASE,
+)
+_DRAW_REVEAL_LINKED_DRAW = re.compile(
+    r"^Whenever you reveal a (?P<quality>basic land|creature) card "
+    r"this way, draw a card\.?$",
+    re.IGNORECASE,
+)
 
 
 def fixed_draw_effect_template(text: str) -> DrawEffectTemplate | None:
@@ -245,9 +258,97 @@ def static_draw_result_handler(
     )
 
 
+def draw_reveal_line_parts(text: str) -> tuple[str, str] | None:
+    """Split only the closed CR 121.9 first-draw reveal grammar."""
+
+    match = _DRAW_REVEAL_FIRST.fullmatch(text.strip())
+    if match is None:
+        return None
+    return match.group("sentence"), str(match.group("remainder") or "")
+
+
+def static_draw_reveal_handler(
+    text: str,
+) -> tuple[str, Mapping[str, Any], str] | None:
+    """Lower one first-draw reveal policy without interpreting its rider."""
+
+    parts = draw_reveal_line_parts(text)
+    if parts is None or parts[1]:
+        return None
+    sentence = parts[0].casefold()
+    optional = sentence.startswith("you may")
+    controller_turn = "on each of your turns" in sentence
+    return (
+        (
+            "draw-reveal-first-controller-turn-static-v1"
+            if controller_turn
+            else "draw-reveal-first-controller-static-v1"
+        ),
+        {
+            "handler_id": "action.draw.reveal-first.v1",
+            "schema_version": 1,
+            "event": "draw.reveal_as_drawn",
+            "condition": {
+                "affected_player_relation": "source_controller",
+                "turn_relation": (
+                    "source_controller_turn" if controller_turn else "any"
+                ),
+                "draw_ordinal": 1,
+            },
+            "reveal": {"optional": optional, "public": True},
+        },
+        "zone.draw.reveal_as_drawn",
+    )
+
+
+def linked_draw_reveal_condition(
+    text: str,
+) -> tuple[str, Mapping[str, Any]] | None:
+    """Lower the two closed source-linked reveal-and-draw conditions."""
+
+    match = _DRAW_REVEAL_LINKED_DRAW.fullmatch(text.strip())
+    if match is None:
+        return None
+    quality = match.group("quality").casefold()
+    conditions: list[Mapping[str, Any]] = [
+        {
+            "field": "reveal_source_object_id",
+            "op": "eq",
+            "value": "$source.object_id",
+        }
+    ]
+    if quality == "basic land":
+        conditions.extend(
+            (
+                {
+                    "field": "revealed_card_types",
+                    "op": "contains_any",
+                    "value": ["land"],
+                },
+                {
+                    "field": "revealed_card_supertypes",
+                    "op": "contains_any",
+                    "value": ["basic"],
+                },
+            )
+        )
+    else:
+        conditions.append(
+            {
+                "field": "revealed_card_types",
+                "op": "contains_any",
+                "value": ["creature"],
+            }
+        )
+    return quality.replace(" ", "-"), {"all": conditions}
+
+
 __all__ = [
+    "draw_reveal_line_parts",
     "fixed_draw_effect_template",
+    "linked_draw_reveal_condition",
     "static_draw_instruction_handler",
+    "static_draw_reveal_handler",
     "static_draw_result_handler",
     "static_draw_restriction_handler",
 ]

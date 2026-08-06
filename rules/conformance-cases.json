@@ -14095,24 +14095,46 @@
       "status": "blocked"
     },
     {
-      "assertion_kind": "unsupported_fail_closed",
-      "blockers": [
-        "optional reveal-as-drawn choices and their private pre-reveal view are not implemented"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-121.9",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "121"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_mandatory_first_draw_reveals_and_dispatches_only_its_linked_trigger",
+        "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_second_draw_and_non_draw_replacement_do_not_apply_reveal",
+        "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_optional_reveal_is_seat_scoped_and_public_only_after_acceptance",
+        "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_optional_sources_are_chosen_sequentially_and_linked_by_physical_source",
+        "tests.test_draw_reveal_as_drawn.DrawRevealCoordinatorTests.test_optional_reveal_choice_replays_exactly"
+      ],
+      "implementation_components": [
+        "semantic_runtime.DrawRevealFirstHandler",
+        "drawing.DrawRevealDecisionContinuation",
+        "drawing.coordinator.complete_draw_reveal",
+        "drawing.transaction.commit_prepared_draw_result",
+        "compiler.draw_templates.static_draw_reveal_handler"
+      ],
+      "notes": [
+        "The represented policy reveals the exact first card while it is still being drawn, before it enters hand. Mandatory and seat-scoped optional policies pin the live physical battlefield source, preserve private identity until acceptance, and emit source-linked events for the closed basic-land and creature draw riders. Wider reveal-trigger riders remain precise compiler residuals."
+      ],
       "required_scenarios": [
         "positive",
         "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
         "hidden_information"
       ],
       "reviewed": true,
@@ -14124,7 +14146,7 @@
         "end_line": 1175,
         "start_line": 1174
       },
-      "status": "blocked"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",

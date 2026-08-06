@@ -9,7 +9,7 @@
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",
     "represented continuous effects distinguish locked resolution-created sets, live source-bound static membership, and exact relation-bound attached fixed characteristics; simple battlefield-object Auras now cast, revalidate, enter, attach, and fail closed generically, but player/graveyard/quality/subtype/compound/multiple Enchant grammar, Aura creatures, complete phasing, exotic Equip costs, dynamic attached values, player/rules/control-changing effects, broader durations, full dependencies/CDAs, and wider action/combat/copy invalidation remain incomplete; the structural benchmark still records latency observationally",
-    "represented draws now use one immutable replacement-aware transaction and iterative coordinator for turn, resolution, conditional, optional-follow-up, and APNAP producers, with generic Dredge, fixed draw CardPrograms, fixed per-turn limits, optional-draw legality, large-count suspension/resume, typed CR 121.7 replacement-result draws, and one closed CR 121.6c public-reveal/discard-unless-land action family; dynamic limits, complete draw-as-cost production, shared-team turns, broader drawn-card actions, casting-process face-down draws, optional reveal-as-drawn choices, and the wider replacement corpus remain incomplete",
+    "represented draws now use one immutable replacement-aware transaction and iterative coordinator for turn, resolution, conditional, optional-follow-up, and APNAP producers, with generic Dredge, fixed draw CardPrograms, fixed per-turn limits, optional-draw legality, large-count suspension/resume, typed CR 121.7 replacement-result draws, one closed CR 121.6c public-reveal/discard-unless-land action family, and typed CR 121.9 first-draw reveal policies with physical source-linked basic-land or creature draw riders; dynamic limits, complete draw-as-cost production, shared-team turns, broader drawn-card actions, casting-process face-down draws, wider reveal qualities and riders, hidden-zone type-changing effects, and the wider replacement corpus remain incomplete",
     "a fresh full-database manual/browser journey created after a clean current-server restart is still required as broader current-snapshot evidence; compact trusted-only browser evidence now covers target/response handling, combat, concession, natural completion, exact replay, and restart persistence",
     "saved customizable board tabs and denser public-zone dashboard preferences remain incomplete; this is recorded product work, not part of the current architecture audit",
     "the authoritative engine remains a measured oversized legacy module; casting and activation now use dedicated proposal and commit owners, while turn, effect, choice, and variant responsibilities still require incremental extraction",
@@ -21,7 +21,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "bdb84ba094e929d99b1e49612d1ce84e39c53bbd589920d14d42cd84e502de80",
+    "evaluated_source_tree_hash": "dcfc5d75600538641201b0969e5a2ffd30ee94c5ec2ec1aac935e72bc2a00a33",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -258,9 +258,9 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The current source tree closes bounded CR 121.7 result-generated draw ordering through typed CreateResultDraws operations, independently replaceable nested draw events, producing-effect exclusion under CR 614.5, iterative queueing, suspension/resume, privacy, and exact Game Record v3 replay. A separate fine-grained CR 121.6c capability pins typed public-reveal and discard-unless-land actions to the exact physical card drawn without leaking them onto Dredge, prevented, prohibited, or replacement-result draws. Oracle IR v35 generically lowers the closed Fa'adiyah Seer and Sindbad sentence and current unconditional controller draw doublers. The Commander census promotes exactly two exact/trusted/capability-closed cards and removes two material residuals while broader drawn-card actions, hidden casting-process draws, optional reveal-as-drawn choices, and wider replacement grammar remain explicit blockers.",
+      "evidence": "The current source tree closes bounded CR 121.7 result-generated draw ordering through typed CreateResultDraws operations, independently replaceable nested draw events, producing-effect exclusion under CR 614.5, iterative queueing, suspension/resume, privacy, and exact Game Record v3 replay. Fine-grained CR 121.6c and CR 121.9 capabilities pin post-draw actions and pre-hand-entry mandatory or seat-scoped optional reveals to the exact physical drawn card and live physical source without leaking them onto Dredge, prevented, prohibited, or replacement-result draws. Source-linked reveal riders use ordinary typed APNAP trigger placement. Oracle IR v36 generically lowers Fa'adiyah Seer, Sindbad, Rowen, Primitive Etchings, and current unconditional controller draw doublers. Relative to certified main before these two draw slices, the Commander census promotes exactly four exact/trusted/capability-closed cards and removes four material residuals. Broader drawn-card actions, casting-process face-down draws, reveal qualities and riders outside the closed basic-land/creature draw family, shared-team draw ordinals, hidden-zone type-changing effects, and wider replacement grammar remain explicit blockers.",
       "id": "draw_result_ordering_and_drawn_card_actions",
-      "name": "Typed draw-result ordering and specifically-drawn-card actions",
+      "name": "Typed draw-result ordering, drawn-card actions, and reveal-as-drawn",
       "status": "implemented_current_source_tree"
     },
     {
@@ -316,11 +316,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 49942,
+      "material_residuals": 49940,
       "status_counts": {
-        "exact": 1567,
-        "partial": 13636,
-        "unresolved": 16420
+        "exact": 1569,
+        "partial": 13637,
+        "unresolved": 16417
       },
       "total": 31623
     },
@@ -338,18 +338,18 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 57702,
+      "material_residuals": 57700,
       "status_counts": {
-        "exact": 4453,
-        "partial": 14811,
-        "unresolved": 19278
+        "exact": 4455,
+        "partial": 14812,
+        "unresolved": 19275
       },
       "total": 38542
     },
     "rules": {
-      "blocked": 371,
+      "blocked": 370,
       "definition_only": 96,
-      "passing": 176,
+      "passing": 177,
       "total": 3300,
       "unreviewed": 2657
     },
@@ -376,7 +376,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4936,
+    "deterministic_cases_discovered": 4947,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -386,31 +386,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 49942,
+        "material_residuals": 49940,
         "status_counts": {
-          "residual": 30056,
-          "trusted": 1567
+          "residual": 30054,
+          "trusted": 1569
         },
         "trust_basis_counts": {
-          "capability_closed": 1563,
+          "capability_closed": 1565,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 30056
+          "unresolved": 30054
         }
       },
       "full": {
         "cards_considered": 38542,
-        "material_residuals": 57698,
+        "material_residuals": 57696,
         "status_counts": {
           "failed": 2248,
-          "residual": 34086,
-          "trusted": 2208
+          "residual": 34084,
+          "trusted": 2210
         },
         "trust_basis_counts": {
-          "capability_closed": 2204,
+          "capability_closed": 2206,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 34086
+          "unresolved": 34084
         }
       }
     },
