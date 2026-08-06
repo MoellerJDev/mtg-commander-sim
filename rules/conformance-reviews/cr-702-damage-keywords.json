@@ -67,7 +67,7 @@
       "status": "passing",
       "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": ["mtg_commander_sim.damage.source_snapshot", "mtg_commander_sim.deathtouch.deathtouch_damage_result_applies"],
+      "implementation_components": ["mtg_commander_sim.damage_source.DamageSourceSnapshot", "mtg_commander_sim.deathtouch.deathtouch_damage_result_applies"],
       "executable_test_ids": ["tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"],
       "required_scenarios": ["positive", "zone_change"],
       "covered_scenarios": ["positive", "zone_change"],
