@@ -125,6 +125,22 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_color_set_mana_respects_haste_cost_dependency",
+      "piece_ids": ["capability.activation.tap_untap_cost.haste", "capability.mana.activated.color_set", "mechanic.haste"],
+      "capability_ids": ["activation.tap_untap_cost.haste", "mana.activated.color_set"],
+      "interaction_order": 3,
+      "assertion": "A creature's typed color-set mana ability consumes the shared current Haste exception before its tap cost can be paid."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_actual_mox_offer_and_command_share_current_color_modes",
+      "piece_ids": ["capability.mana.activated.color_set", "compiler.template.activated-mana-color-set-v1", "runtime.operation.ability.activated.mana.color-set"],
+      "capability_ids": ["mana.activated.color_set"],
+      "interaction_order": 3,
+      "assertion": "The source-spanned color-set mana compiler descriptor drives the same current modes for projected offers and accepted runtime activation."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_live_generic_equipment_effect_moves_detaches_and_tracks_control",
       "piece_ids": ["capability.attachment.equip.fixed_mana", "capability.continuous.attached.fixed_characteristics"],
       "capability_ids": ["attachment.equip.fixed_mana", "continuous.attached.fixed_characteristics"],

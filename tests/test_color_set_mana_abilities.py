@@ -404,7 +404,7 @@ class ColorSetManaRuntimeTests(unittest.TestCase):
             and action.get("ability") == ability.ability_id
         )
 
-        self.assertNotIn("choices", offer)
+        self.assertNotIn("choice_schema", offer)
         self.assertEqual([{}], self._nonzero_modes(engine, "A", source, ability))
         self.assertNotIn(
             source.ref,
@@ -454,6 +454,48 @@ class ColorSetManaRuntimeTests(unittest.TestCase):
                 for mode in mana_source.modes
             ],
         )
+
+    def test_actual_mox_offer_and_command_share_current_color_modes(self):
+        session = self.session(10615)
+        engine = session.engine
+        source, ability = self._install_actual_mox(session)
+        legend = self._card(engine, "Mishra, Eminent One", owner="A")
+        engine.move_card(
+            legend.object_id,
+            "battlefield",
+            controller="A",
+            tapped=False,
+            log=False,
+        )
+
+        offer = next(
+            action
+            for action in engine._priority_action_hints("A")["actions"]
+            if action.get("source") == source.ref
+            and action.get("ability") == ability.ability_id
+        )
+        self.assertEqual(
+            [{"U": 1}, {"B": 1}, {"R": 1}],
+            [
+                option["value"]
+                for option in offer["choice_schema"]["mana_output"]["options"]
+            ],
+        )
+
+        before = engine.state.players["A"].mana_pool["B"]
+        result = session.act(
+            "pilot:A",
+            {
+                "a": "activate",
+                "source": source.ref,
+                "ability": ability.ability_id,
+                "mana_output": {"B": 1},
+            },
+        )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertTrue(source.tapped)
+        self.assertEqual(before + 1, engine.state.players["A"].mana_pool["B"])
 
     def test_mox_amber_advertises_only_current_qualifying_colors(self):
         session = self.session(10602)
