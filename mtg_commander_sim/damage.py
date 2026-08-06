@@ -30,6 +30,7 @@ from .damage_values import (
     DamageRecipientSnapshot,
     DamageSourceSnapshot,
 )
+from .deathtouch import DeathtouchError, deathtouch_damage_result_applies
 from .commander import CommanderIdentityError, commander_damage_key
 from .combat_damage_events import (
     canonical_combat_assignment_values,
@@ -569,7 +570,6 @@ def damage_proposal(
     combat: bool,
     reason: str,
     unpreventable: bool = False,
-    deathtouch: bool = False,
     damage_step: int | None = None,
     first_strike_step: bool = False,
     source_override: DamageSourceSnapshot | None = None,
@@ -590,7 +590,6 @@ def damage_proposal(
         combat=combat,
         reason=reason,
         unpreventable=unpreventable,
-        deathtouch=deathtouch,
         damage_step=damage_step,
         first_strike_step=first_strike_step,
     )
@@ -699,7 +698,6 @@ def combat_damage_proposals(
                 amount=amount,
                 combat=True,
                 reason="combat damage",
-                deathtouch="deathtouch" in host._combat_keywords(source),
                 damage_step=host.state.combat.damage_step_index + 1,
                 first_strike_step=host.state.combat.first_strike_step,
             )
@@ -962,12 +960,13 @@ def apply_damage_results_to_permanent(
     card: Any,
     amount: int,
     *,
-    deathtouch: bool = False,
     source_keywords: Sequence[str] = (),
 ) -> dict[str, Any]:
     """Commit the represented CR 120.3 permanent results at one owner."""
 
-    damage = int(amount)
+    if type(amount) is not int:
+        raise DamageError("Damage must be an integer")
+    damage = amount
     if damage < 0:
         raise DamageError("Damage cannot be negative")
     data = host._effective_card_data(card)
@@ -993,7 +992,14 @@ def apply_damage_results_to_permanent(
     mark_damage = 0
     mark_deathtouch = False
     if "creature" in card_types:
-        mark_deathtouch = deathtouch
+        try:
+            mark_deathtouch = deathtouch_damage_result_applies(
+                amount=damage,
+                source_keywords=source_keywords,
+                target_types=card_types,
+            )
+        except DeathtouchError as exc:
+            raise DamageError(str(exc)) from exc
         if keywords.intersection({"infect", "wither"}):
             counter_changes.append(
                 CounterChange(

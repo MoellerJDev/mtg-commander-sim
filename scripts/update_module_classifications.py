@@ -130,6 +130,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/damage_transaction.py",
         "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
+        "mtg_commander_sim/deathtouch.py",
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
         "mtg_commander_sim/delayed_triggers.py",
@@ -263,6 +264,7 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/damage_transaction.py",
         "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
+        "mtg_commander_sim/deathtouch.py",
     }:
         return "damage"
     if relative.startswith("mtg_commander_sim/combat_damage_") or relative in {

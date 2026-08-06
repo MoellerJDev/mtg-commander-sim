@@ -92,10 +92,18 @@
     {
       "evidence_class": "interaction",
       "test_id": "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
-      "piece_ids": ["capability.combat.damage.assignment.trample", "mechanic.deathtouch", "mechanic.trample"],
-      "capability_ids": ["combat.damage.assignment.trample"],
-      "interaction_order": 3,
+      "piece_ids": ["capability.combat.damage.assignment.deathtouch", "capability.combat.damage.assignment.trample", "mechanic.deathtouch", "mechanic.trample"],
+      "capability_ids": ["combat.damage.assignment.deathtouch", "combat.damage.assignment.trample"],
+      "interaction_order": 4,
       "assertion": "Deathtouch changes ordinary Trample's lethal-assignment threshold while marked damage remains part of that threshold."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_indestructible_consumes_deathtouch_at_the_first_sba_check",
+      "piece_ids": ["capability.damage.result.deathtouch", "mechanic.deathtouch", "mechanic.indestructible"],
+      "capability_ids": ["damage.result.deathtouch"],
+      "interaction_order": 3,
+      "assertion": "Indestructible prevents the tested Deathtouch destruction while the since-last-SBA marker is consumed exactly once."
     },
     {
       "evidence_class": "interaction",
@@ -128,6 +136,14 @@
       "capability_ids": ["damage.result.infect"],
       "interaction_order": 3,
       "assertion": "Infect replaces the ordinary CR 120 player or creature result with the correct counter result."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_wither_damage_still_records_deathtouch_result",
+      "piece_ids": ["capability.damage.result.deathtouch", "capability.damage.result.wither", "mechanic.deathtouch", "mechanic.wither"],
+      "capability_ids": ["damage.result.deathtouch", "damage.result.wither"],
+      "interaction_order": 4,
+      "assertion": "Wither routes damage through canonical minus-counter placement without suppressing the independent Deathtouch damage result."
     },
     {
       "evidence_class": "interaction",

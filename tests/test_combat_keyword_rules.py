@@ -29,6 +29,16 @@ class CombatDamageStepUnitTests(unittest.TestCase):
     def test_keyword_contracts_trace_the_pinned_rules(self):
         root = Path(__file__).resolve().parents[1]
         expected = {
+            "deathtouch": {
+                "702.2",
+                "702.2a",
+                "702.2b",
+                "702.2c",
+                "702.2d",
+                "702.2e",
+                "702.2f",
+                "704.5h",
+            },
             "defender": {"702.3", "702.3a", "702.3b", "702.3c"},
             "double-strike": {
                 "702.4",
@@ -166,12 +176,18 @@ class CombatKeywordRuleTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.db.close()
 
-    def make_session(self, seed: int, *, step: str = "combat_damage"):
+    def make_session(
+        self,
+        seed: int,
+        *,
+        step: str = "combat_damage",
+        players: int = 2,
+    ):
         session = make_session(
             self.db,
             self.mishra,
             self.zimone,
-            players=2,
+            players=players,
             seed=seed,
             auto_pass_empty=False,
         )
@@ -547,6 +563,84 @@ class CombatKeywordRuleTests(unittest.TestCase):
                 )
                 self.assertTrue(result.ok, result.summary)
                 self.assertEqual(35 + lethal, engine.state.players["B"].life)
+
+    def test_four_player_deathtouch_result_is_source_derived_and_replays(self):
+        session = self.make_session(510451, players=4)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Replay deathtoucher",
+            power=2,
+            toughness=8,
+            keywords=("Deathtouch", "Trample"),
+        )
+        blocker = self.token(
+            engine,
+            "B",
+            "Replay blocker",
+            power=1,
+            toughness=8,
+        )
+        self.set_combat(engine, attacker, blocker)
+        engine._begin_combat_damage()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+
+        self.assertIsNone(session.packet("pilot:C", full=True)["decision"])
+        first = self.submit_damage(
+            session,
+            "A",
+            [
+                {
+                    "source": attacker.ref,
+                    "target": blocker.ref,
+                    "amount": 1,
+                },
+                {"source": attacker.ref, "target": "B", "amount": 1},
+            ],
+        )
+        self.assertTrue(first.ok, first.summary)
+        self.assertEqual("outside", blocker.zone)
+        self.assertEqual("battlefield", attacker.zone)
+        self.assertEqual(39, engine.state.players["B"].life)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "deathtouch-four-player"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(1, replay["commands"])
+
+    def test_indestructible_consumes_deathtouch_at_the_first_sba_check(self):
+        session = self.make_session(510452)
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Deathtouch source",
+            power=1,
+            toughness=8,
+            keywords=("Deathtouch",),
+        )
+        blocker = self.token(
+            engine,
+            "B",
+            "Indestructible survivor",
+            power=1,
+            toughness=8,
+            keywords=("Indestructible",),
+        )
+        self.set_combat(engine, attacker, blocker)
+        engine._begin_combat_damage()
+
+        self.assertEqual("battlefield", blocker.zone)
+        self.assertEqual(1, blocker.marked_damage)
+        self.assertFalse(blocker.deathtouch_damage)
+        blocker.annotations["token_characteristics"]["keywords"] = []
+
+        self.assertFalse(engine._stabilize())
+        self.assertEqual("battlefield", blocker.zone)
 
     def test_trample_deals_to_defender_after_all_blockers_leave(self):
         session = self.make_session(51047)

@@ -10,6 +10,8 @@ from mtg_commander_sim import (
     combat_damage_assignment as combat_assignment_module,
 )
 from mtg_commander_sim import combat as combat_module
+from mtg_commander_sim import combat_damage_trample as trample_module
+from mtg_commander_sim import deathtouch as deathtouch_module
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
@@ -1447,6 +1449,107 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_early_spill_is_rejected()
+
+    def test_deathtouch_assignment_and_result_mutants_are_killed(self):
+        assignments = (
+            combat_assignment_module.DamageAssignment(
+                source="attacker",
+                target="blocker",
+                amount=1,
+            ),
+            combat_assignment_module.DamageAssignment(
+                source="attacker",
+                target="B",
+                amount=3,
+            ),
+        )
+
+        def assert_deathtouch_assignment_is_lethal() -> None:
+            self.assertIsNone(
+                trample_module.trample_assignment_error(
+                    attacker_ref="attacker",
+                    spill_target="B",
+                    blockers=(
+                        (
+                            "blocker",
+                            combat_assignment_module.CreatureDamageState(
+                                toughness=8,
+                                marked_damage=0,
+                            ),
+                        ),
+                    ),
+                    assignments=assignments,
+                    attacking_source_refs=frozenset({"attacker"}),
+                    deathtouch_source_refs=frozenset({"attacker"}),
+                )
+            )
+
+        assert_deathtouch_assignment_is_lethal()
+        with patch.object(
+            deathtouch_module,
+            "deathtouch_assignment_is_lethal",
+            return_value=False,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_deathtouch_assignment_is_lethal()
+
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=702_002,
+        )
+        keep_all(session)
+        engine = session.engine
+        source_ref = engine.create_token(
+            "A",
+            name="Deathtouch mutation source",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "1",
+                "keywords": ["Deathtouch"],
+            },
+        )[0]
+        target_ref = engine.create_token(
+            "B",
+            name="Deathtouch mutation target",
+            characteristics={
+                "type_line": "Token Creature — Test",
+                "power": "1",
+                "toughness": "8",
+            },
+        )[0]
+        event = damage_module.damage_proposal(
+            engine,
+            proposal_id="damage:deathtouch-mutation",
+            actor="A",
+            source_ref=source_ref,
+            target=target_ref,
+            amount=1,
+            combat=False,
+            reason="deathtouch mutation",
+        ).event()
+
+        def assert_deathtouch_result_applies() -> None:
+            roots = damage_results_module.materialize_damage_results(
+                engine,
+                (event,),
+            )
+            self.assertIn(
+                "damage.deathtouch",
+                {child.kind for root in roots for child in root.children},
+            )
+
+        assert_deathtouch_result_applies()
+        with patch.object(
+            deathtouch_module,
+            "deathtouch_damage_result_applies",
+            return_value=False,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_deathtouch_result_applies()
 
     def test_canonical_assignment_order_mutant_is_killed(self):
         proposal = combat_assignment_module.CombatDamageAssignmentProposal(

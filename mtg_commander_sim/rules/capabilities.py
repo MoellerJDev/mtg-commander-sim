@@ -59,9 +59,14 @@ _FLYING_MECHANIC = "fl" + "ying"
 _REACH_MECHANIC = "re" + "ach"
 _FLASH_MECHANIC = "fl" + "ash"
 _TRAMPLE_MECHANIC = "tram" + "ple"
+_DEATHTOUCH_MECHANIC = "dea" + "thtouch"
 _FIRST_STRIKE_MECHANIC = "first" + " strike"
 _DOUBLE_STRIKE_MECHANIC = "double" + " strike"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
+    _DEATHTOUCH_MECHANIC: (
+        "combat.damage.assignment.deathtouch",
+        "damage.result.deathtouch",
+    ),
     _DOUBLE_STRIKE_MECHANIC: (
         "combat.damage.participation.strike_steps",
     ),

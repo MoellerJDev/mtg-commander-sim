@@ -196,7 +196,6 @@ class DamageResultEventTests(unittest.TestCase):
         *,
         event_id: str,
         combat: bool = False,
-        deathtouch: bool = False,
     ):
         return damage_proposal(
             engine,
@@ -207,7 +206,6 @@ class DamageResultEventTests(unittest.TestCase):
             amount=amount,
             combat=combat,
             reason="damage-result witness",
-            deathtouch=deathtouch,
         )
 
     def commit(self, engine, *proposals):
@@ -728,7 +726,12 @@ class DamageResultEventTests(unittest.TestCase):
 
     def test_wither_damage_still_records_deathtouch_result(self):
         engine = self.session(120_300_008).engine
-        source = self.token(engine, "A", "Wither Source", keywords=("Wither",))
+        source = self.token(
+            engine,
+            "A",
+            "Wither Source",
+            keywords=("Wither", "Deathtouch"),
+        )
         target = self.token(engine, "B", "Target", toughness=8)
 
         self.commit(
@@ -739,13 +742,78 @@ class DamageResultEventTests(unittest.TestCase):
                 target,
                 1,
                 event_id="damage:wither-deathtouch",
-                deathtouch=True,
             ),
         )
 
         self.assertEqual(1, target.counters["-1/-1"])
         self.assertEqual(0, target.marked_damage)
         self.assertTrue(target.deathtouch_damage)
+
+    def test_noncombat_deathtouch_uses_pinned_source_lki(self):
+        engine = self.session(120_300_018).engine
+        source = self.token(
+            engine,
+            "A",
+            "Departing Deathtouch Source",
+            keywords=("Deathtouch", "DEATHTOUCH"),
+        )
+        target = self.token(engine, "B", "LKI Target", toughness=8)
+        proposal = self.proposal(
+            engine,
+            source,
+            target,
+            1,
+            event_id="damage:deathtouch-lki",
+            combat=False,
+        )
+        source.controller = "B"
+        engine.move_card(
+            source.object_id,
+            "graveyard",
+            log=False,
+            semantic_events=False,
+        )
+
+        event = proposal.event()
+        result = self.commit(engine, proposal)
+
+        self.assertTrue(event.payload["deathtouch"])
+        self.assertEqual("A", event.payload["source_controller"])
+        self.assertEqual(["deathtouch"], list(event.payload["source_keywords"]))
+        self.assertTrue(target.deathtouch_damage)
+        self.assertIn(
+            "damage.deathtouch",
+            {record.kind for record in result.result_events},
+        )
+
+    def test_legacy_event_flag_cannot_grant_deathtouch(self):
+        engine = self.session(120_300_019).engine
+        source = self.token(engine, "A", "Ordinary Source")
+        target = self.token(engine, "B", "Ordinary Target", toughness=8)
+        event = self.proposal(
+            engine,
+            source,
+            target,
+            1,
+            event_id="damage:forged-deathtouch-flag",
+        ).event()
+        forged = ReplaceableEvent(
+            event_id=event.event_id,
+            kind=event.kind,
+            affected_player=event.affected_player,
+            affected_object=event.affected_object,
+            payload={**dict(event.payload), "deathtouch": True},
+        )
+
+        prepared = prepare_damage_results(engine, (forged,), effects=())
+        plan = plan_damage_result_commit(engine, prepared)
+        commit = commit_damage_result_plan(engine, plan)
+
+        self.assertFalse(target.deathtouch_damage)
+        self.assertNotIn(
+            "damage.deathtouch",
+            {record.kind for record in commit.records},
+        )
 
     def test_containing_result_replacement_precedes_life_gain_replacement(self):
         engine = self.session(120_400_001).engine

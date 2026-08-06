@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
+from .deathtouch import source_has_deathtouch
 from .damage_source import DamageError, DamageSourceSnapshot
 from .replacement_effects import AffectedObject, ReplaceableEvent
 
@@ -76,7 +77,6 @@ class DamageProposal:
     combat: bool
     reason: str
     unpreventable: bool = False
-    deathtouch: bool = False
     damage_step: int | None = None
     first_strike_step: bool = False
 
@@ -141,7 +141,9 @@ class DamageProposal:
             "combat": self.combat,
             _DAMAGE_REASON_FIELD: self.reason,
             "unpreventable": self.unpreventable,
-            "deathtouch": self.deathtouch,
+            # Retain this additive payload field for historical pending-event
+            # compatibility, but derive it from the pinned source snapshot.
+            "deathtouch": source_has_deathtouch(self.source),
             "damage_step": self.damage_step,
             "first_strike_step": self.first_strike_step,
         }

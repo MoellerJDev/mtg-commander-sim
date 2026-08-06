@@ -11,6 +11,22 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Typed Deathtouch assignment and result
+
+- Added a reusable Deathtouch rules owner for positive lethal combat-damage
+  assignment and source-snapshot-derived damage results. Callers can no longer
+  make damage deathtouch by supplying an unchecked effect flag.
+- Routed combat and noncombat Deathtouch through the canonical damage batch,
+  including source last-known information, Wither/Infect counter results,
+  four-player assignment, replay, and precise interaction evidence.
+- Corrected the state-based result lifetime: a Deathtouch-damage marker is
+  consumed after the next state-based-action check even when Indestructible
+  prevents destruction. Regeneration and unsupported characteristic producers
+  remain explicit aggregate-mechanic blockers.
+- Printed Deathtouch now declares fine-grained assignment and result
+  capabilities through generic CardProgram lowering. Current card promotions
+  and residual changes remain generated rather than copied into this file.
+
 ### Typed ordinary-Trample assignment
 
 - Extracted combat-damage state projection and division from `CommanderEngine`

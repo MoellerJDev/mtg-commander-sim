@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 704 — Deathtouch state-based destruction",
+  "cases": [
+    {
+      "rule_id": "704.5h",
+      "rule_text_sha256": "adcb9cf8f4b64e7901e57a88f1f9c5901552b0aad784ac2007fce453cd5e5eca",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions", "mtg_commander_sim.damage_results.consume_deathtouch_damage_checks"],
+      "executable_test_ids": ["tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_check_destroys_only_destructible_positive_toughness_creature", "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_indestructible_consumes_deathtouch_at_the_first_sba_check", "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "blockers": ["regeneration replacement of the destruction event is not implemented"],
+      "notes": ["Destructible positive-toughness creatures are destroyed; indestructible creatures survive and the since-last-check marker is consumed atomically."]
+    }
+  ]
+}

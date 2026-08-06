@@ -64,7 +64,7 @@
       "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
+        "damage.apply_damage_results_to_permanent",
         "CommanderEngine._type_parts"
       ],
       "executable_test_ids": [
@@ -679,7 +679,7 @@
       "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._apply_damage_results_to_permanent",
+        "damage.apply_damage_results_to_permanent",
         "evaluate_permanent_state_based_actions",
         "CommanderEngine._stabilize"
       ],
@@ -843,7 +843,7 @@
       "reviewed": true,
       "implementation_components": [
         "CommanderEngine._numeric_stat",
-        "CommanderEngine._apply_damage_results_to_permanent"
+        "damage.apply_damage_results_to_permanent"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_damage_to_multityped_permanent_applies_every_result"

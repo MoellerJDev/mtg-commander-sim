@@ -1,51 +1,39 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "deathtouch",
   "official_name": "Deathtouch",
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "rule_references": ["702.2", "702.2a", "702.2b", "702.2c", "702.2d", "702.2e", "702.2f", "704.5h"],
   "glossary_references": ["deathtouch"],
-  "dependencies": ["damage", "state-based-actions", "continuous-effects"],
-  "coverage_status": "partial",
+  "dependencies": ["damage", "combat-damage-step", "state-based-actions", "indestructible", "continuous-effects", "last-known-information"],
+  "coverage_status": "tested",
   "trust_level": "untrusted",
   "behavior": {
-    "zones": ["battlefield"],
-    "objects": ["creature source", "creature dealt damage"],
-    "events": ["damage dealt", "state-based actions"],
-    "state_reads": ["source current deathtouch ability", "positive damage dealt or assigned"],
-    "state_writes": ["mark recipient as damaged by a deathtouch source"],
+    "zones": ["any represented damage-source zone"],
+    "objects": ["combat or noncombat damage source", "damaged creature", "combat damage assignee"],
+    "events": ["canonical combat damage assignment", "final positive damage result", "state-based-action check"],
+    "state_reads": ["pinned source keywords", "source logical identity and controller", "current creature toughness", "current indestructible state", "other simultaneous combat assignments"],
+    "state_writes": ["deathtouch-damage-since-last-check marker", "state-based destruction", "one-check marker consumption"],
     "costs": [],
-    "timing": ["state-based actions after damage"],
+    "timing": ["positive combat assignment is lethal before damage is dealt", "positive dealt damage is checked at the next state-based-action check"],
     "targets": [],
-    "choices": ["positive combat damage assigned by a deathtouch source counts as lethal for trample"],
+    "choices": ["the assigning controller divides combat damage through the canonical proposal"],
     "hidden_information": [],
-    "apnap": [],
-    "layers": ["ability-adding/removing effects determine source state"],
-    "replacement_effects": ["prevented or replaced damage does not count as dealt"],
-    "copy": ["copiable keyword state may differ from printed keywords"],
-    "control_change": [],
-    "zone_change": ["last known source characteristics may be required"],
-    "source_leaves": ["damage remembers whether its source had deathtouch"]
+    "apnap": ["combat assignments and replacement choices retain canonical APNAP order"],
+    "layers": ["current represented abilities determine assignment; pinned source abilities determine the damage result"],
+    "replacement_effects": ["prevented damage creates no deathtouch result", "regeneration of the destruction event remains outside this bounded capability"],
+    "copy": ["represented copiable characteristics may supply deathtouch"],
+    "control_change": ["the source controller does not change deathtouch's lethal result"],
+    "zone_change": ["the pinned source snapshot preserves represented last-known deathtouch"],
+    "source_leaves": ["a prepared noncombat damage event retains the source's deathtouch after departure"]
   },
-  "variants": ["state-based destruction", "trample lethal assignment", "multiple instances are redundant"],
-  "witness_cards": [
-    {
-      "name": "Gifted Aetherborn",
-      "oracle_id": "c602bca9-b7c9-47ca-920d-e6df9b94a90f"
-    }
-  ],
+  "variants": ["combat assignment", "noncombat damage", "source leaves", "wither or infect result", "indestructible recipient", "prevented or zero damage", "multiple instances are redundant"],
+  "witness_cards": [],
   "rulings": [],
-  "test_ids": ["test_deathtouch_is_derived_from_source_not_pilot_claim", "test_deathtouch_and_marked_damage_each_reduce_trample_lethal"],
-  "implementation": {
-    "component": "CommanderEngine.combat_damage and CommanderEngine._stabilize",
-    "version": "combat-keywords-v2"
-  },
-  "known_blockers": [
-    "full continuous-effect layers and last-known-information",
-    "complete replacement and prevention ordering",
-    "complete combat assignment edge cases"
-  ],
-  "review_status": "draft"
+  "test_ids": ["test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_deathtouch_damage_from_another_attacker_is_lethal", "test_zero_deathtouch_assignment_is_not_lethal", "test_noncombat_deathtouch_uses_pinned_source_lki", "test_legacy_event_flag_cannot_grant_deathtouch", "test_persisted_marker_and_check_collection_fail_closed", "test_wither_damage_still_records_deathtouch_result", "test_indestructible_consumes_deathtouch_at_the_first_sba_check", "test_stale_check_batch_rolls_back_without_consuming_any_marker", "test_four_player_deathtouch_result_is_source_derived_and_replays", "test_deathtouch_assignment_and_result_mutants_are_killed"],
+  "implementation": {"component": "mtg_commander_sim.deathtouch", "version": "deathtouch-assignment-result-v1"},
+  "known_blockers": ["regeneration is not implemented", "unsupported continuous-effect, copy, face-down, and ability-changing producers remain fail-closed"],
+  "review_status": "reviewed"
 }

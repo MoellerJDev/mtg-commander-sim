@@ -335,30 +335,25 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "deathtouch-assignment-and-result-closure",
+    "batch_id": "defender-attack-restriction-closure",
     "subsystem_id": "keyword-abilities",
     "rule_ids": [
-      "702.2",
-      "702.2a",
-      "702.2b",
-      "702.2c",
-      "702.2d",
-      "702.2e",
-      "702.2f"
+      "702.3",
+      "702.3a",
+      "702.3b",
+      "702.3c"
     ],
     "target_capability_ids": [
-      "combat.damage.assignment.canonical",
-      "damage.amount.positive",
-      "damage.result.deathtouch"
+      "combat.attack.defender"
     ],
-    "rationale": "CR 121.9 is now closed while CR 121.8 remains blocked on casting-process and side-effecting mana-ability prerequisites. The immutable combat snapshot, canonical assignment owner, typed damage results, prevention boundary, and strike-step participation foundation make ordinary Deathtouch the next dependency-ready medium-risk harvest. The pinned Commander frontier records 333 affected cards and 45 sole-blocker cards.",
+    "rationale": "The ordinary attack-declaration, effective-keyword, replay, and multiplayer foundations already expose one legacy Defender restriction without a trusted typed capability owner. The refreshed pinned Commander frontier records 304 affected cards, 42 sole-blocker cards, and 301 material residuals, making bounded ordinary Defender the next dependency-ready medium-risk combat harvest.",
     "exit_criteria": [
-      "Represent Deathtouch lethal assignment and actual positive damage dealt as distinct typed facts.",
-      "Use the source snapshot or required last-known information so source departure and control changes cannot erase or invent Deathtouch.",
-      "Ensure prevented or replaced-away damage does not create the Deathtouch state-based-action result.",
-      "Treat multiple Deathtouch instances as redundant and reject pilot-supplied keyword claims.",
-      "Route the linked CR 704.5h state-based destruction result through the canonical stabilization owner with exact replay, rollback, multiplayer, interaction, and mutation evidence.",
-      "Lower the ordinary keyword generically into CardProgram V2 and keep unsupported ability-changing, copy, face-down, and assignment-modifier interactions explicit residuals."
+      "Introduce one typed read-only Defender attack-restriction query shared by advertised attacker candidates and accepted declarations.",
+      "Evaluate current represented creature type, controller, and effective keyword state without printed-name or runtime Oracle-text behavior.",
+      "Treat multiple Defender instances as redundant and reject malformed or caller-invented keyword facts before mutation.",
+      "Preserve exact replay, rollback, four-player seat projection, interaction, property, and killed-mutation evidence.",
+      "Lower the ordinary keyword generically into CardProgram V2 with precise source spans and capability closure.",
+      "Keep ability-changing, copy, face-down, attack-permission, and the broader CR 508 restrictions-and-requirements solver explicit residuals."
     ]
   }
 }

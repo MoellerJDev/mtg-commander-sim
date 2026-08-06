@@ -100,8 +100,8 @@
     {
       "mechanic_id": "deathtouch",
       "path": "mechanics/contracts/deathtouch.json",
-      "sha256": "b6136559ddad94bbb5dcdd5390ded0b64ee775cf775f10f21f6562b1259f9162",
-      "version": 2
+      "sha256": "fbcbb443817b5946dbdac31657fecbe041e25ba8c521f7ccf9dfc4a9220a1c93",
+      "version": 3
     },
     {
       "mechanic_id": "cr-508-declare-attackers-step",
@@ -124,7 +124,7 @@
     {
       "mechanic_id": "cr-210-defense",
       "path": "mechanics/contracts/defense.json",
-      "sha256": "d91f723c5f4cc92a3201fb51ef88145a896e08f1dc967e3bb89e122294f6e6f4",
+      "sha256": "5bc419ca9499b6c21eb2624c21ed8272a3db797548862be02f5e7d48d6432be9",
       "version": 2
     },
     {
@@ -1096,19 +1096,18 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/deathtouch.json",
-      "contract_sha256": "b6136559ddad94bbb5dcdd5390ded0b64ee775cf775f10f21f6562b1259f9162",
-      "contract_version": 2,
-      "coverage_status": "partial",
+      "contract_sha256": "fbcbb443817b5946dbdac31657fecbe041e25ba8c521f7ccf9dfc4a9220a1c93",
+      "contract_version": 3,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "CommanderEngine.combat_damage and CommanderEngine._stabilize",
-      "implementation_version": "combat-keywords-v2",
+      "implementation_component": "mtg_commander_sim.deathtouch",
+      "implementation_version": "deathtouch-assignment-result-v1",
       "kind": "keyword_ability",
       "known_blockers": [
-        "full continuous-effect layers and last-known-information",
-        "complete replacement and prevention ordering",
-        "complete combat assignment edge cases"
+        "regeneration is not implemented",
+        "unsupported continuous-effect, copy, face-down, and ability-changing producers remain fail-closed"
       ],
       "mechanic_id": "deathtouch",
       "official_name": "Deathtouch",
@@ -1116,8 +1115,17 @@
         "702.2"
       ],
       "test_ids": [
-        "test_deathtouch_is_derived_from_source_not_pilot_claim",
-        "test_deathtouch_and_marked_damage_each_reduce_trample_lethal"
+        "test_deathtouch_and_marked_damage_each_reduce_trample_lethal",
+        "test_deathtouch_damage_from_another_attacker_is_lethal",
+        "test_zero_deathtouch_assignment_is_not_lethal",
+        "test_noncombat_deathtouch_uses_pinned_source_lki",
+        "test_legacy_event_flag_cannot_grant_deathtouch",
+        "test_persisted_marker_and_check_collection_fail_closed",
+        "test_wither_damage_still_records_deathtouch_result",
+        "test_indestructible_consumes_deathtouch_at_the_first_sba_check",
+        "test_stale_check_batch_rolls_back_without_consuming_any_marker",
+        "test_four_player_deathtouch_result_is_source_derived_and_replays",
+        "test_deathtouch_assignment_and_result_mutants_are_killed"
       ],
       "trust_level": "untrusted"
     },
@@ -6040,11 +6048,11 @@
     {
       "category": "card_characteristics",
       "contract_path": "mechanics/contracts/defense.json",
-      "contract_sha256": "d91f723c5f4cc92a3201fb51ef88145a896e08f1dc967e3bb89e122294f6e6f4",
+      "contract_sha256": "5bc419ca9499b6c21eb2624c21ed8272a3db797548862be02f5e7d48d6432be9",
       "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CharacteristicState, CommanderEngine._initialize_intrinsic_entry_counters, and CommanderEngine._apply_damage_results_to_permanent",
+      "implementation_component": "CharacteristicState, CommanderEngine._initialize_intrinsic_entry_counters, and damage.apply_damage_results_to_permanent",
       "implementation_version": "defense-v2",
       "kind": "rules_section",
       "known_blockers": [

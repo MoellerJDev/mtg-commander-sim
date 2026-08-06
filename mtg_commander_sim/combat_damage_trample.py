@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 from .combat_damage_values import CreatureDamageState, DamageAssignment
+from . import deathtouch as deathtouch_rules
 
 
 def trample_assignment_error(
@@ -35,7 +36,11 @@ def trample_assignment_error(
         assigned_amount = sum(assignment.amount for assignment in assigned)
         lethal = (
             any(
-                assignment.source in deathtouch_source_refs
+                deathtouch_rules.deathtouch_assignment_is_lethal(
+                    source=assignment.source,
+                    amount=assignment.amount,
+                    deathtouch_sources=deathtouch_source_refs,
+                )
                 for assignment in assigned
             )
             or state.marked_damage + assigned_amount >= state.toughness

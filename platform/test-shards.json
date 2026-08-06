@@ -107,6 +107,7 @@
       "test_combat_damage_snapshot",
       "test_combat_keyword_rules",
       "test_damage_result_events",
+      "test_deathtouch_rules",
       "test_exact_combat_keywords",
       "test_state_based_actions",
       "test_trample_assignment_integration"

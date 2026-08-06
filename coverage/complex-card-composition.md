@@ -2,7 +2,7 @@
 title: "Complex card composition benchmark"
 status: "generated"
 authoritative_source: "coverage/complex-card-composition.json"
-verified: "b19031640ca4f10d66a3314922ce0b558df483226a778e95350797062fbbe9ef"
+verified: "72da76e2bd7f41e869fb243d0777410945ec23df26857a18cd2a54f1921461b0"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -25,22 +25,22 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Clive, Ifrit's Dominant // Ifrit, Warden of Inferno | 180 | 14 | 5 | 5 | 9 | 21 | `blocked` |
 | Invasion of Zendikar // Awakened Skyclave | 178 | 20 | 5 | 5 | 6 | 18 | `blocked` |
 | Crystal Fragments // Summon: Alexander | 177 | 18 | 6 | 7 | 7 | 8 | `blocked` |
+| Invasion of Fiora // Marchesa, Resolute Monarch | 177 | 17 | 5 | 7 | 7 | 17 | `blocked` |
 | Jin-Gitaxias // The Great Synthesis | 177 | 19 | 5 | 7 | 11 | 6 | `blocked` |
 | Urabrask // The Great Work | 176 | 19 | 6 | 7 | 10 | 4 | `blocked` |
+| Flamewar, Brash Veteran // Flamewar, Streetwise Operative | 173 | 20 | 5 | 6 | 9 | 15 | `blocked` |
 | Ojer Axonil, Deepest Might // Temple of Power | 172 | 20 | 7 | 6 | 8 | 6 | `blocked` |
 | Conqueror's Galleon // Conqueror's Foothold | 171 | 20 | 5 | 7 | 7 | 14 | `blocked` |
 | Twists and Turns // Mycoid Maze | 171 | 18 | 6 | 6 | 8 | 7 | `blocked` |
 | Sorin of House Markov // Sorin, Ravenous Neonate | 170 | 18 | 3 | 7 | 10 | 19 | `blocked` |
 | Invasion of Kaldheim // Pyre of the World Tree | 168 | 16 | 5 | 4 | 5 | 22 | `blocked` |
 | Stay Hidden, Stay Silent | 168 | 15 | 6 | 4 | 5 | 17 | `blocked` |
-| Flamewar, Brash Veteran // Flamewar, Streetwise Operative | 167 | 19 | 4 | 6 | 10 | 15 | `blocked` |
 | Starscream, Power Hungry // Starscream, Seeker Leader | 167 | 17 | 4 | 8 | 5 | 19 | `blocked` |
-| Invasion of Fiora // Marchesa, Resolute Monarch | 166 | 16 | 3 | 7 | 8 | 17 | `blocked` |
+| Grist, Voracious Larva // Grist, the Plague Swarm | 166 | 21 | 4 | 5 | 10 | 14 | `blocked` |
 | Ojer Taq, Deepest Foundation // Temple of Civilization | 164 | 20 | 7 | 6 | 8 | 2 | `blocked` |
 | Gwen Stacy // Ghost-Spider | 163 | 21 | 5 | 5 | 7 | 13 | `blocked` |
 | Faithbound Judge // Sinner's Judgment | 161 | 21 | 5 | 7 | 9 | 1 | `blocked` |
 | Invasion of Kaladesh // Aetherwing, Golden-Scale Flagship | 161 | 16 | 4 | 5 | 7 | 17 | `blocked` |
-| Grist, Voracious Larva // Grist, the Plague Swarm | 160 | 20 | 3 | 5 | 11 | 14 | `blocked` |
 | Devoted Grafkeeper // Departed Soulkeeper | 159 | 19 | 5 | 6 | 7 | 7 | `blocked` |
 | Invasion of Pyrulea // Gargantuan Slabhorn | 159 | 16 | 4 | 4 | 7 | 18 | `blocked` |
 | Starforged Sword | 157 | 16 | 5 | 4 | 6 | 11 | `blocked` |
@@ -48,6 +48,7 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Jace, Mirror Mage | 156 | 19 | 4 | 4 | 11 | 13 | `blocked` |
 | Norman Osborn // Green Goblin | 155 | 17 | 4 | 6 | 6 | 16 | `blocked` |
 | Tribute to Horobi // Echo of Death's Wail | 155 | 19 | 5 | 6 | 6 | 6 | `blocked` |
+| Covert Cutpurse // Covetous Geist | 154 | 19 | 6 | 4 | 6 | 7 | `blocked` |
 | Dennick, Pious Apprentice // Dennick, Pious Apparition | 154 | 16 | 5 | 6 | 6 | 10 | `blocked` |
 | Jill, Shiva's Dominant // Shiva, Warden of Ice | 154 | 14 | 5 | 5 | 9 | 8 | `blocked` |
 | Invasion of Ikoria // Zilortha, Apex of Ikoria | 153 | 14 | 4 | 4 | 6 | 19 | `blocked` |
@@ -62,5 +63,4 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Emeritus of Ideation // Ancestral Recall | 149 | 18 | 5 | 4 | 4 | 15 | `blocked` |
 | Emet-Selch, Unsundered // Hades, Sorcerer of Eld | 149 | 14 | 4 | 6 | 6 | 13 | `blocked` |
 | Invasion of Tarkir // Defiant Thundermaw | 149 | 14 | 4 | 4 | 5 | 18 | `blocked` |
-| Covert Cutpurse // Covetous Geist | 148 | 18 | 5 | 4 | 7 | 7 | `blocked` |
 | Animate Dead | 108 | 14 | 4 | 3 | 4 | 5 | `blocked` |
