@@ -2,7 +2,7 @@
 title: "Legal and third-party content boundary"
 status: "current"
 authoritative_source: "repository policy and runtime content adapter"
-verified: "2026-08-05"
+verified: "2026-08-06"
 audience: "maintainers, deployers, and contributors"
 maintenance: "hand-maintained"
 ---
@@ -20,6 +20,11 @@ the optional local content adapter; Scryfall does not provide or endorse this
 application.
 
 ## Repository and package boundary
+
+The project's original software and documentation are licensed under
+Apache-2.0. That software license does not grant rights to third-party Magic
+card art, official frames, Oracle archives, Comprehensive Rules prose,
+trademarks, or other provider and rights-holder content.
 
 The source repository and built Python/browser packages must not contain:
 
