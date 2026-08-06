@@ -26,6 +26,9 @@ LINKED_GRAVEYARD_ENCHANT_HANDLER_ID = (
 PROTECTION_FRAGMENT_HANDLER_ID = "ability.static.protection.v1"
 FLANKING_FRAGMENT_HANDLER_ID = "ability.trigger.flanking.v1"
 BUSHIDO_FRAGMENT_HANDLER_ID = "ability.trigger.bushido.v1"
+EXALTED_FRAGMENT_HANDLER_ID = "ability.trigger.exalted.v1"
+BATTLE_CRY_FRAGMENT_HANDLER_ID = "ability.trigger.battle_cry.v1"
+MELEE_FRAGMENT_HANDLER_ID = "ability.trigger.melee.v1"
 
 
 def _fragment(
@@ -228,6 +231,105 @@ class BushidoAbilityFragmentHandler:
         return (self.validate(descriptor),)
 
 
+@dataclass(frozen=True, slots=True)
+class ExaltedAbilityFragmentHandler:
+    handler_id: str = EXALTED_FRAGMENT_HANDLER_ID
+    schema_version: int = 1
+    family: str = "ability.trigger.exalted"
+    event: str = "continuous"
+    rule_references: tuple[str, ...] = ("702.83", "702.83a", "702.83b")
+    capability_dependencies: tuple[str, ...] = ("combat.trigger.exalted",)
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> CombatKeywordTriggerSpec:
+        fragment = _fragment(
+            descriptor,
+            handler_id=self.handler_id,
+            event=self.event,
+            expected_type=CombatKeywordTriggerSpec,
+        )
+        if fragment.kind is not CombatKeywordTriggerKind.EXALTED:
+            raise SemanticNodeError(
+                "The Exalted runtime handler requires an Exalted fragment"
+            )
+        return fragment
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: object,
+    ) -> tuple[StaticAbilityFragment, ...]:
+        del context
+        return (self.validate(descriptor),)
+
+
+@dataclass(frozen=True, slots=True)
+class BattleCryAbilityFragmentHandler:
+    handler_id: str = BATTLE_CRY_FRAGMENT_HANDLER_ID
+    schema_version: int = 1
+    family: str = "ability.trigger.battle_cry"
+    event: str = "continuous"
+    rule_references: tuple[str, ...] = ("702.91", "702.91a", "702.91b")
+    capability_dependencies: tuple[str, ...] = ("combat.trigger.battle_cry",)
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> CombatKeywordTriggerSpec:
+        fragment = _fragment(
+            descriptor,
+            handler_id=self.handler_id,
+            event=self.event,
+            expected_type=CombatKeywordTriggerSpec,
+        )
+        if fragment.kind is not CombatKeywordTriggerKind.BATTLE_CRY:
+            raise SemanticNodeError(
+                "The Battle Cry runtime handler requires a Battle Cry fragment"
+            )
+        return fragment
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: object,
+    ) -> tuple[StaticAbilityFragment, ...]:
+        del context
+        return (self.validate(descriptor),)
+
+
+@dataclass(frozen=True, slots=True)
+class MeleeAbilityFragmentHandler:
+    handler_id: str = MELEE_FRAGMENT_HANDLER_ID
+    schema_version: int = 1
+    family: str = "ability.trigger.melee"
+    event: str = "continuous"
+    rule_references: tuple[str, ...] = ("702.121", "702.121a", "702.121b")
+    capability_dependencies: tuple[str, ...] = ("combat.trigger.melee",)
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> CombatKeywordTriggerSpec:
+        fragment = _fragment(
+            descriptor,
+            handler_id=self.handler_id,
+            event=self.event,
+            expected_type=CombatKeywordTriggerSpec,
+        )
+        if fragment.kind is not CombatKeywordTriggerKind.MELEE:
+            raise SemanticNodeError(
+                "The Melee runtime handler requires a Melee fragment"
+            )
+        return fragment
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: object,
+    ) -> tuple[StaticAbilityFragment, ...]:
+        del context
+        return (self.validate(descriptor),)
+
+
 class AbilityFragmentRegistry(
     RuntimeComponentRegistry[object, StaticAbilityFragment]
 ):
@@ -238,10 +340,13 @@ class AbilityFragmentRegistry(
 def default_ability_fragment_registry() -> AbilityFragmentRegistry:
     registry = AbilityFragmentRegistry(
         (
+            BattleCryAbilityFragmentHandler(),
             BushidoAbilityFragmentHandler(),
             EnchantAbilityFragmentHandler(),
+            ExaltedAbilityFragmentHandler(),
             FlankingAbilityFragmentHandler(),
             LinkedGraveyardEnchantFragmentHandler(),
+            MeleeAbilityFragmentHandler(),
             ProtectionAbilityFragmentHandler(),
         )
     )
@@ -266,13 +371,19 @@ def fragments_from_descriptors(
 __all__ = [
     "ENCHANT_FRAGMENT_HANDLER_ID",
     "BUSHIDO_FRAGMENT_HANDLER_ID",
+    "BATTLE_CRY_FRAGMENT_HANDLER_ID",
+    "EXALTED_FRAGMENT_HANDLER_ID",
     "FLANKING_FRAGMENT_HANDLER_ID",
     "LINKED_GRAVEYARD_ENCHANT_HANDLER_ID",
     "PROTECTION_FRAGMENT_HANDLER_ID",
+    "MELEE_FRAGMENT_HANDLER_ID",
     "EnchantAbilityFragmentHandler",
     "BushidoAbilityFragmentHandler",
+    "BattleCryAbilityFragmentHandler",
+    "ExaltedAbilityFragmentHandler",
     "FlankingAbilityFragmentHandler",
     "LinkedGraveyardEnchantFragmentHandler",
+    "MeleeAbilityFragmentHandler",
     "ProtectionAbilityFragmentHandler",
     "AbilityFragmentRegistry",
     "default_ability_fragment_registry",

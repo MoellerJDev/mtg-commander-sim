@@ -57,6 +57,7 @@ from .combat_damage_sequence import (
     CombatDamageSequenceError,
 )
 from . import block_transition_engine_adapter as block_triggers
+from . import attack_transition_engine_adapter as attack_transitions
 from .combat_relationship_state import remove_combat_relationships
 from .continuous_effects import (
     ContinuousEffect,
@@ -7737,7 +7738,9 @@ class CommanderEngine(
                 note="Ward trigger resolved",
             )
             return
-        if block_triggers.prepare_block_keyword_trigger_resolution(self, item):
+        if attack_transitions.prepare_attack_keyword_trigger_resolution(
+            self, item
+        ) or block_triggers.prepare_block_keyword_trigger_resolution(self, item):
             return
         if item.semantic_key == "builtin:optional-mill-one":
             self._begin_resolve_item(
@@ -11373,30 +11376,21 @@ class CommanderEngine(
                 response,
                 spend_context="combat_declaration",
             )
-        surviving_attackers: list[
-            tuple[CardInstance, dict[str, str]]
-        ] = []
-        for card, target_details in chosen:
-            if (
-                card.zone != "battlefield"
-                or card.controller != active
-                or card.phased_out
-            ):
-                continue
-            defender = target_details["target"]
-            card.attacking = defender
-            self.state.combat.attackers[card.object_id] = defender
-            self.state.combat.attack_target_context[card.object_id] = dict(
-                target_details
-            )
+        committed = attack_transitions.commit_engine_attack_declaration(
+            self, controller=active, chosen=chosen
+        )
+        surviving_attackers = [
+            (self.state.cards[value.attacker_object_id], value.target_context)
+            for value in committed
+        ]
+        for card, target_details in surviving_attackers:
             self._record_turn_history(
                 "creature_attacked",
                 actor=active,
                 object_incarnation=card.logical_object_id,
-                target=defender,
+                target=target_details["target"],
                 target_kind=target_details["kind"],
             )
-            surviving_attackers.append((card, target_details))
         used = {card.object_id for card, _ in surviving_attackers}
         self.state.combat.attackers_declared = True
         if used:
@@ -11466,6 +11460,9 @@ class CommanderEngine(
                     },
                 )
             )
+        attack_triggers.extend(
+            attack_transitions.attack_transition_stack_items(self)
+        )
         enqueue_trigger_batch(self, attack_triggers)
         self._grant_priority(active)
 

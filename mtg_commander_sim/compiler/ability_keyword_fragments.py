@@ -109,6 +109,49 @@ def lower_ability_keyword_fragments(
         }
         for match in bushido_matches
     )
+    ordinary_attack_keywords = (
+        (
+            "exalted",
+            CombatKeywordTriggerKind.EXALTED,
+            "ability.trigger.exalted.v1",
+        ),
+        (
+            "battle-cry",
+            CombatKeywordTriggerKind.BATTLE_CRY,
+            "ability.trigger.battle_cry.v1",
+        ),
+        (
+            "melee",
+            CombatKeywordTriggerKind.MELEE,
+            "ability.trigger.melee.v1",
+        ),
+    )
+    for mechanic, kind, handler_id in ordinary_attack_keywords:
+        keyword = mechanic.replace("-", " ")
+        matching_parts = tuple(
+            part for part in parts if part.casefold() == keyword
+        )
+        handlers.extend(
+            {
+                "handler_id": handler_id,
+                "schema_version": 1,
+                "event": "continuous",
+                "fragment": ability_fragment_to_dict(
+                    CombatKeywordTriggerSpec(kind=kind, amount=1)
+                ),
+            }
+            for _part in matching_parts
+        )
+        if mechanics.count(mechanic) != len(matching_parts):
+            return AbilityKeywordFragmentLowering(
+                handlers=tuple(handlers),
+                residual_kind=f"unsupported_{kind.value}_variant",
+                residual_reason=(
+                    f"{keyword.title()} wording is outside the closed "
+                    "printed keyword grammar"
+                ),
+                residual_blockers=(f"ordinary printed {keyword.title()}",),
+            )
     if mechanics.count("flanking") != len(flanking_parts):
         return AbilityKeywordFragmentLowering(
             handlers=tuple(handlers),
