@@ -171,14 +171,23 @@ async function declineSeatOpportunity(
   pages: readonly Page[],
   seatPage: Page,
   opportunity: Locator,
+  expectedActiveSeat: string,
   expectedStep: "Main Phase 1" | "Main Phase 2",
   testInfo: TestInfo,
   durabilityTimeout = 90_000,
 ) {
   const step = seatPage.getByTestId("exact-step-label");
+  const shell = seatPage.locator(".game-shell");
+  const expectedPhase = expectedStep === "Main Phase 1"
+    ? "precombat_main"
+    : "postcombat_main";
+  const atExpectedWindow = async () =>
+    (await shell.getAttribute("data-active-player")) === expectedActiveSeat
+    && (await shell.getAttribute("data-phase")) === expectedPhase;
   await driveUntil(
     pages,
     async () =>
+      (await atExpectedWindow()) &&
       (await step.textContent()) === expectedStep &&
       (await actionIsReady(opportunity)) &&
       (await actionIsReady(seatPage.getByTestId("action-pass"))),
@@ -186,6 +195,15 @@ async function declineSeatOpportunity(
     {
       label: `expose ${expectedStep} seat opportunity`,
       noProgressMs: durabilityTimeout,
+      advance: async () => {
+        if (!(await atExpectedWindow())) return false;
+        // The phase projection can arrive before React has made the exact
+        // strategic offer actionable. Hold this phase instead of submitting
+        // the pass that the helper is meant to verify only after the offer is
+        // visible and enabled.
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        return true;
+      },
     },
   );
   expect(await actionIsReady(opportunity)).toBe(true);
@@ -1165,12 +1183,12 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
       const commanderOffer = page.getByTestId("decision-panel")
         .getByRole("button", { name: /Cast Yargle and Multani/ });
       await declineSeatOpportunity(
-        [host, opponent], page, commanderOffer, "Main Phase 1",
+        [host, opponent], page, commanderOffer, "B", "Main Phase 1",
         testInfo,
         durableTransitionTimeout,
       );
       await declineSeatOpportunity(
-        [host, opponent], page, commanderOffer, "Main Phase 2",
+        [host, opponent], page, commanderOffer, "B", "Main Phase 2",
         testInfo,
         durableTransitionTimeout,
       );

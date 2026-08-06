@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "4a7aaff91cb6dcd07e93867eb10269cf6b792bcee2f80f71d7a6b8cd7f4d83dc",
-  "declaration_source_fingerprint": "4efb358bae6c630bd51aa49c22786f976ddd8c2a42d5294caa3ba6b6a4a29bf4",
+  "registry_fingerprint": "696064eee81a5944e9cbbcffaa230393f8149d94043a010292da1bc8f24bf73e",
+  "declaration_source_fingerprint": "da87458f906fd6f174ca5807934aa99c75002229a024767a8d261f0c8f67e14a",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -1219,6 +1219,258 @@
         "commander_review"
       ],
       "applicability_note": "Replay the accepted Reach block from an exact four-player checkpoint."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_effective_menace_gain_and_loss_change_the_shared_restriction",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Recompute the solver and projected restriction from current represented gain or loss of Menace."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_menace_can_make_a_block_requirement_impossible",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "A lone legal blocker cannot satisfy both a must-be-blocked requirement and Menace, so the requirement maximum falls to zero."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_two_blockers_satisfy_menace_and_the_block_requirement",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Two legal blockers satisfy Menace and the independent must-be-blocked requirement in the same complete declaration."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_menace_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Only the attacked player receives and completes the Menace blocker declaration in a four-player game."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_menace_block_restriction_mutant_is_killed",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that stops recognizing the current Menace keyword and allows one blocker."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "negative",
+      "test_id": "tests.test_menace_rules.MenaceRuleTests.test_malformed_current_characteristics_and_identity_fail_closed",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed effective type, keyword, attacker identity, and combat-participation inputs."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "negative",
+      "test_id": "tests.test_menace_rules.MenaceRuleTests.test_nonattacker_noncreature_and_nonmenace_have_no_restriction",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Do not create a Menace restriction for a nonattacker, noncreature, or current creature without Menace."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the typed minimum, reject one blocker atomically, accept two, and replay the accepted command exactly."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "positive",
+      "test_id": "tests.test_menace_rules.MenaceRuleTests.test_current_attacking_creature_has_one_redundant_restriction",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Normalize repeated case-insensitive Menace instances into one immutable conditional minimum."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_menace_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep the blocker-declaration capability and payload scoped to the attacked seat."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "property",
+      "test_id": "tests.test_menace_rules.MenaceRuleTests.test_menace_verdict_holds_across_bounded_characteristic_grid",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Check current creature, combat participation, zero-to-three redundant instances, and zero-to-four blocker counts."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_menace_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact four-player two-blocker declaration from its projected checkpoint."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the exact accepted duel declaration after a one-blocker rejection left state unchanged."
+    },
+    {
+      "capability_id": "combat.block.menace",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+      "official_rule_ids": [
+        "509.1c",
+        "702.111",
+        "702.111a",
+        "702.111b",
+        "702.111c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a single-blocker submission without changing the authoritative state hash."
     },
     {
       "capability_id": "combat.block.reach",
@@ -9324,5 +9576,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "acc5138b327561d987ba0b65c7cee8e5b4b50aa5fa0a2dc845c6a964468d06ef"
+  "fingerprint": "4d3f972fb2687ea88f15ef4de6ef98b5f10382bb9e26b83d5180065f85578380"
 }

@@ -70734,23 +70734,27 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.111",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/menace.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded block restriction and redundancy rule are reviewed in the subrules."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.111",
       "rule_text_sha256": "ec6cf5ad71d5e4275d8c1382f472389e719500dc8cf695d499326db100051b07",
       "schema_version": 1,
@@ -70759,26 +70763,30 @@
         "end_line": 4813,
         "start_line": 4812
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.111a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.111"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_menace_keyword_lowers_with_precise_capability_closed_span"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
+      ],
+      "notes": [
+        "A printed Menace keyword node requests the fine-grained blocker-restriction capability."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.111a",
       "rule_text_sha256": "43b073d62f98b6493ed77eda2347baa6436430e3d61ff8d24c936104503fe16c",
       "schema_version": 1,
@@ -70787,26 +70795,52 @@
         "end_line": 4815,
         "start_line": 4814
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.111b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "702.111"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_effective_menace_gain_and_loss_change_the_shared_restriction",
+        "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_menace_is_seat_scoped_and_replays",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_menace_can_make_a_block_requirement_impossible",
+        "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_two_blockers_satisfy_menace_and_the_block_requirement"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.menace.current_menace_restriction",
+        "mtg_commander_sim.menace.MenaceBlockRestriction",
+        "CommanderEngine._block_declaration_components",
+        "CommanderEngine._issue_next_blocker",
+        "CommanderEngine._complete_blockers"
+      ],
+      "notes": [
+        "One immutable current-attacker restriction supplies the conditional minimum to both projection and the complete-declaration solver."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "702.111b",
       "rule_text_sha256": "02b0510988cc839d26d2c644408cd7d3f5f90883d91cba11fdb82d27818a7394",
       "schema_version": 1,
@@ -70815,26 +70849,40 @@
         "end_line": 4817,
         "start_line": 4816
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.111c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.111"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_menace_rules.MenaceRuleTests.test_current_attacking_creature_has_one_redundant_restriction",
+        "tests.test_menace_rules.MenaceRuleTests.test_menace_verdict_holds_across_bounded_characteristic_grid"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.menace.current_menace_restriction",
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords"
+      ],
+      "notes": [
+        "Case-insensitive keyword normalization collapses multiple current Menace instances to one conditional minimum."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.111c",
       "rule_text_sha256": "53f92d2f5683f469230beacaba847d00d6679885b05abc91cd635ba21c7f77bd",
       "schema_version": 1,
@@ -70843,7 +70891,7 @@
         "end_line": 4819,
         "start_line": 4818
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",

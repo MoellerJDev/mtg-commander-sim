@@ -43,6 +43,7 @@
     "mtg_commander_sim/mana_payment_continuations.py",
     "mtg_commander_sim/mana_undo.py",
     "mtg_commander_sim/mechanic_contracts.py",
+    "mtg_commander_sim/menace.py",
     "mtg_commander_sim/model.py",
     "mtg_commander_sim/oracle_ir.py",
     "mtg_commander_sim/permissions.py",

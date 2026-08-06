@@ -672,7 +672,7 @@ class CombatKeywordRuleTests(unittest.TestCase):
             engine,
             "A",
             "Menacing attacker",
-            keywords=("Menace",),
+            keywords=("Menace", "MENACE"),
         )
         first = self.token(engine, "B", "First blocker")
         second = self.token(engine, "B", "Second blocker")
@@ -722,6 +722,9 @@ class CombatKeywordRuleTests(unittest.TestCase):
             defending_players=["B"],
         )
         accepted_engine._begin_blocker_decisions()
+        accepted_session.initial_checkpoint = checkpoint_envelope(
+            accepted_session.state
+        )
         accepted = accepted_session.act(
             "pilot:B",
             {
@@ -733,6 +736,121 @@ class CombatKeywordRuleTests(unittest.TestCase):
             },
         )
         self.assertTrue(accepted.ok, accepted.summary)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "menace-two-blockers"
+            accepted_session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
+
+    def test_effective_menace_gain_and_loss_change_the_shared_restriction(self):
+        session = self.make_session(50942, step="declare_blockers")
+        engine = session.engine
+        attacker = self.token(engine, "A", "Changing Menace")
+        self.token(engine, "B", "First blocker")
+        self.token(engine, "B", "Second blocker")
+        attacker.attacking = "B"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            had_attacking_creature=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+        )
+
+        problem, _, unresolved, current = (
+            engine._block_declaration_components("B")
+        )
+        self.assertFalse(unresolved)
+        self.assertFalse(current)
+        self.assertTrue(problem.evaluate({}).legal)
+
+        attacker.temporary_keywords.append("Menace")
+        problem, _, unresolved, current = (
+            engine._block_declaration_components("B")
+        )
+        self.assertFalse(unresolved)
+        self.assertEqual(
+            [attacker.ref],
+            [value.attacker_ref for value in current],
+        )
+        blockers = tuple(problem.domains)
+        self.assertFalse(
+            problem.evaluate({blockers[0]: attacker.ref}).legal
+        )
+
+        attacker.temporary_keywords.remove("Menace")
+        problem, _, unresolved, current = (
+            engine._block_declaration_components("B")
+        )
+        self.assertFalse(unresolved)
+        self.assertFalse(current)
+        self.assertTrue(
+            problem.evaluate({blockers[0]: attacker.ref}).legal
+        )
+
+    def test_four_player_menace_is_seat_scoped_and_replays(self):
+        session = self.make_session(
+            50943,
+            step="declare_blockers",
+            players=4,
+        )
+        engine = session.engine
+        attacker = self.token(
+            engine,
+            "A",
+            "Four-player Menace",
+            keywords=("Menace",),
+        )
+        first = self.token(engine, "C", "First C blocker")
+        second = self.token(engine, "C", "Second C blocker")
+        attacker.attacking = "C"
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            had_attacking_creature=True,
+            attackers={attacker.object_id: "C"},
+            defending_players=["C"],
+        )
+        engine._begin_blocker_decisions()
+        session.initial_checkpoint = checkpoint_envelope(session.state)
+
+        decision = engine.state.pending_decision
+        self.assertEqual(["C"], decision.actors)
+        self.assertEqual({"C"}, set(decision.payload_by_actor))
+        self.assertEqual(
+            {attacker.ref: 2},
+            decision.payload_by_actor["C"]["minimum_blockers"],
+        )
+        for hidden_seat in ("A", "B", "D"):
+            self.assertIsNone(
+                session.packet(
+                    f"pilot:{hidden_seat}",
+                    full=True,
+                )["decision"]
+            )
+        projected = session.packet("pilot:C", full=True)["decision"]
+        self.assertEqual(
+            {attacker.ref: 2},
+            projected["ctx"]["minimum_blockers"],
+        )
+        accepted = session.act(
+            "pilot:C",
+            {
+                "a": "block",
+                "blk": {
+                    first.ref: attacker.ref,
+                    second.ref: attacker.ref,
+                },
+            },
+        )
+        self.assertTrue(accepted.ok, accepted.summary)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "menace-four-player"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+            self.assertTrue(replay["ok"], replay)
+            self.assertEqual(1, replay["commands"])
 
     def test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker(self):
         session = self.make_session(50840, step="declare_blockers")

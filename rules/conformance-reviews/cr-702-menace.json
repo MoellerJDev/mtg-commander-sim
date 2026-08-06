@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702 — Menace",
+  "cases": [
+    {
+      "rule_id": "702.111",
+      "rule_text_sha256": "ec6cf5ad71d5e4275d8c1382f472389e719500dc8cf695d499326db100051b07",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/menace.json"],
+      "executable_test_ids": ["tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; the bounded block restriction and redundancy rule are reviewed in the subrules."]
+    },
+    {
+      "rule_id": "702.111a",
+      "rule_text_sha256": "43b073d62f98b6493ed77eda2347baa6436430e3d61ff8d24c936104503fe16c",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"],
+      "executable_test_ids": ["tests.test_card_program_v2.CardProgramV2Tests.test_menace_keyword_lowers_with_precise_capability_closed_span"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["A printed Menace keyword node requests the fine-grained blocker-restriction capability."]
+    },
+    {
+      "rule_id": "702.111b",
+      "rule_text_sha256": "02b0510988cc839d26d2c644408cd7d3f5f90883d91cba11fdb82d27818a7394",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.menace.current_menace_restriction", "mtg_commander_sim.menace.MenaceBlockRestriction", "CommanderEngine._block_declaration_components", "CommanderEngine._issue_next_blocker", "CommanderEngine._complete_blockers"],
+      "executable_test_ids": ["tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_menace_requires_zero_or_two_blockers_and_projects_the_minimum", "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_effective_menace_gain_and_loss_change_the_shared_restriction", "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_menace_is_seat_scoped_and_replays", "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_menace_can_make_a_block_requirement_impossible", "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_two_blockers_satisfy_menace_and_the_block_requirement"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": [],
+      "notes": ["One immutable current-attacker restriction supplies the conditional minimum to both projection and the complete-declaration solver."]
+    },
+    {
+      "rule_id": "702.111c",
+      "rule_text_sha256": "53f92d2f5683f469230beacaba847d00d6679885b05abc91cd635ba21c7f77bd",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.menace.current_menace_restriction", "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords"],
+      "executable_test_ids": ["tests.test_menace_rules.MenaceRuleTests.test_current_attacking_creature_has_one_redundant_restriction", "tests.test_menace_rules.MenaceRuleTests.test_menace_verdict_holds_across_bounded_characteristic_grid"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["Case-insensitive keyword normalization collapses multiple current Menace instances to one conditional minimum."]
+    }
+  ]
+}

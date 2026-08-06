@@ -146,6 +146,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/mana_ability_runtime.py",
         "mtg_commander_sim/mana_undo.py",
         "mtg_commander_sim/mechanic_contracts.py",
+        "mtg_commander_sim/menace.py",
         "mtg_commander_sim/permissions.py",
         "mtg_commander_sim/protection.py",
         "mtg_commander_sim/replacement_decisions.py",

@@ -268,10 +268,26 @@
     {
       "evidence_class": "interaction",
       "test_id": "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
-      "piece_ids": ["mechanic.cr-509-declare-blockers-step", "mechanic.menace"],
-      "capability_ids": [],
+      "piece_ids": ["capability.combat.block.menace", "mechanic.cr-509-declare-blockers-step", "mechanic.menace"],
+      "capability_ids": ["combat.block.menace"],
+      "interaction_order": 3,
+      "assertion": "The typed Menace restriction contributes one shared minimum to block offer, generic solver validation, and exact replay."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_effective_menace_gain_and_loss_change_the_shared_restriction",
+      "piece_ids": ["capability.combat.block.menace", "mechanic.menace"],
+      "capability_ids": ["combat.block.menace"],
       "interaction_order": 2,
-      "assertion": "Menace contributes its minimum-blocker restriction to block offer and validation."
+      "assertion": "The typed restriction follows current represented gain and loss of Menace without a second runtime rules owner."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_menace_can_make_a_block_requirement_impossible",
+      "piece_ids": ["capability.combat.block.menace", "mechanic.cr-509-declare-blockers-step", "mechanic.menace"],
+      "capability_ids": ["combat.block.menace"],
+      "interaction_order": 3,
+      "assertion": "The declaration solver does not compel an illegal single block merely to satisfy an independent block requirement."
     },
     {
       "evidence_class": "interaction",

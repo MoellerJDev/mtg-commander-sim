@@ -335,25 +335,27 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "menace-block-restriction-closure",
+    "batch_id": "basic-landwalk-block-restriction-closure",
     "subsystem_id": "keyword-abilities",
     "rule_ids": [
-      "702.111",
-      "702.111a",
-      "702.111b",
-      "702.111c"
+      "702.14",
+      "702.14a",
+      "702.14b",
+      "702.14c",
+      "702.14d",
+      "702.14e"
     ],
     "target_capability_ids": [
-      "combat.block.menace"
+      "combat.block.landwalk.basic_type"
     ],
-    "rationale": "The current declare-blockers solver, conditional minimum-count restriction, effective-keyword query, replay, and multiplayer foundations already represent ordinary Menace without a trusted typed capability owner. The refreshed pinned Commander frontier records 372 affected cards, 24 sole-blocker cards, and 366 material residuals, making bounded ordinary Menace the next dependency-ready medium-risk combat harvest.",
+    "rationale": "The refreshed pinned Commander frontier records 121 cards affected by the five basic-landwalk keyword families, 65 cards whose complete blocker set is closed by their bundle, and 121 material residuals. The current effective-characteristic and declaration-legality foundations can support one reusable current-land-type evasion owner without selecting the coarse CR 509 family.",
     "exit_criteria": [
-      "Introduce one typed read-only Menace restriction query shared by projected minimum-blocker constraints and accepted blocker declarations.",
-      "Evaluate current represented attacker identity, combat participation, and effective keyword state without printed-name or runtime Oracle-text behavior.",
-      "Treat multiple Menace instances as redundant and reject malformed or caller-invented keyword and relationship facts before mutation.",
-      "Preserve exact replay, rollback, four-player seat projection, impossible-requirement interaction, property, and killed-mutation evidence.",
-      "Lower the ordinary keyword generically into CardProgram V2 with precise source spans and capability closure.",
-      "Keep additional-block permissions, unsupported characteristic producers, and the broader CR 509 restrictions-and-requirements solver explicit residuals."
+      "Introduce one typed read-only basic-landwalk restriction owner shared by projected legal blocks and accepted declarations.",
+      "Evaluate the current attacking creature's effective keywords and the defending player's current effective land types, including represented type-changing continuous effects, without runtime Oracle parsing.",
+      "Support plainswalk, islandwalk, swampwalk, mountainwalk, and forestwalk through one closed vocabulary; make repeated instances redundant and different evasion restrictions cumulative.",
+      "Reject malformed or caller-invented characteristic and combat relationships before mutation and preserve exact replay, rollback, four-player seat projection, property, interaction, and killed-mutation evidence.",
+      "Lower all five printed keywords generically into CardProgram V2 with precise source spans and one fine-grained capability contract.",
+      "Keep artifact, nonbasic, snow, compound, conditional, and other landwalk qualities plus unsupported characteristic producers explicit residuals; do not trust the aggregate Landwalk mechanic."
     ]
   }
 }

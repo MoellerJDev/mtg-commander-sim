@@ -124,7 +124,8 @@
       "test_defender_rules",
       "test_end_of_combat_rules",
       "test_goad_rules",
-      "test_haste_rules"
+      "test_haste_rules",
+      "test_menace_rules"
     ],
     "multiplayer-commander": [
       "test_ante_rules",

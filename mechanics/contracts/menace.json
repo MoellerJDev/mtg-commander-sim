@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "menace",
   "official_name": "Menace",
   "effective_date": "2026-06-19",
@@ -8,7 +8,7 @@
   "rule_references": ["702.111", "702.111a", "702.111b", "702.111c"],
   "glossary_references": ["menace"],
   "dependencies": ["declare-blockers", "continuous-effects", "restrictions-requirements"],
-  "coverage_status": "partial",
+  "coverage_status": "tested",
   "trust_level": "untrusted",
   "behavior": {
     "zones": ["battlefield"],
@@ -32,8 +32,8 @@
   "variants": ["unblocked", "one illegal blocker", "two legal blockers", "multiple instances are redundant"],
   "witness_cards": [{"name": "Abomination of Llanowar", "oracle_id": "5146ba3f-2c5f-4a86-95d7-a34ce1e842b0"}],
   "rulings": [],
-  "test_ids": ["test_menace_requires_zero_or_two_blockers_and_projects_the_minimum", "test_keyword_contracts_trace_the_pinned_rules", "assignment maps enforce server-issued conditional group minimums"],
-  "implementation": {"component": "mtg_commander_sim.combat, CommanderEngine blocker validation, and the generic assignment-map choice form", "version": "combat-keywords-v2"},
+  "test_ids": ["test_current_attacking_creature_has_one_redundant_restriction", "test_nonattacker_noncreature_and_nonmenace_have_no_restriction", "test_malformed_current_characteristics_and_identity_fail_closed", "test_zero_or_two_blockers_is_the_exact_conditional_minimum", "test_typed_restriction_participates_in_the_generic_solver", "test_menace_verdict_holds_across_bounded_characteristic_grid", "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum", "test_effective_menace_gain_and_loss_change_the_shared_restriction", "test_four_player_menace_is_seat_scoped_and_replays", "test_menace_can_make_a_block_requirement_impossible", "test_two_blockers_satisfy_menace_and_the_block_requirement", "test_keyword_contracts_trace_the_pinned_rules"],
+  "implementation": {"component": "mtg_commander_sim.menace, CommanderEngine._block_declaration_components, and the generic declaration solver", "version": "menace-block-restriction-v1"},
   "known_blockers": ["the general CR 509.1 restrictions-and-requirements solver remains incomplete", "creatures allowed to block additional attackers are not yet represented", "full continuous-effect dependencies and copy/face-down characteristics remain incomplete"],
-  "review_status": "draft"
+  "review_status": "reviewed"
 }

@@ -190,6 +190,22 @@
       "resolution": "The provenance-validating nightly mutation-and-soak job now fetches complete history, and the workflow policy test ratchets that exact job boundary.",
       "run_id": 30987626101,
       "summary": "The nightly mutation-and-soak job ran repository provenance validation from a depth-one checkout, so a valid recorded ancestor commit was unavailable to git cat-file."
+    },
+    {
+      "category": "flaky_test",
+      "deterministic": false,
+      "failed_surfaces": [
+        "browser-soak"
+      ],
+      "head_sha": "b36e9da646090aa76a241c2dedf51c737ab29b9b",
+      "id": "ci-20260806-12",
+      "impact_edge_status": "not_applicable",
+      "regressions": [
+        "four-player.spec.ts: natural commander-damage winner"
+      ],
+      "resolution": "The seat-opportunity helper now anchors the expected active seat and exact projected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation or matching the next player's same-named main phase.",
+      "run_id": 31099433278,
+      "summary": "The natural-winner journey observed the expected main-phase projection before React made its commander offer actionable, then its own progress helper submitted the phase pass it was intended to verify."
     }
   ],
   "known_flaky_tests": [],
@@ -197,7 +213,7 @@
     "average_pushes_per_merged_pr": "GitHub retained workflow runs are not equivalent to pushes, so push counts remain null rather than estimated.",
     "slot_b_inactive_seconds": "GitHub Actions does not observe local worktree activity, so this value remains null rather than estimated."
   },
-  "observed_at": "2026-08-05T11:46:31Z",
+  "observed_at": "2026-08-06T12:06:17Z",
   "recent_pull_requests": [
     {
       "critical_path_seconds": 1488.0,
@@ -242,14 +258,14 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "374e93ca5a37a3eb5cf4dfb2e4e5915d4a975925dab3bd2be07d8b25743d546e",
+  "source_fingerprint": "e6597061829a4acb9ea3f6a9b5f597fd4d0bcb3447854e293ac40d2d984f37ac",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,
     "average_slot_b_inactive_seconds": null,
     "category_counts": {
       "browser_integration": 1,
-      "flaky_test": 4,
+      "flaky_test": 5,
       "generated_artifact_drift": 1,
       "infrastructure": 1,
       "missing_affected_test": 2,
@@ -257,7 +273,7 @@
     },
     "current_missing_impact_edges": [],
     "deterministic_escape_count": 7,
-    "escape_count": 11,
+    "escape_count": 12,
     "exact_head_pass_rate": 1.0,
     "known_flaky_test_count": 0,
     "repeated_failure_categories": [
