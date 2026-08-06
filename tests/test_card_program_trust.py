@@ -139,7 +139,7 @@ class CardProgramTrustTests(unittest.TestCase):
     def test_global_handler_and_component_inventory_is_capability_bound(self):
         status = runtime_component_status("commander_review")
         self.assertEqual(85, len(status["semantic_handlers"]))
-        self.assertEqual(22, len(status["runtime_components"]))
+        self.assertEqual(24, len(status["runtime_components"]))
         self.assertEqual(
             {
                 "ability.activated.mana.fixed-output",
@@ -147,6 +147,8 @@ class CardProgramTrustTests(unittest.TestCase):
                 "ability.static.enchant",
                 "ability.static.flash",
                 "ability.static.protection",
+                "ability.trigger.bushido",
+                "ability.trigger.flanking",
                 "continuous.attached.fixed_characteristics",
                 "continuous.fixed_query_power_toughness_anthem",
                 "continuous.fixed_power_toughness_anthem",
