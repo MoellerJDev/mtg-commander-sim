@@ -203,7 +203,7 @@
       "regressions": [
         "four-player.spec.ts: natural commander-damage winner"
       ],
-      "resolution": "The seat-opportunity helper now holds the exact expected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation.",
+      "resolution": "The seat-opportunity helper now anchors the expected active seat and exact projected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation or matching the next player's same-named main phase.",
       "run_id": 31099433278,
       "summary": "The natural-winner journey observed the expected main-phase projection before React made its commander offer actionable, then its own progress helper submitted the phase pass it was intended to verify."
     }
@@ -258,7 +258,7 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "af58f97a506562abd5bca078b86de5b360e6efb4ae7bc5dc46424c8c774cf5e8",
+  "source_fingerprint": "e6597061829a4acb9ea3f6a9b5f597fd4d0bcb3447854e293ac40d2d984f37ac",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,

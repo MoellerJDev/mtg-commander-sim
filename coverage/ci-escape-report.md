@@ -2,7 +2,7 @@
 title: "CI escape report"
 status: "generated"
 authoritative_source: "platform/ci-escape-source.json"
-verified: "af58f97a506562abd5bca078b86de5b360e6efb4ae7bc5dc46424c8c774cf5e8"
+verified: "e6597061829a4acb9ea3f6a9b5f597fd4d0bcb3447854e293ac40d2d984f37ac"
 audience: "maintainers and contributors"
 maintenance: "generated"
 ---
@@ -37,7 +37,7 @@ This report classifies observed deterministic failures that escaped the local qu
 | `ci-20260805-09` | [30988263099](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30988263099) | `flaky_test` | `not_applicable` | Authorized pass submissions are now keyed by decision ID, land confirmation snapshots the hand only after the card is currently playable, and the witness verifies distinct precombat and postcombat main-phase commander offers; both focused journeys passed together headlessly in 27.9 minutes against the CI compact database. |
 | `ci-20260805-10` | [30998174979](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30998174979) | `missing_affected_test` | `added` | Both handler inventories now ratchet at nineteen and the handoff links to generated frontier and architecture reports instead of copying grouped numerical metrics. |
 | `ci-20260805-11` | [30987626101](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30987626101) | `infrastructure` | `not_applicable` | The provenance-validating nightly mutation-and-soak job now fetches complete history, and the workflow policy test ratchets that exact job boundary. |
-| `ci-20260806-12` | [31099433278](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31099433278) | `flaky_test` | `not_applicable` | The seat-opportunity helper now holds the exact expected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation. |
+| `ci-20260806-12` | [31099433278](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31099433278) | `flaky_test` | `not_applicable` | The seat-opportunity helper now anchors the expected active seat and exact projected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation or matching the next player's same-named main phase. |
 
 ## Measurement limitations
 

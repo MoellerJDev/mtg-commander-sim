@@ -170,7 +170,7 @@
       "failed_surfaces": ["browser-soak"],
       "regressions": ["four-player.spec.ts: natural commander-damage winner"],
       "impact_edge_status": "not_applicable",
-      "resolution": "The seat-opportunity helper now holds the exact expected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation."
+      "resolution": "The seat-opportunity helper now anchors the expected active seat and exact projected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation or matching the next player's same-named main phase."
     }
   ],
   "recent_pull_requests": [
