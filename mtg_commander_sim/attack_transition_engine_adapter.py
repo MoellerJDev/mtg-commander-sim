@@ -9,7 +9,6 @@ from .ability_fragments import (
     combat_keyword_trigger_specs,
 )
 from .attack_transition_model import (
-    ATTACK_KEYWORD_TRIGGER_SEMANTIC_KEY,
     ATTACK_TRIGGER_KINDS,
     AttackKeywordTriggerOccurrence,
     AttackRecipient,
@@ -17,9 +16,12 @@ from .attack_transition_model import (
     AttackTransitionError,
     AttackTransitionParticipant,
     AttackTransitionQuery,
-    attack_keyword_trigger_stack_item,
     build_attack_transition,
     derive_attack_keyword_trigger_occurrences,
+)
+from .attack_transition_resolution import (
+    ATTACK_KEYWORD_TRIGGER_SEMANTIC_KEY,
+    attack_keyword_trigger_stack_item,
     resolve_attack_keyword_trigger,
 )
 from .combat_relationship_state import (

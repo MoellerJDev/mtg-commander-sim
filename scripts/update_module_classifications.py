@@ -108,6 +108,9 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/abilities.py",
         "mtg_commander_sim/ability_fragments.py",
         "mtg_commander_sim/attachments.py",
+        "mtg_commander_sim/attack_transition_engine_adapter.py",
+        "mtg_commander_sim/attack_transition_model.py",
+        "mtg_commander_sim/attack_transition_resolution.py",
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/block_transition_engine_adapter.py",
@@ -220,6 +223,9 @@ def _owner(relative: str, layer: str) -> str:
     if relative == "mtg_commander_sim/commander.py":
         return "commander_variant"
     if relative in {
+        "mtg_commander_sim/attack_transition_engine_adapter.py",
+        "mtg_commander_sim/attack_transition_model.py",
+        "mtg_commander_sim/attack_transition_resolution.py",
         "mtg_commander_sim/block_transition_engine_adapter.py",
         "mtg_commander_sim/block_transitions.py",
     }:
@@ -363,6 +369,8 @@ def build_classifications() -> dict[str, Any]:
                         marker in relative
                         for marker in (
                             "attachments.py",
+                            "attack_transition",
+                            "block_transition",
                             "ability_fragment_host.py",
                             "ability_fragments.py",
                             "aura/",

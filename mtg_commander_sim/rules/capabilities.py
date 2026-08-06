@@ -70,7 +70,7 @@ _SKULK_MECHANIC = "sku" + "lk"
 _FLANKING_MECHANIC = "flan" + "king"
 _BUSHIDO_MECHANIC = "bu" + "shido"
 _EXALTED_MECHANIC = "ex" + "alted"
-_BATTLE_CRY_MECHANIC = "battle" + "-cry"
+_BATTLE_CRY_MECHANIC = "battle" + " cry"
 _MELEE_MECHANIC = "me" + "lee"
 _BASIC_LANDWALK_MECHANICS = (
     "pl" + "ainswalk",

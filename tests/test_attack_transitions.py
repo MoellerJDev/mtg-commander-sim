@@ -246,7 +246,7 @@ class AttackTransitionModelTests(unittest.TestCase):
             derive_attack_keyword_trigger_occurrences(second),
         )
 
-    def test_malformed_transition_and_occurrence_fail_closed(self):
+    def test_malformed_attack_transition_and_occurrence_fail_closed(self):
         query = _Query()
         query.attackers = ("attacker-a", "attacker-a")
         with self.assertRaises(AttackTransitionError):

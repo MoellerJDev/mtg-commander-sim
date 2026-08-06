@@ -183,6 +183,54 @@ class AttackKeywordTriggerIntegrationTests(unittest.TestCase):
         )
         self.assertFalse(session.state.pending_trigger_batches)
 
+    def test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer(self):
+        session = self.make_session(702_121_004)
+        engine = session.engine
+        battle_cry = self.permanent(
+            engine,
+            "Departing Battle Cry attacker",
+            CombatKeywordTriggerKind.BATTLE_CRY,
+        )
+        melee = self.permanent(
+            engine,
+            "Melee attacker",
+            CombatKeywordTriggerKind.MELEE,
+        )
+        ordinary = self.permanent(engine, "Other attacker")
+
+        result = self.declare(
+            session,
+            {
+                battle_cry.ref: "B",
+                melee.ref: "C",
+                ordinary.ref: "C",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        decision = session.state.pending_decision
+        trigger_refs = [
+            row["id"]
+            for row in decision.payload_by_actor["A"]["triggers"]
+        ]
+        ordered = session.act(
+            "pilot:A",
+            {"a": "order", "triggers": trigger_refs},
+        )
+        self.assertTrue(ordered.ok, ordered.summary)
+        self.assertEqual(2, len(session.state.stack))
+
+        engine.move_card(battle_cry.object_id, "graveyard")
+        while session.state.stack:
+            for _seat in engine.active_seats:
+                pass_current(session)
+
+        melee_current = engine._effective_card_data(melee)
+        ordinary_current = engine._effective_card_data(ordinary)
+        self.assertEqual("5", melee_current["power"])
+        self.assertEqual("4", melee_current["toughness"])
+        self.assertEqual("3", ordinary_current["power"])
+        self.assertEqual("2", ordinary_current["toughness"])
+
     def test_attack_transition_is_public_without_hidden_cards(self):
         session = self.make_session(702_091_001)
         attacker = self.permanent(

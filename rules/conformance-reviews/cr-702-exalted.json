@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702.83 — Exalted",
+  "cases": [
+    {
+      "rule_id": "702.83",
+      "rule_text_sha256": "2a6fd44dea3c406b64a593e2f1a39f8ced83b267f94f440b78c9cea35b118660",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/exalted.json"],
+      "executable_test_ids": ["tests.test_attack_keyword_compiler.AttackKeywordCompilerTests.test_attack_keywords_lower_with_precise_closed_spans"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; the bounded ordinary printed family is owned by combat.trigger.exalted."]
+    },
+    {
+      "rule_id": "702.83a",
+      "rule_text_sha256": "e8d20cb8994dfc9b47df0a90430429da16ab5f0fe0151a060329f235af30c0d9",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.attack_transition_model.AttackTransitionEvent", "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences", "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger", "mtg_commander_sim.attack_transition_engine_adapter.attack_transition_stack_items"],
+      "executable_test_ids": ["tests.test_attack_transitions.AttackTransitionModelTests.test_exalted_triggers_once_per_instance_only_for_attack_alone", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_exalted_from_noncreature_source_resolves_on_lone_attacker", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_multiple_attackers_do_not_create_exalted_trigger", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_is_public_without_hidden_cards", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_replays_exactly", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_attack_declaration"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": [],
+      "notes": ["One sealed attack transition derives one occurrence per current typed Exalted instance and resolves the exact lone attacker through the canonical layer 7c owner."]
+    },
+    {
+      "rule_id": "702.83b",
+      "rule_text_sha256": "75ac6ebc6d41a3601dcaf9d9ca75005e54bf1109087c6581dade269013efecf3",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences"],
+      "executable_test_ids": ["tests.test_attack_transitions.AttackTransitionModelTests.test_exalted_triggers_once_per_instance_only_for_attack_alone", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_multiple_attackers_do_not_create_exalted_trigger", "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed"],
+      "required_scenarios": ["positive", "negative"],
+      "covered_scenarios": ["positive", "negative"],
+      "blockers": [],
+      "notes": ["The immutable assignment set counts creatures declared as attackers, independent of recipient and source type."]
+    }
+  ]
+}

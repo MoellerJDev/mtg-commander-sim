@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702.121 — Melee",
+  "cases": [
+    {
+      "rule_id": "702.121",
+      "rule_text_sha256": "2e24eb8ac3378a24fb64d99f02cd9135880e26f0b84b5dd3feac1be91a16a00f",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/melee.json"],
+      "executable_test_ids": ["tests.test_attack_keyword_compiler.AttackKeywordCompilerTests.test_attack_keywords_lower_with_precise_closed_spans"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; the bounded ordinary printed family is owned by combat.trigger.melee."]
+    },
+    {
+      "rule_id": "702.121a",
+      "rule_text_sha256": "7b84c5588bd2504d93451ffe855061a7ccf111ba3ee00ead4d49b4790963e5a1",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.attack_transition_model.AttackTransitionEvent", "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences", "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger", "mtg_commander_sim.attack_transition_engine_adapter.attack_transition_stack_items"],
+      "executable_test_ids": ["tests.test_attack_transitions.AttackTransitionModelTests.test_melee_counts_distinct_opponents_attacked_as_players", "tests.test_attack_transitions.AttackTransitionModelTests.test_melee_still_triggers_for_zero_opponents_attacked_directly", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_is_public_without_hidden_cards", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_replays_exactly", "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_attack_declaration"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": [],
+      "notes": ["The sealed recipient set counts each directly attacked player once, excludes planeswalker and Battle recipients, and resolves the exact Melee source through the canonical layer 7c owner."]
+    },
+    {
+      "rule_id": "702.121b",
+      "rule_text_sha256": "4f6ebe0fd1765acbcbbcae7093ef1949859f85d4f7c902afa6b636595a33f903",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.ability_fragments.CombatKeywordTriggerSpec", "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences"],
+      "executable_test_ids": ["tests.test_attack_transitions.AttackTransitionModelTests.test_melee_counts_distinct_opponents_attacked_as_players", "tests.test_attack_transitions.AttackTransitionModelTests.test_bounded_multiplicity_grid_preserves_every_instance", "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed"],
+      "required_scenarios": ["positive"],
+      "covered_scenarios": ["positive"],
+      "blockers": [],
+      "notes": ["Typed fragments preserve each printed Melee instance and stable instance index."]
+    }
+  ]
+}

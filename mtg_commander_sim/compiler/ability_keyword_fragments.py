@@ -116,7 +116,7 @@ def lower_ability_keyword_fragments(
             "ability.trigger.exalted.v1",
         ),
         (
-            "battle-cry",
+            "battle cry",
             CombatKeywordTriggerKind.BATTLE_CRY,
             "ability.trigger.battle_cry.v1",
         ),
@@ -127,7 +127,7 @@ def lower_ability_keyword_fragments(
         ),
     )
     for mechanic, kind, handler_id in ordinary_attack_keywords:
-        keyword = mechanic.replace("-", " ")
+        keyword = mechanic
         matching_parts = tuple(
             part for part in parts if part.casefold() == keyword
         )
