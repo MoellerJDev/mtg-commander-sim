@@ -99,7 +99,7 @@ class DeathtouchValueTests(unittest.TestCase):
                             deathtouch_sources=("snake",),
                         ),
                     )
-            for keywords in ((), ("Deathtouch",)):
+            for keywords in ((), ("Flying",), ("Deathtouch",)):
                 for target_types in (("Creature",), ("Planeswalker",)):
                     with self.subTest(
                         amount=amount,
@@ -108,7 +108,7 @@ class DeathtouchValueTests(unittest.TestCase):
                     ):
                         self.assertEqual(
                             amount > 0
-                            and bool(keywords)
+                            and "Deathtouch" in keywords
                             and target_types == ("Creature",),
                             deathtouch_damage_result_applies(
                                 amount=amount,
