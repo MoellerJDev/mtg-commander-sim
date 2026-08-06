@@ -1,5 +1,5 @@
 {
-  "contract_count": 68,
+  "contract_count": 69,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -239,6 +239,12 @@
       "mechanic_id": "infect",
       "path": "mechanics/contracts/infect.json",
       "sha256": "dc529cfa4f57a97aa16d86fd62d079e1dc2c90a6e502bba000b44db69a6ca0c8",
+      "version": 1
+    },
+    {
+      "mechanic_id": "landwalk",
+      "path": "mechanics/contracts/landwalk.json",
+      "sha256": "73717f39e79c0b04dcf41aaeab8ad25f87c3b45e0d893f1a2620e6122747c584",
       "version": 1
     },
     {
@@ -2480,19 +2486,37 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/landwalk.json",
+      "contract_sha256": "73717f39e79c0b04dcf41aaeab8ad25f87c3b45e0d893f1a2620e6122747c584",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.landwalk.basic_landwalk_block_verdict, mtg_commander_sim.combat_evasion.combat_evasion_verdict, and mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types",
+      "implementation_version": "basic-landwalk-block-restriction-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "nonbasic, legendary, Desert, snow compound, type, supertype, negative, and other non-basic-land-type variants remain unsupported",
+        "unsupported characteristic producers remain outside the trusted capability",
+        "the aggregate Landwalk mechanic remains untrusted"
+      ],
       "mechanic_id": "landwalk",
       "official_name": "Landwalk",
       "rule_references": [
         "702.14"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_each_basic_variant_uses_current_matching_land_subtype",
+        "test_multiple_variants_are_cumulative_and_repeated_instances_redundant",
+        "test_basic_landwalk_holds_across_the_bounded_keyword_land_grid",
+        "test_malformed_and_unsupported_variants_fail_closed",
+        "test_landwalk_remains_cumulative_with_shadow_and_flying",
+        "test_offer_and_command_share_current_landwalk_legality_and_rollback",
+        "test_legal_nonmatching_block_is_seat_scoped_and_replays",
+        "test_urborg_generated_swamp_activates_opposing_swampwalk",
+        "test_basic_landwalk_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {

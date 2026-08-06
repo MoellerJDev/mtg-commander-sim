@@ -144,7 +144,7 @@ from .life_state import (
     pay_life_cost,
 )
 from . import haste
-from .aerial_blocking import aerial_block_verdict
+from .combat_evasion_engine_adapter import engine_combat_evasion_verdict
 from .keyword_abilities import normalized_characteristic_keywords
 from .errors import GameRuleError, StateInvariantError
 from .deck import DeckDefinition
@@ -10025,13 +10025,11 @@ class CommanderEngine(
                         False,
                         f"declaration_restriction:{template.template_id}",
                     )
-        if "shadow" in attacker_keywords and "shadow" not in blocker_keywords:
-            return False, "attacker_has_shadow"
-        if "shadow" in blocker_keywords and "shadow" not in attacker_keywords:
-            return False, "blocker_has_shadow"
-        aerial = aerial_block_verdict(attacker_keywords, blocker_keywords)
-        if not aerial.allowed:
-            return False, aerial.reason
+        evasion = engine_combat_evasion_verdict(
+            self, attacker_keywords, blocker_keywords, blocker.controller
+        )
+        if not evasion.allowed:
+            return False, evasion.reason
         if protection_verdict(
             attacker_data,
             ProtectionSource.from_characteristics(blocker_data),

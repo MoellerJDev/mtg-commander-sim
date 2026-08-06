@@ -631,6 +631,34 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/combat_evasion.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/combat_evasion_engine_adapter.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/combat_relationship_state.py",
       "layer": "rules",
       "owning_subsystem": "combat_damage",
@@ -1555,6 +1583,20 @@
     },
     {
       "file": "mtg_commander_sim/keyword_abilities.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/landwalk.py",
       "layer": "rules",
       "owning_subsystem": "legacy_rules",
       "allowed_dependency_layers": [
@@ -3586,5 +3628,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "0a12b9cb5dadaee6e18adca98aebb51abbc6bc04d47d01a63f0de4f4569201e3"
+  "fingerprint": "1f5df9a784cf3bfedc96c70069d9844ff75d2bcd9b86469bb1138573592e94fa"
 }

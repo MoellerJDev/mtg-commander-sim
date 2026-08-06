@@ -14,6 +14,7 @@ from mtg_commander_sim import combat_damage_trample as trample_module
 from mtg_commander_sim import deathtouch as deathtouch_module
 from mtg_commander_sim import defender as defender_module
 from mtg_commander_sim import menace as menace_module
+from mtg_commander_sim import landwalk as landwalk_module
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
@@ -1460,6 +1461,27 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_single_blocker_is_rejected()
+
+    def test_basic_landwalk_keyword_mapping_mutant_is_killed(self):
+        def assert_matching_swamp_prohibits_block() -> None:
+            verdict = landwalk_module.basic_landwalk_block_verdict(
+                frozenset({"landwalk", "swampwalk"}),
+                frozenset({"swamp"}),
+            )
+            self.assertFalse(verdict.allowed)
+
+        assert_matching_swamp_prohibits_block()
+        with patch.object(
+            landwalk_module,
+            "BASIC_LANDWALK_TYPES",
+            tuple(
+                pair
+                for pair in landwalk_module.BASIC_LANDWALK_TYPES
+                if pair[0] != "swampwalk"
+            ),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_matching_swamp_prohibits_block()
 
     def test_aerial_blocking_flying_and_reach_mutants_are_killed(self):
         def assert_ground_cannot_block_flying() -> None:

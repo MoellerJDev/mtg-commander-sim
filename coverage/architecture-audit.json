@@ -22,8 +22,8 @@
         },
         "engine_logical_lines": {
           "baseline": 13017,
-          "current": 12640,
-          "delta": -377
+          "current": 12638,
+          "delta": -379
         },
         "legacy_card_specific_operations": {
           "baseline": 5,
@@ -783,7 +783,7 @@
           "expression": "self.state.combat.attackers_declared = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11209,
+          "line": 11207,
           "state_path": "combat.attackers_declared",
           "symbol": "_issue_attackers"
         },
@@ -792,7 +792,7 @@
           "expression": "self.state.combat.defending_players = [ seat for seat in self.active_seats if seat != active ]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11210,
+          "line": 11208,
           "state_path": "combat.defending_players",
           "symbol": "_issue_attackers"
         },
@@ -801,7 +801,7 @@
           "expression": "self.state.combat.attackers[card.object_id] = defender",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11519,
+          "line": 11517,
           "state_path": "combat.attackers",
           "symbol": "_complete_attackers"
         },
@@ -810,7 +810,7 @@
           "expression": "self.state.combat.attack_target_context[card.object_id] = dict( target_details )",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11520,
+          "line": 11518,
           "state_path": "combat.attack_target_context",
           "symbol": "_complete_attackers"
         },
@@ -819,7 +819,7 @@
           "expression": "self.state.combat.attackers_declared = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11532,
+          "line": 11530,
           "state_path": "combat.attackers_declared",
           "symbol": "_complete_attackers"
         },
@@ -828,7 +828,7 @@
           "expression": "self.state.combat.had_attacking_creature = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11534,
+          "line": 11532,
           "state_path": "combat.had_attacking_creature",
           "symbol": "_complete_attackers"
         },
@@ -837,7 +837,7 @@
           "expression": "self.state.combat.defending_players = [ seat for seat in self.active_seats if seat != active ]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11535,
+          "line": 11533,
           "state_path": "combat.defending_players",
           "symbol": "_complete_attackers"
         },
@@ -846,7 +846,7 @@
           "expression": "self.state.combat.blockers_declared = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11639,
+          "line": 11637,
           "state_path": "combat.blockers_declared",
           "symbol": "_begin_blocker_decisions"
         },
@@ -855,7 +855,7 @@
           "expression": "self.state.combat.blocker_cursor = 0",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11642,
+          "line": 11640,
           "state_path": "combat.blocker_cursor",
           "symbol": "_begin_blocker_decisions"
         },
@@ -864,7 +864,7 @@
           "expression": "self.state.combat.blockers_declared = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 11648,
+          "line": 11646,
           "state_path": "combat.blockers_declared",
           "symbol": "_issue_next_blocker"
         },
@@ -873,7 +873,7 @@
           "expression": "self.state.combat.blocker_cursor += 1",
           "file": "mtg_commander_sim/engine.py",
           "kind": "augmented_assignment",
-          "line": 11692,
+          "line": 11690,
           "state_path": "combat.blocker_cursor",
           "symbol": "_issue_next_blocker"
         },
@@ -882,7 +882,7 @@
           "expression": "self.state.combat.blockers.setdefault(attacker.object_id, [])",
           "file": "mtg_commander_sim/engine.py",
           "kind": "mutating_call:setdefault",
-          "line": 11803,
+          "line": 11801,
           "state_path": "combat.blockers",
           "symbol": "_complete_blockers"
         },
@@ -891,7 +891,7 @@
           "expression": "self.state.combat.blocker_cursor += 1",
           "file": "mtg_commander_sim/engine.py",
           "kind": "augmented_assignment",
-          "line": 11842,
+          "line": 11840,
           "state_path": "combat.blocker_cursor",
           "symbol": "_complete_blockers"
         },
@@ -900,7 +900,7 @@
           "expression": "self.state.combat.damage_assignments.extend(declared)",
           "file": "mtg_commander_sim/engine.py",
           "kind": "mutating_call:extend",
-          "line": 12153,
+          "line": 12151,
           "state_path": "combat.damage_assignments",
           "symbol": "_apply_combat_assignments"
         },
@@ -909,7 +909,7 @@
           "expression": "self.state.stack = [ item for item in self.state.stack if item.card_object_id != card.object_id ]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 12798,
+          "line": 12796,
           "state_path": "stack",
           "symbol": "_stabilize"
         },
@@ -918,7 +918,7 @@
           "expression": "self.state.eliminated_players.append(seat)",
           "file": "mtg_commander_sim/engine.py",
           "kind": "mutating_call:append",
-          "line": 13058,
+          "line": 13056,
           "state_path": "eliminated_players",
           "symbol": "_eliminate_players"
         },
@@ -927,7 +927,7 @@
           "expression": "self.state.stack = [item for item in self.state.stack if item.card_object_id != card.object_id]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13071,
+          "line": 13069,
           "state_path": "stack",
           "symbol": "_eliminate_players"
         },
@@ -936,7 +936,7 @@
           "expression": "self.state.stack = [item for item in self.state.stack if item.controller != seat or item.card_object_id is not None]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13102,
+          "line": 13100,
           "state_path": "stack",
           "symbol": "_eliminate_players"
         },
@@ -945,7 +945,7 @@
           "expression": "self.state.extra_turns = [turn for turn in self.state.extra_turns if turn.player != seat]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13103,
+          "line": 13101,
           "state_path": "extra_turns",
           "symbol": "_eliminate_players"
         },
@@ -954,7 +954,7 @@
           "expression": "self.state.priority_passes = [passed for passed in self.state.priority_passes if passed != seat]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13104,
+          "line": 13102,
           "state_path": "priority_passes",
           "symbol": "_eliminate_players"
         },
@@ -963,7 +963,7 @@
           "expression": "self.state.monarch = None",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13111,
+          "line": 13109,
           "state_path": "monarch",
           "symbol": "_eliminate_players"
         },
@@ -972,7 +972,7 @@
           "expression": "self.state.combat.defending_players = [ seat for seat in self.state.combat.defending_players if seat in remaining ]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13142,
+          "line": 13140,
           "state_path": "combat.defending_players",
           "symbol": "_eliminate_players"
         },
@@ -981,7 +981,7 @@
           "expression": "self.state.game_over = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13148,
+          "line": 13146,
           "state_path": "game_over",
           "symbol": "_eliminate_players"
         },
@@ -990,7 +990,7 @@
           "expression": "self.state.winner = remaining[0]",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13149,
+          "line": 13147,
           "state_path": "winner",
           "symbol": "_eliminate_players"
         },
@@ -999,7 +999,7 @@
           "expression": "self.state.priority_player = None",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13150,
+          "line": 13148,
           "state_path": "priority_player",
           "symbol": "_eliminate_players"
         },
@@ -1008,7 +1008,7 @@
           "expression": "self.state.game_over = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13154,
+          "line": 13152,
           "state_path": "game_over",
           "symbol": "_eliminate_players"
         },
@@ -1017,7 +1017,7 @@
           "expression": "self.state.draw = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13155,
+          "line": 13153,
           "state_path": "draw",
           "symbol": "_eliminate_players"
         },
@@ -1026,7 +1026,7 @@
           "expression": "self.state.priority_player = None",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13156,
+          "line": 13154,
           "state_path": "priority_player",
           "symbol": "_eliminate_players"
         },
@@ -1035,7 +1035,7 @@
           "expression": "self.state.priority_player = self._next_active_after(unique[-1])",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13160,
+          "line": 13158,
           "state_path": "priority_player",
           "symbol": "_eliminate_players"
         },
@@ -1044,7 +1044,7 @@
           "expression": "self.state.cards[object_id] = emblem",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13281,
+          "line": 13279,
           "state_path": "cards",
           "symbol": "create_emblem"
         },
@@ -1053,7 +1053,7 @@
           "expression": "self.state.players[owner].zones[\"command\"].append(object_id)",
           "file": "mtg_commander_sim/engine.py",
           "kind": "mutating_call:append",
-          "line": 13282,
+          "line": 13280,
           "state_path": "players.zones",
           "symbol": "create_emblem"
         },
@@ -1062,7 +1062,7 @@
           "expression": "self.state.players[owner].stats[\"emblem_objects_v1\"] = True",
           "file": "mtg_commander_sim/engine.py",
           "kind": "assignment",
-          "line": 13283,
+          "line": 13281,
           "state_path": "players.stats",
           "symbol": "create_emblem"
         },
@@ -1071,7 +1071,7 @@
           "expression": "self.state.players[old].zones[\"battlefield\"].remove(object_id)",
           "file": "mtg_commander_sim/engine.py",
           "kind": "mutating_call:remove",
-          "line": 13346,
+          "line": 13344,
           "state_path": "players.zones",
           "symbol": "change_control"
         },
@@ -1080,7 +1080,7 @@
           "expression": "self.state.players[new_controller].zones[\"battlefield\"].append(object_id)",
           "file": "mtg_commander_sim/engine.py",
           "kind": "mutating_call:append",
-          "line": 13347,
+          "line": 13345,
           "state_path": "players.zones",
           "symbol": "change_control"
         },
@@ -1260,8 +1260,8 @@
     "engine": {
       "cross_subsystem_responsibility_count": 7,
       "dunder_methods": 1,
-      "logical_lines": 12640,
-      "physical_lines": 13377,
+      "logical_lines": 12638,
+      "physical_lines": 13375,
       "private_methods": 279,
       "public_methods": 28,
       "responsibility_groups": [
@@ -1699,7 +1699,7 @@
       ],
       "highest_fan_out": [
         {
-          "fan_in": 7,
+          "fan_in": 8,
           "fan_out": 66,
           "module": "mtg_commander_sim.engine"
         },
@@ -1774,7 +1774,7 @@
           "module": "mtg_commander_sim.rules.activation.commit"
         }
       ],
-      "internal_edges": 899,
+      "internal_edges": 905,
       "modules": [
         {
           "fan_in": 2,
@@ -1917,7 +1917,7 @@
           "module": "mtg_commander_sim.cast_timing"
         },
         {
-          "fan_in": 6,
+          "fan_in": 7,
           "fan_out": 4,
           "module": "mtg_commander_sim.characteristic_evaluation"
         },
@@ -1990,6 +1990,16 @@
           "fan_in": 4,
           "fan_out": 0,
           "module": "mtg_commander_sim.combat_damage_values"
+        },
+        {
+          "fan_in": 1,
+          "fan_out": 2,
+          "module": "mtg_commander_sim.combat_evasion"
+        },
+        {
+          "fan_in": 1,
+          "fan_out": 4,
+          "module": "mtg_commander_sim.combat_evasion_engine_adapter"
         },
         {
           "fan_in": 1,
@@ -2292,7 +2302,7 @@
           "module": "mtg_commander_sim.enchant_spec"
         },
         {
-          "fan_in": 7,
+          "fan_in": 8,
           "fan_out": 66,
           "module": "mtg_commander_sim.engine"
         },
@@ -2315,6 +2325,11 @@
           "fan_in": 4,
           "fan_out": 0,
           "module": "mtg_commander_sim.keyword_abilities"
+        },
+        {
+          "fan_in": 2,
+          "fan_out": 0,
+          "module": "mtg_commander_sim.landwalk"
         },
         {
           "fan_in": 2,
@@ -3080,7 +3095,7 @@
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 262,
+      "file_count": 265,
       "largest_functions_and_methods": [
         {
           "end_line": 1645,
@@ -3160,10 +3175,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 12971,
+          "end_line": 12969,
           "file": "mtg_commander_sim/engine.py",
           "kind": "method",
-          "line": 12618,
+          "line": 12616,
           "logical_lines": 342,
           "name": "_stabilize",
           "physical_lines": 354,
@@ -3292,10 +3307,10 @@
           "visibility": "private"
         },
         {
-          "end_line": 10888,
+          "end_line": 10886,
           "file": "mtg_commander_sim/engine.py",
           "kind": "method",
-          "line": 10656,
+          "line": 10654,
           "logical_lines": 232,
           "name": "_declaration_restrictions",
           "physical_lines": 233,
@@ -3358,10 +3373,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 11601,
+          "end_line": 11599,
           "file": "mtg_commander_sim/engine.py",
           "kind": "method",
-          "line": 11431,
+          "line": 11429,
           "logical_lines": 170,
           "name": "_complete_attackers",
           "physical_lines": 171,
@@ -3413,20 +3428,20 @@
           "visibility": "public"
         }
       ],
-      "logical_lines": 101214,
+      "logical_lines": 101432,
       "methods": {
-        "dunder": 228,
+        "dunder": 230,
         "private": 630,
-        "public": 957,
-        "total": 1815
+        "public": 958,
+        "total": 1818
       },
       "modules": [
         {
           "file": "mtg_commander_sim/engine.py",
           "functions_and_methods": 313,
           "language": "python",
-          "logical_lines": 12640,
-          "physical_lines": 13377
+          "logical_lines": 12638,
+          "physical_lines": 13375
         },
         {
           "file": "mtg_commander_sim/report.py",
@@ -3593,8 +3608,8 @@
           "file": "mtg_commander_sim/rules/capabilities.py",
           "functions_and_methods": 27,
           "language": "python",
-          "logical_lines": 776,
-          "physical_lines": 843
+          "logical_lines": 787,
+          "physical_lines": 854
         },
         {
           "file": "mtg_commander_sim/replacement/ordering.py",
@@ -4717,6 +4732,13 @@
           "physical_lines": 132
         },
         {
+          "file": "mtg_commander_sim/landwalk.py",
+          "functions_and_methods": 4,
+          "language": "python",
+          "logical_lines": 102,
+          "physical_lines": 126
+        },
+        {
           "file": "mtg_commander_sim/replacement/__init__.py",
           "functions_and_methods": 0,
           "language": "python",
@@ -4934,6 +4956,13 @@
           "physical_lines": 68
         },
         {
+          "file": "mtg_commander_sim/combat_evasion.py",
+          "functions_and_methods": 2,
+          "language": "python",
+          "logical_lines": 57,
+          "physical_lines": 72
+        },
+        {
           "file": "mtg_commander_sim/semantic_choices/__init__.py",
           "functions_and_methods": 0,
           "language": "python",
@@ -4981,6 +5010,13 @@
           "language": "web",
           "logical_lines": 51,
           "physical_lines": 54
+        },
+        {
+          "file": "mtg_commander_sim/combat_evasion_engine_adapter.py",
+          "functions_and_methods": 2,
+          "language": "python",
+          "logical_lines": 50,
+          "physical_lines": 61
         },
         {
           "file": "mtg_commander_sim/combat.py",
@@ -5336,10 +5372,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 12971,
+          "end_line": 12969,
           "file": "mtg_commander_sim/engine.py",
           "kind": "method",
-          "line": 12618,
+          "line": 12616,
           "logical_lines": 342,
           "name": "_stabilize",
           "physical_lines": 354,
@@ -5468,10 +5504,10 @@
           "visibility": "private"
         },
         {
-          "end_line": 10888,
+          "end_line": 10886,
           "file": "mtg_commander_sim/engine.py",
           "kind": "method",
-          "line": 10656,
+          "line": 10654,
           "logical_lines": 232,
           "name": "_declaration_restrictions",
           "physical_lines": 233,
@@ -5534,10 +5570,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 11601,
+          "end_line": 11599,
           "file": "mtg_commander_sim/engine.py",
           "kind": "method",
-          "line": 11431,
+          "line": 11429,
           "logical_lines": 170,
           "name": "_complete_attackers",
           "physical_lines": 171,
@@ -5639,8 +5675,8 @@
           "file": "mtg_commander_sim/engine.py",
           "functions_and_methods": 313,
           "language": "python",
-          "logical_lines": 12640,
-          "physical_lines": 13377
+          "logical_lines": 12638,
+          "physical_lines": 13375
         },
         {
           "file": "mtg_commander_sim/report.py",
@@ -5671,8 +5707,8 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 110373,
-      "python_file_count": 246,
+      "physical_lines": 110641,
+      "python_file_count": 249,
       "review_thresholds": {
         "function_logical_lines_review": 150,
         "module_logical_lines_review": 1500
@@ -5689,7 +5725,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1310,
+      "top_level_functions": 1315,
       "web_file_count": 16
     },
     "semantic_handlers": {
@@ -8323,7 +8359,7 @@
         {
           "condition": "isinstance(operation, str) and operation",
           "file": "mtg_commander_sim/rules/capabilities.py",
-          "line": 682,
+          "line": 693,
           "string_literals": [],
           "symbol": "nested_operations"
         },
@@ -9185,9 +9221,9 @@
       "current_snapshot_complete": false,
       "status_counts": {
         "partial": 58,
-        "tested": 5,
+        "tested": 6,
         "trusted": 5,
-        "unclassified": 357
+        "unclassified": 356
       },
       "total": 425,
       "trusted": 5
@@ -9259,31 +9295,31 @@
         }
       ],
       "dependency_fail_closed_status_counts": {
-        "not_applicable": 26,
+        "not_applicable": 27,
         "not_run": 3,
         "passed": 31
       },
       "effective_date": "2026-06-19",
       "evidence": {
         "class_counts": {
-          "interaction": 90,
-          "multiplayer": 47,
-          "mutation": 57,
-          "negative": 87,
-          "positive": 101,
-          "privacy": 37,
-          "property": 4,
-          "replay": 68,
-          "rollback": 7
+          "interaction": 92,
+          "multiplayer": 49,
+          "mutation": 58,
+          "negative": 88,
+          "positive": 102,
+          "privacy": 38,
+          "property": 5,
+          "replay": 69,
+          "rollback": 8
         },
-        "declaration_count": 498,
-        "declaration_source_fingerprint": "da87458f906fd6f174ca5807934aa99c75002229a024767a8d261f0c8f67e14a",
-        "fingerprint": "4d3f972fb2687ea88f15ef4de6ef98b5f10382bb9e26b83d5180065f85578380",
-        "registry_fingerprint": "696064eee81a5944e9cbbcffaa230393f8149d94043a010292da1bc8f24bf73e"
+        "declaration_count": 509,
+        "declaration_source_fingerprint": "b82c5cabadff9278c2e08ff672c8966a7b738809e6caa5ff6017549d61823853",
+        "fingerprint": "89e8e373771f4794380f03428c51a131455a7dc2d69a6acf3369e1a00572135c",
+        "registry_fingerprint": "ed0ee738454401b10a350d6205a45fb5700f401ef6c8c757492e0f95ee4b5874"
       },
-      "fingerprint": "696064eee81a5944e9cbbcffaa230393f8149d94043a010292da1bc8f24bf73e",
+      "fingerprint": "ed0ee738454401b10a350d6205a45fb5700f401ef6c8c757492e0f95ee4b5874",
       "implementation_mutation_status_counts": {
-        "killed": 53,
+        "killed": 54,
         "not_run": 7
       },
       "profiles": [
@@ -9291,15 +9327,15 @@
         "commander_duel",
         "commander_review"
       ],
-      "registry_version": 36,
+      "registry_version": 37,
       "schema_version": 1,
       "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
       "status_counts": {
         "blocked": 4,
         "tested": 6,
-        "trusted": 50
+        "trusted": 51
       },
-      "total": 60
+      "total": 61
     },
     "stages": [
       {
@@ -9441,7 +9477,7 @@
             "mtg_commander_sim/oracle_ir.py:57",
             "mtg_commander_sim/preflight.py:28",
             "mtg_commander_sim/rules/__init__.py:3",
-            "mtg_commander_sim/rules/capabilities.py:261"
+            "mtg_commander_sim/rules/capabilities.py:272"
           ],
           "_dependency_gate": [
             "mtg_commander_sim/oracle_ir.py:29"
@@ -9935,7 +9971,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "53b4875da59187825758de1e39f8a439e4283da11b49b2ec78572c7173ab599a"
+          "verified": "a6b57bda9d0fb280bb2a3e627405b3b995bc5403038290109f69159c4e12278c"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -10029,19 +10065,19 @@
       "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
     },
     "conformance": {
-      "blocked_cases": 372,
+      "blocked_cases": 373,
       "current_snapshot_complete": false,
-      "definition_only_cases": 102,
-      "semantic_passing_cases": 185,
+      "definition_only_cases": 105,
+      "semantic_passing_cases": 187,
       "total_cases": 3300,
-      "unreviewed_cases": 2641
+      "unreviewed_cases": 2635
     },
     "mechanics": {
       "status_counts": {
         "partial": 58,
-        "tested": 5,
+        "tested": 6,
         "trusted": 5,
-        "unclassified": 357
+        "unclassified": 356
       },
       "total": 425,
       "trusted": 5
@@ -10346,7 +10382,7 @@
       "playwright_e2e_journeys": 9
     },
     "mutation_testing": {
-      "capability_mutation_declarations": 57,
+      "capability_mutation_declarations": 58,
       "configured_tools": [],
       "focused_executable_suite": true,
       "mutation_score": null
@@ -10374,18 +10410,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1677,
-      "discovered_total": 4977,
+      "conventional_ast_cases": 1687,
+      "discovered_total": 4987,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 49,
         "fuzz_named": 1,
         "privacy_or_projection_named": 22,
-        "replay_named": 102,
+        "replay_named": 103,
         "server_named": 25
       },
       "reconciles": true,
-      "test_files": 170
+      "test_files": 171
     }
   }
 }

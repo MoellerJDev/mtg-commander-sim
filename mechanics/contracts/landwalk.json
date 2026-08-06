@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "landwalk",
+  "official_name": "Landwalk",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": ["509.1b", "702.14", "702.14a", "702.14b", "702.14c", "702.14d", "702.14e"],
+  "glossary_references": ["landwalk"],
+  "dependencies": ["declare-blockers", "continuous-effects"],
+  "coverage_status": "tested",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield"],
+    "objects": ["attacking creature", "defending player's lands", "proposed blocker"],
+    "events": ["declare blockers legality check"],
+    "state_reads": ["attacker current represented effective keywords", "defending player identity", "defender current effective battlefield land types"],
+    "state_writes": [],
+    "costs": [],
+    "timing": ["the restriction is evaluated against current characteristics during blocker declaration"],
+    "targets": [],
+    "choices": ["the defending player chooses among block pairs legal after all represented evasion restrictions"],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": ["current layer-4 land subtypes and layer-6 keyword abilities are consumed"],
+    "replacement_effects": [],
+    "copy": ["represented copied characteristics may supply a supported basic landwalk keyword or matching land subtype"],
+    "control_change": ["the current defending player's current controlled lands are queried"],
+    "zone_change": ["only current phased-in battlefield lands and creatures participate"],
+    "source_leaves": ["the restriction ceases when the keyword or matching land subtype is absent"]
+  },
+  "variants": ["plainswalk", "islandwalk", "swampwalk", "mountainwalk", "forestwalk", "different landwalk abilities are cumulative", "same-kind instances are redundant"],
+  "witness_cards": [
+    {"name": "Bog Wraith", "oracle_id": "508248d1-09a4-4e41-a4c9-286618e5061e"}
+  ],
+  "rulings": [],
+  "test_ids": ["test_each_basic_variant_uses_current_matching_land_subtype", "test_multiple_variants_are_cumulative_and_repeated_instances_redundant", "test_basic_landwalk_holds_across_the_bounded_keyword_land_grid", "test_malformed_and_unsupported_variants_fail_closed", "test_landwalk_remains_cumulative_with_shadow_and_flying", "test_offer_and_command_share_current_landwalk_legality_and_rollback", "test_legal_nonmatching_block_is_seat_scoped_and_replays", "test_urborg_generated_swamp_activates_opposing_swampwalk", "test_basic_landwalk_keywords_lower_with_precise_closed_spans"],
+  "implementation": {
+    "component": "mtg_commander_sim.landwalk.basic_landwalk_block_verdict, mtg_commander_sim.combat_evasion.combat_evasion_verdict, and mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types",
+    "version": "basic-landwalk-block-restriction-v1"
+  },
+  "known_blockers": ["nonbasic, legendary, Desert, snow compound, type, supertype, negative, and other non-basic-land-type variants remain unsupported", "unsupported characteristic producers remain outside the trusted capability", "the aggregate Landwalk mechanic remains untrusted"],
+  "review_status": "reviewed"
+}

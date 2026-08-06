@@ -291,6 +291,30 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_urborg_generated_swamp_activates_opposing_swampwalk",
+      "piece_ids": ["capability.combat.block.landwalk.basic_type", "capability.continuous.basic_land_type.add_all_lands", "mechanic.landwalk"],
+      "capability_ids": ["combat.block.landwalk.basic_type", "continuous.basic_land_type.add_all_lands"],
+      "interaction_order": 3,
+      "assertion": "A typed layer-4 effect that adds Swamp to every land changes the current public land subtype consumed by the typed Basic Landwalk restriction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_landwalk_remains_cumulative_with_shadow_and_flying",
+      "piece_ids": ["capability.combat.block.flying", "capability.combat.block.landwalk.basic_type", "capability.combat.block.reach", "mechanic.landwalk"],
+      "capability_ids": ["combat.block.flying", "combat.block.landwalk.basic_type", "combat.block.reach"],
+      "interaction_order": 4,
+      "assertion": "A Reach blocker that satisfies Flying remains prohibited when the same attacker has matching Basic Landwalk."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_landwalk_remains_cumulative_with_shadow_and_flying",
+      "piece_ids": ["capability.combat.block.landwalk.basic_type", "mechanic.landwalk", "mechanic.shadow"],
+      "capability_ids": ["combat.block.landwalk.basic_type"],
+      "interaction_order": 3,
+      "assertion": "A Shadow blocker that satisfies Shadow remains prohibited when the same attacker has matching Basic Landwalk."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_unconditional_entry_tapped_is_engine_derived",
       "piece_ids": ["mechanic.cr-603-handling-triggered-abilities", "mechanic.cr-614-replacement-effects"],
       "capability_ids": [],
