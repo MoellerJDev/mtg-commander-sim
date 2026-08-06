@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "double-strike",
   "official_name": "Double Strike",
   "effective_date": "2026-06-19",
@@ -13,9 +13,9 @@
   "behavior": {
     "zones": ["battlefield"],
     "objects": ["attacking creature", "blocking creature"],
-    "events": ["first combat damage step", "second combat damage step"],
-    "state_reads": ["keyword abilities as each damage step begins", "first-step ordinary-combatant snapshot"],
-    "state_writes": ["combat damage step index", "first-step participant snapshot"],
+    "events": ["typed first combat damage step", "typed second combat damage step", "immutable per-step combat snapshot"],
+    "state_reads": ["stable combat-sequence identity", "keyword abilities as each damage step begins", "first-step ordinary-combatant snapshot", "current combat relationships and effective characteristics"],
+    "state_writes": ["combat damage step index", "first-step participant snapshot", "canonical per-step assignment journal"],
     "costs": [],
     "timing": ["a second real combat damage step follows the first", "priority occurs after each damage step"],
     "targets": [],
@@ -32,8 +32,8 @@
   "variants": ["unblocked damage in both steps", "blocked creature remains blocked after its blocker dies", "recompute trample assignment in the second step", "lose double strike after step one", "gain double strike after first-strike damage", "multiple instances are redundant"],
   "witness_cards": [{"name": "Adorned Pouncer", "oracle_id": "28f3c157-e004-4fd3-9302-f18ab0bf18ed"}],
   "rulings": [],
-  "test_ids": ["test_second_step_uses_the_first_step_snapshot_and_current_double_strike", "test_double_strike_creates_two_real_damage_steps_and_replays", "test_double_strike_does_not_hit_player_after_its_blocker_dies", "test_double_strike_trample_recomputes_after_blocker_leaves", "test_keyword_contracts_trace_the_pinned_rules"],
-  "implementation": {"component": "mtg_commander_sim.combat and CommanderEngine combat-damage step state machine", "version": "combat-keywords-v2"},
+  "test_ids": ["test_second_step_uses_the_first_step_snapshot_and_current_double_strike", "test_double_strike_creates_two_real_damage_steps_and_replays", "test_double_strike_does_not_hit_player_after_its_blocker_dies", "test_double_strike_trample_recomputes_after_blocker_leaves", "test_damage_step_identity_is_stable_and_distinguishes_extra_combats", "test_strike_step_participation_mutant_is_killed", "test_first_and_double_strike_keywords_lower_with_precise_capabilities", "test_keyword_contracts_trace_the_pinned_rules"],
+  "implementation": {"component": "mtg_commander_sim.combat.assigns_in_damage_step", "version": "strike-step-participation-v1"},
   "known_blockers": ["full continuous-effect dependencies, copy, and face-down characteristic evaluation remain incomplete", "the universal simultaneous damage replacement/prevention pipeline remains incomplete", "combat-damage trigger batching before priority remains incomplete"],
-  "review_status": "draft"
+  "review_status": "reviewed"
 }

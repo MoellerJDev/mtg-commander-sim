@@ -9,9 +9,9 @@ maintenance: "hand-maintained"
 
 # CI pipeline and two-slot development
 
-The repository uses a short local feedback loop and exact-head public
-certification. Local checks find likely defects quickly; GitHub Actions is the
-ordinary merge authority. The workflow never requires a visible browser.
+The repository uses narrow, opt-in local feedback and exact-head public
+certification. GitHub Actions is the ordinary broad-test and merge authority.
+The workflow never requires a visible browser.
 
 ## Two development slots
 
@@ -47,13 +47,14 @@ git push origin --delete <merged-branch>
 Do not delete a branch with unique work, an active run, or an unmerged pull
 request.
 
-## Local quick gate
+## Local impact inspection
 
-Run focused tests while implementing. Before commit, use:
+Do not run broad local suites as the ordinary workflow. If feedback is
+materially useful, run only the exact new test and smallest adjacent impacted
+selection. Before push, inspect what CI will select:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/quick_gate.py --dry-run
-.\.venv\Scripts\python.exe scripts/quick_gate.py
 ```
 
 `platform/change-impact-policy.json` is the versioned many-to-many path/check
@@ -73,7 +74,8 @@ and action-opportunity methods require complete browser E2E; unrelated engine
 orchestration does not inherit that cost. Cross-cutting protection and
 attachment sources deliberately select compiler, replacement, targeting, and
 state-action owners so a source-correctness regression cannot escape through a
-single narrow shard. `scripts/quick_gate.py` includes
+single narrow shard. When explicitly executed for diagnosis,
+`scripts/quick_gate.py` includes
 committed and working-tree changes, validates Python 3.12, compiles Python,
 builds the compact card database when necessary, runs directly changed tests
 and affected functional shards, and selects relevant generated, architecture,
@@ -84,9 +86,11 @@ gets generated-type, typecheck, and production-build checks locally; isolated
 headless Chromium belongs to CI. Never add a command that opens, focuses, or
 navigates the user's browser.
 
-The full `scripts/local_merge_gate.py` remains appropriate for a release or an
-exceptional persistence, replay, privacy, or packaging risk. It is deliberately
-not the default per-commit gate.
+The full `scripts/local_merge_gate.py` is not a default development step. Run a
+broad local gate only when the user explicitly asks or while diagnosing a
+CI-only/release-critical persistence, replay, privacy, or packaging failure.
+Otherwise push the coherent exact head and use the CI window for independent
+Slot B work.
 
 ## Pull-request certification
 

@@ -48,10 +48,15 @@ from .combat import (
     normalized_keywords,
     ordinary_second_step_combatants,
 )
-from .combat_damage_assignment import (
-    CombatDamageAssignmentError,
-)
+from .combat_damage_assignment import CombatDamageAssignmentError
+from .combat_damage_engine_adapter import EngineCombatDamageQuery
 from .combat_damage_projection import project_combat_damage_assignment
+from .combat_damage_sequence import (
+    CombatDamageAnnouncement,
+    CombatDamageAssignmentSequence,
+    CombatDamageSequenceError,
+)
+from .combat_relationship_state import remove_combat_relationships
 from .continuous_effects import (
     ContinuousEffect,
 )
@@ -2956,18 +2961,11 @@ class CommanderEngine(
             raise StateInvariantError("A turn has no active player")
 
         if step == "beginning_combat":
-            # The supported Commander multiplayer profile uses the attack-
-            # multiple-players option (CR 802.2), so every active opponent
-            # is a defending player as combat begins. Two-player Commander
-            # has the same result with its single nonactive player. Variants
-            # that require the CR 507.1 defending-player choice are rejected
-            # at the profile boundary rather than guessed here.
+            # CR 802.2 uses the attack-multiple-players option for the supported
+            # Commander profile. Unsupported CR 507.1 variants fail at setup.
             self.state.combat = CombatState(
-                defending_players=[
-                    seat
-                    for seat in self.active_seats
-                    if seat != active
-                ]
+                damage_sequence_id=self._next_ref("CD"),
+                defending_players=[s for s in self.active_seats if s != active],
             )
 
         if step == "untap":
@@ -3357,29 +3355,17 @@ class CommanderEngine(
     ) -> bool:
         """Clear one object's represented CR 506.4 combat relationships."""
 
-        was_attacker = (
-            card.attacking is not None
-            or card.object_id in self.state.combat.attackers
+        removal = remove_combat_relationships(
+            self.state.combat,
+            card.object_id,
         )
+        was_attacker = card.attacking is not None or removal.was_attacker
         was_blocker = card.blocking is not None
-        removed_blocker_links = False
-        for blocker_ids in self.state.combat.blockers.values():
-            if card.object_id not in blocker_ids:
-                continue
-            blocker_ids[:] = [
-                object_id
-                for object_id in blocker_ids
-                if object_id != card.object_id
-            ]
-            removed_blocker_links = True
-        if not (was_attacker or was_blocker or removed_blocker_links):
+        if not (
+            was_attacker or was_blocker or removal.removed_as_blocker
+        ):
             return False
 
-        if was_attacker:
-            self.state.combat.attackers.pop(card.object_id, None)
-            self.state.combat.attack_target_context.pop(
-                card.object_id, None
-            )
         card.attacking = None
         card.blocking = None
         self._log(
@@ -3389,7 +3375,7 @@ class CommanderEngine(
             {
                 "object": card.ref,
                 "was_attacking": was_attacker,
-                "was_blocking": was_blocker or removed_blocker_links,
+                "was_blocking": was_blocker or removal.removed_as_blocker,
                 "reason": reason,
             },
             importance=1,
@@ -11533,6 +11519,7 @@ class CommanderEngine(
                 "target": planeswalker.ref,
                 "kind": "planeswalker",
                 "defending_player": planeswalker.controller,
+                "logical_object_id": planeswalker.logical_object_id,
             }
         battle = self._battle_for_attack_target(value)
         if (
@@ -11544,6 +11531,7 @@ class CommanderEngine(
                 "target": battle.ref,
                 "kind": "battle",
                 "defending_player": str(battle.battle_protector),
+                "logical_object_id": battle.logical_object_id,
             }
         return None
 
@@ -11985,37 +11973,6 @@ class CommanderEngine(
         self.state.combat.blocker_cursor += 1
         self._issue_next_blocker()
 
-    def _automatic_combat_assignments(
-        self,
-        actors: Sequence[str],
-    ) -> list[dict[str, Any]] | None:
-        """Return forced assignments, or None when a player must divide.
-
-        A source with zero legal recipients assigns nothing. A source with one
-        recipient has no strategic division choice. Two or more recipients
-        require the ordinary simultaneous combat.damage decision.
-        """
-
-        options: dict[str, dict[str, Any]] = {}
-        for seat in actors:
-            options.update(self._combat_damage_source_options(seat))
-        if any(len(option["targets"]) > 1 for option in options.values()):
-            return None
-        assignments: list[dict[str, Any]] = []
-        for source, option in sorted(options.items()):
-            targets = list(option["targets"])
-            power = int(option["power"])
-            if power <= 0 or not targets:
-                continue
-            assignments.append(
-                {
-                    "source": source,
-                    "target": targets[0],
-                    "amount": power,
-                }
-            )
-        return assignments
-
     def _begin_combat_damage(self) -> None:
         self._initialize_combat_damage_steps()
         actors = [
@@ -12024,36 +11981,50 @@ class CommanderEngine(
             if self._combat_damage_source_options(seat)
         ]
         self._continue_combat_damage_assignments(
-            actors=actors,
-            cursor=0,
-            announced=[],
+            CombatDamageAssignmentSequence(actors=tuple(actors))
         )
 
     def _continue_combat_damage_assignments(
         self,
-        *,
-        actors: Sequence[str],
-        cursor: int,
-        announced: Sequence[Mapping[str, Any]],
+        sequence: CombatDamageAssignmentSequence,
     ) -> None:
         """Collect CR 510.1/802.5 assignments in public APNAP order."""
 
-        collected = [dict(value) for value in announced]
-        ordered_actors = [
-            seat for seat in actors if seat in self.active_seats
-        ]
-        while cursor < len(ordered_actors):
-            seat = ordered_actors[cursor]
-            automatic = self._automatic_combat_assignments([seat])
+        if not isinstance(sequence, CombatDamageAssignmentSequence):
+            raise GameRuleError(
+                "Combat damage sequencing requires typed immutable state"
+            )
+        ordered_actors = tuple(
+            seat for seat in sequence.actors if seat in self.active_seats
+        )
+        if ordered_actors != sequence.actors:
+            raise GameRuleError(
+                "Combat damage assignment order became stale"
+            )
+        for announcement in sequence.announcements:
+            current_proposal = project_combat_damage_assignment(
+                EngineCombatDamageQuery(self), announcement.actor
+            )
+            if current_proposal.proposal_id != announcement.proposal_id:
+                raise GameRuleError(
+                    "A previously announced combat damage proposal became stale"
+                )
+        current = sequence
+        while (seat := current.pending_actor) is not None:
+            proposal = project_combat_damage_assignment(
+                EngineCombatDamageQuery(self), seat
+            )
+            automatic = proposal.automatic_assignments()
             if automatic is not None:
-                self._record_combat_damage_announcement(
-                    seat,
-                    automatic,
-                    announcement_index=cursor,
+                current = current.announce(
+                    actor=seat,
+                    proposal_id=proposal.proposal_id,
+                    assignments=automatic,
                     automatic=True,
                 )
-                collected.extend(automatic)
-                cursor += 1
+                self._record_combat_damage_announcement(
+                    current.announcements[-1]
+                )
                 continue
 
             self.permissions.issue(
@@ -12065,7 +12036,10 @@ class CommanderEngine(
                     seat: {
                         "combat": self._combat_payload(
                             seat,
-                            announced_assignments=collected,
+                            announced_assignments=(
+                                value.to_dict()
+                                for value in current.collected_assignments
+                            ),
                         ),
                         "instruction": (
                             "Assign damage for sources you control. Earlier "
@@ -12074,46 +12048,43 @@ class CommanderEngine(
                     }
                 },
                 continuation={
-                    "combat_damage_assignment_order": ordered_actors,
-                    "combat_damage_assignment_cursor": cursor,
-                    "announced_assignments": collected,
+                    "combat_damage_sequence": current.to_dict(),
                 },
             )
             return
 
-        waiting = self._apply_combat_assignments(collected)
+        waiting = self._apply_combat_assignments(
+            [value.to_dict() for value in current.collected_assignments]
+        )
         if not waiting:
             self._grant_priority(self.state.active_player)
 
     def _record_combat_damage_announcement(
         self,
-        seat: str,
-        assignments: Sequence[Mapping[str, Any]],
-        *,
-        announcement_index: int,
-        automatic: bool,
+        announcement: CombatDamageAnnouncement,
     ) -> None:
-        canonical = [dict(value) for value in assignments]
+        canonical = [value.to_dict() for value in announcement.assignments]
         self._log(
-            seat,
+            announcement.actor,
             "combat.damage.assigned",
-            f"{seat} announced combat-damage assignments.",
+            f"{announcement.actor} announced combat-damage assignments.",
             {
-                "player": seat,
+                "player": announcement.actor,
                 "assignments": canonical,
-                "announcement_index": announcement_index,
-                "automatic": automatic,
+                "announcement_index": announcement.announcement_index,
+                "automatic": announcement.automatic,
+                "proposal_id": announcement.proposal_id,
                 "damage_step": self.state.combat.damage_step_index + 1,
             },
             importance=1,
-            changed_players=[seat],
+            changed_players=[announcement.actor],
         )
 
     def _complete_combat_damage(self, decision: Any) -> None:
-        order = decision.continuation.get(
-            "combat_damage_assignment_order"
+        serialized_sequence = decision.continuation.get(
+            "combat_damage_sequence"
         )
-        if order is None:
+        if serialized_sequence is None:
             # Backward-compatible completion for a pending pre-v2 checkpoint.
             assignments: list[dict[str, Any]] = []
             for seat in decision.actors:
@@ -12127,52 +12098,51 @@ class CommanderEngine(
             if not waiting:
                 self._grant_priority(self.state.active_player)
             return
-
-        actors = [str(value) for value in order]
-        cursor = int(
-            decision.continuation.get(
-                "combat_damage_assignment_cursor", 0
+        try:
+            sequence = CombatDamageAssignmentSequence.from_dict(
+                serialized_sequence
             )
-        )
-        if cursor < 0 or cursor >= len(actors):
+        except (CombatDamageSequenceError, TypeError) as exc:
+            raise GameRuleError(str(exc)) from exc
+        seat = sequence.pending_actor
+        if seat is None:
             raise GameRuleError(
-                "Combat-damage assignment cursor is invalid"
+                "Completed combat damage sequence cannot receive a response"
             )
-        seat = actors[cursor]
         if decision.actors != [seat]:
             raise GameRuleError(
                 "Only the current APNAP player may assign combat damage"
             )
-        assignments = self._validated_combat_damage_assignments(
-            seat,
-            decision.responses[seat].get("assignments") or [],
+        proposal = project_combat_damage_assignment(
+            EngineCombatDamageQuery(self), seat
         )
+        try:
+            assignments = proposal.validate(
+                decision.responses[seat].get("assignments") or []
+            )
+            sequence = sequence.announce(
+                actor=seat,
+                proposal_id=proposal.proposal_id,
+                assignments=assignments,
+                automatic=False,
+            )
+        except (CombatDamageAssignmentError, CombatDamageSequenceError) as exc:
+            raise GameRuleError(str(exc)) from exc
         self._record_combat_damage_announcement(
-            seat,
-            assignments,
-            announcement_index=cursor,
-            automatic=False,
+            sequence.announcements[-1]
         )
-        self._continue_combat_damage_assignments(
-            actors=actors,
-            cursor=cursor + 1,
-            announced=[
-                *(
-                    dict(value)
-                    for value in decision.continuation.get(
-                        "announced_assignments", []
-                    )
-                ),
-                *assignments,
-            ],
-        )
+        self._continue_combat_damage_assignments(sequence)
 
     def _validated_combat_damage_assignments(
         self,
         seat: str,
         submitted: Sequence[Mapping[str, Any]],
     ) -> list[dict[str, Any]]:
-        proposal = project_combat_damage_assignment(self, seat)
+        """Compatibility validator for pending pre-sequence Game Record v3 state."""
+
+        proposal = project_combat_damage_assignment(
+            EngineCombatDamageQuery(self), seat
+        )
         try:
             assignments = proposal.validate(submitted)
         except CombatDamageAssignmentError as exc:
@@ -12183,7 +12153,7 @@ class CommanderEngine(
         self, seat: str
     ) -> dict[str, dict[str, Any]]:
         return project_combat_damage_assignment(
-            self, seat
+            EngineCombatDamageQuery(self), seat
         ).projected_options()
 
     def _combat_damage_target_exists(
@@ -12227,6 +12197,11 @@ class CommanderEngine(
                 if candidate.ref == target
                 and candidate.zone == "battlefield"
                 and not candidate.phased_out
+                and (
+                    context.get("logical_object_id") is None
+                    or candidate.logical_object_id
+                    == context["logical_object_id"]
+                )
             ),
             None,
         )
@@ -12287,6 +12262,7 @@ class CommanderEngine(
             proposals = combat_damage_proposals(
                 self,
                 declared,
+                damage_step_id=EngineCombatDamageQuery(self).damage_step_identity(),
                 replacement_event_ids=replacement_event_ids,
             )
             result = resolve_damage_batch(

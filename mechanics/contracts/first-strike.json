@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "first-strike",
   "official_name": "First Strike",
   "effective_date": "2026-06-19",
@@ -13,9 +13,9 @@
   "behavior": {
     "zones": ["battlefield"],
     "objects": ["attacking creature", "blocking creature"],
-    "events": ["first combat damage step", "second combat damage step"],
-    "state_reads": ["keyword abilities as the first damage step begins", "first-step ordinary-combatant snapshot"],
-    "state_writes": ["combat damage step index", "first-step participant snapshot"],
+    "events": ["typed first combat damage step", "typed second combat damage step", "immutable per-step combat snapshot"],
+    "state_reads": ["stable combat-sequence identity", "keyword abilities as the first damage step begins", "first-step ordinary-combatant snapshot", "current combat relationships and effective characteristics"],
+    "state_writes": ["combat damage step index", "first-step participant snapshot", "canonical per-step assignment journal"],
     "costs": [],
     "timing": ["first strike creates the restricted first damage step and a later ordinary damage step"],
     "targets": [],
@@ -32,8 +32,8 @@
   "variants": ["gain first strike after step one", "lose first strike after step one", "gain double strike after first-strike damage", "multiple instances are redundant"],
   "witness_cards": [{"name": "Abattoir Ghoul", "oracle_id": "2b211adb-de44-4468-b65d-907a09aa7e9d"}],
   "rulings": [],
-  "test_ids": ["test_second_step_uses_the_first_step_snapshot_and_current_double_strike", "test_first_strike_destroys_blocker_before_ordinary_damage", "test_first_strike_creates_the_initial_combat_damage_step", "test_keyword_contracts_trace_the_pinned_rules"],
-  "implementation": {"component": "mtg_commander_sim.combat and CommanderEngine combat-damage step state machine", "version": "combat-keywords-v2"},
+  "test_ids": ["test_second_step_uses_the_first_step_snapshot_and_current_double_strike", "test_first_strike_destroys_blocker_before_ordinary_damage", "test_first_strike_creates_the_initial_combat_damage_step", "test_damage_step_identity_is_stable_and_distinguishes_extra_combats", "test_strike_step_participation_mutant_is_killed", "test_first_and_double_strike_keywords_lower_with_precise_capabilities", "test_keyword_contracts_trace_the_pinned_rules"],
+  "implementation": {"component": "mtg_commander_sim.combat.assigns_in_damage_step", "version": "strike-step-participation-v1"},
   "known_blockers": ["full continuous-effect dependencies, copy, and face-down characteristic evaluation remain incomplete", "the universal simultaneous damage replacement/prevention pipeline remains incomplete", "combat-damage trigger batching before priority remains incomplete"],
-  "review_status": "draft"
+  "review_status": "reviewed"
 }

@@ -10,10 +10,14 @@ import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from ..util import stable_json
+from .interactions import (
+    _PIECE_ID,
+    build_interactions as _build_interactions,
+)
 
 
 REUSABLE_PIECE_SCHEMA_VERSION = 1
-REUSABLE_PIECE_ALGORITHM_VERSION = "reusable-piece-matrix-v1"
+REUSABLE_PIECE_ALGORITHM_VERSION = "reusable-piece-matrix-v2"
 PROGRAM_BASELINE_SCHEMA_VERSION = 1
 DEFAULT_POLICY_PATH = Path("platform/reusable-piece-policy.json")
 DEFAULT_MATRIX_PATH = Path("coverage/reusable-piece-matrix.json.gz")
@@ -27,7 +31,6 @@ DEFAULT_DELTA_PATH = Path("coverage/reusable-piece-delta.json")
 DEFAULT_COMPLEX_CARDS_PATH = Path("coverage/complex-card-composition.json")
 DEFAULT_BASELINE_PATH = Path("coverage/program-baseline.json")
 
-_PIECE_ID = re.compile(r"^[a-z][a-z0-9._:-]*$")
 _SYSTEM_STATES = (
     "inventoried",
     "represented",
@@ -743,79 +746,6 @@ def _attach_frontier_candidates(
     return candidates
 
 
-def _build_interactions(
-    cards: Sequence[Mapping[str, Any]],
-    pieces: Mapping[str, _PieceAccumulator],
-    policy: Mapping[str, Any],
-) -> tuple[list[dict[str, Any]], dict[str, dict[str, int]]]:
-    pair_cards: dict[tuple[str, str], set[str]] = defaultdict(set)
-    pair_abilities: dict[tuple[str, str], set[str]] = defaultdict(set)
-    for card in cards:
-        oracle_id = str(card["oracle_id"])
-        piece_ids = sorted(
-            str(row["piece_id"]) for row in card.get("pieces", ())
-        )
-        for index, left in enumerate(piece_ids):
-            for right in piece_ids[index + 1 :]:
-                pair_cards[(left, right)].add(oracle_id)
-        ability_pieces: dict[str, set[str]] = defaultdict(set)
-        for relation in card.get("pieces", ()):
-            piece_id = str(relation["piece_id"])
-            for ability_id in relation.get("ability_ids", ()):
-                ability_pieces[str(ability_id)].add(piece_id)
-        for ability_id, related in ability_pieces.items():
-            ordered = sorted(related)
-            for index, left in enumerate(ordered):
-                for right in ordered[index + 1 :]:
-                    pair_abilities[(left, right)].add(
-                        f"{oracle_id}:{ability_id}"
-                    )
-    high_risk_pairs = {
-        tuple(sorted(str(value) for value in pair))
-        for pair in policy["high_risk_class_pairs"]
-    }
-    rows: list[dict[str, Any]] = []
-    per_piece: dict[str, dict[str, int]] = defaultdict(
-        lambda: {
-            "applicable": 0,
-            "covered": 0,
-            "high_risk_applicable": 0,
-            "high_risk_covered": 0,
-        }
-    )
-    for pair in sorted(pair_cards):
-        left, right = pair
-        left_piece = pieces[left]
-        right_piece = pieces[right]
-        shared_tests = sorted(
-            left_piece.interaction_test_ids
-            & right_piece.interaction_test_ids
-        )
-        covered = bool(shared_tests)
-        high_risk = (
-            tuple(sorted((left_piece.class_id, right_piece.class_id)))
-            in high_risk_pairs
-        )
-        row = {
-            "piece_ids": [left, right],
-            "class_ids": [left_piece.class_id, right_piece.class_id],
-            "card_count": len(pair_cards[pair]),
-            "ability_count": len(pair_abilities.get(pair, set())),
-            "covered": covered,
-            "high_risk": high_risk,
-            "evidence_test_ids": shared_tests,
-        }
-        rows.append(row)
-        for piece_id in pair:
-            per_piece[piece_id]["applicable"] += 1
-            per_piece[piece_id]["covered"] += int(covered)
-            per_piece[piece_id]["high_risk_applicable"] += int(high_risk)
-            per_piece[piece_id]["high_risk_covered"] += int(
-                high_risk and covered
-            )
-    return rows, dict(per_piece)
-
-
 def _interaction_status(counts: Mapping[str, int]) -> str:
     if not counts.get("applicable"):
         return "unknown"
@@ -1374,6 +1304,7 @@ def _build_matrix(
     oracle_coverage: Mapping[str, Any],
     program_coverage: Mapping[str, Any],
     policy: Mapping[str, Any],
+    interaction_evidence: Mapping[str, Any],
 ) -> dict[str, Any]:
     return _with_fingerprint(
         {
@@ -1413,6 +1344,7 @@ def _build_matrix(
                 "oracle_coverage": _hash(oracle_coverage),
                 "program_coverage": _hash(program_coverage),
                 "policy": _hash(policy),
+                "interaction_evidence": _hash(interaction_evidence),
             },
             "classes": list(policy["classes"]),
             "relation_types": list(policy["relation_types"]),
@@ -1454,7 +1386,7 @@ def _build_indexes(
     interactions = _with_fingerprint(
         {
             "schema_version": REUSABLE_PIECE_SCHEMA_VERSION,
-            "algorithm_version": "reusable-piece-interactions-v1",
+            "algorithm_version": "reusable-piece-interactions-v2",
             "profile": policy["profile"],
             "matrix_fingerprint": matrix["fingerprint"],
             "summary": {
@@ -1489,6 +1421,7 @@ def build_reusable_piece_artifacts(
     architecture_audit: Mapping[str, Any],
     platform_status: Mapping[str, Any],
     policy: Mapping[str, Any],
+    interaction_evidence: Mapping[str, Any],
     baseline: Mapping[str, Any] | None = None,
     ruling_counts: Mapping[str, int] | None = None,
 ) -> dict[str, dict[str, Any]]:
@@ -1509,7 +1442,7 @@ def build_reusable_piece_artifacts(
         for relation in card["pieces"]:
             pieces[str(relation["piece_id"])].ruling_cards.add(oracle_id)
     interaction_rows, per_piece_interactions = _build_interactions(
-        cards, pieces, policy
+        cards, pieces, policy, interaction_evidence
     )
     piece_rows = [
         _piece_record(
@@ -1534,6 +1467,7 @@ def build_reusable_piece_artifacts(
         oracle_coverage=oracle_coverage,
         program_coverage=program_coverage,
         policy=policy,
+        interaction_evidence=interaction_evidence,
     )
     card_index, interactions = _build_indexes(
         cards=cards,

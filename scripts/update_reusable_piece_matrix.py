@@ -58,6 +58,9 @@ PROGRAM_INPUT = (
 )
 ARCHITECTURE_INPUT = ROOT / "coverage" / "architecture-audit.json"
 PLATFORM_INPUT = ROOT / "coverage" / "platform-readiness.json"
+INTERACTION_EVIDENCE_INPUT = (
+    ROOT / "platform" / "reusable-piece-interaction-evidence.json"
+)
 
 
 def _canonical_gzip(payload: bytes) -> bytes:
@@ -119,6 +122,7 @@ def _build(
         architecture_audit=load_json(ARCHITECTURE_INPUT),
         platform_status=load_json(PLATFORM_INPUT),
         policy=load_reusable_piece_policy(ROOT),
+        interaction_evidence=load_json(INTERACTION_EVIDENCE_INPUT),
         baseline=baseline,
         ruling_counts=_ruling_counts(db_path),
     )
@@ -233,6 +237,9 @@ def _check_freshness(artifacts: dict[str, dict]) -> None:
         "oracle_coverage": _hash(load_json(ORACLE_INPUT)),
         "program_coverage": _hash(load_json(PROGRAM_INPUT)),
         "policy": _hash(policy),
+        "interaction_evidence": _hash(
+            load_json(INTERACTION_EVIDENCE_INPUT)
+        ),
     }
     if inputs != expected:
         raise ValueError("Reusable-piece matrix input fingerprints are stale")

@@ -153,19 +153,21 @@ Build the compact deterministic test database:
 $env:MTG_CARD_DB = "data/test-ci.sqlite3"
 ```
 
-Run focused tests while developing, then inspect and run the deterministic
-change-impact gate:
+When local feedback is needed, run only the exact new or adjacent impacted
+tests. Inspect the deterministic change-impact plan without executing its broad
+gate:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\quick_gate.py --dry-run
-.\.venv\Scripts\python.exe scripts\quick_gate.py
 ```
 
 Pull-request CI is the ordinary exact-head certification authority. It runs
 Python shards, generated/architecture checks, packaging, Windows compatibility
-and isolated headless browser tests. Do not open or navigate a visible browser
-from automation. The full local merge gate is reserved for releases and
-unusually high-risk persistence, replay, privacy or packaging changes. See the
+and isolated headless browser tests. Push coherent work and use the CI window
+for independent development rather than duplicating broad suites locally. Do
+not open or navigate a visible browser from automation. Broader local gates are
+reserved for an explicit request or diagnosis of a release-critical/CI-only
+persistence, replay, privacy or packaging failure. See the
 [CI pipeline guide](docs/development/ci-pipeline.md).
 
 Game records, databases, bulk downloads, image/deck caches, provider memory,

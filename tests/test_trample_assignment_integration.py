@@ -11,6 +11,9 @@ from mtg_commander_sim.combat_damage_assignment import (
 from mtg_commander_sim.combat_damage_projection import (
     project_combat_damage_assignment,
 )
+from mtg_commander_sim.combat_damage_engine_adapter import (
+    EngineCombatDamageQuery,
+)
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -337,7 +340,9 @@ class TrampleAssignmentIntegrationTests(unittest.TestCase):
             {attacker.object_id: [blocker.object_id]},
         )
 
-        proposal = project_combat_damage_assignment(engine, "B")
+        proposal = project_combat_damage_assignment(
+            EngineCombatDamageQuery(engine), "B"
+        )
 
         self.assertEqual(
             {blocker.ref: {"power": 3, "targets": [attacker.ref]}},
@@ -345,7 +350,7 @@ class TrampleAssignmentIntegrationTests(unittest.TestCase):
         )
         self.assertEqual((), proposal.trample_sources)
 
-    def test_removed_attack_target_is_not_replaced_by_controller(self) -> None:
+    def test_reentered_attack_target_is_not_replaced_by_controller(self) -> None:
         session = self.session(70219006, players=3)
         engine = session.engine
         attacker = self.creature(
@@ -379,12 +384,16 @@ class TrampleAssignmentIntegrationTests(unittest.TestCase):
                     "target": target.ref,
                     "kind": "planeswalker",
                     "defending_player": "B",
+                    "logical_object_id": target.logical_object_id,
                 }
             },
         )
         engine.move_card(target.object_id, "graveyard")
+        engine.move_card(target.object_id, "battlefield")
 
-        proposal = project_combat_damage_assignment(engine, "A")
+        proposal = project_combat_damage_assignment(
+            EngineCombatDamageQuery(engine), "A"
+        )
 
         self.assertEqual(
             {attacker.ref: {"power": 5, "targets": [blocker.ref]}},

@@ -1,0 +1,240 @@
+from __future__ import annotations
+
+from dataclasses import replace
+import unittest
+
+from mtg_commander_sim.combat_damage_assignment import (
+    build_combat_damage_assignment_proposal,
+)
+from mtg_commander_sim.combat_damage_snapshot import (
+    build_combat_damage_snapshot,
+    CombatDamageParticipant,
+    CombatDamageRecipient,
+    CombatDamageSnapshot,
+    CombatDamageSnapshotError,
+)
+from mtg_commander_sim.combat_relationship_state import (
+    remove_combat_relationships,
+)
+from mtg_commander_sim.model import CombatState
+
+
+class _Query:
+    def __init__(self) -> None:
+        self.participants = {
+            "attacker-id": CombatDamageParticipant(
+                object_id="attacker-id",
+                logical_object_id="attacker-id@4",
+                reference="A21",
+                controller="A",
+                power=5,
+                toughness=5,
+                marked_damage=0,
+                keywords=frozenset({"Trample"}),
+                assigns_damage=True,
+            ),
+            "blocker-two-id": CombatDamageParticipant(
+                object_id="blocker-two-id",
+                logical_object_id="blocker-two-id@2",
+                reference="B09",
+                controller="B",
+                power=1,
+                toughness=2,
+                marked_damage=0,
+                keywords=frozenset(),
+                assigns_damage=True,
+            ),
+            "blocker-one-id": CombatDamageParticipant(
+                object_id="blocker-one-id",
+                logical_object_id="blocker-one-id@8",
+                reference="B03",
+                controller="B",
+                power=2,
+                toughness=3,
+                marked_damage=1,
+                keywords=frozenset(),
+                assigns_damage=True,
+            ),
+        }
+        self.participant_ids = (
+            "blocker-two-id",
+            "attacker-id",
+            "blocker-one-id",
+        )
+        self.attacker_ids = ("attacker-id",)
+        self.blocker_ids = ("blocker-two-id", "blocker-one-id")
+
+    def damage_step_identity(self) -> str:
+        return "combat-damage:9:0:0"
+
+    def damage_step_index(self) -> int:
+        return 0
+
+    def first_strike_step(self) -> bool:
+        return False
+
+    def active_player(self) -> str:
+        return "A"
+
+    def participant_object_ids(self):
+        return self.participant_ids
+
+    def participant(self, object_id: str):
+        return self.participants[object_id]
+
+    def attacker_object_ids(self):
+        return self.attacker_ids
+
+    def attack_recipient(self, attacker_object_id: str):
+        return CombatDamageRecipient(
+            reference="B",
+            logical_object_id="player:B",
+            controller="B",
+            kind="player",
+            legal=True,
+        )
+
+    def blocker_object_ids(self, attacker_object_id: str):
+        return self.blocker_ids
+
+    def was_blocked(self, attacker_object_id: str) -> bool:
+        return True
+
+
+class CombatDamageSnapshotTests(unittest.TestCase):
+    def test_snapshot_and_proposal_have_one_canonical_relationship_order(self):
+        snapshot = build_combat_damage_snapshot(_Query())
+
+        self.assertEqual(
+            ("A21", "B03", "B09"),
+            tuple(value.reference for value in snapshot.participants),
+        )
+        proposal = build_combat_damage_assignment_proposal(
+            seat="A", snapshot=snapshot
+        )
+        self.assertEqual(
+            ["B03", "B09", "B"],
+            proposal.projected_options()["A21"]["targets"],
+        )
+
+        submitted = [
+            {"source": "A21", "target": "B", "amount": 0},
+            {"source": "A21", "target": "B09", "amount": 2},
+            {"source": "A21", "target": "B03", "amount": 3},
+        ]
+        canonical = proposal.validate(submitted)
+        permuted = proposal.validate(tuple(reversed(submitted)))
+
+        self.assertEqual(canonical, permuted)
+        self.assertEqual(
+            [
+                {"source": "A21", "target": "B03", "amount": 3},
+                {"source": "A21", "target": "B09", "amount": 2},
+            ],
+            [value.to_dict() for value in canonical],
+        )
+        self.assertEqual(proposal.proposal_id, proposal.proposal_id)
+
+    def test_snapshot_deeply_freezes_query_values(self):
+        query = _Query()
+        snapshot = build_combat_damage_snapshot(query)
+        query.participant_ids = ()
+        query.blocker_ids = ()
+        query.participants["attacker-id"] = replace(
+            query.participants["attacker-id"], power=99
+        )
+
+        self.assertEqual(5, snapshot.participants[0].power)
+        self.assertEqual(2, len(snapshot.blocks))
+
+    def test_malformed_internal_relationships_fail_before_projection(self):
+        cases = []
+        missing_blocker = _Query()
+        missing_blocker.blocker_ids = ("missing",)
+        cases.append(missing_blocker)
+        duplicate_source = _Query()
+        duplicate_source.attacker_ids = ("attacker-id", "attacker-id")
+        cases.append(duplicate_source)
+        wrong_controller = _Query()
+        wrong_controller.participants["attacker-id"] = replace(
+            wrong_controller.participants["attacker-id"], controller="B"
+        )
+        cases.append(wrong_controller)
+
+        for query in cases:
+            with self.subTest(query=query):
+                with self.assertRaises(CombatDamageSnapshotError):
+                    build_combat_damage_snapshot(query)
+
+    def test_exact_numeric_and_identity_invariants_reject_booleans(self):
+        with self.assertRaises(CombatDamageSnapshotError):
+            CombatDamageParticipant(
+                object_id="source",
+                logical_object_id="source@1",
+                reference="A01",
+                controller="A",
+                power=True,
+                toughness=1,
+                marked_damage=0,
+                keywords=frozenset(),
+                assigns_damage=True,
+            )
+        with self.assertRaises(CombatDamageSnapshotError):
+            CombatDamageSnapshot(
+                damage_step_id="step",
+                damage_step_index=True,
+                first_strike_step=False,
+                active_player="A",
+                participants=(),
+                attacks=(),
+                blocks=(),
+                was_blocked=frozenset(),
+            )
+        with self.assertRaisesRegex(
+            CombatDamageSnapshotError,
+            "collection of keywords",
+        ):
+            CombatDamageParticipant(
+                object_id="source",
+                logical_object_id="source@1",
+                reference="A01",
+                controller="A",
+                power=1,
+                toughness=1,
+                marked_damage=0,
+                keywords="trample",
+                assigns_damage=True,
+            )
+
+    def test_historical_empty_sequence_identity_is_omitted(self):
+        serialized = CombatState().to_dict()
+
+        self.assertNotIn("damage_sequence_id", serialized)
+        self.assertEqual(serialized, CombatState.from_dict(serialized).to_dict())
+
+    def test_relationship_owner_preserves_blockers_of_removed_attacker(self):
+        combat = CombatState(
+            attackers={"attacker": "B"},
+            blockers={"attacker": ["first", "second"]},
+            attack_target_context={
+                "attacker": {
+                    "target": "B",
+                    "kind": "player",
+                    "defending_player": "B",
+                }
+            },
+        )
+
+        removal = remove_combat_relationships(combat, "attacker")
+
+        self.assertTrue(removal.was_attacker)
+        self.assertEqual({}, combat.attackers)
+        self.assertEqual(
+            {"attacker": ["first", "second"]},
+            combat.blockers,
+        )
+        self.assertEqual({}, combat.attack_target_context)
+
+
+if __name__ == "__main__":
+    unittest.main()

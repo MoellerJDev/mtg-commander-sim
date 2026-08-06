@@ -2,7 +2,7 @@
 title: "Complex card composition benchmark"
 status: "generated"
 authoritative_source: "coverage/complex-card-composition.json"
-verified: "804e86115021d0e34616a0ad8a9520e5e4195a212a4074542b0380b7defa50f9"
+verified: "89b1b1d5c858eaa4b76fc031bb92af089cc456d4a4cc4fa0359c4cbdfe010fcc"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -26,7 +26,7 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Invasion of Zendikar // Awakened Skyclave | 178 | 20 | 5 | 5 | 6 | 18 | `blocked` |
 | Crystal Fragments // Summon: Alexander | 177 | 18 | 6 | 7 | 7 | 8 | `blocked` |
 | Jin-Gitaxias // The Great Synthesis | 177 | 19 | 5 | 7 | 11 | 6 | `blocked` |
-| Urabrask // The Great Work | 173 | 19 | 5 | 7 | 11 | 4 | `blocked` |
+| Urabrask // The Great Work | 176 | 19 | 6 | 7 | 10 | 4 | `blocked` |
 | Ojer Axonil, Deepest Might // Temple of Power | 172 | 20 | 7 | 6 | 8 | 6 | `blocked` |
 | Twists and Turns // Mycoid Maze | 171 | 18 | 6 | 6 | 8 | 7 | `blocked` |
 | Sorin of House Markov // Sorin, Ravenous Neonate | 170 | 18 | 3 | 7 | 10 | 19 | `blocked` |
@@ -51,8 +51,8 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Dennick, Pious Apprentice // Dennick, Pious Apparition | 154 | 16 | 5 | 6 | 6 | 10 | `blocked` |
 | Jill, Shiva's Dominant // Shiva, Warden of Ice | 154 | 14 | 5 | 5 | 9 | 8 | `blocked` |
 | Invasion of Ikoria // Zilortha, Apex of Ikoria | 153 | 14 | 4 | 4 | 6 | 19 | `blocked` |
-| Slicer, Hired Muscle // Slicer, High-Speed Antagonist | 153 | 17 | 4 | 6 | 6 | 15 | `blocked` |
 | Invasion of New Capenna // Holy Frazzle-Cannon | 152 | 12 | 4 | 4 | 5 | 18 | `blocked` |
+| Arcee, Sharpshooter // Arcee, Acrobatic Coupe | 151 | 16 | 5 | 5 | 7 | 14 | `blocked` |
 | Curse of Leeches // Leeching Lurker | 151 | 17 | 4 | 6 | 7 | 13 | `blocked` |
 | Garruk Relentless // Garruk, the Veil-Cursed | 151 | 18 | 4 | 6 | 13 | 6 | `blocked` |
 | Kitnap | 151 | 16 | 5 | 4 | 6 | 8 | `blocked` |
@@ -61,6 +61,6 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Path of Mettle // Metzali, Tower of Triumph | 150 | 15 | 5 | 6 | 6 | 10 | `blocked` |
 | Emet-Selch, Unsundered // Hades, Sorcerer of Eld | 149 | 14 | 4 | 6 | 6 | 13 | `blocked` |
 | Invasion of Tarkir // Defiant Thundermaw | 149 | 14 | 4 | 4 | 5 | 18 | `blocked` |
-| Rankle and Torbran | 149 | 19 | 5 | 5 | 7 | 4 | `blocked` |
-| Arcee, Sharpshooter // Arcee, Acrobatic Coupe | 148 | 16 | 4 | 5 | 8 | 14 | `blocked` |
+| Covert Cutpurse // Covetous Geist | 148 | 18 | 5 | 4 | 7 | 7 | `blocked` |
+| Dorothea, Vengeful Victim // Dorothea's Retribution | 147 | 16 | 5 | 6 | 6 | 2 | `blocked` |
 | Animate Dead | 108 | 14 | 4 | 3 | 4 | 5 | `blocked` |

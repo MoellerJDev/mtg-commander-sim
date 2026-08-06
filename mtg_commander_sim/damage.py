@@ -31,6 +31,12 @@ from .damage_values import (
     DamageSourceSnapshot,
 )
 from .commander import CommanderIdentityError, commander_damage_key
+from .combat_damage_events import (
+    canonical_combat_assignment_values,
+    combat_damage_event_identity,
+    replacement_event_identity_values,
+)
+from .combat_damage_values import CombatDamageAssignmentError
 from .damage_prevention import (
     collect_damage_modifier_effects,
     commit_damage_modifier_plan,
@@ -594,14 +600,25 @@ def combat_damage_proposals(
     host: DamageHost,
     assignments: Sequence[Mapping[str, Any]],
     *,
+    damage_step_id: str | None = None,
     replacement_event_ids: Sequence[str] = (),
 ) -> tuple[DamageProposal, ...]:
     """Materialize current combat assignments as immutable damage proposals."""
 
+    try:
+        canonical = canonical_combat_assignment_values(assignments)
+        replacement_ids = replacement_event_identity_values(
+            replacement_event_ids
+        )
+    except CombatDamageAssignmentError as exc:
+        raise DamageError(str(exc)) from exc
+
     proposals: list[DamageProposal] = []
     event_index = 0
-    for index, assignment in enumerate(assignments):
-        source_ref = str(assignment.get("source") or "")
+    for original_index, assignment in canonical:
+        source_ref = assignment.source
+        target = assignment.target
+        amount = assignment.amount
         source = next(
             (
                 card
@@ -612,13 +629,9 @@ def combat_damage_proposals(
         )
         if source is None:
             raise DamageError(f"Unknown damage source {source_ref}")
-        amount = int(assignment.get("amount", 0))
-        if amount < 0:
-            raise DamageError("Damage cannot be negative")
         if amount == 0:
             # CR 120.8: zero produces no event or replacement window.
             continue
-        target = str(assignment.get("target") or "")
         if source.zone != "battlefield":
             host._log(
                 source.controller,
@@ -643,22 +656,46 @@ def combat_damage_proposals(
                 importance=1,
             )
             continue
-        if replacement_event_ids and event_index >= len(replacement_event_ids):
+        if replacement_ids and event_index >= len(replacement_ids):
             raise DamageError("Combat replacement event identity count is stale")
+        source_value = source_snapshot(
+            host,
+            source.ref,
+            controller=source.controller,
+        )
+        recipient_value = recipient_snapshot(
+            host,
+            target,
+            actor=source.controller,
+        )
+        recipient_identity = (
+            recipient_value.logical_object_id
+            if recipient_value.logical_object_id is not None
+            else f"player:{recipient_value.ref}"
+        )
         proposals.append(
-            damage_proposal(
-                host,
+            DamageProposal(
                 proposal_id=(
-                    str(replacement_event_ids[event_index])
-                    if replacement_event_ids
+                    replacement_ids[event_index]
+                    if replacement_ids
                     else (
-                        f"damage.combat:{host.state.revision}:"
-                        f"{host.state.event_sequence + 1}:{index}"
+                        combat_damage_event_identity(
+                            damage_step_id=damage_step_id,
+                            source_logical_object_id=(
+                                source_value.logical_object_id
+                            ),
+                            recipient_logical_object_id=recipient_identity,
+                            amount=amount,
+                        )
+                        if damage_step_id is not None
+                        else (
+                            f"damage.combat:{host.state.revision}:"
+                            f"{host.state.event_sequence + 1}:{original_index}"
+                        )
                     )
                 ),
-                actor=source.controller,
-                source_ref=source.ref,
-                target=target,
+                source=source_value,
+                recipient=recipient_value,
                 amount=amount,
                 combat=True,
                 reason="combat damage",
@@ -668,7 +705,7 @@ def combat_damage_proposals(
             )
         )
         event_index += 1
-    if replacement_event_ids and event_index != len(replacement_event_ids):
+    if replacement_ids and event_index != len(replacement_ids):
         raise DamageError("Combat replacement event identity count is stale")
     return tuple(proposals)
 

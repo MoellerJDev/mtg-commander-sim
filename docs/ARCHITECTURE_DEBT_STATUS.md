@@ -16,14 +16,14 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `ff5973728476d66406179a2bc6b5113bd8483aaf`
 - Package: `0.8.0`
 - CI run: [31047020917](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31047020917) — `pass`
-- Production scope: 249 files, 106,136 physical lines, 97,335 logical lines
+- Production scope: 257 files, 107,314 physical lines, 98,379 logical lines
 
 ## Central engine debt
 
-- `engine.py`: 13,531 physical / 12,775 logical lines
-- Methods: 28 public, 281 private, 1 dunder
+- `engine.py`: 13,507 physical / 12,762 logical lines
+- Methods: 28 public, 280 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
-- Direct GameState-write heuristic: 135 locations
+- Direct GameState-write heuristic: 133 locations
 - Semantic-operation branches: 172
 - Registered typed semantic handlers: 84 across 84 operations
 - Registered typed runtime components: 20
@@ -42,8 +42,8 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 13,017 | 12,775 | -242 |
-| `direct_game_state_writes` | 135 | 135 | +0 |
+| `engine_logical_lines` | 13,017 | 12,762 | -255 |
+| `direct_game_state_writes` | 135 | 133 | -2 |
 | `printed_name_literals` | 691 | 691 | +0 |
 | `oracle_id_literals` | 5 | 5 | +0 |
 | `legacy_card_specific_operations` | 5 | 5 | +0 |
@@ -55,15 +55,15 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
-| `mtg_commander_sim/engine.py` | python | 13,531 | 12,775 |
+| `mtg_commander_sim/engine.py` | python | 13,507 | 12,762 |
 | `mtg_commander_sim/report.py` | python | 1,818 | 1,782 |
 | `web/src/App.tsx` | web | 1,784 | 1,728 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
 | `mtg_commander_sim/record.py` | python | 1,706 | 1,605 |
-| `mtg_commander_sim/reusable_pieces/generation.py` | python | 1,591 | 1,494 |
+| `mtg_commander_sim/damage.py` | python | 1,623 | 1,492 |
 | `mtg_commander_sim/rules_corpus.py` | python | 1,561 | 1,464 |
-| `mtg_commander_sim/damage.py` | python | 1,586 | 1,456 |
 | `mtg_commander_sim/oracle_ir.py` | python | 1,498 | 1,449 |
+| `mtg_commander_sim/reusable_pieces/generation.py` | python | 1,525 | 1,430 |
 | `mtg_commander_sim/cli.py` | python | 1,473 | 1,408 |
 | `server/app.py` | python | 1,348 | 1,206 |
 | `mtg_commander_sim/damage_results.py` | python | 1,308 | 1,202 |
@@ -82,12 +82,12 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 | `_compile_face` | `mtg_commander_sim/oracle_ir.py:913` | 441 | 450 |
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:122` | 429 | 430 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:549` | 362 | 366 |
-| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:12773` | 342 | 354 |
-| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1551` | 341 | 347 |
+| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:12749` | 342 | 354 |
+| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1556` | 341 | 347 |
 | `build_parser` | `mtg_commander_sim/cli.py:514` | 337 | 361 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:447` | 302 | 302 |
-| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:7920` | 301 | 304 |
-| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2943` | 285 | 319 |
+| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:7906` | 301 | 304 |
+| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2948` | 282 | 312 |
 | `_scripted_choice` | `mtg_commander_sim/cli.py:74` | 266 | 268 |
 | `parse_declaration_cost_line` | `mtg_commander_sim/declaration_costs.py:219` | 249 | 258 |
 
@@ -98,7 +98,7 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 | `turn_priority_decisions` | 39 |
 | `casting_activation_and_costs` | 47 |
 | `semantics_resolution_and_choices` | 74 |
-| `combat_and_damage` | 31 |
+| `combat_and_damage` | 30 |
 | `zones_objects_and_state` | 17 |
 | `commander_and_multiplayer` | 8 |
 | `persistence_logging_and_invariants` | 6 |
@@ -114,15 +114,15 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,884
-- Conventional Python cases: 1,584
+- Python discovered: 4,902
+- Conventional Python cases: 1,602
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 9
 - Browser unit cases: 22
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true
-- Capability mutation declarations: 47
+- Capability mutation declarations: 49
 - Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift

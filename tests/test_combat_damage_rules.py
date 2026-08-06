@@ -6,6 +6,13 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
+from mtg_commander_sim.combat_damage_engine_adapter import (
+    EngineCombatDamageQuery,
+)
+from mtg_commander_sim.combat_damage_snapshot import (
+    CombatDamageSnapshotError,
+)
+from mtg_commander_sim.engine import TURN_STEPS
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -789,6 +796,86 @@ class CombatDamageRuleTests(unittest.TestCase):
         self.assertEqual(0, engine.state.combat.damage_step_index)
         self.assertEqual(life_before - 2, engine.state.players["B"].life)
         self.assertIsNone(engine.state.pending_decision)
+
+    def test_damage_step_identity_is_stable_and_distinguishes_extra_combats(
+        self,
+    ):
+        session = self.make_session(51015)
+        engine = session.engine
+
+        engine.state.phase_index = TURN_STEPS.index(
+            ("combat", "beginning_combat")
+        )
+        engine._enter_step()
+        engine._initialize_combat_damage_steps()
+        first = EngineCombatDamageQuery(engine).damage_step_identity()
+        serialized = engine.state.combat.to_dict()
+        self.assertEqual(
+            serialized,
+            CombatState.from_dict(serialized).to_dict(),
+        )
+        engine.state.combat.damage_step_index = 1
+        second_step = EngineCombatDamageQuery(engine).damage_step_identity()
+
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine._enter_step()
+        engine._initialize_combat_damage_steps()
+        extra_combat = EngineCombatDamageQuery(engine).damage_step_identity()
+
+        self.assertNotEqual(first, second_step)
+        self.assertNotEqual(first, extra_combat)
+        self.assertEqual(
+            first.rsplit(":step:", 1)[0],
+            second_step.rsplit(":step:", 1)[0],
+        )
+        self.assertNotIn("damage_sequence_id", CombatState().to_dict())
+
+    def test_malformed_snapshot_fails_before_a_damage_decision(self):
+        session = self.make_session(51016)
+        engine = session.engine
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            blockers_declared=True,
+            attackers={"missing-attacker": "B"},
+            defending_players=["B"],
+        )
+
+        with self.assertRaises(CombatDamageSnapshotError):
+            engine._begin_combat_damage()
+
+        self.assertIsNone(engine.state.pending_decision)
+        self.assertEqual([], engine.state.combat.damage_assignments)
+
+    def test_departing_attacker_preserves_blocker_without_damage_assignment(self):
+        session = self.make_session(51017)
+        engine = session.engine
+        attacker = self.token(engine, "A", "Departing Attacker", 2)
+        blocker = self.token(engine, "B", "Former Blocker", 2)
+        attacker.attacking = "B"
+        blocker.blocking = attacker.object_id
+        engine.state.combat = CombatState(
+            attackers_declared=True,
+            blockers_declared=True,
+            attackers={attacker.object_id: "B"},
+            defending_players=["B"],
+            blockers={attacker.object_id: [blocker.object_id]},
+        )
+
+        engine.move_card(attacker.object_id, "graveyard")
+
+        self.assertEqual(attacker.object_id, blocker.blocking)
+        self.assertNotIn(attacker.object_id, engine.state.combat.attackers)
+        self.assertEqual(
+            [blocker.object_id],
+            engine.state.combat.blockers[attacker.object_id],
+        )
+        self.assertEqual(
+            (),
+            EngineCombatDamageQuery(engine).participant_object_ids(),
+        )
+        engine._begin_combat_damage()
+        self.assertEqual([], engine.state.combat.damage_assignments)
 
 
 if __name__ == "__main__":

@@ -111,7 +111,14 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_damage_assignment.py",
+        "mtg_commander_sim/combat_damage_engine_adapter.py",
+        "mtg_commander_sim/combat_damage_events.py",
         "mtg_commander_sim/combat_damage_projection.py",
+        "mtg_commander_sim/combat_damage_sequence.py",
+        "mtg_commander_sim/combat_damage_snapshot.py",
+        "mtg_commander_sim/combat_damage_trample.py",
+        "mtg_commander_sim/combat_damage_values.py",
+        "mtg_commander_sim/combat_relationship_state.py",
         "mtg_commander_sim/combat_constraints.py",
         "mtg_commander_sim/commander.py",
         "mtg_commander_sim/cast_timing.py",
@@ -258,6 +265,10 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/damage_results.py",
     }:
         return "damage"
+    if relative.startswith("mtg_commander_sim/combat_damage_") or relative in {
+        "mtg_commander_sim/combat_relationship_state.py",
+    }:
+        return "combat_damage"
     if relative == "mtg_commander_sim/token_creation.py":
         return "token_creation"
     if relative == "mtg_commander_sim/replacement_decisions.py":
@@ -349,6 +360,8 @@ def build_classifications() -> dict[str, Any]:
                             "counter_placement.py",
                             "counter_state.py",
                             "commander.py",
+                            "combat_damage_",
+                            "combat_relationship_state.py",
                             "damage.py",
                             "damage_modifier_state.py",
                             "damage_prevention",

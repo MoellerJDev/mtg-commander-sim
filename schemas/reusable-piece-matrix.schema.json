@@ -26,7 +26,7 @@
   ],
   "properties": {
     "schema_version": {"const": 1},
-    "algorithm_version": {"const": "reusable-piece-matrix-v1"},
+    "algorithm_version": {"const": "reusable-piece-matrix-v2"},
     "ontology_version": {"type": "string", "minLength": 1},
     "profile": {"const": "commander_review"},
     "commander_legal_only": {"const": true},

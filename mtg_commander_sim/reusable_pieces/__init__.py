@@ -10,6 +10,7 @@ from .generation import (
     validate_program_baseline,
     validate_reusable_piece_policy,
 )
+from .interactions import validate_interaction_evidence
 from .reporting import (
     card_piece_relations,
     diff_reusable_piece_matrices,
@@ -43,6 +44,7 @@ __all__ = [
     "render_reusable_piece_delta_markdown",
     "render_reusable_piece_matrix_markdown",
     "validate_complex_card_benchmark",
+    "validate_interaction_evidence",
     "validate_program_baseline",
     "validate_reusable_piece_artifacts",
     "validate_reusable_piece_card_index",

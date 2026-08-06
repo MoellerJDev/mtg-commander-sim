@@ -11,6 +11,13 @@ from mtg_commander_sim.combat_damage_assignment import (
     CreatureDamageState,
     TrampleDamageSpec,
 )
+from mtg_commander_sim.combat_damage_snapshot import (
+    CombatAttackRelationship,
+    CombatBlockRelationship,
+    CombatDamageRecipient,
+    CombatDamageSnapshot,
+    CombatDamageSnapshotError,
+)
 
 
 class CombatDamageAssignmentProposalTests(unittest.TestCase):
@@ -38,14 +45,36 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
 
         proposal = build_combat_damage_assignment_proposal(
             seat="A",
-            attackers={attacker.object_id: "B"},
-            blockers={attacker.object_id: (blocker.object_id,)},
-            participants=(attacker, blocker),
-            valid_spill_targets={attacker.object_id: "B"},
+            snapshot=CombatDamageSnapshot(
+                damage_step_id="combat-damage:1:0:0",
+                damage_step_index=0,
+                first_strike_step=False,
+                active_player="A",
+                participants=(attacker, blocker),
+                attacks=(
+                    CombatAttackRelationship(
+                        attacker.object_id,
+                        CombatDamageRecipient(
+                            reference="B",
+                            logical_object_id="player:B",
+                            controller="B",
+                            kind="player",
+                            legal=True,
+                        ),
+                    ),
+                ),
+                blocks=(
+                    CombatBlockRelationship(
+                        attacker.object_id,
+                        blocker.object_id,
+                    ),
+                ),
+                was_blocked=frozenset({attacker.object_id}),
+            ),
         )
 
         self.assertEqual(
-            {"attacker": {"power": 5, "targets": ["B", "blocker"]}},
+            {"attacker": {"power": 5, "targets": ["blocker", "B"]}},
             proposal.projected_options(),
         )
         blocker_state = proposal.trample_sources[0].blockers[0][1]
@@ -53,15 +82,18 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
         self.assertEqual(1, blocker_state.marked_damage)
 
         with self.assertRaisesRegex(
-            CombatDamageAssignmentError,
+            CombatDamageSnapshotError,
             "object identities must be unique",
         ):
-            build_combat_damage_assignment_proposal(
-                seat="A",
-                attackers={attacker.object_id: "B"},
-                blockers={},
+            CombatDamageSnapshot(
+                damage_step_id="combat-damage:1:0:0",
+                damage_step_index=0,
+                first_strike_step=False,
+                active_player="A",
                 participants=(attacker, attacker),
-                valid_spill_targets={attacker.object_id: "B"},
+                attacks=(),
+                blocks=(),
+                was_blocked=frozenset(),
             )
 
     def proposal(
@@ -74,9 +106,13 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
         extra_sources: tuple[CombatDamageSourceSpec, ...] = (),
     ) -> CombatDamageAssignmentProposal:
         return CombatDamageAssignmentProposal(
+            damage_step_id="combat-damage:1:0:0",
+            actor="A",
             sources=(
                 CombatDamageSourceSpec(
                     source="attacker",
+                    controller="A",
+                    logical_object_id="attacker@1",
                     power=power,
                     targets=("blocker", "B"),
                 ),
@@ -215,6 +251,8 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
     def test_deathtouch_damage_from_another_attacker_is_lethal(self) -> None:
         helper = CombatDamageSourceSpec(
             source="helper",
+            controller="A",
+            logical_object_id="helper@1",
             power=1,
             targets=("blocker", "C"),
         )
@@ -233,6 +271,8 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
     def test_zero_deathtouch_assignment_is_not_lethal(self) -> None:
         helper = CombatDamageSourceSpec(
             source="helper",
+            controller="A",
+            logical_object_id="helper@1",
             power=1,
             targets=("blocker", "C"),
         )
@@ -268,9 +308,13 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
 
     def test_source_without_targets_assigns_zero(self) -> None:
         proposal = CombatDamageAssignmentProposal(
+            damage_step_id="combat-damage:1:0:0",
+            actor="A",
             sources=(
                 CombatDamageSourceSpec(
                     source="stranded",
+                    controller="A",
+                    logical_object_id="stranded@1",
                     power=4,
                     targets=(),
                 ),
@@ -313,11 +357,15 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
     def test_invalid_proposal_relationships_fail_closed(self) -> None:
         source = CombatDamageSourceSpec(
             source="attacker",
+            controller="A",
+            logical_object_id="attacker@1",
             power=1,
             targets=("B",),
         )
         with self.assertRaises(CombatDamageAssignmentError):
             CombatDamageAssignmentProposal(
+                damage_step_id="combat-damage:1:0:0",
+                actor="A",
                 sources=(source,),
                 attacking_sources=frozenset({"unknown"}),
                 deathtouch_sources=frozenset(),
@@ -325,6 +373,8 @@ class CombatDamageAssignmentProposalTests(unittest.TestCase):
             )
         with self.assertRaises(CombatDamageAssignmentError):
             CombatDamageAssignmentProposal(
+                damage_step_id="combat-damage:1:0:0",
+                actor="A",
                 sources=(source,),
                 attacking_sources=frozenset({"attacker"}),
                 deathtouch_sources=frozenset({"unknown"}),

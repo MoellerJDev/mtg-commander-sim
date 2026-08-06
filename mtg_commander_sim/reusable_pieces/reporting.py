@@ -269,10 +269,15 @@ def validate_reusable_piece_interactions(
                 "covered",
                 "high_risk",
                 "evidence_test_ids",
+                "evidence_basis",
             },
             label="Reusable-piece interaction row",
         )
         piece_ids = row.get("piece_ids")
+        if row.get("evidence_basis") != "explicit_interaction_declaration_v1":
+            raise ValueError(
+                "Reusable-piece interaction evidence basis is unsupported"
+            )
         if (
             not isinstance(piece_ids, list)
             or len(piece_ids) != 2
