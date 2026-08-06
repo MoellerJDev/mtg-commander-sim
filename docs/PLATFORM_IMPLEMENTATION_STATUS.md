@@ -36,8 +36,8 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
 - Rules cases: blocked=373, definition_only=105, passing=187, total=3300, unreviewed=2635
 - Mechanics: status_counts={'partial': 58, 'tested': 6, 'trusted': 5, 'unclassified': 356}, total=425, trusted=5
-- Oracle coverage: material_residuals=56591, status_counts={'exact': 4610, 'partial': 14657, 'unresolved': 19275}, total=38542
-- Commander-legal Oracle coverage: material_residuals=48967, status_counts={'exact': 1680, 'partial': 13526, 'unresolved': 16417}, total=31623
+- Oracle coverage: material_residuals=56465, status_counts={'exact': 4678, 'partial': 14589, 'unresolved': 19275}, total=38542
+- Commander-legal Oracle coverage: material_residuals=48846, status_counts={'exact': 1745, 'partial': 13461, 'unresolved': 16417}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -110,7 +110,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4987
+- Tests discovered: 4899
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31095367320](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31095367320) — `pass`
 - Compile: `pass`
@@ -122,7 +122,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Replay: `pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner`
 - Privacy: `pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner`
 - Semantic preflight: `reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory`
-- Commander CardProgram census: `cards_considered=31623, material_residuals=48967, status_counts={'residual': 29943, 'trusted': 1680}, trust_basis_counts={'capability_closed': 1676, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 29943}`
+- Commander CardProgram census: `cards_considered=31623, material_residuals=48846, status_counts={'residual': 29878, 'trusted': 1745}, trust_basis_counts={'capability_closed': 1741, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 29878}`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
 

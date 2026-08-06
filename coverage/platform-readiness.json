@@ -337,10 +337,10 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 48967,
+      "material_residuals": 48846,
       "status_counts": {
-        "exact": 1680,
-        "partial": 13526,
+        "exact": 1745,
+        "partial": 13461,
         "unresolved": 16417
       },
       "total": 31623
@@ -359,10 +359,10 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 56591,
+      "material_residuals": 56465,
       "status_counts": {
-        "exact": 4610,
-        "partial": 14657,
+        "exact": 4678,
+        "partial": 14589,
         "unresolved": 19275
       },
       "total": 38542
@@ -397,7 +397,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4987,
+    "deterministic_cases_discovered": 4899,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -407,31 +407,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 48967,
+        "material_residuals": 48846,
         "status_counts": {
-          "residual": 29943,
-          "trusted": 1680
+          "residual": 29878,
+          "trusted": 1745
         },
         "trust_basis_counts": {
-          "capability_closed": 1676,
+          "capability_closed": 1741,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 29943
+          "unresolved": 29878
         }
       },
       "full": {
         "cards_considered": 38542,
-        "material_residuals": 56587,
+        "material_residuals": 56461,
         "status_counts": {
           "failed": 2248,
-          "residual": 33929,
-          "trusted": 2365
+          "residual": 33861,
+          "trusted": 2433
         },
         "trust_basis_counts": {
-          "capability_closed": 2361,
+          "capability_closed": 2429,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 33929
+          "unresolved": 33861
         }
       }
     },

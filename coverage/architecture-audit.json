@@ -9142,13 +9142,13 @@
     "card_program_v2_present": true,
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.053126,
-      "material_residuals": 48967,
+      "exact_fraction": 0.055181,
+      "material_residuals": 48846,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
         "declaration_restriction": 153,
-        "dependency_contract": 6391,
+        "dependency_contract": 6270,
         "effect": 6461,
         "mana_ability": 676,
         "replacement_effect": 1523,
@@ -9168,8 +9168,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 1680,
-        "partial": 13526,
+        "exact": 1745,
+        "partial": 13461,
         "unresolved": 16417
       },
       "template_count": 183,
@@ -9183,13 +9183,13 @@
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.11961,
-      "material_residuals": 56591,
+      "exact_fraction": 0.121374,
+      "material_residuals": 56465,
       "residual_kinds": {
         "cost": 2015,
         "declaration_cost": 11,
         "declaration_restriction": 170,
-        "dependency_contract": 6821,
+        "dependency_contract": 6695,
         "effect": 7168,
         "mana_ability": 771,
         "replacement_effect": 1758,
@@ -9209,8 +9209,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 4610,
-        "partial": 14657,
+        "exact": 4678,
+        "partial": 14589,
         "unresolved": 19275
       },
       "template_count": 183,
@@ -10411,7 +10411,7 @@
     },
     "python": {
       "conventional_ast_cases": 1687,
-      "discovered_total": 4987,
+      "discovered_total": 4899,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 49,
@@ -10420,7 +10420,7 @@
         "replay_named": 103,
         "server_named": 25
       },
-      "reconciles": true,
+      "reconciles": false,
       "test_files": 171
     }
   }

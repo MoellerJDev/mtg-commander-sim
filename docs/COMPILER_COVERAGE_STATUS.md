@@ -74,8 +74,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 4,610 | 14,657 | 19,275 | 56,591 | false |
-| Commander legal | 31,623 | 1,680 | 13,526 | 16,417 | 48,967 | false |
+| Full Oracle | 38,542 | 4,678 | 14,589 | 19,275 | 56,465 | false |
+| Commander legal | 31,623 | 1,745 | 13,461 | 16,417 | 48,846 | false |
 
 ## Full-corpus residual kinds
 
@@ -85,7 +85,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 | `spell_effect` | 11,241 |
 | `static_ability` | 11,143 |
 | `effect` | 7,168 |
-| `dependency_contract` | 6,821 |
+| `dependency_contract` | 6,695 |
 | `cost` | 2,015 |
 | `replacement_effect` | 1,758 |
 | `mana_ability` | 771 |
