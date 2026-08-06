@@ -1,0 +1,102 @@
+name: Compiler gap
+description: Report Oracle text that does not lower to the expected typed CardProgram construct.
+title: "[Compiler]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Compiler reports describe generic wording families, not card-name runtime exceptions. Use the pinned snapshot and remove all private or live-game data.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: Full commit SHA or version
+    validations:
+      required: true
+  - type: input
+    id: oracle_id
+    attributes:
+      label: Oracle ID
+    validations:
+      required: true
+  - type: input
+    id: face
+    attributes:
+      label: Card face
+      description: Give the exact face name or face index used by the compiler.
+    validations:
+      required: true
+  - type: textarea
+    id: ability
+    attributes:
+      label: Ability or clause
+      description: Quote only the smallest Oracle ability or clause needed to identify the gap.
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Compiler stage
+      options:
+        - Oracle normalization or face selection
+        - Declaration parsing
+        - Typed IR construction
+        - CardProgram lowering
+        - Capability closure or trust validation
+        - Residual classification or reporting
+        - Unknown
+    validations:
+      required: true
+  - type: input
+    id: residual
+    attributes:
+      label: Residual identifier
+      description: Give the exact residual kind/identifier and source span, if available.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected typed construct
+      description: Describe the reusable typed IR/CardProgram node, descriptor, capability, targets, costs, and source span expected from this wording.
+    validations:
+      required: true
+  - type: textarea
+    id: authority
+    attributes:
+      label: Applicable rules and rulings
+      description: List governing Comprehensive Rules IDs and applicable pinned card rulings.
+    validations:
+      required: true
+  - type: dropdown
+    id: primitive
+    attributes:
+      label: Does the runtime primitive already exist?
+      options:
+        - Yes
+        - No
+        - Partially
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: primitive_details
+    attributes:
+      label: Runtime primitive details
+      description: Identify the existing generic owner or explain the missing reusable primitive. Do not propose a card-name or Oracle-ID runtime branch.
+    validations:
+      required: true
+  - type: textarea
+    id: wording_family
+    attributes:
+      label: Other cards with the same wording
+      description: List other Oracle IDs/faces using the same relevant wording, or explain how you confirmed there are none in the pinned corpus.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I did not attach a bulk Oracle archive, private game state, credentials, capabilities, or live records.
+          required: true

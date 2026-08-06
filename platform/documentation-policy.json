@@ -10,7 +10,8 @@
     "rules/*.md"
   ],
   "excluded_prefixes": [
-    ".agents/skills/"
+    ".agents/skills/",
+    ".github/"
   ],
   "required_metadata": [
     "title",

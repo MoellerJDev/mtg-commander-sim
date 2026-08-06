@@ -1,0 +1,55 @@
+name: Documentation issue
+description: Report incorrect, missing, duplicated, or unclear project documentation.
+title: "[Docs]: "
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Document or location
+      description: Link the file, heading, command, or generated report involved.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Issue type
+      options:
+        - Incorrect or stale guidance
+        - Missing guidance
+        - Broken link or anchor
+        - Duplicate or conflicting authority
+        - Generated-report problem
+        - Accessibility or clarity
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain what a reader cannot do or what claim disagrees with its authoritative source.
+    validations:
+      required: true
+  - type: textarea
+    id: authority
+    attributes:
+      label: Authoritative source
+      description: Identify the code, schema, machine-readable policy, generator, test, or accepted decision that should govern the correction.
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed outcome
+      description: Describe the smallest correction, move, consolidation, or deletion that would restore one clear owner.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed credentials, private game state, capabilities, live records, and third-party bulk data or artwork.
+          required: true
+        - label: This is not a security vulnerability; if it is, I will follow SECURITY.md instead of filing a public issue.
+          required: true

@@ -1,0 +1,88 @@
+name: Rules bug
+description: Report authoritative gameplay that disagrees with the pinned rules and Oracle sources.
+title: "[Rules]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Rules reports must be deterministic and source-pinned. Do not include private hands, library order, credentials, capabilities, authoritative checkpoints, or live private records.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: Full commit SHA or version
+    validations:
+      required: true
+  - type: textarea
+    id: snapshots
+    attributes:
+      label: Rules and Oracle snapshot
+      description: Identify the rules manifest revision and the Oracle/rulings snapshot fingerprint or update timestamp used by the reproduction. Do not attach bulk archives.
+    validations:
+      required: true
+  - type: input
+    id: card
+    attributes:
+      label: Card and Oracle ID
+      description: Give every relevant card face/name and its Oracle ID. Write N/A with a reason if no card is involved.
+    validations:
+      required: true
+  - type: input
+    id: rules
+    attributes:
+      label: Relevant rule IDs
+      description: List the Comprehensive Rules IDs and any Commander rule IDs that govern the expected result.
+      placeholder: CR 120.3, CR 616.1, Commander rule ...
+    validations:
+      required: true
+  - type: textarea
+    id: initial_state
+    attributes:
+      label: Initial-state recipe
+      description: Describe the smallest public, sanitized state needed to reproduce the issue, including seats, zones, turn/step, priority, and objects.
+    validations:
+      required: true
+  - type: textarea
+    id: sequence
+    attributes:
+      label: Command or replay sequence
+      description: List the exact commands, decisions, or sanitized replay steps in order.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Explain the expected transition and cite the rule or ruling that requires it.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Explain the observed transition, rejection, state, event, or replay difference.
+    validations:
+      required: true
+  - type: textarea
+    id: multiplayer
+    attributes:
+      label: Multiplayer and APNAP relevance
+      description: State whether player count, active-player/nonactive-player ordering, affected-player/controller ordering, simultaneous choices, or seat privacy changes the result. Write N/A with a reason if none applies.
+    validations:
+      required: true
+  - type: textarea
+    id: interactions
+    attributes:
+      label: Interaction checklist
+      description: Address replacement, prevention, copy, layers, zone identity/leave-and-return, and Commander-specific relevance individually. Write N/A with a reason for each that does not apply.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I confirm this report contains no private hands, library order, credentials, capabilities, authoritative checkpoints, or live private records.
+          required: true
+        - label: This is not a security vulnerability; if it is, I will follow SECURITY.md instead of filing a public issue.
+          required: true
