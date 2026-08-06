@@ -782,7 +782,7 @@ class CombatKeywordRuleTests(unittest.TestCase):
         )
 
         self.assertIsNone(engine._attack_declaration_error(attacker, "A"))
-        attacker.temporary_keywords.add("Defender")
+        attacker.temporary_keywords.append("Defender")
         self.assertIn(
             "defender",
             engine._attack_declaration_error(attacker, "A") or "",
