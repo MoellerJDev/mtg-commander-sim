@@ -237,6 +237,9 @@ def _check_freshness(artifacts: dict[str, dict]) -> None:
         "oracle_coverage": _hash(load_json(ORACLE_INPUT)),
         "program_coverage": _hash(load_json(PROGRAM_INPUT)),
         "policy": _hash(policy),
+        "interaction_evidence": _hash(
+            load_json(INTERACTION_EVIDENCE_INPUT)
+        ),
     }
     if inputs != expected:
         raise ValueError("Reusable-piece matrix input fingerprints are stale")
