@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 34,
+  "registry_version": 35,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -672,6 +672,33 @@
       "dependency_fail_closed_rationale": "Capability closure reaches the canonical combat snapshot, recipient, APNAP announcement, and damage-batch owner and fails closed if that dependency is unavailable.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_trample_lethal_assignment_mutant_is_killed removes lethal-before-spill enforcement and the canonical invalid assignment rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.attack.defender",
+      "version": 1,
+      "official_rules": ["508.1a", "508.1c", "702.3", "702.3a", "702.3b", "702.3c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Prohibit a current represented creature with one or more Defender instances from being declared as an attacker, using one shared verdict for advertised candidates and accepted declarations.",
+        "inputs": ["current effective creature type", "current represented effective keyword state", "authoritative attack-declaration candidate"],
+        "outputs": ["ordinary non-Defender creature left to remaining declaration checks", "Defender creature prohibited", "case-insensitive redundant Defender result", "malformed characteristic rejection before mutation"],
+        "exclusions": ["effects that put a creature onto the battlefield attacking", "permissions that allow a creature with Defender to attack", "the broader CR 508 restrictions-and-requirements solver", "unrepresented continuous-effect, copy, face-down, and ability-changing producers"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.defender.defender_prohibits_attack", "CommanderEngine._attack_declaration_error", "CommanderEngine._attack_declaration_components", "CommanderEngine._complete_attackers"],
+      "positive_tests": ["test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker", "test_current_effective_defender_is_case_insensitive_and_redundant"],
+      "negative_tests": ["test_noncreature_and_nondefender_are_not_restricted", "test_malformed_current_creature_characteristics_fail_closed"],
+      "interaction_tests": ["test_effective_defender_gain_and_loss_change_shared_legality"],
+      "multiplayer_tests": ["test_four_player_defender_restriction_is_seat_scoped_and_replays"],
+      "privacy_tests": ["test_four_player_defender_restriction_is_seat_scoped_and_replays"],
+      "replay_tests": ["test_four_player_defender_restriction_is_seat_scoped_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay", "property", "rollback"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded restriction consumes the authoritative current characteristic snapshot and has no optional capability dependency.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_defender_attack_restriction_mutant_is_killed changes the recognized current keyword and the attack-prohibition assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

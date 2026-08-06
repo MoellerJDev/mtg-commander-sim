@@ -12,6 +12,7 @@ from mtg_commander_sim import (
 from mtg_commander_sim import combat as combat_module
 from mtg_commander_sim import combat_damage_trample as trample_module
 from mtg_commander_sim import deathtouch as deathtouch_module
+from mtg_commander_sim import defender as defender_module
 from mtg_commander_sim import damage_results as damage_results_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
@@ -1365,6 +1366,43 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_haste_exceptions_apply()
+
+    def test_defender_attack_restriction_mutant_is_killed(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=702_003,
+        )
+        keep_all(session)
+        engine = session.engine
+        ref = engine.create_token(
+            "A",
+            name="Defender Mutation Witness",
+            characteristics={
+                "type_line": "Token Creature — Wall",
+                "power": "1",
+                "toughness": "1",
+                "keywords": ["Defender", "Haste"],
+            },
+        )[0]
+        card = engine._resolve_object("A", ref, zones={"battlefield"})
+
+        def assert_defender_prohibits_attack() -> None:
+            self.assertIn(
+                "defender",
+                engine._attack_declaration_error(card, "A") or "",
+            )
+
+        assert_defender_prohibits_attack()
+        with patch.object(
+            defender_module,
+            "DEFENDER_KEYWORD",
+            "mutated-defender",
+        ):
+            with self.assertRaises(AssertionError):
+                assert_defender_prohibits_attack()
 
     def test_aerial_blocking_flying_and_reach_mutants_are_killed(self):
         def assert_ground_cannot_block_flying() -> None:

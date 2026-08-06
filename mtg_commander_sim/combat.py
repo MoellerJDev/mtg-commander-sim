@@ -9,7 +9,6 @@ DEATHTOUCH = "deathtouch"
 TRAMPLE = "trample"
 LIFELINK = "lifelink"
 MENACE = "menace"
-DEFENDER = "defender"
 
 
 def normalized_keywords(values: Iterable[object]) -> frozenset[str]:

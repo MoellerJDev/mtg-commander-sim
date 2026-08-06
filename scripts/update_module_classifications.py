@@ -131,6 +131,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/damage_values.py",
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/deathtouch.py",
+        "mtg_commander_sim/defender.py",
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
         "mtg_commander_sim/delayed_triggers.py",

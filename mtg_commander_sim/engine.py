@@ -40,7 +40,6 @@ from .characteristic_evaluation import (
     type_parts,
 )
 from .combat import (
-    DEFENDER,
     LIFELINK,
     MENACE,
     assigns_in_damage_step,
@@ -48,6 +47,7 @@ from .combat import (
     normalized_keywords,
     ordinary_second_step_combatants,
 )
+from . import defender
 from .combat_damage_assignment import CombatDamageAssignmentError
 from .combat_damage_engine_adapter import EngineCombatDamageQuery
 from .combat_damage_projection import project_combat_damage_assignment
@@ -9874,7 +9874,7 @@ class CommanderEngine(
             return f"{card.ref} is tapped"
         if haste.summoning_sickness_prohibits_attack(self, card):
             return f"{card.ref} is summoning sick"
-        if DEFENDER in normalized_keywords(data.get("keywords", [])):
+        if defender.defender_prohibits_attack(self, card):
             return f"{card.ref} has defender and cannot attack"
         return None
 

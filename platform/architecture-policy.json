@@ -26,6 +26,7 @@
     "mtg_commander_sim/damage_prevention_creation.py",
     "mtg_commander_sim/damage_results.py",
     "mtg_commander_sim/deathtouch.py",
+    "mtg_commander_sim/defender.py",
     "mtg_commander_sim/declaration_costs.py",
     "mtg_commander_sim/declaration_restrictions.py",
     "mtg_commander_sim/delayed_triggers.py",

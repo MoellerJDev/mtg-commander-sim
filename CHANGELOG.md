@@ -11,6 +11,21 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Typed ordinary-Defender attack restriction
+
+- Replaced the legacy keyword check with one read-only Defender rules owner
+  shared by attacker advertisement and accepted declarations. It consumes the
+  current represented creature type and effective keyword snapshot, treats
+  repeated instances as redundant, and fails closed on malformed input.
+- Added four-player seat projection, exact replay, atomic rejection, bounded
+  property, interaction, and focused mutation evidence. Current Haste does not
+  override Defender, while represented gain or loss of Defender immediately
+  changes the shared declaration verdict.
+- Printed Defender now requests a fine-grained source-spanned CardProgram
+  capability. Effects that expressly allow a creature with Defender to attack,
+  the broader restrictions-and-requirements solver, and unsupported
+  characteristic producers remain explicit aggregate-mechanic blockers.
+
 ### Typed Deathtouch assignment and result
 
 - Added a reusable Deathtouch rules owner for positive lethal combat-damage
