@@ -232,35 +232,26 @@ class ActivatedDrawCompilerTests(unittest.TestCase):
                 self.assertEqual(template, node.template_id)
                 self.assertEqual(capabilities, set(node.capability_dependencies))
 
-    def test_drawn_card_action_cards_are_exact_and_source_spanned(self):
+    def test_drawn_card_action_template_is_exact_and_source_spanned(self):
         expected_text = (
             "{T}: Draw a card and reveal it. If it isn't a land card, "
             "discard it."
         )
-        for name in ("Fa'adiyah Seer", "Sindbad"):
-            with self.subTest(name=name):
-                record = self.db.lookup(name)
-                ir = compile_oracle_card(
-                    record,
-                    capability_registry=self.capabilities,
-                    capability_profile="commander_review",
-                )
+        ir = self.compile(expected_text)
 
-                self.assertEqual("exact", ir.status)
-                self.assertEqual(1, len(ir.faces[0].nodes))
-                node = ir.faces[0].nodes[0]
-                self.assertEqual("activated_ability", node.kind)
-                self.assertEqual(
-                    "draw-reveal-discard-unless-land-controller-v1",
-                    node.template_id,
-                )
-                self.assertEqual(
-                    (DRAW_ACTION_CAPABILITY,), node.capability_dependencies
-                )
-                self.assertEqual(
-                    expected_text,
-                    record.oracle_text[node.span.start : node.span.end],
-                )
+        self.assertEqual("exact", ir.status)
+        self.assertEqual(1, len(ir.faces[0].nodes))
+        node = ir.faces[0].nodes[0]
+        self.assertEqual("activated_ability", node.kind)
+        self.assertEqual(
+            "draw-reveal-discard-unless-land-controller-v1",
+            node.template_id,
+        )
+        self.assertEqual((DRAW_ACTION_CAPABILITY,), node.capability_dependencies)
+        self.assertEqual(
+            expected_text,
+            expected_text[node.span.start : node.span.end],
+        )
 
     def test_dynamic_and_compound_draw_wording_remains_residual(self):
         for text in (

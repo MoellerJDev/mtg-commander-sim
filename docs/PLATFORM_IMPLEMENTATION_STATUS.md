@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "fc7aa651b90a4929b610e129ef13b1724fb518af77c99f145330f86fc46c1335"
+verified: "5c501621cb5a22f9a5e19603f35392cd52e5e6df255778dc9ded1005e898cdbc"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,7 +15,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `fc7aa651b90a4929b610e129ef13b1724fb518af77c99f145330f86fc46c1335` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `5c501621cb5a22f9a5e19603f35392cd52e5e6df255778dc9ded1005e898cdbc` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `35f116bd858f4f5f87cefad5793f9b2cf2cb8e1c`
 - Certified exact head: `ce0d9586b0649bb4111976f5d11aa1c6ee94523e`
 - Generation timestamp: `2026-08-05T23:35:58Z`
@@ -107,7 +107,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4851
+- Tests discovered: 4936
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31076588097](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31076588097) — `pass`
 - Compile: `pass`
