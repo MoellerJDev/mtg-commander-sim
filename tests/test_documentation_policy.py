@@ -100,7 +100,7 @@ class DocumentationPolicyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)
             allowed = root / "README.md"
-            extra = root / "STATUS.md"
+            extra = root / ".." / root.name / "STATUS.md"
             allowed.write_text("# Readme\n", encoding="utf-8")
             extra.write_text("# Status\n", encoding="utf-8")
             failures = MODULE.root_document_failures(root, [allowed, extra], policy)

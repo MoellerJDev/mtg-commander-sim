@@ -26,7 +26,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "775a5ef631f21c5b3b119f1d1034829640866967f43690dde2fc209ac78defe9",
+    "evaluated_source_tree_hash": "e6f9d75d447fa64db1bc7dd302c27ff64eaf66f965ab07dbad4d375e7802c3bd",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",

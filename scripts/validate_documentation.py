@@ -247,10 +247,14 @@ def index_failures(root: Path, paths: list[Path]) -> list[str]:
 
 def root_document_failures(root: Path, paths: list[Path], policy: dict) -> list[str]:
     allowed = set(policy.get("root_document_allowlist", []))
+    resolved_root = root.resolve()
     actual = {
         path.name
         for path in paths
-        if path.parent == root.resolve() and path.suffix.lower() == ".md"
+        if (
+            path.parent.resolve() == resolved_root
+            and path.suffix.lower() == ".md"
+        )
     }
     return [
         f"{name}: root Markdown document is not in the allowlist"
