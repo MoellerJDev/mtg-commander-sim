@@ -68,6 +68,16 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_aerial_blocking_flying_and_reach_mutants_are_killed"
     ),
+    "combat.trigger.flanking": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_flanking_qualifying_blocker_mutant_is_killed"
+    ),
+    "combat.trigger.bushido": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_bushido_instance_quantity_mutant_is_killed"
+    ),
     "combat.damage.assignment.trample": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

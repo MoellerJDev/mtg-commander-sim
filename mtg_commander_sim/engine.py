@@ -56,6 +56,11 @@ from .combat_damage_sequence import (
     CombatDamageAssignmentSequence,
     CombatDamageSequenceError,
 )
+from .block_transition_engine_adapter import (
+    commit_engine_block_declaration,
+    enqueue_block_transition_triggers,
+    prepare_block_keyword_trigger_resolution,
+)
 from .combat_relationship_state import remove_combat_relationships
 from .continuous_effects import (
     ContinuousEffect,
@@ -7861,6 +7866,8 @@ class CommanderEngine(
                 note="Ward trigger resolved",
             )
             return
+        if prepare_block_keyword_trigger_resolution(self, item):
+            return
         if item.semantic_key == "builtin:optional-mill-one":
             self._begin_resolve_item(
                 item,
@@ -11641,6 +11648,7 @@ class CommanderEngine(
         defenders = self._attacked_defending_players()
         if self.state.combat.blocker_cursor >= len(defenders):
             self.state.combat.blockers_declared = True
+            enqueue_block_transition_triggers(self)
             self._grant_priority(self.state.active_player)
             return
         defender = defenders[self.state.combat.blocker_cursor]
@@ -11787,19 +11795,13 @@ class CommanderEngine(
                 response,
                 spend_context="combat_declaration",
             )
-        surviving_blockers: list[tuple[CardInstance, CardInstance]] = []
-        for blocker, attacker in chosen:
-            if (
-                blocker.zone != "battlefield"
-                or blocker.controller != defender
-                or blocker.phased_out
-            ):
-                continue
-            self.state.combat.blockers.setdefault(attacker.object_id, []).append(blocker.object_id)
-            blocker.blocking = attacker.object_id
-            surviving_blockers.append((blocker, attacker))
+        committed = commit_engine_block_declaration(
+            self,
+            controller=defender,
+            chosen=chosen,
+        )
         used_blockers = {
-            blocker.object_id for blocker, _ in surviving_blockers
+            assignment.blocker_object_id for assignment in committed
         }
         self._log(
             defender,

@@ -115,6 +115,8 @@
     "combat-declarations": [
       "test_aerial_blocking",
       "test_beginning_of_combat_rules",
+      "test_block_keyword_triggers",
+      "test_block_transitions",
       "test_combat_declaration_constraints",
       "test_combat_declaration_costs",
       "test_combat_declaration_restrictions",
@@ -145,6 +147,7 @@
       "test_seed_20260730_regression"
     ],
     "compiler-cardprogram": [
+      "test_block_keyword_compiler",
       "test_capability_evidence",
       "test_capability_implementation_mutations",
       "test_card_program_trust",

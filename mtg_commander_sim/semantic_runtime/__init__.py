@@ -4,8 +4,12 @@ from functools import lru_cache
 
 from ..rules.capabilities import load_default_capability_registry
 from .ability_fragments import (
+    BUSHIDO_FRAGMENT_HANDLER_ID,
     ENCHANT_FRAGMENT_HANDLER_ID,
+    FLANKING_FRAGMENT_HANDLER_ID,
     PROTECTION_FRAGMENT_HANDLER_ID,
+    BushidoAbilityFragmentHandler,
+    FlankingAbilityFragmentHandler,
     default_ability_fragment_registry,
     fragments_from_descriptors,
 )
@@ -393,6 +397,10 @@ __all__ = [
     "runtime_component_registry_fingerprint",
     "validate_runtime_handler_descriptors",
     "ENCHANT_FRAGMENT_HANDLER_ID",
+    "BUSHIDO_FRAGMENT_HANDLER_ID",
+    "FLANKING_FRAGMENT_HANDLER_ID",
     "PROTECTION_FRAGMENT_HANDLER_ID",
+    "BushidoAbilityFragmentHandler",
+    "FlankingAbilityFragmentHandler",
     "fragments_from_descriptors",
 ]

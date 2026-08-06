@@ -1,5 +1,5 @@
 {
-  "contract_count": 74,
+  "contract_count": 76,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -47,6 +47,12 @@
       "mechanic_id": "cr-501-beginning-phase",
       "path": "mechanics/contracts/beginning-phase.json",
       "sha256": "9b5763c947e84b4106ef49c8f16b4a283a78c48f7fb6499f6eff12b03095bd75",
+      "version": 1
+    },
+    {
+      "mechanic_id": "bushido",
+      "path": "mechanics/contracts/bushido.json",
+      "sha256": "6039d50dee517a61855456dd5b55dd18749dea2085215c1085bf376f3748eaa1",
       "version": 1
     },
     {
@@ -186,6 +192,12 @@
       "path": "mechanics/contracts/first-strike.json",
       "sha256": "d3aceae406047544a03da280e6ac410114007a92844b88f62dd459b071c41f58",
       "version": 2
+    },
+    {
+      "mechanic_id": "flanking",
+      "path": "mechanics/contracts/flanking.json",
+      "sha256": "61bc7ed5f57eac1150d908c5302877704bbd918e93b437823b36062880b15cf7",
+      "version": 1
     },
     {
       "mechanic_id": "flash",
@@ -808,19 +820,40 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/bushido.json",
+      "contract_sha256": "6039d50dee517a61855456dd5b55dd18749dea2085215c1085bf376f3748eaa1",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.block_transitions and mtg_commander_sim.block_transition_engine_adapter",
+      "implementation_version": "typed-block-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "zero, variable, conditional, and rules-text-equivalent Bushido wording remains unsupported",
+        "granted, copied, and face-down Bushido requires trusted typed ability fragments",
+        "trigger-doubling policies remain outside this bounded capability"
+      ],
       "mechanic_id": "bushido",
       "official_name": "Bushido",
       "rule_references": [
         "702.45"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_bushido_triggers_once_for_blocks_or_becomes_blocked_per_instance",
+        "test_keyword_occurrence_counts_hold_across_bounded_grid",
+        "test_unblocked_bushido_creature_does_not_trigger",
+        "test_flanking_and_bushido_share_one_sealed_apnap_batch",
+        "test_four_player_block_declarations_finish_before_apnap_trigger_placement",
+        "test_four_player_block_transition_is_public_without_hidden_cards",
+        "test_four_player_block_transition_replays_exactly",
+        "test_block_keyword_resolution_uses_canonical_eot_continuous_effect",
+        "test_block_keyword_stack_resolution_updates_current_characteristics",
+        "test_malformed_transition_rolls_back_final_block_declaration",
+        "test_bushido_instance_quantity_mutant_is_killed",
+        "test_flanking_and_bushido_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -1810,19 +1843,39 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/flanking.json",
+      "contract_sha256": "61bc7ed5f57eac1150d908c5302877704bbd918e93b437823b36062880b15cf7",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.block_transitions and mtg_commander_sim.block_transition_engine_adapter",
+      "implementation_version": "typed-block-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent Flanking wording remains unsupported",
+        "granted, copied, and face-down Flanking requires trusted typed ability fragments",
+        "multi-attacker blocking and trigger-doubling policies remain outside this bounded capability"
+      ],
       "mechanic_id": "flanking",
       "official_name": "Flanking",
       "rule_references": [
         "702.25"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_flanking_triggers_once_per_instance_and_nonflanking_blocker",
+        "test_flanking_does_not_trigger_for_a_blocker_with_flanking",
+        "test_keyword_occurrence_counts_hold_across_bounded_grid",
+        "test_flanking_and_bushido_share_one_sealed_apnap_batch",
+        "test_four_player_block_declarations_finish_before_apnap_trigger_placement",
+        "test_four_player_block_transition_is_public_without_hidden_cards",
+        "test_four_player_block_transition_replays_exactly",
+        "test_flanking_uses_source_snapshot_after_source_leaves",
+        "test_malformed_transition_rolls_back_final_block_declaration",
+        "test_flanking_qualifying_blocker_mutant_is_killed",
+        "test_flanking_and_bushido_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {

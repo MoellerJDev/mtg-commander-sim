@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702.45 — Bushido",
+  "cases": [
+    {
+      "rule_id": "702.45",
+      "rule_text_sha256": "9cc64b61a75f2355afa22100cd5a6656517ee7716d8898f19522b603ec84d8cd",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/bushido.json"],
+      "executable_test_ids": ["tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; the bounded ordinary positive-integer printed family is owned by combat.trigger.bushido."]
+    },
+    {
+      "rule_id": "702.45a",
+      "rule_text_sha256": "1edb33b8c04575c55a3ef78eeb65630ae0ee6650ac91584a2e0b345769707992",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.block_transitions.BlockTransitionEvent", "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences", "mtg_commander_sim.block_transitions.resolve_block_keyword_trigger", "mtg_commander_sim.block_transition_engine_adapter.enqueue_block_transition_triggers"],
+      "executable_test_ids": ["tests.test_block_transitions.BlockTransitionModelTests.test_bushido_triggers_once_for_blocks_or_becomes_blocked_per_instance", "tests.test_block_transitions.BlockTransitionModelTests.test_unblocked_bushido_creature_does_not_trigger", "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_flanking_and_bushido_share_one_sealed_apnap_batch", "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_declarations_finish_before_apnap_trigger_placement", "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_transition_is_public_without_hidden_cards", "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_transition_replays_exactly", "tests.test_block_transitions.BlockTransitionCommitAndResolutionTests.test_block_keyword_resolution_uses_canonical_eot_continuous_effect", "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_final_block_declaration"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": [],
+      "notes": ["The engine derives one positive-integer Bushido occurrence when a typed source blocks or becomes blocked and resolves through the canonical identity-locked layer 7c effect owner."]
+    },
+    {
+      "rule_id": "702.45b",
+      "rule_text_sha256": "0f085a49379e343dd2c4f8967869a22a371a7adf1d987c0c6bd0d0f8d06a4953",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.ability_fragments.CombatKeywordTriggerSpec", "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences"],
+      "executable_test_ids": ["tests.test_block_transitions.BlockTransitionModelTests.test_bushido_triggers_once_for_blocks_or_becomes_blocked_per_instance", "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_bushido_instance_quantity_mutant_is_killed", "tests.test_block_keyword_compiler.BlockKeywordCompilerTests.test_closed_keyword_lowering_preserves_instances_and_values"],
+      "required_scenarios": ["positive", "negative", "interaction"],
+      "covered_scenarios": ["positive", "negative", "interaction"],
+      "blockers": [],
+      "notes": ["Typed fragments preserve repeated printed instances and derive one stable occurrence for each instance."]
+    }
+  ]
+}

@@ -67,6 +67,8 @@ _HORSEMANSHIP_MECHANIC = "hor" + "semanship"
 _INTIMIDATE_MECHANIC = "intim" + "idate"
 _SHADOW_MECHANIC = "sha" + "dow"
 _SKULK_MECHANIC = "sku" + "lk"
+_FLANKING_MECHANIC = "flan" + "king"
+_BUSHIDO_MECHANIC = "bu" + "shido"
 _BASIC_LANDWALK_MECHANICS = (
     "pl" + "ainswalk",
     "is" + "landwalk",
@@ -88,6 +90,8 @@ MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
     _INTIMIDATE_MECHANIC: ("combat.block.intimidate",),
     _SHADOW_MECHANIC: ("combat.block.shadow",),
     _SKULK_MECHANIC: ("combat.block.skulk",),
+    _FLANKING_MECHANIC: ("combat.trigger.flanking",),
+    _BUSHIDO_MECHANIC: ("combat.trigger.bushido",),
     _DEATHTOUCH_MECHANIC: (
         "combat.damage.assignment.deathtouch",
         "damage.result.deathtouch",

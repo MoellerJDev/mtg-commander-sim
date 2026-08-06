@@ -11,6 +11,7 @@ from mtg_commander_sim import (
 )
 from mtg_commander_sim import combat as combat_module
 from mtg_commander_sim import combat_evasion as combat_evasion_module
+from mtg_commander_sim import block_transitions as block_transitions_module
 from mtg_commander_sim import combat_damage_trample as trample_module
 from mtg_commander_sim import deathtouch as deathtouch_module
 from mtg_commander_sim import defender as defender_module
@@ -29,6 +30,8 @@ from mtg_commander_sim.abilities import ActivatedAbility
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim import protection as protection_module
 from mtg_commander_sim.ability_fragments import (
+    CombatKeywordTriggerKind,
+    CombatKeywordTriggerSpec,
     ProtectionQualityKind,
     ProtectionSpec,
     ability_fragment_to_dict,
@@ -1538,6 +1541,141 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
                 ):
                     with self.assertRaises(AssertionError):
                         assert_restriction_applies()
+
+    def test_flanking_qualifying_blocker_mutant_is_killed(self):
+        flanking = CombatKeywordTriggerSpec(
+            CombatKeywordTriggerKind.FLANKING,
+            1,
+        )
+        attacker = block_transitions_module.BlockTransitionParticipant(
+            object_id="attacker-object",
+            logical_object_id="attacker-incarnation",
+            reference="A1",
+            controller="A",
+            trigger_specs=(flanking,),
+        )
+        blocker = block_transitions_module.BlockTransitionParticipant(
+            object_id="blocker-object",
+            logical_object_id="blocker-incarnation",
+            reference="B1",
+            controller="B",
+            trigger_specs=(flanking,),
+        )
+        event = block_transitions_module.BlockTransitionEvent.create(
+            turn_sequence=3,
+            priority_epoch=5,
+            active_player="A",
+            participants=(attacker, blocker),
+            assignments=(
+                block_transitions_module.BlockTransitionAssignment(
+                    attacker_object_id=attacker.object_id,
+                    blocker_object_id=blocker.object_id,
+                ),
+            ),
+        )
+        original = (
+            block_transitions_module.derive_block_keyword_trigger_occurrences
+        )
+
+        def assert_qualifying_blocker_filter() -> None:
+            occurrences = (
+                block_transitions_module
+                .derive_block_keyword_trigger_occurrences(event)
+            )
+            self.assertFalse(
+                any(
+                    occurrence.kind is CombatKeywordTriggerKind.FLANKING
+                    for occurrence in occurrences
+                )
+            )
+
+        def ignore_blocker_flanking(value):
+            stripped_blocker = replace(blocker, trigger_specs=())
+            stripped = block_transitions_module.BlockTransitionEvent.create(
+                turn_sequence=value.turn_sequence,
+                priority_epoch=value.priority_epoch,
+                active_player=value.active_player,
+                participants=(attacker, stripped_blocker),
+                assignments=value.assignments,
+            )
+            return original(stripped)
+
+        assert_qualifying_blocker_filter()
+        with patch.object(
+            block_transitions_module,
+            "derive_block_keyword_trigger_occurrences",
+            ignore_blocker_flanking,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_qualifying_blocker_filter()
+
+    def test_bushido_instance_quantity_mutant_is_killed(self):
+        bushido = CombatKeywordTriggerSpec(
+            CombatKeywordTriggerKind.BUSHIDO,
+            2,
+        )
+        attacker = block_transitions_module.BlockTransitionParticipant(
+            object_id="attacker-object",
+            logical_object_id="attacker-incarnation",
+            reference="A1",
+            controller="A",
+            trigger_specs=(bushido, bushido),
+        )
+        blocker = block_transitions_module.BlockTransitionParticipant(
+            object_id="blocker-object",
+            logical_object_id="blocker-incarnation",
+            reference="B1",
+            controller="B",
+        )
+        event = block_transitions_module.BlockTransitionEvent.create(
+            turn_sequence=3,
+            priority_epoch=5,
+            active_player="A",
+            participants=(attacker, blocker),
+            assignments=(
+                block_transitions_module.BlockTransitionAssignment(
+                    attacker_object_id=attacker.object_id,
+                    blocker_object_id=blocker.object_id,
+                ),
+            ),
+        )
+        original = (
+            block_transitions_module.derive_block_keyword_trigger_occurrences
+        )
+
+        def assert_instance_quantity() -> None:
+            occurrences = (
+                block_transitions_module
+                .derive_block_keyword_trigger_occurrences(event)
+            )
+            self.assertEqual(
+                2,
+                sum(
+                    occurrence.kind is CombatKeywordTriggerKind.BUSHIDO
+                    for occurrence in occurrences
+                ),
+            )
+
+        def collapse_instances(value):
+            occurrences = original(value)
+            kept_bushido = False
+            collapsed = []
+            for occurrence in occurrences:
+                if occurrence.kind is CombatKeywordTriggerKind.BUSHIDO:
+                    if kept_bushido:
+                        continue
+                    kept_bushido = True
+                collapsed.append(occurrence)
+            return tuple(collapsed)
+
+        assert_instance_quantity()
+        with patch.object(
+            block_transitions_module,
+            "derive_block_keyword_trigger_occurrences",
+            collapse_instances,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_instance_quantity()
 
     def test_aerial_blocking_flying_and_reach_mutants_are_killed(self):
         def assert_ground_cannot_block_flying() -> None:

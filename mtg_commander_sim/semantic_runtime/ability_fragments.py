@@ -6,6 +6,8 @@ from typing import Any, Mapping
 
 from ..ability_fragments import (
     AbilityFragmentError,
+    CombatKeywordTriggerKind,
+    CombatKeywordTriggerSpec,
     ProtectionSpec,
     StaticAbilityFragment,
     ability_fragment_from_dict,
@@ -22,6 +24,8 @@ LINKED_GRAVEYARD_ENCHANT_HANDLER_ID = (
     "ability.enchant.linked_graveyard_creature.v1"
 )
 PROTECTION_FRAGMENT_HANDLER_ID = "ability.static.protection.v1"
+FLANKING_FRAGMENT_HANDLER_ID = "ability.trigger.flanking.v1"
+BUSHIDO_FRAGMENT_HANDLER_ID = "ability.trigger.bushido.v1"
 
 
 def _fragment(
@@ -154,6 +158,76 @@ class LinkedGraveyardEnchantFragmentHandler:
         return (self.validate(descriptor),)
 
 
+@dataclass(frozen=True, slots=True)
+class FlankingAbilityFragmentHandler:
+    handler_id: str = FLANKING_FRAGMENT_HANDLER_ID
+    schema_version: int = 1
+    family: str = "ability.trigger.flanking"
+    event: str = "continuous"
+    rule_references: tuple[str, ...] = ("702.25", "702.25a", "702.25b")
+    capability_dependencies: tuple[str, ...] = (
+        "combat.trigger.flanking",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> CombatKeywordTriggerSpec:
+        fragment = _fragment(
+            descriptor,
+            handler_id=self.handler_id,
+            event=self.event,
+            expected_type=CombatKeywordTriggerSpec,
+        )
+        if fragment.kind is not CombatKeywordTriggerKind.FLANKING:
+            raise SemanticNodeError(
+                "The Flanking runtime handler requires a Flanking fragment"
+            )
+        return fragment
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: object,
+    ) -> tuple[StaticAbilityFragment, ...]:
+        del context
+        return (self.validate(descriptor),)
+
+
+@dataclass(frozen=True, slots=True)
+class BushidoAbilityFragmentHandler:
+    handler_id: str = BUSHIDO_FRAGMENT_HANDLER_ID
+    schema_version: int = 1
+    family: str = "ability.trigger.bushido"
+    event: str = "continuous"
+    rule_references: tuple[str, ...] = ("702.45", "702.45a", "702.45b")
+    capability_dependencies: tuple[str, ...] = (
+        "combat.trigger.bushido",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> CombatKeywordTriggerSpec:
+        fragment = _fragment(
+            descriptor,
+            handler_id=self.handler_id,
+            event=self.event,
+            expected_type=CombatKeywordTriggerSpec,
+        )
+        if fragment.kind is not CombatKeywordTriggerKind.BUSHIDO:
+            raise SemanticNodeError(
+                "The Bushido runtime handler requires a Bushido fragment"
+            )
+        return fragment
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: object,
+    ) -> tuple[StaticAbilityFragment, ...]:
+        del context
+        return (self.validate(descriptor),)
+
+
 class AbilityFragmentRegistry(
     RuntimeComponentRegistry[object, StaticAbilityFragment]
 ):
@@ -164,7 +238,9 @@ class AbilityFragmentRegistry(
 def default_ability_fragment_registry() -> AbilityFragmentRegistry:
     registry = AbilityFragmentRegistry(
         (
+            BushidoAbilityFragmentHandler(),
             EnchantAbilityFragmentHandler(),
+            FlankingAbilityFragmentHandler(),
             LinkedGraveyardEnchantFragmentHandler(),
             ProtectionAbilityFragmentHandler(),
         )
@@ -189,9 +265,13 @@ def fragments_from_descriptors(
 
 __all__ = [
     "ENCHANT_FRAGMENT_HANDLER_ID",
+    "BUSHIDO_FRAGMENT_HANDLER_ID",
+    "FLANKING_FRAGMENT_HANDLER_ID",
     "LINKED_GRAVEYARD_ENCHANT_HANDLER_ID",
     "PROTECTION_FRAGMENT_HANDLER_ID",
     "EnchantAbilityFragmentHandler",
+    "BushidoAbilityFragmentHandler",
+    "FlankingAbilityFragmentHandler",
     "LinkedGraveyardEnchantFragmentHandler",
     "ProtectionAbilityFragmentHandler",
     "AbilityFragmentRegistry",
