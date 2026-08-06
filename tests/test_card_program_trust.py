@@ -158,6 +158,7 @@ class CardProgramTrustTests(unittest.TestCase):
                 "replacement.damage.result.life_floor",
                 "replacement.draw.dredge",
                 "replacement.draw.instruction_quantity",
+                "replacement.draw.result_quantity",
                 "replacement.fixed_additional_token",
                 "replacement.life.gain.multiplier",
                 "replacement.zone.destination",
