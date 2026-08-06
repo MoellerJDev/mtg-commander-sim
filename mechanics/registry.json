@@ -1,5 +1,5 @@
 {
-  "contract_count": 69,
+  "contract_count": 74,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -176,6 +176,12 @@
       "version": 1
     },
     {
+      "mechanic_id": "fear",
+      "path": "mechanics/contracts/fear.json",
+      "sha256": "5da1913cb8779f8139e29ffc3ce06e64bbeed0bde6870ca6ce065bb531772145",
+      "version": 1
+    },
+    {
       "mechanic_id": "first-strike",
       "path": "mechanics/contracts/first-strike.json",
       "sha256": "d3aceae406047544a03da280e6ac410114007a92844b88f62dd459b071c41f58",
@@ -230,6 +236,12 @@
       "version": 1
     },
     {
+      "mechanic_id": "horsemanship",
+      "path": "mechanics/contracts/horsemanship.json",
+      "sha256": "bd1ef2d980bc79b8923fdf9f1cabd084fc37cd300cadf37a676983207c99995e",
+      "version": 1
+    },
+    {
       "mechanic_id": "indestructible",
       "path": "mechanics/contracts/indestructible.json",
       "sha256": "fc1453174fb7763f76ced9ea75963a2cd9c0538cfd0f85770be21cefc2ebb974",
@@ -239,6 +251,12 @@
       "mechanic_id": "infect",
       "path": "mechanics/contracts/infect.json",
       "sha256": "dc529cfa4f57a97aa16d86fd62d079e1dc2c90a6e502bba000b44db69a6ca0c8",
+      "version": 1
+    },
+    {
+      "mechanic_id": "intimidate",
+      "path": "mechanics/contracts/intimidate.json",
+      "sha256": "063d287a4290b1730a5bf42c0ca8fe5f640236fa1ae61da7b4761e22b7baadd9",
       "version": 1
     },
     {
@@ -338,9 +356,21 @@
       "version": 1
     },
     {
+      "mechanic_id": "shadow",
+      "path": "mechanics/contracts/shadow.json",
+      "sha256": "3a7000a7f45d0317fa63ae44ce586961074c38c6c4edee88d1d3f25d82d85935",
+      "version": 1
+    },
+    {
       "mechanic_id": "cr-611-continuous-effects",
       "path": "mechanics/contracts/simple-until-end-of-turn.json",
       "sha256": "7a0747f0f5dd88a44bfa58746dad611b2db8ed4c7eb5e0aebeada351054aa2c9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "skulk",
+      "path": "mechanics/contracts/skulk.json",
+      "sha256": "3de0986a87833711b869fd6c5b2300b41873c03f6783c5049c974c1fb778a873",
       "version": 1
     },
     {
@@ -1699,19 +1729,33 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/fear.json",
+      "contract_sha256": "5da1913cb8779f8139e29ffc3ce06e64bbeed0bde6870ca6ce065bb531772145",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent variants remain unsupported",
+        "full continuous-effect, copy, face-down, color, type, and ability-changing coverage remains incomplete"
+      ],
       "mechanic_id": "fear",
       "official_name": "Fear",
       "rule_references": [
         "702.36"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_all_represented_restrictions_are_cumulative",
+        "test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "test_malformed_and_unresolved_inputs_fail_closed",
+        "test_offer_and_command_share_cumulative_legality_and_rollback",
+        "test_legal_block_replays_exactly_in_four_player_combat",
+        "test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -2241,19 +2285,33 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/horsemanship.json",
+      "contract_sha256": "bd1ef2d980bc79b8923fdf9f1cabd084fc37cd300cadf37a676983207c99995e",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent variants remain unsupported",
+        "full continuous-effect, copy, face-down, and ability-changing coverage remains incomplete"
+      ],
       "mechanic_id": "horsemanship",
       "official_name": "Horsemanship",
       "rule_references": [
         "702.31"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_all_represented_restrictions_are_cumulative",
+        "test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "test_malformed_and_unresolved_inputs_fail_closed",
+        "test_offer_and_command_share_cumulative_legality_and_rollback",
+        "test_legal_block_replays_exactly_in_four_player_combat",
+        "test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -2418,19 +2476,33 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/intimidate.json",
+      "contract_sha256": "063d287a4290b1730a5bf42c0ca8fe5f640236fa1ae61da7b4761e22b7baadd9",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent variants remain unsupported",
+        "full continuous-effect, copy, face-down, color, type, and ability-changing coverage remains incomplete"
+      ],
       "mechanic_id": "intimidate",
       "official_name": "Intimidate",
       "rule_references": [
         "702.13"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_all_represented_restrictions_are_cumulative",
+        "test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "test_malformed_and_unresolved_inputs_fail_closed",
+        "test_offer_and_command_share_cumulative_legality_and_rollback",
+        "test_legal_block_replays_exactly_in_four_player_combat",
+        "test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -3425,19 +3497,33 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/shadow.json",
+      "contract_sha256": "3a7000a7f45d0317fa63ae44ce586961074c38c6c4edee88d1d3f25d82d85935",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent variants remain unsupported",
+        "full continuous-effect, copy, face-down, and ability-changing coverage remains incomplete"
+      ],
       "mechanic_id": "shadow",
       "official_name": "Shadow",
       "rule_references": [
         "702.28"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_all_represented_restrictions_are_cumulative",
+        "test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "test_malformed_and_unresolved_inputs_fail_closed",
+        "test_offer_and_command_share_cumulative_legality_and_rollback",
+        "test_legal_block_replays_exactly_in_four_player_combat",
+        "test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -3459,19 +3545,34 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/skulk.json",
+      "contract_sha256": "3de0986a87833711b869fd6c5b2300b41873c03f6783c5049c974c1fb778a873",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "unresolved variable characteristic definitions fail closed",
+        "conditional and rules-text-equivalent variants remain unsupported",
+        "full continuous-effect, copy, face-down, power, and ability-changing coverage remains incomplete"
+      ],
       "mechanic_id": "skulk",
       "official_name": "Skulk",
       "rule_references": [
         "702.118"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_all_represented_restrictions_are_cumulative",
+        "test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "test_malformed_and_unresolved_inputs_fail_closed",
+        "test_offer_and_command_share_cumulative_legality_and_rollback",
+        "test_legal_block_replays_exactly_in_four_player_combat",
+        "test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {

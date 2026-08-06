@@ -10,6 +10,7 @@ from mtg_commander_sim import (
     combat_damage_assignment as combat_assignment_module,
 )
 from mtg_commander_sim import combat as combat_module
+from mtg_commander_sim import combat_evasion as combat_evasion_module
 from mtg_commander_sim import combat_damage_trample as trample_module
 from mtg_commander_sim import deathtouch as deathtouch_module
 from mtg_commander_sim import defender as defender_module
@@ -1482,6 +1483,61 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_matching_swamp_prohibits_block()
+
+    def test_ordinary_evasion_keyword_mutants_are_killed(self):
+        combatant = combat_evasion_module.CombatantEvasionCharacteristics
+        creature = frozenset({"creature"})
+
+        cases = (
+            (
+                "FEAR_KEYWORD",
+                combatant(frozenset({"fear"}), frozenset({"B"}), creature, 2),
+                combatant(frozenset(), frozenset({"G"}), creature, 2),
+            ),
+            (
+                "HORSEMANSHIP_KEYWORD",
+                combatant(
+                    frozenset({"horsemanship"}), frozenset(), creature, 2
+                ),
+                combatant(frozenset(), frozenset(), creature, 2),
+            ),
+            (
+                "INTIMIDATE_KEYWORD",
+                combatant(
+                    frozenset({"intimidate"}), frozenset({"G"}), creature, 2
+                ),
+                combatant(frozenset(), frozenset({"B"}), creature, 2),
+            ),
+            (
+                "SHADOW_KEYWORD",
+                combatant(frozenset({"shadow"}), frozenset(), creature, 2),
+                combatant(frozenset(), frozenset(), creature, 2),
+            ),
+            (
+                "SKULK_KEYWORD",
+                combatant(frozenset({"skulk"}), frozenset(), creature, 2),
+                combatant(frozenset(), frozenset(), creature, 3),
+            ),
+        )
+        for constant, attacker, blocker in cases:
+            with self.subTest(constant=constant):
+                def assert_restriction_applies() -> None:
+                    self.assertFalse(
+                        combat_evasion_module.combat_evasion_verdict(
+                            attacker,
+                            blocker,
+                            frozenset(),
+                        ).allowed
+                    )
+
+                assert_restriction_applies()
+                with patch.object(
+                    combat_evasion_module,
+                    constant,
+                    f"mutated-{constant.casefold()}",
+                ):
+                    with self.assertRaises(AssertionError):
+                        assert_restriction_applies()
 
     def test_aerial_blocking_flying_and_reach_mutants_are_killed(self):
         def assert_ground_cannot_block_flying() -> None:

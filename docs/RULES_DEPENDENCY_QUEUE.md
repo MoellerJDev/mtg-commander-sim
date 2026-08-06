@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 3,008
+- Queued rules: 2,988
 - Reviewed behavioral blockers: 373
-- Behavioral classification/review required: 2,635
-- Passing behavioral rules: 166
+- Behavioral classification/review required: 2,615
+- Passing behavioral rules: 176
 - Subsystems: 21
-- Queue fingerprint: `54a9dbaedd6903eac4af5627798f3a4592ba55349fd9c27b4fb4ccf7803ffc37`
+- Queue fingerprint: `60fc1e4977530e49345e9671041076a8f8fa885c37db7b345fd77080e2501eb1`
 
 ## Selected next batch
 
-- Batch: `typed-combat-evasion-restriction-bundle`
+- Batch: `typed-block-transition-keyword-triggers`
 - Subsystem: `keyword-abilities`
-- Rules: `702.13`, `702.13a`, `702.13b`, `702.13c`, `702.28`, `702.28a`, `702.28b`, `702.28c`, `702.31`, `702.31a`, `702.31b`, `702.31c`, `702.36`, `702.36a`, `702.36b`, `702.36c`, `702.118`, `702.118a`, `702.118b`, `702.118c`
-- Target capabilities: `combat.block.fear`, `combat.block.horsemanship`, `combat.block.intimidate`, `combat.block.shadow`, `combat.block.skulk`
-- Rationale: After the Basic Landwalk harvest, the refreshed pinned Commander frontier records 136 cards affected by Fear, Horsemanship, Intimidate, Shadow, or Skulk, 31 cards whose complete blocker set is closed by the bundle, 35 one-additional-blocker opportunities, 55 two-additional-blocker opportunities, and 136 material residuals. These five keyword families share the current typed combat-evasion boundary while retaining fine-grained capability closure.
+- Rules: `702.25`, `702.25a`, `702.25b`, `702.45`, `702.45a`, `702.45b`
+- Target capabilities: `combat.trigger.bushido`, `combat.trigger.flanking`
+- Rationale: The pinned Commander snapshot contains 37 Bushido and 29 Flanking cards. The current frontier isolates 27 Flanking dependency residuals, including 4 sole-blocker cards and 20 bounded one- or two-additional-blocker opportunities, while Bushido's valued keyword grammar remains too coarse and must be made explicit. Both families consume the same become-blocked or blocks transition, trigger placement, and until-end-of-turn characteristic boundary without sharing card-specific behavior.
 
 Exit criteria:
 
-- Introduce typed read-only Fear, Horsemanship, Intimidate, Shadow, and Skulk restriction owners composed through the same projected and accepted block-legality boundary.
-- Consume current effective attacker and blocker keywords, colors, artifact/creature types, and power without runtime Oracle parsing or a second characteristic evaluator.
-- Apply every represented evasion restriction cumulatively, including Fear/Intimidate artifact and color exceptions, Shadow and Horsemanship pair matching, and Skulk's current power comparison.
-- Reject malformed or caller-invented characteristic and combat relationships before mutation and preserve exact replay, rollback, four-player seat projection, property, explicit interaction, and killed-mutation evidence.
-- Lower all five printed keywords generically into CardProgram V2 with precise source spans and separate fine-grained capability contracts.
-- Leave conditional, value-modified, rules-text-equivalent, unsupported continuous-characteristic, and broader CR 509 variants explicit residuals; do not trust an aggregate evasion family beyond its certified pieces.
+- Introduce one typed immutable block-transition event shared by declarations, Flanking, Bushido, trigger batching, replay, and projection.
+- Lower ordinary Flanking and positive integer Bushido values generically with precise source spans and fine-grained capability closure.
+- Give each Flanking instance its own trigger only when the blocking creature lacks current Flanking, and give each Bushido instance its stated independent value when its source blocks or becomes blocked.
+- Apply the resulting until-end-of-turn power and toughness changes through the canonical continuous-characteristic owner without direct GameState writes or runtime Oracle parsing.
+- Preserve simultaneous blocker declaration, APNAP trigger ordering, exact replay, rollback, four-player privacy, source departure, multiple-instance, and focused mutation evidence.
+- Leave conditional, nonnumeric, granted, copied, face-down, trigger-doubling, and broader unsupported block-trigger variants explicit residuals.
 
 ## Dependency schedule
 
@@ -58,7 +58,7 @@ Exit criteria:
 | 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 33 | 33 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 5 | 511 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 724 | 4 | 720 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 704 | 4 | 700 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 18 | `alternate-card-forms` | `card-types`, `zones`, `casting-activation`, `continuous-effects`, `replacement-prevention`, `game-actions-state` | 249 | 0 | 249 | `oracle_normalization`, `oracle_parser`, `card_program_faces`, `card_program_zone_permissions`, `mechanic_contracts` |
 | 19 | `designations-variants` | `turn-structure`, `combat`, `triggered-static-linked` | 9 | 0 | 9 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 20 | `multiplayer` | `core-game`, `turn-structure`, `combat` | 182 | 0 | 182 | `runtime_contracts`, `mechanic_contracts` |

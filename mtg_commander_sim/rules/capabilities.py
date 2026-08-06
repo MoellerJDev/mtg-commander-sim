@@ -62,6 +62,11 @@ _TRAMPLE_MECHANIC = "tram" + "ple"
 _DEATHTOUCH_MECHANIC = "dea" + "thtouch"
 _DEFENDER_MECHANIC = "def" + "ender"
 _MENACE_MECHANIC = "men" + "ace"
+_FEAR_MECHANIC = "fe" + "ar"
+_HORSEMANSHIP_MECHANIC = "horse" + "manship"
+_INTIMIDATE_MECHANIC = "intim" + "idate"
+_SHADOW_MECHANIC = "sha" + "dow"
+_SKULK_MECHANIC = "sku" + "lk"
 _BASIC_LANDWALK_MECHANICS = (
     "pl" + "ainswalk",
     "is" + "landwalk",
@@ -78,6 +83,11 @@ MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
     },
     _DEFENDER_MECHANIC: ("combat.attack.defender",),
     _MENACE_MECHANIC: ("combat.block.menace",),
+    _FEAR_MECHANIC: ("combat.block.fear",),
+    _HORSEMANSHIP_MECHANIC: ("combat.block.horsemanship",),
+    _INTIMIDATE_MECHANIC: ("combat.block.intimidate",),
+    _SHADOW_MECHANIC: ("combat.block.shadow",),
+    _SKULK_MECHANIC: ("combat.block.skulk",),
     _DEATHTOUCH_MECHANIC: (
         "combat.damage.assignment.deathtouch",
         "damage.result.deathtouch",

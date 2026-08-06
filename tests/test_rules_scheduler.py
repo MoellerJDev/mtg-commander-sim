@@ -125,7 +125,7 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "typed-combat-evasion-restriction-bundle",
+            "typed-block-transition-keyword-triggers",
             selected["batch_id"],
         )
         self.assertEqual(
@@ -133,26 +133,12 @@ class RulesSchedulerTests(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "702.13",
-                "702.13a",
-                "702.13b",
-                "702.13c",
-                "702.28",
-                "702.28a",
-                "702.28b",
-                "702.28c",
-                "702.31",
-                "702.31a",
-                "702.31b",
-                "702.31c",
-                "702.36",
-                "702.36a",
-                "702.36b",
-                "702.36c",
-                "702.118",
-                "702.118a",
-                "702.118b",
-                "702.118c",
+                "702.25",
+                "702.25a",
+                "702.25b",
+                "702.45",
+                "702.45a",
+                "702.45b",
             },
             set(selected["rule_ids"]),
         )

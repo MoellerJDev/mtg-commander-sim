@@ -118,6 +118,7 @@
       "test_combat_declaration_constraints",
       "test_combat_declaration_costs",
       "test_combat_declaration_restrictions",
+      "test_combat_evasion_restrictions",
       "test_combat_phase_rules",
       "test_declare_attackers_rules",
       "test_declare_blockers_rules",

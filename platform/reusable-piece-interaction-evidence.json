@@ -3,6 +3,96 @@
   "declarations": [
     {
       "evidence_class": "interaction",
+      "test_id": "test_all_represented_restrictions_are_cumulative",
+      "piece_ids": [
+        "capability.combat.block.fear",
+        "mechanic.fear"
+      ],
+      "capability_ids": [
+        "combat.block.fear"
+      ],
+      "interaction_order": 2,
+      "assertion": "The shared blocker-legality boundary consumes current fear and preserves every other represented evasion restriction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_all_represented_restrictions_are_cumulative",
+      "piece_ids": [
+        "capability.combat.block.horsemanship",
+        "mechanic.horsemanship"
+      ],
+      "capability_ids": [
+        "combat.block.horsemanship"
+      ],
+      "interaction_order": 2,
+      "assertion": "The shared blocker-legality boundary consumes current horsemanship and preserves every other represented evasion restriction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_all_represented_restrictions_are_cumulative",
+      "piece_ids": [
+        "capability.combat.block.intimidate",
+        "mechanic.intimidate"
+      ],
+      "capability_ids": [
+        "combat.block.intimidate"
+      ],
+      "interaction_order": 2,
+      "assertion": "The shared blocker-legality boundary consumes current intimidate and preserves every other represented evasion restriction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_all_represented_restrictions_are_cumulative",
+      "piece_ids": [
+        "capability.combat.block.shadow",
+        "mechanic.shadow"
+      ],
+      "capability_ids": [
+        "combat.block.shadow"
+      ],
+      "interaction_order": 2,
+      "assertion": "The shared blocker-legality boundary consumes current shadow and preserves every other represented evasion restriction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_all_represented_restrictions_are_cumulative",
+      "piece_ids": [
+        "capability.combat.block.skulk",
+        "mechanic.skulk"
+      ],
+      "capability_ids": [
+        "combat.block.skulk"
+      ],
+      "interaction_order": 2,
+      "assertion": "The shared blocker-legality boundary consumes current skulk and preserves every other represented evasion restriction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_all_represented_restrictions_are_cumulative",
+      "piece_ids": [
+        "capability.combat.block.fear",
+        "capability.combat.block.horsemanship",
+        "capability.combat.block.intimidate",
+        "capability.combat.block.shadow",
+        "capability.combat.block.skulk",
+        "mechanic.fear",
+        "mechanic.horsemanship",
+        "mechanic.intimidate",
+        "mechanic.shadow",
+        "mechanic.skulk"
+      ],
+      "capability_ids": [
+        "combat.block.fear",
+        "combat.block.horsemanship",
+        "combat.block.intimidate",
+        "combat.block.shadow",
+        "combat.block.skulk"
+      ],
+      "interaction_order": 10,
+      "assertion": "Fear, Horsemanship, Intimidate, Shadow, and Skulk apply cumulatively from one immutable current-characteristics snapshot."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_sick_mana_creature_requires_haste_or_as_though_permission",
       "piece_ids": ["capability.activation.tap_untap_cost.haste", "mechanic.haste"],
       "capability_ids": ["activation.tap_untap_cost.haste"],

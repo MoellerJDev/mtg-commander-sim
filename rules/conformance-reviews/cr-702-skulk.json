@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702 — Skulk",
+  "cases": [
+    {
+      "rule_id": "702.118",
+      "rule_text_sha256": "a1406b3cbad78d65f5f7342f0c876bddc73d1b4e3c02971c862282d6ce0ae7dd",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/skulk.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Keyword heading; the bounded ordinary Skulk restriction is owned by combat.block.skulk."
+      ]
+    },
+    {
+      "rule_id": "702.118a",
+      "rule_text_sha256": "907228da6f4b9c1b4da9f32d14513ea4504f21133f9f6f6d350aec16330ec929",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/skulk.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "A printed Skulk keyword node requests the fine-grained combat.block.skulk capability."
+      ]
+    },
+    {
+      "rule_id": "702.118b",
+      "rule_text_sha256": "3edac0d81bec3fad0bbc9fc15366060deb3bae50d786b209fdd4a02d2a1bb1e3",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_skulk_compares_exact_current_power",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "blockers": [],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Skulk identically for projected and submitted block declarations."
+      ]
+    },
+    {
+      "rule_id": "702.118c",
+      "rule_text_sha256": "02caab5778c6f98625e6f5ab4319bec1841ca81966cc0bb6e7e2a37ec76f89b5",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Skulk instances redundant without weakening other evasion restrictions."
+      ]
+    }
+  ]
+}
