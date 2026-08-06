@@ -217,6 +217,7 @@
       "patterns": [
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_damage_assignment.py",
+        "mtg_commander_sim/combat_damage_projection.py",
         "mtg_commander_sim/damage.py",
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/damage_source.py",
@@ -235,6 +236,7 @@
         "mtg_commander_sim/record_commander_identity.py",
         "mtg_commander_sim/combat.py",
         "mtg_commander_sim/combat_damage_assignment.py",
+        "mtg_commander_sim/combat_damage_projection.py",
         "mtg_commander_sim/damage_results.py",
         "mtg_commander_sim/state_based_actions.py",
         "mtg_commander_sim/state_planner.py"

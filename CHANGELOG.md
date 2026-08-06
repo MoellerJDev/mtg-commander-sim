@@ -13,7 +13,8 @@ maintenance: "hand-maintained"
 
 ### Typed ordinary-Trample assignment
 
-- Extracted combat-damage division into one immutable typed proposal shared by
+- Extracted combat-damage state projection and division from `CommanderEngine`
+  into a read-only projector and one immutable typed proposal shared by
   projected choices and accepted commands. It validates exact-power totals,
   current recipients, marked damage, simultaneous attacking sources,
   deathtouch, and lethal-before-spill assignment without mutating game state.

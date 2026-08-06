@@ -8,6 +8,9 @@ from common import keep_all, load_assets, make_session, pass_current
 from mtg_commander_sim.combat_damage_assignment import (
     CombatDamageAssignmentError,
 )
+from mtg_commander_sim.combat_damage_projection import (
+    project_combat_damage_assignment,
+)
 from mtg_commander_sim.model import CombatState
 from mtg_commander_sim.record import (
     authoritative_state_hash,
@@ -334,7 +337,7 @@ class TrampleAssignmentIntegrationTests(unittest.TestCase):
             {attacker.object_id: [blocker.object_id]},
         )
 
-        proposal = engine._combat_damage_assignment_proposal("B")
+        proposal = project_combat_damage_assignment(engine, "B")
 
         self.assertEqual(
             {blocker.ref: {"power": 3, "targets": [attacker.ref]}},
@@ -381,7 +384,7 @@ class TrampleAssignmentIntegrationTests(unittest.TestCase):
         )
         engine.move_card(target.object_id, "graveyard")
 
-        proposal = engine._combat_damage_assignment_proposal("A")
+        proposal = project_combat_damage_assignment(engine, "A")
 
         self.assertEqual(
             {attacker.ref: {"power": 5, "targets": [blocker.ref]}},

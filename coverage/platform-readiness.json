@@ -20,7 +20,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "9810644a011ccd78dce192590b1a003718f44bd800e9b0922c778621bf730857",
+    "evaluated_source_tree_hash": "04114ad0ea99b391401fdafc4e9449b5d86c991308ca9b6d702fb2cfa26e4a1a",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -245,7 +245,7 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The current source tree extracts ordinary CR 510/702.19 combat-damage division into one immutable typed proposal shared by projected choices and accepted commands. Exact-power totals, current recipients, marked damage, simultaneous attackers, deathtouch, indestructible, protection/prevention, player/planeswalker/Battle targets, departed targets, double strike, atomic rejection, four-player seat projection, replay, property-grid, and killed-mutation evidence are covered. The Commander census promotes 62 exact/trusted/capability-closed cards and removes 907 material residuals with no construction failures or demotions. Shared interaction tests cover the applicable Trample/Double Strike, Trample/Indestructible, and Trample/Protection reusable-piece pairs without promoting the partial mechanics. Trample over planeswalkers, banding assignment control, and unsupported characteristic producers remain explicit blockers.",
+      "evidence": "The current source tree extracts ordinary CR 510/702.19 combat-damage state projection and division from CommanderEngine into one read-only projector and immutable typed proposal shared by projected choices and accepted commands. Exact-power totals, current recipients, marked damage, simultaneous attackers, deathtouch, indestructible, protection/prevention, player/planeswalker/Battle targets, departed targets, double strike, atomic rejection, four-player seat projection, replay, property-grid, and killed-mutation evidence are covered. CommanderEngine falls from 13,017 to 12,775 logical lines while direct authoritative writes remain 135. The Commander census promotes 62 exact/trusted/capability-closed cards and removes 907 material residuals with no construction failures or demotions. Shared interaction tests cover the applicable Trample/Double Strike, Trample/Indestructible, and Trample/Protection reusable-piece pairs without promoting the partial mechanics. Trample over planeswalkers, banding assignment control, and unsupported characteristic producers remain explicit blockers.",
       "id": "generic_ordinary_trample_assignment_harvest",
       "name": "Typed ordinary-Trample assignment and generic harvest",
       "status": "implemented_current_source_tree"
@@ -363,7 +363,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 4883,
+    "deterministic_cases_discovered": 4884,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,

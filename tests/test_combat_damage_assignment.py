@@ -3,7 +3,9 @@ from __future__ import annotations
 import unittest
 
 from mtg_commander_sim.combat_damage_assignment import (
+    build_combat_damage_assignment_proposal,
     CombatDamageAssignmentError,
+    CombatDamageParticipant,
     CombatDamageAssignmentProposal,
     CombatDamageSourceSpec,
     CreatureDamageState,
@@ -12,6 +14,56 @@ from mtg_commander_sim.combat_damage_assignment import (
 
 
 class CombatDamageAssignmentProposalTests(unittest.TestCase):
+    def test_typed_snapshot_builder_owns_offer_and_trample_inputs(self) -> None:
+        attacker = CombatDamageParticipant(
+            object_id="attacker-id",
+            reference="attacker",
+            controller="A",
+            power=5,
+            toughness=5,
+            marked_damage=0,
+            keywords=frozenset({"trample"}),
+            assigns_damage=True,
+        )
+        blocker = CombatDamageParticipant(
+            object_id="blocker-id",
+            reference="blocker",
+            controller="B",
+            power=2,
+            toughness=3,
+            marked_damage=1,
+            keywords=frozenset(),
+            assigns_damage=True,
+        )
+
+        proposal = build_combat_damage_assignment_proposal(
+            seat="A",
+            attackers={attacker.object_id: "B"},
+            blockers={attacker.object_id: (blocker.object_id,)},
+            participants=(attacker, blocker),
+            valid_spill_targets={attacker.object_id: "B"},
+        )
+
+        self.assertEqual(
+            {"attacker": {"power": 5, "targets": ["B", "blocker"]}},
+            proposal.projected_options(),
+        )
+        blocker_state = proposal.trample_sources[0].blockers[0][1]
+        self.assertEqual(3, blocker_state.toughness)
+        self.assertEqual(1, blocker_state.marked_damage)
+
+        with self.assertRaisesRegex(
+            CombatDamageAssignmentError,
+            "object identities must be unique",
+        ):
+            build_combat_damage_assignment_proposal(
+                seat="A",
+                attackers={attacker.object_id: "B"},
+                blockers={},
+                participants=(attacker, attacker),
+                valid_spill_targets={attacker.object_id: "B"},
+            )
+
     def proposal(
         self,
         *,

@@ -30,6 +30,29 @@ class CreatureDamageState:
 
 
 @dataclass(frozen=True, slots=True)
+class CombatDamageParticipant:
+    object_id: str
+    reference: str
+    controller: str
+    power: int
+    toughness: int
+    marked_damage: int
+    keywords: frozenset[str]
+    assigns_damage: bool
+
+    def __post_init__(self) -> None:
+        if not self.object_id or not self.reference or not self.controller:
+            raise CombatDamageAssignmentError(
+                "Combat-damage participants require stable identities"
+            )
+        object.__setattr__(
+            self,
+            "keywords",
+            frozenset(str(value).casefold() for value in self.keywords),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class CombatDamageSourceSpec:
     source: str
     power: int
@@ -152,6 +175,173 @@ class CombatDamageAssignmentProposal:
         return assignments
 
 
+def build_combat_damage_assignment_proposal(
+    *,
+    seat: str,
+    attackers: Mapping[str, str],
+    blockers: Mapping[str, Sequence[str]],
+    participants: Sequence[CombatDamageParticipant],
+    valid_spill_targets: Mapping[str, str],
+) -> CombatDamageAssignmentProposal:
+    """Lower a current immutable combat snapshot into one CR 510 proposal."""
+
+    participants_by_id = {item.object_id: item for item in participants}
+    if len(participants_by_id) != len(participants):
+        raise CombatDamageAssignmentError(
+            "Combat-damage participant object identities must be unique"
+        )
+    references = {item.reference for item in participants}
+    if len(references) != len(participants):
+        raise CombatDamageAssignmentError(
+            "Combat-damage participant references must be unique"
+        )
+
+    source_targets, source_power, attacking = _attacking_sources(
+        seat=seat,
+        attackers=attackers,
+        blockers=blockers,
+        participants=participants_by_id,
+        valid_spill_targets=valid_spill_targets,
+    )
+    blocker_targets, blocker_power = _blocking_sources(
+        seat=seat,
+        blockers=blockers,
+        participants=participants_by_id,
+    )
+    source_targets.update(blocker_targets)
+    source_power.update(blocker_power)
+    attacking_refs = frozenset(item.reference for item in attacking)
+    return CombatDamageAssignmentProposal(
+        sources=tuple(
+            CombatDamageSourceSpec(
+                source=source,
+                power=source_power[source],
+                targets=tuple(sorted(targets)),
+            )
+            for source, targets in sorted(source_targets.items())
+        ),
+        attacking_sources=attacking_refs,
+        deathtouch_sources=frozenset(
+            item.reference
+            for item in attacking
+            if "deathtouch" in item.keywords
+        ),
+        trample_sources=_trample_sources(
+            attackers=attackers,
+            blockers=blockers,
+            participants=participants_by_id,
+            source_targets=source_targets,
+            attacking=attacking,
+        ),
+    )
+
+
+def _attacking_sources(
+    *,
+    seat: str,
+    attackers: Mapping[str, str],
+    blockers: Mapping[str, Sequence[str]],
+    participants: Mapping[str, CombatDamageParticipant],
+    valid_spill_targets: Mapping[str, str],
+) -> tuple[
+    dict[str, set[str]],
+    dict[str, int],
+    tuple[CombatDamageParticipant, ...],
+]:
+    targets_by_source: dict[str, set[str]] = {}
+    power_by_source: dict[str, int] = {}
+    attacking: list[CombatDamageParticipant] = []
+    for attacker_id in attackers:
+        attacker = participants.get(attacker_id)
+        if (
+            attacker is None
+            or attacker.controller != seat
+            or not attacker.assigns_damage
+        ):
+            continue
+        if attacker_id in blockers:
+            targets = {
+                blocker.reference
+                for blocker_id in blockers.get(attacker_id, ())
+                if (blocker := participants.get(blocker_id)) is not None
+            }
+            if "trample" in attacker.keywords:
+                if spill_target := valid_spill_targets.get(attacker_id):
+                    targets.add(spill_target)
+        else:
+            spill_target = valid_spill_targets.get(attacker_id)
+            targets = {spill_target} if spill_target is not None else set()
+        targets_by_source[attacker.reference] = targets
+        power_by_source[attacker.reference] = max(0, attacker.power)
+        attacking.append(attacker)
+    return targets_by_source, power_by_source, tuple(attacking)
+
+
+def _blocking_sources(
+    *,
+    seat: str,
+    blockers: Mapping[str, Sequence[str]],
+    participants: Mapping[str, CombatDamageParticipant],
+) -> tuple[dict[str, set[str]], dict[str, int]]:
+    targets_by_source: dict[str, set[str]] = {}
+    power_by_source: dict[str, int] = {}
+    for attacker_id, blocker_ids in blockers.items():
+        attacker = participants.get(attacker_id)
+        if attacker is None:
+            continue
+        for blocker_id in blocker_ids:
+            blocker = participants.get(blocker_id)
+            if (
+                blocker is None
+                or blocker.controller != seat
+                or not blocker.assigns_damage
+            ):
+                continue
+            targets_by_source.setdefault(blocker.reference, set()).add(
+                attacker.reference
+            )
+            power_by_source[blocker.reference] = max(0, blocker.power)
+    return targets_by_source, power_by_source
+
+
+def _trample_sources(
+    *,
+    attackers: Mapping[str, str],
+    blockers: Mapping[str, Sequence[str]],
+    participants: Mapping[str, CombatDamageParticipant],
+    source_targets: Mapping[str, set[str]],
+    attacking: Sequence[CombatDamageParticipant],
+) -> tuple[TrampleDamageSpec, ...]:
+    trample_sources: list[TrampleDamageSpec] = []
+    for attacker in attacking:
+        if (
+            "trample" not in attacker.keywords
+            or attacker.object_id not in blockers
+        ):
+            continue
+        current_targets = source_targets.get(attacker.reference, set())
+        blocker_states = tuple(
+            (
+                blocker.reference,
+                CreatureDamageState(
+                    toughness=blocker.toughness,
+                    marked_damage=blocker.marked_damage,
+                ),
+            )
+            for blocker_id in blockers.get(attacker.object_id, ())
+            if (blocker := participants.get(blocker_id)) is not None
+            and blocker.reference in current_targets
+        )
+        trample_sources.append(
+            TrampleDamageSpec(
+                attacker=attacker.reference,
+                spill_target=str(attackers[attacker.object_id]),
+                blockers=blocker_states,
+            )
+        )
+    return tuple(trample_sources)
+
+
 def _parse_assignment(
     raw: Mapping[str, Any],
     source_map: Mapping[str, CombatDamageSourceSpec],
@@ -241,7 +431,9 @@ def trample_assignment_error(
 
 
 __all__ = [
+    "build_combat_damage_assignment_proposal",
     "CombatDamageAssignmentError",
+    "CombatDamageParticipant",
     "CombatDamageAssignmentProposal",
     "CombatDamageSourceSpec",
     "CreatureDamageState",

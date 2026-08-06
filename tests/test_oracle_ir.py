@@ -133,6 +133,7 @@ class MechanicContractTests(unittest.TestCase):
                 "goad",
                 "haste",
                 "infect",
+                "indestructible",
                 "lifelink",
                 "menace",
                 "protection",

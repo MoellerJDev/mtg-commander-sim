@@ -1,7 +1,7 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/combat_damage_assignment.py, damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
+authoritative_source: "mtg_commander_sim/combat_damage_assignment.py, combat_damage_projection.py, damage.py, damage_prevention.py, damage_prevention_creation.py, damage_prevention_aftermath.py, damage_results.py, life_change.py, life_state.py, object_predicate.py, object_query.py, mana_payment_continuations.py, replacement/, semantic_runtime/damage_replacements.py, semantic_runtime/damage_results.py, semantic_runtime/life_replacements.py, ADR 0012, ADR 0013, and ADR 0017"
 verified: "2026-08-05"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -16,11 +16,13 @@ and authoritative result mutation. Combat, semantic single-target damage,
 semantic each-opponent damage, and damage produced by represented mana
 abilities use the same transaction.
 
-`combat_damage_assignment.py` owns the immutable offer/validation proposal for
-ordinary combat-damage division. It derives exact current recipients and power,
-then validates exact totals and ordinary Trample's lethal-before-spill rule
-using marked damage, simultaneous attacking sources, and represented
-deathtouch. The proposal has no `GameState` access or mutation authority.
+`combat_damage_projection.py` is the read-only state adapter that produces
+immutable typed combatant snapshots. `combat_damage_assignment.py` consumes
+only those values and owns the offer/validation proposal for ordinary
+combat-damage division. It derives exact current recipients and power, then
+validates exact totals and ordinary Trample's lethal-before-spill rule using
+marked damage, simultaneous attacking sources, and represented deathtouch. The
+proposal has no `GameState` access or mutation authority.
 Trample applies only to an attacking source; it never changes a blocker's
 recipient. An attacked planeswalker or Battle remains the spill target, and a
 departed attacked permanent is not replaced by its controller. The distinct

@@ -41,10 +41,8 @@ from .characteristic_evaluation import (
 )
 from .combat import (
     DEFENDER,
-    DEATHTOUCH,
     LIFELINK,
     MENACE,
-    TRAMPLE,
     assigns_in_damage_step,
     first_strike_step_required,
     normalized_keywords,
@@ -52,11 +50,8 @@ from .combat import (
 )
 from .combat_damage_assignment import (
     CombatDamageAssignmentError,
-    CombatDamageAssignmentProposal,
-    CombatDamageSourceSpec,
-    CreatureDamageState,
-    TrampleDamageSpec,
 )
+from .combat_damage_projection import project_combat_damage_assignment
 from .continuous_effects import (
     ContinuousEffect,
 )
@@ -12177,7 +12172,7 @@ class CommanderEngine(
         seat: str,
         submitted: Sequence[Mapping[str, Any]],
     ) -> list[dict[str, Any]]:
-        proposal = self._combat_damage_assignment_proposal(seat)
+        proposal = project_combat_damage_assignment(self, seat)
         try:
             assignments = proposal.validate(submitted)
         except CombatDamageAssignmentError as exc:
@@ -12187,170 +12182,9 @@ class CommanderEngine(
     def _combat_damage_source_options(
         self, seat: str
     ) -> dict[str, dict[str, Any]]:
-        return self._combat_damage_assignment_proposal(
-            seat
+        return project_combat_damage_assignment(
+            self, seat
         ).projected_options()
-
-    def _combat_damage_assignment_proposal(
-        self, seat: str
-    ) -> CombatDamageAssignmentProposal:
-        source_targets: dict[str, set[str]] = {}
-        source_power: dict[str, int] = {}
-        attacking_cards: list[CardInstance] = []
-        for attacker_id, defender in self.state.combat.attackers.items():
-            attacker = self.state.cards.get(attacker_id)
-            if (
-                attacker is None
-                or attacker.zone != "battlefield"
-                or attacker.controller != seat
-                or attacker.phased_out
-                or not self._assigns_combat_damage_this_step(attacker)
-            ):
-                continue
-            types, _, _ = self._type_parts(
-                str(
-                    self._effective_card_data(attacker).get("type_line")
-                    or ""
-                )
-            )
-            if "creature" not in types:
-                continue
-            was_blocked = attacker_id in self.state.combat.blockers
-            if was_blocked:
-                targets = set()
-                for blocker_id in self.state.combat.blockers.get(
-                    attacker_id, []
-                ):
-                    blocker = self.state.cards.get(blocker_id)
-                    if (
-                        blocker is None
-                        or blocker.zone != "battlefield"
-                        or blocker.phased_out
-                    ):
-                        continue
-                    blocker_types, _, _ = self._type_parts(
-                        str(
-                            self._effective_card_data(blocker).get(
-                                "type_line"
-                            )
-                            or ""
-                        )
-                    )
-                    if "creature" in blocker_types:
-                        targets.add(blocker.ref)
-                if (
-                    TRAMPLE in self._combat_keywords(attacker)
-                    and self._combat_damage_target_exists(
-                        str(defender), attacker_id=attacker.object_id
-                    )
-                ):
-                    targets.add(str(defender))
-            else:
-                target = str(defender)
-                targets = (
-                    {target}
-                    if self._combat_damage_target_exists(
-                        target, attacker_id=attacker.object_id
-                    )
-                    else set()
-                )
-            source_targets[attacker.ref] = targets
-            source_power[attacker.ref] = max(
-                0,
-                self._numeric_stat(attacker.object_id, "power"),
-            )
-            attacking_cards.append(attacker)
-
-        blocker_attackers: dict[str, set[str]] = {}
-        for attacker_id, blocker_ids in self.state.combat.blockers.items():
-            attacker = self.state.cards.get(attacker_id)
-            if attacker is None or attacker.zone != "battlefield":
-                continue
-            for blocker_id in blocker_ids:
-                blocker = self.state.cards.get(blocker_id)
-                if (
-                    blocker is None
-                    or blocker.zone != "battlefield"
-                    or blocker.controller != seat
-                    or blocker.phased_out
-                    or not self._assigns_combat_damage_this_step(blocker)
-                ):
-                    continue
-                types, _, _ = self._type_parts(
-                    str(
-                        self._effective_card_data(blocker).get(
-                            "type_line"
-                        )
-                        or ""
-                    )
-                )
-                if "creature" not in types:
-                    continue
-                blocker_attackers.setdefault(blocker.ref, set()).add(
-                    attacker.ref
-                )
-                source_power[blocker.ref] = max(
-                    0,
-                    self._numeric_stat(blocker.object_id, "power"),
-                )
-        source_targets.update(blocker_attackers)
-        attacking_source_refs = frozenset(
-            card.ref for card in attacking_cards
-        )
-        deathtouch_source_refs = frozenset(
-            card.ref
-            for card in attacking_cards
-            if DEATHTOUCH in self._combat_keywords(card)
-        )
-        trample_sources: list[TrampleDamageSpec] = []
-        for attacker in attacking_cards:
-            if (
-                TRAMPLE not in self._combat_keywords(attacker)
-                or attacker.object_id not in self.state.combat.blockers
-            ):
-                continue
-            blocker_states: list[tuple[str, CreatureDamageState]] = []
-            current_targets = source_targets.get(attacker.ref, set())
-            for blocker_id in self.state.combat.blockers.get(
-                attacker.object_id, []
-            ):
-                blocker = self.state.cards.get(blocker_id)
-                if blocker is None or blocker.ref not in current_targets:
-                    continue
-                blocker_states.append(
-                    (
-                        blocker.ref,
-                        CreatureDamageState(
-                            toughness=self._numeric_stat(
-                                blocker.object_id,
-                                "toughness",
-                            ),
-                            marked_damage=blocker.marked_damage,
-                        ),
-                    )
-                )
-            trample_sources.append(
-                TrampleDamageSpec(
-                    attacker=attacker.ref,
-                    spill_target=str(
-                        self.state.combat.attackers[attacker.object_id]
-                    ),
-                    blockers=tuple(blocker_states),
-                )
-            )
-        return CombatDamageAssignmentProposal(
-            sources=tuple(
-                CombatDamageSourceSpec(
-                    source=source,
-                    power=source_power[source],
-                    targets=tuple(sorted(targets)),
-                )
-                for source, targets in sorted(source_targets.items())
-            ),
-            attacking_sources=attacking_source_refs,
-            deathtouch_sources=deathtouch_source_refs,
-            trample_sources=tuple(trample_sources),
-        )
 
     def _combat_damage_target_exists(
         self,
