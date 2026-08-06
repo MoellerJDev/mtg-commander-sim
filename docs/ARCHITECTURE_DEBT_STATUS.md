@@ -16,17 +16,17 @@ This generated migration dashboard is anchored to the Phase 0 baseline. It measu
 - Main commit: `ff5973728476d66406179a2bc6b5113bd8483aaf`
 - Package: `0.8.0`
 - CI run: [31076588097](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31076588097) — `pass`
-- Production scope: 265 files, 110,817 physical lines, 101,596 logical lines
+- Production scope: 267 files, 112,262 physical lines, 102,901 logical lines
 
 ## Central engine debt
 
-- `engine.py`: 13,372 physical / 12,635 logical lines
+- `engine.py`: 13,366 physical / 12,629 logical lines
 - Methods: 28 public, 279 private, 1 dunder
 - Cross-subsystem responsibility groups: 7
-- Direct GameState-write heuristic: 133 locations
+- Direct GameState-write heuristic: 132 locations
 - Semantic-operation branches: 179
 - Registered typed semantic handlers: 85 across 85 operations
-- Registered typed runtime components: 22
+- Registered typed runtime components: 24
 - Remaining legacy `apply_effect` branches: 0
 - Registered operations still intercepted by engine string dispatch: 0
 - Exact printed-name literals in configured core files: 693 (98 conditional)
@@ -42,8 +42,8 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 
 | Dimension | Baseline | Current | Delta |
 |---|---:|---:|---:|
-| `engine_logical_lines` | 13,017 | 12,635 | -382 |
-| `direct_game_state_writes` | 135 | 133 | -2 |
+| `engine_logical_lines` | 13,017 | 12,629 | -388 |
+| `direct_game_state_writes` | 135 | 132 | -3 |
 | `printed_name_literals` | 693 | 693 | +0 |
 | `oracle_id_literals` | 5 | 5 | +0 |
 | `legacy_card_specific_operations` | 5 | 5 | +0 |
@@ -55,7 +55,7 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 
 | File | Language | Physical | Logical |
 |---|---:|---:|---:|
-| `mtg_commander_sim/engine.py` | python | 13,372 | 12,635 |
+| `mtg_commander_sim/engine.py` | python | 13,366 | 12,629 |
 | `mtg_commander_sim/report.py` | python | 1,818 | 1,782 |
 | `web/src/App.tsx` | web | 1,784 | 1,728 |
 | `mtg_commander_sim/declaration_restrictions.py` | python | 1,833 | 1,679 |
@@ -82,12 +82,12 @@ Baseline: `ff5973728476d66406179a2bc6b5113bd8483aaf`. Guard: `python scripts/val
 | `_compile_face` | `mtg_commander_sim/oracle_ir.py:916` | 441 | 450 |
 | `_effect_template` | `mtg_commander_sim/oracle_ir.py:125` | 429 | 430 |
 | `CommanderSession.act` | `mtg_commander_sim/session.py:549` | 362 | 366 |
-| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:12613` | 342 | 354 |
-| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1540` | 341 | 347 |
+| `CommanderEngine._stabilize` | `mtg_commander_sim/engine.py:12607` | 342 | 354 |
+| `CommanderEngine.move_card` | `mtg_commander_sim/engine.py:1541` | 341 | 347 |
 | `build_parser` | `mtg_commander_sim/cli.py:514` | 337 | 361 |
 | `card_semantic_status` | `mtg_commander_sim/preflight.py:447` | 302 | 302 |
-| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:7778` | 301 | 304 |
-| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2934` | 282 | 312 |
+| `CommanderEngine._prepare_stack_resolution` | `mtg_commander_sim/engine.py:7779` | 299 | 302 |
+| `CommanderEngine._enter_step` | `mtg_commander_sim/engine.py:2935` | 282 | 312 |
 | `_scripted_choice` | `mtg_commander_sim/cli.py:74` | 266 | 268 |
 | `parse_declaration_cost_line` | `mtg_commander_sim/declaration_costs.py:219` | 249 | 258 |
 
@@ -114,15 +114,15 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,998
-- Conventional Python cases: 1,698
+- Python discovered: 5,022
+- Conventional Python cases: 1,722
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 9
 - Browser unit cases: 22
 - Dedicated property suite: false
 - Mutation score: None
 - Focused executable mutation suite: true
-- Capability mutation declarations: 63
+- Capability mutation declarations: 65
 - Performance baseline: `platform/continuous-effect-performance-baseline.json` (5 scenarios; latency observational)
 
 ## Documentation drift

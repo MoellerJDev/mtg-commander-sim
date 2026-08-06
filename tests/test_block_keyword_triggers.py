@@ -282,7 +282,10 @@ class BlockKeywordTriggerIntegrationTests(unittest.TestCase):
         before = authoritative_state_hash(session.state)
 
         with patch(
-            "mtg_commander_sim.engine.enqueue_block_transition_triggers",
+            (
+                "mtg_commander_sim.block_transition_engine_adapter."
+                "enqueue_block_transition_triggers"
+            ),
             side_effect=StateInvariantError("malformed transition"),
         ):
             with self.assertRaisesRegex(

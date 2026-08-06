@@ -13,7 +13,7 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Current representation
 
-- Compiler: `oracle-ir-v36`
+- Compiler: `oracle-ir-v37`
 - Runtime IR: OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index
 - CardProgram V2 present: true
 - Compiler module: 1,501 physical / 1,452 logical lines
@@ -48,16 +48,16 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Fine-grained capability registry
 
-- Registry schema/version: `1/38`
+- Registry schema/version: `1/39`
 - Pinned rules effective date: `2026-06-19`
-- Registry fingerprint: `5d8d82145b916b5831104349eff9447d36c5f8b41bd2c555862e436b4a462d31`
-- Evidence fingerprint: `2a63c990524bf46b2326455c6d21dd1cd6d6218e1a7d3a11aa784ccde6593370`
-- Explicit evidence declarations: 554
-- Capability records: 66
-- Trusted records: 56
+- Registry fingerprint: `e4c530ffa1e859fcfb2f088128ae842c3e8030491dfcb337e2506e85ab8d41d5`
+- Evidence fingerprint: `e5c405e6b823876f28318e5f7ed17009a659ba924752c1ef76c005c0940ca850`
+- Explicit evidence declarations: 570
+- Capability records: 68
+- Trusted records: 58
 - Blocked records: 4
-- Dependency fail-closed statuses: `{"not_applicable": 32, "not_run": 3, "passed": 31}`
-- Implementation mutation statuses: `{"killed": 59, "not_run": 7}`
+- Dependency fail-closed statuses: `{"not_applicable": 32, "not_run": 3, "passed": 33}`
+- Implementation mutation statuses: `{"killed": 61, "not_run": 7}`
 
 | Broad aggregate | Capability records | Trusted | Blocked members |
 |---|---:|---:|---|
@@ -74,8 +74,8 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 | Scope | Oracle IDs | Exact | Partial | Unresolved | Material residuals | Complete |
 |---|---:|---:|---:|---:|---:|---:|
-| Full Oracle | 38,542 | 4,709 | 14,558 | 19,275 | 56,324 | false |
-| Commander legal | 31,623 | 1,776 | 13,430 | 16,417 | 48,710 | false |
+| Full Oracle | 38,542 | 4,727 | 14,565 | 19,250 | 56,261 | false |
+| Commander legal | 31,623 | 1,793 | 13,438 | 16,392 | 48,648 | false |
 
 ## Full-corpus residual kinds
 
@@ -83,9 +83,9 @@ This generated report describes only the pinned Oracle corpus and current compil
 |---|---:|
 | `trigger` | 15,277 |
 | `spell_effect` | 11,241 |
-| `static_ability` | 11,143 |
+| `static_ability` | 11,108 |
 | `effect` | 7,168 |
-| `dependency_contract` | 6,554 |
+| `dependency_contract` | 6,526 |
 | `cost` | 2,015 |
 | `replacement_effect` | 1,758 |
 | `mana_ability` | 771 |
@@ -114,4 +114,4 @@ This generated report describes only the pinned Oracle corpus and current compil
 
 ## Boundary
 
-The current compiler is partial and interleaved. Full-corpus exactness is not claimed. Fine-grained closure currently covers only the reviewed base-damage spell slice; other nodes retain the broad-contract fallback. CardProgram V2 now provides canonical aggregation, validation, and replay pinning. Typed handlers and fully distinct compiler stages remain incremental work.
+The current compiler is partial and interleaved. Full-corpus exactness is not claimed. Fine-grained closure spans the registered typed capabilities for represented damage, draw, continuous-effect, attachment, mana, cast-timing, and combat families; unregistered or blocked dependencies remain residual. CardProgram V2 provides canonical aggregation, validation, and replay pinning, while broader typed handlers and fully distinct compiler stages remain incremental work.

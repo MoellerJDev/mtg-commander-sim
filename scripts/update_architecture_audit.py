@@ -1794,10 +1794,11 @@ def render_compiler_status(report: Mapping[str, Any]) -> str:
             "## Boundary",
             "",
             "The current compiler is partial and interleaved. Full-corpus exactness is "
-            "not claimed. Fine-grained closure currently covers only the reviewed base-damage "
-            "spell slice; other nodes retain the broad-contract fallback. CardProgram V2 now "
-            "provides canonical aggregation, validation, and replay pinning. Typed handlers "
-            "and fully distinct compiler stages remain incremental work.",
+            "not claimed. Fine-grained closure spans the registered typed capabilities for "
+            "represented damage, draw, continuous-effect, attachment, mana, cast-timing, and "
+            "combat families; unregistered or blocked dependencies remain residual. CardProgram "
+            "V2 provides canonical aggregation, validation, and replay pinning, while broader "
+            "typed handlers and fully distinct compiler stages remain incremental work.",
             "",
         ]
     )
