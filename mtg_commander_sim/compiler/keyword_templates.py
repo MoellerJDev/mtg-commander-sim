@@ -5,14 +5,14 @@ from typing import Sequence
 
 
 _KEYWORD_WITH_VALUE = re.compile(
-    r"^(?P<name>ward|equip|enchant|cycling|crew|dredge|kicker|toxic|"
+    r"^(?P<name>ward|equip|enchant|bushido|cycling|crew|dredge|kicker|toxic|"
     r"cumulative upkeep|echo|morph|bestow|evoke|unearth)"
     r"(?:\s+(?P<value>.+))?$",
     re.IGNORECASE,
 )
 _KNOWN_BARE_KEYWORDS = frozenset(
     "deathtouch|defender|double strike|first strike|flash|flying|haste|"
-    "hexproof|indestructible|infect|lifelink|menace|reach|shadow|shroud|"
+    "flanking|hexproof|indestructible|infect|lifelink|menace|reach|shadow|shroud|"
     "trample|vigilance|wither".split("|")
 )
 

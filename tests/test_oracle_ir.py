@@ -129,6 +129,7 @@ class MechanicContractTests(unittest.TestCase):
                 "double-strike",
                 "first-strike",
                 "flash",
+                "flanking",
                 "fear",
                 "flying",
                 "goad",
@@ -149,6 +150,7 @@ class MechanicContractTests(unittest.TestCase):
                 "trample",
                 "vigilance",
                 "wither",
+                "bushido",
             },
             {contract["mechanic_id"] for contract in contracts},
         )

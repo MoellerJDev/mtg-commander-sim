@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 38,
+  "registry_version": 39,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -888,6 +888,60 @@
       "dependency_fail_closed_rationale": "This bounded restriction lowers to the existing complete-declaration solver from one authoritative current characteristic and combat snapshot and has no optional capability dependency.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_menace_block_restriction_mutant_is_killed changes the recognized current keyword and the solver no longer rejects a single blocker.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.trigger.flanking",
+      "version": 1,
+      "official_rules": ["603.2c", "603.3", "702.25", "702.25a", "702.25b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Capture each ordinary printed Flanking instance after the complete simultaneous block declaration, trigger once for each blocking creature without current Flanking, and give that exact blocking logical object -1/-1 until end of turn on resolution.",
+        "inputs": ["immutable canonical block-transition event", "current typed Flanking ability fragments", "current blocker Flanking fragments", "physical and logical source and affected-object identities"],
+        "outputs": ["one occurrence per Flanking instance and qualifying blocker", "ordinary APNAP trigger placement", "identity-pinned layer 7c -1/-1 result", "no effect after the affected blocker changes zones"],
+        "exclusions": ["conditional or rules-text-equivalent Flanking wording", "granted, copied, or face-down Flanking outside trusted typed fragments", "creatures that block more than one attacker", "trigger doubling and countering policies beyond the ordinary trigger subsystem"]
+      },
+      "dependencies": ["continuous.resolution.fixed_characteristics_until_end_of_turn", "trigger.placement.apnap"],
+      "implementation_components": ["mtg_commander_sim.block_transitions.BlockTransitionEvent", "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences", "mtg_commander_sim.block_transitions.resolve_block_keyword_trigger", "mtg_commander_sim.semantic_runtime.ability_fragments.FlankingAbilityFragmentHandler"],
+      "positive_tests": ["test_flanking_triggers_once_per_instance_and_nonflanking_blocker"],
+      "negative_tests": ["test_flanking_does_not_trigger_for_a_blocker_with_flanking", "test_malformed_transition_and_occurrence_fail_closed"],
+      "interaction_tests": ["test_flanking_and_bushido_share_one_sealed_apnap_batch"],
+      "multiplayer_tests": ["test_four_player_block_declarations_finish_before_apnap_trigger_placement"],
+      "privacy_tests": ["test_four_player_block_transition_is_public_without_hidden_cards"],
+      "replay_tests": ["test_four_player_block_transition_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Runtime binding and CardProgram closure require both ordinary APNAP trigger placement and the canonical until-end-of-turn continuous-effect owner; blocking either dependency leaves Flanking partial.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_flanking_qualifying_blocker_mutant_is_killed removes the current-blocker Flanking exclusion and the focused negative assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "combat.trigger.bushido",
+      "version": 1,
+      "official_rules": ["603.2c", "603.3", "702.45", "702.45a", "702.45b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Capture each ordinary positive-integer Bushido instance after the complete simultaneous block declaration, trigger once when its creature blocks or becomes blocked, and give that exact source logical object +N/+N until end of turn on resolution.",
+        "inputs": ["immutable canonical block-transition event", "current typed Bushido ability fragments", "positive integer Bushido values", "physical and logical source identity"],
+        "outputs": ["one occurrence per Bushido instance", "ordinary APNAP trigger placement", "identity-pinned layer 7c +N/+N result", "no effect after the source changes zones"],
+        "exclusions": ["zero, negative, variable, conditional, or rules-text-equivalent Bushido wording", "granted, copied, or face-down Bushido outside trusted typed fragments", "trigger doubling and countering policies beyond the ordinary trigger subsystem"]
+      },
+      "dependencies": ["continuous.resolution.fixed_characteristics_until_end_of_turn", "trigger.placement.apnap"],
+      "implementation_components": ["mtg_commander_sim.block_transitions.BlockTransitionEvent", "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences", "mtg_commander_sim.block_transitions.resolve_block_keyword_trigger", "mtg_commander_sim.semantic_runtime.ability_fragments.BushidoAbilityFragmentHandler"],
+      "positive_tests": ["test_bushido_triggers_once_for_blocks_or_becomes_blocked_per_instance"],
+      "negative_tests": ["test_unblocked_bushido_creature_does_not_trigger", "test_malformed_transition_and_occurrence_fail_closed"],
+      "interaction_tests": ["test_flanking_and_bushido_share_one_sealed_apnap_batch"],
+      "multiplayer_tests": ["test_four_player_block_declarations_finish_before_apnap_trigger_placement"],
+      "privacy_tests": ["test_four_player_block_transition_is_public_without_hidden_cards"],
+      "replay_tests": ["test_four_player_block_transition_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Runtime binding and CardProgram closure require both ordinary APNAP trigger placement and the canonical until-end-of-turn continuous-effect owner; blocking either dependency leaves Bushido partial.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_bushido_instance_quantity_mutant_is_killed collapses repeated Bushido instances and the focused multiplicity assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

@@ -14,29 +14,29 @@ This report schedules the pinned Comprehensive Rules by coupled subsystem. It do
 ## Queue boundary
 
 - Pinned rules: 3,300
-- Queued rules: 2,988
+- Queued rules: 2,982
 - Reviewed behavioral blockers: 373
-- Behavioral classification/review required: 2,615
-- Passing behavioral rules: 176
+- Behavioral classification/review required: 2,609
+- Passing behavioral rules: 180
 - Subsystems: 21
-- Queue fingerprint: `60fc1e4977530e49345e9671041076a8f8fa885c37db7b345fd77080e2501eb1`
+- Queue fingerprint: `00df2c590270519fc4e3b704bcc5bc329954820f62d0601a0e8afd196aca0a60`
 
 ## Selected next batch
 
-- Batch: `typed-block-transition-keyword-triggers`
+- Batch: `typed-attack-transition-keyword-triggers`
 - Subsystem: `keyword-abilities`
-- Rules: `702.25`, `702.25a`, `702.25b`, `702.45`, `702.45a`, `702.45b`
-- Target capabilities: `combat.trigger.bushido`, `combat.trigger.flanking`
-- Rationale: The pinned Commander snapshot contains 37 Bushido and 29 Flanking cards. The current frontier isolates 27 Flanking dependency residuals, including 4 sole-blocker cards and 20 bounded one- or two-additional-blocker opportunities, while Bushido's valued keyword grammar remains too coarse and must be made explicit. Both families consume the same become-blocked or blocks transition, trigger placement, and until-end-of-turn characteristic boundary without sharing card-specific behavior.
+- Rules: `702.83`, `702.83a`, `702.83b`, `702.91`, `702.91a`, `702.91b`, `702.121`, `702.121a`, `702.121b`
+- Target capabilities: `combat.trigger.battle_cry`, `combat.trigger.exalted`, `combat.trigger.melee`
+- Rationale: The current pinned frontier identifies 34 Exalted, 13 Battle Cry, and 12 Melee cards, including 24 sole-blocker opportunities before this branch's final census. These three printed keyword families consume one complete attack-declaration transition, ordinary APNAP trigger placement, and identity-pinned until-end-of-turn layer 7c modifiers while retaining distinct eligibility and affected-object rules.
 
 Exit criteria:
 
-- Introduce one typed immutable block-transition event shared by declarations, Flanking, Bushido, trigger batching, replay, and projection.
-- Lower ordinary Flanking and positive integer Bushido values generically with precise source spans and fine-grained capability closure.
-- Give each Flanking instance its own trigger only when the blocking creature lacks current Flanking, and give each Bushido instance its stated independent value when its source blocks or becomes blocked.
-- Apply the resulting until-end-of-turn power and toughness changes through the canonical continuous-characteristic owner without direct GameState writes or runtime Oracle parsing.
-- Preserve simultaneous blocker declaration, APNAP trigger ordering, exact replay, rollback, four-player privacy, source departure, multiple-instance, and focused mutation evidence.
-- Leave conditional, nonnumeric, granted, copied, face-down, trigger-doubling, and broader unsupported block-trigger variants explicit residuals.
+- Introduce one typed immutable completed attack transition shared by attack declarations, Exalted, Battle Cry, Melee, trigger batching, replay, and projection.
+- Lower ordinary printed Exalted, Battle Cry, and Melee generically with precise source spans and fine-grained capability closure.
+- Derive one occurrence per current ability instance using exact attacks-alone, other-attacker, and distinct-defending-player semantics from the sealed transition.
+- Apply resolving power and toughness changes through the canonical continuous-characteristic owner without direct GameState writes or runtime Oracle parsing.
+- Preserve multiplayer declaration completion, APNAP trigger ordering, exact replay, rollback, privacy, source departure, multiple-instance, and focused mutation evidence.
+- Leave conditional, granted, copied, face-down, trigger-doubling, and broader unsupported attack-trigger variants explicit residuals.
 
 ## Dependency schedule
 
@@ -58,7 +58,7 @@ Exit criteria:
 | 14 | `replacement-prevention` | `resources`, `damage`, `resolution-effects`, `continuous-effects` | 33 | 33 | 0 | `oracle_parser`, `card_program_lowering`, `event_binding`, `mechanic_contracts` |
 | 15 | `combat` | `damage`, `turn-structure`, `continuous-effects` | 75 | 75 | 0 | `runtime_contracts`, `mechanic_contracts` |
 | 16 | `game-actions-state` | `zones`, `turn-structure`, `combat`, `resolution-effects`, `replacement-prevention` | 516 | 5 | 511 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
-| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 704 | 4 | 700 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
+| 17 | `keyword-abilities` | `casting-activation`, `continuous-effects`, `replacement-prevention`, `combat`, `game-actions-state` | 698 | 4 | 694 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 18 | `alternate-card-forms` | `card-types`, `zones`, `casting-activation`, `continuous-effects`, `replacement-prevention`, `game-actions-state` | 249 | 0 | 249 | `oracle_normalization`, `oracle_parser`, `card_program_faces`, `card_program_zone_permissions`, `mechanic_contracts` |
 | 19 | `designations-variants` | `turn-structure`, `combat`, `triggered-static-linked` | 9 | 0 | 9 | `oracle_parser`, `card_program_lowering`, `mechanic_contracts` |
 | 20 | `multiplayer` | `core-game`, `turn-structure`, `combat` | 182 | 0 | 182 | `runtime_contracts`, `mechanic_contracts` |

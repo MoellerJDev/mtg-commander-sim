@@ -25,6 +25,13 @@ class ProtectionQualityKind(str, Enum):
     SUBTYPE = "subtype"
 
 
+class CombatKeywordTriggerKind(str, Enum):
+    """Closed printed combat keywords whose abilities trigger on blocking."""
+
+    FLANKING = "flanking"
+    BUSHIDO = "bushido"
+
+
 _COLOR_NAMES = {
     "white": "W",
     "blue": "U",
@@ -309,12 +316,74 @@ class GrantedTriggeredAbilitySpec:
         return cls(**dict(value))
 
 
+@dataclass(frozen=True, slots=True)
+class CombatKeywordTriggerSpec:
+    """One executable printed Flanking or Bushido ability instance.
+
+    Multiplicity is intentionally preserved by ``canonical_ability_fragments``:
+    each printed or independently granted instance triggers separately.
+    """
+
+    kind: CombatKeywordTriggerKind
+    amount: int
+    schema_version: int = 1
+
+    def __post_init__(self) -> None:
+        if type(self.schema_version) is not int or self.schema_version != 1:
+            raise AbilityFragmentError(
+                "Unsupported combat keyword-trigger fragment schema version"
+            )
+        if not isinstance(self.kind, CombatKeywordTriggerKind):
+            raise AbilityFragmentError(
+                "Unsupported combat keyword-trigger kind"
+            )
+        if type(self.amount) is not int or self.amount <= 0:
+            raise AbilityFragmentError(
+                "Combat keyword-trigger amounts must be positive integers"
+            )
+        if self.kind is CombatKeywordTriggerKind.FLANKING and self.amount != 1:
+            raise AbilityFragmentError("Each Flanking instance has amount 1")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "kind": self.kind.value,
+            "amount": self.amount,
+        }
+
+    @classmethod
+    def from_dict(
+        cls, value: Mapping[str, Any]
+    ) -> "CombatKeywordTriggerSpec":
+        expected = {"schema_version", "kind", "amount"}
+        if not isinstance(value, Mapping) or set(value) != expected:
+            raise AbilityFragmentError(
+                "Combat keyword-trigger fragments have a closed schema"
+            )
+        if not isinstance(value["kind"], str):
+            raise AbilityFragmentError(
+                "Combat keyword-trigger kind must be a string"
+            )
+        try:
+            kind = CombatKeywordTriggerKind(value["kind"])
+        except ValueError as exc:
+            raise AbilityFragmentError(
+                "Unsupported combat keyword-trigger kind"
+            ) from exc
+        return cls(
+            schema_version=value["schema_version"],
+            kind=kind,
+            amount=value["amount"],
+        )
+
+
 StaticAbilityFragment: TypeAlias = (
     SimpleEnchantSpec
     | LinkedGraveyardCreatureEnchantSpec
     | ProtectionSpec
     | GrantedActivatedAbilitySpec
     | GrantedTriggeredAbilitySpec
+    | CombatKeywordTriggerSpec
 )
 
 
@@ -331,6 +400,8 @@ def ability_fragment_to_dict(
         kind = "granted_activated"
     elif isinstance(fragment, GrantedTriggeredAbilitySpec):
         kind = "granted_triggered"
+    elif isinstance(fragment, CombatKeywordTriggerSpec):
+        kind = "combat_keyword_trigger"
     else:
         raise AbilityFragmentError(
             f"Unsupported ability fragment {type(fragment).__name__}"
@@ -361,6 +432,8 @@ def ability_fragment_from_dict(
         return GrantedActivatedAbilitySpec.from_dict(value["value"])
     if value["kind"] == "granted_triggered":
         return GrantedTriggeredAbilitySpec.from_dict(value["value"])
+    if value["kind"] == "combat_keyword_trigger":
+        return CombatKeywordTriggerSpec.from_dict(value["value"])
     raise AbilityFragmentError(
         f"Unsupported ability fragment kind {value['kind']!r}"
     )
@@ -379,6 +452,7 @@ def canonical_ability_fragments(
                 ProtectionSpec,
                 GrantedActivatedAbilitySpec,
                 GrantedTriggeredAbilitySpec,
+                CombatKeywordTriggerSpec,
             ),
         )
         else ability_fragment_from_dict(value)
@@ -482,8 +556,20 @@ def granted_triggered_specs(
     )
 
 
+def combat_keyword_trigger_specs(
+    fragments: Iterable[StaticAbilityFragment],
+) -> tuple[CombatKeywordTriggerSpec, ...]:
+    return tuple(
+        fragment
+        for fragment in fragments
+        if isinstance(fragment, CombatKeywordTriggerSpec)
+    )
+
+
 __all__ = [
     "AbilityFragmentError",
+    "CombatKeywordTriggerKind",
+    "CombatKeywordTriggerSpec",
     "GrantedActivatedAbilitySpec",
     "GrantedTriggeredAbilitySpec",
     "ProtectionQualityKind",
@@ -492,6 +578,7 @@ __all__ = [
     "ability_fragment_from_dict",
     "ability_fragment_to_dict",
     "canonical_ability_fragments",
+    "combat_keyword_trigger_specs",
     "enchant_specs",
     "granted_activated_specs",
     "granted_triggered_specs",

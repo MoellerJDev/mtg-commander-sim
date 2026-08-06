@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Any, Mapping
 
 from ..ability_fragments import (
+    CombatKeywordTriggerKind,
+    CombatKeywordTriggerSpec,
     ability_fragment_to_dict,
     parse_protection_line,
 )
@@ -23,7 +26,7 @@ def lower_ability_keyword_fragments(
     material_line: str,
     mechanics: tuple[str, ...],
 ) -> AbilityKeywordFragmentLowering:
-    """Lower closed Enchant/protection grammar to typed runtime fragments."""
+    """Lower closed keyword grammar to typed executable fragments."""
 
     if mechanics == (PRINTED_FLASH_MECHANIC,):
         return AbilityKeywordFragmentLowering(
@@ -58,10 +61,77 @@ def lower_ability_keyword_fragments(
                 },
             )
         )
+    handlers: list[Mapping[str, Any]] = []
+    parts = tuple(
+        part.strip() for part in material_line.rstrip(".").split(",")
+    )
+    flanking_parts = tuple(
+        part for part in parts if part.casefold() == "flanking"
+    )
+    handlers.extend(
+        {
+            "handler_id": "ability.trigger.flanking.v1",
+            "schema_version": 1,
+            "event": "continuous",
+            "fragment": ability_fragment_to_dict(
+                CombatKeywordTriggerSpec(
+                    kind=CombatKeywordTriggerKind.FLANKING,
+                    amount=1,
+                )
+            ),
+        }
+        for _part in flanking_parts
+    )
+
+    bushido_matches = tuple(
+        match
+        for part in parts
+        if (
+            match := re.fullmatch(
+                r"Bushido (?P<amount>[1-9]\d*)",
+                part,
+                re.IGNORECASE,
+            )
+        )
+        is not None
+    )
+    handlers.extend(
+        {
+            "handler_id": "ability.trigger.bushido.v1",
+            "schema_version": 1,
+            "event": "continuous",
+            "fragment": ability_fragment_to_dict(
+                CombatKeywordTriggerSpec(
+                    kind=CombatKeywordTriggerKind.BUSHIDO,
+                    amount=int(match.group("amount")),
+                )
+            ),
+        }
+        for match in bushido_matches
+    )
+    if mechanics.count("flanking") != len(flanking_parts):
+        return AbilityKeywordFragmentLowering(
+            handlers=tuple(handlers),
+            residual_kind="unsupported_flanking_variant",
+            residual_reason=(
+                "Flanking wording is outside the closed printed keyword grammar"
+            ),
+            residual_blockers=("ordinary printed Flanking",),
+        )
+    if mechanics.count("bushido") != len(bushido_matches):
+        return AbilityKeywordFragmentLowering(
+            handlers=tuple(handlers),
+            residual_kind="unsupported_bushido_value",
+            residual_reason=(
+                "Bushido requires one printed positive integer value"
+            ),
+            residual_blockers=("positive integer Bushido value",),
+        )
+
     if "protection" in mechanics:
         protection_parts = tuple(
-            part.strip()
-            for part in material_line.rstrip(".").split(",")
+            part
+            for part in parts
             if part.strip().casefold().startswith("protection from ")
         )
         parsed = tuple(
@@ -72,6 +142,7 @@ def lower_ability_keyword_fragments(
             or any(not specs for specs in parsed)
         ):
             return AbilityKeywordFragmentLowering(
+                handlers=tuple(handlers),
                 residual_kind="unsupported_protection_quality",
                 residual_reason=(
                     "protection quality is outside the closed typed DEBT "
@@ -84,8 +155,8 @@ def lower_ability_keyword_fragments(
             for values in parsed
             for spec in (values or ())
         )
-        return AbilityKeywordFragmentLowering(
-            handlers=tuple(
+        handlers.extend(
+            tuple(
                 {
                     "handler_id": "ability.static.protection.v1",
                     "schema_version": 1,
@@ -95,7 +166,7 @@ def lower_ability_keyword_fragments(
                 for spec in specs
             )
         )
-    return AbilityKeywordFragmentLowering()
+    return AbilityKeywordFragmentLowering(handlers=tuple(handlers))
 
 
 __all__ = [

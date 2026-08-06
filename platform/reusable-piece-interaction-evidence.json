@@ -93,6 +93,30 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_block_keyword_resolution_uses_canonical_eot_continuous_effect",
+      "piece_ids": ["capability.combat.trigger.bushido", "capability.continuous.resolution.fixed_characteristics_until_end_of_turn", "mechanic.bushido", "mechanic.cr-611-continuous-effects"],
+      "capability_ids": ["combat.trigger.bushido", "continuous.resolution.fixed_characteristics_until_end_of_turn"],
+      "interaction_order": 4,
+      "assertion": "A typed Bushido occurrence resolves through the canonical identity-locked layer 7c until-end-of-turn effect owner."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_flanking_uses_source_snapshot_after_source_leaves",
+      "piece_ids": ["capability.combat.trigger.flanking", "capability.continuous.resolution.fixed_characteristics_until_end_of_turn", "mechanic.cr-611-continuous-effects", "mechanic.flanking"],
+      "capability_ids": ["combat.trigger.flanking", "continuous.resolution.fixed_characteristics_until_end_of_turn"],
+      "interaction_order": 4,
+      "assertion": "A typed Flanking occurrence retains its source snapshot and modifies the exact blocker through the canonical layer 7c effect owner."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_flanking_and_bushido_share_one_sealed_apnap_batch",
+      "piece_ids": ["capability.combat.trigger.bushido", "capability.combat.trigger.flanking", "capability.trigger.placement.apnap", "mechanic.bushido", "mechanic.cr-603-handling-triggered-abilities", "mechanic.flanking"],
+      "capability_ids": ["combat.trigger.bushido", "combat.trigger.flanking", "trigger.placement.apnap"],
+      "interaction_order": 6,
+      "assertion": "Flanking and Bushido occurrences from one complete multiplayer block transition share one sealed APNAP trigger batch."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_sick_mana_creature_requires_haste_or_as_though_permission",
       "piece_ids": ["capability.activation.tap_untap_cost.haste", "mechanic.haste"],
       "capability_ids": ["activation.tap_untap_cost.haste"],

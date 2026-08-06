@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "5d8d82145b916b5831104349eff9447d36c5f8b41bd2c555862e436b4a462d31",
-  "declaration_source_fingerprint": "83f80c5ce9121e850a88c5d6385fe99cf9b8e235edb8dd5bcca81691227a4b98",
+  "registry_fingerprint": "e4c530ffa1e859fcfb2f088128ae842c3e8030491dfcb337e2506e85ab8d41d5",
+  "declaration_source_fingerprint": "ecbba912ce4047d8259fcfd4c32aa25daa116f0b177c0e86e7c061ad3029d364",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -3370,6 +3370,294 @@
         "commander_review"
       ],
       "applicability_note": "Replay both real combat-damage steps and their intervening priority window exactly."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_flanking_and_bushido_share_one_sealed_apnap_batch",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Prove Flanking and Bushido occurrences share one sealed APNAP trigger batch after all block declarations."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_declarations_finish_before_apnap_trigger_placement",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Wait for every attacked defender before placing one four-player APNAP trigger batch."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_bushido_instance_quantity_mutant_is_killed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that collapses multiple Bushido instances into one occurrence."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "negative",
+      "test_id": "tests.test_block_transitions.BlockTransitionModelTests.test_malformed_transition_and_occurrence_fail_closed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed Bushido transition and occurrence data before mutation."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "negative",
+      "test_id": "tests.test_block_transitions.BlockTransitionModelTests.test_unblocked_bushido_creature_does_not_trigger",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Do not trigger Bushido for an attacking creature that did not become blocked."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "positive",
+      "test_id": "tests.test_block_transitions.BlockTransitionModelTests.test_bushido_triggers_once_for_blocks_or_becomes_blocked_per_instance",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create one Bushido occurrence per instance when a creature blocks or becomes blocked."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_transition_is_public_without_hidden_cards",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the public transition without exposing any opposing hand."
+    },
+    {
+      "capability_id": "combat.trigger.bushido",
+      "evidence_class": "replay",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_transition_replays_exactly",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.45",
+        "702.45a",
+        "702.45b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the same typed transition, APNAP batch, and state hash exactly."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_flanking_and_bushido_share_one_sealed_apnap_batch",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Prove Flanking and Bushido occurrences share one sealed APNAP trigger batch after all block declarations."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_declarations_finish_before_apnap_trigger_placement",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Wait for every attacked defender before placing one four-player APNAP trigger batch."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_flanking_qualifying_blocker_mutant_is_killed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that ignores the blocking creature's current Flanking ability."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "negative",
+      "test_id": "tests.test_block_transitions.BlockTransitionModelTests.test_flanking_does_not_trigger_for_a_blocker_with_flanking",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Do not trigger Flanking for a blocking creature with current Flanking."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "negative",
+      "test_id": "tests.test_block_transitions.BlockTransitionModelTests.test_malformed_transition_and_occurrence_fail_closed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed Flanking transition and occurrence data before mutation."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "positive",
+      "test_id": "tests.test_block_transitions.BlockTransitionModelTests.test_flanking_triggers_once_per_instance_and_nonflanking_blocker",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create one Flanking occurrence per instance and qualifying blocker."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_transition_is_public_without_hidden_cards",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the public transition without exposing any opposing hand."
+    },
+    {
+      "capability_id": "combat.trigger.flanking",
+      "evidence_class": "replay",
+      "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_four_player_block_transition_replays_exactly",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.25",
+        "702.25a",
+        "702.25b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the same typed transition, APNAP batch, and state hash exactly."
     },
     {
       "capability_id": "continuous.attached.fixed_characteristics",
@@ -10606,5 +10894,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "2a63c990524bf46b2326455c6d21dd1cd6d6218e1a7d3a11aa784ccde6593370"
+  "fingerprint": "e5c405e6b823876f28318e5f7ed17009a659ba924752c1ef76c005c0940ca850"
 }
