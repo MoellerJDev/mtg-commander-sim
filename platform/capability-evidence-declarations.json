@@ -6029,6 +6029,14 @@
       "applicability_note": "Kill omission of deathtouch's positive-assignment lethal contribution."
     },
     {
+      "capability_id": "combat.damage.assignment.deathtouch",
+      "evidence_class": "property",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_assignment_and_result_predicates_hold_across_bounded_grid",
+      "official_rule_ids": ["510.1c", "702.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Check the exact positive-assignment predicate across a bounded source and amount grid."
+    },
+    {
       "capability_id": "damage.result.deathtouch",
       "evidence_class": "positive",
       "test_id": "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki",
@@ -6099,6 +6107,14 @@
       "official_rule_ids": ["702.2b", "704.5h"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Kill omission of the source-derived deathtouch damage-result leaf."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
+      "evidence_class": "property",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchValueTests.test_assignment_and_result_predicates_hold_across_bounded_grid",
+      "official_rule_ids": ["702.2b", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Check positive-damage, source-keyword, and creature-recipient closure across a bounded result grid."
     }
   ]
 }

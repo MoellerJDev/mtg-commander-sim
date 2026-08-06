@@ -86,6 +86,36 @@ class DeathtouchValueTests(unittest.TestCase):
             )
         )
 
+    def test_assignment_and_result_predicates_hold_across_bounded_grid(self):
+        for amount in range(8):
+            for source in ("snake", "bear"):
+                with self.subTest(amount=amount, source=source):
+                    self.assertEqual(
+                        amount > 0 and source == "snake",
+                        deathtouch_assignment_is_lethal(
+                            source=source,
+                            amount=amount,
+                            deathtouch_sources=("snake",),
+                        ),
+                    )
+            for keywords in ((), ("Deathtouch",)):
+                for target_types in (("Creature",), ("Planeswalker",)):
+                    with self.subTest(
+                        amount=amount,
+                        keywords=keywords,
+                        target_types=target_types,
+                    ):
+                        self.assertEqual(
+                            amount > 0
+                            and bool(keywords)
+                            and target_types == ("Creature",),
+                            deathtouch_damage_result_applies(
+                                amount=amount,
+                                source_keywords=keywords,
+                                target_types=target_types,
+                            ),
+                        )
+
 
 class DeathtouchStateBasedActionTests(unittest.TestCase):
     def test_check_destroys_only_destructible_positive_toughness_creature(self):
