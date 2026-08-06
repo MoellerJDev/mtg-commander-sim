@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 import tempfile
@@ -381,7 +382,7 @@ class DrawRevealCoordinatorTests(unittest.TestCase):
 
     @staticmethod
     def trigger_source_object_id(item):
-        if isinstance(item, dict):
+        if isinstance(item, Mapping):
             return item["source_object_id"]
         return item.source_object_id
 
