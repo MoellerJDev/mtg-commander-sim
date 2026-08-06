@@ -1695,6 +1695,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/menace.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/model.py",
       "layer": "domain",
       "owning_subsystem": "legacy_domain",
@@ -3572,5 +3586,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "107620d2fd3aa533c17dff816476f391fdecf27d98663c9751d6615f2b38299f"
+  "fingerprint": "0a12b9cb5dadaee6e18adca98aebb51abbc6bc04d47d01a63f0de4f4569201e3"
 }

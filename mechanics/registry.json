@@ -280,8 +280,8 @@
     {
       "mechanic_id": "menace",
       "path": "mechanics/contracts/menace.json",
-      "sha256": "34e37987949e47919ffa87a4a214ee8143de46620640970104aa12d9c048f150",
-      "version": 1
+      "sha256": "86307912f30fbbe9788ff8ee20dfd4a1965e7d9884afc896a80fa3575202040c",
+      "version": 2
     },
     {
       "mechanic_id": "cr-725-the-monarch",
@@ -2647,14 +2647,14 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/menace.json",
-      "contract_sha256": "34e37987949e47919ffa87a4a214ee8143de46620640970104aa12d9c048f150",
-      "contract_version": 1,
-      "coverage_status": "partial",
+      "contract_sha256": "86307912f30fbbe9788ff8ee20dfd4a1965e7d9884afc896a80fa3575202040c",
+      "contract_version": 2,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat, CommanderEngine blocker validation, and the generic assignment-map choice form",
-      "implementation_version": "combat-keywords-v2",
+      "implementation_component": "mtg_commander_sim.menace, CommanderEngine._block_declaration_components, and the generic declaration solver",
+      "implementation_version": "menace-block-restriction-v1",
       "kind": "keyword_ability",
       "known_blockers": [
         "the general CR 509.1 restrictions-and-requirements solver remains incomplete",
@@ -2667,9 +2667,18 @@
         "702.111"
       ],
       "test_ids": [
+        "test_current_attacking_creature_has_one_redundant_restriction",
+        "test_nonattacker_noncreature_and_nonmenace_have_no_restriction",
+        "test_malformed_current_characteristics_and_identity_fail_closed",
+        "test_zero_or_two_blockers_is_the_exact_conditional_minimum",
+        "test_typed_restriction_participates_in_the_generic_solver",
+        "test_menace_verdict_holds_across_bounded_characteristic_grid",
         "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum",
-        "test_keyword_contracts_trace_the_pinned_rules",
-        "assignment maps enforce server-issued conditional group minimums"
+        "test_effective_menace_gain_and_loss_change_the_shared_restriction",
+        "test_four_player_menace_is_seat_scoped_and_replays",
+        "test_menace_can_make_a_block_requirement_impossible",
+        "test_two_blockers_satisfy_menace_and_the_block_requirement",
+        "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"
     },
@@ -8876,22 +8885,7 @@
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "sources": {
     "card_data_snapshot": {
-      "available": true,
-      "database_schema_version": "2",
-      "oracle_bulk": {
-        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
-        "oracle_id_count": 38542,
-        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
-        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
-        "updated_at": "2026-08-04T09:02:45.219+00:00"
-      },
-      "rulings_bulk": {
-        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
-        "ruling_count": 77998,
-        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
-        "source_filename": "rulings-20260804090038.jsonl.gz",
-        "updated_at": "2026-08-04T09:00:38.847+00:00"
-      }
+      "available": false
     },
     "comprehensive_rules": "indexed",
     "official_set_mechanics": "planned",
