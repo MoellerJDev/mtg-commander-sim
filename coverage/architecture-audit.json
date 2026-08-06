@@ -9751,7 +9751,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "074840cf5d2e7292ffc0727d5f05b30a934a3a1989ded7f8a1d8efe6928df0bc"
+          "verified": "ea419d566a011225f04b5fdd491879ca015e26cbf41701e3ebbca77eae942637"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -10190,8 +10190,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1603,
-      "discovered_total": 4903,
+      "conventional_ast_cases": 1602,
+      "discovered_total": 4902,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 46,
