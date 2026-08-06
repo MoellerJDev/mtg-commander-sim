@@ -780,6 +780,12 @@ class CombatKeywordRuleTests(unittest.TestCase):
             "Changing Defender",
             keywords=("Haste",),
         )
+        ordinary = self.token(
+            engine,
+            "A",
+            "Ordinary companion",
+            keywords=("Haste",),
+        )
 
         self.assertIsNone(engine._attack_declaration_error(attacker, "A"))
         attacker.temporary_keywords.append("Defender")
@@ -788,28 +794,26 @@ class CombatKeywordRuleTests(unittest.TestCase):
             engine._attack_declaration_error(attacker, "A") or "",
         )
         engine._issue_attackers()
-        self.assertNotIn(
-            attacker.ref,
-            {
-                row["id"]
-                for row in engine.state.pending_decision.payload_by_actor[
-                    "A"
-                ]["candidates"]
-            },
-        )
+        candidates = {
+            row["id"]
+            for row in engine.state.pending_decision.payload_by_actor["A"][
+                "candidates"
+            ]
+        }
+        self.assertNotIn(attacker.ref, candidates)
+        self.assertIn(ordinary.ref, candidates)
 
         engine.state.pending_decision = None
         attacker.temporary_keywords.remove("Defender")
         engine._issue_attackers()
-        self.assertIn(
-            attacker.ref,
-            {
-                row["id"]
-                for row in engine.state.pending_decision.payload_by_actor[
-                    "A"
-                ]["candidates"]
-            },
-        )
+        candidates = {
+            row["id"]
+            for row in engine.state.pending_decision.payload_by_actor["A"][
+                "candidates"
+            ]
+        }
+        self.assertIn(attacker.ref, candidates)
+        self.assertIn(ordinary.ref, candidates)
 
     def test_four_player_defender_restriction_is_seat_scoped_and_replays(self):
         session = self.make_session(
