@@ -335,28 +335,32 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "typed-block-transition-keyword-triggers",
+    "batch_id": "typed-attack-transition-keyword-triggers",
     "subsystem_id": "keyword-abilities",
     "rule_ids": [
-      "702.25",
-      "702.25a",
-      "702.25b",
-      "702.45",
-      "702.45a",
-      "702.45b"
+      "702.83",
+      "702.83a",
+      "702.83b",
+      "702.91",
+      "702.91a",
+      "702.91b",
+      "702.121",
+      "702.121a",
+      "702.121b"
     ],
     "target_capability_ids": [
-      "combat.trigger.bushido",
-      "combat.trigger.flanking"
+      "combat.trigger.battle_cry",
+      "combat.trigger.exalted",
+      "combat.trigger.melee"
     ],
-    "rationale": "The pinned Commander snapshot contains 37 Bushido and 29 Flanking cards. The current frontier isolates 27 Flanking dependency residuals, including 4 sole-blocker cards and 20 bounded one- or two-additional-blocker opportunities, while Bushido's valued keyword grammar remains too coarse and must be made explicit. Both families consume the same become-blocked or blocks transition, trigger placement, and until-end-of-turn characteristic boundary without sharing card-specific behavior.",
+    "rationale": "The current pinned frontier identifies 34 Exalted, 13 Battle Cry, and 12 Melee cards, including 24 sole-blocker opportunities before this branch's final census. These three printed keyword families consume one complete attack-declaration transition, ordinary APNAP trigger placement, and identity-pinned until-end-of-turn layer 7c modifiers while retaining distinct eligibility and affected-object rules.",
     "exit_criteria": [
-      "Introduce one typed immutable block-transition event shared by declarations, Flanking, Bushido, trigger batching, replay, and projection.",
-      "Lower ordinary Flanking and positive integer Bushido values generically with precise source spans and fine-grained capability closure.",
-      "Give each Flanking instance its own trigger only when the blocking creature lacks current Flanking, and give each Bushido instance its stated independent value when its source blocks or becomes blocked.",
-      "Apply the resulting until-end-of-turn power and toughness changes through the canonical continuous-characteristic owner without direct GameState writes or runtime Oracle parsing.",
-      "Preserve simultaneous blocker declaration, APNAP trigger ordering, exact replay, rollback, four-player privacy, source departure, multiple-instance, and focused mutation evidence.",
-      "Leave conditional, nonnumeric, granted, copied, face-down, trigger-doubling, and broader unsupported block-trigger variants explicit residuals."
+      "Introduce one typed immutable completed attack transition shared by attack declarations, Exalted, Battle Cry, Melee, trigger batching, replay, and projection.",
+      "Lower ordinary printed Exalted, Battle Cry, and Melee generically with precise source spans and fine-grained capability closure.",
+      "Derive one occurrence per current ability instance using exact attacks-alone, other-attacker, and distinct-defending-player semantics from the sealed transition.",
+      "Apply resolving power and toughness changes through the canonical continuous-characteristic owner without direct GameState writes or runtime Oracle parsing.",
+      "Preserve multiplayer declaration completion, APNAP trigger ordering, exact replay, rollback, privacy, source departure, multiple-instance, and focused mutation evidence.",
+      "Leave conditional, granted, copied, face-down, trigger-doubling, and broader unsupported attack-trigger variants explicit residuals."
     ]
   }
 }
