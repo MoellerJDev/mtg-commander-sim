@@ -6,7 +6,10 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.combat_evasion import combat_evasion_verdict
+from mtg_commander_sim.combat_evasion import (
+    CombatantEvasionCharacteristics,
+    combat_evasion_verdict,
+)
 from mtg_commander_sim.landwalk import (
     BASIC_LANDWALK_TYPES,
     BasicLandwalkBlockVerdict,
@@ -22,6 +25,15 @@ from mtg_commander_sim.record import (
 
 
 class BasicLandwalkTests(unittest.TestCase):
+    @staticmethod
+    def combatant(*keywords: str) -> CombatantEvasionCharacteristics:
+        return CombatantEvasionCharacteristics(
+            keywords=frozenset(keywords),
+            colors=frozenset(),
+            card_types=frozenset({"creature"}),
+            power=2,
+        )
+
     def test_each_basic_variant_uses_current_matching_land_subtype(self):
         for keyword, land_type in BASIC_LANDWALK_TYPES:
             with self.subTest(keyword=keyword):
@@ -108,16 +120,16 @@ class BasicLandwalkTests(unittest.TestCase):
         self.assertEqual(
             "attacker_has_swampwalk",
             combat_evasion_verdict(
-                frozenset({"flying", "swampwalk", "landwalk"}),
-                frozenset({"reach"}),
+                self.combatant("flying", "swampwalk", "landwalk"),
+                self.combatant("reach"),
                 frozenset({"swamp"}),
             ).reason,
         )
         self.assertEqual(
             "attacker_has_islandwalk",
             combat_evasion_verdict(
-                frozenset({"shadow", "islandwalk", "landwalk"}),
-                frozenset({"shadow"}),
+                self.combatant("shadow", "islandwalk", "landwalk"),
+                self.combatant("shadow"),
                 frozenset({"island"}),
             ).reason,
         )

@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702 — Fear",
+  "cases": [
+    {
+      "rule_id": "702.36",
+      "rule_text_sha256": "140262b32b0c98dfc6afb74b287d2df7f50e0645cea8c1dd907c793699180ee2",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/fear.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Keyword heading; the bounded ordinary Fear restriction is owned by combat.block.fear."
+      ]
+    },
+    {
+      "rule_id": "702.36a",
+      "rule_text_sha256": "e38b9d445939fd02324fe75f874ef16a8cd627830813e968a40bbe1991b31ed0",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/fear.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "A printed Fear keyword node requests the fine-grained combat.block.fear capability."
+      ]
+    },
+    {
+      "rule_id": "702.36b",
+      "rule_text_sha256": "fe67de5cdf6c08a5740fd6912becf65d02eaff90e913374caa89aea2efcc7ebb",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_fear_accepts_black_or_artifact_blockers",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "blockers": [],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Fear identically for projected and submitted block declarations."
+      ]
+    },
+    {
+      "rule_id": "702.36c",
+      "rule_text_sha256": "d7f667956b5d2b72085fceba516efd1250c60e7994cadcbca245619004e34c1b",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Fear instances redundant without weakening other evasion restrictions."
+      ]
+    }
+  ]
+}

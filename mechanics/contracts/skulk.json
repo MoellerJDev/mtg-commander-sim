@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "skulk",
+  "official_name": "Skulk",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "509.1b",
+    "702.118",
+    "702.118a",
+    "702.118b",
+    "702.118c"
+  ],
+  "glossary_references": [
+    "skulk"
+  ],
+  "dependencies": [
+    "declare-blockers",
+    "continuous-effects"
+  ],
+  "coverage_status": "tested",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": [
+      "battlefield"
+    ],
+    "objects": [
+      "attacking creature",
+      "proposed blocker"
+    ],
+    "events": [
+      "declare blockers legality check"
+    ],
+    "state_reads": [
+      "attacker current represented effective keywords and exact power",
+      "blocker exact current represented power"
+    ],
+    "state_writes": [],
+    "costs": [],
+    "timing": [
+      "current characteristics are evaluated during blocker declaration"
+    ],
+    "targets": [],
+    "choices": [
+      "the defending player chooses among block pairs legal after every represented evasion restriction"
+    ],
+    "hidden_information": [],
+    "apnap": [],
+    "layers": [
+      "current layer-4 types, layer-5 colors, layer-6 abilities, and layer-7 power are consumed when applicable"
+    ],
+    "replacement_effects": [],
+    "copy": [
+      "represented copied current characteristics participate"
+    ],
+    "control_change": [
+      "the current defending player declares blockers"
+    ],
+    "zone_change": [
+      "only current phased-in battlefield creatures participate"
+    ],
+    "source_leaves": [
+      "the restriction ceases when the attacking creature leaves combat or loses the keyword"
+    ]
+  },
+  "variants": [
+    "lower-power blocker permitted",
+    "equal-power blocker permitted",
+    "greater-power blocker prohibited",
+    "negative power compared normally",
+    "multiple instances are redundant"
+  ],
+  "witness_cards": [
+    {
+      "name": "Gregor, Shrewd Magistrate",
+      "oracle_id": "0b64da77-ca1c-427b-b48b-b919f0fe08e9"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_all_represented_restrictions_are_cumulative",
+    "test_keyword_bundle_holds_across_bounded_blocker_grid",
+    "test_malformed_and_unresolved_inputs_fail_closed",
+    "test_offer_and_command_share_cumulative_legality_and_rollback",
+    "test_legal_block_replays_exactly_in_four_player_combat",
+    "test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+  ],
+  "implementation": {
+    "component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+    "version": "ordinary-combat-evasion-restrictions-v1"
+  },
+  "known_blockers": [
+    "unresolved variable characteristic definitions fail closed",
+    "conditional and rules-text-equivalent variants remain unsupported",
+    "full continuous-effect, copy, face-down, power, and ability-changing coverage remains incomplete"
+  ],
+  "review_status": "reviewed"
+}

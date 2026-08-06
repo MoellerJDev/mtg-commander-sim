@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702 — Horsemanship",
+  "cases": [
+    {
+      "rule_id": "702.31",
+      "rule_text_sha256": "1d6f4bb9181cf6ef91b3e25c54fa5401a8e73d34ee8b02ad732d659429c16649",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mechanics/contracts/horsemanship.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "Keyword heading; the bounded ordinary Horsemanship restriction is owned by combat.block.horsemanship."
+      ]
+    },
+    {
+      "rule_id": "702.31a",
+      "rule_text_sha256": "9b053507694ab9f3c4c9429d5747025f0c5c09411974bc0a81f5c9b0c986f4bb",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/horsemanship.json"
+      ],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": [
+        "A printed Horsemanship keyword node requests the fine-grained combat.block.horsemanship capability."
+      ]
+    },
+    {
+      "rule_id": "702.31b",
+      "rule_text_sha256": "0f83121232ccf277e6f89635635aaa79e75d11318014d9e5ef2b46d164a11e51",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_shadow_is_symmetric_and_horsemanship_is_not",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "blockers": [],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Horsemanship identically for projected and submitted block declarations."
+      ]
+    },
+    {
+      "rule_id": "702.31c",
+      "rule_text_sha256": "1d6406041d3862ab4cc524ab4d42284c27297a4266a511cd75ec1a1cb8886fcd",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "blockers": [],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Horsemanship instances redundant without weakening other evasion restrictions."
+      ]
+    }
+  ]
+}

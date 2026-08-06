@@ -11,6 +11,22 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Typed ordinary combat-evasion restrictions
+
+- Added one immutable current-characteristics boundary for ordinary Fear,
+  Horsemanship, Intimidate, Shadow, and Skulk. Projected legal blockers and
+  accepted declarations now consume the same current keywords, colors, card
+  types, and exact power, and malformed or unresolved required values fail
+  before mutation.
+- Preserved the asymmetric Horsemanship rule, symmetric Shadow rule,
+  artifact/color exceptions for Fear and Intimidate, and exact current-power
+  comparison for Skulk. These restrictions compose cumulatively with Flying,
+  Reach, Basic Landwalk, protection, declaration costs, and requirements.
+- Printed instances lower generically to five fine-grained source-spanned
+  CardProgram capabilities. Conditional and rules-text-equivalent variants,
+  variable power that the current characteristic evaluator cannot resolve,
+  and unsupported characteristic producers remain explicit blockers.
+
 ### Typed ordinary-Menace block restriction
 
 - Replaced independent solver and UI keyword reads with one immutable Menace

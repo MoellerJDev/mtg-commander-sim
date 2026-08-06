@@ -145,7 +145,6 @@ from .life_state import (
 )
 from . import haste
 from .combat_evasion_engine_adapter import engine_combat_evasion_verdict
-from .keyword_abilities import normalized_characteristic_keywords
 from .errors import GameRuleError, StateInvariantError
 from .deck import DeckDefinition
 from .mana import (
@@ -9956,8 +9955,6 @@ class CommanderEngine(
     ) -> tuple[bool, str | None]:
         attacker_data = self._effective_card_data(attacker)
         blocker_data = self._effective_card_data(blocker)
-        attacker_keywords = normalized_characteristic_keywords(attacker_data)
-        blocker_keywords = normalized_characteristic_keywords(blocker_data)
         blocker_types, _, _ = self._type_parts(
             str(blocker_data.get("type_line") or "")
         )
@@ -10026,7 +10023,7 @@ class CommanderEngine(
                         f"declaration_restriction:{template.template_id}",
                     )
         evasion = engine_combat_evasion_verdict(
-            self, attacker_keywords, blocker_keywords, blocker.controller
+            self, attacker, blocker, blocker.controller
         )
         if not evasion.allowed:
             return False, evasion.reason

@@ -59509,23 +59509,27 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.13",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/intimidate.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded ordinary Intimidate restriction is owned by combat.block.intimidate."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.13",
       "rule_text_sha256": "7879eb29f5ceb4bfa4ca8ebb34c0f3dc56b4446110d7a418c7a3acbb50a847ab",
       "schema_version": 1,
@@ -59534,26 +59538,31 @@
         "end_line": 4006,
         "start_line": 4005
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.13a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.13"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/intimidate.json"
+      ],
+      "notes": [
+        "A printed Intimidate keyword node requests the fine-grained combat.block.intimidate capability."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.13a",
       "rule_text_sha256": "e36cc10d3b516f118dc84edb93293f65810e4fdb8ea888b89d0fa60b32c98dee",
       "schema_version": 1,
@@ -59562,26 +59571,50 @@
         "end_line": 4008,
         "start_line": 4007
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.13b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "702.13"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_intimidate_accepts_artifacts_or_a_shared_color",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Intimidate identically for projected and submitted block declarations."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "702.13b",
       "rule_text_sha256": "de94327e2ee434df6065dce08bbd85345bcd418506d0165464d2c1a42e131bf8",
       "schema_version": 1,
@@ -59590,26 +59623,40 @@
         "end_line": 4010,
         "start_line": 4009
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.13c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.13"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Intimidate instances redundant without weakening other evasion restrictions."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.13c",
       "rule_text_sha256": "e1af75dfeec1441b8c62af16fadc5efabceb6962257117230f4bc163dacc5bb5",
       "schema_version": 1,
@@ -59618,7 +59665,7 @@
         "end_line": 4012,
         "start_line": 4011
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "static_traceability",
@@ -62276,23 +62323,27 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.28",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/shadow.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded ordinary Shadow restriction is owned by combat.block.shadow."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.28",
       "rule_text_sha256": "4c764cb6248ef9337fc1c8769d4b74fc1d4c1fff6a9e8d00ca6753a560b3e74b",
       "schema_version": 1,
@@ -62301,26 +62352,31 @@
         "end_line": 4205,
         "start_line": 4204
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.28a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.28"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/shadow.json"
+      ],
+      "notes": [
+        "A printed Shadow keyword node requests the fine-grained combat.block.shadow capability."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.28a",
       "rule_text_sha256": "5063b3b8b2eb6b9363ef700777014014cf80710d98df2219bf1a14e736e7ed78",
       "schema_version": 1,
@@ -62329,26 +62385,50 @@
         "end_line": 4207,
         "start_line": 4206
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.28b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "702.28"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_shadow_is_symmetric_and_horsemanship_is_not",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Shadow identically for projected and submitted block declarations."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "702.28b",
       "rule_text_sha256": "118f46bffd55e54c79361f021f3bc449e3e77309ef8a693a3fa20bfe958e17b5",
       "schema_version": 1,
@@ -62357,26 +62437,40 @@
         "end_line": 4209,
         "start_line": 4208
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.28c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.28"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Shadow instances redundant without weakening other evasion restrictions."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.28c",
       "rule_text_sha256": "30b30e17b2b13934444f5d8dae7246e2a5501d3ca922787db290c3f819a7f12d",
       "schema_version": 1,
@@ -62385,7 +62479,7 @@
         "end_line": 4211,
         "start_line": 4210
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -62668,23 +62762,27 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.31",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/horsemanship.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded ordinary Horsemanship restriction is owned by combat.block.horsemanship."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.31",
       "rule_text_sha256": "1d6f4bb9181cf6ef91b3e25c54fa5401a8e73d34ee8b02ad732d659429c16649",
       "schema_version": 1,
@@ -62693,26 +62791,31 @@
         "end_line": 4233,
         "start_line": 4232
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.31a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.31"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/horsemanship.json"
+      ],
+      "notes": [
+        "A printed Horsemanship keyword node requests the fine-grained combat.block.horsemanship capability."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.31a",
       "rule_text_sha256": "9b053507694ab9f3c4c9429d5747025f0c5c09411974bc0a81f5c9b0c986f4bb",
       "schema_version": 1,
@@ -62721,26 +62824,50 @@
         "end_line": 4235,
         "start_line": 4234
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.31b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "702.31"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_shadow_is_symmetric_and_horsemanship_is_not",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Horsemanship identically for projected and submitted block declarations."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "702.31b",
       "rule_text_sha256": "0f83121232ccf277e6f89635635aaa79e75d11318014d9e5ef2b46d164a11e51",
       "schema_version": 1,
@@ -62749,26 +62876,40 @@
         "end_line": 4237,
         "start_line": 4236
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.31c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.31"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Horsemanship instances redundant without weakening other evasion restrictions."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.31c",
       "rule_text_sha256": "1d6406041d3862ab4cc524ab4d42284c27297a4266a511cd75ec1a1cb8886fcd",
       "schema_version": 1,
@@ -62777,7 +62918,7 @@
         "end_line": 4239,
         "start_line": 4238
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -63256,23 +63397,27 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.36",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/fear.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded ordinary Fear restriction is owned by combat.block.fear."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.36",
       "rule_text_sha256": "140262b32b0c98dfc6afb74b287d2df7f50e0645cea8c1dd907c793699180ee2",
       "schema_version": 1,
@@ -63281,26 +63426,31 @@
         "end_line": 4275,
         "start_line": 4274
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.36a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.36"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/fear.json"
+      ],
+      "notes": [
+        "A printed Fear keyword node requests the fine-grained combat.block.fear capability."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.36a",
       "rule_text_sha256": "e38b9d445939fd02324fe75f874ef16a8cd627830813e968a40bbe1991b31ed0",
       "schema_version": 1,
@@ -63309,26 +63459,50 @@
         "end_line": 4277,
         "start_line": 4276
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.36b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "702.36"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_fear_accepts_black_or_artifact_blockers",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Fear identically for projected and submitted block declarations."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "702.36b",
       "rule_text_sha256": "fe67de5cdf6c08a5740fd6912becf65d02eaff90e913374caa89aea2efcc7ebb",
       "schema_version": 1,
@@ -63337,26 +63511,40 @@
         "end_line": 4279,
         "start_line": 4278
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.36c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.36"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Fear instances redundant without weakening other evasion restrictions."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.36c",
       "rule_text_sha256": "d7f667956b5d2b72085fceba516efd1250c60e7994cadcbca245619004e34c1b",
       "schema_version": 1,
@@ -63365,7 +63553,7 @@
         "end_line": 4281,
         "start_line": 4280
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",
@@ -71436,23 +71624,27 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.118",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_keyword_contracts_trace_the_pinned_rules"
+      ],
+      "implementation_components": [
+        "mechanics/contracts/skulk.json"
+      ],
+      "notes": [
+        "Keyword heading; the bounded ordinary Skulk restriction is owned by combat.block.skulk."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.118",
       "rule_text_sha256": "a1406b3cbad78d65f5f7342f0c876bddc73d1b4e3c02971c862282d6ce0ae7dd",
       "schema_version": 1,
@@ -71461,26 +71653,31 @@
         "end_line": 4855,
         "start_line": 4854
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "static_traceability",
+      "blockers": [],
       "case_id": "cr-702.118a",
       "case_version": 1,
-      "classification": "unclassified",
+      "classification": "definition_only",
       "covered_scenarios": [],
       "dependency_rule_ids": [
         "702.118"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
+      "executable_test_ids": [
+        "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "mechanics/contracts/skulk.json"
+      ],
+      "notes": [
+        "A printed Skulk keyword node requests the fine-grained combat.block.skulk capability."
+      ],
       "required_scenarios": [],
-      "reviewed": false,
+      "reviewed": true,
       "rule_id": "702.118a",
       "rule_text_sha256": "907228da6f4b9c1b4da9f32d14513ea4504f21133f9f6f6d350aec16330ec929",
       "schema_version": 1,
@@ -71489,26 +71686,50 @@
         "end_line": 4857,
         "start_line": 4856
       },
-      "status": "unreviewed"
+      "status": "definition_only"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.118b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
       "dependency_rule_ids": [
         "702.118"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_skulk_compares_exact_current_power",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+        "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
+        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "CommanderEngine._can_block"
+      ],
+      "notes": [
+        "The shared typed current-characteristics verdict enforces ordinary Skulk identically for projected and submitted block declarations."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay",
+        "hidden_information"
+      ],
+      "reviewed": true,
       "rule_id": "702.118b",
       "rule_text_sha256": "3edac0d81bec3fad0bbc9fc15366060deb3bae50d786b209fdd4a02d2a1bb1e3",
       "schema_version": 1,
@@ -71517,26 +71738,40 @@
         "end_line": 4859,
         "start_line": 4858
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-702.118c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "702.118"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+        "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
+      ],
+      "implementation_components": [
+        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
+        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+      ],
+      "notes": [
+        "Canonical case-folded keyword sets make multiple current Skulk instances redundant without weakening other evasion restrictions."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "702.118c",
       "rule_text_sha256": "02caab5778c6f98625e6f5ab4319bec1841ca81966cc0bb6e7e2a37ec76f89b5",
       "schema_version": 1,
@@ -71545,7 +71780,7 @@
         "end_line": 4861,
         "start_line": 4860
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
       "assertion_kind": "inventory_only",

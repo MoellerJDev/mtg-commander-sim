@@ -3,11 +3,18 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from .characteristic_evaluation import type_parts
-from .combat_evasion import CombatEvasionVerdict, combat_evasion_verdict
+from .combat_evasion import (
+    CombatantEvasionCharacteristics,
+    CombatEvasionRuleError,
+    CombatEvasionVerdict,
+    combat_evasion_verdict,
+)
+from .keyword_abilities import normalized_characteristic_keywords
 from .landwalk import BASIC_LAND_TYPES, LandwalkRuleError
 
 if TYPE_CHECKING:
     from .engine import CommanderEngine
+    from .model import CardInstance
 
 
 def defending_basic_land_types(
@@ -42,20 +49,52 @@ def defending_basic_land_types(
 
 def engine_combat_evasion_verdict(
     engine: CommanderEngine,
-    attacker_keywords: frozenset[str],
-    blocker_keywords: frozenset[str],
+    attacker: CardInstance,
+    blocker: CardInstance,
     defending_player: str,
 ) -> CombatEvasionVerdict:
     """Compose the pure verdict from one narrow authoritative-state query."""
 
     return combat_evasion_verdict(
-        attacker_keywords,
-        blocker_keywords,
+        combatant_evasion_characteristics(engine, attacker),
+        combatant_evasion_characteristics(engine, blocker),
         defending_basic_land_types(engine, defending_player),
     )
 
 
+def combatant_evasion_characteristics(
+    engine: CommanderEngine,
+    card: CardInstance,
+) -> CombatantEvasionCharacteristics:
+    """Project one combatant's current public represented characteristics."""
+
+    data = engine._effective_card_data(card)
+    type_line = data.get("type_line", "")
+    if not isinstance(type_line, str):
+        raise CombatEvasionRuleError("Effective type line must be a string")
+    raw_colors = data.get("colors", ())
+    if not isinstance(raw_colors, (list, tuple, set, frozenset)) or any(
+        not isinstance(color, str) or not color.strip()
+        for color in raw_colors
+    ):
+        raise CombatEvasionRuleError("Effective colors are malformed")
+    raw_power = data.get("power")
+    try:
+        int(str(raw_power))
+    except (TypeError, ValueError):
+        power = None
+    else:
+        power = engine._numeric_stat(card.object_id, "power")
+    return CombatantEvasionCharacteristics(
+        keywords=normalized_characteristic_keywords(data),
+        colors=frozenset(color.strip().upper() for color in raw_colors),
+        card_types=frozenset(type_parts(type_line)[0]),
+        power=power,
+    )
+
+
 __all__ = [
+    "combatant_evasion_characteristics",
     "defending_basic_land_types",
     "engine_combat_evasion_verdict",
 ]

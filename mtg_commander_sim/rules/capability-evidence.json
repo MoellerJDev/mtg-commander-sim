@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "ed0ee738454401b10a350d6205a45fb5700f401ef6c8c757492e0f95ee4b5874",
-  "declaration_source_fingerprint": "b82c5cabadff9278c2e08ff672c8966a7b738809e6caa5ff6017549d61823853",
+  "registry_fingerprint": "5d8d82145b916b5831104349eff9447d36c5f8b41bd2c555862e436b4a462d31",
+  "declaration_source_fingerprint": "83f80c5ce9121e850a88c5d6385fe99cf9b8e235edb8dd5bcca81691227a4b98",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -1095,6 +1095,168 @@
       "applicability_note": "Replay the attack declaration and verify both tap outcomes exactly."
     },
     {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply Fear cumulatively with every other represented evasion restriction."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate Fear only for the attacked seat in a four-player blocker decision."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_ordinary_evasion_keyword_mutants_are_killed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that changes the recognized Fear keyword and permits its prohibited block."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_malformed_and_unresolved_inputs_fail_closed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed or unresolved current combatant characteristics before applying Fear."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_fear_accepts_black_or_artifact_blockers",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exercise the supported ordinary Fear blocker restriction and its explicit exceptions."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the Fear-constrained blocker task only to the attacked seat from public characteristics."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "property",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Check Fear over the bounded color, artifact, power, Shadow, and Horsemanship blocker grid."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay an accepted four-player block through the shared Fear legality boundary."
+    },
+    {
+      "capability_id": "combat.block.fear",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.36",
+        "702.36a",
+        "702.36b",
+        "702.36c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an injected block prohibited by the cumulative Fear boundary without changing state."
+    },
+    {
       "capability_id": "combat.block.flying",
       "evidence_class": "interaction",
       "test_id": "tests.test_aerial_blocking.AerialBlockingIntegrationTests.test_current_flying_and_reach_share_offer_and_command_legality",
@@ -1219,6 +1381,330 @@
         "commander_review"
       ],
       "applicability_note": "Replay the accepted Reach block from an exact four-player checkpoint."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply Horsemanship cumulatively with every other represented evasion restriction."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate Horsemanship only for the attacked seat in a four-player blocker decision."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_ordinary_evasion_keyword_mutants_are_killed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that changes the recognized Horsemanship keyword and permits its prohibited block."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_malformed_and_unresolved_inputs_fail_closed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed or unresolved current combatant characteristics before applying Horsemanship."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_shadow_is_symmetric_and_horsemanship_is_not",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exercise the supported ordinary Horsemanship blocker restriction and its explicit exceptions."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the Horsemanship-constrained blocker task only to the attacked seat from public characteristics."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "property",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Check Horsemanship over the bounded color, artifact, power, Shadow, and Horsemanship blocker grid."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay an accepted four-player block through the shared Horsemanship legality boundary."
+    },
+    {
+      "capability_id": "combat.block.horsemanship",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.31",
+        "702.31a",
+        "702.31b",
+        "702.31c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an injected block prohibited by the cumulative Horsemanship boundary without changing state."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply Intimidate cumulatively with every other represented evasion restriction."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate Intimidate only for the attacked seat in a four-player blocker decision."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_ordinary_evasion_keyword_mutants_are_killed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that changes the recognized Intimidate keyword and permits its prohibited block."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_malformed_and_unresolved_inputs_fail_closed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed or unresolved current combatant characteristics before applying Intimidate."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_intimidate_accepts_artifacts_or_a_shared_color",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exercise the supported ordinary Intimidate blocker restriction and its explicit exceptions."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the Intimidate-constrained blocker task only to the attacked seat from public characteristics."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "property",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Check Intimidate over the bounded color, artifact, power, Shadow, and Horsemanship blocker grid."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay an accepted four-player block through the shared Intimidate legality boundary."
+    },
+    {
+      "capability_id": "combat.block.intimidate",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.13",
+        "702.13a",
+        "702.13b",
+        "702.13c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an injected block prohibited by the cumulative Intimidate boundary without changing state."
     },
     {
       "capability_id": "combat.block.landwalk.basic_type",
@@ -1817,6 +2303,330 @@
         "commander_review"
       ],
       "applicability_note": "Replay the accepted Reach block and exact combat relation."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply Shadow cumulatively with every other represented evasion restriction."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate Shadow only for the attacked seat in a four-player blocker decision."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_ordinary_evasion_keyword_mutants_are_killed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that changes the recognized Shadow keyword and permits its prohibited block."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_malformed_and_unresolved_inputs_fail_closed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed or unresolved current combatant characteristics before applying Shadow."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_shadow_is_symmetric_and_horsemanship_is_not",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exercise the supported ordinary Shadow blocker restriction and its explicit exceptions."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the Shadow-constrained blocker task only to the attacked seat from public characteristics."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "property",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Check Shadow over the bounded color, artifact, power, Shadow, and Horsemanship blocker grid."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay an accepted four-player block through the shared Shadow legality boundary."
+    },
+    {
+      "capability_id": "combat.block.shadow",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.28",
+        "702.28a",
+        "702.28b",
+        "702.28c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an injected block prohibited by the cumulative Shadow boundary without changing state."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply Skulk cumulatively with every other represented evasion restriction."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Evaluate Skulk only for the attacked seat in a four-player blocker decision."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_ordinary_evasion_keyword_mutants_are_killed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that changes the recognized Skulk keyword and permits its prohibited block."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "negative",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_malformed_and_unresolved_inputs_fail_closed",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed or unresolved current combatant characteristics before applying Skulk."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "positive",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_skulk_compares_exact_current_power",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exercise the supported ordinary Skulk blocker restriction and its explicit exceptions."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the Skulk-constrained blocker task only to the attacked seat from public characteristics."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "property",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Check Skulk over the bounded color, artifact, power, Shadow, and Horsemanship blocker grid."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "replay",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay an accepted four-player block through the shared Skulk legality boundary."
+    },
+    {
+      "capability_id": "combat.block.skulk",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_offer_and_command_share_cumulative_legality_and_rollback",
+      "official_rule_ids": [
+        "509.1b",
+        "702.118",
+        "702.118a",
+        "702.118b",
+        "702.118c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an injected block prohibited by the cumulative Skulk boundary without changing state."
     },
     {
       "capability_id": "combat.damage.assignment.canonical",
@@ -9796,5 +10606,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "89e8e373771f4794380f03428c51a131455a7dc2d69a6acf3369e1a00572135c"
+  "fingerprint": "2a63c990524bf46b2326455c6d21dd1cd6d6218e1a7d3a11aa784ccde6593370"
 }

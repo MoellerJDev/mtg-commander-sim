@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "e55f67b2529fde4c2822968a5952a1d4924346b81f51bb2fd66df104f1fcca24"
+verified: "d862bedfd349ea0ddc3a80a3262a15e9c2ef75ae8ee002aa779ee7080c357394"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 ---
@@ -15,7 +15,7 @@ This is the durable program ledger. It is generated from `platform/readiness-sou
 
 - Repository: public `MoellerJDev/mtg-commander-sim`
 - Default branch: `main`
-- Evaluated source tree: `e55f67b2529fde4c2822968a5952a1d4924346b81f51bb2fd66df104f1fcca24` (`tracked-git-clean-blobs-sha256-v3`)
+- Evaluated source tree: `d862bedfd349ea0ddc3a80a3262a15e9c2ef75ae8ee002aa779ee7080c357394` (`tracked-git-clean-blobs-sha256-v3`)
 - Feature head: `35f116bd858f4f5f87cefad5793f9b2cf2cb8e1c`
 - Certified exact head: `ce0d9586b0649bb4111976f5d11aa1c6ee94523e`
 - Generation timestamp: `2026-08-05T23:35:58Z`
@@ -34,10 +34,10 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Rules manifest present on this branch: yes
 - Rules effective date: 2026-06-19
 - Rules source SHA-256: e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b
-- Rules cases: blocked=373, definition_only=105, passing=187, total=3300, unreviewed=2635
-- Mechanics: status_counts={'partial': 58, 'tested': 6, 'trusted': 5, 'unclassified': 356}, total=425, trusted=5
-- Oracle coverage: material_residuals=56465, status_counts={'exact': 4678, 'partial': 14589, 'unresolved': 19275}, total=38542
-- Commander-legal Oracle coverage: material_residuals=48846, status_counts={'exact': 1745, 'partial': 13461, 'unresolved': 16417}, total=31623
+- Rules cases: blocked=373, definition_only=115, passing=197, total=3300, unreviewed=2615
+- Mechanics: status_counts={'partial': 58, 'tested': 11, 'trusted': 5, 'unclassified': 351}, total=425, trusted=5
+- Oracle coverage: material_residuals=56324, status_counts={'exact': 4709, 'partial': 14558, 'unresolved': 19275}, total=38542
+- Commander-legal Oracle coverage: material_residuals=48710, status_counts={'exact': 1776, 'partial': 13430, 'unresolved': 16417}, total=31623
 - Current rules/Oracle snapshot complete: no
 
 ## Platform milestone status
@@ -110,7 +110,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 
 ## Deterministic validation
 
-- Tests discovered: 4987
+- Tests discovered: 4998
 - Python matrix: Python 3.12 on Ubuntu and Windows
 - Baseline CI: [31095367320](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31095367320) — `pass`
 - Compile: `pass`
@@ -122,7 +122,7 @@ Historical integration chronology belongs in `CHANGELOG.md`; this current report
 - Replay: `pass_for_seed_20260730_native_v3_and_49_command_browser_natural_winner`
 - Privacy: `pass_for_principal_projection_command_objects_sanitized_fixtures_and_browser_natural_winner`
 - Semantic preflight: `reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory`
-- Commander CardProgram census: `cards_considered=31623, material_residuals=48846, status_counts={'residual': 29878, 'trusted': 1745}, trust_basis_counts={'capability_closed': 1741, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 29878}`
+- Commander CardProgram census: `cards_considered=31623, material_residuals=48710, status_counts={'residual': 29847, 'trusted': 1776}, trust_basis_counts={'capability_closed': 1772, 'legacy_reviewed': 3, 'mixed': 1, 'unresolved': 29847}`
 
 AI/Codex pilot runs are optional client experiments. They are not product, rules, CI, merge, or release gates.
 
