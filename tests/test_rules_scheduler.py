@@ -62,7 +62,7 @@ class RulesSchedulerTests(unittest.TestCase):
             for subsystem in self.queue["subsystems"]
             for rule in subsystem["rules"]
         ]
-        self.assertEqual(3017, len(queued))
+        self.assertEqual(3013, len(queued))
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
@@ -70,7 +70,7 @@ class RulesSchedulerTests(unittest.TestCase):
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
-            2645,
+            2641,
             self.queue["summary"]["behavioral_review_required"],
         )
 
@@ -125,7 +125,7 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "menace-block-restriction-closure",
+            "basic-landwalk-block-restriction-closure",
             selected["batch_id"],
         )
         self.assertEqual(
@@ -133,10 +133,12 @@ class RulesSchedulerTests(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "702.111",
-                "702.111a",
-                "702.111b",
-                "702.111c",
+                "702.14",
+                "702.14a",
+                "702.14b",
+                "702.14c",
+                "702.14d",
+                "702.14e",
             },
             set(selected["rule_ids"]),
         )

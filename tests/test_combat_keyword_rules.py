@@ -815,7 +815,7 @@ class CombatKeywordRuleTests(unittest.TestCase):
         session.initial_checkpoint = checkpoint_envelope(session.state)
 
         decision = engine.state.pending_decision
-        self.assertEqual(("C",), decision.actors)
+        self.assertEqual(["C"], decision.actors)
         self.assertEqual({"C"}, set(decision.payload_by_actor))
         self.assertEqual(
             {attacker.ref: 2},
