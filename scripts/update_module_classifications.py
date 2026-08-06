@@ -110,6 +110,8 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/attachments.py",
         "mtg_commander_sim/choice_forms.py",
         "mtg_commander_sim/combat.py",
+        "mtg_commander_sim/block_transition_engine_adapter.py",
+        "mtg_commander_sim/block_transitions.py",
         "mtg_commander_sim/combat_damage_assignment.py",
         "mtg_commander_sim/combat_damage_engine_adapter.py",
         "mtg_commander_sim/combat_damage_events.py",
@@ -215,6 +217,11 @@ def _owner(relative: str, layer: str) -> str:
         return "replacement_effects"
     if relative == "mtg_commander_sim/commander.py":
         return "commander_variant"
+    if relative in {
+        "mtg_commander_sim/block_transition_engine_adapter.py",
+        "mtg_commander_sim/block_transitions.py",
+    }:
+        return "combat_transitions"
     if relative in {
         "mtg_commander_sim/damage_modifier_state.py",
         "mtg_commander_sim/damage_source.py",
