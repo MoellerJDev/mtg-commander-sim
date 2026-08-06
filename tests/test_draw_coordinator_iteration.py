@@ -44,7 +44,8 @@ class _IterationHost:
             event_sequence=0,
             players={
                 "A": SimpleNamespace(
-                    zones={"library": list(range(library_size))}
+                    zones={"library": list(range(library_size))},
+                    stats={},
                 )
             },
         )

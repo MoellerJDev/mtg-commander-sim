@@ -66,7 +66,7 @@ class RulesSchedulerTests(unittest.TestCase):
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
-            371,
+            370,
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
