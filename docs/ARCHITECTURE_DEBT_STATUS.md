@@ -114,7 +114,7 @@ These are review classifications from the machine-readable source, not automatic
 
 ## Test classes
 
-- Python discovered: 4,862
+- Python discovered: 4,947
 - Conventional Python cases: 1,647
 - Generated CR conformance cases: 3,300
 - Playwright journeys: 9
