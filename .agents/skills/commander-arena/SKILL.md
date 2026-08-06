@@ -21,7 +21,8 @@ Use this skill only for the optional arena adapter. Read the canonical
 4. Give each provider only its fixed-seat task, profile, and bounded memory.
 5. Route only the authoritative next principal. Submit strict schema-valid
    output through that seat's façade and return rejection context only to the
-   same session.
+   same session. Use the fixed seat's parent-message channel for pilot replies;
+   never copy a private task packet into coordinator-visible output.
 6. Apply legal seat strategy without coordinator substitution. Stop on an
    unsupported semantic, fidelity failure, identity drift, private-data echo,
    or suppressed meaningful window.
