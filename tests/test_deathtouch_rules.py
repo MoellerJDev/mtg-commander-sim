@@ -12,6 +12,7 @@ from mtg_commander_sim.deathtouch import (
     deathtouch_damage_result_applies,
     DeathtouchError,
 )
+from mtg_commander_sim.model import CardInstance
 from mtg_commander_sim.state_based_actions import (
     evaluate_permanent_state_based_actions,
     PermanentSnapshot,
@@ -118,6 +119,24 @@ class DeathtouchValueTests(unittest.TestCase):
 
 
 class DeathtouchStateBasedActionTests(unittest.TestCase):
+    def test_persisted_marker_and_check_collection_fail_closed(self):
+        payload = CardInstance(
+            object_id="creature",
+            ref="A01",
+            oracle_id="oracle:creature",
+            printed_name="Creature",
+            owner="A",
+            controller="A",
+            zone="battlefield",
+        ).to_dict()
+        payload["deathtouch_damage"] = 1
+        with self.assertRaisesRegex(ValueError, "must be a boolean"):
+            CardInstance.from_dict(payload)
+
+        host = SimpleNamespace(state=SimpleNamespace(cards={}))
+        with self.assertRaisesRegex(DamageResultError, "must be a collection"):
+            consume_deathtouch_damage_checks(host, "creature")
+
     def test_check_destroys_only_destructible_positive_toughness_creature(self):
         batch = evaluate_permanent_state_based_actions(
             (

@@ -1322,6 +1322,10 @@ def consume_deathtouch_damage_checks(
 ) -> tuple[str, ...]:
     """Consume CR 702.2b markers after one state-based-action check."""
 
+    if isinstance(object_ids, (str, bytes)):
+        raise DamageResultError(
+            "Deathtouch check identities must be a collection"
+        )
     values = tuple(object_ids)
     if len(values) != len(set(values)) or any(
         not isinstance(value, str) or not value for value in values

@@ -189,6 +189,8 @@ class CardInstance:
             raise ValueError(
                 "Only a designated commander card may carry a commander ID"
             )
+        if type(self.deathtouch_damage) is not bool:
+            raise ValueError("Deathtouch damage state must be a boolean")
 
     @property
     def logical_object_id(self) -> str:

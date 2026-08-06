@@ -6062,6 +6062,14 @@
     },
     {
       "capability_id": "damage.result.deathtouch",
+      "evidence_class": "negative",
+      "test_id": "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_persisted_marker_and_check_collection_fail_closed",
+      "official_rule_ids": ["702.2b", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject malformed persisted marker values and noncollection state-based-action check inputs."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
       "evidence_class": "rollback",
       "test_id": "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_stale_check_batch_rolls_back_without_consuming_any_marker",
       "official_rule_ids": ["702.2b", "704.5h"],
