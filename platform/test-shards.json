@@ -189,6 +189,7 @@
       "test_local_merge_gate",
       "test_platform_status",
       "test_property_budget",
+      "test_protocol_reference",
       "test_python_runtime",
       "test_quick_gate",
       "test_reusable_pieces",

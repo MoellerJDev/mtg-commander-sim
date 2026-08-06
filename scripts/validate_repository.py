@@ -158,6 +158,30 @@ def validate_generated_architecture_audit() -> None:
     )
 
 
+def validate_generated_protocol_reference() -> None:
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "update_protocol_reference.py"),
+            "--check",
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+
+
+def validate_generated_rules_queue() -> None:
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "update_rules_scheduler.py"),
+            "--check",
+        ],
+        cwd=ROOT,
+        check=True,
+    )
+
+
 def validate_architecture_policy() -> None:
     subprocess.run(
         [
@@ -190,6 +214,8 @@ def main() -> int:
     validate_public_fixture()
     validate_generated_platform_status()
     validate_generated_architecture_audit()
+    validate_generated_protocol_reference()
+    validate_generated_rules_queue()
     validate_architecture_policy()
     validate_documentation_policy()
     tracked, scanned_bytes = validate_tracked_files()
@@ -206,6 +232,8 @@ def main() -> int:
                 "history_artifact_scan": "pass",
                 "platform_status_stale_check": "pass",
                 "architecture_audit_stale_check": "pass",
+                "protocol_reference_stale_check": "pass",
+                "rules_queue_stale_check": "pass",
                 "architecture_policy": "pass",
                 "documentation_policy": "pass",
             },

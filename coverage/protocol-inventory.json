@@ -1,0 +1,903 @@
+{
+  "generation_command": ".\\.venv\\Scripts\\python.exe scripts\\update_protocol_reference.py --write",
+  "http_routes": [
+    {
+      "method": "GET",
+      "operation_id": "card_image_api_v1_cards__oracle_prefix__image_get",
+      "path": "/api/v1/cards/{oracle_prefix}/image",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Card Image"
+    },
+    {
+      "method": "GET",
+      "operation_id": "inspect_game_api_v1_games__game_id__get",
+      "path": "/api/v1/games/{game_id}",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Inspect Game"
+    },
+    {
+      "method": "POST",
+      "operation_id": "submit_command_api_v1_games__game_id__commands_post",
+      "path": "/api/v1/games/{game_id}/commands",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Submit Command"
+    },
+    {
+      "method": "GET",
+      "operation_id": "public_game_events_api_v1_games__game_id__events_get",
+      "path": "/api/v1/games/{game_id}/events",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Public Game Events"
+    },
+    {
+      "method": "GET",
+      "operation_id": "game_progress_api_v1_games__game_id__progress_get",
+      "path": "/api/v1/games/{game_id}/progress",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Game Progress"
+    },
+    {
+      "method": "POST",
+      "operation_id": "resume_game_api_v1_games__game_id__resume_post",
+      "path": "/api/v1/games/{game_id}/resume",
+      "request_schema": "#/components/schemas/ResumeGameRequest",
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Resume Game"
+    },
+    {
+      "method": "GET",
+      "operation_id": "game_state_api_v1_games__game_id__state_get",
+      "path": "/api/v1/games/{game_id}/state",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Game State"
+    },
+    {
+      "method": "POST",
+      "operation_id": "stop_game_api_v1_games__game_id__stop_post",
+      "path": "/api/v1/games/{game_id}/stop",
+      "request_schema": "#/components/schemas/StopGameRequest",
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Stop Game"
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_guest_api_v1_guests_post",
+      "path": "/api/v1/guests",
+      "request_schema": "#/components/schemas/GuestRequest",
+      "response_statuses": [
+        "201",
+        "422"
+      ],
+      "summary": "Create Guest"
+    },
+    {
+      "method": "GET",
+      "operation_id": "health_api_v1_health_get",
+      "path": "/api/v1/health",
+      "request_schema": null,
+      "response_statuses": [
+        "200"
+      ],
+      "summary": "Health"
+    },
+    {
+      "method": "GET",
+      "operation_id": "me_api_v1_me_get",
+      "path": "/api/v1/me",
+      "request_schema": null,
+      "response_statuses": [
+        "200"
+      ],
+      "summary": "Me"
+    },
+    {
+      "method": "POST",
+      "operation_id": "create_room_api_v1_rooms_post",
+      "path": "/api/v1/rooms",
+      "request_schema": "#/components/schemas/RoomRequest",
+      "response_statuses": [
+        "201",
+        "422"
+      ],
+      "summary": "Create Room"
+    },
+    {
+      "method": "POST",
+      "operation_id": "join_room_api_v1_rooms_join_post",
+      "path": "/api/v1/rooms/join",
+      "request_schema": "#/components/schemas/JoinRoomRequest",
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Join Room"
+    },
+    {
+      "method": "POST",
+      "operation_id": "watch_room_api_v1_rooms_watch_post",
+      "path": "/api/v1/rooms/watch",
+      "request_schema": "#/components/schemas/WatchRoomRequest",
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Watch Room"
+    },
+    {
+      "method": "GET",
+      "operation_id": "get_room_api_v1_rooms__room_id__get",
+      "path": "/api/v1/rooms/{room_id}",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Get Room"
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "clear_deck_api_v1_rooms__room_id__deck_delete",
+      "path": "/api/v1/rooms/{room_id}/deck",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Clear Deck"
+    },
+    {
+      "method": "PUT",
+      "operation_id": "upload_deck_api_v1_rooms__room_id__deck_put",
+      "path": "/api/v1/rooms/{room_id}/deck",
+      "request_schema": "#/components/schemas/DeckRequest",
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Upload Deck"
+    },
+    {
+      "method": "POST",
+      "operation_id": "rotate_room_invite_api_v1_rooms__room_id__invite_post",
+      "path": "/api/v1/rooms/{room_id}/invite",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Rotate Room Invite"
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "leave_room_api_v1_rooms__room_id__membership_delete",
+      "path": "/api/v1/rooms/{room_id}/membership",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Leave Room"
+    },
+    {
+      "method": "POST",
+      "operation_id": "replace_room_api_v1_rooms__room_id__replace_post",
+      "path": "/api/v1/rooms/{room_id}/replace",
+      "request_schema": "#/components/schemas/RoomRequest",
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Replace Room"
+    },
+    {
+      "method": "DELETE",
+      "operation_id": "remove_room_seat_api_v1_rooms__room_id__seats__seat__delete",
+      "path": "/api/v1/rooms/{room_id}/seats/{seat}",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Remove Room Seat"
+    },
+    {
+      "method": "POST",
+      "operation_id": "start_game_api_v1_rooms__room_id__start_post",
+      "path": "/api/v1/rooms/{room_id}/start",
+      "request_schema": null,
+      "response_statuses": [
+        "200",
+        "422"
+      ],
+      "summary": "Start Game"
+    },
+    {
+      "method": "GET",
+      "operation_id": "system_status_api_v1_system_get",
+      "path": "/api/v1/system",
+      "request_schema": null,
+      "response_statuses": [
+        "200"
+      ],
+      "summary": "System Status"
+    },
+    {
+      "method": "POST",
+      "operation_id": "refresh_system_api_v1_system_refresh_post",
+      "path": "/api/v1/system/refresh",
+      "request_schema": null,
+      "response_statuses": [
+        "202"
+      ],
+      "summary": "Refresh System"
+    }
+  ],
+  "protocol": {
+    "title": "Commander Arena Server",
+    "version": "0.8.0"
+  },
+  "schema_version": 1,
+  "schemas": [
+    {
+      "id": "https://mtg-commander-sim.local/schemas/card-program-v2.json",
+      "path": "schemas/card-program-v2.schema.json",
+      "properties": [
+        "abilities",
+        "capability_dependencies",
+        "card_identity",
+        "compiler_version",
+        "faces",
+        "fingerprint",
+        "oracle_id",
+        "oracle_source_hash",
+        "provenance",
+        "residuals",
+        "rulings_source_hash",
+        "schema_version",
+        "semantic_hash",
+        "trust_closure"
+      ],
+      "required": [
+        "schema_version",
+        "compiler_version",
+        "oracle_id",
+        "card_identity",
+        "faces",
+        "oracle_source_hash",
+        "rulings_source_hash",
+        "abilities",
+        "capability_dependencies",
+        "trust_closure",
+        "semantic_hash",
+        "residuals",
+        "provenance",
+        "fingerprint"
+      ],
+      "title": "CardProgram V2",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/command-envelope-v3.0.json",
+      "path": "schemas/command-envelope.schema.json",
+      "properties": [
+        "action_id",
+        "capability",
+        "choices",
+        "command_id",
+        "decision_id",
+        "expected_view_revision",
+        "game_id",
+        "protocol_version"
+      ],
+      "required": [
+        "protocol_version",
+        "game_id",
+        "command_id",
+        "decision_id",
+        "action_id",
+        "capability",
+        "expected_view_revision",
+        "choices"
+      ],
+      "title": "MTG Commander Sim client command envelope v3.0",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/decision-packet-v3.0.json",
+      "path": "schemas/decision-packet.schema.json",
+      "properties": [
+        "base",
+        "decision",
+        "defs",
+        "event",
+        "events",
+        "mode",
+        "patch",
+        "pkt",
+        "principal",
+        "rev",
+        "state",
+        "v",
+        "view",
+        "view_revision"
+      ],
+      "required": [
+        "v",
+        "mode",
+        "principal",
+        "pkt",
+        "base",
+        "view",
+        "view_revision",
+        "decision"
+      ],
+      "title": "MTG Commander Sim projected decision packet v3.0",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/game-record-v3-checkpoint.schema.json",
+      "path": "schemas/game-record-v3-checkpoint.schema.json",
+      "properties": [
+        "active_capabilities",
+        "kind",
+        "schema_version",
+        "state",
+        "state_hash"
+      ],
+      "required": [
+        "schema_version",
+        "kind",
+        "state_hash",
+        "active_capabilities",
+        "state"
+      ],
+      "title": "MTG Commander Game Record v3 checkpoint",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/game-record-v3-command.schema.json",
+      "path": "schemas/game-record-v3-command.schema.json",
+      "properties": [
+        "action",
+        "action_template_id",
+        "actor",
+        "after_state_hash",
+        "before_state_hash",
+        "capability_id",
+        "client_command_id",
+        "client_receipt",
+        "client_request_fingerprint",
+        "command_id",
+        "continuation",
+        "decision_id",
+        "execution",
+        "modes",
+        "normalized_payload",
+        "payload",
+        "principal",
+        "rng",
+        "selected_costs",
+        "selected_object_refs",
+        "semantics",
+        "semantics_fingerprint",
+        "sequence",
+        "targets",
+        "x"
+      ],
+      "required": [
+        "sequence",
+        "command_id",
+        "decision_id",
+        "principal",
+        "actor",
+        "execution",
+        "action_template_id",
+        "capability_id",
+        "action",
+        "payload",
+        "normalized_payload",
+        "selected_object_refs",
+        "targets",
+        "modes",
+        "x",
+        "selected_costs",
+        "before_state_hash",
+        "after_state_hash",
+        "rng",
+        "semantics_fingerprint",
+        "semantics"
+      ],
+      "title": "MTG Commander Game Record v3 accepted command",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/game-record-v3-decision.schema.json",
+      "path": "schemas/game-record-v3-decision.schema.json",
+      "properties": [
+        "accepted",
+        "action",
+        "action_id",
+        "actor",
+        "after_state_hash",
+        "automatic",
+        "before_state_hash",
+        "capability_id",
+        "confidence",
+        "decision_context",
+        "decision_id",
+        "fallback",
+        "kind",
+        "legacy_incomplete",
+        "legal_alternatives",
+        "metrics",
+        "model",
+        "observation_base_hash",
+        "observation_revision",
+        "payload",
+        "phase",
+        "plan",
+        "plan_category",
+        "principal",
+        "projected_state_hash",
+        "reason",
+        "rejection",
+        "retry_count",
+        "role",
+        "seat",
+        "sequence",
+        "step",
+        "turn"
+      ],
+      "required": [
+        "sequence",
+        "principal",
+        "action",
+        "accepted"
+      ],
+      "title": "MTG Commander Game Record v3 pilot/arbiter decision attempt",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/game-record-v3-event.schema.json",
+      "path": "schemas/game-record-v3-event.schema.json",
+      "properties": [
+        "active_player",
+        "actor",
+        "changed_objects",
+        "changed_players",
+        "code",
+        "details",
+        "id",
+        "importance",
+        "phase",
+        "revision",
+        "step",
+        "summary",
+        "turn",
+        "visibility"
+      ],
+      "required": [
+        "id",
+        "revision",
+        "turn",
+        "phase",
+        "step",
+        "code",
+        "details",
+        "visibility",
+        "importance"
+      ],
+      "title": "MTG Commander Game Record v3 event",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/game-record-v3-manifest.schema.json",
+      "path": "schemas/game-record-v3-manifest.schema.json",
+      "properties": [
+        "card_programs",
+        "created_at",
+        "draw",
+        "ended_at",
+        "engine_version",
+        "final_state_hash",
+        "format",
+        "game_id",
+        "migrated_at",
+        "player_count",
+        "players",
+        "protocol_version",
+        "record_schema_version",
+        "record_type",
+        "replay",
+        "review",
+        "runtime_trust",
+        "schema_version",
+        "scryfall",
+        "seed",
+        "semantics_fingerprint",
+        "semantics_registry",
+        "started_at",
+        "state_version",
+        "status",
+        "trace_level",
+        "turn_order",
+        "updated_at",
+        "winner"
+      ],
+      "required": [
+        "schema_version",
+        "record_schema_version",
+        "record_type",
+        "game_id",
+        "engine_version",
+        "format",
+        "players",
+        "player_count",
+        "turn_order",
+        "trace_level",
+        "semantics_fingerprint",
+        "semantics_registry",
+        "scryfall",
+        "final_state_hash",
+        "replay",
+        "review"
+      ],
+      "title": "MTG Commander Game Record v3 manifest",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/game-review-v1.schema.json",
+      "path": "schemas/game-review-v1.schema.json",
+      "properties": [
+        "fetchlands",
+        "fidelity",
+        "format",
+        "game_id",
+        "land_entry",
+        "opening_hands",
+        "outcome",
+        "pilot_audit",
+        "players",
+        "schema_version",
+        "semantic_coverage",
+        "trace",
+        "turns"
+      ],
+      "required": [
+        "schema_version",
+        "game_id",
+        "outcome",
+        "format",
+        "opening_hands",
+        "players",
+        "land_entry",
+        "fetchlands",
+        "semantic_coverage",
+        "pilot_audit",
+        "turns",
+        "fidelity"
+      ],
+      "title": "MTG Commander derived review v1",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/pilot-profile-v2.json",
+      "path": "schemas/pilot-profile.schema.json",
+      "properties": [
+        "archetype",
+        "cards_commonly_used_as_fodder",
+        "cards_normally_preserved",
+        "cards_that_require_setup",
+        "commander",
+        "common_tutor_priorities",
+        "deck_fingerprint",
+        "deck_list_fingerprint",
+        "deck_source_fingerprint",
+        "expected_development_turns",
+        "fingerprint_algorithm_version",
+        "interaction_priorities",
+        "known_color_requirements",
+        "mulligan_requirements",
+        "primary_engine_pieces",
+        "primary_game_plan",
+        "primary_win_lines",
+        "profile_schema_version",
+        "profile_source_fingerprint",
+        "schema_version",
+        "secondary_game_plan",
+        "threat_assessment"
+      ],
+      "required": [
+        "profile_schema_version",
+        "fingerprint_algorithm_version",
+        "deck_list_fingerprint",
+        "profile_source_fingerprint",
+        "commander",
+        "archetype",
+        "primary_game_plan",
+        "secondary_game_plan",
+        "primary_engine_pieces",
+        "primary_win_lines",
+        "mulligan_requirements",
+        "known_color_requirements",
+        "threat_assessment"
+      ],
+      "title": "Deck pilot profile",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/pilot-response-v1.json",
+      "path": "schemas/pilot-response.schema.json",
+      "properties": [
+        "action",
+        "action_id",
+        "actions",
+        "choices",
+        "confidence",
+        "memory_update",
+        "plan",
+        "reason",
+        "yield"
+      ],
+      "required": [
+        "plan",
+        "reason"
+      ],
+      "title": "Provider-neutral pilot response",
+      "type": "object"
+    },
+    {
+      "id": "https://example.invalid/mtg-commander-sim/reusable-piece-matrix.schema.json",
+      "path": "schemas/reusable-piece-matrix.schema.json",
+      "properties": [
+        "algorithm_version",
+        "classes",
+        "classification_boundary",
+        "commander_legal_only",
+        "complete_snapshot_claimed",
+        "fingerprint",
+        "input_fingerprints",
+        "ontology_version",
+        "pieces",
+        "profile",
+        "relation_types",
+        "rule_index",
+        "ruling_evidence_boundary",
+        "schema_version",
+        "snapshot",
+        "status_axes",
+        "summary",
+        "universal_systems"
+      ],
+      "required": [
+        "schema_version",
+        "algorithm_version",
+        "ontology_version",
+        "profile",
+        "commander_legal_only",
+        "classification_boundary",
+        "ruling_evidence_boundary",
+        "snapshot",
+        "input_fingerprints",
+        "classes",
+        "relation_types",
+        "status_axes",
+        "summary",
+        "universal_systems",
+        "rule_index",
+        "pieces",
+        "complete_snapshot_claimed",
+        "fingerprint"
+      ],
+      "title": "Reusable rules-piece matrix",
+      "type": "object"
+    },
+    {
+      "id": "https://example.invalid/mtg-commander-sim/reusable-piece-policy.schema.json",
+      "path": "schemas/reusable-piece-policy.schema.json",
+      "properties": [
+        "capability_prefix_classes",
+        "classes",
+        "complex_card_sentinels",
+        "complex_card_weights",
+        "high_risk_class_pairs",
+        "ontology_version",
+        "profile",
+        "relation_types",
+        "residual_family_classes",
+        "runtime_family_classes",
+        "schema_version",
+        "status_axes",
+        "universal_system_classes"
+      ],
+      "required": [
+        "schema_version",
+        "ontology_version",
+        "profile",
+        "classes",
+        "relation_types",
+        "status_axes",
+        "residual_family_classes",
+        "capability_prefix_classes",
+        "runtime_family_classes",
+        "universal_system_classes",
+        "high_risk_class_pairs",
+        "complex_card_weights",
+        "complex_card_sentinels"
+      ],
+      "title": "Reusable rules piece generation policy",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/rule-capability-registry-v1.json",
+      "path": "schemas/rule-capability-registry.schema.json",
+      "properties": [
+        "aggregates",
+        "capabilities",
+        "effective_date",
+        "profiles",
+        "registry_version",
+        "schema_version",
+        "source_sha256"
+      ],
+      "required": [
+        "schema_version",
+        "registry_version",
+        "effective_date",
+        "source_sha256",
+        "profiles",
+        "aggregates",
+        "capabilities"
+      ],
+      "title": "Fine-grained rules capability registry",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/rule-conformance-case-v1.json",
+      "path": "schemas/rule-conformance-case.schema.json",
+      "properties": [
+        "assertion_kind",
+        "blockers",
+        "case_id",
+        "case_version",
+        "classification",
+        "covered_scenarios",
+        "dependency_rule_ids",
+        "effective_date",
+        "executable_test_ids",
+        "implementation_components",
+        "notes",
+        "required_scenarios",
+        "reviewed",
+        "rule_id",
+        "rule_text_sha256",
+        "schema_version",
+        "source_sha256",
+        "source_span",
+        "status"
+      ],
+      "required": [
+        "schema_version",
+        "case_version",
+        "case_id",
+        "rule_id",
+        "effective_date",
+        "source_sha256",
+        "rule_text_sha256",
+        "source_span",
+        "classification",
+        "status",
+        "assertion_kind",
+        "reviewed",
+        "implementation_components",
+        "executable_test_ids",
+        "required_scenarios",
+        "covered_scenarios",
+        "dependency_rule_ids",
+        "blockers",
+        "notes"
+      ],
+      "title": "Pinned Comprehensive Rules conformance case v1",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/rule-conformance-review-v1.json",
+      "path": "schemas/rule-conformance-review.schema.json",
+      "properties": [
+        "cases",
+        "effective_date",
+        "family",
+        "schema_version",
+        "source_sha256"
+      ],
+      "required": [
+        "schema_version",
+        "effective_date",
+        "source_sha256",
+        "family",
+        "cases"
+      ],
+      "title": "Pinned Comprehensive Rules conformance review overlay v1",
+      "type": "object"
+    },
+    {
+      "id": "https://mtg-commander-sim.local/schemas/semantic-program-v3.json",
+      "path": "schemas/semantic-program.schema.json",
+      "properties": [
+        "ability_id",
+        "active_zone",
+        "capability_closure",
+        "capability_dependencies",
+        "cost_schema",
+        "coverage",
+        "destination",
+        "effects",
+        "event",
+        "event_condition",
+        "handlers",
+        "key",
+        "label",
+        "notes",
+        "oracle_id",
+        "provenance",
+        "requires_arbiter",
+        "semantic_schema_version",
+        "target_schema",
+        "tests",
+        "trust_level",
+        "version"
+      ],
+      "required": [
+        "key",
+        "label",
+        "effects",
+        "oracle_id",
+        "ability_id",
+        "active_zone",
+        "event",
+        "semantic_schema_version",
+        "trust_level",
+        "provenance",
+        "tests",
+        "coverage"
+      ],
+      "title": "Reusable semantic program v3",
+      "type": "object"
+    }
+  ],
+  "source_fingerprint": "59b592525d78457dbace88d8fa26f1ce2e31d9087a9443e06db8fb1d19822afa",
+  "top_blockers": [],
+  "websocket_routes": [
+    "/api/v1/games/{game_id}/stream"
+  ]
+}

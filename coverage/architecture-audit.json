@@ -9618,11 +9618,11 @@
         "file": "docs/index.md",
         "metadata": {
           "audience": "users, operators, contributors, and coding agents",
-          "authoritative_source": "repository documentation policy and maintained documentation set",
+          "authoritative_source": "platform/documentation-policy.json and the maintained documentation set",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Documentation map and standard",
-          "verified": "2026-08-05"
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9673,12 +9673,12 @@
       {
         "file": "docs/architecture/card-programs.md",
         "metadata": {
-          "audience": "compiler, rules, replay, and semantic-pack contributors",
-          "authoritative_source": "mtg_commander_sim/card_programs, mtg_commander_sim/semantics.py, and schemas/card-program-v2.schema.json",
+          "audience": "compiler, rules, replay, and extension contributors",
+          "authoritative_source": "mtg_commander_sim/card_programs and schemas/card-program-v2.schema.json",
           "maintenance": "hand-maintained",
           "status": "current",
-          "title": "CardProgram V2",
-          "verified": "2026-08-05"
+          "title": "CardProgram architecture",
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9688,11 +9688,11 @@
         "file": "docs/architecture/compiler.md",
         "metadata": {
           "audience": "compiler and rules contributors",
-          "authoritative_source": "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler/program_generation.py, mtg_commander_sim/card_programs, the capability registry, and pinned coverage artifacts",
+          "authoritative_source": "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler, and mtg_commander_sim/card_programs",
           "maintenance": "hand-maintained",
           "status": "current",
-          "title": "Oracle compiler",
-          "verified": "2026-08-05"
+          "title": "Oracle compiler architecture",
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9706,7 +9706,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Typed semantic handlers",
-          "verified": "2026-08-05"
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9716,7 +9716,7 @@
         "file": "docs/architecture/runtime-components.md",
         "metadata": {
           "audience": "rules, compiler, runtime, replay, and extension contributors",
-          "authoritative_source": "mtg_commander_sim/semantic_runtime component registries, mtg_commander_sim/drawing, and ADRs 0007/0010/0011/0012",
+          "authoritative_source": "mtg_commander_sim/semantic_runtime component registries and schemas/card-program-v2.schema.json",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "CardProgram runtime components",
@@ -9757,12 +9757,12 @@
       {
         "file": "docs/architecture/server-runtime.md",
         "metadata": {
-          "audience": "server contributors and local operators",
-          "authoritative_source": "server package and GameService",
+          "audience": "server and persistence contributors",
+          "authoritative_source": "server package, GameService, ServerStore, and GameActor",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Server runtime",
-          "verified": "2026-08-05"
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9786,11 +9786,11 @@
         "file": "docs/architecture/visibility.md",
         "metadata": {
           "audience": "client, server, pilot, and security contributors",
-          "authoritative_source": "StateProjector, protocol schemas, and privacy tests",
+          "authoritative_source": "StateProjector, protocol schemas, public-log filtering, and privacy tests",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Visibility and projection",
-          "verified": "2026-08-05"
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9955,10 +9955,11 @@
         "metadata": {
           "audience": "local users and contributors",
           "authoritative_source": "server launcher, settings, managed data service, and browser build",
+          "concern": "local-operations",
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Local application operations",
-          "verified": "2026-08-05"
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -9986,7 +9987,7 @@
           "maintenance": "hand-maintained",
           "status": "current",
           "title": "Legal and third-party content boundary",
-          "verified": "2026-08-05"
+          "verified": "2026-08-06"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -10011,10 +10012,12 @@
         "metadata": {
           "audience": "maintainers, operators, and contributors",
           "authoritative_source": "platform/readiness-source.json",
+          "generated_source": "coverage/platform-readiness.json",
+          "generation_command": ".\\.venv\\Scripts\\python.exe scripts\\update_platform_status.py --write",
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "f721abe509dff61ff54f6e04390ffccee3d6a703245df09b8de978efde162443"
+          "verified": "0eac2c9908b06accaf422b20439deba329649edcc2cf743328ce2d94ea96f0db"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -10061,23 +10064,9 @@
         "metadata_complete": true,
         "missing_metadata": [],
         "present": true
-      },
-      {
-        "file": "OVERNIGHT_HANDOFF.md",
-        "metadata": {
-          "audience": "maintainers resuming repository work",
-          "authoritative_source": "live Git state and generated status reports",
-          "maintenance": "hand-maintained",
-          "status": "current",
-          "title": "Integration checkpoint",
-          "verified": "2026-08-05"
-        },
-        "metadata_complete": true,
-        "missing_metadata": [],
-        "present": true
       }
     ],
-    "metadata_complete_count": 33,
+    "metadata_complete_count": 32,
     "metadata_drift": [],
     "missing_count": 0,
     "missing_documents": [],
@@ -10089,8 +10078,8 @@
       "stale_claims_enforced": true,
       "validator": "python scripts/validate_documentation.py --check"
     },
-    "present_count": 33,
-    "required_count": 33
+    "present_count": 32,
+    "required_count": 32
   },
   "generated": {
     "card_specificity_source": "platform/card-specificity-baseline.json",
@@ -10453,18 +10442,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1727,
-      "discovered_total": 5027,
+      "conventional_ast_cases": 1734,
+      "discovered_total": 5034,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 49,
         "fuzz_named": 1,
         "privacy_or_projection_named": 23,
         "replay_named": 105,
-        "server_named": 25
+        "server_named": 26
       },
       "reconciles": true,
-      "test_files": 176
+      "test_files": 177
     }
   }
 }

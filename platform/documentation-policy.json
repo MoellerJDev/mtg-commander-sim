@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "document_globs": [
     "*.md",
     "coverage/*.md",
@@ -38,6 +38,77 @@
     "superseded",
     "rejected"
   ],
+  "root_document_allowlist": [
+    "AGENTS.md",
+    "ARCHITECTURE.md",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "SECURITY.md"
+  ],
+  "authoritative_concerns": {
+    "architecture-portal": "ARCHITECTURE.md",
+    "browser-product": "docs/product/browser.md",
+    "codex-arena-adapter": "docs/optional-clients/codex-arena.md",
+    "contributor-contract": "CONTRIBUTING.md",
+    "game-record": "docs/reference/game-record.md",
+    "local-operations": "docs/operations/local-app.md",
+    "network-protocol": "docs/reference/protocol.md",
+    "optional-provider-contract": "docs/optional-clients/providers.md",
+    "oracle-ir": "docs/reference/oracle-ir.md",
+    "project-overview": "README.md",
+    "rules-assurance": "docs/rules/assurance-model.md"
+  },
+  "retired_documents": [
+    "CLIENT_INTEGRATION.md",
+    "CODEX_ARENA.md",
+    "GAME_RECORD.md",
+    "LLM_PROTOCOL.md",
+    "ORACLE_IR.md",
+    "OVERNIGHT_HANDOFF.md",
+    "PACKAGE_INFO.txt",
+    "PILOT_PROVIDERS.md",
+    "RULE_CONFORMANCE.md",
+    "RULES_COMPLETENESS.md",
+    "SEMANTIC_PACKS.md",
+    "SERVER_BROWSER.md",
+    "TEST_RESULTS.txt",
+    "docs/architecture/damage-transactions.md"
+  ],
+  "historical_allowed_prefixes": [
+    "docs/adr/",
+    "docs/history/"
+  ],
+  "historical_allowed_documents": [
+    "CHANGELOG.md"
+  ],
+  "generated_dashboards": {
+    "coverage/platform-readiness.md": {
+      "source": "coverage/platform-readiness.json",
+      "command": ".\\.venv\\Scripts\\python.exe scripts\\update_platform_status.py --write"
+    },
+    "docs/ARCHITECTURE_DEBT_STATUS.md": {
+      "source": "coverage/architecture-audit.json",
+      "command": ".\\.venv\\Scripts\\python.exe scripts\\update_architecture_audit.py --write --card-db data\\scryfall-current.sqlite3"
+    },
+    "docs/COMPILER_COVERAGE_STATUS.md": {
+      "source": "coverage/architecture-audit.json",
+      "command": ".\\.venv\\Scripts\\python.exe scripts\\update_architecture_audit.py --write --card-db data\\scryfall-current.sqlite3"
+    },
+    "docs/PLATFORM_IMPLEMENTATION_STATUS.md": {
+      "source": "coverage/platform-readiness.json",
+      "command": ".\\.venv\\Scripts\\python.exe scripts\\update_platform_status.py --write"
+    },
+    "docs/RULES_DEPENDENCY_QUEUE.md": {
+      "source": "coverage/rules-dependency-queue.json",
+      "command": ".\\.venv\\Scripts\\python.exe scripts\\update_rules_scheduler.py --write"
+    },
+    "docs/reference/protocol-inventory.md": {
+      "source": "coverage/protocol-inventory.json",
+      "command": ".\\.venv\\Scripts\\python.exe scripts\\update_protocol_reference.py --write"
+    }
+  },
   "metric_authorities": [
     "coverage/architecture-audit.json",
     "coverage/mechanics-coverage.json",
