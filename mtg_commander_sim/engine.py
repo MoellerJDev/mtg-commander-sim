@@ -56,11 +56,7 @@ from .combat_damage_sequence import (
     CombatDamageAssignmentSequence,
     CombatDamageSequenceError,
 )
-from .block_transition_engine_adapter import (
-    commit_engine_block_declaration,
-    enqueue_block_transition_triggers,
-    prepare_block_keyword_trigger_resolution,
-)
+from . import block_transition_engine_adapter as block_transition_adapter
 from .combat_relationship_state import remove_combat_relationships
 from .continuous_effects import (
     ContinuousEffect,
@@ -7866,7 +7862,9 @@ class CommanderEngine(
                 note="Ward trigger resolved",
             )
             return
-        if prepare_block_keyword_trigger_resolution(self, item):
+        if block_transition_adapter.prepare_block_keyword_trigger_resolution(
+            self, item
+        ):
             return
         if item.semantic_key == "builtin:optional-mill-one":
             self._begin_resolve_item(
@@ -11648,7 +11646,7 @@ class CommanderEngine(
         defenders = self._attacked_defending_players()
         if self.state.combat.blocker_cursor >= len(defenders):
             self.state.combat.blockers_declared = True
-            enqueue_block_transition_triggers(self)
+            block_transition_adapter.enqueue_block_transition_triggers(self)
             self._grant_priority(self.state.active_player)
             return
         defender = defenders[self.state.combat.blocker_cursor]
@@ -11795,7 +11793,7 @@ class CommanderEngine(
                 response,
                 spend_context="combat_declaration",
             )
-        committed = commit_engine_block_declaration(
+        committed = block_transition_adapter.commit_engine_block_declaration(
             self,
             controller=defender,
             chosen=chosen,

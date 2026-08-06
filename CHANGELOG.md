@@ -11,6 +11,23 @@ maintenance: "hand-maintained"
 
 ## Unreleased
 
+### Typed Flanking and Bushido block-transition triggers
+
+- Added one immutable, canonical block-transition event after every defending
+  player completes declarations. Ordinary printed Flanking and positive-integer
+  Bushido instances derive independent triggered abilities from that sealed
+  event and enter one APNAP trigger batch before priority.
+- Flanking excludes blockers that currently have Flanking and retains the
+  source snapshot if the attacker leaves. Bushido triggers once per current
+  instance when its source blocks or becomes blocked and resolves only onto the
+  same logical source object. Both modifiers use the canonical identity-pinned
+  layer 7c continuous-effect owner until end of turn.
+- Added generic source-spanned CardProgram fragments, fine-grained capability
+  closure, exact replay, rollback, four-player privacy, bounded property,
+  source-departure, malformed-input, explicit interaction, and killed-mutation
+  evidence. Conditional, variable, granted, copied, face-down, and
+  trigger-doubling variants remain explicit blockers.
+
 ### Typed ordinary combat-evasion restrictions
 
 - Added one immutable current-characteristics boundary for ordinary Fear,
