@@ -23,4 +23,4 @@ matching load and the intended fail-closed mismatch.
 Do not “fix” Game Record v3 by editing a saved command or checkpoint. Historical
 private records stay local; public fixtures contain sanitized recipes and no
 capabilities or hidden library order. See the [replay architecture](../architecture/replay.md)
-and [Game Record reference](../../GAME_RECORD.md).
+and the [Game Record reference](../reference/game-record.md).

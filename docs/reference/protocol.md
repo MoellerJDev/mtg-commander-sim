@@ -1,205 +1,140 @@
 ---
-title: "Client integration and permission boundary"
+title: "Application protocol"
 status: "current"
-authoritative_source: "projection, protocol, client, and service implementation"
-verified: "2026-08-05"
-audience: "client and protocol contributors"
+authoritative_source: "GameService, server OpenAPI, protocol implementation, and versioned schemas"
+verified: "2026-08-06"
+audience: "client, server, and protocol contributors"
 maintenance: "hand-maintained"
+concern: "network-protocol"
 ---
 
-# Client Integration and Permission Boundary
+# Application protocol
 
-## Goal
+Every browser, CLI, scripted pilot, subprocess, and optional automated client
+uses the same projected-state and capability-command boundary. A client can
+render richer presentation or strategy, but it cannot select its principal,
+read authoritative state, or mutate game fields directly.
 
-The browser client reuses the simulation service without changing how game
-actions are authorized. UI code may render richer state, animations, card
-presentation, clocks, and prompts, but it never receives direct mutation
-access.
+The generated [protocol inventory](protocol-inventory.md) lists the current
+OpenAPI operations and versioned JSON schemas. Generate it from the application
+and schema files rather than copying a route table into hand-maintained prose.
 
-## Transport-neutral core
+## Transport-neutral boundary
 
-`GameService` exposes two concepts:
+`GameService` exposes observation and command operations:
 
 ```python
 service.observe(authenticated_principal, full=False)
 service.command(CommandEnvelope(...), principal=authenticated_principal)
 ```
 
-A transport adapter is responsible for:
+The transport authenticates a guest, binds room membership to one principal,
+forwards observations and commands, and owns connection-local projection
+cursors. `principal` is trusted transport metadata, never request content. A
+room spectator maps to the capability-free `spectator` principal.
 
-1. authenticating a user/agent connection
-2. mapping that connection to one game principal
-3. forwarding observations
-4. forwarding capability-scoped commands
-5. persisting/reconnecting projection cursors
+HTTP owns request/response lifecycle operations. The game WebSocket carries
+the same principal-scoped full and delta packets plus safe lifecycle metadata.
+The in-process and network paths share protocol and validation code; neither is
+a second rules interface.
 
-The server—not the request body—determines the authenticated principal.
+## Command envelope
 
-The in-process boundary and the listening FastAPI adapter both use protocol
-3.0. `schemas/command-envelope.schema.json` rejects unknown properties and
-requires client command/decision/action IDs plus the expected projected-state
-revision. The authenticated guest's room seat—not the request body—selects the
-principal.
+[`schemas/command-envelope.schema.json`](../../schemas/command-envelope.schema.json)
+is the network command authority. A command supplies:
 
-## HTTP/WebSocket surface
+- the protocol and game identity;
+- a client command idempotency key;
+- the current decision and server-issued action IDs;
+- one opaque, single-use capability;
+- the expected projected-view revision; and
+- only the delegated choices declared by that action.
 
-```text
-POST /api/v1/guests
-POST /api/v1/rooms
-POST /api/v1/rooms/join
-PUT  /api/v1/rooms/{room_id}/deck
-POST /api/v1/rooms/{room_id}/start
-GET  /api/v1/games/{game_id}
-GET  /api/v1/games/{game_id}/state?full=true
-POST /api/v1/games/{game_id}/stop
-POST /api/v1/games/{game_id}/resume
-POST /api/v1/games/{game_id}/commands
-WS   /api/v1/games/{game_id}/stream
-```
+The envelope cannot select a principal, seat, controller, effect operation,
+mana side effect, state field, or unadvertised cost. The service validates the
+strict field set, game, expected revision, identity, capability, decision,
+action, choices, legality, costs, and targets before mutation. A rejected
+attempt rolls back and does not consume the decision capability. Reusing a
+client command ID with a byte-equivalent request returns the durable receipt;
+reusing it for different content is a conflict.
 
-The game-inspection response is an application projection containing only safe
-lifecycle metadata and journal counts. Stop/resume are room-owner operations,
-not pilot actions: they never accept a seat or principal in the body and never
-mint an engine capability. The WebSocket carries the same lifecycle projection
-beside each ordinary seat packet. Clients must disable action submission while
-status is not `active`; the service independently enforces that rule.
-Terminal lifecycle metadata includes `winner` and `draw`; a complete game has
-no player decision or reusable capability after reconnect or process restart.
+## Projected packets
 
-Example command body:
+[`schemas/decision-packet.schema.json`](../../schemas/decision-packet.schema.json)
+defines the client packet. A full packet establishes a principal-specific view,
+its canonical hash, current revision, visible definitions/events, and current
+decision. A delta names the exact base hash, resulting view hash, patch, event
+tail, and current decision.
 
-```json
-{
-  "protocol_version":"3.0",
-  "game_id":"game-uuid",
-  "command_id":"web-7b63b",
-  "decision_id":"D14",
-  "action_id":"cast:A12",
-  "capability":"opaque-single-use-token",
-  "expected_view_revision":37,
-  "choices":{"targets":["S4"]}
-}
-```
+A client must:
 
-The connection identity supplies `principal`; the client-controlled command body does not contain it. `GameService.command(..., principal=...)` accepts the principal only as trusted transport metadata.
+1. apply a delta only when its `base` equals the local view hash;
+2. verify the resulting canonical `view` hash;
+3. request or await a new full packet after a mismatch or reconnect;
+4. replace a stale decision when the packet carries `decision: null`; and
+5. submit only the action IDs and choice fields issued by the current decision.
 
-## Capability checks
+Every network connection has an independent ephemeral cursor. Reconnect begins
+with a full packet, so cursor state is an optimization rather than replay or
+correctness authority. The Python `ProjectedClientView` implements the same
+rules for in-process clients.
 
-Every command is validated against:
+## Actions and choice forms
 
-- protocol version and strict field set
-- game ID
-- client command idempotency key
-- expected projected-state revision
-- authenticated principal
-- unconsumed capability token
-- live decision ID
-- role
-- actor/seat
-- allowed action name
+Legal actions contain stable action IDs and may contain a versioned JSON choice
+form. The same adapter that projects a form defines the accepted choice-field
+names. Forms cover scalar, object, ordering, mode, target, grouped, assignment,
+payment, private search, and delegated rules choices. Unknown fields and
+unknown form versions fail closed.
 
-Invalid actions roll back transactionally. A capability is consumed only by an accepted response within its decision group.
+The client may choose presentation and automation policy. For example, an
+automatic pass still submits the ordinary server-issued `pass` action, and
+automatic mana still selects from authoritative mana modes. The engine
+revalidates the result; presentation code never predicts legality.
 
-Capabilities are not reusable API keys. They are narrow authorization grants for one rules decision.
+## Lifecycle and public history
 
-## Projection synchronization
+Safe game inspection, administrative stop/resume, command submission,
+projection reads, public-event pagination, and streaming all cross the same
+per-game actor. An accepted mutation is persisted before acknowledgement.
+Paused, corrupt, aborted, and complete games expose no reusable player action.
+Administrative resume can clear only its own stop reason; it cannot override a
+rules, fidelity, corruption, or terminal boundary.
 
-Protocol 3.0 provides:
+The WebSocket event tail is bounded delivery context. The paginated public log
+returns a fixed spectator-filtered event shape and never exposes raw details,
+checkpoints, private events, capabilities, record paths, or analyst artifacts.
 
-- initial `state`
-- `base` and `view` hashes
-- JSON `patch` operations
-- explicit current `decision`
-- definitions and visible events
+## Versioned schema ownership
 
-A client should use `ProjectedClientView` or implement equivalent logic:
+- [Command envelope](../../schemas/command-envelope.schema.json) — authenticated
+  command input
+- [Decision packet](../../schemas/decision-packet.schema.json) — projected full
+  and delta output
+- [Pilot response](../../schemas/pilot-response.schema.json) — optional
+  provider response before it is normalized to a command
+- [CardProgram](../../schemas/card-program-v2.schema.json) — compiled card
+  behavior, not a client mutation format
+- [Game Record schemas](game-record.md) — durable replay and audit files, not a
+  network API
 
-```python
-view = ProjectedClientView("pilot:A")
-view.ingest(packet)
-```
+Browser TypeScript bindings are generated from the command and decision schemas
+with `npm run generate:types --prefix web`. OpenAPI owns HTTP models and status
+codes. Change a schema and its producers, consumers, compatibility tests,
+generated bindings, protocol inventory, and reference in one coherent change.
 
-When a delta's `base` differs from the local hash, reconnect or request
-`full=true`. Never apply a patch to an unknown base. Every WebSocket connection
-has an independent ephemeral cursor, so a second tab or reconnect cannot move
-the first tab's delta base.
+## Security and extension rules
 
-## Hidden information
+- Derive identity from the authenticated connection; reject identity in bodies.
+- Project before serialization and independently filter public-history output.
+- Treat capabilities as narrow decision grants, never login credentials.
+- Keep full checkpoints, raw journals, private zones, provider memory, and
+  analyst artifacts outside every client route.
+- Rate-limit hostile transport traffic without changing engine semantics.
+- Add positive and negative projection, idempotency, replay, malformed-input,
+  and reconnect tests for new fields or operations.
 
-Each connection receives a principal-specific projection. An invited spectator
-is authenticated as a room member but receives principal `spectator`, no hand,
-no decision capability, and no command authority. A pilot receives its own hand
-and legally known opposing cards. The arbiter receives public state and
-resolution context, not all private hands. Analyst access should be disabled
-during live adversarial play unless the environment explicitly permits it.
-
-The WebSocket event tail is bounded delivery context. To render the complete
-public history, an authenticated player or spectator paginates
-`GET /api/v1/games/{game_id}/events`. The response uses one fixed public event
-shape and never includes raw details. A client must not read the Game Record
-directory, checkpoint, or analyst artifacts directly.
-
-## UI action generation
-
-The server packet contains the capability's allowed action categories and context. A client can render buttons/forms from these categories, but final legality still belongs to the engine.
-
-Examples:
-
-- `mulligan.declare` → Keep / Mulligan
-- `priority` → pass, land, cast, activate, or confirmed concede
-- `combat.attackers` → attacker-to-defender mapping
-- `combat.blockers` → blocker-to-attacker mapping for that defender
-- `state.legend` → choose one object to keep
-- `arbiter.resolve` → rules effect form; never shown to ordinary pilots
-
-Concession uses the ordinary current priority capability. Its generated form
-requires `{"confirm_concede": true}`; omission or false is rejected without a
-state change. It is deliberately excluded from meaningful-action/yield
-telemetry so merely being allowed to concede does not force a pilot prompt in
-an otherwise empty response window.
-
-Browser-created games set kernel empty-priority auto-pass to false. The owning
-tab therefore receives each pass-only capability and may either submit it
-automatically or hold it for explicit approval. The browser's saved
-**Auto-pass** mode submits the same capability-scoped `pass` command only when
-no nonmana legal action or player choice is present. **Full control** submits
-nothing until the player presses **Pass priority**. This is presentation and
-strategy policy, not a second priority engine: meaningful actions, decision
-IDs, stale-command rejection, event history, and exact replay remain entirely
-server-authoritative.
-
-Auto-mana/Manual mana and Auto-pass/Full control are non-secret local browser
-preferences. They do not enter a projected packet, capability, checkpoint, or
-opposing seat view.
-
-## Persistence model
-
-Server persistence separates:
-
-- authoritative `GameState`
-- semantic registry
-- ephemeral projection cursor by `(game_id, principal, connection_id)`
-- append-only events/metrics
-- authentication and seat assignment
-
-A client reconnect receives a full projection, so cursors are an optimization
-rather than a correctness dependency. SQLite contains the control plane and
-hashed idempotency receipts; Game Record v3 contains authoritative game state
-and accepted-command replay truth.
-
-## Security notes
-
-- Do not accept principal/seat in a client-controlled body, and do not trust role, controller, mana payment, cast zone, cost overrides, or effect operations from a client.
-- Do not expose authoritative save files to pilots.
-- Do not use capability tokens as long-lived session authentication.
-- Rate-limit rejected commands.
-- Log capability issuance and consumption without logging private hand contents to public telemetry.
-- Keep analyst access separate from the safe game-member lifecycle
-  projection; never turn inspection into a record-path or checkpoint endpoint.
-
-## Why the GUI does not require a permission refactor
-
-Every browser, native, scripted, subprocess, or optional AI client speaks the
-same projected-state and capability-command protocol. A new client renders and
-submits packets; it does not replace the engine, permissions, state projection,
-or command envelope.
+See [visibility](../architecture/visibility.md),
+[server runtime](../architecture/server-runtime.md),
+[replay](../architecture/replay.md), and the
+[threat model](../THREAT_MODEL.md).

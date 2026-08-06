@@ -1,51 +1,93 @@
 ---
 title: "Server runtime"
 status: "current"
-authoritative_source: "server package and GameService"
-verified: "2026-08-05"
-audience: "server contributors and local operators"
+authoritative_source: "server package, GameService, ServerStore, and GameActor"
+verified: "2026-08-06"
+audience: "server and persistence contributors"
 maintenance: "hand-maintained"
 ---
 
 # Server runtime
 
-The FastAPI runtime is an adapter around the deterministic game service. It
-owns guest sessions, rooms, deck submissions, serialized game actors, HTTP and
-WebSocket projection delivery, local SQLite control-plane persistence, managed
-Scryfall snapshots, card images, and static browser assets.
+The FastAPI application is a transport and local-operations adapter around the
+deterministic game service. It owns guest authentication, room membership,
+deck intake, HTTP/WebSocket delivery, one serialized actor per loaded game,
+SQLite control-plane persistence, managed card snapshots, local images, and
+static browser assets. Transport dependencies do not enter
+`mtg_commander_sim/`.
 
-## State ownership
+## Lifecycle and ownership
 
-`ServerStore` owns durable guests, memberships, rooms, lifecycle metadata,
-idempotency, and record locations. Each loaded game has one `GameActor` mailbox;
-only that actor invokes state-changing `GameService` operations. The runtime
-persists the Game Record before acknowledging an accepted command.
+`ServerStore` owns durable guests, token/invite hashes, memberships, seats,
+rooms, deck readiness, game index, lifecycle metadata, and idempotency receipts.
+It does not become game-state authority. Each loaded game has exactly one
+`GameActor`; observations, commands, public-log reads, lifecycle mutations, and
+cursor cleanup cross its bounded mailbox.
 
-That acknowledgement boundary contains the authoritative checkpoint, command,
-event, decision and opportunity journals, manifest, semantic snapshot, and
-idempotency receipt. `review.json` and `review.md` are derived analyst outputs,
-so ordinary in-progress commands do not repeatedly regenerate them. A paused,
-aborted, terminal, explicit direct, or finalization save writes a current
-review; resuming a live record removes the now-stale derived review until the
-next such boundary. This changes no Game Record v3 replay input.
+Only the actor invokes state-changing `GameService` operations. An accepted
+command writes the Game Record and durable idempotency receipt before the
+server acknowledges it. A stop writes a structured administrative pause before
+replying. Retry with the same principal, command ID, and request fingerprint
+returns the recorded receipt without applying the transition again.
 
-## Trust boundary
+## Identity and command boundary
 
-The browser supplies an opaque action/capability, expected view revision,
-choices, CSRF proof, and client command ID. The server derives the authenticated
-principal and rejects client-selected seats, effect operations, mana side
-effects, or state fields. WebSockets carry projections, not checkpoints.
+Guest bearer tokens are random HttpOnly cookie values; SQLite retains hashes.
+A per-tab selector binds distinct top-level tabs without putting the bearer in
+JavaScript or URLs. Unsafe cookie-authenticated requests also require CSRF
+proof. Room membership determines the player or spectator principal.
+
+The browser supplies an action/capability, expected projection revision,
+delegated choices, and client command ID. The server rejects client-selected
+principal, seat, controller, mana side effects, effect operations, or state
+fields. WebSockets carry projections and safe lifecycle metadata, never
+checkpoints. See the [protocol reference](../reference/protocol.md) and
+generated [operation inventory](../reference/protocol-inventory.md).
+
+## Persistence boundary
+
+SQLite is the application control plane. Game Record v3 is authoritative game
+truth: initial state, checkpoints, accepted commands, events, decisions,
+opportunities, semantic identity, manifest, and replay hashes. Projection
+cursors are connection-local and nondurable. Capabilities are reissued after
+load rather than persisted as raw secrets.
+
+Derived review files are not replay inputs. Routine live saves update the
+authoritative record without rebuilding postgame review; pause, abort,
+completion, explicit refresh, or finalization produces current derived review.
+See [Game Record](../reference/game-record.md) and
+[replay architecture](replay.md).
+
+## Card-data and image services
+
+The managed-data service builds a pending Scryfall SQLite snapshot beside the
+active database and activates it only at a safe startup boundary. A game pins
+its card metadata hash; lazy recovery opens the matching retained snapshot.
+Unreferenced snapshots and superseded downloads are pruned.
+
+The image route resolves a projected Oracle prefix against local metadata,
+accepts only the pinned HTTPS Scryfall host, bounds the response, writes the
+cache atomically, and serves the local copy thereafter. The client cannot name
+an arbitrary upstream URL or enumerate the bulk database.
 
 ## Failure and recovery
 
-Idempotency makes a retried command safe. Ambiguous persistence failures make
-the actor unavailable until durable reload. Restart recovery reopens the
-record with its exact card and semantic fingerprints. A rules/fidelity pause is
-not an administrative pause and cannot be cleared by ordinary resume.
+- A rejected command leaves authoritative state and capability use unchanged.
+- A lost response is recovered through durable idempotency.
+- An ambiguous persistence failure fails the actor closed until durable reload.
+- Reconnect starts a new cursor with a full hash-verified projection.
+- Process restart lazily recreates the actor from the checksummed record and
+  exact card/semantic fingerprints.
+- Administrative resume clears only `administrative_stop`; rules, fidelity,
+  corruption, abort, and completion remain fail-closed.
+- Loss of authenticated game access terminates the stream instead of creating
+  a reconnect loop.
 
-## Current limit
+## Deployment boundary
 
-This is a single-process local-development topology. Production accounts,
-external actor leasing, rate limiting, multi-process ownership, PostgreSQL,
-TLS/reverse-proxy operations, and hosted deployment are not implemented or
-supported by the current application.
+The topology is one local process and local storage. Production accounts,
+password recovery, rate limiting, external actor leases, multi-process
+ownership, PostgreSQL, reverse-proxy/TLS operations, secret rotation,
+monitoring, backups, abuse controls, and public hosting are not implemented.
+See [hosted operations](../operations/hosted.md), [security policy](../../SECURITY.md),
+and the [threat model](../THREAT_MODEL.md).

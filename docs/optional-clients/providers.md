@@ -1,185 +1,127 @@
 ---
-title: "Pilot providers"
+title: "Optional pilot providers"
 status: "current"
-authoritative_source: "pilot implementations, protocol schemas, and provider tests"
-verified: "2026-08-05"
+authoritative_source: "pilot interfaces, response schemas, fixed-seat tools, and provider tests"
+verified: "2026-08-06"
 audience: "pilot-provider implementers and arena operators"
 maintenance: "hand-maintained"
+concern: "optional-provider-contract"
 ---
 
-# Pilot providers
+# Optional pilot providers
 
-Pilot providers are optional automation clients. The authoritative platform,
-ordinary gameplay, tests, rules enforcement, persistence, replay, and releases
-must operate without them or any AI dependency.
+Pilot providers are untrusted strategy clients. Gameplay, legality, rules
+execution, persistence, replay, CI, and releases must operate without them or
+any AI dependency. Providers observe one principal projection and choose among
+that principal's server-issued actions; they never author rules effects or
+write state.
 
-Strategic inference is separate from the authoritative game. A provider
-implements:
+## Isolation and interface
+
+A provider implements the transport-neutral boundary:
 
 ```python
 PilotProvider.decide(observation, decision, memory) -> PilotResponse
 ```
 
-`observation` is the principal-specific full or delta packet. `decision` is its
-current capability-scoped choice. `memory` belongs to that principal only.
-Providers never receive another seat's hand, library order, private choices,
-analyst record, or arbiter-only resolution context.
+`observation` is the seat's full or delta packet, `decision` is its current
+capability-scoped catalog, and `memory` belongs only to that principal. Each
+seat receives an independent provider instance. Another seat's hand, library
+order, private choices, memory, checkpoint, analyst files, and development
+arbiter context are unavailable.
 
-## Built-in adapters
+The built-in adapters are:
 
-`ScriptedPilot` consumes exact responses or a deterministic chooser. It is for
-characterization tests and reproducible fixtures, not evidence of strong
-strategic play.
+- `ScriptedPilot` for deterministic characterization and fixtures;
+- `ManualJsonPilot` for one validated file/stdin response;
+- `SubprocessJsonPilot` for one JSON request on stdin and one JSON response on
+  stdout; and
+- the optional Codex adapter described in [Codex arena](codex-arena.md).
 
-`ManualJsonPilot` writes the compact task JSON to the configured run path and
-reads one response from a response file or stdin. It supports assisted play
-without an API or credential dependency.
+Timeout, nonzero exit, empty output, invalid JSON, schema failure, or identity
+drift is visible and fail-closed. Strict authoritative play does not invoke a
+live model to resolve unknown semantics. A development arbiter, when explicitly
+enabled, is a separate public/rules-scoped provider and is never multiplexed
+into a strategic seat.
 
-`SubprocessJsonPilot` starts the configured command with one JSON request on
-stdin and reads one JSON object on stdout. Each seat gets its own provider
-instance, so a wrapper can maintain an independent local or remote model
-session. Nonzero exit, timeout, empty output, and invalid JSON fail visibly.
+## Response schema
 
-The arbiter is a separate provider and receives only an `arbiter` capability.
-A pilot response can never submit effect-DSL operations.
-
-`codex_subagent` is the project-scoped live arena provider. It does not replace
-the scripted, manual, or subprocess adapters. Exactly four persistent
-GPT-5.6 Sol contexts are registered once, one per seat, and every later task
-returns to the same thread. The default fast pilot profile is `low` reasoning
-on the `priority` tier; the exact configured/reported identity is journaled.
-The primary GPT-5.6 Sol/Ultra task is the
-coordinator/arbiter, never a strategic pilot.
-
-Pilots do not read the run directory. `simctl pilot-mcp --game-dir <run>
---seat A` fixes the seat at startup and exposes only `get_task`,
-`submit_action`, `get_rules`, `get_profile`, `get_memory`, and
-`update_memory`. Provider/model/thread metadata is injected by the coordinator;
-pilot-supplied identity, capability, principal, effect, or semantic fields are
-rejected and journaled.
-
-`simctl arena-codex-run --game <run>` is the preferred desktop transport when
-the host cannot retain four child agents in addition to the primary. It starts
-four persistent Codex CLI sessions in parallel, disables their shell, apps,
-tools, and nested agents, and then sequentially supplies only the appropriate
-fixed-seat task. The broker validates a strict structured-output schema and
-submits through `SeatScopedPilotTools`; it never writes task packets to its
-registry or benchmark. Codex `turn.completed` input, cached-input, output,
-reasoning-output, and latency values are stored as provider-owned metrics.
-
-## Response contract
-
-Responses validate against `schemas/pilot-response.schema.json`. The Codex MCP
-tool exposes these fields directly as a typed union; it does not accept a
-nested untyped `response` blob. The preferred
-single-action shape is:
+[`schemas/pilot-response.schema.json`](../../schemas/pilot-response.schema.json)
+is the provider-response authority. Prefer one server-issued `action_id` with
+only its delegated `choices`:
 
 ```json
 {
   "action_id": "cast:A64",
   "choices": {"targets": ["B14"]},
   "plan": "DEVELOP_ENGINE",
-  "reason": "Deploy Lotus Cobra before the fetchland so landfall fixes the next color.",
+  "reason": "Develop the engine while preserving the available interaction.",
   "confidence": 0.91,
   "yield": null,
-  "memory_update": "Preserve Bojuka Bog while opposing recursion remains live."
+  "memory_update": "Preserve the graveyard answer while recursion remains live."
 }
 ```
 
-`reason` is at most 180 characters and `memory_update` at most 500. `plan` is
-one of:
+`plan`, `reason`, `confidence`, `yield`, and `memory_update` are audit or
+strategy metadata. They are removed before the engine receives the normalized
+action. The schema bounds text and confidence and restricts `plan` to its
+versioned strategic enum. Provider/model/thread/usage/latency fields are
+injected or recorded by the runner, not trusted from an action body.
 
-- `MULLIGAN`
-- `DEVELOP_MANA`
-- `FIX_COLORS`
-- `DEVELOP_ENGINE`
-- `HOLD_INTERACTION`
-- `DISRUPT_LEADER`
-- `PROTECT_ENGINE`
-- `ASSEMBLE_WIN`
-- `PRESSURE_PLAYER`
-- `RECOVER`
-- `PASS_WITH_YIELD`
+An ordered response may use `actions`, each with an `action_id`, immediate
+choices, and optional declared future choices. Only the first action is
+submitted immediately. A later entry runs without another provider call only
+when the same principal immediately receives a new decision and the exact ID is
+still legal. Another principal, material state/stack/cost/target change, hidden
+draw, unsupplied private choice, combat, semantic uncertainty, save/load,
+rejection, or stale identity cancels the remaining plan.
 
-Codex-subagent responses must include a plan category, nonempty concise reason,
-and confidence. Missing audit fields are rejected rather than silently filled
-by the parent.
+A future private search may state an intended public card name, but only the
+fixed-seat server resolves it to a physical reference after that seat receives
+the private candidate list. Provider output never selects a hidden physical
+object it was not shown.
 
-An ordered response may instead provide `actions`, each containing an
-`action_id`, immediate `choices`, and optional `future_choices`. A future
-private search choice may name the desired card; the server resolves that name
-to a physical ref only after the searching seat receives the candidate list.
-Only the first action is initially submitted. Later
-entries execute without another provider invocation only if the same principal
-immediately receives another decision and the exact action ID is still legal.
-Opposing responses, material stack/cost/target changes, new hidden draws,
-unsupplied searches or delegated choices, combat, semantic uncertainty,
-fidelity failure, rejection, save/load, or stale IDs stop the plan.
+## Rejection and retry
 
-Invalid output and rejected actions use the existing same-capability compact
-retry. The full projected state is not resent. Rejections remain in
-`decisions.jsonl` and never become accepted replay commands.
+A rejected response does not consume the game decision and never enters the
+accepted command journal. The runner may return a compact error and the current
+action catalog to the same provider instance. A retry corrects the illegal
+assumption without replacing state, identity, or another seat's context.
+Automatic fallback and retry status remain explicit audit facts.
 
-## Metadata and measurement
+## Fixed-seat tools
 
-The decision audit can persist:
+The fixed-seat façade binds one game directory and seat at process startup. It
+exposes projected task, action submission, bounded rules lookup by visible or
+legally known object reference, advisory profile, and that seat's bounded
+memory. It exposes no checkpoint, run-directory browser, arbitrary file access,
+cross-seat selector, state mutation, or effect DSL.
 
-- provider
-- model or implementation ID
-- stable thread handle/label and separate per-call invocation ID
-- input/output tokens
-- latency
-- retry count
-- automatic-fallback status
-- immutable seat thread ID/label and reasoning effort
-- first/last invocation timestamps and reuse/restart telemetry
-
-Only a call made through a provider is counted as an invocation. A decision
-record is not assumed to be a model call. Token counts are `null` with
-`token_measurement_status: "unavailable"` when the provider does not report
-them; packet-size token estimates remain separately labeled estimates.
-Configured, reported, and verified provider/model fields remain distinct.
-Refresh reconstructs summaries from the durable journal and never promotes an
-older recorded value to verified.
+Provider identity and invocation metadata are coordinator-owned. Do not label a
+manual, scripted, mock, or unavailable call as a live provider invocation. A
+missing observed value stays `null`/unavailable; packet-size estimates remain
+separately labeled estimates.
 
 ## Profiles and memory
 
-`DeckProfileCache` keys advisory JSON profiles by a canonical deck-list
-fingerprint.
-The built-in Zimone and Mishra profiles conform to
-`schemas/pilot-profile.schema.json`. The runner copies the matching profile
-into that seat's `PilotMemory` once, and persists memory independently in
-`pilot-seat-memory/<seat>.json`.
+Advisory deck profiles validate against
+[`schemas/pilot-profile.schema.json`](../../schemas/pilot-profile.schema.json)
+and bind to a canonical deck-list fingerprint. Commander/archetype fallback is
+explicit, warns, and never counts as an exact profile match. Profiles and
+memory guide strategy only; the engine never reads them to decide legality.
 
-Profiles describe strategy, mulligan policy, colors, engines, preservation
-priorities, and threat assessment. They are not rules data. The engine does not
-read them and cannot use them to make a card legal.
+Memory is bounded and persisted independently by principal. A runner may resume
+the same provider-side session, but the durable game remains valid when
+provider-side context is unavailable only if the run stops honestly rather
+than silently substituting identity.
 
-Profile schema v2 distinguishes `deck_list_fingerprint`, optional
-`deck_source_fingerprint`, `profile_source_fingerprint`,
-`profile_schema_version`, and `fingerprint_algorithm_version`. Exact compatible
-list identity is required by default. A commander/archetype fallback must be
-explicitly enabled, emits a fidelity warning, and never counts as
-`profile_fingerprint_match`. Refreshing a changed live Moxfield list therefore
-invalidates stale tutor, combo, and mulligan assumptions.
+## Run and resume
 
-## CLI
+Use `simctl.py pilot-run --help` for the current adapter arguments. A run
+directory resumes the same checkpoint, projection cursor, profiles, and seat
+memory. External providers own restoration of any additional remote session
+state.
 
-```bash
-python simctl.py pilot-run \
-  --db data/scryfall-current.sqlite3 \
-  --profile commander_duel \
-  --deck A=<public-moxfield-url> \
-  --deck B=<public-moxfield-url> \
-  --pilot A=manual \
-  --pilot B=subprocess:"python local_model_wrapper.py" \
-  --output run/native-game
-```
-
-Running the same command again resumes an existing output directory. The
-checkpoint, projection cursors, profiles, and per-seat memories are restored.
-The external subprocess is responsible for restoring any provider-side session
-state beyond the persisted compact memory supplied in the request.
-
-See `CODEX_ARENA.md` for the project agent files, primary prompt, lifecycle,
-fixed-seat commands, and honest provider-identity rules.
+See the [application protocol](../reference/protocol.md),
+[visibility boundary](../architecture/visibility.md), and
+[Game Record](../reference/game-record.md).
