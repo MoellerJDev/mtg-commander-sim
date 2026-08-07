@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "9a1819822d505d07266b1989a3c93ad463bd7aed",
+  "baseline_commit": "59b47ea9e634db4632e6f466885c65c87abb2e42",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -169,12 +169,6 @@
       "kind": "mutating_call:append",
       "state_path": "stack",
       "symbol": "_copy_stack_item"
-    },
-    {
-      "file": "mtg_commander_sim/engine.py",
-      "kind": "mutating_call:remove",
-      "state_path": "stack",
-      "symbol": "_counter_stack_item"
     },
     {
       "file": "mtg_commander_sim/engine.py",
@@ -730,12 +724,12 @@
     }
   ],
   "direct_game_state_writes_by_file": {
-    "mtg_commander_sim/engine.py": 111,
+    "mtg_commander_sim/engine.py": 110,
     "mtg_commander_sim/permissions.py": 8,
     "mtg_commander_sim/record.py": 11
   },
   "engine": {
-    "logical_lines": 12492,
+    "logical_lines": 12449,
     "methods": [
       {
         "kind": "method",
@@ -2278,12 +2272,12 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 13226
+    "physical_lines": 13183
   },
   "exception_binding": {
-    "adr": "docs/adr/0029-typed-permanent-exile.md",
-    "allowance_fingerprint": "eccfcd08044a84e72d3b7643f666d501f2b9a83a6b4219c48b457602819686c0",
-    "exception_id": "ARCH-EXC-0011"
+    "adr": "docs/adr/0030-typed-stack-counter.md",
+    "allowance_fingerprint": "2b8a233fed455174b270f62c806626eb2e45874973f7a4ea47fb9303a4e922fd",
+    "exception_id": "ARCH-EXC-0012"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2432,7 +2426,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 225,
+      "logical_lines": 235,
       "symbol": "CommanderEngine._target_row_matches"
     },
     {
@@ -2452,12 +2446,12 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 441,
+      "logical_lines": 453,
       "symbol": "_compile_face"
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 351,
+      "logical_lines": 338,
       "symbol": "_effect_template"
     },
     {
@@ -2518,7 +2512,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 12492
+      "logical_lines": 12449
     },
     {
       "file": "mtg_commander_sim/record.py",
@@ -2563,6 +2557,7 @@
     "counter_all_subtype",
     "counter_or_destroy_blue",
     "counter_stack",
+    "counter_stack_target",
     "counter_unless_pay",
     "create_damage_prevention_shield",
     "create_damage_redirection",
@@ -2658,6 +2653,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "8e79a21c109c3af1038a18dc549af506b56155f63b27d509cedd6499026b075d"
+    "printed_name_allowances_sha256": "80860714b832eb26d92e9d3ade811d0eb05f9d007a8d722a313ff7e9f536e9af"
   }
 }

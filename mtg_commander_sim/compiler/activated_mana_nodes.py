@@ -253,6 +253,7 @@ def _activated_effect_dependency_gate(
         and str(effects[0].get("op") or "")
         in {
             "bounce",
+            "counter_stack_target",
             "damage",
             "damage_each_opponent",
             "draw",

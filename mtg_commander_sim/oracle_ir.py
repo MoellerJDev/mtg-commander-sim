@@ -20,6 +20,10 @@ from .compiler.corpus_reporting import (
 from .compiler.continuous_templates import (
     controlled_creature_until_end_of_turn_effect,
 )
+from .compiler.counter_templates import (
+    is_intrinsically_uncounterable_spell,
+    targeted_counter_effect_template,
+)
 from .compiler.cycling_nodes import ordinary_cycling_keyword_node
 from .cycling_abilities import CYCLING_MECHANIC_ID
 from .compiler.activated_mana_nodes import (
@@ -70,7 +74,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v41"
+ORACLE_COMPILER_VERSION = "oracle-ir-v42"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
@@ -217,22 +221,9 @@ def _effect_template(
     returned = targeted_return_to_hand_effect_template(normalized)
     if returned is not None:
         return returned.compiled()
-    match = re.fullmatch(
-        r"counter target spell\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        return (
-            "counter-target-spell-v1",
-            ({"op": "counter_stack", "stack": "$target.0"},),
-            {
-                "zones": ["stack"],
-                "categories": ["spell"],
-                "count": 1,
-            },
-            ("counter", "cr-115-targets"),
-        )
+    countered = targeted_counter_effect_template(normalized)
+    if countered is not None:
+        return countered.compiled()
     match = re.fullmatch(
         r"target player mills (?P<count>\d+) cards?\.?",
         normalized,
@@ -727,6 +718,65 @@ def _runtime_handler_node(
     )
 
 
+def _intrinsic_counter_prohibition_node(
+    *,
+    node_id: str,
+    line: str,
+    material_line: str,
+    span: SourceSpan,
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+) -> OracleNode | None:
+    if not is_intrinsically_uncounterable_spell(material_line):
+        return None
+    gate = _explicit_capability_gate(
+        "stack.counter.prohibition.intrinsic",
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+    )
+    residual_ids = (
+        (
+            _residual(
+                residuals,
+                kind="dependency_contract",
+                text=line,
+                span=span,
+                reason=(
+                    "intrinsic counter prohibition lacks a trusted "
+                    "capability closure"
+                ),
+                blockers=gate.blockers,
+            ),
+        )
+        if gate.blockers
+        else ()
+    )
+    return OracleNode(
+        node_id=node_id,
+        kind="static_ability",
+        text=line,
+        span=span,
+        active_zone="stack",
+        event="continuous",
+        lowerable=True,
+        exact=not gate.blockers,
+        template_id="intrinsic-spell-counter-prohibition-v1",
+        mechanics=("counter",),
+        residual_ids=residual_ids,
+        capability_dependencies=gate.capabilities,
+        capability_closure=(
+            gate.closure.reachable if gate.closure is not None else ()
+        ),
+        capability_profile=(
+            gate.closure.profile if gate.closure is not None else None
+        ),
+        capability_fingerprint=(
+            gate.closure.fingerprint if gate.closure is not None else None
+        ),
+    )
+
+
 def _trigger_node(
     *,
     node_id: str,
@@ -934,6 +984,19 @@ def _compile_face(
         )
         if event_nodes is not None:
             nodes.extend(event_nodes)
+            continue
+
+        counter_prohibition = _intrinsic_counter_prohibition_node(
+            node_id=node_id,
+            line=line,
+            material_line=material_line,
+            span=span,
+            capability_registry=capability_registry,
+            capability_profile=capability_profile,
+            residuals=residuals,
+        )
+        if counter_prohibition is not None:
+            nodes.append(counter_prohibition)
             continue
 
         enters_tapped = re.fullmatch(

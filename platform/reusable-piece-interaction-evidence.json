@@ -554,6 +554,22 @@
       "capability_ids": ["permanent.return.owner_hand"],
       "interaction_order": 3,
       "assertion": "The typed return request enters the canonical zone-change replacement tree and reports the committed replacement destination without bypassing CR 400 ownership."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_counter_target_that_leaves_stack_invalidates_resolution",
+      "piece_ids": ["capability.stack.counter.effect", "capability.target.revalidate_resolution", "mechanic.counter"],
+      "capability_ids": ["stack.counter.effect", "target.revalidate_resolution"],
+      "interaction_order": 3,
+      "assertion": "A typed direct counter revalidates the selected public stack identity immediately before execution and fails closed when that object already left the stack."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_intrinsic_uncounterable_spell_survives_typed_counter",
+      "piece_ids": ["capability.stack.counter.effect", "capability.stack.counter.prohibition.intrinsic", "mechanic.counter"],
+      "capability_ids": ["stack.counter.effect", "stack.counter.prohibition.intrinsic"],
+      "interaction_order": 3,
+      "assertion": "The direct counter owner consumes the exact trusted intrinsic counter-prohibition declaration pinned at cast commit and leaves the protected spell on the stack."
     }
   ]
 }

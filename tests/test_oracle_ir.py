@@ -77,6 +77,7 @@ class MechanicContractTests(unittest.TestCase):
             {
                 "cr-613-interaction-of-continuous-effects",
                 "cr-616-interaction-of-replacement-and-or-prevention-effects",
+                "counter",
                 "destroy",
                 "cr-111-tokens",
                 "cr-120-damage",

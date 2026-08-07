@@ -1,5 +1,5 @@
 {
-  "contract_count": 81,
+  "contract_count": 82,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -101,6 +101,12 @@
       "mechanic_id": "cr-707-copying-objects",
       "path": "mechanics/contracts/copying-objects.json",
       "sha256": "6c3620b6ef7d267679778eff709af9d574117e65ba9254464034b1ea8b377e0a",
+      "version": 1
+    },
+    {
+      "mechanic_id": "counter",
+      "path": "mechanics/contracts/counter.json",
+      "sha256": "de7e4e249820db72778e5cfb443ac249bab42d97d657b0247ed1df5a9be9fca9",
       "version": 1
     },
     {
@@ -4734,19 +4740,49 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/counter.json",
+      "contract_sha256": "de7e4e249820db72778e5cfb443ac249bab42d97d657b0247ed1df5a9be9fca9",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "701"
       ],
-      "implementation_component": null,
+      "implementation_component": "closed direct-counter compiler, strict semantic handler, typed stack-counter owner, target revalidation, and trusted intrinsic prohibition declaration",
+      "implementation_version": "typed-direct-stack-counter-v1",
       "kind": "keyword_action",
+      "known_blockers": [
+        "conditional-payment, optional, modal, mass, multi-target, linked-result, and alternate-destination counter clauses remain residual",
+        "conditional, source-qualified, name-qualified, target-qualified, and variable-mana-value stack predicates remain residual",
+        "conditional, source-qualified, granted, and temporary counter prohibitions beyond existing typed cast context remain unsupported",
+        "complete counter replacement and destination replacement ordering remains unsupported",
+        "the broad Counter keyword action remains untrusted even though the two bounded capabilities are trusted"
+      ],
       "mechanic_id": "counter",
       "official_name": "Counter",
       "rule_references": [
         "701.6"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_counter_whole_clause_parser_accepts_only_closed_direct_targets",
+        "test_spell_trigger_and_activated_contexts_share_targeted_counter_lowering",
+        "test_all_closed_counter_target_domains_have_precise_source_spans",
+        "test_unsupported_counter_variants_remain_material_residuals",
+        "test_targeted_counter_shape_mutants_fail_closed",
+        "test_intrinsic_uncounterable_compiles_as_stack_capability",
+        "test_conditional_counter_prohibitions_remain_residuals",
+        "test_generated_targeted_counter_program_is_capability_closed",
+        "test_handler_lowers_one_strict_typed_counter_intent",
+        "test_compiled_counter_targets_exact_stack_domains_and_replays",
+        "test_countered_ability_leaves_card_zones_unchanged",
+        "test_counter_source_cannot_target_its_own_stack_object",
+        "test_intrinsic_uncounterable_spell_survives_typed_counter",
+        "test_temporary_spell_prohibition_does_not_protect_abilities",
+        "test_counter_target_that_leaves_stack_invalidates_resolution",
+        "test_untrusted_counter_prohibition_declaration_is_ignored",
+        "test_missing_stack_target_rolls_back_without_mutation",
+        "test_stack_counter_owner_mutants_are_killed",
+        "test_intrinsic_counter_prohibition_mutant_is_killed"
+      ],
       "trust_level": "untrusted"
     },
     {

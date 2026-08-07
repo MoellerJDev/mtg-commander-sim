@@ -171,6 +171,11 @@ from .mana_undo import (
     undo_mana_activation,
 )
 from .tap_state import tap_declared_attackers
+from .stack_counter import (
+    counter_stack_item,
+    stack_item_can_be_countered,
+)
+from .stack_resolution import trusted_generic_empty_resolution
 from .mana_payment_continuations import (
     execute_mana_choice_capable_priority_action,
 )
@@ -6574,6 +6579,16 @@ class CommanderEngine(
                     or stack_item.kind != "triggered_ability"
                 ):
                     return False
+            elif group.predicate == "activated_ability":
+                stack_item = row.get("stack_item")
+                if (
+                    not isinstance(stack_item, StackItem)
+                    or stack_item.kind != "activated_ability"
+                ):
+                    return False
+            elif group.predicate == "nonblue_spell":
+                if row.get("category") != "spell" or "U" in colors:
+                    return False
             else:
                 raise GameRuleError(
                     f"Unsupported target predicate {group.predicate!r}"
@@ -7090,7 +7105,7 @@ class CommanderEngine(
             public_schema = self._public_target_schema(
                 item.controller,
                 target_schema,
-                source_ref=self._stack_source_ref(item),
+                source_ref=item.ref,
             )
             if public_schema is None:
                 self._counter_stack_item(
@@ -7842,18 +7857,9 @@ class CommanderEngine(
                 if not self._stabilize():
                     self._grant_priority(self.state.active_player)
                 return
-        trusted_generic_resolution = False
-        if program is None and item.kind == "spell" and item.card_object_id:
-            record = self.card_record(item.card_object_id)
-            trusted_generic_resolution = bool(
-                record and self._trusted_generic_spell(record)
-            )
-        elif (
-            program is None
-            and item.kind == "spell_copy"
-            and item.context.get("copy_permanent_spell")
-        ):
-            trusted_generic_resolution = True
+        trusted_generic_resolution = trusted_generic_empty_resolution(
+            self, item, program
+        )
         if (
             self.state.config.semantic_policy == "trusted_only"
             and (
@@ -7920,6 +7926,14 @@ class CommanderEngine(
                 list(item.context.get("dynamic_effects") or []),
                 item.default_destination,
                 note=item.notes,
+            )
+            return
+        if trusted_generic_resolution is not None:
+            self._begin_resolve_item(
+                item,
+                [],
+                trusted_generic_resolution.destination,
+                note=trusted_generic_resolution.note,
             )
             return
         if self._program_can_auto_resolve(item):
@@ -8422,7 +8436,7 @@ class CommanderEngine(
             program,
             targets,
             modes=modes,
-            source_ref=self._stack_source_ref(item),
+            source_ref=item.ref,
             target_schema=self._stack_target_schema(item, program),
         )
         item.targets = validated
@@ -9496,24 +9510,7 @@ class CommanderEngine(
         )
 
     def _stack_item_can_be_countered(self, item: StackItem) -> bool:
-        if item.context.get("cant_be_countered"):
-            return False
-        if self.state.players[item.controller].stats.get(
-            "spells_cant_be_countered_until_end"
-        ):
-            return False
-        if item.card_object_id:
-            card = self.state.cards[item.card_object_id]
-            if card.annotations.get("cant_be_countered"):
-                return False
-            record = self.card_record(card)
-            if (
-                record
-                and "this spell can't be countered"
-                in record.oracle_text.casefold()
-            ):
-                return False
-        return True
+        return stack_item_can_be_countered(self, item)
 
     def _counter_stack_item(
         self,
@@ -9524,54 +9521,14 @@ class CommanderEngine(
         as_rule: bool = False,
         countered_by: str | None = None,
     ) -> StackItem:
-        item = next((candidate for candidate in self.state.stack if candidate.ref == value or candidate.stack_id == value), None)
-        if item is None:
-            raise GameRuleError(f"No stack object {value}")
-        if not as_rule and not self._stack_item_can_be_countered(item):
-            self._log(
-                countered_by,
-                "stack.counter.failed",
-                f"{item.ref} {item.label} could not be countered.",
-                {
-                    "stack": item.ref,
-                    "reason": reason,
-                    "cant_be_countered": True,
-                },
-                importance=2,
-            )
-            return item
-        self.state.stack.remove(item)
-        self._maybe_sacrifice_completed_saga(item)
-        if item.card_object_id:
-            card = self.state.cards[item.card_object_id]
-            if card.zone == "stack":
-                self.move_card(card.object_id, destination, reason=reason, log=False)
-        telemetry_seat = (
-            countered_by
-            if countered_by in self.state.players
-            else item.controller
+        return counter_stack_item(
+            self,
+            value,
+            destination=destination,
+            reason=reason,
+            as_rule=as_rule,
+            countered_by=countered_by,
         )
-        self._increment_optimization(
-            telemetry_seat,
-            (
-                "spells_countered_by_rules"
-                if as_rule
-                else "spells_countered_by_effect"
-            ),
-        )
-        self._log(
-            countered_by,
-            "stack.counter",
-            f"{item.ref} {item.label} was countered.",
-            {
-                "stack": item.ref,
-                "destination": destination,
-                "reason": reason,
-                "counter_kind": "rules" if as_rule else "effect",
-            },
-            importance=2,
-        )
-        return item
 
     def _maybe_sacrifice_completed_saga(
         self, chapter_item: StackItem

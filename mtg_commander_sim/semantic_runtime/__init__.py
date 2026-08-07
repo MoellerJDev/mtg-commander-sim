@@ -152,6 +152,10 @@ from .return_to_hand_handlers import (
     RETURN_TO_HAND_HANDLERS,
     ReturnPermanentToOwnerHandHandler,
 )
+from .stack_counter_handlers import (
+    CounterStackTargetHandler,
+    STACK_COUNTER_HANDLERS,
+)
 from .generic import GENERIC_HANDLERS
 from .handlers import SemanticNodeHandler
 from .intents import (
@@ -240,6 +244,7 @@ def default_semantic_handler_registry() -> SemanticHandlerRegistry:
             *DESTRUCTION_HANDLERS,
             *PERMANENT_EXILE_HANDLERS,
             *RETURN_TO_HAND_HANDLERS,
+            *STACK_COUNTER_HANDLERS,
             *DOMAIN_EFFECT_HANDLERS,
         )
     )
@@ -274,6 +279,7 @@ __all__ = [
     "AmassIntent",
     "BecomeMonarchIntent",
     "CounterStackIntent",
+    "CounterStackTargetHandler",
     "CopyControlledTokensIntent",
     "CopyStackItemIntent",
     "ChooseOneRestBottomRandomIntent",

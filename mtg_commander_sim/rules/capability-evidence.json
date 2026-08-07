@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "c26e6082e685a4614aa5f0139e8edd6d6c3223df0d62347d80ca4570702827a4",
-  "declaration_source_fingerprint": "5f76e572386d60cab900e1fbfa282e52bc6c411a0a657673b69a58d7dfeda4b0",
+  "registry_fingerprint": "1edf3d47774bf7d8e403ae20da30bcc9699409bbb5709318357afda12e3e5059",
+  "declaration_source_fingerprint": "242f4f121f17811efa76678ee33df26a8ab59fa3ed89c42a9dd7b77824ba2078",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -10652,6 +10652,384 @@
       "applicability_note": "Replay the exact protected-object filtering and selected legal Aura attachment from a pinned continuation."
     },
     {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_target_that_leaves_stack_invalidates_resolution",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate the selected stack object on resolution and counter the countering spell by the represented game-rule path after its sole target leaves the stack."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_intrinsic_uncounterable_spell_survives_typed_counter",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve a generated typed counter against an intrinsically uncounterable spell and retain the target on the stack until its ordinary resolution."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Advertise, submit, resolve, and publicly project one generated direct counter instruction in a four-seat game."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_stack_counter_owner_mutants_are_killed",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill suppression of the counterability guard and omission of the canonical stack-removal and countered-spell zone movement owner."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_source_cannot_target_its_own_stack_object",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exclude the counter spell or ability's own stack object from the legal target set."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_targeted_counter_shape_mutants_fail_closed",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject altered operations, target references, target domains, source-exclusion rules, and missing mechanic ownership before capability promotion."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_unsupported_counter_variants_remain_material_residuals",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep optional, conditional-payment, mass, qualified, linked-result, and alternate-destination counter clauses outside the bounded grammar."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Offer and commit an exact generated counter spell through the same target and legality path advertised to the acting player."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_countered_ability_leaves_card_zones_unchanged",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Remove a represented activated ability from the stack without moving any physical card between zones."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_handler_lowers_one_strict_typed_counter_intent",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Validate one strict JSON-compatible counter operation and lower it through a read-only handler context to one typed stack-counter intent."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_counter_lowering",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower the same mandatory direct counter instruction from spell, triggered, and activated contexts with exact source spans."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project only public stack and graveyard results while withholding unrelated opposing hand identities."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the advertised target, paid counter spell, canonical stack removal, public zone result, event journal, and final state hash exactly."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_missing_stack_target_rolls_back_without_mutation",
+      "official_rule_ids": [
+        "115.1",
+        "115.5",
+        "608.2b",
+        "701.6",
+        "701.6a",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a missing stack identity before any stack, zone, telemetry, or event mutation."
+    },
+    {
+      "capability_id": "stack.counter.prohibition.intrinsic",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_intrinsic_uncounterable_spell_survives_typed_counter",
+      "official_rule_ids": [
+        "101.2",
+        "609.1",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Pin a trusted intrinsic prohibition to the cast spell and reject a later generated typed counter instruction."
+    },
+    {
+      "capability_id": "stack.counter.prohibition.intrinsic",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_intrinsic_counter_prohibition_mutant_is_killed",
+      "official_rule_ids": [
+        "101.2",
+        "609.1",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill omission of the trusted static CardProgram lookup during spell stack creation."
+    },
+    {
+      "capability_id": "stack.counter.prohibition.intrinsic",
+      "evidence_class": "negative",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_untrusted_counter_prohibition_declaration_is_ignored",
+      "official_rule_ids": [
+        "101.2",
+        "609.1",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Ignore a provisional declaration even when it claims the intrinsic counter-prohibition capability."
+    },
+    {
+      "capability_id": "stack.counter.prohibition.intrinsic",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_conditional_counter_prohibitions_remain_residuals",
+      "official_rule_ids": [
+        "101.2",
+        "609.1",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Leave conditional, source-qualified, granted, and temporary counter prohibitions outside the exact intrinsic sentence family."
+    },
+    {
+      "capability_id": "stack.counter.prohibition.intrinsic",
+      "evidence_class": "positive",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_intrinsic_uncounterable_spell_survives_typed_counter",
+      "official_rule_ids": [
+        "101.2",
+        "609.1",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Consume the exact trusted static declaration during cast commit and pin the prohibition to the created spell object."
+    },
+    {
+      "capability_id": "stack.counter.prohibition.intrinsic",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_intrinsic_uncounterable_compiles_as_stack_capability",
+      "official_rule_ids": [
+        "101.2",
+        "609.1",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Compile only the complete intrinsic sentence into an exact stack-active typed capability declaration with a precise source span."
+    },
+    {
+      "capability_id": "stack.counter.prohibition.intrinsic",
+      "evidence_class": "replay",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_intrinsic_uncounterable_spell_survives_typed_counter",
+      "official_rule_ids": [
+        "101.2",
+        "609.1",
+        "701.6b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the generated counter attempt against a checkpoint-pinned intrinsic prohibition with the same failed-counter journal and final state."
+    },
+    {
       "capability_id": "target.public.player_or_damageable_permanent",
       "evidence_class": "interaction",
       "test_id": "tests.test_exact_mishra_closure.ExactMishraClosureTests.test_stasis_coffin_protection_blocks_targeting_and_damage",
@@ -12880,5 +13258,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "4fc1e59c5cb71ad7ac19527f7161755f451fdbcf0b3f02d552ac39cbac853e9c"
+  "fingerprint": "20d14048e077d2544860e08d5d0eca66202465a540508f77557c9f3dca4e796e"
 }

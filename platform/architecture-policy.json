@@ -61,6 +61,7 @@
     "mtg_commander_sim/rules_corpus.py",
     "mtg_commander_sim/semantics.py",
     "mtg_commander_sim/shortcuts.py",
+    "mtg_commander_sim/stack_counter.py",
     "mtg_commander_sim/state_based_actions.py",
     "mtg_commander_sim/state_based_execution.py",
     "mtg_commander_sim/state_planner.py",
@@ -163,6 +164,7 @@
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
       "mtg_commander_sim/permanent_exile.py": "typed identity-pinned permanent-exile transaction delegating mutation to the canonical zone-change owner",
       "mtg_commander_sim/return_to_hand.py": "typed identity-pinned permanent-return transaction delegating mutation to the canonical zone-change owner",
+      "mtg_commander_sim/stack_counter.py": "typed stack-counter legality, removal, ordinary spell destination, telemetry, and public journal owner",
       "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine",
       "mtg_commander_sim/trigger_discovery.py": "normalized semantic trigger detection and immutable ordinary occurrence construction behind CommanderEngine"
       ,"mtg_commander_sim/mana_activation.py": "activated mana ability and reversible activation transaction owner"

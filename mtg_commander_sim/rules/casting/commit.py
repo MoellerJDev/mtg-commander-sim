@@ -7,6 +7,7 @@ from typing import Any, Protocol
 
 from ...life_state import LifeStateError, pay_life_cost
 from ...model import StackItem, YieldPolicy
+from ...stack_counter import oracle_has_intrinsic_counter_prohibition
 from ...tap_state import set_permanent_tapped
 from ...trigger_processing import enqueue_trigger_batch
 from ..action_proposals import CastProposal, thaw_json
@@ -73,6 +74,8 @@ class CastCommitHost(Protocol):
     def _queue_ward_triggers_for_targets(self, item: Any) -> Any: ...
 
     def _stabilize(self) -> bool: ...
+
+    def semantic_program_is_current_trusted(self, program: Any) -> bool: ...
 
 
 @dataclass(slots=True)
@@ -306,6 +309,11 @@ def _create_spell_item(
             "next_spell_uncounterable", False
         )
     )
+    intrinsic_uncounterable = oracle_has_intrinsic_counter_prohibition(
+        host.semantics,
+        record.oracle_id,
+        current_trusted=host.semantic_program_is_current_trusted,
+    )
     return StackItem(
         stack_id=host._stable_runtime_id("stack", ref),
         ref=ref,
@@ -336,7 +344,9 @@ def _create_spell_item(
                 if details.get("aura_enchant_spec") is not None
                 else {}
             ),
-            "cant_be_countered": used_uncounterable,
+            "cant_be_countered": (
+                used_uncounterable or intrinsic_uncounterable
+            ),
             "granted_improvise": used_improvise,
             "cost_option": proposal.cost_option_id,
             **(

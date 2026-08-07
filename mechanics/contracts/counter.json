@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "counter",
+  "official_name": "Counter",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "101.2",
+    "115.1",
+    "115.5",
+    "608.2b",
+    "701.6",
+    "701.6a",
+    "701.6b"
+  ],
+  "glossary_references": ["counter", "uncounterable"],
+  "dependencies": [
+    "targets",
+    "stack",
+    "zone-changes",
+    "continuous-effects",
+    "replay"
+  ],
+  "coverage_status": "partial",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["stack", "graveyard"],
+    "objects": [
+      "spell stack object",
+      "activated-ability stack object",
+      "triggered-ability stack object",
+      "physical spell card"
+    ],
+    "events": [
+      "counter a spell or nonmana ability",
+      "reject a represented counter prohibition",
+      "resolution-time target invalidation"
+    ],
+    "state_reads": [
+      "public stack identity",
+      "canonical spell or ability category",
+      "effective spell types and colors",
+      "trusted intrinsic counter-prohibition declaration"
+    ],
+    "state_writes": [
+      "canonical stack removal",
+      "ordinary countered-spell movement to its owner's graveyard",
+      "public counter or counter-failure journal",
+      "decision-optimization telemetry"
+    ],
+    "costs": [],
+    "timing": [
+      "the bounded effect executes during resolution after target revalidation"
+    ],
+    "targets": [
+      "one current public spell, activated ability, or triggered ability in a closed target domain",
+      "a counter instruction cannot target its own stack object"
+    ],
+    "choices": [
+      "the acting player chooses one legal public stack target while announcing the spell or ability"
+    ],
+    "hidden_information": [
+      "the bounded family reads and projects only public stack and public destination information"
+    ],
+    "apnap": [
+      "ordinary multiplayer priority determines when a counter spell or ability may be announced"
+    ],
+    "layers": [
+      "only an exact trusted intrinsic 'This spell can't be countered' declaration is represented by this slice"
+    ],
+    "replacement_effects": [
+      "alternate destinations and replacement effects for countered spells remain outside this bounded slice"
+    ],
+    "copy": [
+      "spell copies are stack objects and ordinary copies do not inherit an intrinsic prohibition from the copied physical card unless the stack snapshot says so"
+    ],
+    "control_change": [
+      "the current stack controller supplies counter-prohibition and telemetry context"
+    ],
+    "zone_change": [
+      "a countered physical spell ordinarily moves from the stack to its owner's graveyard",
+      "a countered ability leaves the stack without moving a card"
+    ],
+    "source_leaves": [
+      "the resolving counter instruction does not require its physical source to remain in its prior zone"
+    ]
+  },
+  "variants": [
+    "mandatory direct counter target spell",
+    "mandatory direct counter target typed spell domain",
+    "mandatory direct counter target activated or triggered ability",
+    "intrinsic complete-sentence counter prohibition",
+    "resolution-time target invalidation",
+    "four-player public projection",
+    "transaction rollback",
+    "exact command replay"
+  ],
+  "witness_cards": [
+    {
+      "name": "Counterspell",
+      "oracle_id": "cc187110-1148-4090-bbb8-e205694a39f5"
+    },
+    {
+      "name": "Supreme Verdict",
+      "oracle_id": "0230de18-8d15-4cfa-9d42-7ccddd9f9570"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_counter_whole_clause_parser_accepts_only_closed_direct_targets",
+    "test_spell_trigger_and_activated_contexts_share_targeted_counter_lowering",
+    "test_all_closed_counter_target_domains_have_precise_source_spans",
+    "test_unsupported_counter_variants_remain_material_residuals",
+    "test_targeted_counter_shape_mutants_fail_closed",
+    "test_intrinsic_uncounterable_compiles_as_stack_capability",
+    "test_conditional_counter_prohibitions_remain_residuals",
+    "test_generated_targeted_counter_program_is_capability_closed",
+    "test_handler_lowers_one_strict_typed_counter_intent",
+    "test_compiled_counter_targets_exact_stack_domains_and_replays",
+    "test_countered_ability_leaves_card_zones_unchanged",
+    "test_counter_source_cannot_target_its_own_stack_object",
+    "test_intrinsic_uncounterable_spell_survives_typed_counter",
+    "test_temporary_spell_prohibition_does_not_protect_abilities",
+    "test_counter_target_that_leaves_stack_invalidates_resolution",
+    "test_untrusted_counter_prohibition_declaration_is_ignored",
+    "test_missing_stack_target_rolls_back_without_mutation",
+    "test_stack_counter_owner_mutants_are_killed",
+    "test_intrinsic_counter_prohibition_mutant_is_killed"
+  ],
+  "implementation": {
+    "component": "closed direct-counter compiler, strict semantic handler, typed stack-counter owner, target revalidation, and trusted intrinsic prohibition declaration",
+    "version": "typed-direct-stack-counter-v1",
+    "capability_ids": [
+      "stack.counter.effect",
+      "stack.counter.prohibition.intrinsic"
+    ],
+    "supported_slice": "Mandatory direct one-target counter clauses over the closed spell and nonmana-ability domains, plus the complete intrinsic sentence 'This spell can't be countered'."
+  },
+  "known_blockers": [
+    "conditional-payment, optional, modal, mass, multi-target, linked-result, and alternate-destination counter clauses remain residual",
+    "conditional, source-qualified, name-qualified, target-qualified, and variable-mana-value stack predicates remain residual",
+    "conditional, source-qualified, granted, and temporary counter prohibitions beyond existing typed cast context remain unsupported",
+    "complete counter replacement and destination replacement ordering remains unsupported",
+    "the broad Counter keyword action remains untrusted even though the two bounded capabilities are trusted"
+  ],
+  "review_status": "reviewed"
+}
