@@ -1677,6 +1677,11 @@
           "module": "mtg_commander_sim.engine"
         },
         {
+          "fan_in": 8,
+          "fan_out": 25,
+          "module": "mtg_commander_sim.oracle_ir"
+        },
+        {
           "fan_in": 10,
           "fan_out": 25,
           "module": "mtg_commander_sim.semantic_runtime"
@@ -1685,11 +1690,6 @@
           "fan_in": 2,
           "fan_out": 24,
           "module": "mtg_commander_sim"
-        },
-        {
-          "fan_in": 8,
-          "fan_out": 24,
-          "module": "mtg_commander_sim.oracle_ir"
         },
         {
           "fan_in": 7,
@@ -1747,7 +1747,7 @@
           "module": "mtg_commander_sim.mana_activation"
         }
       ],
-      "internal_edges": 973,
+      "internal_edges": 974,
       "modules": [
         {
           "fan_in": 2,
@@ -2135,6 +2135,11 @@
           "module": "mtg_commander_sim.compiler.runtime_templates"
         },
         {
+          "fan_in": 1,
+          "fan_out": 0,
+          "module": "mtg_commander_sim.compiler.tap_state_templates"
+        },
+        {
           "fan_in": 0,
           "fan_out": 7,
           "module": "mtg_commander_sim.compiler.unlock_frontier"
@@ -2426,7 +2431,7 @@
         },
         {
           "fan_in": 8,
-          "fan_out": 24,
+          "fan_out": 25,
           "module": "mtg_commander_sim.oracle_ir"
         },
         {
@@ -3133,7 +3138,7 @@
       "structural_identity": "file, nearest symbol, literal value, conditional use"
     },
     "production": {
-      "file_count": 278,
+      "file_count": 279,
       "largest_functions_and_methods": [
         {
           "end_line": 1645,
@@ -3180,10 +3185,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 1385,
+          "end_line": 1364,
           "file": "mtg_commander_sim/oracle_ir.py",
           "kind": "function",
-          "line": 936,
+          "line": 915,
           "logical_lines": 441,
           "name": "_compile_face",
           "physical_lines": 450,
@@ -3191,13 +3196,13 @@
           "visibility": "private"
         },
         {
-          "end_line": 556,
+          "end_line": 535,
           "file": "mtg_commander_sim/oracle_ir.py",
           "kind": "function",
-          "line": 127,
-          "logical_lines": 429,
+          "line": 128,
+          "logical_lines": 407,
           "name": "_effect_template",
-          "physical_lines": 430,
+          "physical_lines": 408,
           "symbol": "_effect_template",
           "visibility": "private"
         },
@@ -3466,12 +3471,12 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 105736,
+      "logical_lines": 105873,
       "methods": {
-        "dunder": 249,
+        "dunder": 250,
         "private": 648,
-        "public": 1043,
-        "total": 1940
+        "public": 1048,
+        "total": 1946
       },
       "modules": [
         {
@@ -3517,18 +3522,18 @@
           "physical_lines": 1629
         },
         {
-          "file": "mtg_commander_sim/oracle_ir.py",
-          "functions_and_methods": 14,
-          "language": "python",
-          "logical_lines": 1472,
-          "physical_lines": 1521
-        },
-        {
           "file": "mtg_commander_sim/rules_corpus.py",
           "functions_and_methods": 38,
           "language": "python",
           "logical_lines": 1464,
           "physical_lines": 1561
+        },
+        {
+          "file": "mtg_commander_sim/oracle_ir.py",
+          "functions_and_methods": 14,
+          "language": "python",
+          "logical_lines": 1451,
+          "physical_lines": 1500
         },
         {
           "file": "mtg_commander_sim/reusable_pieces/generation.py",
@@ -3650,18 +3655,18 @@
           "physical_lines": 869
         },
         {
+          "file": "mtg_commander_sim/rules/capabilities.py",
+          "functions_and_methods": 27,
+          "language": "python",
+          "logical_lines": 821,
+          "physical_lines": 888
+        },
+        {
           "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
           "functions_and_methods": 12,
           "language": "python",
           "logical_lines": 810,
           "physical_lines": 837
-        },
-        {
-          "file": "mtg_commander_sim/rules/capabilities.py",
-          "functions_and_methods": 27,
-          "language": "python",
-          "logical_lines": 809,
-          "physical_lines": 876
         },
         {
           "file": "mtg_commander_sim/replacement/ordering.py",
@@ -3748,6 +3753,13 @@
           "physical_lines": 693
         },
         {
+          "file": "mtg_commander_sim/compiler/program_generation.py",
+          "functions_and_methods": 19,
+          "language": "python",
+          "logical_lines": 634,
+          "physical_lines": 703
+        },
+        {
           "file": "mtg_commander_sim/continuous_effect_model.py",
           "functions_and_methods": 14,
           "language": "python",
@@ -3774,13 +3786,6 @@
           "language": "python",
           "logical_lines": 624,
           "physical_lines": 678
-        },
-        {
-          "file": "mtg_commander_sim/compiler/program_generation.py",
-          "functions_and_methods": 18,
-          "language": "python",
-          "logical_lines": 614,
-          "physical_lines": 680
         },
         {
           "file": "mtg_commander_sim/carddb.py",
@@ -4045,8 +4050,8 @@
           "file": "mtg_commander_sim/compiler/activated_mana_nodes.py",
           "functions_and_methods": 6,
           "language": "python",
-          "logical_lines": 415,
-          "physical_lines": 433
+          "logical_lines": 417,
+          "physical_lines": 435
         },
         {
           "file": "mtg_commander_sim/semantic_runtime/counter_replacements.py",
@@ -4364,6 +4369,13 @@
           "physical_lines": 281
         },
         {
+          "file": "mtg_commander_sim/rules/node_capability_shapes.py",
+          "functions_and_methods": 4,
+          "language": "python",
+          "logical_lines": 257,
+          "physical_lines": 276
+        },
+        {
           "file": "mtg_commander_sim/mana_undo.py",
           "functions_and_methods": 18,
           "language": "python",
@@ -4460,13 +4472,6 @@
           "language": "python",
           "logical_lines": 219,
           "physical_lines": 249
-        },
-        {
-          "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "functions_and_methods": 3,
-          "language": "python",
-          "logical_lines": 218,
-          "physical_lines": 233
         },
         {
           "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
@@ -4987,6 +4992,13 @@
           "physical_lines": 100
         },
         {
+          "file": "mtg_commander_sim/compiler/tap_state_templates.py",
+          "functions_and_methods": 7,
+          "language": "python",
+          "logical_lines": 85,
+          "physical_lines": 106
+        },
+        {
           "file": "mtg_commander_sim/rules/activation/resolution.py",
           "functions_and_methods": 4,
           "language": "python",
@@ -5468,10 +5480,10 @@
           "visibility": "public"
         },
         {
-          "end_line": 1385,
+          "end_line": 1364,
           "file": "mtg_commander_sim/oracle_ir.py",
           "kind": "function",
-          "line": 936,
+          "line": 915,
           "logical_lines": 441,
           "name": "_compile_face",
           "physical_lines": 450,
@@ -5479,13 +5491,13 @@
           "visibility": "private"
         },
         {
-          "end_line": 556,
+          "end_line": 535,
           "file": "mtg_commander_sim/oracle_ir.py",
           "kind": "function",
-          "line": 127,
-          "logical_lines": 429,
+          "line": 128,
+          "logical_lines": 407,
           "name": "_effect_template",
-          "physical_lines": 430,
+          "physical_lines": 408,
           "symbol": "_effect_template",
           "visibility": "private"
         },
@@ -5836,8 +5848,8 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 115411,
-      "python_file_count": 262,
+      "physical_lines": 115576,
+      "python_file_count": 263,
       "review_thresholds": {
         "function_logical_lines_review": 150,
         "module_logical_lines_review": 1500
@@ -5854,7 +5866,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1378,
+      "top_level_functions": 1381,
       "web_file_count": 16
     },
     "semantic_handlers": {
@@ -7410,7 +7422,7 @@
       "card_specific_operation_branch_occurrences": {
         "remora_tax": 1
       },
-      "count": 179,
+      "count": 180,
       "limitations": "AST heuristic covers if/match conditions whose source names op or operation.",
       "locations": [
         {
@@ -8591,14 +8603,14 @@
         {
           "condition": "isinstance(operation, str) and operation",
           "file": "mtg_commander_sim/rules/capabilities.py",
-          "line": 715,
+          "line": 716,
           "string_literals": [],
           "symbol": "nested_operations"
         },
         {
           "condition": "target_schema is None and set(effect) == {\"op\", \"source\", \"amount\"} and effect.get(\"op\") == \"damage_each_opponent\" and effect.get(\"source\") == \"$source\" and _positive_int(effect.get(\"amount\"))",
           "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "line": 103,
+          "line": 113,
           "string_literals": [
             "$source",
             "amount",
@@ -8611,7 +8623,7 @@
         {
           "condition": "\"cr-115-targets\" not in mechanics or set(effect) != {\"op\", \"source\", \"target\", \"amount\"} or effect.get(\"op\") != \"damage\" or effect.get(\"source\") != \"$source\" or effect.get(\"target\") != \"$target.0\" or not _positive_int(effect.get(\"amount\"))",
           "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "line": 114,
+          "line": 124,
           "string_literals": [
             "$source",
             "$target.0",
@@ -8627,7 +8639,7 @@
         {
           "condition": "operation == \"draw_with_actions\"",
           "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "line": 160,
+          "line": 170,
           "string_literals": [
             "draw_with_actions"
           ],
@@ -8636,7 +8648,7 @@
         {
           "condition": "target_schema is None and set(effect) == { \"op\", \"player\", \"count\", \"private\", \"post_draw_actions\", } and effect.get(\"player\") == \"$controller\" and effect.get(\"count\") == 1 and type(effect.get(\"count\")) is int and effect.get(\"private\") is T",
           "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "line": 168,
+          "line": 178,
           "string_literals": [
             "$controller",
             "count",
@@ -8650,7 +8662,7 @@
         {
           "condition": "target_schema is None and operation == \"draw_each_player\" and set(effect) == {\"op\", \"count\"} and _positive_int(effect.get(\"count\"))",
           "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "line": 186,
+          "line": 196,
           "string_literals": [
             "count",
             "draw_each_player",
@@ -8661,7 +8673,7 @@
         {
           "condition": "operation not in {\"draw\", \"offer_draw\"}",
           "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "line": 193,
+          "line": 203,
           "string_literals": [
             "draw",
             "offer_draw"
@@ -8671,7 +8683,7 @@
         {
           "condition": "( (operation == \"draw\" and player == \"$target.0\") or (operation == \"offer_draw\" and player == \"$controller\") ) and drawer == \"$target.0\" and dict(target_schema or {}) in _DRAW_TARGET_SCHEMAS and \"cr-115-targets\" in mechanics",
           "file": "mtg_commander_sim/rules/node_capability_shapes.py",
-          "line": 214,
+          "line": 224,
           "string_literals": [
             "$controller",
             "$target.0",
@@ -8680,6 +8692,19 @@
             "offer_draw"
           ],
           "symbol": "fixed_draw_node_capabilities"
+        },
+        {
+          "condition": "set(effect) != {\"op\", \"card\"} or effect.get(\"op\") not in {\"tap\", \"untap\"} or effect.get(\"card\") != \"$target.0\"",
+          "file": "mtg_commander_sim/rules/node_capability_shapes.py",
+          "line": 256,
+          "string_literals": [
+            "$target.0",
+            "card",
+            "op",
+            "tap",
+            "untap"
+          ],
+          "symbol": "targeted_tap_state_node_capabilities"
         },
         {
           "condition": "operation == \"sync\"",
@@ -9029,7 +9054,7 @@
         "": 5,
         "$controller": 2,
         "$source": 2,
-        "$target.0": 2,
+        "$target.0": 3,
         "add": 4,
         "add_ability": 2,
         "add_ability_fragment": 2,
@@ -9043,7 +9068,7 @@
         "audit": 2,
         "blockers": 2,
         "cap_result_life_loss": 1,
-        "card": 1,
+        "card": 2,
         "cards": 2,
         "choose_card_name": 1,
         "choose_cards_apnap": 1,
@@ -9101,7 +9126,7 @@
         "next": 2,
         "not_in": 1,
         "offer_draw": 2,
-        "op": 17,
+        "op": 18,
         "operation": 4,
         "overrides": 1,
         "parse": 1,
@@ -9145,12 +9170,14 @@
         "submit-action": 1,
         "switch_power_toughness": 2,
         "sync": 1,
+        "tap": 1,
         "target": 1,
         "toxic_deluge": 1,
         "transmute_artifact": 1,
         "trust-closure": 2,
         "truthy": 1,
         "union": 1,
+        "untap": 1,
         "value": 1,
         "verify": 1,
         "welder_exchange": 1
@@ -9374,13 +9401,13 @@
     "card_program_v2_present": true,
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.058976,
-      "material_residuals": 48296,
+      "exact_fraction": 0.060589,
+      "material_residuals": 48208,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
         "declaration_restriction": 153,
-        "dependency_contract": 5751,
+        "dependency_contract": 5663,
         "effect": 6461,
         "mana_ability": 671,
         "replacement_effect": 1523,
@@ -9401,8 +9428,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 1865,
-        "partial": 13363,
+        "exact": 1916,
+        "partial": 13312,
         "unresolved": 16395
       },
       "template_count": 186,
@@ -9410,19 +9437,19 @@
       "total_oracle_ids": 31623
     },
     "compiler_module": "mtg_commander_sim/oracle_ir.py",
-    "compiler_module_logical_lines": 1472,
-    "compiler_module_physical_lines": 1521,
-    "compiler_version": "oracle-ir-v37",
+    "compiler_module_logical_lines": 1451,
+    "compiler_module_physical_lines": 1500,
+    "compiler_version": "oracle-ir-v38",
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.124514,
-      "material_residuals": 55899,
+      "exact_fraction": 0.125863,
+      "material_residuals": 55810,
       "residual_kinds": {
         "cost": 2015,
         "declaration_cost": 11,
         "declaration_restriction": 170,
-        "dependency_contract": 6160,
+        "dependency_contract": 6071,
         "effect": 7168,
         "mana_ability": 766,
         "replacement_effect": 1758,
@@ -9443,8 +9470,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 4799,
-        "partial": 14490,
+        "exact": 4851,
+        "partial": 14438,
         "unresolved": 19253
       },
       "template_count": 186,
@@ -9519,9 +9546,7 @@
         },
         {
           "blocked_capabilities": [
-            "permanent.tap.effect",
-            "permanent.untap.all_creatures",
-            "permanent.untap.effect"
+            "permanent.untap.all_creatures"
           ],
           "capability_count": 3,
           "mechanic_id": "tap-and-untap",
@@ -9536,22 +9561,22 @@
       "effective_date": "2026-06-19",
       "evidence": {
         "class_counts": {
-          "interaction": 110,
-          "multiplayer": 61,
+          "interaction": 111,
+          "multiplayer": 62,
           "mutation": 70,
-          "negative": 107,
-          "positive": 123,
-          "privacy": 50,
+          "negative": 111,
+          "positive": 127,
+          "privacy": 51,
           "property": 10,
-          "replay": 81,
+          "replay": 83,
           "rollback": 13
         },
-        "declaration_count": 625,
-        "declaration_source_fingerprint": "d7e1213933ad1f6999ccc92d699062592e260ebaa7f419e13a79c3614afa99fa",
-        "fingerprint": "18e331020eb8b9aadaae75312e0bf0cd95c1199ba86548fda63546945d2577f1",
-        "registry_fingerprint": "c4e24c239e037e55615f87e9da26ec6f36b615c453ab1a3b72481a91dfa2a0a5"
+        "declaration_count": 638,
+        "declaration_source_fingerprint": "75fcf83fad5cf881ee123042da002f2ca55d89e3f4a058c0949fa2bc98ab8ca1",
+        "fingerprint": "48d7c6bdc510aab3d642d1c3fc079264d88351212de91f947846d41b5db62227",
+        "registry_fingerprint": "c6ea08fcfc45e9d50c3c7a6094f7a4813f709a9ddb4eca4c9809bb8c4d249eff"
       },
-      "fingerprint": "c4e24c239e037e55615f87e9da26ec6f36b615c453ab1a3b72481a91dfa2a0a5",
+      "fingerprint": "c6ea08fcfc45e9d50c3c7a6094f7a4813f709a9ddb4eca4c9809bb8c4d249eff",
       "implementation_mutation_status_counts": {
         "killed": 66,
         "not_run": 7
@@ -9561,13 +9586,13 @@
         "commander_duel",
         "commander_review"
       ],
-      "registry_version": 43,
+      "registry_version": 44,
       "schema_version": 1,
       "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
       "status_counts": {
         "blocked": 4,
-        "tested": 6,
-        "trusted": 63
+        "tested": 4,
+        "trusted": 65
       },
       "total": 73
     },
@@ -9577,10 +9602,10 @@
         "current_status": "interleaved",
         "evidence": {
           "_source_lines": [
-            "mtg_commander_sim/oracle_ir.py:80"
+            "mtg_commander_sim/oracle_ir.py:81"
           ],
           "_without_parenthetical_reminder": [
-            "mtg_commander_sim/oracle_ir.py:97",
+            "mtg_commander_sim/oracle_ir.py:98",
             "mtg_commander_sim/preflight.py:104"
           ]
         },
@@ -9595,10 +9620,10 @@
         "current_status": "interleaved",
         "evidence": {
           "_compile_face": [
-            "mtg_commander_sim/oracle_ir.py:936"
+            "mtg_commander_sim/oracle_ir.py:915"
           ],
           "_source_lines": [
-            "mtg_commander_sim/oracle_ir.py:80"
+            "mtg_commander_sim/oracle_ir.py:81"
           ]
         },
         "evidence_symbols": [
@@ -9619,7 +9644,7 @@
         "current_status": "regex_and_helper_parsers_interleaved",
         "evidence": {
           "_effect_template": [
-            "mtg_commander_sim/oracle_ir.py:127"
+            "mtg_commander_sim/oracle_ir.py:128"
           ],
           "parse_activated_abilities": [
             "mtg_commander_sim/abilities.py:605",
@@ -9677,7 +9702,7 @@
         "current_status": "generated_abilities_extracted_and_aggregated_to_card_program_v2",
         "evidence": {
           "_compile_face": [
-            "mtg_commander_sim/oracle_ir.py:936"
+            "mtg_commander_sim/oracle_ir.py:915"
           ],
           "compile_card_program": [
             "mtg_commander_sim/__init__.py:9",
@@ -9686,8 +9711,8 @@
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:281",
-            "mtg_commander_sim/oracle_ir.py:1464"
+            "mtg_commander_sim/compiler/program_generation.py:304",
+            "mtg_commander_sim/oracle_ir.py:1443"
           ]
         },
         "evidence_symbols": [
@@ -9710,18 +9735,18 @@
             "mtg_commander_sim/compiler/draw_templates.py:6",
             "mtg_commander_sim/compiler/program_generation.py:10",
             "mtg_commander_sim/compiler/unlock_frontier.py:13",
-            "mtg_commander_sim/oracle_ir.py:59",
+            "mtg_commander_sim/oracle_ir.py:60",
             "mtg_commander_sim/preflight.py:28",
             "mtg_commander_sim/rules/__init__.py:3",
-            "mtg_commander_sim/rules/capabilities.py:294"
+            "mtg_commander_sim/rules/capabilities.py:295"
           ],
           "_dependency_gate": [
             "mtg_commander_sim/oracle_ir.py:31"
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:281",
-            "mtg_commander_sim/oracle_ir.py:1464"
+            "mtg_commander_sim/compiler/program_generation.py:304",
+            "mtg_commander_sim/oracle_ir.py:1443"
           ]
         },
         "evidence_symbols": [
@@ -9767,8 +9792,8 @@
             "mtg_commander_sim/engine.py:31"
           ],
           "register_generated_programs": [
-            "mtg_commander_sim/compiler/program_generation.py:546",
-            "mtg_commander_sim/oracle_ir.py:1487",
+            "mtg_commander_sim/compiler/program_generation.py:569",
+            "mtg_commander_sim/oracle_ir.py:1466",
             "mtg_commander_sim/preflight.py:16",
             "mtg_commander_sim/session.py:14"
           ]
@@ -10210,7 +10235,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "406bb2eca17fcd6a1a62a3cddec16c1b53b00c1808a9acd816fb3e998695e580"
+          "verified": "a7fa0c78f0b0685ac038aa665fe2a4078ac0808dec4daca6bdc76eadf2ef561d"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -10635,18 +10660,18 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1785,
-      "discovered_total": 5085,
+      "conventional_ast_cases": 1793,
+      "discovered_total": 5093,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 54,
         "fuzz_named": 1,
         "privacy_or_projection_named": 25,
-        "replay_named": 108,
+        "replay_named": 110,
         "server_named": 26
       },
       "reconciles": true,
-      "test_files": 182
+      "test_files": 183
     }
   }
 }

@@ -14,6 +14,7 @@ from ..rules.capabilities import (
 from ..rules.node_capability_shapes import (
     fixed_damage_node_capabilities,
     fixed_draw_node_capabilities,
+    targeted_tap_state_node_capabilities,
 )
 from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
@@ -269,12 +270,34 @@ def _is_closed_fixed_draw_program(program: SemanticProgram) -> bool:
     )
 
 
+def _is_closed_targeted_tap_state_program(
+    program: SemanticProgram,
+) -> bool:
+    """Recognize only the reviewed direct-target tap/untap effect family."""
+
+    required = set(
+        targeted_tap_state_node_capabilities(
+            effects=program.effects,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value in {"tap-and-untap", "cr-115-targets"}
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def _is_closed_effect_program(program: SemanticProgram) -> bool:
     """Return whether a reviewed capability-shaped effect owns execution."""
 
     return bool(
         _is_closed_fixed_damage_program(program)
         or _is_closed_fixed_draw_program(program)
+        or _is_closed_targeted_tap_state_program(program)
     )
 
 

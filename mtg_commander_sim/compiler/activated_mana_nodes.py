@@ -258,6 +258,8 @@ def _activated_effect_dependency_gate(
             "draw_each_player",
             "draw_with_actions",
             "offer_draw",
+            "tap",
+            "untap",
         }
     )
     if capability_shaped_effect and capability_registry is not None:

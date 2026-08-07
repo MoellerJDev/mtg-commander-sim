@@ -40,3 +40,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0023 — current-state documentation system](0023-documentation-system.md)
 - [ADR 0024 — canonical attack-transition trigger ownership](0024-canonical-attack-transition-triggers.md)
 - [ADR 0025 — source-pinned ordinary Cycling ownership](0025-source-pinned-ordinary-cycling.md)
+- [ADR 0026 — source-pinned targeted tap-state clauses](0026-source-pinned-targeted-tap-state-clauses.md)

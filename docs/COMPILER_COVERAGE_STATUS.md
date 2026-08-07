@@ -2,7 +2,7 @@
 title: "Compiler coverage status"
 status: "generated"
 authoritative_source: "coverage/architecture-audit.json"
-verified: "d908c2f2d437c884a4b70d3875ce7a77a9c705bce38cba5b7855ba6984943f35"
+verified: "9d1e49b58895d0891aaa5035f5b9c566a38e440409fece9770c63ff2226ba899"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 generated_source: "coverage/architecture-audit.json"
@@ -11,21 +11,21 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_architecture_audi
 
 # Compiler coverage status
 
-Source fingerprint: `d908c2f2d437c884a4b70d3875ce7a77a9c705bce38cba5b7855ba6984943f35`
+Source fingerprint: `9d1e49b58895d0891aaa5035f5b9c566a38e440409fece9770c63ff2226ba899`
 
 ## Current top-level state
 
-- Compiler version: `oracle-ir-v37`
+- Compiler version: `oracle-ir-v38`
 - Runtime IR: `OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index`
 - CardProgram schema version: `2`
 - Commander Oracle objects: `31623`
-- Exact fraction: `0.058976`
+- Exact fraction: `0.060589`
 - Capability records: `73`
 
 ## Top blockers
 
 - The pinned Commander Oracle snapshot is not capability-complete.
-- Material compiler residuals remain: `48296`.
+- Material compiler residuals remain: `48208`.
 - Blocked capability records remain: `4`.
 - Configured evidence is incomplete for: `lexing`, `binding`.
 

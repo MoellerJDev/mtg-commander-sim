@@ -430,8 +430,8 @@
     {
       "mechanic_id": "tap-and-untap",
       "path": "mechanics/contracts/tap-and-untap.json",
-      "sha256": "3234df16df3b3d8b066e19805accc6203bf8066c03d3eb88ccd23dfbb9f09580",
-      "version": 1
+      "sha256": "f1f65131892b81922990de59d91e8820b85f886dc9d9091d3d7b467e9ea49451",
+      "version": 2
     },
     {
       "mechanic_id": "toxic",
@@ -5511,17 +5511,18 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/tap-and-untap.json",
-      "contract_sha256": "3234df16df3b3d8b066e19805accc6203bf8066c03d3eb88ccd23dfbb9f09580",
-      "contract_version": 1,
+      "contract_sha256": "f1f65131892b81922990de59d91e8820b85f886dc9d9091d3d7b467e9ea49451",
+      "contract_version": 2,
       "coverage_status": "tested",
       "dependencies": [
         "701"
       ],
-      "implementation_component": "typed tap, untap, and all-creatures semantic handlers with the canonical tap_state mutation port and stun-aware engine primitive",
-      "implementation_version": "tap-state-effects-v1",
+      "implementation_component": "typed direct-target compiler, tap and untap semantic handlers, canonical tap_state mutation port, and stun-aware engine primitive",
+      "implementation_version": "tap-state-effects-v2",
       "kind": "keyword_action",
       "known_blockers": [
-        "continuous effects that prohibit tapping or untapping are not represented generically in ambient closure",
+        "optional, modal, aggregate, quantified, relational, qualified, and compound tap-state clauses remain precise compiler residuals",
+        "continuous effects that prohibit tapping or untapping are not represented generically; cards carrying those effects remain material residuals and fail match trust closed",
         "replacement discovery and affected-player ordering beyond the represented stun-counter replacement are incomplete",
         "complete layer dependencies and dynamically granted types are not capability-closed",
         "tap and untap costs and the untap-step selection procedure are separate incomplete capabilities"
@@ -5540,7 +5541,12 @@
         "test_tap_state_validation_fails_before_mutation",
         "test_tap_state_resolution_rolls_back_atomically",
         "test_tap_state_effects_replay_exactly",
-        "test_semantic_tap_state_mutants_are_killed"
+        "test_semantic_tap_state_mutants_are_killed",
+        "test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering",
+        "test_unsupported_tap_state_variants_remain_material_residuals",
+        "test_targeted_tap_state_shape_mutants_fail_closed",
+        "test_compiled_tap_activation_is_multiplayer_public_and_replays",
+        "test_compiled_untap_activation_consumes_stun_and_replays"
       ],
       "trust_level": "untrusted"
     },
@@ -9165,7 +9171,22 @@
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "sources": {
     "card_data_snapshot": {
-      "available": false
+      "available": true,
+      "database_schema_version": "2",
+      "oracle_bulk": {
+        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
+        "oracle_id_count": 38542,
+        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
+        "updated_at": "2026-08-04T09:02:45.219+00:00"
+      },
+      "rulings_bulk": {
+        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
+        "ruling_count": 77998,
+        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
+        "source_filename": "rulings-20260804090038.jsonl.gz",
+        "updated_at": "2026-08-04T09:00:38.847+00:00"
+      }
     },
     "comprehensive_rules": "indexed",
     "official_set_mechanics": "planned",
