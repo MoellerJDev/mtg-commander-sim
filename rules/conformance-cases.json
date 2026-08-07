@@ -38764,9 +38764,9 @@
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "physical spell countered to graveyard emits a pre-counter occurrence",
-        "physical spell emits its card-graveyard occurrence only after the committed destination is known",
-        "graveyard destination replacement preserves the counter occurrence and suppresses the graveyard occurrence"
+        "positive",
+        "negative",
+        "interaction"
       ],
       "dependency_rule_ids": [
         "603.10"

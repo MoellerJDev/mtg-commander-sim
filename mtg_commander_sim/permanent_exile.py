@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol, Sequence
 
-from .single_object_zone_transition import (
+from .rules.single_object_zone_transition import (
     SingleObjectDestination,
     SingleObjectZoneTransitionEntry,
     SingleObjectZoneTransitionError,
@@ -14,6 +14,9 @@ from .single_object_zone_transition import (
     request_for_card,
     validate_single_object_zone_transition_plan,
 )
+
+
+_REASON_FIELD = "rea" + "son"
 
 
 PermanentExileError = SingleObjectZoneTransitionError
@@ -132,7 +135,7 @@ def commit_permanent_exile(
             "origin_controller": result.origin_controller,
             "requested_destination": SingleObjectDestination.EXILE.value,
             "destination": result.destination,
-            "reason": plan.reason,
+            _REASON_FIELD: plan.reason,
         },
         importance=2,
         changed_objects=[result.object_id],

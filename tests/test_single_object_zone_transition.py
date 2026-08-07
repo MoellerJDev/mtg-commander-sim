@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import unittest
 
 from mtg_commander_sim.replacement.immutable import thaw_value
-from mtg_commander_sim.single_object_zone_transition import (
+from mtg_commander_sim.rules.single_object_zone_transition import (
     SingleObjectDestination,
     SingleObjectZoneTransitionError,
     SingleObjectZoneTransitionPlan,

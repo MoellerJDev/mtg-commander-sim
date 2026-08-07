@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from ..replacement.immutable import FrozenMap, ImmutableValueError, freeze_value
 from .context import ReadOnlyHandlerContext, SemanticNodeError
 
 
@@ -15,7 +16,7 @@ _REASON_FIELD = "reason"
 class DirectTargetFields:
     object_ref: str
     reason: str
-    replacement_selections: tuple[Any, ...] = ()
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
 
 
 def validate_direct_target_effect(
@@ -58,10 +59,35 @@ def validate_direct_target_effect(
         raise SemanticNodeError(
             f"{family_label} replacement selections must be an array"
         )
+    selections: list[str | FrozenMap] = []
+    for index, selection in enumerate(raw_selections):
+        if type(selection) is str:
+            if not selection:
+                raise SemanticNodeError(
+                    f"{family_label} replacement selection {index} is empty"
+                )
+            selections.append(selection)
+            continue
+        if not isinstance(selection, Mapping):
+            raise SemanticNodeError(
+                f"{family_label} replacement selection {index} must be an object"
+            )
+        try:
+            frozen = freeze_value(
+                selection,
+                field=f"{family_label} replacement selection {index}",
+            )
+        except ImmutableValueError as exc:
+            raise SemanticNodeError(str(exc)) from exc
+        if not isinstance(frozen, FrozenMap):
+            raise SemanticNodeError(
+                f"{family_label} replacement selection {index} is invalid"
+            )
+        selections.append(frozen)
     return DirectTargetFields(
         object_ref=object_ref,
         reason=raw_reason or context.default_reason,
-        replacement_selections=tuple(raw_selections),
+        replacement_selections=tuple(selections),
     )
 
 

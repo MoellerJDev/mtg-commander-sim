@@ -137,10 +137,15 @@ from .trigger_discovery import (
     semantic_event_matches,
     semantic_event_value,
 )
-from .zone_trigger_events import ZoneChangeOccurrence, ZoneTransitionKind
+from .zone_trigger_events import (
+    validate_zone_transition_request,
+    ZoneChangeOccurrence,
+    ZoneTransitionKind,
+)
 from .zone_trigger_processing import (
     capture_departure_trigger_sources,
     dispatch_zone_change_occurrence,
+    semantic_event_sources,
 )
 from .life_state import (
     pay_life_cost,
@@ -1574,9 +1579,7 @@ class CommanderEngine(
         prepared_replacement: PreparedZoneChange | None = None,
         transition_kind: ZoneTransitionKind = ZoneTransitionKind.ORDINARY,
     ) -> CardInstance:
-        if destination not in {"library", "hand", "battlefield", "graveyard", "exile", "command", "outside"}:
-            raise GameRuleError(f"Unsupported destination {destination}")
-        card = self.state.cards[object_id]
+        card = validate_zone_transition_request(self.state.cards, object_id, destination, transition_kind)
         requested_destination = destination
         origin = card.zone
         library_position: str | int | None = None
@@ -1719,11 +1722,7 @@ class CommanderEngine(
             if semantic_events
             else {}
         )
-        departure_snapshot = capture_departure_trigger_sources(
-            self,
-            semantic_events=semantic_events,
-            origin=origin,
-        )
+        departure_snapshot = capture_departure_trigger_sources(self, semantic_events=semantic_events, origin=origin)
         if origin == "stack":
             # A resolving or countered spell has already had its StackItem
             # removed by that procedure.  A zone-changing effect can instead
@@ -1899,8 +1898,7 @@ class CommanderEngine(
                 departure_source_characteristics=(
                     departure_snapshot.source_characteristics
                 ),
-                reason=reason,
-                transition_kind=transition_kind,
+                reason=reason, transition_kind=transition_kind,
             )
         return card
 
@@ -1943,27 +1941,9 @@ class CommanderEngine(
         *,
         zones: set[str] | None = None,
     ) -> list[CardInstance]:
-        """Return cards whose visible zone can host a semantic event handler.
-
-        Library cards are deliberately excluded.  Hand handlers are allowed so
-        long as their semantic program explicitly declares ``active_zone=hand``;
-        the resulting trigger remains controlled and visible through the normal
-        projected stack protocol.
-        """
-
-        active_zones = zones or {
-            "battlefield",
-            "graveyard",
-            "exile",
-            "command",
-            "hand",
-        }
-        return [
-            card
-            for card in self.state.cards.values()
-            if card.zone in active_zones
-            and (card.controller in self.active_seats or card.owner in self.active_seats)
-        ]
+        return semantic_event_sources(
+            self.state.cards.values(), active_seats=self.active_seats, zones=zones
+        )
 
     def _dispatch_zone_change_events(
         self,

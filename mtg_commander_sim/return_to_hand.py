@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol, Sequence
 
-from .single_object_zone_transition import (
+from .rules.single_object_zone_transition import (
     SingleObjectDestination,
     SingleObjectZoneTransitionEntry,
     SingleObjectZoneTransitionError,

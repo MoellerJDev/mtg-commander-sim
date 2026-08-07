@@ -48,14 +48,22 @@ the underlying counter or zone mutation. Broad legacy exile operations remain
 separate because they also represent stack and hidden-zone movement outside the
 direct battlefield-target grammar.
 
+The direct-target compiler families share structural builders for their one
+effect, closed target schema, and mechanics tuple, while each family retains
+its own grammar and capability owner. Their runtime handlers likewise share
+strict operation, reference, reason, and immutable replacement-selection field
+validation. This shared code does not choose a target, infer a card family, or
+create a generic move operation.
+
 Mandatory direct stack counters lower through a separate strict handler to one
 typed intent. The focused stack owner performs counterability, stack removal,
-ordinary spell movement, and journaling; target legality and source exclusion
+replacement-aware physical spell movement, normalized pre-counter and
+post-graveyard event dispatch, and journaling; target legality and source exclusion
 come from the same closed schema used by action offers. The exact intrinsic
 sentence “This spell can't be countered” is compiled once as a trusted
 stack-active declaration and pinned during cast commit. Conditional counter
-clauses and prohibitions remain residual rather than falling back to runtime
-Oracle parsing.
+clauses, countered ability and spell-copy look-back triggers, and broader
+prohibitions remain residual rather than falling back to runtime Oracle parsing.
 
 To migrate an instruction, characterize existing output and replay, define the
 smallest typed node/query/intent surface, register one stable handler, add

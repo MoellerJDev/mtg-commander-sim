@@ -107,10 +107,15 @@ class ArchitectureGuardTests(unittest.TestCase):
 from enum import Enum
 _EXILE_MECHANIC = "exile"
 _REASON_FIELD = "reason"
+_ZONE_CHANGE_DESTINATIONS = {"library", "hand"}
 class Destination(str, Enum):
     EXILE = "exile"
 def bad(card):
-    return card.printed_name == "Exile" or card.printed_name == "Reason"
+    return (
+        card.printed_name == "Exile"
+        or card.printed_name == "Reason"
+        or card.printed_name == "Library"
+    )
 """
         )
         parents = {
@@ -135,6 +140,13 @@ def bad(card):
         self.assertEqual(
             2,
             sum(not item["card_specificity_exempt"] for item in words),
+        )
+        library_words = [
+            item for item in strings if str(item["value"]).casefold() == "library"
+        ]
+        self.assertEqual(
+            [False, True],
+            sorted(bool(item["card_specificity_exempt"]) for item in library_words),
         )
 
 

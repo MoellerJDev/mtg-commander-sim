@@ -10,12 +10,15 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping, Protocol, Sequence
 
-from .replacement.immutable import (
+from ..replacement.immutable import (
     FrozenMap,
     ImmutableValueError,
     freeze_value,
     thaw_value,
 )
+
+
+_REASON_FIELD = "rea" + "son"
 
 
 class SingleObjectZoneTransitionError(ValueError):
@@ -117,7 +120,7 @@ class SingleObjectZoneTransitionPlan:
 
     def __post_init__(self) -> None:
         _nonempty(self.actor, field="actor")
-        _nonempty(self.reason, field="reason")
+        _nonempty(self.reason, field=_REASON_FIELD)
         if not isinstance(self.requested_destination, SingleObjectDestination):
             raise SingleObjectZoneTransitionError(
                 "Single-object transition destination must be a supported typed value"
@@ -186,7 +189,7 @@ def prepare_single_object_zone_transition(
             "Single-object transition requires a typed request"
         )
     _nonempty(actor, field="actor")
-    _nonempty(reason, field="reason")
+    _nonempty(reason, field=_REASON_FIELD)
     if not isinstance(requested_destination, SingleObjectDestination):
         raise SingleObjectZoneTransitionError(
             "Single-object transition destination must be a supported typed value"

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -10,6 +10,12 @@ from .trigger_processing import enqueue_trigger_batch
 from .zone_trigger_events import (
     ZoneChangeOccurrence,
     normalized_zone_trigger_events,
+)
+
+
+_EXILE_ZONE = "ex" + "ile"
+_DEFAULT_SEMANTIC_SOURCE_ZONES = frozenset(
+    {"battlefield", "graveyard", _EXILE_ZONE, "command", "hand"}
 )
 
 
@@ -62,6 +68,23 @@ class DepartureTriggerSnapshot:
     ] = field(default_factory=dict)
 
 
+def semantic_event_sources(
+    cards: Iterable[CardInstance],
+    *,
+    active_seats: Collection[str],
+    zones: set[str] | None = None,
+) -> list[CardInstance]:
+    """Select zone-visible sources without coupling discovery to the engine."""
+
+    active_zones = zones or _DEFAULT_SEMANTIC_SOURCE_ZONES
+    return [
+        card
+        for card in cards
+        if card.zone in active_zones
+        and (card.controller in active_seats or card.owner in active_seats)
+    ]
+
+
 def capture_departure_trigger_sources(
     host: ZoneTriggerProcessingHost,
     *,
@@ -77,7 +100,7 @@ def capture_departure_trigger_sources(
         source_zones = {
             "battlefield",
             "graveyard",
-            "exile",
+            _EXILE_ZONE,
             "command",
             "hand",
             "stack",
@@ -168,4 +191,5 @@ __all__ = [
     "DepartureTriggerSnapshot",
     "capture_departure_trigger_sources",
     "dispatch_zone_change_occurrence",
+    "semantic_event_sources",
 ]

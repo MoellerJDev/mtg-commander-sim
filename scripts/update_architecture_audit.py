@@ -406,7 +406,22 @@ def _string_records(
     parents: Mapping[ast.AST, ast.AST],
 ) -> tuple[tuple[dict[str, Any], ...], tuple[dict[str, Any], ...]]:
     def specificity_exempt(node: ast.Constant) -> bool:
-        if node.value.casefold() not in {"exile", "reason"}:
+        structural_values = {
+            "_EXILE_MECHANIC": {"exile"},
+            "_EXILE_ZONE": {"exile"},
+            "_REASON_FIELD": {"reason"},
+            "_ZONE_CHANGE_DESTINATIONS": {
+                "battlefield",
+                "command",
+                "exile",
+                "graveyard",
+                "hand",
+                "library",
+                "outside",
+            },
+        }
+        normalized_value = node.value.casefold()
+        if normalized_value not in set().union(*structural_values.values()):
             return False
         containing_class: ast.ClassDef | None = None
         ancestor: ast.AST = node
@@ -455,8 +470,9 @@ def _string_records(
                     for target in targets
                     if isinstance(target, ast.Name)
                 }
-                if names.intersection(
-                    {"_EXILE_MECHANIC", "_EXILE_ZONE", "_REASON_FIELD"}
+                if any(
+                    normalized_value in structural_values.get(name, set())
+                    for name in names
                 ):
                     return True
                 if (

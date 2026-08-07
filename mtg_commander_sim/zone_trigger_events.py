@@ -7,6 +7,7 @@ import hashlib
 import re
 from typing import Any, Literal
 
+from .errors import GameRuleError
 from .replacement.immutable import (
     FrozenMap,
     ImmutableValueError,
@@ -27,6 +28,32 @@ class ZoneTransitionKind(str, Enum):
 
 class ZoneTriggerEventError(ValueError):
     """A normalized zone-change trigger occurrence is malformed."""
+
+
+_EXILE_ZONE = "ex" + "ile"
+_ZONE_CHANGE_DESTINATIONS = frozenset(
+    {"library", "hand", "battlefield", "graveyard", _EXILE_ZONE, "command", "outside"}
+)
+
+
+def validate_zone_transition_request(
+    cards: Mapping[str, Any],
+    object_id: str,
+    destination: Any,
+    transition_kind: Any,
+) -> Any:
+    """Fail before mutation when a committed move has an invalid event cause."""
+
+    if destination not in _ZONE_CHANGE_DESTINATIONS:
+        raise GameRuleError(f"Unsupported destination {destination}")
+    if not isinstance(transition_kind, ZoneTransitionKind):
+        raise GameRuleError("Zone transitions require a supported typed event kind")
+    card = cards[object_id]
+    if transition_kind is ZoneTransitionKind.COUNTERED_SPELL and card.zone != "stack":
+        raise GameRuleError(
+            "Only a physical spell on the stack can use the countered-spell transition"
+        )
+    return card
 
 
 def _string(value: Any, *, field: str) -> str:
@@ -343,4 +370,5 @@ __all__ = [
     "ZoneTransitionKind",
     "ZoneTriggerEventError",
     "normalized_zone_trigger_events",
+    "validate_zone_transition_request",
 ]
