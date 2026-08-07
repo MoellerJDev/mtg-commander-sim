@@ -59,6 +59,7 @@
     "optional-provider-contract": "docs/optional-clients/providers.md",
     "oracle-ir": "docs/reference/oracle-ir.md",
     "project-overview": "README.md",
+    "rebrand-status": "docs/REBRAND_STATUS.md",
     "rules-assurance": "docs/rules/assurance-model.md"
   },
   "retired_documents": [

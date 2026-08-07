@@ -1,16 +1,16 @@
 ---
-title: "Codex Commander arena adapter"
+title: "Quorune Pilot Harness adapter"
 status: "current"
-authoritative_source: "Codex pilot configuration, fixed-seat tools, and arena commands"
-verified: "2026-08-06"
-audience: "Codex arena operators and provider contributors"
+authoritative_source: "optional pilot configuration, fixed-seat tools, and compatibility commands"
+verified: "2026-08-07"
+audience: "pilot-harness operators and provider contributors"
 maintenance: "hand-maintained"
 concern: "codex-arena-adapter"
 ---
 
-# Codex Commander arena adapter
+# Quorune Pilot Harness adapter
 
-The Codex arena is an optional protocol-adapter experiment. It is not product
+The Quorune Pilot Harness is an optional protocol-adapter experiment. It is not product
 execution, a rules authority, or a CI/merge/release dependency. One neutral
 coordinator routes tasks to persistent seat-isolated strategy sessions. The
 coordinator is not a player and never chooses or replaces a seat action.
@@ -41,13 +41,13 @@ Create a game with current commands discovered through help:
 .\.venv\Scripts\python.exe simctl.py arena-codex-run --help
 ```
 
-Use the primary four-player review profile for arena evidence unless the user
+Use the primary four-player review profile for harness evidence unless the user
 requests a bounded duel regression. Strict evidence runs use trusted-only
 semantics. An explicitly development-only run may stop at a scoped arbiter
 boundary, but live improvisation cannot become rules or deck evidence.
 
 Start every requested seat session once and retain its actual identity. A
-runner may bootstrap independent sessions concurrently, but Magic decisions are
+runner may bootstrap independent sessions concurrently, but game decisions are
 routed in authoritative principal order. If a recorded session cannot resume,
 stop and record the restart/fidelity failure; do not silently substitute a new
 session.
@@ -98,4 +98,4 @@ evidence, and a predeclared multi-game methodology.
 
 See [provider contract](providers.md), [protocol](../reference/protocol.md),
 [Game Record](../reference/game-record.md), and the agent-only
-[arena skill](../../.agents/skills/commander-arena/SKILL.md).
+[Pilot Harness skill](../../.agents/skills/commander-arena/SKILL.md).

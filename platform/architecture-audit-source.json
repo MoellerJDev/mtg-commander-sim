@@ -10,7 +10,7 @@
   "ci": {
     "workflow": "PR",
     "run_id": 31180670367,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31180670367",
+    "url": "https://github.com/MoellerJDev/quorune/actions/runs/31180670367",
     "status": "pass",
     "python_versions": [
       "3.12"

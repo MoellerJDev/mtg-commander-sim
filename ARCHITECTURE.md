@@ -2,7 +2,7 @@
 title: "Architecture portal"
 status: "current"
 authoritative_source: "implemented runtime boundaries and modular architecture documentation"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "engine, server, client, and rules contributors"
 maintenance: "hand-maintained"
 concern: "architecture-portal"
@@ -10,7 +10,7 @@ concern: "architecture-portal"
 
 # Architecture portal
 
-This page routes contributors to the current architecture owners. Code,
+This page routes contributors to Quorune's current architecture owners. Code,
 schemas, machine-readable policy, and executable tests define behavior;
 [ADRs](docs/adr/index.md) preserve accepted decisions and alternatives;
 generated [architecture status](docs/ARCHITECTURE_DEBT_STATUS.md) owns changing

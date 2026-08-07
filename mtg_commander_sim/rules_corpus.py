@@ -165,7 +165,7 @@ def _download(url: str, *, timeout: float = 30.0) -> tuple[bytes, str]:
         headers={
             "Accept": "text/plain,text/html;q=0.9,*/*;q=0.1",
             "User-Agent": (
-                "mtg-commander-sim-rules-corpus/"
+                "quorune-rules-corpus/"
                 f"{RULES_PARSER_VERSION}"
             ),
         },

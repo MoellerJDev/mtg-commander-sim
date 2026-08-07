@@ -1,24 +1,30 @@
 ---
-title: "MTG Commander Sim"
+title: "Quorune"
 status: "current"
 authoritative_source: "product entry point, supported profile, and local startup workflow"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "new users and contributors"
 maintenance: "hand-maintained"
 concern: "project-overview"
 ---
 
-# MTG Commander Sim
+# Quorune
 
-MTG Commander Sim is a deterministic, server-authoritative multiplayer
-Commander platform. It combines typed rules execution, capability-scoped
-commands, seat-private projections, exact command replay, a local browser
-client, and a pinned local card-data snapshot.
+**Authoritative rules. Private state. Exact replay.**
 
-The project is experimental. Four-player Free-for-All Commander is the primary
-supported profile; the documented duel profile supports narrower testing and
-local play. The engine does not implement every Comprehensive Rule or Oracle
-interaction, and the local server is not a production deployment. Unsupported
+Quorune is a deterministic, server-authoritative multiplayer card-game
+platform. It combines typed rules execution, server-issued legal-action
+capabilities, private player projections, persistent games, a browser client,
+and exact replay against pinned rules and card-data snapshots.
+
+Current rules work primarily targets four-player Magic: The Gathering
+Commander. Quorune is an independent, unofficial project and is not affiliated
+with or endorsed by Wizards of the Coast or Scryfall.
+
+The platform is experimental. Four-player Free-for-All Commander is the
+primary supported profile; the documented duel profile supports narrower
+testing and local play. The engine does not implement every Comprehensive Rule
+or Oracle interaction, and the local server is not a production deployment. Unsupported
 material behavior fails trusted preflight or stops before mutation. Read the
 generated [platform](docs/PLATFORM_IMPLEMENTATION_STATUS.md),
 [rules](docs/RULES_COMPLETENESS_STATUS.md), and
@@ -61,8 +67,8 @@ operations, extension, and decision records.
 
 The repository does not ship Scryfall bulk exports, a complete Oracle archive,
 Comprehensive Rules prose, card scans, official frames, or Wizards branding.
-Local card data and images are rebuildable, ignored runtime content. Commander
-Arena is independent and is not endorsed by Wizards of the Coast or Scryfall.
+Local card data and images are rebuildable, ignored runtime content. Quorune
+is independent and is not endorsed by Wizards of the Coast or Scryfall.
 See the [legal and third-party content boundary](docs/LEGAL_CONTENT_BOUNDARY.md)
 before distributing or deploying the application.
 

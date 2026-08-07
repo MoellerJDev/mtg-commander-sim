@@ -2,7 +2,7 @@
 title: "CI pipeline and two-slot development"
 status: "current"
 authoritative_source: "GitHub workflows, platform/test-shards.json, and local gate scripts"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "contributors and maintainers"
 maintenance: "hand-maintained"
 ---
@@ -24,8 +24,8 @@ Create Slot B from current remote `main` while Slot A is running:
 
 ```powershell
 git fetch origin --prune
-git worktree add ..\mtg-commander-sim-next -b <next-branch> origin/main
-Set-Location ..\mtg-commander-sim-next
+git worktree add ..\quorune-next -b <next-branch> origin/main
+Set-Location ..\quorune-next
 py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e . -r requirements-dev.txt
 ```

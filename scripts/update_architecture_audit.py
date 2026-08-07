@@ -1462,7 +1462,7 @@ def _rules_metrics() -> dict[str, Any]:
 def _coordinates(source: Mapping[str, Any]) -> dict[str, Any]:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     return {
-        "repository": "MoellerJDev/mtg-commander-sim",
+        "repository": "MoellerJDev/quorune",
         "default_branch": "main",
         "baseline_main_commit": source["audit"]["baseline_main_commit"],
         "baseline_worktree_clean": source["audit"]["baseline_worktree_clean"],

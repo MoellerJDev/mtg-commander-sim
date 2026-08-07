@@ -13,6 +13,7 @@ from typing import Any, Iterable, Iterator
 
 from .carddb import CardDatabase
 from .util import normalize_card_name, stable_json, unique_preserving_order
+from .version import __version__
 
 MOXFIELD_ID_RE = re.compile(r"[A-Za-z0-9_-]{10,64}")
 MOXFIELD_HOSTS = frozenset({"moxfield.com", "www.moxfield.com"})
@@ -376,7 +377,7 @@ def fetch_moxfield_deck(
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 Chrome/126 Safari/537.36 mtg-duel-lab/1.0"
+            f"AppleWebKit/537.36 Chrome/126 Safari/537.36 quorune/{__version__}"
         ),
         "Accept": "application/json,text/plain;q=0.9,*/*;q=0.8",
         "Referer": source_url,

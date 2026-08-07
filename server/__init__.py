@@ -1,4 +1,4 @@
-"""Network transport adapter for the deterministic Commander engine."""
+"""Network transport adapter for the Quorune rules runtime."""
 
 from .app import ServerSettings, create_app
 

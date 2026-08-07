@@ -2,15 +2,15 @@
 title: "Rules completeness status"
 status: "current"
 authoritative_source: "pinned rules, generated coverage, capability evidence, and CardProgram census"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "rules, compiler, engine, and product contributors"
 maintenance: "hand-maintained"
 ---
 
 # Rules completeness status
 
-MTG Commander Sim is a deterministic, replayable **partial** implementation of
-Magic and Commander. It does not implement every Comprehensive Rule or Oracle
+Quorune currently provides a deterministic, replayable **partial** implementation
+of Magic: The Gathering and Commander rules. It does not implement every Comprehensive Rule or Oracle
 interaction. Unsupported material behavior fails trusted preflight or stops the
 game before mutation.
 

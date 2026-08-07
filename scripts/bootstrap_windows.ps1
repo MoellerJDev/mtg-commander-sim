@@ -41,5 +41,5 @@ if ($LASTEXITCODE -ne 0) { throw "Could not install project dependencies in .ven
 & $projectPython scripts/validate_python_runtime.py
 if ($LASTEXITCODE -ne 0) { throw "Python runtime validation failed." }
 
-Write-Host "Commander Arena is ready. Start it without opening a browser:"
+Write-Host "Quorune is ready. Start it without opening a browser:"
 Write-Host ".\.venv\Scripts\python.exe -m server --no-open"

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mtg-commander-sim.local/schemas/command-envelope-v3.0.json",
-  "title": "MTG Commander Sim client command envelope v3.0",
+  "title": "Quorune client command envelope v3.0",
   "description": "The authenticated principal is transport metadata and MUST NOT be accepted from this client-controlled body.",
   "type": "object",
   "required": [

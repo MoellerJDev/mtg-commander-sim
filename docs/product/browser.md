@@ -2,7 +2,7 @@
 title: "Browser product"
 status: "current"
 authoritative_source: "web client, projected protocol, server application, and headless browser tests"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "local players, spectators, and product contributors"
 maintenance: "hand-maintained"
 concern: "browser-product"
@@ -10,8 +10,9 @@ concern: "browser-product"
 
 # Browser product
 
-The local browser is a projected client for two- or four-player Commander. It
-supports invite-only rooms, validated deck submission, seat-isolated play,
+The Quorune browser is a projected client for two- or four-player games under
+the current Commander profile. It supports invite-only rooms, validated deck
+submission, seat-isolated play,
 read-only spectators, public history, and restart-safe game lifecycle. It does
 not contain a second timing, mana, combat, target, or card-rules engine.
 

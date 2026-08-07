@@ -2,14 +2,15 @@
 title: "System context"
 status: "current"
 authoritative_source: "implemented package, server, web client, and protocol"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "contributors and operators"
 maintenance: "hand-maintained"
 ---
 
 # System context
 
-The application is a deterministic, server-authoritative Commander platform.
+Quorune is a deterministic, server-authoritative multiplayer card-game platform.
+Its current rules profile targets Commander.
 Humans, scripted pilots, subprocess pilots, and optional Codex pilots all use
 the same projected legal-action protocol. They do not mutate game state or
 interpret Oracle text as authority.
@@ -48,7 +49,7 @@ the required environment differs.
 
 ## Current versus target
 
-Current behavior is the implemented partial Commander kernel and local
+Current behavior is the implemented partial Commander rules kernel and local
 browser/server runtime described above. The target is a modular compiler-backed
 rules platform with complete capability closure for a pinned rules and Oracle
 snapshot. Target work must not be described as implemented until its generated

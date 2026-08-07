@@ -134,7 +134,7 @@ class ManagedScryfallData:
                 self._activation_warning = (
                     "A newer card database is ready, but the active database is locked by "
                     "another process. The existing card database remains available; close "
-                    "other Commander Arena servers and restart to activate the update."
+                    "other Quorune servers and restart to activate the update."
                 )
                 self.restart_required = True
         if self.database.exists():

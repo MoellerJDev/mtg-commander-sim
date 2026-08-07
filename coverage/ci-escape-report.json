@@ -272,9 +272,9 @@
       "workflow_runs_observed": 3
     }
   ],
-  "repository": "MoellerJDev/mtg-commander-sim",
+  "repository": "MoellerJDev/quorune",
   "schema_version": 1,
-  "source_fingerprint": "b44ee0f0e8831fb8f508100af53cfd33d5fa80bf7011497b9fc1016a3146f72d",
+  "source_fingerprint": "d09299ad7467caba335749334711ad33f680a0b124d4542171cbcb2e2e040901",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,

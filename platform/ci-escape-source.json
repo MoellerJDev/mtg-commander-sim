@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "observed_at": "2026-08-06T12:06:17Z",
-  "repository": "MoellerJDev/mtg-commander-sim",
+  "repository": "MoellerJDev/quorune",
   "escapes": [
     {
       "id": "ci-20260804-01",

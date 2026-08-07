@@ -325,7 +325,7 @@ def _github_request(url: str, token: str) -> bytes:
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {token}",
             "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "mtg-commander-sim-certification",
+            "User-Agent": "quorune-certification",
         },
     )
     try:

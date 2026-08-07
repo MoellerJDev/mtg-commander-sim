@@ -49,6 +49,7 @@ from .util import stable_json
 
 
 _ORACLE_COMMAND = "ora" + "cle"
+_CLI_DESCRIPTION = "Operate the Quorune rules, replay, and local-match toolchain."
 
 
 def _seat_values(values: list[str]) -> dict[str, str]:
@@ -512,7 +513,7 @@ def _run_semantic_preflight_command(args: argparse.Namespace) -> int | None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="mtg-commander-sim")
+    parser = argparse.ArgumentParser(prog="simctl", description=_CLI_DESCRIPTION)
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     new = sub.add_parser("new", help="Create a persistent multiplayer game")

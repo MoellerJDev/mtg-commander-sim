@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mtg-commander-sim.local/schemas/decision-packet-v3.0.json",
-  "title": "MTG Commander Sim projected decision packet v3.0",
+  "title": "Quorune projected decision packet v3.0",
   "type": "object",
   "required": [
     "v",

@@ -2,7 +2,7 @@
 title: "Local application operations"
 status: "current"
 authoritative_source: "server launcher, settings, managed data service, and browser build"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "local users and contributors"
 maintenance: "hand-maintained"
 concern: "local-operations"
@@ -19,7 +19,7 @@ From the repository root in PowerShell:
 .\.venv\Scripts\python.exe -m server
 ```
 
-The project requires CPython 3.12.x. Bootstrap creates a local environment,
+Quorune requires CPython 3.12.x. Bootstrap creates a local environment,
 installs project and browser dependencies, and validates the runtime without
 changing global `PATH`, elevating, or removing another Python. The server builds
 the browser when needed, prepares card data, serves same-origin HTTP/WebSocket

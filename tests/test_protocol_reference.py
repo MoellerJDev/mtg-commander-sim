@@ -16,6 +16,7 @@ SPEC.loader.exec_module(MODULE)
 class ProtocolReferenceTests(unittest.TestCase):
     def test_inventory_contains_http_and_websocket_routes(self) -> None:
         inventory = MODULE.build_inventory()
+        self.assertEqual("Quorune Server", inventory["protocol"]["title"])
         routes = {(item["method"], item["path"]) for item in inventory["http_routes"]}
         self.assertIn(("GET", "/api/v1/health"), routes)
         self.assertIn(("POST", "/api/v1/games/{game_id}/commands"), routes)
@@ -27,6 +28,15 @@ class ProtocolReferenceTests(unittest.TestCase):
         self.assertIn("schemas/command-envelope.schema.json", paths)
         self.assertIn("schemas/decision-packet.schema.json", paths)
         self.assertIn("schemas/pilot-response.schema.json", paths)
+        titles = {item["path"]: item["title"] for item in inventory["schemas"]}
+        self.assertEqual(
+            "Quorune client command envelope v3.0",
+            titles["schemas/command-envelope.schema.json"],
+        )
+        self.assertEqual(
+            "Quorune projected decision packet v3.0",
+            titles["schemas/decision-packet.schema.json"],
+        )
 
     def test_generation_is_deterministic(self) -> None:
         first = MODULE.build_inventory()

@@ -222,7 +222,7 @@ def build_report() -> dict:
     }
     project = _project_metadata()
     report["package"] = {
-        "name": "mtg-commander-sim",
+        "name": str(project["name"]),
         "version": str(project["version"]),
         "python": str(project["requires-python"]),
     }

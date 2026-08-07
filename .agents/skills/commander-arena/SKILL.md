@@ -1,11 +1,11 @@
 ---
 name: commander-arena
-description: Coordinate, resume, inspect, or review a four-seat Commander match through fixed-seat projected pilot sessions.
+description: Coordinate, resume, inspect, or review a four-seat match through Quorune's optional fixed-seat pilot harness.
 ---
 
-# Commander arena
+# Quorune Pilot Harness
 
-Use this skill only for the optional arena adapter. Read the canonical
+Use this compatibility-named skill only for the optional pilot-harness adapter. Read the canonical
 [arena operations](../../../docs/optional-clients/codex-arena.md),
 [provider contract](../../../docs/optional-clients/providers.md), and
 [Game Record contract](../../../docs/reference/game-record.md) before acting.

@@ -623,7 +623,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
                 await runtime.close()
 
     app = FastAPI(
-        title="Commander Arena Server",
+        title="Quorune Server",
         version="0.8.0",
         lifespan=lifespan,
     )

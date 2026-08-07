@@ -2,7 +2,7 @@
 title: "Contributing"
 status: "current"
 authoritative_source: "repository contribution, architecture, test, and review policy"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "human contributors"
 maintenance: "hand-maintained"
 concern: "contributor-contract"
@@ -10,7 +10,7 @@ concern: "contributor-contract"
 
 # Contributing
 
-Thank you for helping improve MTG Commander Sim. This document is the human
+Thank you for helping improve Quorune. This document is the human
 contributor contract: it explains which work the project supports, how to keep
 changes reviewable, and what evidence maintainers need before merging them.
 

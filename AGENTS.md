@@ -2,7 +2,7 @@
 title: "Codex project instructions"
 status: "current"
 authoritative_source: "repository contribution, architecture, and documentation policy"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "Codex agents and contributors"
 maintenance: "hand-maintained"
 ---
@@ -32,10 +32,20 @@ Useful status entry points:
 - [`docs/RULES_COMPLETENESS_STATUS.md`](docs/RULES_COMPLETENESS_STATUS.md)
 - [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md)
 - [`docs/ARCHITECTURE_DEBT_STATUS.md`](docs/ARCHITECTURE_DEBT_STATUS.md)
+- [`docs/REBRAND_STATUS.md`](docs/REBRAND_STATUS.md)
 - [`coverage/card-unlock-frontier.md`](coverage/card-unlock-frontier.md)
 - [`coverage/reusable-piece-matrix.md`](coverage/reusable-piece-matrix.md)
 
 ## Authority and safety boundaries
+
+- Quorune is the first-party product and repository identity. Magic: The
+  Gathering, Commander, Oracle, Comprehensive Rules, Scryfall, and Moxfield are
+  third-party rules, format, or data compatibility references; do not replace
+  those terms when they are technically accurate.
+- Before renaming a distribution, module, environment variable, schema ID,
+  protocol key, record field, replay prefix, command, or optional-client path,
+  read [`docs/REBRAND_STATUS.md`](docs/REBRAND_STATUS.md). Compatibility
+  identifiers require an explicit migration rather than a global replacement.
 
 - `CommanderEngine` and its typed rules subsystems are authoritative. A client
   never mutates zones, life, mana, stack, counters, choices or effects.

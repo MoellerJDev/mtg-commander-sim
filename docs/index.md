@@ -2,7 +2,7 @@
 title: "Documentation map and standard"
 status: "current"
 authoritative_source: "platform/documentation-policy.json and the maintained documentation set"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "users, operators, contributors, and coding agents"
 maintenance: "hand-maintained"
 ---
@@ -24,6 +24,7 @@ belongs in the changelog or `docs/history/`.
 - [Security policy](../SECURITY.md)
 - [Code of Conduct](../CODE_OF_CONDUCT.md)
 - [Agent instructions](../AGENTS.md)
+- [Rebrand and compatibility status](REBRAND_STATUS.md)
 
 ## Product, operations, and protocol
 
@@ -72,8 +73,8 @@ belongs in the changelog or `docs/history/`.
 ## Optional clients
 
 - [Provider adapters](optional-clients/providers.md)
-- [Codex arena adapter](optional-clients/codex-arena.md)
-- [Commander arena operational skill](../.agents/skills/commander-arena/SKILL.md)
+- [Quorune Pilot Harness adapter](optional-clients/codex-arena.md)
+- [Pilot Harness operational skill](../.agents/skills/commander-arena/SKILL.md)
 
 Optional clients consume the ordinary seat-projected protocol. They do not
 define rules authority or become a production runtime dependency.

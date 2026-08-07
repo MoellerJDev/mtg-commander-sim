@@ -2,7 +2,7 @@
   "schema_version": 3,
   "repository": {
     "default_branch": "main",
-    "name": "MoellerJDev/mtg-commander-sim",
+    "name": "MoellerJDev/quorune",
     "visibility": "public"
   },
   "provenance": {

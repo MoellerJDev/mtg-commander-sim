@@ -2,7 +2,7 @@
 title: "Changelog"
 status: "historical"
 authoritative_source: "merged repository history"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "users and maintainers"
 maintenance: "hand-maintained"
 ---
@@ -10,6 +10,20 @@ maintenance: "hand-maintained"
 # Changelog
 
 ## Unreleased
+
+### Quorune public identity
+
+- Renamed the public product and repository to Quorune with the tagline
+  “Authoritative rules. Private state. Exact replay.” Public documentation,
+  browser presentation, server metadata, repository coordinates, and
+  project-specific network user agents now use the Quorune identity.
+- Repositioned AI, scripted, subprocess, and future native integrations as
+  optional untrusted clients of the same projected protocol used by humans.
+  Current rules compatibility remains focused on Magic: The Gathering
+  Commander without presenting that third-party format as the product name.
+- Preserved the `mtg-commander-sim` distribution, `mtg_commander_sim` import
+  namespace, legacy commands, Game Record v3 identifiers, replay hashes, and
+  protocol compatibility keys for the separately certified namespace migration.
 
 ### Typed Flanking and Bushido block-transition triggers
 

@@ -94,11 +94,11 @@ function Welcome({ onReady }: { onReady: (guest: Guest) => void }) {
     <main className="welcome-shell">
       <section className="hero-card">
         <div className="hero-copy">
-          <div className="brand-mark" aria-hidden="true">CA</div>
-          <div className="eyebrow">SERVER-AUTHORITATIVE COMMANDER</div>
-          <h1>Four seats.<br />One source of truth.</h1>
+          <div className="brand-mark" aria-hidden="true">Q</div>
+          <div className="eyebrow">QUORUNE · SERVER-AUTHORITATIVE PLAY</div>
+          <h1>Authoritative rules.<br />Private state. Exact replay.</h1>
           <p>
-            Play multiplayer Commander through a deterministic rules engine.
+            Play multiplayer card games through a deterministic rules engine.
             Your hand stays private, every accepted move is replayable, and each
             player sees only their own projected table.
           </p>
@@ -111,7 +111,7 @@ function Welcome({ onReady }: { onReady: (guest: Guest) => void }) {
         <form onSubmit={submit} className="stack-form entry-form">
           <div>
             <span className="step-kicker">01 · PLAYER IDENTITY</span>
-            <h2>Enter the arena</h2>
+            <h2>Enter Quorune</h2>
             <p>Choose the name your pod will see. No account is required.</p>
           </div>
           <label>
@@ -174,9 +174,9 @@ function Lobby({ guest, system, onRoom }: { guest: Guest; system: SystemStatus |
           <span className="status-dot" /> Session ready · {guest.display_name}
           {system?.card_data.database && <> · {system.card_data.database.cards.toLocaleString()} local cards</>}
         </div>
-        <div className="eyebrow">COMMANDER ARENA</div>
+        <div className="eyebrow">QUORUNE</div>
         <h1>Find your table</h1>
-        <p className="page-lede">Host a private Commander duel or four-player pod, join a seat, or watch a table with an invite code.</p>
+        <p className="page-lede">Host a private duel or four-player table using the current Commander profile, join a seat, or watch with an invite code.</p>
       </header>
       <div className="lobby-grid">
         <section className="panel">
@@ -749,9 +749,9 @@ function SetupScreen({ initial, onReady }: { initial: SystemStatus; onReady: () 
   return (
     <main className="setup-shell" data-testid="setup-screen">
       <section className="setup-card" aria-live="polite">
-        <div className="brand-mark" aria-hidden="true">CA</div>
+        <div className="brand-mark" aria-hidden="true">Q</div>
         <div>
-          <div className="eyebrow">FIRST-RUN SETUP</div>
+          <div className="eyebrow">QUORUNE · FIRST-RUN SETUP</div>
           <h1>Preparing your card library.</h1>
           <p>{data.detail}</p>
         </div>

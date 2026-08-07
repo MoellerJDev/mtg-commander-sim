@@ -5,12 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mtg-commander-sim"
 version = "0.8.0"
-description = "Deterministic, server-authoritative multiplayer Commander platform"
+description = "Deterministic, server-authoritative multiplayer card-game platform with private state and exact replay"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.12,<3.13"
-authors = [{name = "OpenAI"}]
+authors = [{name = "MoellerJDev"}]
+maintainers = [{name = "MoellerJDev"}]
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.12",
@@ -21,6 +22,11 @@ dependencies = [
   "uvicorn>=0.52,<0.53",
   "websockets>=16,<18",
 ]
+
+[project.urls]
+Repository = "https://github.com/MoellerJDev/quorune"
+Issues = "https://github.com/MoellerJDev/quorune/issues"
+Documentation = "https://github.com/MoellerJDev/quorune#readme"
 
 [project.scripts]
 mtg-commander-sim = "mtg_commander_sim.cli:main"

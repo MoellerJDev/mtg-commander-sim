@@ -5,7 +5,7 @@
  * and run json-schema-to-typescript to regenerate this file.
  */
 
-export type MTGCommanderSimProjectedDecisionPacketV30 = {
+export type QuoruneProjectedDecisionPacketV30 = {
   [k: string]: unknown;
 } & {
   v: "3.0";

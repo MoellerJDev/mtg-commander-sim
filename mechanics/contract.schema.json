@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.invalid/mtg-commander-sim/mechanic-contract-v1.schema.json",
-  "title": "MTG Commander Sim mechanic contract",
+  "title": "Quorune mechanic contract",
   "type": "object",
   "additionalProperties": false,
   "required": [

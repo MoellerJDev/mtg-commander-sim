@@ -45,12 +45,15 @@ def _prepare_browser(web_root: Path) -> None:
     if dependencies_stale:
         print("Installing browser dependencies…", flush=True)
         subprocess.run([npm, "ci"], cwd=web_root, check=True)
-    print("Building the Commander Arena browser…", flush=True)
+    print("Building the Quorune browser…", flush=True)
     subprocess.run([npm, "run", "build"], cwd=web_root, check=True)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(prog="commander-server")
+    parser = argparse.ArgumentParser(
+        prog="commander-server",
+        description="Start the local Quorune server and browser client.",
+    )
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=8000, type=int)
     parser.add_argument("--reload", action="store_true")
@@ -89,7 +92,7 @@ def main() -> None:
         opener = threading.Timer(1.2, lambda: webbrowser.open(url))
         opener.daemon = True
         opener.start()
-    print(f"Commander Arena: {url}", flush=True)
+    print(f"Quorune: {url}", flush=True)
     print("The server manages card-data updates and the local image cache.", flush=True)
     uvicorn.run(
         "server.app:create_app",
