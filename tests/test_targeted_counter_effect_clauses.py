@@ -244,7 +244,7 @@ class TargetedCounterCompilerTests(unittest.TestCase):
             {**template.target_schema, "count": 2},
             {**template.target_schema, "source_exclusion": False},
             {**template.target_schema, "controller": "opponent"},
-            {**template.target_schema, "types_any": ["creature"]},
+            {**template.target_schema, "types_any": ["dragon"]},
         )
         for schema in malformed_schemas:
             with self.subTest(schema=schema):
