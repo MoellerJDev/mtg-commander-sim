@@ -6,11 +6,15 @@
     "visibility": "public"
   },
   "integration": {
-    "active_phase": null,
+    "active_phase": {
+      "id": "typed_permanent_exile_and_direct_target_harvest",
+      "pull_request": 127,
+      "head": "compiler/generic-exile-target-effect-clauses"
+    },
     "branch": "compiler/generic-exile-target-effect-clauses",
     "branch_ancestry": {
       "focused_branch_base": "98cc889801a361921bb10a7f4c7051fa6a8585ad",
-      "focused_branch_unique_commits_over_main": 4
+      "focused_branch_unique_commits_over_main": 5
     },
     "pull_requests": [
       {
@@ -880,6 +884,13 @@
         "number": 126,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/126"
+      },
+      {
+        "base": "main",
+        "head": "compiler/generic-exile-target-effect-clauses",
+        "number": 127,
+        "state": "open",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/127"
       }
     ],
     "tags": [
@@ -894,7 +905,7 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "ddd537783705d5fe5ee12f0871cb4e274765ac2c",
+    "feature_head_sha": "ec40701e1545734ac45dd6ba03f1657b1803422a",
     "feature_head_classification": "active_candidate",
     "certified_head_sha": "5459890c69e4ef09c1cfbf9f87f2bb5b0b6c3013",
     "certified_head_classification": "current_main_tree_equivalent",

@@ -32,14 +32,18 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "1429becc72130b899671e12d6432d2f55f6cfe45d4ec1d8cd6ac04caa846697d",
+    "evaluated_source_tree_hash": "804ce07a1b319843ec93611a2d083e81ab098252d41cf8802354346dfcd293c9",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": null,
+    "active_phase": {
+      "head": "compiler/generic-exile-target-effect-clauses",
+      "id": "typed_permanent_exile_and_direct_target_harvest",
+      "pull_request": 127
+    },
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -401,7 +405,7 @@
     "certified_head_classification": "current_main_tree_equivalent",
     "certified_head_sha": "5459890c69e4ef09c1cfbf9f87f2bb5b0b6c3013",
     "feature_head_classification": "active_candidate",
-    "feature_head_sha": "ddd537783705d5fe5ee12f0871cb4e274765ac2c",
+    "feature_head_sha": "ec40701e1545734ac45dd6ba03f1657b1803422a",
     "generation_timestamp": "2026-08-07T07:48:44Z"
   },
   "repository": {
