@@ -31,7 +31,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "2593372547e2b164bf40b9e682b3d95d38a3b69860dc6ff0113a94e661a5a700",
+    "evaluated_source_tree_hash": "afc55111a5b914866f66898e0dfcd431aa45d31c7552e3df9edc183e96b346be",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -428,13 +428,13 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 55318,
+      "material_residuals": 55224,
       "status_counts": {
-        "exact": 5111,
-        "partial": 14386,
-        "unresolved": 19126
+        "exact": 5094,
+        "partial": 14361,
+        "unresolved": 19087
       },
-      "total": 38623
+      "total": 38542
     },
     "rules": {
       "blocked": 375,
@@ -489,18 +489,18 @@
         }
       },
       "full": {
-        "cards_considered": 38623,
-        "material_residuals": 55314,
+        "cards_considered": 38542,
+        "material_residuals": 55220,
         "status_counts": {
           "failed": 2248,
-          "residual": 33509,
-          "trusted": 2866
+          "residual": 33445,
+          "trusted": 2849
         },
         "trust_basis_counts": {
-          "capability_closed": 2862,
+          "capability_closed": 2845,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 33509
+          "unresolved": 33445
         }
       }
     },
