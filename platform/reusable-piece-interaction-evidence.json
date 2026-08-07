@@ -506,6 +506,22 @@
       "capability_ids": ["activation.cycling.hand", "trigger.event.normalized_zone_change", "zone.draw.library_to_hand"],
       "interaction_order": 5,
       "assertion": "One source-pinned Cycling activation pays the physical discard through normalized zone-change ownership before its ordinary stack object resolves through the canonical private draw transaction."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_compiled_tap_activation_is_multiplayer_public_and_replays",
+      "piece_ids": ["capability.permanent.tap.effect", "capability.target.revalidate_resolution", "mechanic.tap-and-untap"],
+      "capability_ids": ["permanent.tap.effect", "target.revalidate_resolution"],
+      "interaction_order": 3,
+      "assertion": "The source-pinned direct tap clause advertises and revalidates the same public battlefield target before the canonical tap-state owner commits the transition."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_compiled_untap_activation_consumes_stun_and_replays",
+      "piece_ids": ["capability.permanent.untap.effect", "capability.target.revalidate_resolution", "mechanic.tap-and-untap"],
+      "capability_ids": ["permanent.untap.effect", "target.revalidate_resolution"],
+      "interaction_order": 3,
+      "assertion": "A source-pinned direct untap clause revalidates its target and then composes with the represented stun-counter replacement without bypassing the canonical untap owner."
     }
   ]
 }
