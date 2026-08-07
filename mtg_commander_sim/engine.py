@@ -6510,12 +6510,10 @@ class CommanderEngine(
         ):
             return False
         derived = {
-            "land": "land" in types,
-            "creature": "creature" in types,
-            "artifact": "artifact" in types,
-            "enchantment": "enchantment" in types,
-            "permanent": row["category"] == "permanent",
+            name: name in types
+            for name in ("land", "creature", "artifact", "enchantment")
         }
+        derived["permanent"] = row["category"] == "permanent"
         if group.predicate:
             if group.predicate == "artifact_or_enchantment_or_nonbasic_land":
                 if not (
