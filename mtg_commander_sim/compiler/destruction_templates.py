@@ -169,7 +169,10 @@ _COLOR_WORDS = {
     "green": "G",
 }
 _BASIC_LAND_SUBTYPES = {
-    f"{land_type}s": land_type for land_type in BASIC_LAND_MANA
+    (
+        land_type if land_type.endswith("s") else f"{land_type}s"
+    ): land_type
+    for land_type in BASIC_LAND_MANA
 }
 
 
