@@ -2,7 +2,7 @@
 title: "Complex card composition benchmark"
 status: "generated"
 authoritative_source: "coverage/complex-card-composition.json"
-verified: "bfb24e2ffd3c3d58fc888926c140e9ca0c5a42bbb7e686f1aaa2aa5e0ad92f64"
+verified: "34c4fbdc9f04a7082864ee4b951be999fcc4829da063332429be73052c9b5f12"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -35,10 +35,10 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Sorin of House Markov // Sorin, Ravenous Neonate | 170 | 18 | 3 | 7 | 10 | 19 | `blocked` |
 | Invasion of Kaldheim // Pyre of the World Tree | 168 | 16 | 5 | 4 | 5 | 22 | `blocked` |
 | Stay Hidden, Stay Silent | 168 | 15 | 6 | 4 | 5 | 17 | `blocked` |
-| Grist, Voracious Larva // Grist, the Plague Swarm | 166 | 21 | 4 | 5 | 10 | 14 | `blocked` |
 | Starscream, Power Hungry // Starscream, Seeker Leader | 165 | 17 | 4 | 8 | 4 | 19 | `blocked` |
 | Ojer Taq, Deepest Foundation // Temple of Civilization | 164 | 20 | 7 | 6 | 8 | 2 | `blocked` |
 | Gwen Stacy // Ghost-Spider | 163 | 21 | 5 | 5 | 7 | 13 | `blocked` |
+| Grist, Voracious Larva // Grist, the Plague Swarm | 162 | 21 | 4 | 5 | 8 | 14 | `blocked` |
 | Invasion of Kaladesh // Aetherwing, Golden-Scale Flagship | 161 | 16 | 4 | 5 | 7 | 17 | `blocked` |
 | Devoted Grafkeeper // Departed Soulkeeper | 159 | 19 | 5 | 6 | 7 | 7 | `blocked` |
 | Faithbound Judge // Sinner's Judgment | 159 | 21 | 5 | 7 | 8 | 1 | `blocked` |
