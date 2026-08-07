@@ -14,7 +14,7 @@
     "branch": "compiler/generic-counter-target-effect-clauses",
     "branch_ancestry": {
       "focused_branch_base": "8d9b1b170c4a9d2ade0cdcdf52505a0974febce2",
-      "focused_branch_unique_commits_over_main": 5
+      "focused_branch_unique_commits_over_main": 6
     },
     "pull_requests": [
       {
@@ -916,7 +916,7 @@
     "feature_head_classification": "active_candidate",
     "certified_head_sha": "8d9b1b170c4a9d2ade0cdcdf52505a0974febce2",
     "certified_head_classification": "current_main",
-    "generation_timestamp": "2026-08-07T11:35:00Z"
+    "generation_timestamp": "2026-08-07T11:46:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {

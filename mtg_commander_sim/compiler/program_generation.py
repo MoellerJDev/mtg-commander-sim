@@ -174,13 +174,7 @@ def _validate_generated_program_trust(
             kind=node.kind,
             face_id=face.face_id,
             line=node.span.line,
-            static_declaration=bool(
-                node.handlers
-                or (
-                    node.kind == "keyword_ability"
-                    and node.capability_dependencies
-                )
-            ),
+            static_declaration=_generated_static_declaration(node),
             node_id=node.node_id,
         )
         is not None

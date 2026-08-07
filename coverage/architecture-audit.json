@@ -3527,7 +3527,7 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 108411,
+      "logical_lines": 108405,
       "methods": {
         "dunder": 269,
         "private": 659,
@@ -3756,8 +3756,8 @@
           "file": "mtg_commander_sim/compiler/program_generation.py",
           "functions_and_methods": 23,
           "language": "python",
-          "logical_lines": 723,
-          "physical_lines": 806
+          "logical_lines": 717,
+          "physical_lines": 800
         },
         {
           "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
@@ -5995,7 +5995,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 118447,
+      "physical_lines": 118441,
       "python_file_count": 276,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -9980,7 +9980,7 @@
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:407",
+            "mtg_commander_sim/compiler/program_generation.py:401",
             "mtg_commander_sim/oracle_ir.py:1457"
           ]
         },
@@ -10014,7 +10014,7 @@
           ],
           "generated_programs": [
             "mtg_commander_sim/card_programs/adapters.py:9",
-            "mtg_commander_sim/compiler/program_generation.py:407",
+            "mtg_commander_sim/compiler/program_generation.py:401",
             "mtg_commander_sim/oracle_ir.py:1457"
           ]
         },
@@ -10061,7 +10061,7 @@
             "mtg_commander_sim/engine.py:31"
           ],
           "register_generated_programs": [
-            "mtg_commander_sim/compiler/program_generation.py:672",
+            "mtg_commander_sim/compiler/program_generation.py:666",
             "mtg_commander_sim/oracle_ir.py:1480",
             "mtg_commander_sim/preflight.py:16",
             "mtg_commander_sim/session.py:14"
@@ -10504,7 +10504,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "bc1c7c9ef11f8eb83748b3b01a22de1fdd4912e9bfed485a9cce0a694addff44"
+          "verified": "dfe676448e4c7f465cb1a4c2038a4d482dfc693ea2170412ee6065365c1e8cba"
         },
         "metadata_complete": true,
         "missing_metadata": [],
