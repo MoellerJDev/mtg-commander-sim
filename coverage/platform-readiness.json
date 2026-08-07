@@ -8,6 +8,7 @@
     "ordinary printed Flanking and positive-integer Bushido now consume one immutable complete multiplayer block transition, ordinary APNAP trigger placement, and the canonical identity-pinned layer 7c until-end-of-turn owner; conditional, variable, granted, copied, face-down, trigger-doubling, and multi-attacker-blocking variants remain explicit residuals, so neither aggregate mechanic is trusted",
     "ordinary printed Exalted, Battle Cry, and Melee now consume one immutable completed attack transition, ordinary APNAP trigger placement, and the canonical identity-pinned layer 7c until-end-of-turn owner; conditional, granted, copied, face-down, put-attacking, trigger-doubling, and broader attack-trigger variants remain explicit residuals, so none of the aggregate mechanics is trusted",
     "fixed ordinary-mana Cycling now consumes one source-pinned hand-only activation, canonical mana payment, exact source discard cost, ordinary stack placement, and iterative replacement-aware draw transaction; variable, hybrid, Phyrexian, snow, and nonmana costs, typecycling, Cycling triggers, modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone activated-ability inspection remain explicit blockers, so the aggregate mechanic is not trusted",
+    "mandatory direct-target tap and untap clauses now share one source-pinned typed compiler template across spell, trigger, and activated contexts and consume canonical target revalidation, tap-state mutation, stun replacement, and replay owners; optional, modal, aggregate, quantified, relational, qualified, compound, cost, untap-step, prohibition, and wider replacement forms remain explicit residuals, so the aggregate Tap and Untap mechanic is not trusted",
     "generic face-pinned First Strike and Double Strike now close the represented strike-step participation capability and harvest its sole-blocker cards, but the aggregate mechanics remain partial while ability-changing, copy, face-down, additional-combat or damage-step, and other unsupported participation producers remain reachable",
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "generic Vigilance, Haste, Flying, and Reach consume current represented effective keywords through canonical attack, tap-state, activation, mana-payment, and block-legality owners; unsupported ability-changing and copy producers, conditional haste acquisition, other evasion and declaration requirements or costs, and complete effective-characteristic closure remain explicit blockers",
@@ -28,7 +29,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "4961300345869c4f98bc97dbab032dac2f0c6f97aea1265ae5c5a4caabd77012",
+    "evaluated_source_tree_hash": "9bb77c79c2a755c7ad754d728416a8db3804b06b8ac54864169f60308a23fb5b",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -325,9 +326,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The current source tree lowers fixed ordinary-mana Cycling once into an immutable source-spanned CardProgram descriptor. Advertisement and command validation consume the same hand-only owner activation, canonical fixed mana payment, exact physical-card discard cost, ordinary nonmana stack placement, and iterative replacement-aware draw transaction. The descriptor is discoverable in every zone but executable only from its owner's hand; changed Oracle text, unsupported costs, and unpayable activations fail closed before mutation. Focused compiler, capability, stack, replay, privacy, rollback, multiplayer, and implementation-mutation evidence passes. The Commander census promotes 46 exact cards, closes 46 additional CardPrograms by capability, and removes 288 material residuals while keeping zero construction failures. CommanderEngine, direct writes, printed-name behavior, and Oracle-ID behavior remain flat. Variable, hybrid, Phyrexian, snow, and nonmana Cycling costs, typecycling, Cycling triggers, modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone activated-ability inspection remain explicit residuals pending public exact-head CI.",
+      "evidence": "PR 123 lowers fixed ordinary-mana Cycling once into an immutable source-spanned CardProgram descriptor. Advertisement and command validation consume the same hand-only owner activation, canonical fixed mana payment, exact physical-card discard cost, ordinary nonmana stack placement, and iterative replacement-aware draw transaction. The descriptor is discoverable in every zone but executable only from its owner's hand; changed Oracle text, unsupported costs, and unpayable activations fail closed before mutation. The Commander census promotes 46 exact cards, closes 46 additional CardPrograms by capability, removes 288 material residuals, and keeps zero construction failures. CommanderEngine, direct writes, printed-name behavior, and Oracle-ID behavior remain flat. Exact-head run 31148706323 passed every required gate and squash commit b07c5155d1ed03f986cf820277a47996ff8e5400 is on main. Variable, hybrid, Phyrexian, snow, and nonmana Cycling costs, typecycling, Cycling triggers, modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone activated-ability inspection remain explicit residuals.",
       "id": "ordinary_cycling_activation_harvest",
       "name": "Typed ordinary Cycling activation and generic harvest",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The current source tree lowers one mandatory whole-clause tap or untap instruction for exactly one target artifact, creature, land, or permanent into a shared immutable compiler template. Spell, trigger, and activated contexts declare the same fine-grained tap-state and resolution-time target capabilities, while execution reuses the canonical tap-state mutation owner and represented stun-counter replacement without runtime Oracle parsing. Shape mutations, optional, modal, aggregate, quantified, relational, qualified, and compound clauses fail closed. The pinned Commander census promotes 51 exact and capability-closed cards and removes 88 material residuals with zero construction failures. CommanderEngine, direct writes, printed-name behavior, and Oracle-ID behavior remain flat. Changed-module compilation and deterministic generators pass locally; regression, replay, privacy, multiplayer, and mutation certification are delegated to public exact-head CI by repository policy.",
+      "id": "targeted_tap_state_effect_clause_harvest",
+      "name": "Typed direct-target tap and untap effect clauses",
       "status": "implemented_current_source_tree"
     },
     {
@@ -343,7 +350,7 @@
       "status": "partial"
     }
   ],
-  "next_task": "Certify and merge the typed ordinary Cycling activation candidate. The pinned Commander census now promotes 46 exact cards, closes 46 additional CardPrograms by capability, and removes 288 material residuals; variable, hybrid, Phyrexian, snow, and nonmana Cycling costs, typecycling, Cycling triggers, cost modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone ability inspection remain separate work.",
+  "next_task": "Certify and merge the typed direct-target tap-state effect-clause candidate. The pinned Commander census promotes 51 exact and capability-closed cards and removes 88 material residuals; optional, modal, aggregate, quantified, relational, qualified, compound, cost, untap-step, prohibition, and wider replacement variants remain separate work.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -371,10 +378,10 @@
   },
   "provenance": {
     "certified_head_classification": "current_main",
-    "certified_head_sha": "05e0d99818cc7c98747cb6cf88e75e3fd9c941f7",
+    "certified_head_sha": "b07c5155d1ed03f986cf820277a47996ff8e5400",
     "feature_head_classification": "active_candidate",
-    "feature_head_sha": "75389d3a5b9017859a626db5560fd8ade2f62a80",
-    "generation_timestamp": "2026-08-07T04:13:29Z"
+    "feature_head_sha": "f0a670df55a90df450e68bda54713853ea1ad06e",
+    "generation_timestamp": "2026-08-07T05:02:37Z"
   },
   "repository": {
     "default_branch": "main",
@@ -383,10 +390,10 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 48296,
+      "material_residuals": 48208,
       "status_counts": {
-        "exact": 1865,
-        "partial": 13363,
+        "exact": 1916,
+        "partial": 13312,
         "unresolved": 16395
       },
       "total": 31623
@@ -405,10 +412,10 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 55899,
+      "material_residuals": 55810,
       "status_counts": {
-        "exact": 4799,
-        "partial": 14490,
+        "exact": 4851,
+        "partial": 14438,
         "unresolved": 19253
       },
       "total": 38542
@@ -443,7 +450,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5085,
+    "deterministic_cases_discovered": 5093,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -453,39 +460,39 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 48296,
+        "material_residuals": 48208,
         "status_counts": {
-          "residual": 29758,
-          "trusted": 1865
+          "residual": 29707,
+          "trusted": 1916
         },
         "trust_basis_counts": {
-          "capability_closed": 1861,
+          "capability_closed": 1912,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 29758
+          "unresolved": 29707
         }
       },
       "full": {
         "cards_considered": 38542,
-        "material_residuals": 55895,
+        "material_residuals": 55806,
         "status_counts": {
           "failed": 2248,
-          "residual": 33740,
-          "trusted": 2554
+          "residual": 33688,
+          "trusted": 2606
         },
         "trust_basis_counts": {
-          "capability_closed": 2550,
+          "capability_closed": 2602,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 33740
+          "unresolved": 33688
         }
       }
     },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31145100111,
+      "run_id": 31148706323,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31145100111"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31148706323"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -493,9 +500,9 @@
       "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr122_exact_head_31145100111_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31145507505_passed_29_integration_tests_then_failed_only_stale_certified_head_provenance_corrected_in_current_source_tree",
+      "deterministic_tests": "certified_main_through_pr123_exact_head_31148706323_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
-      "focused_rules_tests": "ordinary_cycling_descriptor_compiler_residual_capability_mutation_payment_stack_replay_source_pin_zone_payability_multiplayer_and_privacy_evidence_10_tests_pass; affected_activated_and_mana_ability_tests_60_pass; changed_modules_compile; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
+      "focused_rules_tests": "targeted_tap_state_changed_modules_compile_and_deterministic_generators_pass; no local regression suite executed; focused_and_broad_regression_replay_privacy_multiplayer_and_mutation_validation_deferred_to_public_exact_head_ci_by_repository_policy",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",
