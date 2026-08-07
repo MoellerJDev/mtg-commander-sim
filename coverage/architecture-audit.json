@@ -3096,9 +3096,9 @@
       "baseline_entry_count": 698,
       "conditional_entry_count": 98,
       "database_snapshot": {
-        "card_count": "38623",
-        "oracle_source_sha256": "9d44ab29ff15a239d48f190ec59adb8046049d9a18e8010b793a96361749295d",
-        "scryfall_oracle_updated_at": "2026-08-06T09:02:54.394+00:00"
+        "card_count": "38542",
+        "oracle_source_sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+        "scryfall_oracle_updated_at": "2026-08-04T09:02:45.219+00:00"
       },
       "entry_count": 698,
       "limitations": "Exact full printed-name literals only. Card-named helpers and semantic operations are separately reviewed in architecture-audit-source.json.",
@@ -9326,13 +9326,13 @@
         "unsupported_protection_quality": 53
       },
       "snapshot": {
-        "card_count": "38623",
-        "oracle_source_sha256": "9d44ab29ff15a239d48f190ec59adb8046049d9a18e8010b793a96361749295d",
+        "card_count": "38542",
+        "oracle_source_sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
         "ruling_count": "77998",
-        "rulings_source_sha256": "8e4f6b41785ce7ca1fd881372598e48410e2643e95aa893668a784827deeb3ea",
+        "rulings_source_sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
         "schema_version": "2",
-        "scryfall_oracle_updated_at": "2026-08-06T09:02:54.394+00:00",
-        "scryfall_rulings_updated_at": "2026-08-06T09:00:37.813+00:00"
+        "scryfall_oracle_updated_at": "2026-08-04T09:02:45.219+00:00",
+        "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
         "exact": 1819,
@@ -9350,39 +9350,39 @@
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.123502,
-      "material_residuals": 56289,
+      "exact_fraction": 0.12332,
+      "material_residuals": 56195,
       "residual_kinds": {
         "cost": 2015,
         "declaration_cost": 11,
         "declaration_restriction": 170,
-        "dependency_contract": 6471,
-        "effect": 7175,
-        "mana_ability": 767,
-        "replacement_effect": 1762,
-        "spell_effect": 11265,
-        "static_ability": 11131,
-        "trigger": 15305,
-        "unsupported_enchant_restriction": 149,
+        "dependency_contract": 6465,
+        "effect": 7168,
+        "mana_ability": 766,
+        "replacement_effect": 1758,
+        "spell_effect": 11241,
+        "static_ability": 11108,
+        "trigger": 15277,
+        "unsupported_enchant_restriction": 148,
         "unsupported_protection_quality": 68
       },
       "snapshot": {
-        "card_count": "38623",
-        "oracle_source_sha256": "9d44ab29ff15a239d48f190ec59adb8046049d9a18e8010b793a96361749295d",
+        "card_count": "38542",
+        "oracle_source_sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
         "ruling_count": "77998",
-        "rulings_source_sha256": "8e4f6b41785ce7ca1fd881372598e48410e2643e95aa893668a784827deeb3ea",
+        "rulings_source_sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
         "schema_version": "2",
-        "scryfall_oracle_updated_at": "2026-08-06T09:02:54.394+00:00",
-        "scryfall_rulings_updated_at": "2026-08-06T09:00:37.813+00:00"
+        "scryfall_oracle_updated_at": "2026-08-04T09:02:45.219+00:00",
+        "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 4770,
-        "partial": 14566,
-        "unresolved": 19287
+        "exact": 4753,
+        "partial": 14541,
+        "unresolved": 19248
       },
       "template_count": 184,
-      "total_faces": 41840,
-      "total_oracle_ids": 38623
+      "total_faces": 41759,
+      "total_oracle_ids": 38542
     },
     "mechanic_contracts": {
       "current_snapshot_complete": false,
@@ -10141,7 +10141,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "8b4cb8758630536ae972668cf473b86e2f02a8b23034dce37e867b1a28811388"
+          "verified": "f853817e81e165a9bb164f57f29a978ff17c089aa179e39fc48ee9459f31ef8f"
         },
         "metadata_complete": true,
         "missing_metadata": [],

@@ -9140,18 +9140,18 @@
       "available": true,
       "database_schema_version": "2",
       "oracle_bulk": {
-        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260806090254.jsonl.gz",
-        "oracle_id_count": 38623,
-        "sha256": "9d44ab29ff15a239d48f190ec59adb8046049d9a18e8010b793a96361749295d",
-        "source_filename": "oracle-cards-20260806090254.jsonl.gz",
-        "updated_at": "2026-08-06T09:02:54.394+00:00"
+        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
+        "oracle_id_count": 38542,
+        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
+        "updated_at": "2026-08-04T09:02:45.219+00:00"
       },
       "rulings_bulk": {
-        "download_uri": "https://data.scryfall.io/rulings/rulings-20260806090037.jsonl.gz",
+        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
         "ruling_count": 77998,
-        "sha256": "8e4f6b41785ce7ca1fd881372598e48410e2643e95aa893668a784827deeb3ea",
-        "source_filename": "rulings-20260806090037.jsonl.gz",
-        "updated_at": "2026-08-06T09:00:37.813+00:00"
+        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
+        "source_filename": "rulings-20260804090038.jsonl.gz",
+        "updated_at": "2026-08-04T09:00:38.847+00:00"
       }
     },
     "comprehensive_rules": "indexed",
