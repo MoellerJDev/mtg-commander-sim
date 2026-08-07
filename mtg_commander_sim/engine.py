@@ -6458,7 +6458,7 @@ class CommanderEngine(
         ):
             return False
         if not group.matches_type_characteristics(
-            types=row.get("types") or (),
+            types=(types := set(row.get("types") or ())),
             subtypes=row.get("subtypes") or (),
             supertypes=row.get("supertypes") or (),
         ):
