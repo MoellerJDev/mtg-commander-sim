@@ -407,7 +407,22 @@ class ReturnToOwnerHandRuleTests(unittest.TestCase):
         self.assertTrue(accepted.ok, accepted.summary)
         self.pass_stack(session)
 
-        self.assertEqual("hand", target.zone)
+        self.assertEqual(
+            "hand",
+            target.zone,
+            {
+                "source_zone": source.zone,
+                "stack": [item.to_dict() for item in engine.state.stack],
+                "recent_events": [
+                    {
+                        "code": event.code,
+                        "summary": event.summary,
+                        "details": event.details,
+                    }
+                    for event in engine.state.events[-20:]
+                ],
+            },
+        )
         self.assertEqual("B", target.owner)
         self.assertEqual("graveyard", source.zone)
         self.assertIn(

@@ -6457,10 +6457,12 @@ class CommanderEngine(
             group.player_relation,
         ):
             return False
+        types = set(row.get("types") or ())
+        supertypes = set(row.get("supertypes") or ())
         if not group.matches_type_characteristics(
-            types=(types := set(row.get("types") or ())),
+            types=types,
             subtypes=row.get("subtypes") or (),
-            supertypes=row.get("supertypes") or (),
+            supertypes=supertypes,
         ):
             return False
         colors = set(row.get("colors") or ())
