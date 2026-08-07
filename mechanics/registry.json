@@ -1,5 +1,5 @@
 {
-  "contract_count": 79,
+  "contract_count": 80,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -101,6 +101,12 @@
       "mechanic_id": "cr-707-copying-objects",
       "path": "mechanics/contracts/copying-objects.json",
       "sha256": "6c3620b6ef7d267679778eff709af9d574117e65ba9254464034b1ea8b377e0a",
+      "version": 1
+    },
+    {
+      "mechanic_id": "cycling",
+      "path": "mechanics/contracts/cycling.json",
+      "sha256": "9bc2133c7a873f7adeb1beb8e6d7cdf54baa2113845980efdabaacbe9903c80c",
       "version": 1
     },
     {
@@ -1149,19 +1155,41 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/cycling.json",
+      "contract_sha256": "9bc2133c7a873f7adeb1beb8e6d7cdf54baa2113845980efdabaacbe9903c80c",
+      "contract_version": 1,
+      "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "OrdinaryCyclingAbilitySpec, OrdinaryCyclingAbilityHandler, activation query and commit, and the canonical draw coordinator",
+      "implementation_version": "typed-ordinary-cycling-activation-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "variable, hybrid, Phyrexian, snow, and nonmana Cycling costs remain residual",
+        "typecycling remains residual",
+        "Cycling cost modifiers and prohibitions remain residual",
+        "triggered abilities that refer to cycling or discarding remain residual",
+        "granted, copied, and face-down Cycling needs a trusted typed ability-fragment dependency",
+        "generic effects that inspect activated abilities in arbitrary zones are not capability-closed by this slice"
+      ],
       "mechanic_id": "cycling",
       "official_name": "Cycling",
       "rule_references": [
         "702.29"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_descriptor_is_strict_immutable_and_round_trips",
+        "test_fixed_ordinary_cycling_compiles_typed_hand_activation",
+        "test_unsupported_cycling_variants_remain_precise_residuals",
+        "test_generated_cycling_program_is_capability_closed",
+        "test_generic_cycling_discards_before_stack_draw_and_replays_exactly",
+        "test_changed_cycling_oracle_fails_closed_without_runtime_reparse",
+        "test_cycling_descriptor_exists_in_every_zone_but_activates_only_from_hand",
+        "test_unpayable_cycling_is_not_offered_and_rejects_without_mutation",
+        "test_four_player_cycling_draw_is_private_and_seat_scoped",
+        "test_ordinary_cycling_compiler_mutant_is_killed"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -9137,22 +9165,7 @@
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "sources": {
     "card_data_snapshot": {
-      "available": true,
-      "database_schema_version": "2",
-      "oracle_bulk": {
-        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
-        "oracle_id_count": 38542,
-        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
-        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
-        "updated_at": "2026-08-04T09:02:45.219+00:00"
-      },
-      "rulings_bulk": {
-        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
-        "ruling_count": 77998,
-        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
-        "source_filename": "rulings-20260804090038.jsonl.gz",
-        "updated_at": "2026-08-04T09:00:38.847+00:00"
-      }
+      "available": false
     },
     "comprehensive_rules": "indexed",
     "official_set_mechanics": "planned",

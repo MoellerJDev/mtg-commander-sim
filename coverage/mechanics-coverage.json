@@ -5,10 +5,10 @@
   "schema_version": 1,
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "status_counts": {
-    "partial": 58,
+    "partial": 59,
     "tested": 16,
     "trusted": 5,
-    "unclassified": 346
+    "unclassified": 345
   },
   "total_mechanics": 425,
   "trusted_fraction": 0.011765,
