@@ -140,10 +140,10 @@ class RulesSchedulerTests(unittest.TestCase):
         )
         self.assertTrue(
             all(
-                not rule["reviewed"]
-                and rule["classification"] == "unclassified"
-                and rule["conformance_status"] == "unreviewed"
-                and rule["work_state"] == "behavioral_review_required"
+                rule["reviewed"]
+                and rule["classification"] == "behavioral"
+                and rule["conformance_status"] == "blocked"
+                and rule["work_state"] == "reviewed_behavioral_blocked"
                 for rule in selected["rules"]
             )
         )
