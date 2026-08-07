@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 46,
+  "registry_version": 47,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -75,6 +75,12 @@
       "mechanic_id": "destroy",
       "capabilities": [
         "permanent.destroy.effect"
+      ]
+    },
+    {
+      "mechanic_id": "exile",
+      "capabilities": [
+        "permanent.exile.effect"
       ]
     },
     {
@@ -1251,6 +1257,33 @@
       "dependency_fail_closed_rationale": "The exact direct-target compiler shape requires resolution-time target revalidation; blocking that dependency prevents the destruction node and its CardProgram from becoming trusted.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_destruction_disposition_mutants_are_killed changes shield, Indestructible, and state-based disposition boundaries; the focused assertions reject each mutant.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "permanent.exile.effect",
+      "version": 1,
+      "official_rules": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and execute one mandatory direct-target instruction that moves a phased-in battlefield permanent toward exile through target revalidation and a typed precommit transaction owned by the canonical replacement-aware zone-change path.",
+        "inputs": ["closed typed direct-target clause", "revalidated phased-in battlefield permanent", "physical and logical object identity", "current owner and controller", "represented destination-replacement selections"],
+        "outputs": ["requested exile zone event", "new logical object identity", "replacement-aware final destination", "owner-indexed public exile presentation", "public typed result journal"],
+        "exclusions": ["exile from hand, library, graveyard, command, or stack", "mass, multi-target, optional, modal, conditional, qualified, linked-result, cost, or temporary-exile clauses", "face-down exile, linked exile piles, return permissions, and cast-from-exile permissions", "complete type-changing, copy, token, commander-replacement, and dependency interactions beyond the represented zone-change owner; cards representing those interactions remain material residuals and fail match trust closed"]
+      },
+      "dependencies": ["target.revalidate_resolution"],
+      "implementation_components": ["mtg_commander_sim.compiler.exile_templates.TargetedExileEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_exile_node_capabilities", "mtg_commander_sim.semantic_runtime.permanent_exile_handlers.ExilePermanentHandler", "mtg_commander_sim.permanent_exile.prepare_permanent_exile", "mtg_commander_sim.permanent_exile.commit_permanent_exile"],
+      "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_exile_lowering", "test_control_changed_permanent_exiles_to_owner_public_zone", "test_exile_destination_replacement_preserves_typed_result"],
+      "negative_tests": ["test_unsupported_exile_variants_remain_material_residuals", "test_targeted_exile_shape_mutants_fail_closed", "test_exile_phased_and_stale_permanents_fail_before_mutation"],
+      "interaction_tests": ["test_exile_destination_replacement_preserves_typed_result", "test_indestructible_and_shield_do_not_prevent_exile"],
+      "multiplayer_tests": ["test_compiled_exile_is_multiplayer_public_and_replays"],
+      "privacy_tests": ["test_compiled_exile_is_multiplayer_public_and_replays"],
+      "replay_tests": ["test_compiled_exile_is_multiplayer_public_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The exact direct-target compiler shape requires resolution-time target revalidation; blocking that dependency prevents the exile node and its CardProgram from becoming trusted.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_permanent_exile_transaction_mutant_is_killed bypasses stale-plan validation; the no-mutation assertion rejects the survivor.",
       "blockers": [],
       "status": "trusted"
     },

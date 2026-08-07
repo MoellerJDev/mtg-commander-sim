@@ -525,6 +525,22 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_compiled_exile_is_multiplayer_public_and_replays",
+      "piece_ids": ["capability.permanent.exile.effect", "capability.target.revalidate_resolution", "mechanic.cr-406-exile"],
+      "capability_ids": ["permanent.exile.effect", "target.revalidate_resolution"],
+      "interaction_order": 3,
+      "assertion": "The compiled direct-target exile revalidates one public permanent, commits the owner-indexed public exile zone change, and preserves exact replay and seat projection."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_exile_destination_replacement_preserves_typed_result",
+      "piece_ids": ["capability.permanent.exile.effect", "mechanic.cr-400-general", "mechanic.cr-614-replacement-effects"],
+      "capability_ids": ["permanent.exile.effect"],
+      "interaction_order": 3,
+      "assertion": "The typed permanent-exile request enters the canonical zone-change replacement tree and reports the committed replacement destination without bypassing CR 400 ownership."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_compiled_return_is_multiplayer_private_and_replays",
       "piece_ids": ["capability.permanent.return.owner_hand", "capability.target.revalidate_resolution", "mechanic.cr-400-general"],
       "capability_ids": ["permanent.return.owner_hand", "target.revalidate_resolution"],

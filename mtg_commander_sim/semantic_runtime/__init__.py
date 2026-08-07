@@ -144,6 +144,10 @@ from .destruction_handlers import (
     DESTRUCTION_HANDLERS,
     DestroyPermanentHandler,
 )
+from .permanent_exile_handlers import (
+    ExilePermanentHandler,
+    PERMANENT_EXILE_HANDLERS,
+)
 from .return_to_hand_handlers import (
     RETURN_TO_HAND_HANDLERS,
     ReturnPermanentToOwnerHandHandler,
@@ -165,6 +169,7 @@ from .intents import (
     DestroyPermanentIntent,
     IntentPlan,
     EliminatePlayersIntent,
+    ExilePermanentIntent,
     LifeChangeIntent,
     MoveObjectsSimultaneouslyIntent,
     MoveLibraryCardsToBottomIntent,
@@ -233,6 +238,7 @@ def default_semantic_handler_registry() -> SemanticHandlerRegistry:
             *GENERIC_HANDLERS,
             *TAP_STATE_HANDLERS,
             *DESTRUCTION_HANDLERS,
+            *PERMANENT_EXILE_HANDLERS,
             *RETURN_TO_HAND_HANDLERS,
             *DOMAIN_EFFECT_HANDLERS,
         )
@@ -281,6 +287,8 @@ __all__ = [
     "DomainEffectIntent",
     "DestroyPermanentHandler",
     "DestroyPermanentIntent",
+    "ExilePermanentHandler",
+    "ExilePermanentIntent",
     "ReturnPermanentToOwnerHandHandler",
     "ReturnPermanentToOwnerHandIntent",
     "DrawEachPlayerNode",

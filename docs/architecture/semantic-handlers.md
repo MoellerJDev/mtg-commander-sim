@@ -41,10 +41,12 @@ effects, and other persistent descriptors—belongs to
 [runtime components](runtime-components.md), not this boundary. Family-specific
 mutation and ordering contracts belong in subsystem documents such as
 [drawing](drawing.md), [damage](damage.md), [prevention](prevention.md), and
-[counter placement](counter-placement.md). Direct permanent destruction and
-return-to-owner-hand instructions lower through strict handlers into their
-identity-pinned transactions; neither handler reparses Oracle text or owns the
-underlying counter or zone mutation.
+[counter placement](counter-placement.md). Direct permanent destruction,
+permanent exile, and return-to-owner-hand instructions lower through strict
+handlers into identity-pinned transactions; none reparses Oracle text or owns
+the underlying counter or zone mutation. Broad legacy exile operations remain
+separate because they also represent stack and hidden-zone movement outside the
+direct battlefield-target grammar.
 
 To migrate an instruction, characterize existing output and replay, define the
 smallest typed node/query/intent surface, register one stable handler, add
