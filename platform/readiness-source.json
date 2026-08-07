@@ -7,9 +7,9 @@
   },
   "integration": {
     "active_phase": null,
-    "branch": "fix/typed-color-among-mana",
+    "branch": "rules/typed-attack-transition-keyword-triggers",
     "branch_ancestry": {
-      "focused_branch_base": "e0e80861bfc3f332146cda91597b901521f47779",
+      "focused_branch_base": "ad15194cbe4fc8c8cd8958f3d3fc3c88cc2c3bb4",
       "focused_branch_unique_commits_over_main": 6
     },
     "pull_requests": [
@@ -838,6 +838,13 @@
         "number": 118,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/118"
+      },
+      {
+        "base": "main",
+        "head": "fix/typed-color-among-mana",
+        "number": 121,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/121"
       }
     ],
     "tags": [
@@ -852,11 +859,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "578c8dec96d9429e9420320f423531099fcba7c8",
+    "feature_head_sha": "43a9299de9e2e0be74bd4c9b68077c888d44036d",
     "feature_head_classification": "active_candidate",
-    "certified_head_sha": "e0e80861bfc3f332146cda91597b901521f47779",
+    "certified_head_sha": "ad15194cbe4fc8c8cd8958f3d3fc3c88cc2c3bb4",
     "certified_head_classification": "current_main",
-    "generation_timestamp": "2026-08-07T01:40:00Z"
+    "generation_timestamp": "2026-08-07T02:37:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -1145,8 +1152,14 @@
     {
       "id": "color_set_activated_mana_harvest",
       "name": "Typed current-color-set activated mana abilities",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 121 gives four closed current-color-set activated mana templates one immutable compiler descriptor, seat-bound object query, shared manual-offer and automatic-payment mode owner, immediate stackless result, rollback boundary, and exact replay path. Mox Amber with no qualifying legendary creature or planeswalker remains legally activatable but advertises no colored output, adds no mana, and cannot pay another action automatically. Bloom Tender and Mox Amber become exact, trusted, capability-closed CardPrograms; Faeburrow Elder and The Grey Havens lose only the resolved mana residuals while retaining unrelated blockers. The certified Commander census gained two exact cards and removed five material residuals; CommanderEngine shrank by 122 logical lines with no direct-write or card-specificity growth. Exact-head run 31139677134 passed every required gate and squash commit ad15194 is on main. Post-merge run 31140060336 passed all 29 integration tests but exposed stale certified-head metadata; the present substantive branch corrects that provenance-only failure. Monocolored-only, linked-exile, opponent-relative, restricted, triggered, side-effecting, and wider conditional variants remain residual."
+    },
+    {
+      "id": "attack_transition_keyword_trigger_harvest",
+      "name": "Typed attack-transition Exalted, Battle Cry, and Melee triggers",
       "status": "implemented_current_source_tree",
-      "evidence": "The current source tree gives four closed current-color-set activated mana templates one immutable compiler descriptor, seat-bound object query, shared manual-offer and automatic-payment mode owner, immediate stackless result, rollback boundary, and exact replay path. Mox Amber with no qualifying legendary creature or planeswalker remains legally activatable but advertises no colored output, adds no mana, and cannot pay another action automatically. Bloom Tender and Mox Amber become exact, trusted, capability-closed CardPrograms; Faeburrow Elder and The Grey Havens lose only the resolved mana residuals while retaining their unrelated blockers. The Commander census gains two exact cards, removes five material residuals, and keeps zero construction failures. CommanderEngine shrinks by 122 logical lines with no direct-write or card-specificity growth. Closed negative grammar, current-control/color/phasing, Haste, multiplayer, privacy, rollback, replay, offer-command parity, mutation, and explicit pair evidence pass focused checks; monocolored-only, linked-exile, opponent-relative, restricted, triggered, side-effecting, and wider conditional variants remain residual."
+      "evidence": "The current source tree seals one immutable completed attack transition after the full declaration, derives ordinary printed Exalted, Battle Cry, and Melee occurrences from current typed ability fragments, places them through the ordinary APNAP trigger owner, and resolves exact logical-object bonuses through the canonical layer 7c until-end-of-turn owner. The relationship mutation owner preflights the complete eligible batch before its first write. Closed compiler lowering preserves precise source spans and every printed keyword instance without runtime Oracle parsing or printed-name behavior. The refreshed Commander census promotes the predicted 24 exact, trusted, capability-closed cards, reduces material residuals by 59, and keeps zero Commander construction failures; CommanderEngine shrinks by three logical lines and direct writes remain 132. Focused compilation and 66 attack, replay, privacy, rollback, malformed-input, multiplier, and implementation-mutation tests pass. Conditional, granted, copied, face-down, put-attacking, trigger-doubling, and broader attack-trigger variants remain explicit residuals pending public exact-head CI."
     },
     {
       "id": "rules_snapshot",
@@ -1172,8 +1185,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty-five bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger fixed_mana_ability color_set_mana_ability and cast_permission owners",
-    "capability_evidence": "implemented_registry_v41_with_69_records_59_trusted_and_590_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty-eight bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger attack_transition_keyword_trigger fixed_mana_ability color_set_mana_ability and cast_permission owners",
+    "capability_evidence": "implemented_registry_v42_with_72_records_62_trusted_and_616_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -1184,14 +1197,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31138335232,
+      "run_id": 31139677134,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31138335232"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31139677134"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr118_exact_head_31137555278_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31138335232_pass",
-      "focused_rules_tests": "color_set_mana_closed_grammar_current_control_effective_colors_phasing_haste_multiplayer_privacy_rollback_replay_offer_command_parity_empty_qualifying_set_and_mutation_evidence_pass; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
+      "deterministic_tests": "certified_main_through_pr121_exact_head_31139677134_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31140060336_passed_29_integration_tests_then_failed_only_stale_certified_head_provenance_corrected_in_current_source_tree",
+      "focused_rules_tests": "attack_transition_keyword_compiler_event_identity_multiplicity_exalted_battle_cry_melee_source_lki_apnap_multiplayer_privacy_rollback_replay_malformed_input_batch_preflight_and_implementation_mutation_evidence_66_tests_pass; changed_modules_compile; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
@@ -1216,6 +1229,7 @@
     "ordinary Menace now has one typed current-characteristic conditional blocker minimum shared by projected constraints and accepted declarations plus generic CardProgram lowering; additional-block permissions, unsupported ability-changing/copy/face-down producers, and the broader CR 509 restrictions-and-requirements solver remain blocked, so the aggregate mechanic is not trusted",
     "ordinary Basic Landwalk, Fear, Horsemanship, Intimidate, Shadow, and Skulk now consume one shared typed current-characteristics block-legality boundary, while nonbasic or qualified landwalk, conditional or rules-text-equivalent evasion, unresolved variable power, additional-block permissions, and unsupported characteristic producers remain explicit blockers",
     "ordinary printed Flanking and positive-integer Bushido now consume one immutable complete multiplayer block transition, ordinary APNAP trigger placement, and the canonical identity-pinned layer 7c until-end-of-turn owner; conditional, variable, granted, copied, face-down, trigger-doubling, and multi-attacker-blocking variants remain explicit residuals, so neither aggregate mechanic is trusted",
+    "ordinary printed Exalted, Battle Cry, and Melee now consume one immutable completed attack transition, ordinary APNAP trigger placement, and the canonical identity-pinned layer 7c until-end-of-turn owner; conditional, granted, copied, face-down, put-attacking, trigger-doubling, and broader attack-trigger variants remain explicit residuals, so none of the aggregate mechanics is trusted",
     "generic face-pinned First Strike and Double Strike now close the represented strike-step participation capability and harvest its sole-blocker cards, but the aggregate mechanics remain partial while ability-changing, copy, face-down, additional-combat or damage-step, and other unsupported participation producers remain reachable",
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "generic Vigilance, Haste, Flying, and Reach consume current represented effective keywords through canonical attack, tap-state, activation, mana-payment, and block-legality owners; unsupported ability-changing and copy producers, conditional haste acquisition, other evasion and declaration requirements or costs, and complete effective-characteristic closure remain explicit blockers",
@@ -1232,5 +1246,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Implement the selected Exalted, Battle Cry, and Melee bundle through one immutable completed attack-declaration transition, ordinary APNAP trigger placement, and identity-pinned layer 7c results, then harvest the current 24 sole-blocker Commander opportunities while keeping conditional, granted, copied, face-down, and trigger-doubling variants residual."
+  "next_task": "Implement the selected ordinary Cycling family as one typed hand-zone activation that pays the represented cost, discards the exact card as a cost, and resolves through the canonical iterative draw transaction. The refreshed frontier identifies 297 affected Commander cards, 46 sole-blocker cards, 98 one-additional-blocker opportunities, and 112 two-additional-blocker opportunities; typecycling, cycling triggers, cost modifiers, and cycling prohibitions remain outside the bounded batch."
 }

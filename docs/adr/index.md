@@ -38,3 +38,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0021 — canonical draw transaction and replacement ownership](0021-canonical-draw-transaction.md)
 - [ADR 0022 — reusable rules-piece inventory](0022-reusable-rules-piece-inventory.md)
 - [ADR 0023 — current-state documentation system](0023-documentation-system.md)
+- [ADR 0024 — canonical attack-transition trigger ownership](0024-canonical-attack-transition-triggers.md)

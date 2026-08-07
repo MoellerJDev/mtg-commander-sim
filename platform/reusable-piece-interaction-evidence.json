@@ -474,6 +474,30 @@
       "capability_ids": [],
       "interaction_order": 2,
       "assertion": "Protection prevention reduces the final amount used by Lifelink."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_exalted_from_noncreature_source_resolves_on_lone_attacker",
+      "piece_ids": ["capability.combat.trigger.exalted", "capability.continuous.resolution.fixed_characteristics_until_end_of_turn", "mechanic.cr-611-continuous-effects", "mechanic.exalted"],
+      "capability_ids": ["combat.trigger.exalted", "continuous.resolution.fixed_characteristics_until_end_of_turn"],
+      "interaction_order": 4,
+      "assertion": "A typed Exalted occurrence from a noncreature source resolves on the exact lone attacker through the canonical layer 7c effect owner."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer",
+      "piece_ids": ["capability.combat.trigger.battle_cry", "capability.combat.trigger.melee", "capability.continuous.resolution.fixed_characteristics_until_end_of_turn", "mechanic.battle-cry", "mechanic.cr-611-continuous-effects", "mechanic.melee"],
+      "capability_ids": ["combat.trigger.battle_cry", "combat.trigger.melee", "continuous.resolution.fixed_characteristics_until_end_of_turn"],
+      "interaction_order": 6,
+      "assertion": "Battle Cry retains source last-known identity while Battle Cry and Melee resolve their sealed affected objects and amount through the canonical layer 7c owner."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_attack_keywords_share_one_completed_declaration_batch",
+      "piece_ids": ["capability.combat.trigger.battle_cry", "capability.combat.trigger.exalted", "capability.combat.trigger.melee", "capability.trigger.placement.apnap", "mechanic.battle-cry", "mechanic.cr-603-handling-triggered-abilities", "mechanic.exalted", "mechanic.melee"],
+      "capability_ids": ["combat.trigger.battle_cry", "combat.trigger.exalted", "combat.trigger.melee", "trigger.placement.apnap"],
+      "interaction_order": 8,
+      "assertion": "Exalted, Battle Cry, and Melee derive from one immutable completed multiplayer attack declaration and enter one ordinary trigger batch before priority."
     }
   ]
 }

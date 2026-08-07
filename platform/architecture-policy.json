@@ -198,6 +198,8 @@
       ,"mtg_commander_sim/drawing/coordinator.py": "replacement-aware draw orchestration delegating mutation to the canonical draw owner"
       ,"mtg_commander_sim/semantic_runtime/draw_replacements.py": "read-only trusted draw-replacement discovery and lowering"
       ,"mtg_commander_sim/combat_damage_engine_adapter.py": "narrow read-only CommanderEngine compatibility query for immutable combat-damage snapshots"
+      ,"mtg_commander_sim/attack_transition_engine_adapter.py": "narrow read-only CommanderEngine compatibility query and trigger coordinator for immutable completed attack transitions"
+      ,"mtg_commander_sim/attack_transition_resolution.py": "read-only attack-trigger result coordinator delegating mutation to the canonical continuous-effect owner"
     },
     "model_definition": "mtg_commander_sim/model.py"
   },

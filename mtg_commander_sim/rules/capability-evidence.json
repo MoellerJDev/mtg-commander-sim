@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "bbdf4957929881bf9a1d0b24d6cdcdc8c59e724e2ac3beb67e7c3596107d8884",
-  "declaration_source_fingerprint": "9327c9ebdb45b83cd9ffeb5d9d02111ea030e6c4ebc3dbf4eded516d45342f0d",
+  "registry_fingerprint": "dc9c5b0be164ba862be4a45d2035be1179d14f1994100f1585c82ca64d826631",
+  "declaration_source_fingerprint": "3ebbc30a179b5d886bab024ee0fe87bb0eaca06fa855580f4d15f2b91cee0c1d",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -3372,6 +3372,150 @@
       "applicability_note": "Replay both real combat-damage steps and their intervening priority window exactly."
     },
     {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve a Battle Cry source snapshot after the source leaves through the identity-pinned layer 7c owner."
+    },
+    {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Share one immutable declaration event and ordinary trigger batch with the represented Exalted and Melee families."
+    },
+    {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Capture all other active-player attackers across several defending players in one four-player event."
+    },
+    {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that collapses multiple Battle Cry instances into one occurrence."
+    },
+    {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "negative",
+      "test_id": "tests.test_attack_transitions.AttackTransitionModelTests.test_malformed_attack_transition_and_occurrence_fail_closed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed Battle Cry occurrences and noncanonical transition data before mutation."
+    },
+    {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "positive",
+      "test_id": "tests.test_attack_transitions.AttackTransitionModelTests.test_battle_cry_triggers_per_instance_and_affects_other_attackers",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create one Battle Cry occurrence per instance and include every other declared attacking creature."
+    },
+    {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_is_public_without_hidden_cards",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project public attacker identities without exposing any opposing hidden card."
+    },
+    {
+      "capability_id": "combat.trigger.battle_cry",
+      "evidence_class": "replay",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_replays_exactly",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.91",
+        "702.91a",
+        "702.91b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay canonical affected-attacker identities and stack occurrences exactly."
+    },
+    {
       "capability_id": "combat.trigger.bushido",
       "evidence_class": "interaction",
       "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_flanking_and_bushido_share_one_sealed_apnap_batch",
@@ -3516,6 +3660,158 @@
       "applicability_note": "Replay the same typed transition, APNAP batch, and state hash exactly."
     },
     {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive attack keyword occurrences from one sealed declaration and place them through the ordinary trigger batch."
+    },
+    {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_exalted_from_noncreature_source_resolves_on_lone_attacker",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve a noncreature Exalted source through the identity-pinned layer 7c owner on the lone attacker."
+    },
+    {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Seal the four-player declaration before placing the active player's simultaneous attack triggers."
+    },
+    {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that treats one of two declared attacking creatures as an attack-alone event."
+    },
+    {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "negative",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_multiple_attackers_do_not_create_exalted_trigger",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Do not create Exalted triggers when more than one creature was declared as an attacker."
+    },
+    {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "positive",
+      "test_id": "tests.test_attack_transitions.AttackTransitionModelTests.test_exalted_triggers_once_per_instance_only_for_attack_alone",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Create one Exalted occurrence per current typed instance when exactly one creature was declared as an attacker."
+    },
+    {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_is_public_without_hidden_cards",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project only public attack-transition and trigger facts without exposing any opposing hand."
+    },
+    {
+      "capability_id": "combat.trigger.exalted",
+      "evidence_class": "replay",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_replays_exactly",
+      "official_rule_ids": [
+        "506.5",
+        "603.2c",
+        "603.3",
+        "702.83",
+        "702.83a",
+        "702.83b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the typed transition, occurrence identities, trigger batch, and final state hash exactly."
+    },
+    {
       "capability_id": "combat.trigger.flanking",
       "evidence_class": "interaction",
       "test_id": "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_flanking_and_bushido_share_one_sealed_apnap_batch",
@@ -3658,6 +3954,150 @@
         "commander_review"
       ],
       "applicability_note": "Replay the same typed transition, APNAP batch, and state hash exactly."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve the sealed multiplayer opponent count through the identity-pinned layer 7c owner."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Share one canonical four-player declaration and ordinary trigger batch with Battle Cry."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_keywords_share_one_completed_declaration_batch",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Count two distinct directly attacked opponents across a four-player declaration."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that overcounts attacked recipients as distinct opponents."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "negative",
+      "test_id": "tests.test_attack_transitions.AttackTransitionModelTests.test_malformed_attack_transition_and_occurrence_fail_closed",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed Melee amounts and occurrence identity mismatches before mutation."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "positive",
+      "test_id": "tests.test_attack_transitions.AttackTransitionModelTests.test_melee_counts_distinct_opponents_attacked_as_players",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Count distinct opponents attacked directly by creatures while excluding planeswalker and Battle recipients."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_is_public_without_hidden_cards",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive the opponent count entirely from public attack recipients."
+    },
+    {
+      "capability_id": "combat.trigger.melee",
+      "evidence_class": "replay",
+      "test_id": "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_replays_exactly",
+      "official_rule_ids": [
+        "603.2c",
+        "603.3",
+        "702.121",
+        "702.121a",
+        "702.121b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the distinct-opponent amount and source identity exactly."
     },
     {
       "capability_id": "continuous.attached.fixed_characteristics",
@@ -11315,5 +11755,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "620df489b58e4d9e0b9d4ee27f91ae7bc0fba1aa04980826e0ef194497c70714"
+  "fingerprint": "c13bd08b4c7ce7b7e67d63d5b5f7a82c5d665a92280d5b3921f56be0f0fab6aa"
 }

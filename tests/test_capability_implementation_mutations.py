@@ -12,6 +12,7 @@ from mtg_commander_sim import (
 from mtg_commander_sim import combat as combat_module
 from mtg_commander_sim import combat_evasion as combat_evasion_module
 from mtg_commander_sim import block_transitions as block_transitions_module
+from mtg_commander_sim import attack_transition_model as attack_transitions_module
 from mtg_commander_sim import combat_damage_trample as trample_module
 from mtg_commander_sim import deathtouch as deathtouch_module
 from mtg_commander_sim import defender as defender_module
@@ -1676,6 +1677,175 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_instance_quantity()
+
+    def test_attack_keyword_trigger_mutants_are_killed(self):
+        exalted = CombatKeywordTriggerSpec(
+            CombatKeywordTriggerKind.EXALTED,
+            1,
+        )
+        battle_cry = CombatKeywordTriggerSpec(
+            CombatKeywordTriggerKind.BATTLE_CRY,
+            1,
+        )
+        melee = CombatKeywordTriggerSpec(
+            CombatKeywordTriggerKind.MELEE,
+            1,
+        )
+
+        def participant(object_id, reference, *specs, creature=True):
+            return attack_transitions_module.AttackTransitionParticipant(
+                object_id=object_id,
+                logical_object_id=f"logical:{object_id}",
+                reference=reference,
+                controller="A",
+                is_creature=creature,
+                trigger_specs=specs,
+            )
+
+        def assignment(object_id, opponent):
+            return attack_transitions_module.AttackTransitionAssignment(
+                attacker_object_id=object_id,
+                recipient=attack_transitions_module.AttackRecipient(
+                    attack_transitions_module.AttackRecipientKind.PLAYER,
+                    opponent,
+                    opponent,
+                ),
+            )
+
+        exalted_source = participant(
+            "exalted-source",
+            "A01",
+            exalted,
+            creature=False,
+        )
+        first = participant("first-attacker", "A02")
+        second = participant("second-attacker", "A03")
+        two_attacker_event = attack_transitions_module.AttackTransitionEvent.create(
+            turn_sequence=3,
+            priority_epoch=5,
+            active_player="A",
+            participants=(exalted_source, first, second),
+            assignments=(
+                assignment(first.object_id, "B"),
+                assignment(second.object_id, "C"),
+            ),
+        )
+        lone_attacker_event = attack_transitions_module.AttackTransitionEvent.create(
+            turn_sequence=3,
+            priority_epoch=5,
+            active_player="A",
+            participants=(exalted_source, first),
+            assignments=(assignment(first.object_id, "B"),),
+        )
+        original = (
+            attack_transitions_module.derive_attack_keyword_trigger_occurrences
+        )
+
+        def assert_two_attackers_do_not_trigger_exalted():
+            self.assertFalse(
+                any(
+                    value.kind is CombatKeywordTriggerKind.EXALTED
+                    for value in (
+                        attack_transitions_module
+                        .derive_attack_keyword_trigger_occurrences(
+                            two_attacker_event
+                        )
+                    )
+                )
+            )
+
+        assert_two_attackers_do_not_trigger_exalted()
+        with patch.object(
+            attack_transitions_module,
+            "derive_attack_keyword_trigger_occurrences",
+            lambda _event: original(lone_attacker_event),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_two_attackers_do_not_trigger_exalted()
+
+        battle_source = participant(
+            "battle-source",
+            "A04",
+            battle_cry,
+            battle_cry,
+        )
+        battle_other = participant("battle-other", "A05")
+        battle_event = attack_transitions_module.AttackTransitionEvent.create(
+            turn_sequence=3,
+            priority_epoch=6,
+            active_player="A",
+            participants=(battle_source, battle_other),
+            assignments=(
+                assignment(battle_source.object_id, "B"),
+                assignment(battle_other.object_id, "B"),
+            ),
+        )
+
+        def assert_battle_cry_preserves_instances():
+            self.assertEqual(
+                2,
+                len(
+                    attack_transitions_module
+                    .derive_attack_keyword_trigger_occurrences(battle_event)
+                ),
+            )
+
+        def collapse_battle_cry(event):
+            values = original(event)
+            return values[:1]
+
+        assert_battle_cry_preserves_instances()
+        with patch.object(
+            attack_transitions_module,
+            "derive_attack_keyword_trigger_occurrences",
+            collapse_battle_cry,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_battle_cry_preserves_instances()
+
+        melee_source = participant("melee-source", "A06", melee)
+        melee_other = participant("melee-other", "A07")
+        melee_event = attack_transitions_module.AttackTransitionEvent.create(
+            turn_sequence=3,
+            priority_epoch=7,
+            active_player="A",
+            participants=(melee_source, melee_other),
+            assignments=(
+                assignment(melee_source.object_id, "B"),
+                assignment(melee_other.object_id, "C"),
+            ),
+        )
+
+        def assert_melee_counts_direct_opponents():
+            occurrence = (
+                attack_transitions_module
+                .derive_attack_keyword_trigger_occurrences(melee_event)[0]
+            )
+            self.assertEqual(2, occurrence.amount)
+
+        def overcount_melee(event):
+            values = original(event)
+            return tuple(
+                attack_transitions_module.AttackKeywordTriggerOccurrence.create(
+                    transition_id=value.transition_id,
+                    kind=value.kind,
+                    controller=value.controller,
+                    source=value.source,
+                    affected=value.affected,
+                    amount=value.amount + 1,
+                    instance_index=value.instance_index,
+                )
+                for value in values
+            )
+
+        assert_melee_counts_direct_opponents()
+        with patch.object(
+            attack_transitions_module,
+            "derive_attack_keyword_trigger_occurrences",
+            overcount_melee,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_melee_counts_direct_opponents()
 
     def test_aerial_blocking_flying_and_reach_mutants_are_killed(self):
         def assert_ground_cannot_block_flying() -> None:

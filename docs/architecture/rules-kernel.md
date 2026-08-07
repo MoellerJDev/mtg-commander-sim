@@ -92,6 +92,19 @@ effects keep a live source-bound `ObjectQuerySpec` and recompute membership
 after earlier layers. Unsupported duration or operation families fail before
 the journal mutates.
 
+Combat declaration relationships commit through
+`combat_relationship_state.py`. After a complete declaration, the engine
+adapts public combat facts into immutable canonical attack or block transition
+values. Typed transition derivation owns ordinary printed Exalted, Battle Cry,
+Melee, Flanking, and positive-integer Bushido occurrences; the shared trigger
+batch owns APNAP placement, and the continuous-effect journal owns their
+identity-pinned layer 7c results. Transition models have no mutable state or
+engine dependency. Their narrow adapters may read effective characteristics
+and delegate commits to the declared combat, trigger, and continuous-effect
+owners. Conditional or prose-equivalent variants, unsupported granted or
+copied fragments, trigger multiplication, and broader attack/block transition
+triggers remain explicit residuals.
+
 `ObjectQuerySpec` is a strict immutable predicate shared by those live effects
 and other represented rules families. Its current schema distinguishes
 all-required from any-required card types and preserves colors, subtypes,

@@ -26,10 +26,13 @@ class ProtectionQualityKind(str, Enum):
 
 
 class CombatKeywordTriggerKind(str, Enum):
-    """Closed printed combat keywords whose abilities trigger on blocking."""
+    """Closed printed combat keywords tied to declaration transitions."""
 
     FLANKING = "flanking"
     BUSHIDO = "bushido"
+    EXALTED = "exalted"
+    BATTLE_CRY = "battle_cry"
+    MELEE = "melee"
 
 
 _COLOR_NAMES = {
@@ -318,7 +321,7 @@ class GrantedTriggeredAbilitySpec:
 
 @dataclass(frozen=True, slots=True)
 class CombatKeywordTriggerSpec:
-    """One executable printed Flanking or Bushido ability instance.
+    """One executable printed combat keyword-trigger ability instance.
 
     Multiplicity is intentionally preserved by ``canonical_ability_fragments``:
     each printed or independently granted instance triggers separately.
@@ -341,8 +344,13 @@ class CombatKeywordTriggerSpec:
             raise AbilityFragmentError(
                 "Combat keyword-trigger amounts must be positive integers"
             )
-        if self.kind is CombatKeywordTriggerKind.FLANKING and self.amount != 1:
-            raise AbilityFragmentError("Each Flanking instance has amount 1")
+        if (
+            self.kind is not CombatKeywordTriggerKind.BUSHIDO
+            and self.amount != 1
+        ):
+            raise AbilityFragmentError(
+                f"Each {self.kind.value} instance has amount 1"
+            )
 
     def to_dict(self) -> dict[str, Any]:
         return {

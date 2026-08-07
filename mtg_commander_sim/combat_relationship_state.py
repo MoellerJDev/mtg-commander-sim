@@ -36,6 +36,119 @@ class BlockDeclarationAssignment:
             )
 
 
+@dataclass(frozen=True, slots=True)
+class AttackDeclarationAssignment:
+    """One validated declared attacker and its public recipient context."""
+
+    attacker_object_id: str
+    target: str
+    target_kind: str
+    defending_player: str
+    target_logical_object_id: str | None = None
+
+    def __post_init__(self) -> None:
+        for field in (
+            "attacker_object_id",
+            "target",
+            "target_kind",
+            "defending_player",
+        ):
+            if type(getattr(self, field)) is not str or not getattr(self, field):
+                raise CombatRelationshipStateError(
+                    "Attack declaration values must be nonempty strings"
+                )
+        if self.target_kind not in {"player", "planeswalker", "battle"}:
+            raise CombatRelationshipStateError(
+                "Attack declaration target kind is unsupported"
+            )
+        if self.target_kind == "player":
+            if self.target != self.defending_player:
+                raise CombatRelationshipStateError(
+                    "A player attack target must be its defending player"
+                )
+            if self.target_logical_object_id is not None:
+                raise CombatRelationshipStateError(
+                    "Player attack targets have no logical object identity"
+                )
+        elif (
+            type(self.target_logical_object_id) is not str
+            or not self.target_logical_object_id
+        ):
+            raise CombatRelationshipStateError(
+                "Permanent attack targets require logical object identity"
+            )
+
+    @property
+    def target_context(self) -> dict[str, str]:
+        value = {
+            "target": self.target,
+            "kind": self.target_kind,
+            "defending_player": self.defending_player,
+        }
+        if self.target_logical_object_id is not None:
+            value["logical_object_id"] = self.target_logical_object_id
+        return value
+
+
+def commit_attack_declaration(
+    combat: CombatState,
+    cards: Mapping[str, Any],
+    *,
+    controller: str,
+    assignments: Sequence[AttackDeclarationAssignment],
+) -> tuple[AttackDeclarationAssignment, ...]:
+    """Commit already-validated attackers that survived declaration costs."""
+
+    if not isinstance(combat, CombatState):
+        raise CombatRelationshipStateError(
+            "Attack declaration commit requires CombatState"
+        )
+    if type(controller) is not str or not controller:
+        raise CombatRelationshipStateError(
+            "Attack declaration controller must be a nonempty string"
+        )
+    values = tuple(assignments)
+    if any(not isinstance(value, AttackDeclarationAssignment) for value in values):
+        raise CombatRelationshipStateError(
+            "Attack declaration commit requires typed assignments"
+        )
+    attacker_ids = [value.attacker_object_id for value in values]
+    if len(attacker_ids) != len(set(attacker_ids)):
+        raise CombatRelationshipStateError(
+            "An attacker cannot be committed more than once"
+        )
+    committed: list[AttackDeclarationAssignment] = []
+    for assignment in values:
+        attacker = cards.get(assignment.attacker_object_id)
+        if attacker is None:
+            raise CombatRelationshipStateError(
+                "A committed attack requires a known attacker"
+            )
+        if (
+            attacker.zone != "battlefield"
+            or attacker.controller != controller
+            or attacker.phased_out
+        ):
+            continue
+        if assignment.attacker_object_id in combat.attackers:
+            raise CombatRelationshipStateError(
+                "An attacker relationship is already committed"
+            )
+        committed.append(assignment)
+
+    # The complete batch is validated before the canonical owner performs its
+    # first write. This keeps the owner transactional even when it is exercised
+    # independently of the engine's command-level rollback boundary.
+    for assignment in committed:
+        attacker = cards[assignment.attacker_object_id]
+        attacker.attacking = assignment.target
+        combat.attackers[assignment.attacker_object_id] = assignment.target
+        combat.attack_target_context[assignment.attacker_object_id] = (
+            assignment.target_context
+        )
+    return tuple(committed)
+
+
 def commit_block_declaration(
     combat: CombatState,
     cards: Mapping[str, Any],
@@ -144,9 +257,11 @@ def remove_combat_relationships(
 
 
 __all__ = [
+    "AttackDeclarationAssignment",
     "BlockDeclarationAssignment",
     "CombatRelationshipRemoval",
     "CombatRelationshipStateError",
     "commit_block_declaration",
+    "commit_attack_declaration",
     "remove_combat_relationships",
 ]

@@ -148,23 +148,23 @@
     },
     {
       "exception_id": "ARCH-EXC-0008",
-      "adr": "docs/adr/0021-canonical-draw-transaction.md",
+      "adr": "docs/adr/0024-canonical-attack-transition-triggers.md",
       "artifact": "platform/architecture-guard-baseline.json",
-      "allowance_fingerprint": "3ccbfd4d4105a5e6a8ea182fa0f21de7c51b5298bdfb7ab7904f4642341bcb7c",
-      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after typed draw-result and specifically-drawn-card action closure.",
-      "rationale": "The canonical draw owner gains one closed draw_with_actions operation for typed public reveal and discard-unless-land actions, while result-generated draws remain typed replacement operations. The reviewed specificity additions are structural reason metadata fields, not card dispatch; direct writes and oversized symbols do not grow.",
+      "allowance_fingerprint": "0f03b4ad74bb01fcae2f7bd1a663ce605e10812c729835afed3e257cb2b2fe54",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after canonical Exalted, Battle Cry, and Melee attack-transition closure.",
+      "rationale": "The reviewed specificity additions are generic rules vocabulary for Exalted, Battle Cry, and Melee typed fragments and labels, never printed-name dispatch. The branch reduces engine and direct-write allowances, keeps effect-operation and Oracle-ID inventories flat, and introduces no card-specific helper or override.",
       "owner": "rules architecture maintainers",
-      "maximum_scope": "Existing serialized residual allowances plus the reviewed draw_with_actions operation; removals are allowed and additions or growth are forbidden.",
-      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; retain draw_with_actions only while it remains the closed typed action family described by ADR 0021.",
-      "target_milestone": "incremental draw, replacement, choice, and ordinary-effect closure",
-      "replay_implications": "Game Record v3 remains compatible; result draws, specifically-drawn-card actions, replacement continuations, and historical instruction multipliers use explicit deterministic representations.",
-      "privacy_implications": "Ordinary draws remain principal scoped until a typed public reveal action commits; replacement-result draws never inherit the original event's hidden action sequence.",
-      "security_implications": "The reviewed operation accepts only the closed typed reveal and discard-unless-land vocabulary and grants no callback, arbitrary mutation, transport access, or hidden cross-seat authority.",
+      "maximum_scope": "Existing serialized residual allowances plus the reviewed generic attack-keyword literals described by ADR 0024; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; remove the keyword-literal allowance if the specificity scanner gains a canonical rules-vocabulary classification.",
+      "target_milestone": "typed combat declaration, attack-transition trigger, and generic keyword closure",
+      "replay_implications": "Game Record v3 remains compatible; immutable attack-transition and occurrence identities preserve APNAP trigger placement and temporary-result replay exactly.",
+      "privacy_implications": "Attack transitions contain only public declaration, controller, recipient, and battlefield keyword-fragment facts; no hidden hand or library data enters the allowance.",
+      "security_implications": "The reviewed vocabulary lowers only through closed typed fragments and grants no callback, arbitrary mutation, transport access, or hidden cross-seat authority.",
       "tests": [
         "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
         "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
-        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_drawn_nonland_is_revealed_then_that_exact_card_is_discarded",
-        "tests.test_draw_result_ordering.DrawResultCoordinatorTests.test_replacement_result_draw_does_not_inherit_post_draw_actions"
+        "tests.test_attack_transitions.AttackTransitionModelTests.test_malformed_attack_transition_and_occurrence_fail_closed",
+        "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_attack_transition_replays_exactly"
       ]
     }
   ]

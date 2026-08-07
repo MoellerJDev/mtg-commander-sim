@@ -1,5 +1,5 @@
 {
-  "contract_count": 76,
+  "contract_count": 79,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -24,6 +24,12 @@
       "path": "mechanics/contracts/basic-token-creation.json",
       "sha256": "6a3e8b566af1361f9812d74274be25153e9919e174ba191427644639be0f8d2a",
       "version": 2
+    },
+    {
+      "mechanic_id": "battle-cry",
+      "path": "mechanics/contracts/battle-cry.json",
+      "sha256": "2ce1041a9cd9cce85dd489153a9bd2fafa18ec1265e0f0bcc489632757dfe3a8",
+      "version": 1
     },
     {
       "mechanic_id": "cr-403-battlefield",
@@ -176,6 +182,12 @@
       "version": 1
     },
     {
+      "mechanic_id": "exalted",
+      "path": "mechanics/contracts/exalted.json",
+      "sha256": "038eaeed0daac519d42d5349a6085a3594e4a4d2ef4fdbe2f93b0088486cd431",
+      "version": 1
+    },
+    {
       "mechanic_id": "cr-406-exile",
       "path": "mechanics/contracts/exile.json",
       "sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
@@ -311,6 +323,12 @@
       "mechanic_id": "cr-605-mana-abilities",
       "path": "mechanics/contracts/mana-abilities.json",
       "sha256": "f92b7deaf7fc69d5285c817df7561afe4410c19b600a8a0a7595c036d8055af9",
+      "version": 1
+    },
+    {
+      "mechanic_id": "melee",
+      "path": "mechanics/contracts/melee.json",
+      "sha256": "cd02dc5ab35697135a7650004412617df7f3f1da3e770921b3d6cfb4ac550bea",
       "version": 1
     },
     {
@@ -735,19 +753,37 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/battle-cry.json",
+      "contract_sha256": "2ce1041a9cd9cce85dd489153a9bd2fafa18ec1265e0f0bcc489632757dfe3a8",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution",
+      "implementation_version": "typed-attack-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent Battle Cry wording remains unsupported",
+        "granted, copied, and face-down Battle Cry requires trusted typed ability fragments",
+        "put-attacking effects and attack costs that remove a declared attacker remain outside this bounded capability",
+        "trigger-doubling policies remain outside this bounded capability"
+      ],
       "mechanic_id": "battle-cry",
       "official_name": "Battle Cry",
       "rule_references": [
         "702.91"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_battle_cry_triggers_per_instance_and_affects_other_attackers",
+        "test_attack_keywords_share_one_completed_declaration_batch",
+        "test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer",
+        "test_attack_transition_is_public_without_hidden_cards",
+        "test_attack_transition_replays_exactly",
+        "test_malformed_transition_rolls_back_attack_declaration",
+        "test_attack_keyword_trigger_mutants_are_killed",
+        "test_attack_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -1660,19 +1696,38 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/exalted.json",
+      "contract_sha256": "038eaeed0daac519d42d5349a6085a3594e4a4d2ef4fdbe2f93b0088486cd431",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution",
+      "implementation_version": "typed-attack-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent Exalted wording remains unsupported",
+        "granted, copied, and face-down Exalted requires trusted typed ability fragments",
+        "put-attacking effects and attack costs that remove a declared attacker remain outside this bounded capability",
+        "trigger-doubling policies remain outside this bounded capability"
+      ],
       "mechanic_id": "exalted",
       "official_name": "Exalted",
       "rule_references": [
         "702.83"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_exalted_triggers_once_per_instance_only_for_attack_alone",
+        "test_exalted_from_noncreature_source_resolves_on_lone_attacker",
+        "test_multiple_attackers_do_not_create_exalted_trigger",
+        "test_attack_keywords_share_one_completed_declaration_batch",
+        "test_attack_transition_is_public_without_hidden_cards",
+        "test_attack_transition_replays_exactly",
+        "test_malformed_transition_rolls_back_attack_declaration",
+        "test_attack_keyword_trigger_mutants_are_killed",
+        "test_attack_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -2778,19 +2833,38 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/melee.json",
+      "contract_sha256": "cd02dc5ab35697135a7650004412617df7f3f1da3e770921b3d6cfb4ac550bea",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": null,
+      "implementation_component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution",
+      "implementation_version": "typed-attack-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
+      "known_blockers": [
+        "conditional and rules-text-equivalent Melee wording remains unsupported",
+        "granted, copied, and face-down Melee requires trusted typed ability fragments",
+        "put-attacking effects and attack costs that remove a declared attacker remain outside this bounded capability",
+        "trigger-doubling policies remain outside this bounded capability"
+      ],
       "mechanic_id": "melee",
       "official_name": "Melee",
       "rule_references": [
         "702.121"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_melee_counts_distinct_opponents_attacked_as_players",
+        "test_melee_still_triggers_for_zero_opponents_attacked_directly",
+        "test_attack_keywords_share_one_completed_declaration_batch",
+        "test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer",
+        "test_attack_transition_is_public_without_hidden_cards",
+        "test_attack_transition_replays_exactly",
+        "test_malformed_transition_rolls_back_attack_declaration",
+        "test_attack_keyword_trigger_mutants_are_killed",
+        "test_attack_keywords_lower_with_precise_closed_spans"
+      ],
       "trust_level": "untrusted"
     },
     {
@@ -9063,7 +9137,22 @@
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "sources": {
     "card_data_snapshot": {
-      "available": false
+      "available": true,
+      "database_schema_version": "2",
+      "oracle_bulk": {
+        "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260804090245.jsonl.gz",
+        "oracle_id_count": 38542,
+        "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+        "source_filename": "oracle-cards-20260804090245.jsonl.gz",
+        "updated_at": "2026-08-04T09:02:45.219+00:00"
+      },
+      "rulings_bulk": {
+        "download_uri": "https://data.scryfall.io/rulings/rulings-20260804090038.jsonl.gz",
+        "ruling_count": 77998,
+        "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
+        "source_filename": "rulings-20260804090038.jsonl.gz",
+        "updated_at": "2026-08-04T09:00:38.847+00:00"
+      }
     },
     "comprehensive_rules": "indexed",
     "official_set_mechanics": "planned",

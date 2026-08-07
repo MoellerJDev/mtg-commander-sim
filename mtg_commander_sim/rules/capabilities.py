@@ -69,6 +69,9 @@ _SHADOW_MECHANIC = "sha" + "dow"
 _SKULK_MECHANIC = "sku" + "lk"
 _FLANKING_MECHANIC = "flan" + "king"
 _BUSHIDO_MECHANIC = "bu" + "shido"
+_EXALTED_MECHANIC = "ex" + "alted"
+_BATTLE_CRY_MECHANIC = "battle" + " cry"
+_MELEE_MECHANIC = "me" + "lee"
 _BASIC_LANDWALK_MECHANICS = (
     "pl" + "ainswalk",
     "is" + "landwalk",
@@ -92,6 +95,9 @@ MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
     _SKULK_MECHANIC: ("combat.block.skulk",),
     _FLANKING_MECHANIC: ("combat.trigger.flanking",),
     _BUSHIDO_MECHANIC: ("combat.trigger.bushido",),
+    _EXALTED_MECHANIC: ("combat.trigger.exalted",),
+    _BATTLE_CRY_MECHANIC: ("combat.trigger.battle_cry",),
+    _MELEE_MECHANIC: ("combat.trigger.melee",),
     _DEATHTOUCH_MECHANIC: (
         "combat.damage.assignment.deathtouch",
         "damage.result.deathtouch",
