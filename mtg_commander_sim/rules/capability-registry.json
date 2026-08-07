@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 42,
+  "registry_version": 43,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -81,6 +81,33 @@
     }
   ],
   "capabilities": [
+    {
+      "id": "activation.cycling.hand",
+      "version": 1,
+      "official_rules": ["602.1", "602.2", "602.2a", "602.2b", "601.2h", "701.8a", "702.29", "702.29a", "702.29b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Activate printed ordinary Cycling from its owner's hand by paying one fixed generic, colored, or colorless mana cost and discarding that same physical card, then place the nonmana ability on the stack and draw one card through the canonical draw transaction on resolution.",
+        "inputs": ["current owner-controlled card in hand", "source-pinned typed ordinary Cycling descriptor", "fixed ordinary mana cost", "current priority and payment state", "canonical source logical identity"],
+        "outputs": ["one payable hand-zone activation offer", "mana payment and source discard committed as costs", "normalized hand-to-graveyard event before stack placement", "one ordinary activated-ability stack object", "one private replacement-aware draw on resolution"],
+        "exclusions": ["Cycling costs containing X, hybrid, Phyrexian, snow, or nonmana costs", "typecycling", "Cycling triggers", "Cycling cost modifiers", "Cycling prohibitions", "granted or copied Cycling outside a trusted typed descriptor", "abilities activated from zones other than hand"]
+      },
+      "dependencies": ["trigger.event.normalized_zone_change", "zone.draw.library_to_hand"],
+      "implementation_components": ["mtg_commander_sim.cycling_abilities.OrdinaryCyclingAbilitySpec", "mtg_commander_sim.compiler.cycling_nodes.ordinary_cycling_keyword_node", "mtg_commander_sim.semantic_runtime.cycling_abilities.OrdinaryCyclingAbilityHandler", "mtg_commander_sim.compiled_cycling_abilities.compiled_ordinary_cycling_abilities", "mtg_commander_sim.rules.activation.query.activated_abilities", "mtg_commander_sim.rules.activation.commit.commit_activation", "mtg_commander_sim.drawing.coordinator.begin_draw_sequence"],
+      "positive_tests": ["test_fixed_ordinary_cycling_compiles_typed_hand_activation", "test_generic_cycling_discards_before_stack_draw_and_replays_exactly", "test_cycling_descriptor_exists_in_every_zone_but_activates_only_from_hand"],
+      "negative_tests": ["test_unsupported_cycling_variants_remain_precise_residuals", "test_changed_cycling_oracle_fails_closed_without_runtime_reparse", "test_unpayable_cycling_is_not_offered_and_rejects_without_mutation"],
+      "interaction_tests": ["test_generic_cycling_discards_before_stack_draw_and_replays_exactly"],
+      "multiplayer_tests": ["test_four_player_cycling_draw_is_private_and_seat_scoped"],
+      "privacy_tests": ["test_four_player_cycling_draw_is_private_and_seat_scoped"],
+      "replay_tests": ["test_generic_cycling_discards_before_stack_draw_and_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The compiler and runtime CardProgram closure require both normalized discard-cost zone events and the canonical replacement-aware draw owner; blocking either dependency leaves the ordinary Cycling node partial and prevents trusted runtime discovery.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_ordinary_cycling_compiler_mutant_is_killed removes the typed Cycling lowering and the exact hand-zone activation assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
     {
       "id": "attachment.aura.simple_object",
       "version": 1,

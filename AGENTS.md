@@ -112,11 +112,12 @@ Use the worktree-local CPython 3.12 environment, never a global `python` alias.
 Keep one substantive branch under certification and at most one independent
 next-batch worktree. Do not mix their changes.
 
-As the default development policy, do not run broad suites or gates locally.
-Every ordinary rules change must nevertheless run the exact regression red
-and green, the affected focused test module, directly relevant interaction and
-replay tests, compilation for changed production modules, and the applicable
-generated checks. Keep those selections narrow. Inspect the deterministic
+As the default development policy, do not run broad suites, gates, or historical
+regression journeys locally. During implementation, run only changed-module
+compilation, applicable generated checks, and the smallest directly affected
+unit or subsystem tests needed for a useful red/green loop. Push the coherent
+head so public CI runs exact regressions, replay and privacy shards, the broad
+suite, packaging, and headless browser certification. Inspect the deterministic
 impact plan without executing the broad gate:
 
 ```powershell

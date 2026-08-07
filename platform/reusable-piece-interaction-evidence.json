@@ -498,6 +498,14 @@
       "capability_ids": ["combat.trigger.battle_cry", "combat.trigger.exalted", "combat.trigger.melee", "trigger.placement.apnap"],
       "interaction_order": 8,
       "assertion": "Exalted, Battle Cry, and Melee derive from one immutable completed multiplayer attack declaration and enter one ordinary trigger batch before priority."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_generic_cycling_discards_before_stack_draw_and_replays_exactly",
+      "piece_ids": ["capability.activation.cycling.hand", "capability.trigger.event.normalized_zone_change", "capability.zone.draw.library_to_hand", "mechanic.cr-121-drawing-a-card", "mechanic.cycling"],
+      "capability_ids": ["activation.cycling.hand", "trigger.event.normalized_zone_change", "zone.draw.library_to_hand"],
+      "interaction_order": 5,
+      "assertion": "One source-pinned Cycling activation pays the physical discard through normalized zone-change ownership before its ordinary stack object resolves through the canonical private draw transaction."
     }
   ]
 }

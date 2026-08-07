@@ -20,6 +20,7 @@ from .compiler.corpus_reporting import (
 from .compiler.continuous_templates import (
     controlled_creature_until_end_of_turn_effect,
 )
+from .compiler.cycling_nodes import ordinary_cycling_keyword_node
 from .compiler.activated_mana_nodes import (
     activated_oracle_node,
 )
@@ -589,6 +590,18 @@ def _keyword_node_for_mechanics(
     capability_profile: str,
     residuals: list[OracleResidual],
 ) -> OracleNode:
+    cycling = ordinary_cycling_keyword_node(
+        node_id=node_id,
+        line=line,
+        material_line=material_line,
+        span=span,
+        mechanics=mechanics,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+        residuals=residuals,
+    )
+    if cycling is not None:
+        return cycling
     gate = keyword_dependency_gate(
         material_line=material_line,
         mechanics=mechanics,
@@ -684,6 +697,12 @@ def _keyword_nodes(
     """Compile one keyword line without conflating Flash's active zone."""
 
     mechanics = keyword_mechanics(material_line, keywords)
+    if mechanics is None and re.match(
+        r"^Cycling(?:\s+\{|[\-\u2013\u2014])",
+        material_line,
+        re.IGNORECASE,
+    ):
+        mechanics = ("cycling",)
     if mechanics is None:
         return ()
 

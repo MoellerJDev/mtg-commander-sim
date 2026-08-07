@@ -15,6 +15,7 @@ from .damage_results import default_damage_result_replacement_registry
 from .draw_replacements import default_draw_replacement_registry
 from .draw_reveals import default_draw_reveal_registry
 from .draw_restrictions import default_draw_restriction_registry
+from .cycling_abilities import default_ordinary_cycling_ability_registry
 from .life_replacements import default_life_replacement_registry
 from .color_set_mana_abilities import (
     default_color_set_mana_ability_registry,
@@ -41,6 +42,7 @@ def runtime_component_registries() -> tuple[Any, ...]:
         default_draw_reveal_registry(),
         default_draw_restriction_registry(),
         default_life_replacement_registry(),
+        default_ordinary_cycling_ability_registry(),
         default_color_set_mana_ability_registry(),
         default_fixed_mana_ability_registry(),
         default_token_creation_replacement_registry(),

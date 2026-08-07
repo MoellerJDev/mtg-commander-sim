@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702.29 — Ordinary Cycling activation",
+  "cases": [
+    {
+      "rule_id": "702.29",
+      "rule_text_sha256": "5343ac1023785c197e9572ec0010e2cb961b4263590ac974939daf9b34ce7d65",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["mechanics/contracts/cycling.json"],
+      "executable_test_ids": ["tests.test_ordinary_cycling.OrdinaryCyclingCompilerTests.test_fixed_ordinary_cycling_compiles_typed_hand_activation"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; the bounded fixed ordinary-mana family is owned by activation.cycling.hand."]
+    },
+    {
+      "rule_id": "702.29a",
+      "rule_text_sha256": "0661ec92fc6bb1fe74651e761445fba457157becdfceca1ba9668bc957f85c01",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.cycling_abilities.OrdinaryCyclingAbilitySpec", "mtg_commander_sim.compiler.cycling_nodes.ordinary_cycling_keyword_node", "mtg_commander_sim.rules.activation.commit.commit_activation", "mtg_commander_sim.drawing.coordinator.begin_draw_sequence"],
+      "executable_test_ids": ["tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_generic_cycling_discards_before_stack_draw_and_replays_exactly", "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_unpayable_cycling_is_not_offered_and_rejects_without_mutation", "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_four_player_cycling_draw_is_private_and_seat_scoped", "tests.test_ordinary_cycling.OrdinaryCyclingCompilerTests.test_unsupported_cycling_variants_remain_precise_residuals"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": ["variable, hybrid, Phyrexian, snow, and nonmana Cycling costs are outside the closed ordinary cost grammar", "typecycling, Cycling modifiers and prohibitions, and Cycling-related triggered abilities remain separate families"],
+      "notes": ["The trusted fine-grained capability pays fixed ordinary mana and discards the same physical source as costs, then places one ordinary ability on the stack and resolves one canonical draw.", "The aggregate rule remains blocked because the supported capability is deliberately narrower than every legal Cycling cost and related interaction."]
+    },
+    {
+      "rule_id": "702.29b",
+      "rule_text_sha256": "168f37395c393620571a3c42e89b920f601d67d0e41bab1eb243c6bdcde81f97",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["mtg_commander_sim.compiled_cycling_abilities.compiled_ordinary_cycling_abilities", "mtg_commander_sim.rules.activation.query.activated_abilities"],
+      "executable_test_ids": ["tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_cycling_descriptor_exists_in_every_zone_but_activates_only_from_hand", "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_changed_cycling_oracle_fails_closed_without_runtime_reparse"],
+      "required_scenarios": ["positive", "negative"],
+      "covered_scenarios": ["positive", "negative"],
+      "blockers": ["generic effects that inspect activated abilities on objects in arbitrary zones do not yet share a capability-closed typed query"],
+      "notes": ["The source-pinned descriptor remains discoverable as an object characteristic after zone changes, while its activation zone remains exactly hand.", "The broader ambient effects described by this rule remain fail-closed and prevent aggregate promotion."]
+    }
+  ]
+}

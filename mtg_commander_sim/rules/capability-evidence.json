@@ -1,8 +1,206 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "dc9c5b0be164ba862be4a45d2035be1179d14f1994100f1585c82ca64d826631",
-  "declaration_source_fingerprint": "3ebbc30a179b5d886bab024ee0fe87bb0eaca06fa855580f4d15f2b91cee0c1d",
+  "registry_fingerprint": "c4e24c239e037e55615f87e9da26ec6f36b615c453ab1a3b72481a91dfa2a0a5",
+  "declaration_source_fingerprint": "d7e1213933ad1f6999ccc92d699062592e260ebaa7f419e13a79c3614afa99fa",
   "declarations": [
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_generic_cycling_discards_before_stack_draw_and_replays_exactly",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Commit the source discard before stack placement and route the later resolving draw through the canonical draw owner."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_four_player_cycling_draw_is_private_and_seat_scoped",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Offer and resolve the hand-zone activation only for its owner in a four-player game."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingCompilerTests.test_ordinary_cycling_compiler_mutant_is_killed",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a compiler mutant that removes the typed ordinary Cycling node."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingCompilerTests.test_unsupported_cycling_variants_remain_precise_residuals",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep variable, hybrid, nonmana, typecycling, trigger, modifier, and prohibition variants outside the bounded ordinary family."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_unpayable_cycling_is_not_offered_and_rejects_without_mutation",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep an unpayable ordinary Cycling activation out of the legal offer and reject a forged command transactionally without discarding the source."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingCompilerTests.test_fixed_ordinary_cycling_compiles_typed_hand_activation",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower a fixed ordinary printed Cycling line to one hand-zone activation with exact mana, source-discard, stack, and draw facts."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_cycling_descriptor_exists_in_every_zone_but_activates_only_from_hand",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Preserve the source-pinned Cycling ability descriptor across zones while exposing activation only for its owner from hand."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_four_player_cycling_draw_is_private_and_seat_scoped",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep the source hidden before activation and the newly drawn card private to the activating seat."
+    },
+    {
+      "capability_id": "activation.cycling.hand",
+      "evidence_class": "replay",
+      "test_id": "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_generic_cycling_discards_before_stack_draw_and_replays_exactly",
+      "official_rule_ids": [
+        "601.2h",
+        "602.1",
+        "602.2",
+        "602.2a",
+        "602.2b",
+        "701.8a",
+        "702.29",
+        "702.29a",
+        "702.29b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the source-pinned descriptor, payment, discard-cost event, stack object, and private draw exactly."
+    },
     {
       "capability_id": "activation.tap_untap_cost.haste",
       "evidence_class": "interaction",
@@ -11755,5 +11953,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "c13bd08b4c7ce7b7e67d63d5b5f7a82c5d665a92280d5b3921f56be0f0fab6aa"
+  "fingerprint": "18e331020eb8b9aadaae75312e0bf0cd95c1199ba86548fda63546945d2577f1"
 }
