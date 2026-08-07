@@ -2,7 +2,7 @@
 title: "Rules kernel"
 status: "current"
 authoritative_source: "mtg_commander_sim engine and rules modules"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "rules and engine contributors"
 maintenance: "hand-maintained"
 ---
@@ -24,13 +24,21 @@ decisions, events, yields, and fidelity telemetry. During migration,
 `CommanderEngine` remains the declared general mutation owner. Casting and
 activation use read-only immutable proposal builders followed by declared
 typed commit owners; `mana_activation.py`, `tap_state.py`, and
-`token_creation.py` own focused transactions behind typed host protocols.
+`token_creation.py`, `destruction.py`, and `return_to_hand.py` own focused
+transactions behind typed host protocols. Destruction delegates shield removal
+to the counter owner and permanent movement to the zone owner; direct return
+snapshots owner, controller, and object identity before delegating its requested
+move to that same replacement-aware zone owner.
 Capability lifecycle and replay hydration have narrowly declared compatibility
 ownership. All other rules helpers return values or operate through an
 approved mutation boundary. Typed semantic handlers receive
 an immutable rules query and emit intents; they cannot import the engine or
 state model. The intent executor calls existing canonical engine methods or
 the focused tap-state port.
+Typed direct-target destruction and return-to-owner-hand handlers likewise
+commit only through their focused transactions; the aggregate mechanics remain
+untrusted where regeneration, mass selection, recursion, reanimation, costs,
+or other unsupported grammar and interactions are materially reachable.
 
 Continuous characteristics are a shared rules responsibility rather than a
 client reconstruction. `continuous_effect_state.py` owns the authoritative

@@ -5172,7 +5172,7 @@
       "capability_id": "permanent.return.owner_hand",
       "evidence_class": "negative",
       "test_id": "tests.test_targeted_return_to_hand_effect_clauses.TargetedReturnToHandCompilerTests.test_targeted_return_shape_mutants_fail_closed",
-      "official_rule_ids": ["108.3", "110.2", "115.1", "115.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Reject altered operations, target references, schemas, and missing mechanic ownership before capability promotion."
     },
@@ -5180,7 +5180,7 @@
       "capability_id": "permanent.return.owner_hand",
       "evidence_class": "negative",
       "test_id": "tests.test_targeted_return_to_hand_effect_clauses.TargetedReturnToHandCompilerTests.test_unsupported_return_variants_remain_material_residuals",
-      "official_rule_ids": ["108.3", "110.2", "115.1", "115.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Keep optional, qualified, aggregate, graveyard, controller-hand, and compound return wording outside the bounded family."
     },
@@ -5196,7 +5196,7 @@
       "capability_id": "permanent.return.owner_hand",
       "evidence_class": "positive",
       "test_id": "tests.test_targeted_return_to_hand_effect_clauses.TargetedReturnToHandCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_return_lowering",
-      "official_rule_ids": ["108.3", "110.2", "115.1", "115.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Lower the same direct-target return instruction in spell, trigger, and activated contexts with precise source spans."
     },

@@ -1132,6 +1132,21 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/return_to_hand_templates.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/compiler/runtime_templates.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -2371,6 +2386,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/return_to_hand.py",
+      "layer": "rules",
+      "owning_subsystem": "return_to_hand",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/reusable_pieces/__init__.py",
       "layer": "semantics",
       "owning_subsystem": "reusable_piece_inventory",
@@ -3490,6 +3519,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/return_to_hand_handlers.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_runtime/tap_state_handlers.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_runtime",
@@ -3888,5 +3932,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "d9e6c8a6f8d4bda69d06ba33493f25f73128752e6601f9be3a403ae684d4918e"
+  "fingerprint": "97beef0703bd6d9c8d6ab7d3cd3617edbff64d3eea42e3f76f590dbc809bf1e2"
 }

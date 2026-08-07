@@ -2,7 +2,7 @@
 title: "Semantic node extension guide"
 status: "current"
 authoritative_source: "Oracle IR and semantic executor implementation"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---
@@ -34,6 +34,9 @@ ratchets the operation vocabulary. A new compiler stage, schema version, or
 custom runtime extension interface requires an ADR.
 
 See the [typed semantic handler architecture](../architecture/semantic-handlers.md)
-for the migration sequence and current operation inventory. The tap-state
-family and its focused mutation port are the bounded example recorded in
-[ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md).
+for the migration sequence and current operation inventory. Bounded examples
+include tap state in
+[ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md), direct permanent
+destruction in [ADR 0027](../adr/0027-typed-permanent-destruction.md), and
+direct return to an owner's hand in
+[ADR 0028](../adr/0028-typed-return-to-owner-hand.md).

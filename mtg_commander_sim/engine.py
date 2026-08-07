@@ -6457,24 +6457,10 @@ class CommanderEngine(
             group.player_relation,
         ):
             return False
-        types = set(row.get("types") or ())
-        subtypes = set(row.get("subtypes") or ())
-        supertypes = set(row.get("supertypes") or ())
-        types_any = {value.casefold() for value in group.types_any}
-        types_all = {value.casefold() for value in group.types_all}
-        types_none = {value.casefold() for value in group.types_none}
-        if types_any and not types.intersection(types_any):
-            return False
-        if types_all and not types_all.issubset(types):
-            return False
-        if types_none and types.intersection(types_none):
-            return False
-        if group.subtypes_any and not subtypes.intersection(
-            value.casefold() for value in group.subtypes_any
-        ):
-            return False
-        if group.supertypes_any and not supertypes.intersection(
-            value.casefold() for value in group.supertypes_any
+        if not group.matches_type_characteristics(
+            types=row.get("types") or (),
+            subtypes=row.get("subtypes") or (),
+            supertypes=row.get("supertypes") or (),
         ):
             return False
         colors = set(row.get("colors") or ())

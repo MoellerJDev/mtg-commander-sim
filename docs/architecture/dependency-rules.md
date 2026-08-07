@@ -2,7 +2,7 @@
 title: "Dependency and mutation rules"
 status: "current"
 authoritative_source: "platform/architecture-policy.json and architecture validator"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "all code contributors"
 maintenance: "hand-maintained"
 ---
@@ -43,11 +43,17 @@ port. `mtg_commander_sim/tap_state.py` is such a port. The replacement event
 boundary also routes represented counter events to
 `mtg_commander_sim/counter_placement.py`. Represented damage events route to
 `mtg_commander_sim/damage.py` for proposal preparation, replacement/prevention,
-atomic result commit, and final-event dispatch. All three depend on narrow
+atomic result commit, and final-event dispatch. Direct destruction and
+return-to-owner-hand intents route to `mtg_commander_sim/destruction.py` and
+`mtg_commander_sim/return_to_hand.py`; those transaction owners validate
+identity and disposition before delegating authoritative counter or zone writes
+to existing canonical owners. These ports depend on narrow
 structural host protocols rather than the engine class and are authorized by
 [ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md) and
 [ADR 0011](../adr/0011-counter-placement-event-and-mutation-owner.md), plus
-[ADR 0012](../adr/0012-damage-transaction-and-static-prevention.md).
+[ADR 0012](../adr/0012-damage-transaction-and-static-prevention.md),
+[ADR 0027](../adr/0027-typed-permanent-destruction.md), and
+[ADR 0028](../adr/0028-typed-return-to-owner-hand.md).
 
 Every production Python module has one generated exact classification covering
 layer, owner, allowed dependency layers, GameState access, specificity,

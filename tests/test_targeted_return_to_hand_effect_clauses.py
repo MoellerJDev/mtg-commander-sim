@@ -21,6 +21,7 @@ from mtg_commander_sim.rules.capabilities import (
     load_default_capability_registry,
 )
 from mtg_commander_sim.semantics import SemanticRegistry
+from mtg_commander_sim.targets import TargetGroup
 from scripts.build_test_database import build_fixture_database
 
 
@@ -82,12 +83,35 @@ class TargetedReturnToHandTemplateTests(unittest.TestCase):
             "Return another target creature to its owner's hand.",
             "Return target tapped creature to its owner's hand.",
             "Return target creature to its controller's hand.",
+            "Return target creature to its owners hand.",
             "Return target creature card from a graveyard to its owner's hand.",
             "Return all creatures to their owners' hands.",
             "Return target creature to its owner's hand. Draw a card.",
         ):
             with self.subTest(text=text):
                 self.assertIsNone(targeted_return_to_hand_effect_template(text))
+
+    def test_nonland_target_uses_the_shared_exact_type_predicate(self):
+        group = TargetGroup.from_mapping(
+            TargetedReturnToHandEffectTemplate(
+                ReturnToHandTarget.NONLAND_PERMANENT
+            ).target_schema
+        )
+
+        self.assertTrue(
+            group.matches_type_characteristics(
+                types=("artifact",),
+                subtypes=(),
+                supertypes=(),
+            )
+        )
+        self.assertFalse(
+            group.matches_type_characteristics(
+                types=("artifact", "land"),
+                subtypes=(),
+                supertypes=(),
+            )
+        )
 
 
 class TargetedReturnToHandCompilerTests(unittest.TestCase):
@@ -237,7 +261,7 @@ class TargetedReturnToHandCompilerTests(unittest.TestCase):
             )
         )
 
-    def test_generated_direct_target_program_is_capability_closed(self):
+    def test_generated_return_program_is_capability_closed(self):
         registry = SemanticRegistry(include_builtin_packs=False)
         result = register_generated_programs(
             self.db,
