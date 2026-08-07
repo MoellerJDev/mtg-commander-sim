@@ -6458,20 +6458,11 @@ class CommanderEngine(
         ):
             return False
         types = set(row.get("types") or ())
-        subtypes = set(row.get("subtypes") or ())
         supertypes = set(row.get("supertypes") or ())
-        types_any = {value.casefold() for value in group.types_any}
-        types_all = {value.casefold() for value in group.types_all}
-        if types_any and not types.intersection(types_any):
-            return False
-        if types_all and not types_all.issubset(types):
-            return False
-        if group.subtypes_any and not subtypes.intersection(
-            value.casefold() for value in group.subtypes_any
-        ):
-            return False
-        if group.supertypes_any and not supertypes.intersection(
-            value.casefold() for value in group.supertypes_any
+        if not group.matches_type_characteristics(
+            types=types,
+            subtypes=row.get("subtypes") or (),
+            supertypes=supertypes,
         ):
             return False
         colors = set(row.get("colors") or ())
@@ -6519,12 +6510,10 @@ class CommanderEngine(
         ):
             return False
         derived = {
-            "land": "land" in types,
-            "creature": "creature" in types,
-            "artifact": "artifact" in types,
-            "enchantment": "enchantment" in types,
-            "permanent": row["category"] == "permanent",
+            name: name in types
+            for name in ("land", "creature", "artifact", "enchantment")
         }
+        derived["permanent"] = row["category"] == "permanent"
         if group.predicate:
             if group.predicate == "artifact_or_enchantment_or_nonbasic_land":
                 if not (

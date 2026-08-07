@@ -2,7 +2,7 @@
 title: "Reusable rules piece matrix"
 status: "generated"
 authoritative_source: "coverage/reusable-piece-matrix.json.gz"
-verified: "91ecb7f5627b2dc3083990f7e84066d19cb8fe207c2d979772589934dc10c05a"
+verified: "e1f571fe3136b6ccb046205e0ad36ce063c719fa22edba9c01ae9ebe014d32ce"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -17,13 +17,13 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 
 - Profile: `commander_review`
 - Ontology: `reusable-pieces-v1`
-- Pieces: 1,009
+- Pieces: 1,013
 - Cards indexed: 31,623
 - Material abilities classified: 59,968
 - Unclassified material spans: 0
-- Mapped pinned rules: 663 / 3,300
-- Applicable piece pairs: 20,131
-- Covered piece pairs: 110
+- Mapped pinned rules: 667 / 3,300
+- Applicable piece pairs: 20,229
+- Covered piece pairs: 112
 
 ## Ontology classes
 
@@ -33,14 +33,14 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `card_forms` — Card types and specialized forms | 3 |
 | `choices_continuations` — Modes, targets, choices, and continuations | 6 |
 | `combat` — Combat | 21 |
-| `compiler_cardprogram` — Compiler and CardProgram pieces | 195 |
+| `compiler_cardprogram` — Compiler and CardProgram pieces | 197 |
 | `continuous_effects` — Static abilities and continuous effects | 16 |
 | `costs_mana` — Costs and mana | 7 |
-| `events_mutations` — Typed events and mutations | 59 |
-| `keyword_mechanics` — Keyword actions and keyword abilities | 556 |
+| `events_mutations` — Typed events and mutations | 60 |
+| `keyword_mechanics` — Keyword actions and keyword abilities | 557 |
 | `multiplayer_commander` — Multiplayer, Commander, and profile pieces | 1 |
-| `object_identity` — Object identity and lifetime | 28 |
-| `one_shot_effects` — One-shot semantic effects | 90 |
+| `object_identity` — Object identity and lifetime | 27 |
+| `one_shot_effects` — One-shot semantic effects | 91 |
 | `players_format` — Players, relationships, and format state | 1 |
 | `proposals` — Casting and activation proposals | 5 |
 | `quantities` — Quantity and value expressions | 1 |
@@ -57,35 +57,35 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `derived_characteristics_static_layers` | `inventoried` | 16 | 5 |
 | `generic_triggers_stack_placement` | `inventoried` | 2 | 2 |
 | `multiplayer_player_leaving_commander` | `represented` | 2 | 0 |
-| `objects_identity_zones_faces_copies` | `represented` | 31 | 0 |
+| `objects_identity_zones_faces_copies` | `represented` | 30 | 0 |
 | `replacement_prevention` | `inventoried` | 13 | 5 |
 | `state_turn_loops_stabilization` | `inventoried` | 0 | 0 |
 | `targets_modes_searches_references_choices` | `inventoried` | 8 | 6 |
-| `typed_transactions_events_mutations` | `inventoried` | 149 | 54 |
+| `typed_transactions_events_mutations` | `inventoried` | 151 | 54 |
 
 ## Highest current blocker leverage
 
 | Piece | Class | Residuals | Sole blockers | Expected cards | Runtime | Assurance |
 |---|---|---:|---:|---:|---|---|
-| `residual.continuous_layer.continuous-effect-layers-and-dependencies` | `continuous_effects` | 9,643 | 3,321 | 3,321 | `absent` | `untested` |
+| `residual.continuous_layer.continuous-effect-layers-and-dependencies` | `continuous_effects` | 9,643 | 3,322 | 3,322 | `absent` | `untested` |
 | `residual.activated_effect.unparsed-clause-grammar` | `one_shot_effects` | 2,880 | 789 | 789 | `absent` | `untested` |
-| `residual.effect_clause.unparsed-clause-grammar` | `one_shot_effects` | 2,943 | 503 | 503 | `absent` | `untested` |
-| `residual.mechanic_dependency.cr-611-continuous-effects` | `keyword_mechanics` | 565 | 186 | 186 | `absent` | `untested` |
+| `residual.effect_clause.unparsed-clause-grammar` | `one_shot_effects` | 2,943 | 505 | 505 | `absent` | `untested` |
+| `residual.mechanic_dependency.cr-611-continuous-effects` | `keyword_mechanics` | 565 | 187 | 187 | `absent` | `untested` |
 | `residual.mechanic_dependency.cr-614-replacement-effects` | `keyword_mechanics` | 531 | 162 | 162 | `absent` | `untested` |
 | `residual.mechanic_dependency.cr-509-declare-blockers-step` | `keyword_mechanics` | 421 | 136 | 136 | `absent` | `untested` |
 | `residual.effect_clause.deal-damage` | `one_shot_effects` | 1,048 | 134 | 134 | `absent` | `untested` |
-| `residual.effect_clause.return` | `one_shot_effects` | 754 | 112 | 112 | `absent` | `untested` |
+| `residual.effect_clause.return` | `one_shot_effects` | 743 | 112 | 112 | `absent` | `untested` |
 | `residual.mechanic_dependency.cr-111-tokens` | `keyword_mechanics` | 311 | 106 | 106 | `absent` | `untested` |
 | `residual.effect_clause.destroy-target` | `one_shot_effects` | 590 | 94 | 94 | `absent` | `untested` |
 | `residual.activated_effect.deal-damage` | `one_shot_effects` | 525 | 92 | 92 | `absent` | `untested` |
-| `residual.effect_clause.exile` | `one_shot_effects` | 1,062 | 85 | 85 | `absent` | `untested` |
-| `residual.mechanic_dependency.cr-115-targets` | `keyword_mechanics` | 481 | 82 | 82 | `absent` | `untested` |
+| `residual.effect_clause.exile` | `one_shot_effects` | 1,062 | 89 | 89 | `absent` | `untested` |
+| `residual.mechanic_dependency.cr-115-targets` | `keyword_mechanics` | 433 | 82 | 82 | `absent` | `untested` |
 | `residual.activated_effect.return` | `one_shot_effects` | 451 | 80 | 80 | `absent` | `untested` |
 | `residual.activated_effect.tap-state` | `one_shot_effects` | 322 | 75 | 75 | `absent` | `untested` |
 | `residual.effect_clause.tap-state` | `one_shot_effects` | 387 | 70 | 70 | `absent` | `untested` |
 | `residual.activated_effect.put-counter` | `one_shot_effects` | 408 | 62 | 62 | `absent` | `untested` |
 | `residual.activated_effect.create-token` | `one_shot_effects` | 487 | 59 | 59 | `absent` | `untested` |
-| `residual.effect_clause.look-reveal` | `one_shot_effects` | 579 | 55 | 55 | `absent` | `untested` |
+| `residual.effect_clause.look-reveal` | `one_shot_effects` | 579 | 56 | 56 | `absent` | `untested` |
 | `residual.activated_effect.search` | `one_shot_effects` | 236 | 52 | 52 | `absent` | `untested` |
 | `residual.effect_clause.counter` | `one_shot_effects` | 276 | 50 | 50 | `absent` | `untested` |
 | `residual.effect_clause.destroy-mass` | `one_shot_effects` | 201 | 45 | 45 | `absent` | `untested` |

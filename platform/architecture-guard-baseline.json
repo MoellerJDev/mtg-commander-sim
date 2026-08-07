@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "c637630",
+  "baseline_commit": "9d4278417f57290e8f05ef2fcd949da19fbdfec3",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -735,7 +735,7 @@
     "mtg_commander_sim/record.py": 11
   },
   "engine": {
-    "logical_lines": 12503,
+    "logical_lines": 12492,
     "methods": [
       {
         "kind": "method",
@@ -2278,12 +2278,12 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 13237
+    "physical_lines": 13226
   },
   "exception_binding": {
-    "adr": "docs/adr/0027-typed-permanent-destruction.md",
-    "allowance_fingerprint": "d1820035ae4b4dc7b78adac148ccdabf35a9aff69840ac38a326f9c691a720ba",
-    "exception_id": "ARCH-EXC-0009"
+    "adr": "docs/adr/0028-typed-return-to-owner-hand.md",
+    "allowance_fingerprint": "51ed7fa14113122d2c724026093616395ea7f4f6aabcc79fc40fbe9ec3052d0b",
+    "exception_id": "ARCH-EXC-0010"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2432,7 +2432,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 236,
+      "logical_lines": 225,
       "symbol": "CommanderEngine._target_row_matches"
     },
     {
@@ -2457,7 +2457,7 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 388,
+      "logical_lines": 370,
       "symbol": "_effect_template"
     },
     {
@@ -2518,7 +2518,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 12503
+      "logical_lines": 12492
     },
     {
       "file": "mtg_commander_sim/record.py",
@@ -2657,6 +2657,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "63134e91e921cd54f2ac305eac31f1a244940f1f5512427bbf72d4fc9fdad0d3"
+    "printed_name_allowances_sha256": "8e79a21c109c3af1038a18dc549af506b56155f63b27d509cedd6499026b075d"
   }
 }

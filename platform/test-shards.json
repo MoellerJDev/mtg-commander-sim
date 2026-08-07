@@ -45,6 +45,7 @@
       "test_replacement_event_ordering",
       "test_replacement_event_tree",
       "test_replacement_model_hardening",
+      "test_return_to_hand_rules",
       "test_token_creation_replacements"
     ],
     "casting-costs-mana": [
@@ -167,6 +168,7 @@
       "test_preflight_v080",
       "test_rule_capabilities",
       "test_targeted_destruction_effect_clauses",
+      "test_targeted_return_to_hand_effect_clauses",
       "test_targeted_tap_state_effect_clauses"
     ],
     "server-replay-privacy": [

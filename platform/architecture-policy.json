@@ -55,6 +55,7 @@
     "mtg_commander_sim/protection.py",
     "mtg_commander_sim/replacement_decisions.py",
     "mtg_commander_sim/replacement_effects.py",
+    "mtg_commander_sim/return_to_hand.py",
     "mtg_commander_sim/rule_conformance.py",
     "mtg_commander_sim/rules_corpus.py",
     "mtg_commander_sim/semantics.py",
@@ -159,6 +160,7 @@
       "mtg_commander_sim/attachments.py": "typed reciprocal attachment relation and transition owner",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
+      "mtg_commander_sim/return_to_hand.py": "typed identity-pinned permanent-return transaction delegating mutation to the canonical zone-change owner",
       "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine",
       "mtg_commander_sim/trigger_discovery.py": "normalized semantic trigger detection and immutable ordinary occurrence construction behind CommanderEngine"
       ,"mtg_commander_sim/mana_activation.py": "activated mana ability and reversible activation transaction owner"

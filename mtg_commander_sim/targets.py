@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence
 
 
 PUBLIC_TARGET_ZONES = {
@@ -49,6 +49,7 @@ class TargetGroup:
     categories: tuple[str, ...] = ()
     types_any: tuple[str, ...] = ()
     types_all: tuple[str, ...] = ()
+    types_none: tuple[str, ...] = ()
     subtypes_any: tuple[str, ...] = ()
     supertypes_any: tuple[str, ...] = ()
     colors_any: tuple[str, ...] = ()
@@ -80,6 +81,39 @@ class TargetGroup:
     different_from_groups: tuple[str, ...] = ()
     predicate: str = ""
     resolution_condition: dict[str, Any] = field(default_factory=dict)
+
+    def matches_type_characteristics(
+        self,
+        *,
+        types: Iterable[str],
+        subtypes: Iterable[str],
+        supertypes: Iterable[str],
+    ) -> bool:
+        """Evaluate only the canonical parsed type predicates."""
+
+        actual_types = {str(value).casefold() for value in types}
+        actual_subtypes = {str(value).casefold() for value in subtypes}
+        actual_supertypes = {str(value).casefold() for value in supertypes}
+        types_any = {value.casefold() for value in self.types_any}
+        types_all = {value.casefold() for value in self.types_all}
+        types_none = {value.casefold() for value in self.types_none}
+        return not (
+            (types_any and not actual_types.intersection(types_any))
+            or (types_all and not types_all.issubset(actual_types))
+            or (types_none and actual_types.intersection(types_none))
+            or (
+                self.subtypes_any
+                and not actual_subtypes.intersection(
+                    value.casefold() for value in self.subtypes_any
+                )
+            )
+            or (
+                self.supertypes_any
+                and not actual_supertypes.intersection(
+                    value.casefold() for value in self.supertypes_any
+                )
+            )
+        )
 
     @classmethod
     def from_mapping(
@@ -129,6 +163,7 @@ class TargetGroup:
                 raw.get("types_any", raw.get("card_types", raw.get("type")))
             ),
             types_all=_strings(raw.get("types_all")),
+            types_none=_strings(raw.get("types_none")),
             subtypes_any=_strings(raw.get("subtypes_any", raw.get("subtype"))),
             supertypes_any=_strings(
                 raw.get("supertypes_any", raw.get("supertype"))

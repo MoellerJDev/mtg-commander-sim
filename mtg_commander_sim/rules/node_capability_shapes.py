@@ -109,6 +109,31 @@ _TARGETED_DESTRUCTION_SCHEMAS: tuple[Mapping[str, Any], ...] = tuple(
         ("creature", "planeswalker"),
     )
 )
+_TARGETED_RETURN_TO_HAND_SCHEMAS: tuple[Mapping[str, Any], ...] = (
+    *tuple(
+        {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            **({"types_any": list(kinds)} if kinds else {}),
+            "count": 1,
+        }
+        for kinds in (
+            ("artifact",),
+            ("creature",),
+            ("enchantment",),
+            ("land",),
+            (),
+            ("artifact", "enchantment"),
+            ("creature", "planeswalker"),
+        )
+    ),
+    {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        "types_none": ["land"],
+        "count": 1,
+    },
+)
 
 
 def _positive_int(value: Any) -> bool:
@@ -314,9 +339,38 @@ def targeted_destruction_node_capabilities(
     )
 
 
+def targeted_return_to_hand_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for the closed direct battlefield grammar."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if (
+        not {"return-to-owner-hand", "cr-115-targets"}.issubset(mechanics)
+        or len(effects) != 1
+        or dict(target_schema or {}) not in _TARGETED_RETURN_TO_HAND_SCHEMAS
+    ):
+        return ()
+    effect = effects[0]
+    if (
+        set(effect) != {"op", "card"}
+        or effect.get("op") != "bounce"
+        or effect.get("card") != "$target.0"
+    ):
+        return ()
+    return (
+        "permanent.return.owner_hand",
+        "target.revalidate_resolution",
+    )
+
+
 __all__ = [
     "fixed_damage_node_capabilities",
     "fixed_draw_node_capabilities",
     "targeted_destruction_node_capabilities",
+    "targeted_return_to_hand_node_capabilities",
     "targeted_tap_state_node_capabilities",
 ]

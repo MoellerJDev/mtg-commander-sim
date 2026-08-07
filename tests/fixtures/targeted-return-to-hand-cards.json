@@ -1,0 +1,27 @@
+{
+  "cards": [
+    {
+      "cmc": 1.0,
+      "color_identity": ["U"],
+      "colors": ["U"],
+      "defense": null,
+      "keywords": [],
+      "layout": "normal",
+      "legalities": {"commander": "legal"},
+      "loyalty": null,
+      "mana_cost": "{U}",
+      "name": "Unsummon",
+      "oracle_id": "837182db-1bf3-4a2c-bd01-1af9d9873561",
+      "oracle_text": "Return target creature to its owner's hand.",
+      "power": null,
+      "produced_mana": [],
+      "released_at": "2024-11-15",
+      "toughness": null,
+      "type_line": "Instant"
+    }
+  ],
+  "fixture_kind": "focused_targeted_return_to_hand_cards",
+  "rulings": [],
+  "schema_version": 1,
+  "source": "Pinned Scryfall witness for focused compiler/runtime tests"
+}
