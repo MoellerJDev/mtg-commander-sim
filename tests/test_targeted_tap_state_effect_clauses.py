@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from common import DB_PATH, keep_all, load_assets, make_session
+from common import ROOT, keep_all, make_session
 from mtg_commander_sim.carddb import CardDatabase
 from mtg_commander_sim.compiler.tap_state_templates import (
     TapStateAction,
@@ -28,7 +28,21 @@ from mtg_commander_sim.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
+from mtg_commander_sim.deck import DeckLoader
 from mtg_commander_sim.semantics import SemanticRegistry
+from scripts.build_test_database import build_fixture_database
+
+
+def focused_card_database(directory: str) -> CardDatabase:
+    database = Path(directory) / "targeted-tap-state.sqlite3"
+    build_fixture_database(
+        [
+            ROOT / "tests" / "fixtures" / "scryfall-exact-lists.json",
+            ROOT / "tests" / "fixtures" / "targeted-tap-state-cards.json",
+        ],
+        database,
+    )
+    return CardDatabase(database)
 
 
 class TargetedTapStateTemplateTests(unittest.TestCase):
@@ -89,13 +103,15 @@ class TargetedTapStateTemplateTests(unittest.TestCase):
 class TargetedTapStateCompilerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db = CardDatabase(DB_PATH)
+        cls.temporary = tempfile.TemporaryDirectory()
+        cls.db = focused_card_database(cls.temporary.name)
         cls.base = cls.db.lookup("Lightning Bolt")
         cls.capabilities = load_default_capability_registry()
 
     @classmethod
     def tearDownClass(cls):
         cls.db.close()
+        cls.temporary.cleanup()
 
     def compile(self, oracle_text: str, *, type_line: str = "Instant"):
         return compile_oracle_card(
@@ -276,11 +292,24 @@ class TargetedTapStateCompilerTests(unittest.TestCase):
 class TargetedTapStateRuntimeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db, cls.mishra, cls.zimone = load_assets()
+        cls.temporary = tempfile.TemporaryDirectory()
+        cls.db = focused_card_database(cls.temporary.name)
+        loader = DeckLoader(cls.db)
+        cls.mishra = loader.load(
+            ROOT / "examples" / "mishra-eminent-one.txt",
+            commander="Mishra, Eminent One",
+            deck_name="Mishra",
+        )
+        cls.zimone = loader.load(
+            ROOT / "examples" / "zimone-and-dina.txt",
+            commander="Zimone and Dina",
+            deck_name="Zimone",
+        )
 
     @classmethod
     def tearDownClass(cls):
         cls.db.close()
+        cls.temporary.cleanup()
 
     def session_with_card(self, card_name: str, *, players: int, seed: int):
         deck = copy.deepcopy(self.mishra)
