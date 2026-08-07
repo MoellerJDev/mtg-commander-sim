@@ -1020,12 +1020,37 @@ test("@browser-rules @combat a duel declares an attacker in the browser and appl
         : cards.first();
       const landRef = await land.getAttribute("data-card-ref");
       expect(landRef).toBeTruthy();
+      const ownPlayerId = await page
+        .locator('[data-testid^="player-"]')
+        .filter({ has: page.getByTestId("own-battlefield") })
+        .first()
+        .getAttribute("data-testid");
+      const ownSeat = ownPlayerId?.replace("player-", "") || null;
+      expect(ownSeat).toBeTruthy();
       const battlefieldCards = page
         .getByTestId("own-battlefield")
         .locator(".card-tile");
       const battlefieldCount = await battlefieldCards.count();
       const playAction = page.getByTestId(`action-play-land:${landRef}`);
-      await advanceToActionReady([host, opponent], playAction, testInfo, 90_000);
+      await advanceToActionReady(
+        [host, opponent],
+        playAction,
+        testInfo,
+        90_000,
+        async () => {
+          const shell = page.locator(".game-shell");
+          const [phase, activePlayer, hasDecision] = await Promise.all([
+            shell.getAttribute("data-phase"),
+            shell.getAttribute("data-active-player"),
+            page.getByTestId("decision-panel").count(),
+          ]);
+          return (
+            hasDecision > 0
+            && activePlayer === ownSeat
+            && (phase === "precombat_main" || phase === "postcombat_main")
+          );
+        },
+      );
       await playAction.click();
       const dialog = page.getByTestId("choice-dialog");
       await expect.poll(async () =>
