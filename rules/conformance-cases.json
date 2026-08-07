@@ -25017,15 +25017,16 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "universal_zone_move_replacement_discovery_not_implemented",
-        "contradictory_effect_choice_not_integrated",
-        "complete_apnap_replacement_collection_not_integrated"
+        "moving_object_self_inspection_not_implemented",
+        "destination_zone_viewer_inspection_not_implemented",
+        "entry_and_command_zone_replacement_families_not_implemented"
       ],
       "case_id": "cr-400.6",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
+        "negative",
         "interaction",
         "multiplayer",
         "hidden_information",
@@ -25038,16 +25039,23 @@
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_simultaneous_move_captures_all_lki_before_mutation",
         "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_replacement_uses_the_sources_pre_move_controller",
-        "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly"
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_competing_replacements_follow_four_player_apnap",
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_preflight_rejects_malformed_and_stale_moves",
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_snapshot_mutant_is_killed",
+        "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_closed_family_lowers_to_capability_closed_card_program",
+        "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_unrepresented_destination_variants_remain_residual"
       ],
       "implementation_components": [
         "CommanderEngine.move_card",
         "CommanderEngine._move_cards_simultaneously",
-        "semantic_runtime.zone_replacements.prepare_zone_change_replacement",
-        "replacement_effects"
+        "compiler.zone_templates.static_zone_destination_replacement_handler",
+        "semantic_runtime.zone_replacement_model.ZoneChangeReplacementSnapshot",
+        "semantic_runtime.zone_replacements.prepare_zone_change_replacement_snapshot",
+        "replacement.ordering.advance_replacement_batch"
       ],
       "notes": [
-        "Represented simultaneous moves capture all pre-move information and selected graveyard replacements before mutation. Universal self-inspection, battlefield destination inspection, contradictory effect choice, and CR 616 ordering are not wired into every zone event."
+        "The bounded destination-replacement capability captures represented ambient sources and every affected object once, resolves contradictory single and simultaneous events in multiplayer APNAP order, and commits only after choice-complete preparation. A closed opponent-card graveyard-to-exile-with-counter wording family lowers to the same typed handler. Aggregate CR 400.6 remains blocked on moving-object self-inspection, destination-viewer inspection, and unrepresented entry and command-zone families."
       ],
       "required_scenarios": [
         "positive",
@@ -46693,7 +46701,7 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "linked replacement identity is implemented for the exact Dauthi family rather than generic linked abilities",
+        "the paired exiled-card permission remains source-pinned rather than a generic linked-ability production",
         "gained paired abilities and old/new object incarnations are not fully modeled"
       ],
       "case_id": "cr-614.14",
@@ -46708,14 +46716,17 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"
+        "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
+        "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_closed_family_lowers_to_capability_closed_card_program",
+        "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_unrepresented_destination_variants_remain_residual"
       ],
       "implementation_components": [
+        "compiler.zone_templates.static_zone_destination_replacement_handler",
         "semantic_runtime.zone_replacements.ZoneDestinationReplacementHandler",
         "CommanderEngine._activate"
       ],
       "notes": [
-        "Dauthi's destination replacement now comes from a source-pinned runtime descriptor and links its exiled-card permission to the represented effect, but this is not broad linked-ability coverage."
+        "The closed opponent-card graveyard-to-exile-with-counter wording family compiles generically to the typed destination handler. Dauthi's separate permission for cards marked by that replacement is still source-pinned, so this is not broad linked-ability coverage."
       ],
       "required_scenarios": [
         "positive",

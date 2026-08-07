@@ -37,12 +37,22 @@ permanent type. The reviewed source-pinned witnesses are Doubling Season and
 Doc Samson, Super Psychiatrist. Cost-generated counters and inactive sources
 do not match.
 
-Zone-destination replacements can create a typed nested counter event. The
-containing zone event is exhausted before that child is considered. All
-replacement choices are resolved before the zone move; the child counter is
-committed only after the card reaches its validated destination. A nested
-counter on a card outside the battlefield is represented for ordering but is
-outside the permanent-only quantity component.
+Zone-destination replacements use the closed
+`CreateAffectedObjectCounter` operation to derive a typed child from the
+parent zone event. The operation binds the affected physical object and the
+already transformed destination at application time, so one immutable source
+effect can serve every event in a simultaneous batch. The containing zone
+event is exhausted before its child is considered. Every replacement choice
+is complete before the move; the child counter commits only after the card
+reaches its validated destination. A counter on a card outside the battlefield
+is represented for ordering but remains outside the permanent-only quantity
+component.
+
+The Oracle compiler lowers the closed “an opponent's card from anywhere would
+enter a graveyard; exile it with one named counter instead” family to this same
+destination handler and nested counter operation. Different owners, origins,
+object kinds, optional wording, counter-free moves, and alternate destinations
+remain residual rather than being inferred at runtime.
 
 ## Ownership and dependencies
 
@@ -88,13 +98,7 @@ Primary assurance is in `test_counter_placement_replacements.py`, with shared
 event-order coverage in `test_replacement_event_tree.py` and focused mutation
 evidence in `test_capability_implementation_mutations.py`.
 
-## Pinned-corpus effect
-
-Against the 2026-07-31 local Scryfall snapshot, this counter-placement tranche
-added two reviewed ability programs but no capability-closed cards by itself,
-because the bounded counter-quantity capability remained tested and the
-witness cards retained material behavior outside the slice. Current aggregate
-counts are generated in
-[`docs/COMPILER_COVERAGE_STATUS.md`](../COMPILER_COVERAGE_STATUS.md); later
-damage work changes those totals. These figures measure representation, not
-matchup or complete Oracle correctness.
+Current aggregate corpus counts and remaining blockers are generated in
+[`docs/COMPILER_COVERAGE_STATUS.md`](../COMPILER_COVERAGE_STATUS.md). They
+measure represented behavior against the pinned corpus, not matchup results or
+complete Oracle correctness.

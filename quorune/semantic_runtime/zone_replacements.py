@@ -6,6 +6,7 @@ from typing import Any, Mapping, Protocol, Sequence
 
 from ..replacement_effects import (
     AffectedObject,
+    CreateAffectedObjectCounter,
     ReplaceableEvent,
     ReplacementBatchChoice,
     ReplacementClass,
@@ -21,26 +22,21 @@ from .context import SemanticNodeError
 from .counter_replacements import (
     collect_counter_placement_replacement_effects,
 )
+from .zone_replacement_model import (
+    PreparedZoneChange,
+    SUPPORTED_ZONE_DESTINATIONS,
+    ZoneChangeReplacementContext,
+    ZoneChangeReplacementResolution,
+    ZoneChangeReplacementSnapshot,
+    ZoneChangeSubjectSnapshot,
+    ZoneDestinationIntent,
+    ZoneDestinationReplacementNode,
+    ZoneReplacementError,
+)
 
 
 _DESTINATION_HANDLER_ID = "replacement.zone.destination.v1"
 _COUNTERS_FIELD = "counter" + "s"
-# These zone labels are also exact printed card names.  Keep them assembled so
-# the architecture card-specificity scanner does not misclassify zone-schema
-# validation as card dispatch.
-_EXILE_ZONE = "ex" + "ile"
-_LIBRARY_ZONE = "lib" + "rary"
-_SUPPORTED_DESTINATIONS = frozenset(
-    {
-        "battlefield",
-        "command",
-        _EXILE_ZONE,
-        "graveyard",
-        "hand",
-        _LIBRARY_ZONE,
-        "outside",
-    }
-)
 
 
 class ZoneReplacementHost(Protocol):
@@ -74,95 +70,6 @@ class ZoneReplacementHost(Protocol):
         importance: int = 1,
         changed_objects: Sequence[str] | None = None,
     ) -> Any: ...
-
-
-class ZoneReplacementError(ValueError):
-    pass
-
-
-@dataclass(frozen=True, slots=True)
-class ZoneDestinationReplacementNode:
-    destination: str
-    object_kind: str
-    owner_relation: str
-    replacement_destination: str
-    counters: tuple[tuple[str, int], ...]
-
-
-@dataclass(frozen=True, slots=True)
-class ZoneChangeReplacementContext:
-    source_ref: str
-    source_controller: str
-    object_id: str
-    object_ref: str
-    object_owner: str
-    object_controller: str | None
-    object_types: tuple[str, ...]
-    origin: str
-    destination: str
-    is_card_object: bool
-    component_id: str = ""
-
-    def __post_init__(self) -> None:
-        if not all(
-            (
-                self.source_ref,
-                self.source_controller,
-                self.object_id,
-                self.object_ref,
-                self.object_owner,
-                self.origin,
-                self.destination,
-            )
-        ):
-            raise SemanticNodeError(
-                "Zone replacement context requires stable source and event facts"
-            )
-
-
-@dataclass(frozen=True, slots=True)
-class ZoneDestinationIntent:
-    handler_id: str
-    source_ref: str
-    destination: str
-    counters: tuple[tuple[str, int], ...]
-
-
-@dataclass(frozen=True, slots=True)
-class ZoneChangeReplacementResolution:
-    batch: ReplacementEventBatch
-    event: ReplaceableEvent
-    effects: tuple[ReplacementEffect, ...]
-    journal: tuple[ReplacementSelection, ...]
-    pending: ReplacementBatchChoice | None
-
-    @property
-    def destination(self) -> str:
-        return str(self.event.payload["destination"])
-
-    @property
-    def counter_events(self) -> tuple[ReplaceableEvent, ...]:
-        events: list[ReplaceableEvent] = []
-
-        def visit(event: ReplaceableEvent) -> None:
-            if event.kind == "counter.place":
-                events.append(event)
-            for child in event.children:
-                visit(child)
-
-        visit(self.event)
-        return tuple(events)
-
-
-@dataclass(frozen=True, slots=True)
-class PreparedZoneChange:
-    object_id: str
-    requested_destination: str
-    destination: str
-    event: ReplaceableEvent | None = None
-    effects: tuple[ReplacementEffect, ...] = ()
-    counter_events: tuple[ReplaceableEvent, ...] = ()
-    journal: tuple[ReplacementSelection, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -220,8 +127,8 @@ class ZoneDestinationReplacementHandler:
         owner_relation = str(condition["owner_relation"] or "")
         replacement_destination = str(descriptor["destination"] or "")
         if (
-            destination not in _SUPPORTED_DESTINATIONS
-            or replacement_destination not in _SUPPORTED_DESTINATIONS
+            destination not in SUPPORTED_ZONE_DESTINATIONS
+            or replacement_destination not in SUPPORTED_ZONE_DESTINATIONS
         ):
             raise SemanticNodeError(
                 "Zone destination replacement requires supported game zones"
@@ -285,7 +192,42 @@ class ZoneDestinationReplacementHandler:
         context: ZoneChangeReplacementContext,
     ) -> ReplacementEffect:
         node = self.validate(descriptor)
-        component_id = context.component_id or node.replacement_destination
+        return self._source_replacement_effect(
+            node,
+            source_ref=context.source_ref,
+            source_controller=context.source_controller,
+            component_id=(
+                context.component_id or node.replacement_destination
+            ),
+        )
+
+    def source_replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        *,
+        source_ref: str,
+        source_controller: str,
+        component_id: str,
+    ) -> ReplacementEffect:
+        return self._source_replacement_effect(
+            self.validate(descriptor),
+            source_ref=source_ref,
+            source_controller=source_controller,
+            component_id=component_id,
+        )
+
+    def _source_replacement_effect(
+        self,
+        node: ZoneDestinationReplacementNode,
+        *,
+        source_ref: str,
+        source_controller: str,
+        component_id: str,
+    ) -> ReplacementEffect:
+        if not source_ref or not source_controller or not component_id:
+            raise SemanticNodeError(
+                "Zone replacement sources require stable identity"
+            )
         operations: list[Mapping[str, Any]] = [
             {
                 "op": "set",
@@ -293,61 +235,31 @@ class ZoneDestinationReplacementHandler:
                 "value": node.replacement_destination,
             }
         ]
-        target_controller = (
-            context.object_controller
-            if node.replacement_destination == "battlefield"
-            else None
-        )
-        target_kind = (
-            "permanent"
-            if node.replacement_destination == "battlefield"
-            else "card"
-        )
         for index, (name, amount) in enumerate(node.counters):
             operations.append(
-                {
-                    "op": "nested_event",
-                    "event": {
-                        "event_id": (
-                            f"zone.counter:{context.object_ref}:"
-                            f"{context.source_ref}:{index}"
-                        ),
-                        "kind": "counter.place",
-                        "affected_object": {
-                            "object_id": context.object_id,
-                            "owner": context.object_owner,
-                            "controller": target_controller,
-                        },
-                        "payload": {
-                            "placing_player": context.source_controller,
-                            "target_controller": target_controller,
-                            "target_zone": node.replacement_destination,
-                            "target_kind": target_kind,
-                            "target_types": list(context.object_types),
-                            "counter_name": name,
-                            "amount": amount,
-                            "requested_amount": amount,
-                            "source": context.source_ref,
-                            "effect_generated": True,
-                        },
-                    },
-                }
+                CreateAffectedObjectCounter(
+                    counter_name=name,
+                    amount=amount,
+                    placing_player=source_controller,
+                    source_ref=source_ref,
+                    sequence=index,
+                )
             )
         return ReplacementEffect(
             effect_id=(
-                f"{self.handler_id}:{context.source_ref}:{component_id}"
+                f"{self.handler_id}:{source_ref}:{component_id}"
             ),
-            source_id=context.source_ref,
+            source_id=source_ref,
             event_kind=self.event,
             replacement_class=ReplacementClass.OTHER,
             conditions={
                 "destination": {"eq": node.destination},
                 "object_kind": {"eq": node.object_kind},
-                "owner": {"not_in": [context.source_controller]},
+                "owner": {"not_in": [source_controller]},
             },
             operations=tuple(operations),
             label=(
-                f"{context.source_ref}: put the card into "
+                f"{source_ref}: put the card into "
                 f"{node.replacement_destination} instead"
             ),
         )
@@ -373,6 +285,28 @@ class ZoneChangeReplacementRegistry(
             )
         return compiler(descriptor, context)
 
+    def source_replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        *,
+        source_ref: str,
+        source_controller: str,
+        component_id: str,
+    ) -> ReplacementEffect:
+        handler = self._handler(descriptor)
+        compiler = getattr(handler, "source_replacement_effect", None)
+        if compiler is None:
+            raise SemanticNodeError(
+                f"Runtime handler {handler.handler_id} cannot compile a "
+                "source replacement effect"
+            )
+        return compiler(
+            descriptor,
+            source_ref=source_ref,
+            source_controller=source_controller,
+            component_id=component_id,
+        )
+
 
 @lru_cache(maxsize=1)
 def default_zone_change_replacement_registry(
@@ -388,13 +322,16 @@ def default_zone_change_replacement_registry(
 
 def collect_zone_change_replacement_effects(
     host: ZoneReplacementHost,
-    card: Any,
-    destination: str,
     *,
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
 ) -> tuple[ReplacementEffect, ...]:
-    """Compile trusted ambient zone replacements without card dispatch."""
+    """Compile trusted ambient zone replacements without card dispatch.
+
+    The returned effects contain only source semantics.  Affected-object facts
+    are bound later by the immutable event snapshot, so one effect can safely
+    participate in every event of a simultaneous batch.
+    """
 
     candidates = (
         list(sources)
@@ -425,38 +362,11 @@ def collect_zone_change_replacement_effects(
                 continue
             for descriptor_index, descriptor in enumerate(program.handlers):
                 effects.append(
-                    registry.replacement_effect(
+                    registry.source_replacement_effect(
                         descriptor,
-                        ZoneChangeReplacementContext(
-                            source_ref=source.ref,
-                            source_controller=source.controller,
-                            object_id=card.object_id,
-                            object_ref=card.ref,
-                            object_owner=card.owner,
-                            object_controller=(
-                                card.controller
-                                if card.zone in {"battlefield", "stack"}
-                                else None
-                            ),
-                            object_types=tuple(
-                                sorted(
-                                    set().union(
-                                        *host._type_parts(
-                                            str(
-                                                host._effective_card_data(
-                                                    card
-                                                ).get("type_line")
-                                                or ""
-                                            )
-                                        )
-                                    )
-                                )
-                            ),
-                            origin=card.zone,
-                            destination=destination,
-                            is_card_object=card.is_card_object,
-                            component_id=f"{program.key}:{descriptor_index}",
-                        ),
+                        source_ref=source.ref,
+                        source_controller=source.controller,
+                        component_id=f"{program.key}:{descriptor_index}",
                     )
                 )
     effects.extend(
@@ -469,6 +379,186 @@ def collect_zone_change_replacement_effects(
     return tuple(effects)
 
 
+def capture_zone_change_replacement_snapshot(
+    host: ZoneReplacementHost,
+    changes: Sequence[tuple[str, str]],
+    *,
+    destination_controllers: Mapping[str, str | None] | None = None,
+    sources: Sequence[Any] | None = None,
+    source_zones: Mapping[str, str] | None = None,
+    error_type: type[Exception] = ZoneReplacementError,
+) -> ZoneChangeReplacementSnapshot:
+    """Capture every represented source and affected object before mutation."""
+
+    supplied = tuple(changes)
+    if any(
+        not isinstance(change, tuple)
+        or len(change) != 2
+        or any(type(value) is not str or not value for value in change)
+        for change in supplied
+    ):
+        raise error_type(
+            "Zone replacement snapshots require object and destination pairs"
+        )
+    object_ids = tuple(object_id for object_id, _destination in supplied)
+    if len(object_ids) != len(set(object_ids)):
+        raise error_type(
+            "Zone replacement snapshots cannot repeat one object"
+        )
+    destination_controllers = destination_controllers or {}
+    if set(destination_controllers) - set(object_ids):
+        raise error_type(
+            "Zone replacement destination controllers reference unknown objects"
+        )
+
+    subjects: list[ZoneChangeSubjectSnapshot] = []
+    for object_id, destination in supplied:
+        card = host.state.cards.get(object_id)
+        if card is None:
+            raise error_type(
+                "Zone replacement snapshot references an unknown object"
+            )
+        try:
+            types = tuple(
+                sorted(
+                    set().union(
+                        *host._type_parts(
+                            str(
+                                host._effective_card_data(card).get("type_line")
+                                or ""
+                            )
+                        )
+                    )
+                )
+            )
+            subjects.append(
+                ZoneChangeSubjectSnapshot(
+                    object_id=card.object_id,
+                    object_ref=card.ref,
+                    logical_object_id=card.logical_object_id,
+                    owner=card.owner,
+                    controller=(
+                        card.controller
+                        if card.zone in {"battlefield", "stack"}
+                        else None
+                    ),
+                    origin=card.zone,
+                    destination=destination,
+                    destination_controller=(
+                        destination_controllers[object_id]
+                        if object_id in destination_controllers
+                        else (
+                            card.owner
+                            if destination == "battlefield"
+                            else (
+                                card.controller
+                                if card.zone in {"battlefield", "stack"}
+                                else None
+                            )
+                        )
+                    ),
+                    object_types=types,
+                    is_card_object=card.is_card_object,
+                )
+            )
+        except (SemanticNodeError, ZoneReplacementError) as exc:
+            raise error_type(str(exc)) from exc
+
+    candidates = (
+        tuple(sources)
+        if sources is not None
+        else tuple(host._semantic_event_sources(zones={"battlefield"}))
+    )
+    active_sources = tuple(
+        source
+        for source in candidates
+        if (
+            (
+                source_zones.get(source.object_id, source.zone)
+                if source_zones is not None
+                else source.zone
+            )
+            == "battlefield"
+            and not source.phased_out
+            and source.controller in host.active_seats
+        )
+    )
+    try:
+        effects = collect_zone_change_replacement_effects(
+            host,
+            sources=active_sources,
+            source_zones={source.object_id: "battlefield" for source in active_sources},
+        )
+        return ZoneChangeReplacementSnapshot(
+            revision=host.state.revision,
+            event_sequence=host.state.event_sequence,
+            apnap_order=tuple(host.apnap_order()),
+            source_refs=tuple(source.ref for source in active_sources),
+            subjects=tuple(subjects),
+            effects=tuple(sorted(effects, key=lambda effect: effect.effect_id)),
+        )
+    except (SemanticNodeError, ZoneReplacementError) as exc:
+        raise error_type(str(exc)) from exc
+
+
+def _snapshot_event(
+    snapshot: ZoneChangeReplacementSnapshot,
+    subject: ZoneChangeSubjectSnapshot,
+) -> ReplaceableEvent:
+    return ReplaceableEvent(
+        event_id=(
+            f"zone.change:{snapshot.revision}:"
+            f"{snapshot.event_sequence + 1}:{subject.object_ref}"
+        ),
+        kind="zone.change",
+        affected_player=None,
+        affected_object=AffectedObject(
+            object_id=subject.object_id,
+            owner=subject.owner,
+            controller=subject.controller,
+        ),
+        payload={
+            "origin": subject.origin,
+            "destination": subject.destination,
+            "destination_controller": subject.destination_controller,
+            "object_kind": "card" if subject.is_card_object else "noncard",
+            "object_ref": subject.object_ref,
+            "object_types": list(subject.object_types),
+            "logical_object_id": subject.logical_object_id,
+            "owner": subject.owner,
+        },
+    )
+
+
+def _prepared_from_event(
+    subject: ZoneChangeSubjectSnapshot,
+    event: ReplaceableEvent,
+    *,
+    effects: tuple[ReplacementEffect, ...],
+    journal: tuple[ReplacementSelection, ...],
+) -> PreparedZoneChange:
+    counter_events: list[ReplaceableEvent] = []
+
+    def visit(current: ReplaceableEvent) -> None:
+        if current.kind == "counter.place":
+            counter_events.append(current)
+        for child in current.children:
+            visit(child)
+
+    visit(event)
+    return PreparedZoneChange(
+        object_id=subject.object_id,
+        logical_object_id=subject.logical_object_id,
+        origin=subject.origin,
+        requested_destination=subject.destination,
+        destination=str(event.payload["destination"]),
+        event=event,
+        effects=effects,
+        counter_events=tuple(counter_events),
+        journal=journal,
+    )
+
+
 def prepare_zone_change_replacement(
     host: ZoneReplacementHost,
     card: Any,
@@ -476,7 +566,8 @@ def prepare_zone_change_replacement(
     *,
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
-    selections: Sequence[str | None] = (),
+    destination_controller: str | None = None,
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
     prepared: PreparedZoneChange | None = None,
     error_type: type[Exception] = ZoneReplacementError,
 ) -> PreparedZoneChange:
@@ -485,6 +576,8 @@ def prepare_zone_change_replacement(
     if prepared is not None:
         if (
             prepared.object_id != card.object_id
+            or prepared.logical_object_id != card.logical_object_id
+            or prepared.origin != card.zone
             or prepared.requested_destination != destination
         ):
             raise error_type(
@@ -495,58 +588,19 @@ def prepare_zone_change_replacement(
                 "Replacement selections cannot modify a prepared zone move"
             )
         return prepared
-    effects = collect_zone_change_replacement_effects(
+    return prepare_zone_change_replacement_batch(
         host,
-        card,
-        destination,
-        sources=sources,
-        source_zones=source_zones,
-    )
-    if not effects:
-        if selections:
-            raise error_type(
-                "Replacement selections were supplied without an applicable "
-                "zone-change replacement"
-            )
-        return PreparedZoneChange(
-            object_id=card.object_id,
-            requested_destination=destination,
-            destination=destination,
-        )
-    resolution = resolve_zone_change_replacements(
-        event_id=(
-            f"zone.change:{host.state.revision}:"
-            f"{host.state.event_sequence + 1}:{card.ref}"
-        ),
-        object_id=card.object_id,
-        owner=card.owner,
-        controller=(
-            card.controller
-            if card.zone in {"battlefield", "stack"}
+        ((card.object_id, destination),),
+        destination_controllers=(
+            {card.object_id: destination_controller}
+            if destination_controller is not None
             else None
         ),
-        origin=card.zone,
-        destination=destination,
-        is_card_object=card.is_card_object,
-        effects=effects,
-        apnap_order=host.apnap_order(),
+        sources=sources,
+        source_zones=source_zones,
         selections=selections,
-    )
-    if resolution.pending is not None:
-        raise ReplacementChoiceRequired(
-            batch=resolution.batch,
-            effects=effects,
-            pending=resolution.pending,
-        )
-    return PreparedZoneChange(
-        object_id=card.object_id,
-        requested_destination=destination,
-        destination=resolution.destination,
-        event=resolution.event,
-        effects=effects,
-        counter_events=resolution.counter_events,
-        journal=resolution.journal,
-    )
+        error_type=error_type,
+    )[card.object_id]
 
 
 def prepare_zone_change_replacement_batch(
@@ -555,61 +609,91 @@ def prepare_zone_change_replacement_batch(
     *,
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
+    destination_controllers: Mapping[str, str | None] | None = None,
     selections: Sequence[str | None | Mapping[str, Any]] = (),
     error_type: type[Exception] = ZoneReplacementError,
 ) -> dict[str, PreparedZoneChange]:
-    """Preflight an ordered simultaneous batch without mutating any object.
+    """Resolve one immutable simultaneous batch before mutating any object."""
 
-    A single external selection journal is consumed in batch order. Each
-    object's complete replacement tree resolves before the next object begins,
-    matching CR 616.1 while preserving APNAP order supplied by the caller.
-    """
+    snapshot = capture_zone_change_replacement_snapshot(
+        host,
+        changes,
+        destination_controllers=destination_controllers,
+        sources=sources,
+        source_zones=source_zones,
+        error_type=error_type,
+    )
+    return prepare_zone_change_replacement_snapshot(
+        snapshot,
+        selections=selections,
+        error_type=error_type,
+    )
 
-    supplied = tuple(changes)
-    if any(
-        not isinstance(change, tuple)
-        or len(change) != 2
-        or any(type(value) is not str or not value for value in change)
-        for change in supplied
-    ):
+
+def prepare_zone_change_replacement_snapshot(
+    snapshot: ZoneChangeReplacementSnapshot,
+    *,
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
+    error_type: type[Exception] = ZoneReplacementError,
+) -> dict[str, PreparedZoneChange]:
+    """Resolve a captured batch without consulting mutable game state."""
+
+    if not isinstance(snapshot, ZoneChangeReplacementSnapshot):
         raise error_type(
-            "Zone replacement batches require object and destination pairs"
+            "Zone replacement preparation requires an immutable snapshot"
         )
-    object_ids = tuple(object_id for object_id, _ in supplied)
-    if len(object_ids) != len(set(object_ids)):
-        raise error_type(
-            "Zone replacement batches cannot repeat one object"
-        )
-    journal = tuple(selections)
-    cursor = 0
-    prepared: dict[str, PreparedZoneChange] = {}
-    for object_id, destination in supplied:
-        card = host.state.cards.get(object_id)
-        if card is None:
+    events = tuple(
+        _snapshot_event(snapshot, subject) for subject in snapshot.subjects
+    )
+    if not snapshot.effects:
+        if selections:
             raise error_type(
-                "Zone replacement batch references an unknown object"
+                "Replacement selections were supplied without an applicable "
+                "zone-change replacement"
             )
-        object_selections: list[str | None | Mapping[str, Any]] = []
-        while True:
-            try:
-                prepared[object_id] = prepare_zone_change_replacement(
-                    host,
-                    card,
-                    destination,
-                    sources=sources,
-                    source_zones=source_zones,
-                    selections=tuple(object_selections),
-                    error_type=error_type,
-                )
-                break
-            except ReplacementChoiceRequired:
-                if cursor >= len(journal):
-                    raise
-                object_selections.append(journal[cursor])
-                cursor += 1
-    if cursor != len(journal):
-        raise error_type(
-            "Zone replacement selections exceed the batch's pending choices"
+        return {
+            subject.object_id: _prepared_from_event(
+                subject,
+                event,
+                effects=(),
+                journal=(),
+            )
+            for subject, event in zip(snapshot.subjects, events, strict=True)
+        }
+    progress = advance_replacement_batch(
+        ReplacementEventBatch(
+            batch_id=(
+                f"replacement:zone.batch:{snapshot.revision}:"
+                f"{snapshot.event_sequence + 1}"
+            ),
+            events=events,
+            apnap_order=snapshot.apnap_order,
+        ),
+        snapshot.effects,
+        selections=tuple(selections),
+    )
+    if progress.pending is not None:
+        raise ReplacementChoiceRequired(
+            batch=progress.batch,
+            effects=snapshot.effects,
+            pending=progress.pending,
+        )
+    prepared: dict[str, PreparedZoneChange] = {}
+    for subject, event in zip(
+        snapshot.subjects,
+        progress.batch.events,
+        strict=True,
+    ):
+        event_journal = tuple(
+            selection
+            for selection in progress.batch.journal
+            if selection.event_id == event.event_id
+        )
+        prepared[subject.object_id] = _prepared_from_event(
+            subject,
+            event,
+            effects=snapshot.effects,
+            journal=event_journal,
         )
     return prepared
 
@@ -679,7 +763,11 @@ def resolve_zone_change_replacements(
     is_card_object: bool,
     effects: Sequence[ReplacementEffect],
     apnap_order: Sequence[str],
-    selections: Sequence[str | None] = (),
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
+    object_ref: str | None = None,
+    logical_object_id: str | None = None,
+    object_types: Sequence[str] = (),
+    destination_controller: str | None = None,
 ) -> ZoneChangeReplacementResolution:
     event = ReplaceableEvent(
         event_id=event_id,
@@ -693,7 +781,15 @@ def resolve_zone_change_replacements(
         payload={
             "origin": origin,
             "destination": destination,
+            "destination_controller": (
+                destination_controller
+                if destination_controller is not None
+                else controller
+            ),
             "object_kind": "card" if is_card_object else "noncard",
+            "object_ref": object_ref or object_id,
+            "object_types": sorted(set(object_types)),
+            "logical_object_id": logical_object_id or object_id,
             "owner": owner,
         },
     )

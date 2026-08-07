@@ -18,6 +18,7 @@ from .operations import (
     AddAmount,
     AppendValues,
     CapResultLifeLoss,
+    CreateAffectedObjectCounter,
     CreateResultDraws,
     CreateNestedEvent,
     DredgeDraw,
@@ -282,6 +283,78 @@ def _create_result_draw_instruction(
     )
 
 
+def _create_affected_object_counter_event(
+    event: ReplaceableEvent,
+    payload: Mapping[str, Any],
+    children: list[ReplaceableEvent],
+    operation: CreateAffectedObjectCounter,
+    *,
+    effect_id: str,
+) -> None:
+    if event.kind != "zone.change" or event.affected_object is None:
+        raise ReplacementEffectError(
+            "Affected-object counters require a zone-change object event"
+        )
+    object_ref = payload.get("object_ref")
+    object_types = payload.get("object_types")
+    destination = payload.get("destination")
+    if type(object_ref) is not str or not object_ref:
+        raise ReplacementEffectError(
+            "Affected-object counters require the object's public ref"
+        )
+    if not isinstance(object_types, (list, tuple)) or any(
+        type(value) is not str or not value for value in object_types
+    ):
+        raise ReplacementEffectError(
+            "Affected-object counters require canonical object types"
+        )
+    if type(destination) is not str or not destination:
+        raise ReplacementEffectError(
+            "Affected-object counters require a resolved destination"
+        )
+    target_controller = (
+        payload.get("destination_controller")
+        if destination == "battlefield"
+        else None
+    )
+    event_id = (
+        f"zone.counter:{object_ref}:{operation.source_ref}:"
+        f"{operation.sequence}"
+    )
+    if any(child.event_id == event_id for child in children):
+        event_id = f"{event_id}:{effect_id}"
+    children.append(
+        ReplaceableEvent(
+            event_id=event_id,
+            kind="counter.place",
+            affected_player=None,
+            affected_object=AffectedObject(
+                object_id=event.affected_object.object_id,
+                owner=event.affected_object.owner,
+                controller=(
+                    str(target_controller)
+                    if target_controller is not None
+                    else None
+                ),
+            ),
+            payload={
+                "placing_player": operation.placing_player,
+                "target_controller": target_controller,
+                "target_zone": destination,
+                "target_kind": (
+                    "permanent" if destination == "battlefield" else "card"
+                ),
+                "target_types": sorted(set(object_types)),
+                "counter_name": operation.counter_name,
+                "amount": operation.amount,
+                "requested_amount": operation.amount,
+                "source": operation.source_ref,
+                "effect_generated": True,
+            },
+        )
+    )
+
+
 def _apply_operation(
     event: ReplaceableEvent,
     payload: dict[str, Any],
@@ -347,6 +420,15 @@ def _apply_operation(
                 thaw_value(operation.event),
                 suffix=str(len(children)),
             )
+        )
+        return entry_scope
+    if isinstance(operation, CreateAffectedObjectCounter):
+        _create_affected_object_counter_event(
+            event,
+            payload,
+            children,
+            operation,
+            effect_id=effect_id,
         )
         return entry_scope
     if isinstance(operation, ReserveZoneChange):

@@ -370,8 +370,8 @@
     {
       "mechanic_id": "cr-400-general",
       "path": "mechanics/contracts/object-zone-identity.json",
-      "sha256": "cec27688887e90bcdbf3d591c4cdc63316caae94833fd04a065d3ffa5be278c3",
-      "version": 4
+      "sha256": "2910cfe34ec38dd595a5f2a082100850b31dc9e5c6fae79f3825c13b9ef824c6",
+      "version": 5
     },
     {
       "mechanic_id": "cr-615-prevention-effects",
@@ -6775,12 +6775,12 @@
     {
       "category": "zones",
       "contract_path": "mechanics/contracts/object-zone-identity.json",
-      "contract_sha256": "cec27688887e90bcdbf3d591c4cdc63316caae94833fd04a065d3ffa5be278c3",
-      "contract_version": 4,
+      "contract_sha256": "2910cfe34ec38dd595a5f2a082100850b31dc9e5c6fae79f3825c13b9ef824c6",
+      "contract_version": 5,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CardInstance.zone_change_counter and zone_timestamp, GameState.timestamp_sequence, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
-      "implementation_version": "object-incarnation-v4",
+      "implementation_component": "CardInstance zone identity, the immutable ZoneChangeReplacementSnapshot, CommanderEngine.move_card, target revalidation, and identity-guarded semantic moves",
+      "implementation_version": "object-incarnation-v5",
       "kind": "rules_section",
       "known_blockers": [
         "the complete CR 400.7a-m exception matrix is not represented as typed continuation policies",
@@ -6789,7 +6789,8 @@
         "merged permanents, meld components, stickers, and complete face-down object identity are not implemented",
         "turning a face-up command-zone object face down does not yet create a new incarnation",
         "all legacy semantic references have not yet migrated from physical refs to typed logical handles",
-        "all simultaneous replacement choices are not yet routed through the CR 616 ordering engine",
+        "moving-object self-inspection and destination-zone viewer inspection are not represented by the bounded replacement grammar",
+        "entry-zone choices and the complete Commander command-zone replacement family remain outside the bounded destination descriptor",
         "sideboards, outside-the-game wish effects, and their lifecycle are not represented",
         "complete effects that instruct actions over every card in a zone are not compiled generically",
         "complete CR 613.7m APNAP relative-timestamp choices are not represented"
@@ -6822,6 +6823,9 @@
         "test_spell_copy_cessation_replays_exactly",
         "test_permanent_spell_keeps_its_logical_incarnation",
         "test_simultaneous_move_captures_all_lki_before_mutation",
+        "test_simultaneous_competing_replacements_follow_four_player_apnap",
+        "test_zone_replacement_preflight_rejects_malformed_and_stale_moves",
+        "test_zone_replacement_snapshot_mutant_is_killed",
         "test_worlds_entering_simultaneously_are_tied_and_all_leave"
       ],
       "trust_level": "untrusted"

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "f2ba92d6ec9d8c3dce1a6ec8fc6e4d1bf9c9a6cb3f569597c89abd788ed31a60",
-  "declaration_source_fingerprint": "0981594a855c158f5c9ac9d9bc649710bf3b182bf2538ffb9cdc36e6dbff68d8",
+  "registry_fingerprint": "602c6aa5e9ec2aa3f85aac5abac26bc6c828f809eb4f3e4cd8119d97dfe1e8ee",
+  "declaration_source_fingerprint": "021e2738a9a91f8f6d9892be8302ac247fe7817ca24ed2e4c0f78b7626c06ed3",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -12639,6 +12639,26 @@
     {
       "capability_id": "zone.change.destination_replacement",
       "evidence_class": "interaction",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_competing_replacements_follow_four_player_apnap",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Collect contradictory represented destination replacements for simultaneous affected objects through one APNAP-ordered immutable batch."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "interaction",
       "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_replacement_uses_the_sources_pre_move_controller",
       "official_rule_ids": [
         "400.6",
@@ -12675,6 +12695,46 @@
         "commander_review"
       ],
       "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_competing_replacements_follow_four_player_apnap",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Choose the active player's affected object before a caller-earlier nonactive object, without mutating either object during suspension."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_snapshot_mutant_is_killed",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject source-order and live-source rediscovery mutants by preparing from canonical immutable source effects after the candidates are reordered and mutated."
     },
     {
       "capability_id": "zone.change.destination_replacement",
@@ -12718,6 +12778,46 @@
     },
     {
       "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_preflight_rejects_malformed_and_stale_moves",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject duplicate, unknown, unsupported-destination, and stale affected-object facts before mutation."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_unrepresented_destination_variants_remain_residual",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject owner, origin, object-kind, optional, counter-free, and alternate-destination wording outside the closed compiler grammar."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
       "evidence_class": "positive",
       "test_id": "tests.test_exact_zimone_closure.ExactZimoneClosureTests.test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
       "official_rule_ids": [
@@ -12735,6 +12835,46 @@
         "commander_review"
       ],
       "applicability_note": "Replace a represented card's proposed zone destination through the affected-object ordering boundary before committing the move."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "positive",
+      "test_id": "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_snapshot_mutant_is_killed",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Prepare a represented destination replacement and its nested counter result from one immutable pre-move snapshot."
+    },
+    {
+      "capability_id": "zone.change.destination_replacement",
+      "evidence_class": "positive",
+      "test_id": "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_closed_family_lowers_to_capability_closed_card_program",
+      "official_rule_ids": [
+        "400.6",
+        "614.1",
+        "614.1a",
+        "614.5",
+        "616.1",
+        "616.1f",
+        "616.2"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower the exact opponent-card graveyard-to-exile-with-counter wording family to one source-spanned capability-closed CardProgram V2 handler."
     },
     {
       "capability_id": "zone.change.destination_replacement",
@@ -13773,5 +13913,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "e7f734305ffe5c958f113c2560ef38a9ec4e071f73ba489e2f8756a03ccf6636"
+  "fingerprint": "28b868f317dde7b1b37998438739967a2c29a2e4fb7bb501a54e9defba31b9d5"
 }

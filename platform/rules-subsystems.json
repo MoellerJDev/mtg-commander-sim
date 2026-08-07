@@ -335,22 +335,22 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "universal-zone-change-replacement-discovery",
-    "subsystem_id": "zones",
+    "batch_id": "additional-token-replacement-closure",
+    "subsystem_id": "replacement-prevention",
     "rule_ids": [
-      "400.6"
+      "614.16"
     ],
     "target_capability_ids": [
-      "zone.change.destination_replacement"
+      "token.creation.additional_replacement"
     ],
-    "rationale": "Ordinary Cycling is already complete at its bounded trusted capability even though the wider CR 702.29 family remains blocked. Current repository evidence instead selects the universal CR 400.6 destination-replacement boundary: it is a dependency-ready shared zone owner used by spells, abilities, state-based actions, and the direct single-object transitions, and its remaining blockers are explicit discovery, contradictory-effect choice, and complete APNAP replacement collection rather than card-count ranking.",
+    "rationale": "The immutable universal destination-replacement snapshot is complete for its bounded represented grammar. The next dependency-ready replacement slice is the existing fixed additional-token capability: it already uses the shared nested-event tree and token owner, but remains tested rather than trusted because generic compiler lowering, multiplayer evidence, and focused implementation mutation evidence are incomplete. Closing that bounded family harvests the replacement substrate without taking on optional, multiplying, or state-derived token effects.",
     "exit_criteria": [
-      "Discover every represented destination replacement from one canonical pre-mutation source snapshot without printed-name dispatch or runtime Oracle parsing.",
-      "Resolve mutually contradictory applicable destination effects through the affected object's correct chooser in complete multiplayer APNAP order.",
-      "Use the same typed preparation and commitment boundary for represented single and simultaneous zone changes without introducing an arbitrary move DSL.",
-      "Fail closed before mutation when a replacement dependency, chooser, event path, or supported-zone predicate is unresolved.",
-      "Preserve rollback, privacy, save/load, exact replay, and focused implementation mutation evidence across generic producers.",
-      "Leave self-inspection and destination-specific variants outside the represented grammar as explicit blockers rather than promoting the aggregate family."
+      "Lower one closed, reusable fixed additional-token replacement wording family to the existing typed runtime descriptor with precise CardProgram V2 source spans.",
+      "Create replacement-generated tokens through the same immutable nested-event and authoritative token-creation owner used by ordinary token instructions.",
+      "Resolve simultaneous and contradictory represented token replacements in complete multiplayer APNAP order before mutation.",
+      "Add canonical positive, negative, interaction, multiplayer, rollback, privacy, replay, and killed implementation-mutation evidence for the bounded capability.",
+      "Promote the bounded capability only when its mandatory trust evidence and ambient dependencies close; report the pinned Commander-card delta honestly.",
+      "Leave optional replacements, quantity doublers, mutable-state token definitions, and unrepresented token-entry riders as explicit residuals."
     ]
   }
 }

@@ -2,7 +2,7 @@
 title: "Rules dependency queue"
 status: "generated"
 authoritative_source: "coverage/rules-dependency-queue.json"
-verified: "2446f1051eacca59a1458a04079c5d4fa622894d2af3624fbf01c583648c0f5c"
+verified: "a75f97860653f4cd964459ad36491ce79fb996d6b5417e8e756b8031a30d59df"
 audience: "rules, compiler, and engine contributors"
 maintenance: "generated"
 generated_source: "coverage/rules-dependency-queue.json"
@@ -11,23 +11,23 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_rules_scheduler.p
 
 # Rules dependency queue
 
-Source fingerprint: `4175daaf30ef87c811734a05a4f7447d684d4d79e4e6615f4a14b0869d04af6b`
+Source fingerprint: `84d87dcf828e74e18a079d9954c34abc444cfead3a604579abf7a3a201007737`
 
 ## Current top-level state
 
 - Pinned rules: `3300`
 - Queued rules: `2972`
 - Subsystems: `21`
-- Selected subsystem: `zones`
-- Selected batch: `universal-zone-change-replacement-discovery`
+- Selected subsystem: `replacement-prevention`
+- Selected batch: `additional-token-replacement-closure`
 
 ## Top blockers
 
-- Discover every represented destination replacement from one canonical pre-mutation source snapshot without printed-name dispatch or runtime Oracle parsing.
-- Resolve mutually contradictory applicable destination effects through the affected object's correct chooser in complete multiplayer APNAP order.
-- Use the same typed preparation and commitment boundary for represented single and simultaneous zone changes without introducing an arbitrary move DSL.
-- Fail closed before mutation when a replacement dependency, chooser, event path, or supported-zone predicate is unresolved.
-- Preserve rollback, privacy, save/load, exact replay, and focused implementation mutation evidence across generic producers.
+- Lower one closed, reusable fixed additional-token replacement wording family to the existing typed runtime descriptor with precise CardProgram V2 source spans.
+- Create replacement-generated tokens through the same immutable nested-event and authoritative token-creation owner used by ordinary token instructions.
+- Resolve simultaneous and contradictory represented token replacements in complete multiplayer APNAP order before mutation.
+- Add canonical positive, negative, interaction, multiplayer, rollback, privacy, replay, and killed implementation-mutation evidence for the bounded capability.
+- Promote the bounded capability only when its mandatory trust evidence and ambient dependencies close; report the pinned Commander-card delta honestly.
 
 Complete rule, subsystem, dependency, classification, and selected-batch data is in the [machine-readable rules queue](../coverage/rules-dependency-queue.json).
 

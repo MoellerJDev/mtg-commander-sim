@@ -63,6 +63,14 @@ structural host protocols rather than the engine class and are authorized by
 [ADR 0029](../adr/0029-typed-permanent-exile.md), and
 [ADR 0030](../adr/0030-typed-stack-counter.md).
 
+Represented zone-destination replacements use an additional narrow split.
+`semantic_runtime/zone_replacement_model.py` owns immutable affected-object,
+source-effect, and prepared-move values. `zone_replacements.py` owns read-only
+descriptor discovery and APNAP preparation. Single and simultaneous moves
+capture that model once before mutation. Only `CommanderEngine.move_card`
+commits zone membership, so replacement discovery cannot become a competing
+state owner.
+
 Every production Python module has one generated exact classification covering
 layer, owner, allowed dependency layers, GameState access, specificity,
 visibility, and replay participation. A new unclassified module fails CI.

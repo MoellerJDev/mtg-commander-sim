@@ -3,9 +3,11 @@ from __future__ import annotations
 import copy
 import unittest
 
+from quorune.replacement.operations import ReplacementOperationError
 from quorune.replacement_effects import (
     AffectedObject,
     AddAmount,
+    CreateAffectedObjectCounter,
     MultiplyAmount,
     ReplaceableEvent,
     ReplacementClass,
@@ -20,6 +22,7 @@ from quorune.replacement_effects import (
     apply_replacement,
     immutable_fingerprint,
     next_batch_replacement_choice,
+    operation_from_dict,
     replacement_choice,
 )
 
@@ -148,6 +151,108 @@ class ReplacementImmutabilityTests(unittest.TestCase):
         ):
             apply_replacement(choice, (replacement,), replacement.effect_id)
         self.assertEqual(before, immutable_fingerprint(event.to_dict()))
+
+    def test_affected_object_counter_is_typed_roundtrippable_and_post_transform(self):
+        operation = CreateAffectedObjectCounter(
+            counter_name="Void",
+            amount=1,
+            placing_player="B",
+            source_ref="B-source",
+        )
+        self.assertEqual(operation, operation_from_dict(operation.to_dict()))
+        event = ReplaceableEvent(
+            event_id="zone:affected-counter",
+            kind="zone.change",
+            affected_player=None,
+            affected_object=AffectedObject("card:A", "A", "A"),
+            payload={
+                "origin": "battlefield",
+                "destination": "graveyard",
+                "destination_controller": None,
+                "object_kind": "card",
+                "object_ref": "A-card",
+                "object_types": ["artifact"],
+                "owner": "A",
+            },
+        )
+        replacement = ReplacementEffect(
+            effect_id="zone:replace-and-counter",
+            source_id="B-source",
+            event_kind="zone.change",
+            replacement_class=ReplacementClass.OTHER,
+            operations=(
+                SetField("destination", "exile"),
+                operation,
+            ),
+        )
+        choice = replacement_choice(event, (replacement,))
+        resolved = apply_replacement(
+            choice,
+            (replacement,),
+            replacement.effect_id,
+        )
+
+        self.assertEqual("exile", resolved.payload["destination"])
+        self.assertEqual(1, len(resolved.children))
+        self.assertEqual("exile", resolved.children[0].payload["target_zone"])
+        self.assertEqual("void", resolved.children[0].payload["counter_name"])
+
+    def test_affected_object_counter_rejects_malformed_event_without_mutation(self):
+        event = ReplaceableEvent(
+            event_id="zone:malformed-counter",
+            kind="zone.change",
+            affected_player=None,
+            affected_object=AffectedObject("card:A", "A"),
+            payload={"destination": "exile", "object_kind": "card"},
+        )
+        replacement = ReplacementEffect(
+            effect_id="zone:malformed-counter-effect",
+            source_id="B-source",
+            event_kind="zone.change",
+            replacement_class=ReplacementClass.OTHER,
+            operations=(
+                CreateAffectedObjectCounter("void", 1, "B", "B-source"),
+            ),
+        )
+        before = immutable_fingerprint(event.to_dict())
+
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "public ref",
+        ):
+            apply_replacement(
+                replacement_choice(event, (replacement,)),
+                (replacement,),
+                replacement.effect_id,
+            )
+
+        self.assertEqual(before, immutable_fingerprint(event.to_dict()))
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "must be an integer",
+        ):
+            effect(
+                "zone:boolean-counter",
+                "zone.change",
+                {
+                    "op": "create_affected_object_counter",
+                    "counter_name": "void",
+                    "amount": True,
+                    "placing_player": "B",
+                    "source_ref": "B-source",
+                    "sequence": 0,
+                },
+            )
+        for field in ("counter_name", "placing_player", "source_ref"):
+            malformed = CreateAffectedObjectCounter(
+                "void", 1, "B", "B-source"
+            ).to_dict()
+            malformed[field] = True
+            with self.subTest(field=field), self.assertRaisesRegex(
+                ReplacementOperationError,
+                "string",
+            ):
+                operation_from_dict(malformed)
 
 
 class ReplacementTreeValidationTests(unittest.TestCase):
