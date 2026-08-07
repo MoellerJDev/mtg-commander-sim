@@ -87,6 +87,39 @@ class DestroyPermanentIntent:
 
 
 @dataclass(frozen=True, slots=True)
+class ReturnPermanentToOwnerHandIntent:
+    actor: str
+    object_ref: str
+    reason: str
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not all((self.actor, self.object_ref, self.reason)):
+            raise ValueError(
+                "Return intents require actor, object, and reason"
+            )
+        frozen: list[str | FrozenMap] = []
+        for index, value in enumerate(self.replacement_selections):
+            if isinstance(value, str):
+                if not value:
+                    raise ValueError(
+                        "Return replacement selections must be nonempty"
+                    )
+                frozen.append(value)
+                continue
+            result = freeze_value(
+                value,
+                field=f"replacement_selections[{index}]",
+            )
+            if not isinstance(result, FrozenMap):
+                raise ValueError(
+                    "Return replacement selections must be objects"
+                )
+            frozen.append(result)
+        object.__setattr__(self, "replacement_selections", tuple(frozen))
+
+
+@dataclass(frozen=True, slots=True)
 class AddManaIntent:
     player: str
     color: str
@@ -417,6 +450,7 @@ SemanticIntent: TypeAlias = (
     | SetPermanentTappedIntent
     | UntapAllCreaturesIntent
     | DestroyPermanentIntent
+    | ReturnPermanentToOwnerHandIntent
     | AddManaIntent
     | SetCardDesignationIntent
     | RecordChoiceIntent

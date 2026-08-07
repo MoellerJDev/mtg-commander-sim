@@ -164,6 +164,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/protection.py",
         "mtg_commander_sim/replacement_decisions.py",
         "mtg_commander_sim/replacement_effects.py",
+        "mtg_commander_sim/return_to_hand.py",
         "mtg_commander_sim/rule_conformance.py",
         "mtg_commander_sim/rules_corpus.py",
         "mtg_commander_sim/rules_scheduler.py",
@@ -311,6 +312,8 @@ def _owner(relative: str, layer: str) -> str:
         return "combat_damage"
     if relative == "mtg_commander_sim/token_creation.py":
         return "token_creation"
+    if relative == "mtg_commander_sim/return_to_hand.py":
+        return "return_to_hand"
     if relative == "mtg_commander_sim/replacement_decisions.py":
         return "replacement_effects"
     if relative == "mtg_commander_sim/rules_scheduler.py":
@@ -420,6 +423,7 @@ def build_classifications() -> dict[str, Any]:
                             "object_predicate.py",
                             "object_query.py",
                             "replacement/",
+                            "return_to_hand.py",
                             "state_planner.py",
                             "tap_state.py",
                             "token_creation.py",

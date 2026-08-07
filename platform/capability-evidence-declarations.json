@@ -5137,6 +5137,94 @@
       "applicability_note": "Validate the complete prepared destruction batch before moving a permanent or removing a shield counter."
     },
     {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_destination_replacement_preserves_typed_result",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Commit the return request through the canonical zone-change replacement boundary and report the actual replaced destination."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_compiled_return_is_multiplayer_private_and_replays",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Advertise, submit, and resolve one compiled direct-target return in a four-seat game."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_return_transaction_mutants_are_killed",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill removal of the physical/logical identity and controller staleness guard before the zone-change commit."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_phased_and_stale_permanents_fail_before_mutation",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject phased-out and stale permanent identities before any authoritative zone mutation."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_return_to_hand_effect_clauses.TargetedReturnToHandCompilerTests.test_targeted_return_shape_mutants_fail_closed",
+      "official_rule_ids": ["108.3", "110.2", "115.1", "115.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject altered operations, target references, schemas, and missing mechanic ownership before capability promotion."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_return_to_hand_effect_clauses.TargetedReturnToHandCompilerTests.test_unsupported_return_variants_remain_material_residuals",
+      "official_rule_ids": ["108.3", "110.2", "115.1", "115.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep optional, qualified, aggregate, graveyard, controller-hand, and compound return wording outside the bounded family."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_controlled_permanent_returns_to_owners_hand",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Move a permanent controlled by another seat into its physical owner's hand and create a new logical object."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_return_to_hand_effect_clauses.TargetedReturnToHandCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_return_lowering",
+      "official_rule_ids": ["108.3", "110.2", "115.1", "115.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower the same direct-target return instruction in spell, trigger, and activated contexts with precise source spans."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_compiled_return_is_multiplayer_private_and_replays",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose an owning seat's hand while withholding its private hand contents from another pilot projection."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "replay",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_compiled_return_is_multiplayer_private_and_replays",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the advertised target, paid spell, return request, hidden-zone result, and final state hash exactly."
+    },
+    {
+      "capability_id": "permanent.return.owner_hand",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_phased_and_stale_permanents_fail_before_mutation",
+      "official_rule_ids": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Validate the complete prepared identity and control snapshot before entering the canonical zone-change transaction."
+    },
+    {
       "capability_id": "permanent.tap.effect",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_tap_activation_is_multiplayer_public_and_replays",

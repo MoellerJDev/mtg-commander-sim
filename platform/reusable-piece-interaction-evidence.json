@@ -522,6 +522,22 @@
       "capability_ids": ["permanent.untap.effect", "target.revalidate_resolution"],
       "interaction_order": 3,
       "assertion": "A source-pinned direct untap clause revalidates its target and then composes with the represented stun-counter replacement without bypassing the canonical untap owner."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_compiled_return_is_multiplayer_private_and_replays",
+      "piece_ids": ["capability.permanent.return.owner_hand", "capability.target.revalidate_resolution", "mechanic.cr-400-general", "mechanic.return-to-owner-hand"],
+      "capability_ids": ["permanent.return.owner_hand", "target.revalidate_resolution"],
+      "interaction_order": 4,
+      "assertion": "The compiled direct-target return revalidates one public permanent, commits the owner-hand zone change, and preserves the existing seat-scoped hidden-zone projection and exact replay boundary."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_destination_replacement_preserves_typed_result",
+      "piece_ids": ["capability.permanent.return.owner_hand", "mechanic.cr-400-general", "mechanic.cr-614-replacement-effects"],
+      "capability_ids": ["permanent.return.owner_hand"],
+      "interaction_order": 3,
+      "assertion": "The typed return request enters the canonical zone-change replacement tree and reports the committed replacement destination without bypassing CR 400 ownership."
     }
   ]
 }

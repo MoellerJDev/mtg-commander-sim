@@ -41,6 +41,9 @@ from .compiler.damage_templates import fixed_damage_effect_template
 from .compiler.destruction_templates import (
     targeted_destruction_effect_template,
 )
+from .compiler.return_to_hand_templates import (
+    targeted_return_to_hand_effect_template,
+)
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.keyword_nodes import dredge_keyword_node
@@ -66,7 +69,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v39"
+ORACLE_COMPILER_VERSION = "oracle-ir-v40"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
@@ -229,27 +232,9 @@ def _effect_template(
             schema,
             ("exile", "cr-115-targets"),
         )
-    match = re.fullmatch(
-        r"return target (?P<kind>creature|artifact|enchantment|land|"
-        r"permanent) to its owner'?s hand\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        kind = match.group("kind").casefold()
-        schema = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "count": 1,
-        }
-        if kind != "permanent":
-            schema[kind] = True
-        return (
-            f"bounce-target-{kind}-v1",
-            ({"op": "bounce", "card": "$target.0"},),
-            schema,
-            ("cr-400-general", "cr-115-targets"),
-        )
+    returned = targeted_return_to_hand_effect_template(normalized)
+    if returned is not None:
+        return returned.compiled()
     match = re.fullmatch(
         r"counter target spell\.?",
         normalized,

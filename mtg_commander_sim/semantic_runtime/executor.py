@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
 
-from .. import destruction, tap_state
+from .. import destruction, return_to_hand, tap_state
 from ..destruction import DestructionHost
+from ..return_to_hand import ReturnToHandHost
 from ..tap_state import TapStateHost
 from .context import SemanticNodeError
 from .intents import (
@@ -31,6 +32,7 @@ from .intents import (
     RecordChoiceIntent,
     RecordZoneMoveIntent,
     ReturnCardsToLibraryTopIntent,
+    ReturnPermanentToOwnerHandIntent,
     ReorderLibraryTopIntent,
     RetargetStackItemIntent,
     RevealLibraryCardsIntent,
@@ -43,7 +45,12 @@ from .intents import (
 )
 
 
-class SemanticIntentSink(TapStateHost, DestructionHost, Protocol):
+class SemanticIntentSink(
+    TapStateHost,
+    DestructionHost,
+    ReturnToHandHost,
+    Protocol,
+):
     def apply_domain_effect_intent(self, intent: DomainEffectIntent) -> Any: ...
 
     def draw(
@@ -217,6 +224,19 @@ def _execute_destruction_intent(
     )
 
 
+def _execute_return_to_hand_intent(
+    sink: SemanticIntentSink,
+    intent: ReturnPermanentToOwnerHandIntent,
+) -> object:
+    return return_to_hand.return_permanent_to_owner_hand(
+        sink,
+        intent.object_ref,
+        actor=intent.actor,
+        reason=intent.reason,
+        replacement_selections=intent.replacement_selections,
+    )
+
+
 def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
     if any(isinstance(intent, DrawCardsIntent) for intent in plan.intents):
         raise SemanticNodeError(
@@ -253,6 +273,14 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
         if isinstance(intent, DestroyPermanentIntent):
             results.append(
                 (intent.object_ref, _execute_destruction_intent(sink, intent))
+            )
+            continue
+        if isinstance(intent, ReturnPermanentToOwnerHandIntent):
+            results.append(
+                (
+                    intent.object_ref,
+                    _execute_return_to_hand_intent(sink, intent),
+                )
             )
             continue
         if isinstance(intent, AddManaIntent):

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 45,
+  "registry_version": 46,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -75,6 +75,12 @@
       "mechanic_id": "destroy",
       "capabilities": [
         "permanent.destroy.effect"
+      ]
+    },
+    {
+      "mechanic_id": "return-to-owner-hand",
+      "capabilities": [
+        "permanent.return.owner_hand"
       ]
     },
     {
@@ -1245,6 +1251,33 @@
       "dependency_fail_closed_rationale": "The exact direct-target compiler shape requires resolution-time target revalidation; blocking that dependency prevents the destruction node and its CardProgram from becoming trusted.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_destruction_disposition_mutants_are_killed changes shield, Indestructible, and state-based disposition boundaries; the focused assertions reject each mutant.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "permanent.return.owner_hand",
+      "version": 1,
+      "official_rules": ["108.3", "110.2", "400.2", "400.3", "400.6", "400.7", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and execute one mandatory direct-target instruction that moves a phased-in battlefield permanent to its owner's hand through target revalidation and the canonical replacement-aware zone-change owner.",
+        "inputs": ["closed typed direct-target clause", "revalidated phased-in battlefield permanent", "physical and logical object identity", "current owner and controller", "represented destination-replacement selections"],
+        "outputs": ["requested owner-hand zone event", "new logical object identity", "replacement-aware final destination", "seat-projected hidden-zone knowledge", "public typed result journal"],
+        "exclusions": ["graveyard-to-hand recursion and graveyard-to-battlefield reanimation", "mass, multi-target, optional, modal, conditional, qualified, linked-result, cost, or self-return clauses", "complete type-changing, copy, face-down, and dependency interactions", "unrepresented zone-change replacement effects; cards representing those interactions remain material residuals and fail match trust closed"]
+      },
+      "dependencies": ["target.revalidate_resolution"],
+      "implementation_components": ["mtg_commander_sim.compiler.return_to_hand_templates.TargetedReturnToHandEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_return_to_hand_node_capabilities", "mtg_commander_sim.semantic_runtime.return_to_hand_handlers.ReturnPermanentToOwnerHandHandler", "mtg_commander_sim.return_to_hand.prepare_return_to_owner_hand", "mtg_commander_sim.return_to_hand.commit_return_to_owner_hand"],
+      "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_return_lowering", "test_controlled_permanent_returns_to_owners_hand", "test_destination_replacement_preserves_typed_result"],
+      "negative_tests": ["test_unsupported_return_variants_remain_material_residuals", "test_targeted_return_shape_mutants_fail_closed", "test_phased_and_stale_permanents_fail_before_mutation"],
+      "interaction_tests": ["test_destination_replacement_preserves_typed_result", "test_controlled_permanent_returns_to_owners_hand"],
+      "multiplayer_tests": ["test_compiled_return_is_multiplayer_private_and_replays"],
+      "privacy_tests": ["test_compiled_return_is_multiplayer_private_and_replays"],
+      "replay_tests": ["test_compiled_return_is_multiplayer_private_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The exact direct-target compiler shape requires resolution-time target revalidation; blocking that dependency prevents the return node and its CardProgram from becoming trusted.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_return_transaction_mutants_are_killed changes the battlefield, phasing, owner, and destination boundaries; the focused assertions reject each mutant.",
       "blockers": [],
       "status": "trusted"
     },

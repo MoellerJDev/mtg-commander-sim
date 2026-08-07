@@ -49,6 +49,7 @@ class TargetGroup:
     categories: tuple[str, ...] = ()
     types_any: tuple[str, ...] = ()
     types_all: tuple[str, ...] = ()
+    types_none: tuple[str, ...] = ()
     subtypes_any: tuple[str, ...] = ()
     supertypes_any: tuple[str, ...] = ()
     colors_any: tuple[str, ...] = ()
@@ -129,6 +130,7 @@ class TargetGroup:
                 raw.get("types_any", raw.get("card_types", raw.get("type")))
             ),
             types_all=_strings(raw.get("types_all")),
+            types_none=_strings(raw.get("types_none")),
             subtypes_any=_strings(raw.get("subtypes_any", raw.get("subtype"))),
             supertypes_any=_strings(
                 raw.get("supertypes_any", raw.get("supertype"))

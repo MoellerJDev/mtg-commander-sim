@@ -144,6 +144,10 @@ from .destruction_handlers import (
     DESTRUCTION_HANDLERS,
     DestroyPermanentHandler,
 )
+from .return_to_hand_handlers import (
+    RETURN_TO_HAND_HANDLERS,
+    ReturnPermanentToOwnerHandHandler,
+)
 from .generic import GENERIC_HANDLERS
 from .handlers import SemanticNodeHandler
 from .intents import (
@@ -170,6 +174,7 @@ from .intents import (
     RecordChoiceIntent,
     RecordZoneMoveIntent,
     ReturnCardsToLibraryTopIntent,
+    ReturnPermanentToOwnerHandIntent,
     ReorderLibraryTopIntent,
     RetargetStackItemIntent,
     RevealLibraryCardsIntent,
@@ -228,6 +233,7 @@ def default_semantic_handler_registry() -> SemanticHandlerRegistry:
             *GENERIC_HANDLERS,
             *TAP_STATE_HANDLERS,
             *DESTRUCTION_HANDLERS,
+            *RETURN_TO_HAND_HANDLERS,
             *DOMAIN_EFFECT_HANDLERS,
         )
     )
@@ -275,6 +281,8 @@ __all__ = [
     "DomainEffectIntent",
     "DestroyPermanentHandler",
     "DestroyPermanentIntent",
+    "ReturnPermanentToOwnerHandHandler",
+    "ReturnPermanentToOwnerHandIntent",
     "DrawEachPlayerNode",
     "DrawNode",
     "DrawResolutionBatch",
