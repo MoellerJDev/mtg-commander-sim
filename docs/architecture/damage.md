@@ -1,8 +1,8 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/damage.py, mtg_commander_sim/damage_values.py, mtg_commander_sim/damage_results.py, and mtg_commander_sim/combat_damage_*"
-verified: "2026-08-06"
+authoritative_source: "mtg_commander_sim/damage.py, mtg_commander_sim/damage_values.py, mtg_commander_sim/damage_results.py, mtg_commander_sim/fixed_damage_set*, and mtg_commander_sim/combat_damage_*"
+verified: "2026-08-07"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -33,6 +33,16 @@ legal recipients, totals, canonical source and recipient order, lethal
 thresholds, and trample spill. Client JSON order is never authoritative.
 Noncombat producers use the same immutable damage values and stable physical
 or logical source identities.
+
+Fixed simultaneous affected-set instructions compile to an immutable ordered
+group descriptor. `fixed_damage_set_model.py` owns its closed player and
+permanent vocabulary; `fixed_damage_set.py` materializes current public
+effective-characteristic rows through a narrow query port. The snapshot uses
+APNAP controller order plus stable logical object identity, excludes phased-out
+objects, and deduplicates overlapping groups before creating proposals. Every
+recipient then enters one `resolve_damage_batch` call, so replacement,
+prevention, result, trigger, rollback, and replay behavior cannot diverge from
+single-target or combat damage.
 
 Preparation discovers applicable runtime components against the current
 event, validates the affected player or permanent controller, records any
@@ -68,6 +78,13 @@ registering exact capability dependencies, integrating it at one transaction
 stage, and adding multiplayer ordering, rollback, privacy, replay, and mutation
 witnesses. Card-name or Oracle-ID branches are not permitted in the generic
 transaction.
+
+The fixed-set grammar currently covers positive fixed damage to closed player,
+creature, planeswalker, opponent-controlled, flying, color-qualified,
+nonartifact, nontoken, and shadow sets. Divided or variable damage, negative
+keyword or subtype predicates, multiple independent damage instructions,
+unpreventable wording, and linked life/draw/scry/conditional riders remain
+compiler residuals. Do not widen the runtime query to approximate them.
 
 See [ADR 0012](../adr/0012-damage-transaction-and-static-prevention.md),
 [ADR 0013](../adr/0013-damage-result-event-ownership.md),

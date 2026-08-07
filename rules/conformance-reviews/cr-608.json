@@ -159,12 +159,15 @@
       "reviewed": true,
       "implementation_components": [
         "CommanderEngine._continue_resolution",
-        "CommanderEngine.apply_effect"
+        "CommanderEngine.apply_effect",
+        "semantic_runtime.fixed_damage_set_handlers.FixedDamageSetHandler",
+        "fixed_damage_set.resolve_fixed_damage_set"
       ],
       "executable_test_ids": [
         "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves",
         "tests.test_oracle_ir.OracleIRTests.test_fixed_post_prevention_life_is_a_sequential_instruction",
-        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private"
+        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private",
+        "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -183,7 +186,7 @@
         "the compiler cannot prove complete whole-text English semantics"
       ],
       "notes": [
-        "Represented effect operations run in array order, and the reviewed chosen-source prevention template now resumes its independent life instruction exactly once after a serialized source choice.",
+        "Represented effect operations run in array order. Fixed affected-set damage snapshots current recipients once and commits all of them through one canonical batch, while the reviewed chosen-source prevention template resumes its independent life instruction exactly once after a serialized source choice.",
         "That bounded sequence does not satisfy the whole-text and replacement requirements of CR 608.2c for arbitrary Oracle text."
       ]
     },

@@ -12414,14 +12414,18 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent"
+        "tests.test_exact_deck_triggers.ExactDeckTriggerFamilyTests.test_reckless_fireweaver_damages_each_opponent",
+        "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_resolves_one_canonical_batch",
+        "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_replays_exactly"
       ],
       "implementation_components": [
         "SemanticProgram",
-        "CommanderEngine._apply_effect"
+        "CommanderEngine._apply_effect",
+        "fixed_damage_set.resolve_fixed_damage_set",
+        "semantic_runtime.fixed_damage_set_handlers.FixedDamageSetHandler"
       ],
       "notes": [
-        "Selected compiled spell and ability programs apply damage, but universal source attribution is incomplete."
+        "Selected compiled spell and ability programs apply damage, including fixed simultaneous player and permanent sets through one source-pinned typed handler and canonical damage batch, but universal source attribution remains incomplete."
       ],
       "required_scenarios": [
         "positive",
@@ -12876,16 +12880,20 @@
         "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_semantic_damage_replacement_choice_replays_exactly",
         "tests.test_damage_replacement_integration.DamageReplacementIntegrationTests.test_infect_creature_result_commits_with_other_damage_atomically",
         "tests.test_damage_result_events.DamageResultEventTests.test_damage_result_replacement_choice_is_private_and_replays",
-        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment"
+        "tests.test_damage_result_events.DamageResultEventTests.test_keyword_damage_results_replay_from_combat_assignment",
+        "tests.test_fixed_mass_damage.FixedMassDamageInteractionTests.test_fixed_set_damage_uses_effective_types_and_replacement_order",
+        "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_replays_exactly"
       ],
       "implementation_components": [
         "damage.prepare_damage_batch",
         "damage.commit_prepared_damage_batch",
+        "fixed_damage_set.snapshot_fixed_damage_set",
+        "fixed_damage_set.resolve_fixed_damage_set",
         "replacement.ordering.advance_replacement_batch",
         "replacement_decisions.issue_combat_damage_replacement_choice"
       ],
       "notes": [
-        "Combat, semantic single-target, each-opponent, and mana-result damage share typed proposal, preparation, result-event, and atomic commit paths. Represented infect, wither, lifelink, toxic, and result replacements are covered, but the remaining blockers prevent a universal four-stage claim."
+        "Combat, semantic single-target, each-opponent, fixed simultaneous affected-set, and mana-result damage share typed proposal, preparation, result-event, and atomic commit paths. Represented infect, wither, lifelink, toxic, and result replacements are covered, but the remaining blockers prevent a universal four-stage claim."
       ],
       "required_scenarios": [
         "positive",
@@ -41495,14 +41503,17 @@
       "executable_test_ids": [
         "tests.test_resolution_rules.ResolutionRuleTests.test_resolution_continues_after_underlying_card_moves",
         "tests.test_oracle_ir.OracleIRTests.test_fixed_post_prevention_life_is_a_sequential_instruction",
-        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private"
+        "tests.test_prevention_immediate_sequencing.PreventionImmediateSequencingTests.test_source_choice_resume_replays_sibling_life_once_and_stays_private",
+        "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_replays_exactly"
       ],
       "implementation_components": [
         "CommanderEngine._continue_resolution",
-        "CommanderEngine.apply_effect"
+        "CommanderEngine.apply_effect",
+        "semantic_runtime.fixed_damage_set_handlers.FixedDamageSetHandler",
+        "fixed_damage_set.resolve_fixed_damage_set"
       ],
       "notes": [
-        "Represented effect operations run in array order, and the reviewed chosen-source prevention template now resumes its independent life instruction exactly once after a serialized source choice.",
+        "Represented effect operations run in array order. Fixed affected-set damage snapshots current recipients once and commits all of them through one canonical batch, while the reviewed chosen-source prevention template resumes its independent life instruction exactly once after a serialized source choice.",
         "That bounded sequence does not satisfy the whole-text and replacement requirements of CR 608.2c for arbitrary Oracle text."
       ],
       "required_scenarios": [

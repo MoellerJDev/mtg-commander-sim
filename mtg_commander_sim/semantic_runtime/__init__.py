@@ -148,6 +148,10 @@ from .permanent_exile_handlers import (
     ExilePermanentHandler,
     PERMANENT_EXILE_HANDLERS,
 )
+from .fixed_damage_set_handlers import (
+    FIXED_DAMAGE_SET_HANDLERS,
+    FixedDamageSetHandler,
+)
 from .return_to_hand_handlers import (
     RETURN_TO_HAND_HANDLERS,
     ReturnPermanentToOwnerHandHandler,
@@ -168,6 +172,7 @@ from .intents import (
     CopyStackItemIntent,
     ChooseOneRestBottomRandomIntent,
     CreateTokenIntent,
+    DealFixedDamageSetIntent,
     DrawCardsIntent,
     DomainEffectIntent,
     DestroyPermanentIntent,
@@ -243,6 +248,7 @@ def default_semantic_handler_registry() -> SemanticHandlerRegistry:
             *TAP_STATE_HANDLERS,
             *DESTRUCTION_HANDLERS,
             *PERMANENT_EXILE_HANDLERS,
+            *FIXED_DAMAGE_SET_HANDLERS,
             *RETURN_TO_HAND_HANDLERS,
             *STACK_COUNTER_HANDLERS,
             *DOMAIN_EFFECT_HANDLERS,
@@ -284,6 +290,7 @@ __all__ = [
     "CopyStackItemIntent",
     "ChooseOneRestBottomRandomIntent",
     "CreateTokenIntent",
+    "DealFixedDamageSetIntent",
     "BecomeMonarchNode",
     "AdditionalTokenIntent",
     "AdditionalTokenReplacementHandler",
@@ -295,6 +302,7 @@ __all__ = [
     "DestroyPermanentIntent",
     "ExilePermanentHandler",
     "ExilePermanentIntent",
+    "FixedDamageSetHandler",
     "ReturnPermanentToOwnerHandHandler",
     "ReturnPermanentToOwnerHandIntent",
     "DrawEachPlayerNode",

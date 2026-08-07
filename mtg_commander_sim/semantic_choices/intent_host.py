@@ -12,6 +12,10 @@ from ..counter_state import (
     plan_counter_changes,
 )
 from ..errors import GameRuleError
+from ..fixed_damage_set import (
+    FixedDamageSetError,
+    resolve_fixed_damage_set,
+)
 from ..effect_runtime import dispatch_effect
 from ..life_state import (
     LifeChange,
@@ -28,6 +32,7 @@ from ..semantic_runtime import (
     CopyControlledTokensIntent,
     CopyStackItemIntent,
     CounterStackIntent,
+    DealFixedDamageSetIntent,
     CreateTokenIntent,
     DomainEffectIntent,
     EliminatePlayersIntent,
@@ -52,6 +57,36 @@ from ..util import unique_preserving_order
 
 
 class SemanticChoiceIntentHostMixin:
+    def fixed_damage_active_seats(self) -> tuple[str, ...]:
+        return tuple(self.active_seats)
+
+    def fixed_damage_apnap_order(self) -> tuple[str, ...]:
+        return tuple(self.apnap_order())
+
+    def fixed_damage_object_rows(self, actor: str):
+        return tuple(self._semantic_choice_object_rows(actor))
+
+    def deal_fixed_damage_set_intent(
+        self,
+        intent: DealFixedDamageSetIntent,
+    ):
+        try:
+            return resolve_fixed_damage_set(
+                self,
+                actor=intent.actor,
+                source_ref=intent.source_ref,
+                amount=intent.amount,
+                spec=intent.spec,
+                reason=intent.reason,
+                replacement_selections=tuple(
+                    thaw_value(value)
+                    for value in intent.replacement_selections
+                ),
+                replacement_event_ids=intent.replacement_event_ids,
+            )
+        except FixedDamageSetError as exc:
+            raise GameRuleError(str(exc)) from exc
+
     def apply_domain_effect_intent(self, intent: DomainEffectIntent) -> Any:
         try:
             effect = thaw_value(intent.effect)

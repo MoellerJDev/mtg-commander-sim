@@ -8,6 +8,7 @@ from ..drawing.model import (
     DrawnCardAction,
     RevealDrawnCard,
 )
+from ..fixed_damage_set_model import FixedDamageSetSpec
 from ..replacement.immutable import FrozenMap, freeze_value
 
 
@@ -143,6 +144,52 @@ class ExilePermanentIntent:
                 family="Permanent-exile",
             ),
         )
+
+
+@dataclass(frozen=True, slots=True)
+class DealFixedDamageSetIntent:
+    actor: str
+    source_ref: str
+    amount: int
+    spec: FixedDamageSetSpec
+    reason: str
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+    replacement_event_ids: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if any(
+            type(value) is not str or not value
+            for value in (self.actor, self.source_ref, self.reason)
+        ):
+            raise ValueError(
+                "Fixed damage-set intents require actor, source, and reason"
+            )
+        if type(self.amount) is not int or self.amount <= 0:
+            raise ValueError(
+                "Fixed damage-set intent amount must be a positive integer"
+            )
+        if not isinstance(self.spec, FixedDamageSetSpec):
+            raise ValueError(
+                "Fixed damage-set intents require a typed recipient set"
+            )
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                self.replacement_selections,
+                family="Fixed damage-set",
+            ),
+        )
+        event_ids = tuple(self.replacement_event_ids)
+        if any(type(value) is not str or not value for value in event_ids):
+            raise ValueError(
+                "Fixed damage-set replacement event identities are invalid"
+            )
+        if len(event_ids) != len(set(event_ids)):
+            raise ValueError(
+                "Fixed damage-set replacement event identities must be unique"
+            )
+        object.__setattr__(self, "replacement_event_ids", event_ids)
 
 
 @dataclass(frozen=True, slots=True)
@@ -478,6 +525,7 @@ SemanticIntent: TypeAlias = (
     | DestroyPermanentIntent
     | ReturnPermanentToOwnerHandIntent
     | ExilePermanentIntent
+    | DealFixedDamageSetIntent
     | AddManaIntent
     | SetCardDesignationIntent
     | RecordChoiceIntent

@@ -2,7 +2,7 @@
 title: "Oracle compiler architecture"
 status: "current"
 authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler, and mtg_commander_sim/card_programs"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---
@@ -57,6 +57,15 @@ and adding one mana of each color among controlled permanents. Each form
 lowers an immutable relative `ObjectQuerySpec`. Monocolored-only, linked-exile,
 opponent-relative, additional-condition, restricted, and side-effecting
 variants remain source-spanned residuals.
+
+Fixed mass-damage lowering uses the same complete `ObjectQuerySpec` descriptor
+consumed by the runtime affected-set snapshot. The compiler emits ordered
+player/permanent groups and an optional exact target-opponent controller; it
+does not encode card names or reparse Oracle text during resolution. Only the
+closed positive predicates represented by the object-query vocabulary are
+accepted. Negative keyword or subtype predicates, divided or variable damage,
+multiple damage clauses, and linked result riders remain source-spanned
+residuals until their own typed families exist.
 
 ## Extending the compiler
 

@@ -58,6 +58,7 @@ VALID_EFFECT_OPERATIONS = {
     "create_damage_redirection",
     "damage",
     "damage_each_opponent",
+    "damage_fixed_set",
     "delayed_mana",
     "delayed_pact_payment",
     "delayed_trigger",

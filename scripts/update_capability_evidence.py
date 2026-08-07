@@ -153,6 +153,11 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_damage_amount_guard_mutant_is_killed"
     ),
+    "damage.batch.fixed_set": (
+        "tests.test_fixed_mass_damage."
+        "FixedDamageSetModelTests."
+        "test_fixed_set_snapshot_order_and_predicate_mutants_are_killed"
+    ),
     "damage.replacement.static_quantity": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

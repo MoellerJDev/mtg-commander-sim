@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "8d9b1b170c4a9d2ade0cdcdf52505a0974febce2",
+    "baseline_main_commit": "34a2cc46b94c06187dbaeb9a8fb56402116d5329",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-07",
-    "phase": "typed_direct_stack_counter_and_intrinsic_prohibition_harvest",
-    "scope_note": "Certified main through PR 127 includes typed permanent-exile ownership and direct-target harvest. The current focused branch adds a closed mandatory direct stack-counter compiler family shared by spell, trigger, and activated contexts, one typed stack-removal owner, current trusted intrinsic counter-prohibition declarations, exact target revalidation, Oracle IR v42 harvest, and current generated status."
+    "phase": "typed_fixed_affected_set_damage_harvest",
+    "scope_note": "Certified main through PR 130 includes typed direct stack-counter ownership and current provenance. The focused branch adds one immutable public affected-set snapshot, closed typed player and permanent group queries, canonical APNAP and logical-identity ordering, one-batch damage commitment, strict semantic lowering, Oracle IR v43, and generic fixed simultaneous mass-damage harvest without runtime Oracle parsing or card-identity behavior."
   },
   "ci": {
     "workflow": "PR",
-    "run_id": 31168367380,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31168367380",
+    "run_id": 31180670367,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31180670367",
     "status": "pass",
     "python_versions": [
       "3.12"

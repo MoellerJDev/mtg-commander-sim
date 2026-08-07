@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 48,
+  "registry_version": 49,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -1581,6 +1581,33 @@
       "dependency_fail_closed_rationale": "This capability has no capability dependencies.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "damage.batch.fixed_set",
+      "version": 1,
+      "official_rules": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Snapshot a closed public player/permanent recipient set and commit one positive amount to every current recipient as one canonical simultaneous damage batch.",
+        "inputs": ["positive fixed damage amount", "typed ordered recipient groups", "effective public battlefield characteristics", "current APNAP player order"],
+        "outputs": ["immutable deduplicated affected-set snapshot", "one canonical replacement-aware damage batch", "stable per-recipient event identities"],
+        "exclusions": ["variable or divided amounts", "negative keyword or subtype predicates", "multiple independent damage instructions", "linked life, draw, scry, or conditional riders", "unpreventable wording"]
+      },
+      "dependencies": ["damage.amount.positive"],
+      "implementation_components": ["mtg_commander_sim.fixed_damage_set_model.FixedDamageSetSpec", "mtg_commander_sim.fixed_damage_set.snapshot_fixed_damage_set", "mtg_commander_sim.fixed_damage_set.resolve_fixed_damage_set", "mtg_commander_sim.semantic_runtime.fixed_damage_set_handlers.FixedDamageSetHandler"],
+      "positive_tests": ["test_fixed_set_snapshot_is_immutable_canonical_and_deduplicated", "test_compiled_mass_damage_resolves_one_canonical_batch"],
+      "negative_tests": ["test_fixed_set_handler_rejects_malformed_or_unrepresented_groups", "test_unsupported_mass_damage_wording_remains_residual"],
+      "interaction_tests": ["test_fixed_set_damage_uses_effective_types_and_replacement_order"],
+      "multiplayer_tests": ["test_compiled_mass_damage_resolves_one_canonical_batch"],
+      "privacy_tests": ["test_fixed_set_damage_projects_no_hidden_zone_cards"],
+      "replay_tests": ["test_compiled_mass_damage_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The node capability shape requires canonical positive damage and the typed handler refuses malformed or unsupported recipient queries before any mutation.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "Focused mutation evidence bypasses the affected-set query predicate and observes an out-of-domain permanent in the canonical snapshot.",
       "blockers": [],
       "status": "trusted"
     },
