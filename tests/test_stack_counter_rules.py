@@ -19,6 +19,9 @@ from mtg_commander_sim.record import (
     checkpoint_envelope,
     replay_record,
 )
+from mtg_commander_sim.rules.capabilities import (
+    load_default_capability_registry,
+)
 from mtg_commander_sim.semantic_runtime import (
     CounterStackIntent,
     ReadOnlyHandlerContext,
@@ -251,7 +254,7 @@ class StackCounterRuleTests(unittest.TestCase):
                 f"pilot:{seat}"
             )
             self.assertIn(
-                target.ref,
+                engine.state.cards[target.card_object_id].ref,
                 {
                     row["id"]
                     for row in projected["players"]["B"]["gy"]
@@ -492,6 +495,12 @@ class StackCounterRuleTests(unittest.TestCase):
                 capability_dependencies=[
                     INTRINSIC_COUNTER_PROHIBITION_CAPABILITY
                 ],
+                capability_closure=load_default_capability_registry()
+                .closure(
+                    [INTRINSIC_COUNTER_PROHIBITION_CAPABILITY],
+                    profile=engine.state.config.review_profile,
+                )
+                .to_dict(),
             )
         )
 

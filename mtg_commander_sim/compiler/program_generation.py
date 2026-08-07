@@ -233,6 +233,14 @@ def _generated_static_declaration(node: Any) -> bool:
             node.kind == "keyword_ability"
             and node.capability_dependencies
         )
+        or (
+            node.kind == "static_ability"
+            and node.template_id
+            == "intrinsic-spell-counter-prohibition-v1"
+            and tuple(node.capability_dependencies)
+            == ("stack.counter.prohibition.intrinsic",)
+            and not node.effects
+        )
     )
 
 

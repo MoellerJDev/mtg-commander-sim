@@ -313,6 +313,33 @@ class TargetedCounterCompilerTests(unittest.TestCase):
             }.issubset(programs[0].capability_dependencies)
         )
 
+    def test_generated_intrinsic_prohibition_is_a_trusted_static_declaration(
+        self,
+    ):
+        registry = SemanticRegistry(include_builtin_packs=False)
+        result = register_generated_programs(
+            self.db,
+            registry,
+            (self.db.lookup("Unanswerable Test Spell"),),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            promote_exact_capability_declarations=True,
+        )
+        programs = registry.programs_for_oracle(
+            self.db.lookup("Unanswerable Test Spell").oracle_id
+        )
+
+        self.assertEqual(1, result["exact_programs_promoted"])
+        self.assertEqual(1, len(programs))
+        self.assertEqual("trusted", programs[0].trust_level)
+        self.assertEqual("static:front:n1", programs[0].ability_id)
+        self.assertEqual("stack", programs[0].active_zone)
+        self.assertEqual("continuous", programs[0].event)
+        self.assertEqual(
+            ["stack.counter.prohibition.intrinsic"],
+            programs[0].capability_dependencies,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
