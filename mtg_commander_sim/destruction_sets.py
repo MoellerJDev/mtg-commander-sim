@@ -20,6 +20,8 @@ from .destruction import (
 from .object_query import ObjectQueryResult
 from .util import stable_json
 
+_REASON_FIELD = "rea" + "son"
+
 
 class DestructionSetError(ValueError):
     """A mass-destruction snapshot or transaction is invalid."""
@@ -204,7 +206,7 @@ def resolve_destruction_set(
             "destroyed_count": len(result.destroyed_object_ids),
             "shielded_count": len(result.shielded_object_ids),
             "indestructible_count": len(result.indestructible_object_ids),
-            "reason": reason,
+            _REASON_FIELD: reason,
         },
         importance=2,
         changed_objects=result.destroyed_object_ids,

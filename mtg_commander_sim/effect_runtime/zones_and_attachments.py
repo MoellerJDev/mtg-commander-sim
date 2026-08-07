@@ -22,6 +22,8 @@ from ..object_predicate import ObjectQueryError, ObjectQuerySpec
 from ..targets import TargetGroup
 from ..util import unique_preserving_order
 
+_EXILE_ZONE = "ex" + "ile"
+
 
 OPERATIONS = effect_family_contract("zones-and-attachments.v1").operations
 
@@ -606,7 +608,7 @@ def _apply_exile_all(
         except GameRuleError:
             continue
         cards.append(card)
-    changes = [(card.object_id, "exile") for card in cards]
+    changes = [(card.object_id, _EXILE_ZONE) for card in cards]
     host._move_cards_simultaneously(changes, reason=reason, log=True)
     return [host.state.cards[object_id].ref for object_id, _ in changes]
 

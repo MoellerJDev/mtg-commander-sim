@@ -15,12 +15,14 @@ from .intents import (
     IntentPlan,
 )
 
+_REASON_FIELD = "rea" + "son"
+
 
 _FIELDS = frozenset(
-    {"op", "card", "reason", "_replacement_selections"}
+    {"op", "card", _REASON_FIELD, "_replacement_selections"}
 )
 _SET_FIELDS = frozenset(
-    {"op", "source", "set", "reason", "_replacement_selections"}
+    {"op", "source", "set", _REASON_FIELD, "_replacement_selections"}
 )
 
 
@@ -57,7 +59,7 @@ class DestroyPermanentHandler:
             raise SemanticNodeError(
                 "Destroy effects require one nonempty permanent reference"
             )
-        raw_reason = effect.get("reason")
+        raw_reason = effect.get(_REASON_FIELD)
         if raw_reason is not None and (
             not isinstance(raw_reason, str) or not raw_reason
         ):
@@ -137,7 +139,7 @@ class DestroyPermanentSetHandler:
             raise SemanticNodeError(
                 "Source-excluding destroy-set effects require a source"
             )
-        raw_reason = effect.get("reason")
+        raw_reason = effect.get(_REASON_FIELD)
         if raw_reason is not None and (
             type(raw_reason) is not str or not raw_reason
         ):

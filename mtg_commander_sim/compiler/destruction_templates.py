@@ -9,6 +9,7 @@ from ..affected_permanents import (
     AffectedPermanentSetSpec,
     PermanentControllerRelation,
 )
+from ..mana import BASIC_LAND_MANA
 from ..object_predicate import ObjectQuerySpec
 
 class DestructionTarget(str, Enum):
@@ -148,13 +149,17 @@ class MassDestructionEffectTemplate:
         )
 
 
+_MASS_DESTRUCTION_CARD_TYPES = (
+    "artifact",
+    "battle",
+    "creature",
+    "enchantment",
+    "land",
+    "planeswalker",
+)
 _TYPE_WORDS = {
-    "artifacts": "artifact",
-    "battles": "battle",
-    "creatures": "creature",
-    "enchantments": "enchantment",
-    "lands": "land",
-    "planeswalkers": "planeswalker",
+    f"{card_type}s": card_type
+    for card_type in _MASS_DESTRUCTION_CARD_TYPES
 }
 _COLOR_WORDS = {
     "white": "W",
@@ -164,11 +169,7 @@ _COLOR_WORDS = {
     "green": "G",
 }
 _BASIC_LAND_SUBTYPES = {
-    "plains": "plains",
-    "islands": "island",
-    "swamps": "swamp",
-    "mountains": "mountain",
-    "forests": "forest",
+    f"{land_type}s": land_type for land_type in BASIC_LAND_MANA
 }
 
 
