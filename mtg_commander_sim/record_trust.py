@@ -11,6 +11,7 @@ from .semantic_runtime import (
     runtime_component_registry_fingerprint,
 )
 from .semantics import SemanticRegistry
+from .stack_resolution import trusted_generic_empty_resolution
 
 
 def card_program_trust_provenance(
@@ -66,16 +67,19 @@ def implicit_semantic_execution_provenance(
         if item.kind != "spell" or not item.card_object_id:
             continue
         record = engine.card_record(item.card_object_id)
-        if record is None or not engine._trusted_generic_spell(record):
+        if record is None:
             continue
         expected_key = f"{record.oracle_id}:spell:front"
         if semantic_key != expected_key:
+            continue
+        resolution = trusted_generic_empty_resolution(engine, item, None)
+        if resolution is None:
             continue
         return {
             "oracle_id": record.oracle_id,
             "version": 1,
             "builtin": False,
-            "implicit_fallback": "trusted_generic_permanent_spell",
+            "implicit_fallback": resolution.provenance,
         }
     return None
 

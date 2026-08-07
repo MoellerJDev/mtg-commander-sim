@@ -21,6 +21,7 @@ class GenericStackResolutionQuery(Protocol):
 class EmptyStackResolution:
     destination: str | None
     note: str
+    provenance: str
 
 
 def trusted_generic_empty_resolution(
@@ -32,27 +33,26 @@ def trusted_generic_empty_resolution(
 
     if program is not None:
         return None
-    trusted = False
+    provenance: str | None = None
     if item.kind == "spell" and item.card_object_id:
         record = host.card_record(item.card_object_id)
-        trusted = bool(
-            record
-            and (
-                host._trusted_generic_spell(record)
-                or oracle_has_intrinsic_counter_prohibition(
-                    host.semantics,
-                    str(record.oracle_id),
-                    current_trusted=host.semantic_program_is_current_trusted,
-                )
-            )
-        )
+        if record and host._trusted_generic_spell(record):
+            provenance = "trusted_generic_permanent_spell"
+        elif record and oracle_has_intrinsic_counter_prohibition(
+            host.semantics,
+            str(record.oracle_id),
+            current_trusted=host.semantic_program_is_current_trusted,
+        ):
+            provenance = "trusted_intrinsic_counter_prohibition_spell"
     elif item.kind == "spell_copy":
-        trusted = bool(item.context.get("copy_permanent_spell"))
-    if not trusted:
+        if item.context.get("copy_permanent_spell"):
+            provenance = "trusted_generic_permanent_spell_copy"
+    if provenance is None:
         return None
     return EmptyStackResolution(
         destination=item.default_destination,
         note="Trusted exact spell resolved with no executable resolution effects",
+        provenance=provenance,
     )
 
 

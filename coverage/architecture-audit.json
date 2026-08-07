@@ -1738,7 +1738,7 @@
           "module": "mtg_commander_sim.mana_activation"
         }
       ],
-      "internal_edges": 1010,
+      "internal_edges": 1011,
       "modules": [
         {
           "fan_in": 2,
@@ -2522,7 +2522,7 @@
         },
         {
           "fan_in": 2,
-          "fan_out": 4,
+          "fan_out": 5,
           "module": "mtg_commander_sim.record_trust"
         },
         {
@@ -3021,7 +3021,7 @@
           "module": "mtg_commander_sim.stack_counter"
         },
         {
-          "fan_in": 1,
+          "fan_in": 2,
           "fan_out": 2,
           "module": "mtg_commander_sim.stack_resolution"
         },
@@ -3532,7 +3532,7 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 108454,
+      "logical_lines": 108458,
       "methods": {
         "dunder": 269,
         "private": 660,
@@ -4318,6 +4318,13 @@
           "physical_lines": 370
         },
         {
+          "file": "mtg_commander_sim/record_trust.py",
+          "functions_and_methods": 10,
+          "language": "python",
+          "logical_lines": 325,
+          "physical_lines": 356
+        },
+        {
           "file": "mtg_commander_sim/semantic_choices/payments.py",
           "functions_and_methods": 4,
           "language": "python",
@@ -4336,13 +4343,6 @@
           "functions_and_methods": 16,
           "language": "python",
           "logical_lines": 322,
-          "physical_lines": 352
-        },
-        {
-          "file": "mtg_commander_sim/record_trust.py",
-          "functions_and_methods": 10,
-          "language": "python",
-          "logical_lines": 321,
           "physical_lines": 352
         },
         {
@@ -6007,7 +6007,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 118504,
+      "physical_lines": 118508,
       "python_file_count": 277,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -10516,7 +10516,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "2c62b1378bca8631b25fc5a3bba8b6e7f583097522d0a7b3832e46c73df20e43"
+          "verified": "12100762bc93cdea321fca20c8102e35a3c2f9669effe7580bf72dbcbc3284b1"
         },
         "metadata_complete": true,
         "missing_metadata": [],

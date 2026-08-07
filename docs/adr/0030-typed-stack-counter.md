@@ -50,7 +50,10 @@ The generated runtime registry materializes that closed static declaration;
 it is not merely an Oracle-coverage fact. A separate immutable stack-resolution
 query recognizes an exact spell with no executable resolution node and plans
 its empty resolution. This keeps capability-only spells out of arbiter fallback
-without adding another decision path to `CommanderEngine`.
+without adding another decision path to `CommanderEngine`. The same immutable
+plan supplies the explicit fallback identity used by Game Record replay
+provenance, so execution and verification cannot disagree about why the empty
+resolution was trusted.
 
 ## Alternatives
 

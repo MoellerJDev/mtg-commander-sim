@@ -14,7 +14,7 @@
     "branch": "compiler/generic-counter-target-effect-clauses",
     "branch_ancestry": {
       "focused_branch_base": "8d9b1b170c4a9d2ade0cdcdf52505a0974febce2",
-      "focused_branch_unique_commits_over_main": 7
+      "focused_branch_unique_commits_over_main": 8
     },
     "pull_requests": [
       {
@@ -916,7 +916,7 @@
     "feature_head_classification": "active_candidate",
     "certified_head_sha": "8d9b1b170c4a9d2ade0cdcdf52505a0974febce2",
     "certified_head_classification": "current_main",
-    "generation_timestamp": "2026-08-07T11:59:00Z"
+    "generation_timestamp": "2026-08-07T12:22:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -1248,7 +1248,7 @@
       "id": "typed_direct_stack_counter_harvest",
       "name": "Typed direct stack-counter effects and intrinsic prohibition",
       "status": "implemented_at_feature_head",
-      "evidence": "The current feature head lowers complete mandatory direct counter clauses over a closed set of spell, activated-ability, and triggered-ability targets into one source-spanned CardProgram V2 operation. Advertisement and command acceptance share the same target schema, resolution revalidates the exact public stack identity, and one typed owner performs represented counterability, stack removal, ordinary spell destination, telemetry, and public journaling. Exact trusted 'This spell can't be countered' declarations are materialized in the pinned runtime registry and consumed at cast commit without runtime Oracle parsing; capability-only exact spells resolve as verified no-ops without arbiter intervention. Oracle IR v42 promotes 42 Commander cards to exact, trusted, capability-closed and removes 165 material residuals with zero Commander construction failures. CommanderEngine shrinks by 43 logical lines, direct-write identities fall by one, oversized symbols stay flat, and card-specific behavior does not grow. Local validation is limited to changed-module compilation, pinned corpus/census/frontier/reusable-piece generation, architecture/documentation checks, and static freshness; all behavioral, replay, privacy, multiplayer, rollback, and mutation certification is delegated to public exact-head CI. Conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, and conditional or granted prohibition variants remain explicit residuals."
+      "evidence": "The current feature head lowers complete mandatory direct counter clauses over a closed set of spell, activated-ability, and triggered-ability targets into one source-spanned CardProgram V2 operation. Advertisement and command acceptance share the same target schema, resolution revalidates the exact public stack identity, and one typed owner performs represented counterability, stack removal, ordinary spell destination, telemetry, and public journaling. Exact trusted 'This spell can't be countered' declarations are materialized in the pinned runtime registry and consumed at cast commit without runtime Oracle parsing; capability-only exact spells resolve as verified no-ops without arbiter intervention, and the immutable resolution plan supplies their replay-pinned fallback provenance. Oracle IR v42 promotes 42 Commander cards to exact, trusted, capability-closed and removes 165 material residuals with zero Commander construction failures. CommanderEngine shrinks by 43 logical lines, direct-write identities fall by one, oversized symbols stay flat, and card-specific behavior does not grow. Local validation is limited to changed-module compilation, pinned corpus/census/frontier/reusable-piece generation, architecture/documentation checks, and static freshness; all behavioral, replay, privacy, multiplayer, rollback, and mutation certification is delegated to public exact-head CI. Conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, and conditional or granted prohibition variants remain explicit residuals."
     },
     {
       "id": "rules_snapshot",
