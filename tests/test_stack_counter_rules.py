@@ -238,10 +238,24 @@ class StackCounterRuleTests(unittest.TestCase):
             },
         )
         self.assertTrue(accepted.ok, accepted.summary)
-        self.pass_stack(session)
+        with patch.object(
+            engine,
+            "_dispatch_semantic_event",
+            wraps=engine._dispatch_semantic_event,
+        ) as dispatch:
+            self.pass_stack(session)
 
         self.assertEqual("graveyard", engine.state.cards[target.card_object_id].zone)
         self.assertEqual("graveyard", source.zone)
+        normalized_calls = [
+            call.args[0]
+            for call in dispatch.call_args_list
+            if call.args[0] in {"spell.countered", "card.graveyard"}
+        ]
+        self.assertEqual(
+            ["spell.countered", "card.graveyard"],
+            normalized_calls,
+        )
         event = next(
             event
             for event in reversed(engine.state.events)
@@ -300,13 +314,85 @@ class StackCounterRuleTests(unittest.TestCase):
             ),
         )
 
-        execute_intent_plan(engine, plan)
+        with patch.object(
+            engine,
+            "_dispatch_semantic_event",
+            wraps=engine._dispatch_semantic_event,
+        ) as dispatch:
+            execute_intent_plan(engine, plan)
 
         self.assertNotIn(ability, engine.state.stack)
         self.assertEqual(
             before_zones,
             {seat: player.zones for seat, player in engine.state.players.items()},
         )
+        self.assertFalse(
+            any(
+                call.args[0] in {"spell.countered", "card.graveyard"}
+                for call in dispatch.call_args_list
+            )
+        )
+
+    def test_counter_destination_replacement_emits_only_pre_counter_event(self):
+        session = self.session(7012711, players=2)
+        engine = session.engine
+        target = self.put_spell_on_stack(
+            engine,
+            "A",
+            "Counterspell",
+            ref="S-counter-to-exile",
+        )
+        source = self.card(engine, "B", "Birds of Paradise")
+        engine.move_card(source.object_id, "battlefield", controller="B")
+        engine.semantics.put(
+            SemanticProgram(
+                key="test:counter-destination-replacement",
+                label="Replace counter graveyard destination",
+                oracle_id=source.oracle_id,
+                ability_id="static:front:counter-destination",
+                active_zone="battlefield",
+                event="zone.change",
+                trust_level="provisional",
+                handlers=[
+                    {
+                        "handler_id": "replacement.zone.destination.v1",
+                        "schema_version": 1,
+                        "event": "zone.change",
+                        "condition": {
+                            "destination": "graveyard",
+                            "object_kind": "card",
+                            "owner_relation": "opponent",
+                        },
+                        "destination": "exile",
+                        "counters": {},
+                    }
+                ],
+            )
+        )
+
+        with patch.object(
+            type(engine),
+            "semantic_program_is_current_trusted",
+            return_value=True,
+        ), patch.object(
+            engine,
+            "_dispatch_semantic_event",
+            wraps=engine._dispatch_semantic_event,
+        ) as dispatch:
+            engine._counter_stack_item(
+                target.ref,
+                as_rule=True,
+                countered_by="B",
+                reason="counter destination replacement witness",
+            )
+
+        self.assertEqual("exile", engine.state.cards[target.card_object_id].zone)
+        normalized_calls = [
+            call.args[0]
+            for call in dispatch.call_args_list
+            if call.args[0] in {"spell.countered", "card.graveyard"}
+        ]
+        self.assertEqual(["spell.countered"], normalized_calls)
 
     def test_counter_source_cannot_target_its_own_stack_object(self):
         session = self.session(7012703, players=2)
@@ -457,18 +543,37 @@ class StackCounterRuleTests(unittest.TestCase):
             },
         )
         engine.state.stack.append(counter_item)
-        engine._counter_stack_item(
-            target.ref,
-            as_rule=True,
-            countered_by="B",
-            reason="target left before resolution",
-        )
-        engine.state.priority_player = None
+        with patch.object(
+            engine,
+            "_dispatch_semantic_event",
+            wraps=engine._dispatch_semantic_event,
+        ) as dispatch:
+            engine._counter_stack_item(
+                target.ref,
+                as_rule=True,
+                countered_by="B",
+                reason="target left before resolution",
+            )
+            engine.state.priority_player = None
 
-        engine._prepare_stack_resolution()
+            engine._prepare_stack_resolution()
 
         self.assertEqual("graveyard", source.zone)
         self.assertNotIn(counter_item, engine.state.stack)
+        normalized_calls = [
+            call.args[0]
+            for call in dispatch.call_args_list
+            if call.args[0] in {"spell.countered", "card.graveyard"}
+        ]
+        self.assertEqual(
+            [
+                "spell.countered",
+                "card.graveyard",
+                "spell.countered",
+                "card.graveyard",
+            ],
+            normalized_calls,
+        )
         self.assertTrue(
             any(
                 event.code == "target.illegal"
@@ -556,6 +661,61 @@ class StackCounterRuleTests(unittest.TestCase):
         self.assertNotIn(target, engine.state.stack)
         self.assertEqual(
             "graveyard", engine.state.cards[target.card_object_id].zone
+        )
+
+    def test_counter_event_derivation_mutant_is_killed(self):
+        mutated = self.session(7012712, players=2)
+        mutated_target = self.put_spell_on_stack(
+            mutated.engine,
+            "B",
+            "Birds of Paradise",
+            ref="S-event-mutation-target",
+        )
+        with patch(
+            "mtg_commander_sim.zone_trigger_processing."
+            "normalized_zone_trigger_events",
+            return_value=(),
+        ), patch.object(
+            mutated.engine,
+            "_dispatch_semantic_event",
+            wraps=mutated.engine._dispatch_semantic_event,
+        ) as mutated_dispatch:
+            mutated.engine._counter_stack_item(
+                mutated_target.ref,
+                reason="event mutation witness",
+                countered_by="A",
+            )
+        self.assertFalse(
+            any(
+                call.args[0] in {"spell.countered", "card.graveyard"}
+                for call in mutated_dispatch.call_args_list
+            )
+        )
+
+        canonical = self.session(7012713, players=2)
+        canonical_target = self.put_spell_on_stack(
+            canonical.engine,
+            "B",
+            "Birds of Paradise",
+            ref="S-event-owner-target",
+        )
+        with patch.object(
+            canonical.engine,
+            "_dispatch_semantic_event",
+            wraps=canonical.engine._dispatch_semantic_event,
+        ) as canonical_dispatch:
+            canonical.engine._counter_stack_item(
+                canonical_target.ref,
+                reason="event owner witness",
+                countered_by="A",
+            )
+        self.assertEqual(
+            ["spell.countered", "card.graveyard"],
+            [
+                call.args[0]
+                for call in canonical_dispatch.call_args_list
+                if call.args[0] in {"spell.countered", "card.graveyard"}
+            ],
         )
 
     def test_intrinsic_counter_prohibition_mutant_is_killed(self):

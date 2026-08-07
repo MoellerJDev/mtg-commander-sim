@@ -17,7 +17,7 @@ from ..fixed_damage_set_model import (
     PlayerDamageGroup,
 )
 
-_EXILE_MECHANIC = "ex" + "ile"
+_EXILE_MECHANIC = "exile"
 
 
 _FIXED_DAMAGE_TARGET_SCHEMAS: dict[str, Mapping[str, Any]] = {

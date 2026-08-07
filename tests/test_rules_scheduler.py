@@ -125,17 +125,14 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "typed-ordinary-cycling-activation",
+            "universal-zone-change-replacement-discovery",
             selected["batch_id"],
         )
         self.assertEqual(
-            "keyword-abilities", selected["subsystem_id"]
+            "zones", selected["subsystem_id"]
         )
         self.assertEqual(
-            {
-                "702.29a",
-                "702.29b",
-            },
+            {"400.6"},
             set(selected["rule_ids"]),
         )
         self.assertTrue(
@@ -175,6 +172,26 @@ class RulesSchedulerTests(unittest.TestCase):
                 self.conformance,
                 duplicate,
                 self.capabilities,
+            )
+
+        completed_selection = deepcopy(self.catalog)
+        completed_selection["selected_batch"] = {
+            "batch_id": "typed-ordinary-cycling-activation",
+            "subsystem_id": "keyword-abilities",
+            "rule_ids": ["702.29a", "702.29b"],
+            "target_capability_ids": ["activation.cycling.hand"],
+            "exit_criteria": ["The bounded family is already complete."],
+        }
+        with self.assertRaisesRegex(
+            RulesSchedulerError,
+            "already complete",
+        ):
+            build_rules_dependency_queue(
+                self.rule_index,
+                self.conformance,
+                completed_selection,
+                self.capabilities,
+                repository_root=ROOT,
             )
 
         cycle = deepcopy(self.catalog)

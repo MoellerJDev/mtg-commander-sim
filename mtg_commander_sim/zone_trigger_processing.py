@@ -14,7 +14,9 @@ from .zone_trigger_events import (
 
 
 class ZoneTriggerProcessingHost(Protocol):
-    def _semantic_event_sources(self) -> Sequence[CardInstance]: ...
+    def _semantic_event_sources(
+        self, *, zones: set[str] | None = None
+    ) -> Sequence[CardInstance]: ...
 
     def _effective_card_data(
         self, card: CardInstance
@@ -42,6 +44,14 @@ class ZoneTriggerProcessingHost(Protocol):
         types: set[str],
     ) -> None: ...
 
+    def _add_saga_lore(
+        self,
+        saga: CardInstance,
+        *,
+        trigger_batch: list[StackItem] | None = None,
+        reason: str,
+    ) -> int: ...
+
 
 @dataclass(frozen=True, slots=True)
 class DepartureTriggerSnapshot:
@@ -60,11 +70,21 @@ def capture_departure_trigger_sources(
 ) -> DepartureTriggerSnapshot:
     """Snapshot battlefield trigger sources and LKI before zone mutation."""
 
-    if not semantic_events or origin != "battlefield":
+    if not semantic_events or origin not in {"battlefield", "stack"}:
         return DepartureTriggerSnapshot((), {}, {})
+    source_zones = None
+    if origin == "stack":
+        source_zones = {
+            "battlefield",
+            "graveyard",
+            "exile",
+            "command",
+            "hand",
+            "stack",
+        }
     sources = tuple(
         copy.deepcopy(source)
-        for source in host._semantic_event_sources()
+        for source in host._semantic_event_sources(zones=source_zones)
     )
     return DepartureTriggerSnapshot(
         sources=sources,
@@ -76,14 +96,6 @@ def capture_departure_trigger_sources(
             for source in sources
         },
     )
-
-    def _add_saga_lore(
-        self,
-        saga: CardInstance,
-        *,
-        trigger_batch: list[StackItem] | None = None,
-        reason: str,
-    ) -> int: ...
 
 
 def dispatch_zone_change_occurrence(

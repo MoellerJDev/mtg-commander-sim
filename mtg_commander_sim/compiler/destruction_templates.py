@@ -11,6 +11,11 @@ from ..affected_permanents import (
 )
 from ..mana import BASIC_LAND_MANA
 from ..object_predicate import ObjectQuerySpec
+from .direct_target import (
+    compiled_direct_target,
+    direct_target_effect,
+    permanent_target_schema,
+)
 
 class DestructionTarget(str, Enum):
     ARTIFACT = "artifact"
@@ -46,18 +51,17 @@ class TargetedDestructionEffectTemplate:
 
     @property
     def effects(self) -> tuple[Mapping[str, Any], ...]:
-        return ({"op": "destroy", "card": "$target.0"},)
+        return direct_target_effect("destroy", reference_field="card")
 
     @property
     def target_schema(self) -> Mapping[str, Any]:
-        schema: dict[str, Any] = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "count": 1,
-        }
-        if self.target is not DestructionTarget.PERMANENT:
-            schema["types_any"] = list(self.target.card_types)
-        return schema
+        return permanent_target_schema(
+            types_any=(
+                ()
+                if self.target is DestructionTarget.PERMANENT
+                else self.target.card_types
+            )
+        )
 
     @property
     def mechanics(self) -> tuple[str, ...]:
@@ -71,11 +75,11 @@ class TargetedDestructionEffectTemplate:
         Mapping[str, Any],
         tuple[str, ...],
     ]:
-        return (
-            self.template_id,
-            self.effects,
-            self.target_schema,
-            self.mechanics,
+        return compiled_direct_target(
+            template_id=self.template_id,
+            effects=self.effects,
+            target_schema=self.target_schema,
+            mechanics=self.mechanics,
         )
 
 

@@ -405,6 +405,74 @@ def _string_records(
     relative: str,
     parents: Mapping[ast.AST, ast.AST],
 ) -> tuple[tuple[dict[str, Any], ...], tuple[dict[str, Any], ...]]:
+    def specificity_exempt(node: ast.Constant) -> bool:
+        if node.value.casefold() not in {"exile", "reason"}:
+            return False
+        containing_class: ast.ClassDef | None = None
+        ancestor: ast.AST = node
+        while ancestor in parents:
+            ancestor = parents[ancestor]
+            if isinstance(ancestor, ast.ClassDef):
+                containing_class = ancestor
+                break
+        current: ast.AST = node
+        while current in parents:
+            parent = parents[current]
+            if isinstance(parent, (ast.Compare, ast.Call, ast.Subscript)) and any(
+                (
+                    isinstance(child, ast.Attribute)
+                    and child.attr
+                    in {
+                        "printed_name",
+                        "oracle_id",
+                        "collector_number",
+                        "set_code",
+                        "card_name",
+                    }
+                )
+                or (
+                    isinstance(child, ast.Name)
+                    and child.id
+                    in {
+                        "printed_name",
+                        "oracle_id",
+                        "collector_number",
+                        "set_code",
+                        "card_name",
+                    }
+                )
+                for child in ast.walk(parent)
+            ):
+                return False
+            if isinstance(parent, (ast.Assign, ast.AnnAssign)):
+                targets = (
+                    parent.targets
+                    if isinstance(parent, ast.Assign)
+                    else [parent.target]
+                )
+                names = {
+                    target.id
+                    for target in targets
+                    if isinstance(target, ast.Name)
+                }
+                if names.intersection(
+                    {"_EXILE_MECHANIC", "_EXILE_ZONE", "_REASON_FIELD"}
+                ):
+                    return True
+                if (
+                    node.value.casefold() == "exile"
+                    and "EXILE" in names
+                    and containing_class is not None
+                    and any(
+                        isinstance(base, ast.Name) and base.id == "Enum"
+                        for base in containing_class.bases
+                    )
+                ):
+                    return True
+                return False
+            current = parent
+        return False
+
     condition_nodes: set[ast.AST] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.If):
@@ -427,6 +495,7 @@ def _string_records(
             "symbol": _nearest_function(node, parents),
             "value": node.value,
             "in_condition": node in condition_nodes,
+            "card_specificity_exempt": specificity_exempt(node),
         }
         strings.append(record)
         for oracle_id in UUID_PATTERN.findall(node.value):
@@ -843,6 +912,7 @@ def _validate_card_baseline(
         literal
         for relative in card_specificity_scope(analyses, source)
         for literal in analyses[relative].string_literals
+        if not literal.get("card_specificity_exempt", False)
         if printed_name_digest(str(literal["value"])) in digest_index
     ]
     allowances = Counter(

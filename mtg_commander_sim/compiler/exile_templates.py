@@ -5,8 +5,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping
 
+from .direct_target import (
+    compiled_direct_target,
+    direct_target_effect,
+    permanent_target_schema,
+)
 
-_EXILE_MECHANIC = "ex" + "ile"
+_EXILE_MECHANIC = "exile"
 
 
 class ExileTarget(str, Enum):
@@ -42,20 +47,23 @@ class TargetedExileEffectTemplate:
 
     @property
     def effects(self) -> tuple[Mapping[str, Any], ...]:
-        return ({"op": "exile_permanent", "card": "$target.0"},)
+        return direct_target_effect("exile_permanent", reference_field="card")
 
     @property
     def target_schema(self) -> Mapping[str, Any]:
-        schema: dict[str, Any] = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "count": 1,
-        }
-        if self.target is ExileTarget.NONLAND_PERMANENT:
-            schema["types_none"] = ["land"]
-        elif self.target is not ExileTarget.PERMANENT:
-            schema["types_any"] = list(self.target.card_types)
-        return schema
+        return permanent_target_schema(
+            types_none=(
+                ("land",)
+                if self.target is ExileTarget.NONLAND_PERMANENT
+                else ()
+            ),
+            types_any=(
+                self.target.card_types
+                if self.target
+                not in {ExileTarget.NONLAND_PERMANENT, ExileTarget.PERMANENT}
+                else ()
+            ),
+        )
 
     @property
     def mechanics(self) -> tuple[str, ...]:
@@ -69,11 +77,11 @@ class TargetedExileEffectTemplate:
         Mapping[str, Any],
         tuple[str, ...],
     ]:
-        return (
-            self.template_id,
-            self.effects,
-            self.target_schema,
-            self.mechanics,
+        return compiled_direct_target(
+            template_id=self.template_id,
+            effects=self.effects,
+            target_schema=self.target_schema,
+            mechanics=self.mechanics,
         )
 
 

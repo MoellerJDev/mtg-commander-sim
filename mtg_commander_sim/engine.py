@@ -137,7 +137,7 @@ from .trigger_discovery import (
     semantic_event_matches,
     semantic_event_value,
 )
-from .zone_trigger_events import ZoneChangeOccurrence
+from .zone_trigger_events import ZoneChangeOccurrence, ZoneTransitionKind
 from .zone_trigger_processing import (
     capture_departure_trigger_sources,
     dispatch_zone_change_occurrence,
@@ -1572,6 +1572,7 @@ class CommanderEngine(
         replacement_source_zones: Mapping[str, str] | None = None,
         replacement_selections: Sequence[str | None | Mapping[str, Any]] = (),
         prepared_replacement: PreparedZoneChange | None = None,
+        transition_kind: ZoneTransitionKind = ZoneTransitionKind.ORDINARY,
     ) -> CardInstance:
         if destination not in {"library", "hand", "battlefield", "graveyard", "exile", "command", "outside"}:
             raise GameRuleError(f"Unsupported destination {destination}")
@@ -1718,7 +1719,11 @@ class CommanderEngine(
             if semantic_events
             else {}
         )
-        departure_snapshot = capture_departure_trigger_sources(self, semantic_events=semantic_events, origin=origin)
+        departure_snapshot = capture_departure_trigger_sources(
+            self,
+            semantic_events=semantic_events,
+            origin=origin,
+        )
         if origin == "stack":
             # A resolving or countered spell has already had its StackItem
             # removed by that procedure.  A zone-changing effect can instead
@@ -1895,6 +1900,7 @@ class CommanderEngine(
                     departure_snapshot.source_characteristics
                 ),
                 reason=reason,
+                transition_kind=transition_kind,
             )
         return card
 
@@ -1976,6 +1982,7 @@ class CommanderEngine(
             str, Mapping[str, Any]
         ],
         reason: str,
+        transition_kind: ZoneTransitionKind = ZoneTransitionKind.ORDINARY,
         trigger_batch: list[StackItem] | None = None,
     ) -> None:
         """Compatibility adapter from committed moves to immutable facts."""
@@ -1999,6 +2006,7 @@ class CommanderEngine(
             previous_attached_to=origin_attached_to,
             tapped=card.tapped,
             cause=reason,
+            transition_kind=transition_kind,
         )
         owns_trigger_batch = trigger_batch is None
         event_triggers = trigger_batch if trigger_batch is not None else []

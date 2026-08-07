@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from .context import ReadOnlyHandlerContext, SemanticNodeError
+from .direct_target_fields import validate_direct_target_effect
 from .intents import (
     IntentPlan,
     SetPermanentTappedIntent,
@@ -12,9 +13,6 @@ from .intents import (
 from .nodes import SetPermanentTappedNode, UntapAllCreaturesNode
 
 
-_SINGLE_TAP_STATE_FIELDS = frozenset(
-    dict(op=None, card=None, reason=None)
-)
 _AGGREGATE_TAP_STATE_FIELDS = frozenset(dict(op=None, reason=None))
 _REASON_FIELD = next(iter(dict(reason=None)))
 
@@ -23,15 +21,6 @@ def _reason(
     effect: Mapping[str, Any], context: ReadOnlyHandlerContext
 ) -> str:
     return str(effect.get(_REASON_FIELD) or context.default_reason)
-
-
-def _object_ref(effect: Mapping[str, Any]) -> str:
-    value = effect.get("card")
-    if not isinstance(value, str) or not value.strip():
-        raise SemanticNodeError(
-            "Tap-state effects require a nonempty permanent reference"
-        )
-    return value
 
 
 def _source_logical_object_id(
@@ -70,12 +59,19 @@ class TapPermanentHandler:
         effect: Mapping[str, Any],
         context: ReadOnlyHandlerContext,
     ) -> IntentPlan:
-        _require_fields(effect, _SINGLE_TAP_STATE_FIELDS)
-        object_ref = _object_ref(effect)
+        fields = validate_direct_target_effect(
+            effect,
+            context,
+            operation=self.operation,
+            reference_field="card",
+            family_label="Tap-state",
+            allow_replacement_selections=False,
+        )
+        object_ref = fields.object_ref
         node = SetPermanentTappedNode(
             object_ref=object_ref,
             tapped=True,
-            reason=_reason(effect, context),
+            reason=fields.reason,
         )
         return IntentPlan(
             operation=self.operation,
@@ -115,12 +111,19 @@ class UntapPermanentHandler:
         effect: Mapping[str, Any],
         context: ReadOnlyHandlerContext,
     ) -> IntentPlan:
-        _require_fields(effect, _SINGLE_TAP_STATE_FIELDS)
-        object_ref = _object_ref(effect)
+        fields = validate_direct_target_effect(
+            effect,
+            context,
+            operation=self.operation,
+            reference_field="card",
+            family_label="Tap-state",
+            allow_replacement_selections=False,
+        )
+        object_ref = fields.object_ref
         node = SetPermanentTappedNode(
             object_ref=object_ref,
             tapped=False,
-            reason=_reason(effect, context),
+            reason=fields.reason,
         )
         return IntentPlan(
             operation=self.operation,

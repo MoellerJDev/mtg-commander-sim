@@ -13,6 +13,10 @@ from mtg_commander_sim.compiler.counter_templates import (
     is_intrinsically_uncounterable_spell,
     targeted_counter_effect_template,
 )
+from mtg_commander_sim.compiler.direct_target import (
+    permanent_target_schema,
+    stack_target_schema,
+)
 from mtg_commander_sim.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
@@ -38,6 +42,38 @@ def focused_card_database(directory: str) -> CardDatabase:
 
 
 class TargetedCounterTemplateTests(unittest.TestCase):
+    def test_shared_direct_target_schema_rejects_mixed_or_malformed_predicates(self):
+        self.assertEqual(
+            {
+                "zones": ["battlefield"],
+                "categories": ["permanent"],
+                "count": 1,
+                "types_none": ["land"],
+            },
+            permanent_target_schema(types_none=("land",)),
+        )
+        for operation in (
+            lambda: permanent_target_schema(
+                types_any=("creature",),
+                types_none=("land",),
+            ),
+            lambda: permanent_target_schema(types_any="creature"),
+            lambda: stack_target_schema(categories=()),
+            lambda: stack_target_schema(categories=("spell", "spell")),
+            lambda: stack_target_schema(
+                categories=("spell",),
+                types_any=("creature",),
+                colors_any=("U",),
+            ),
+            lambda: stack_target_schema(
+                categories=("spell",),
+                colorless="yes",
+            ),
+        ):
+            with self.subTest(operation=operation):
+                with self.assertRaises(ValueError):
+                    operation()
+
     def test_targeted_counter_template_is_immutable_and_copy_isolated(self):
         template = TargetedCounterEffectTemplate(
             CounterTarget.CREATURE_SPELL

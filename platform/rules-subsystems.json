@@ -335,23 +335,22 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "typed-ordinary-cycling-activation",
-    "subsystem_id": "keyword-abilities",
+    "batch_id": "universal-zone-change-replacement-discovery",
+    "subsystem_id": "zones",
     "rule_ids": [
-      "702.29a",
-      "702.29b"
+      "400.6"
     ],
     "target_capability_ids": [
-      "activation.cycling.hand"
+      "zone.change.destination_replacement"
     ],
-    "rationale": "The refreshed pinned frontier identifies 297 Commander-legal cards with the Cycling dependency, including 46 sole-blocker cards, 98 one-additional-blocker opportunities, and 112 two-additional-blocker opportunities. Ordinary Cycling is a bounded medium-risk hand-zone activated-ability family that can reuse canonical activation costs, discard zone changes, draw transactions, capability closure, and exact replay without taking on typecycling or cycling-trigger grammar.",
+    "rationale": "Ordinary Cycling is already complete at its bounded trusted capability even though the wider CR 702.29 family remains blocked. Current repository evidence instead selects the universal CR 400.6 destination-replacement boundary: it is a dependency-ready shared zone owner used by spells, abilities, state-based actions, and the direct single-object transitions, and its remaining blockers are explicit discovery, contradictory-effect choice, and complete APNAP replacement collection rather than card-count ranking.",
     "exit_criteria": [
-      "Introduce one immutable typed ordinary-Cycling descriptor that exists in every zone but is activatable only by the card's owner from that player's hand.",
-      "Offer and accept the same seat-scoped Cycling activation, pay its represented cost, discard the exact physical card as a cost, and place the draw ability on the ordinary stack.",
-      "Resolve through the canonical iterative replacement-aware draw transaction without runtime Oracle parsing or direct GameState writes.",
-      "Lower only closed ordinary printed Cycling grammar with precise source spans and one fine-grained capability declaration.",
-      "Preserve rollback, privacy, multiplayer priority, save/load, exact replay, and focused implementation mutation evidence.",
-      "Leave typecycling, cycling-cost modifiers, cycling prohibitions, and triggered 'cycle' or 'cycle or discard' families explicit residuals."
+      "Discover every represented destination replacement from one canonical pre-mutation source snapshot without printed-name dispatch or runtime Oracle parsing.",
+      "Resolve mutually contradictory applicable destination effects through the affected object's correct chooser in complete multiplayer APNAP order.",
+      "Use the same typed preparation and commitment boundary for represented single and simultaneous zone changes without introducing an arbitrary move DSL.",
+      "Fail closed before mutation when a replacement dependency, chooser, event path, or supported-zone predicate is unresolved.",
+      "Preserve rollback, privacy, save/load, exact replay, and focused implementation mutation evidence across generic producers.",
+      "Leave self-inspection and destination-specific variants outside the represented grammar as explicit blockers rather than promoting the aggregate family."
     ]
   }
 }

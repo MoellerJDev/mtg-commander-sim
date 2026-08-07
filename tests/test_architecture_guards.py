@@ -9,7 +9,7 @@ from scripts.architecture_support import (
     decode_card_name_hash_index,
     printed_name_digest,
 )
-from scripts.update_architecture_audit import ROOT
+from scripts.update_architecture_audit import ROOT, _string_records
 from scripts.validate_architecture import (
     _counter_extras,
     _game_state_imports,
@@ -99,6 +99,42 @@ class ArchitectureGuardTests(unittest.TestCase):
         self.assertEqual(
             _counter_extras(identities, []),
             [(relative, "bad_branch", "Black Lotus", True)],
+        )
+
+    def test_domain_words_are_exempt_only_in_structural_assignments(self):
+        tree = ast.parse(
+            """
+from enum import Enum
+_EXILE_MECHANIC = "exile"
+_REASON_FIELD = "reason"
+class Destination(str, Enum):
+    EXILE = "exile"
+def bad(card):
+    return card.printed_name == "Exile" or card.printed_name == "Reason"
+"""
+        )
+        parents = {
+            child: parent
+            for parent in ast.walk(tree)
+            for child in ast.iter_child_nodes(parent)
+        }
+        strings, _oracle_ids = _string_records(
+            tree,
+            "mtg_commander_sim/fixture.py",
+            parents,
+        )
+        words = [
+            item
+            for item in strings
+            if str(item["value"]).casefold() in {"exile", "reason"}
+        ]
+        self.assertEqual(
+            3,
+            sum(bool(item["card_specificity_exempt"]) for item in words),
+        )
+        self.assertEqual(
+            2,
+            sum(not item["card_specificity_exempt"] for item in words),
         )
 
 

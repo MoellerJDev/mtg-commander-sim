@@ -303,7 +303,10 @@ def printed_name_literal_identities(
     matches = []
     for relative in scope:
         for item in analyses[relative].string_literals:
-            if printed_name_digest(str(item["value"])) in digest_index:
+            if (
+                not item.get("card_specificity_exempt", False)
+                and printed_name_digest(str(item["value"])) in digest_index
+            ):
                 matches.append(
                     _identity(item, "file", "symbol", "value", "in_condition")
                 )

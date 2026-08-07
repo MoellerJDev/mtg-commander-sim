@@ -25,7 +25,7 @@ from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
 
 
-_EXILE_MECHANIC = "ex" + "ile"
+_EXILE_MECHANIC = "exile"
 
 
 def runtime_handler_footprint(
@@ -409,16 +409,17 @@ def _is_closed_targeted_return_to_hand_program(
 def _is_closed_effect_program(program: SemanticProgram) -> bool:
     """Return whether a reviewed capability-shaped effect owns execution."""
 
-    return bool(
-        _is_closed_fixed_damage_program(program)
-        or _is_closed_fixed_draw_program(program)
-        or _is_closed_targeted_counter_program(program)
-        or _is_closed_targeted_destruction_program(program)
-        or _is_closed_mass_destruction_program(program)
-        or _is_closed_targeted_exile_program(program)
-        or _is_closed_targeted_return_to_hand_program(program)
-        or _is_closed_targeted_tap_state_program(program)
+    recognizers = (
+        _is_closed_fixed_damage_program,
+        _is_closed_fixed_draw_program,
+        _is_closed_targeted_counter_program,
+        _is_closed_targeted_destruction_program,
+        _is_closed_mass_destruction_program,
+        _is_closed_targeted_exile_program,
+        _is_closed_targeted_return_to_hand_program,
+        _is_closed_targeted_tap_state_program,
     )
+    return any(recognizer(program) for recognizer in recognizers)
 
 
 def generated_programs(

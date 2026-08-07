@@ -5,6 +5,7 @@ from typing import Any, Protocol
 
 from .errors import GameRuleError
 from .model import StackItem
+from .zone_trigger_events import ZoneTransitionKind
 
 
 INTRINSIC_COUNTER_PROHIBITION_CAPABILITY = (
@@ -111,6 +112,8 @@ def counter_stack_item(
                 destination,
                 reason=reason,
                 log=False,
+                semantic_events=True,
+                transition_kind=ZoneTransitionKind.COUNTERED_SPELL,
             )
     telemetry_seat = (
         countered_by
