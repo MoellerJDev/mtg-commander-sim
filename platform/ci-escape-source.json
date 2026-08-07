@@ -171,6 +171,18 @@
       "regressions": ["four-player.spec.ts: natural commander-damage winner"],
       "impact_edge_status": "not_applicable",
       "resolution": "The seat-opportunity helper now anchors the expected active seat and exact projected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation or matching the next player's same-named main phase."
+    },
+    {
+      "id": "ci-20260806-13",
+      "run_id": 31132735817,
+      "head_sha": "37cf12c6a4a2c86384aa4b2756c5c25410b21fce",
+      "category": "flaky_test",
+      "deterministic": true,
+      "summary": "The natural-winner journey armed Full Control only after a preceding command could auto-advance through the defender's next precombat main phase, so the test driver searched for an opportunity that had already passed.",
+      "failed_surfaces": ["browser-soak"],
+      "regressions": ["four-player.spec.ts: natural commander-damage winner"],
+      "impact_edge_status": "not_applicable",
+      "resolution": "The journey now arms the defender's stop before each preceding turn-transition command, advances only the intervening stack response, and waits for the exact host pass to become enabled after durability serialization before submitting it."
     }
   ],
   "recent_pull_requests": [
