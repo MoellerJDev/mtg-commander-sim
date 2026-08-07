@@ -7,19 +7,30 @@ import unittest
 
 from common import keep_all, load_assets, make_session
 from quorune.model import StackItem
+from quorune.compiler.token_templates import (
+    static_additional_token_replacement_handler,
+)
+from quorune.oracle_ir import register_generated_programs
 from quorune.projection import StateProjector
+from quorune.replacement_effects import (
+    CreateAdditionalToken,
+    ReplacementChoiceRequired,
+    replacement_choice_payload,
+)
 from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from quorune.replacement_effects import ReplacementChoiceRequired
 from quorune.semantic_runtime import (
     AdditionalTokenReplacementHandler,
+    GenericAdditionalTokenReplacementHandler,
     SemanticNodeError,
     TokenCreationReplacementContext,
     default_token_creation_replacement_registry,
+    resolve_token_creation_replacements,
 )
+from quorune.rules.capabilities import load_default_capability_registry
 from quorune.semantics import SemanticProgram, SemanticRegistry
 
 
@@ -78,6 +89,23 @@ class TokenCreationReplacementTests(unittest.TestCase):
             if card.owner == "A" and card.printed_name == name
         )
 
+    def install_generated_xorn(self, engine):
+        xorn = self.db.lookup("Xorn")
+        result = register_generated_programs(
+            self.db,
+            engine.semantics,
+            (xorn,),
+            capability_registry=load_default_capability_registry(),
+            capability_profile="commander_review",
+            promote_exact_runtime_handlers=True,
+        )
+        self.assertEqual(1, result["runtime_handlers_promoted"])
+        source = self.card(engine, "Stridehangar Automaton")
+        source.oracle_id = xorn.oracle_id
+        source.printed_name = "Anonymous replacement source"
+        engine.move_card(source.object_id, "battlefield", controller="A")
+        return source
+
     def test_registered_additional_token_components_replace_without_name_dispatch(
         self,
     ):
@@ -106,7 +134,7 @@ class TokenCreationReplacementTests(unittest.TestCase):
         self.assertEqual(
             [
                 {
-                    "handler_id": "replacement.token.additional.v1",
+                    "handler_id": "replacement.token.additional.v2",
                     "source": automaton.ref,
                     "quantity": 1,
                 }
@@ -118,6 +146,36 @@ class TokenCreationReplacementTests(unittest.TestCase):
             default_token_creation_replacement_registry().inventory()[0][
                 "capability_dependencies"
             ][0],
+        )
+
+    def test_generic_compiler_program_drives_runtime_without_name_dispatch(self):
+        session = self.session(12505011)
+        engine = session.engine
+        self.install_generated_xorn(engine)
+
+        created = engine.create_token(
+            "A",
+            name="Treasure",
+            characteristics={"type_line": "Token Artifact — Treasure"},
+            reason="generic compiler replacement characterization",
+        )
+
+        self.assertEqual(2, len(created))
+        self.assertEqual(
+            ["Treasure", "Treasure"],
+            sorted(
+                engine._resolve_object("A", ref).printed_name
+                for ref in created
+            ),
+        )
+        event = next(
+            event
+            for event in reversed(engine.state.events)
+            if event.code == "token.create"
+        )
+        self.assertEqual(
+            "replacement.token.additional.v2",
+            event.details["replacement_components"][0]["handler_id"],
         )
 
     def test_additional_token_component_rejects_malformed_or_nonmatching_events(
@@ -144,6 +202,16 @@ class TokenCreationReplacementTests(unittest.TestCase):
         )
         self.assertEqual((), handler.lower(descriptor, creature_context))
         self.assertEqual((), handler.lower(descriptor, opponent_context))
+        matching = TokenCreationReplacementContext(
+            source_ref="P1",
+            source_controller="A",
+            event_controller="A",
+            created_types=("artifact",),
+        )
+        self.assertIsInstance(
+            handler.replacement_effect(descriptor, matching).operations[0],
+            CreateAdditionalToken,
+        )
         with self.assertRaisesRegex(SemanticNodeError, "Unknown runtime handler"):
             SemanticProgram(
                 key="test:unknown-runtime-handler",
@@ -155,6 +223,44 @@ class TokenCreationReplacementTests(unittest.TestCase):
                     }
                 ],
             )
+
+    def test_generic_filter_and_context_types_are_canonical_and_unique(self):
+        handler = GenericAdditionalTokenReplacementHandler()
+        descriptor = static_additional_token_replacement_handler(
+            "If you would create one or more artifact tokens, instead create "
+            "those tokens plus an additional Map token."
+        )[1]
+        context = TokenCreationReplacementContext(
+            source_ref="P1",
+            source_controller="A",
+            event_controller="A",
+            created_types=("Creature", "Artifact"),
+            created_subtypes=("Cat",),
+        )
+        self.assertEqual(("artifact", "creature"), context.created_types)
+        self.assertEqual(("cat",), context.created_subtypes)
+        self.assertEqual(
+            "artifact",
+            handler.validate(descriptor).created_types_all[0],
+        )
+
+        with self.assertRaisesRegex(SemanticNodeError, "must be unique"):
+            TokenCreationReplacementContext(
+                source_ref="P1",
+                source_controller="A",
+                event_controller="A",
+                created_types=("Artifact", "artifact"),
+            )
+
+        duplicate_filter = {
+            **descriptor,
+            "condition": {
+                **descriptor["condition"],
+                "created_types_all": ["Artifact", "artifact"],
+            },
+        }
+        with self.assertRaisesRegex(SemanticNodeError, "must be unique"):
+            handler.validate(duplicate_filter)
 
     def test_multiple_additional_token_components_share_one_creation_timestamp(
         self,
@@ -201,6 +307,72 @@ class TokenCreationReplacementTests(unittest.TestCase):
             if event.code == "token.create"
         )
         self.assertEqual(2, len(event.details["replacement_order"]))
+
+    def test_replacement_created_token_rediscovery_uses_same_event(self):
+        handler = GenericAdditionalTokenReplacementHandler()
+        any_descriptor = static_additional_token_replacement_handler(
+            "If you would create one or more tokens, instead create those "
+            "tokens plus an additional Food token."
+        )[1]
+        artifact_descriptor = static_additional_token_replacement_handler(
+            "If you would create one or more artifact tokens, instead create "
+            "those tokens plus an additional Map token."
+        )[1]
+        context = TokenCreationReplacementContext(
+            source_ref="A-any",
+            source_controller="A",
+            event_controller="A",
+            created_types=("creature",),
+            created_subtypes=("cat",),
+            component_id="any",
+        )
+        effects = (
+            handler.replacement_effect(any_descriptor, context),
+            handler.replacement_effect(
+                artifact_descriptor,
+                TokenCreationReplacementContext(
+                    source_ref="A-artifact",
+                    source_controller="A",
+                    event_controller="A",
+                    created_types=("creature",),
+                    created_subtypes=("cat",),
+                    component_id="artifact",
+                ),
+            ),
+        )
+
+        resolution = resolve_token_creation_replacements(
+            event_id="token:create:rediscovery",
+            controller="A",
+            tokens=(
+                {
+                    "name": "Cat",
+                    "quantity": 1,
+                    "characteristics": {
+                        "type_line": "Token Creature — Cat"
+                    },
+                },
+            ),
+            created_types=("creature",),
+            created_subtypes=("cat",),
+            effects=effects,
+            apnap_order=("A", "B", "C", "D"),
+        )
+
+        self.assertIsNone(resolution.pending)
+        self.assertEqual(
+            ["Cat", "Food", "Map"],
+            [token["name"] for token in resolution.tokens],
+        )
+        self.assertEqual(2, len(resolution.journal))
+        self.assertEqual(
+            ["artifact", "creature"],
+            list(resolution.event.payload["created_types"]),
+        )
+        self.assertEqual(
+            ["cat", "food", "map"],
+            list(resolution.event.payload["created_subtypes"]),
+        )
 
     def test_additional_token_does_not_inherit_original_entry_modifiers(self):
         session = self.session(12505021)
@@ -358,6 +530,54 @@ class TokenCreationReplacementTests(unittest.TestCase):
             any(candidate.ref == item.ref for candidate in engine.state.stack)
         )
 
+    def test_four_player_replacement_choice_is_affected_seat_scoped(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=4,
+            seed=12505061,
+            auto_pass_empty=False,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        engine.state.priority_passes = []
+        sources = [
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "C"
+            and card.printed_name in {
+                "Stridehangar Automaton",
+                "Worldwalker Helm",
+            }
+        ]
+        self.assertEqual(2, len(sources))
+        for source in sources:
+            engine.move_card(source.object_id, "battlefield", controller="C")
+
+        before = authoritative_state_hash(engine.state)
+        with self.assertRaises(ReplacementChoiceRequired) as required:
+            engine.create_token(
+                "C",
+                name="Treasure",
+                characteristics={"type_line": "Token Artifact — Treasure"},
+                reason="four-player replacement order characterization",
+            )
+        self.assertEqual("C", required.exception.pending.choice.chooser)
+        self.assertEqual(before, authoritative_state_hash(engine.state))
+        # The pure creation call suspends before the engine installs a task;
+        # the replacement payload itself still contains no private state.
+        payload = replacement_choice_payload(
+            required.exception.pending,
+            required.exception.effects,
+        )
+        self.assertNotIn("hand", json.dumps(payload))
+        self.assertNotIn("library", json.dumps(payload))
+        self.assertEqual("C", payload["chooser"])
+
     def test_additional_token_component_replays_exactly(self):
         session = self.session(1250503)
         engine = session.engine
@@ -432,6 +652,66 @@ class TokenCreationReplacementTests(unittest.TestCase):
         self.assertTrue(replay["ok"], replay)
         self.assertEqual(3, replay["commands"])
 
+    def test_generic_additional_token_program_replays_exactly(self):
+        session = self.session(12505031)
+        engine = session.engine
+        self.install_generated_xorn(engine)
+        program = SemanticProgram(
+            key="test:generic-treasure-token-effect",
+            label="Create a Treasure token",
+            effects=[
+                {
+                    "op": "create_token",
+                    "controller": "A",
+                    "name": "Treasure",
+                    "characteristics": {
+                        "type_line": "Token Artifact — Treasure"
+                    },
+                }
+            ],
+            trust_level="provisional",
+        )
+        engine.semantics.put(program)
+        engine.state.stack.append(
+            StackItem(
+                stack_id="generic-treasure-token-effect",
+                ref="S-generic-treasure-token-effect",
+                kind="triggered_ability",
+                controller="A",
+                label=program.label,
+                semantic_key=program.key,
+                visibility=["A", "B"],
+            )
+        )
+        engine.state.active_player = "A"
+        engine.state.phase = "precombat_main"
+        engine.state.step = "main"
+        engine._grant_priority("A")
+        engine._issue_priority("A")
+        session.initial_checkpoint = checkpoint_envelope(engine.state)
+        session.commands.clear()
+        session.decisions.clear()
+
+        for principal in ("pilot:A", "pilot:B"):
+            result = session.act(principal, {"action_id": "pass"})
+            self.assertTrue(result.ok, result.summary)
+        self.assertEqual(
+            2,
+            sum(
+                card.is_token
+                and card.zone == "battlefield"
+                and card.printed_name == "Treasure"
+                for card in engine.state.cards.values()
+            ),
+        )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            record_dir = Path(temporary) / "generic-additional-token-record"
+            session.save(record_dir)
+            replay = replay_record(record_dir, self.db, verify=True)
+        self.assertTrue(replay["ok"], replay)
+        self.assertEqual(2, replay["commands"])
+
     def test_complete_legacy_registry_uses_pinned_compatibility_component(self):
         with tempfile.TemporaryDirectory() as temporary:
             semantics_path = Path(temporary) / "semantics.json"
@@ -460,6 +740,10 @@ class TokenCreationReplacementTests(unittest.TestCase):
         )
         self.assertTrue(
             registry.is_runtime_handler_compatibility_program(programs[0])
+        )
+        self.assertEqual(
+            "replacement.token.additional.v2",
+            programs[0].handlers[0]["handler_id"],
         )
 
         session = self.session(1250504)

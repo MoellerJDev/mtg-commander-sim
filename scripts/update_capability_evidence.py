@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "token.creation.additional_replacement": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_additional_token_replacement_mutant_is_killed"
+    ),
     "combat.block.landwalk.basic_type": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."
@@ -263,6 +268,14 @@ EXTRA_EVIDENCE_TESTS = {
         "permanent.untap.all_creatures",
     )
 }
+EXTRA_EVIDENCE_TESTS["token.creation.additional_replacement"] = (
+    (
+        "rollback",
+        "tests.test_replacement_model_hardening."
+        "ReplacementImmutabilityTests."
+        "test_additional_token_operation_rejects_wrong_event_without_mutation",
+    ),
+)
 
 
 class EvidenceGenerationError(ValueError):

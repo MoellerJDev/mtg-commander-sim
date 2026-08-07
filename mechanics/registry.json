@@ -22,8 +22,8 @@
     {
       "mechanic_id": "cr-111-tokens",
       "path": "mechanics/contracts/basic-token-creation.json",
-      "sha256": "6a3e8b566af1361f9812d74274be25153e9919e174ba191427644639be0f8d2a",
-      "version": 2
+      "sha256": "47889000fea03308ffa1e9bd475820a1ae44f5918229e9c8d6fc8beb93ff1d7d",
+      "version": 3
     },
     {
       "mechanic_id": "battle-cry",
@@ -5941,16 +5941,16 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/basic-token-creation.json",
-      "contract_sha256": "6a3e8b566af1361f9812d74274be25153e9919e174ba191427644639be0f8d2a",
-      "contract_version": 2,
+      "contract_sha256": "47889000fea03308ffa1e9bd475820a1ae44f5918229e9c8d6fc8beb93ff1d7d",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "oracle_ir._effect_template, CommanderEngine.create_token/move_card/_stabilize, and state_based_actions.evaluate_state_based_actions",
-      "implementation_version": "token-lifecycle-v2",
+      "implementation_component": "oracle_ir._effect_template, compiler.token_templates, token_creation.create_tokens, CommanderEngine.move_card/_stabilize, and state_based_actions.evaluate_state_based_actions",
+      "implementation_version": "token-lifecycle-v3",
       "kind": "rules_section",
       "known_blockers": [
-        "tokens with abilities, dynamic values, predefined named characteristics, or linked choices remain residual",
-        "generic replacement ordering for token multipliers is incomplete",
+        "tokens with unrecognized abilities, dynamic values, predefined named characteristics outside the closed vocabulary, or linked choices remain residual",
+        "optional, multiplying, and mutable-state token replacements are not compiled",
         "copy-token characteristic and entry replacement coverage is incomplete"
       ],
       "mechanic_id": "cr-111-tokens",
@@ -5964,7 +5964,11 @@
         "test_token_that_left_battlefield_cannot_move_again",
         "test_nonbattlefield_token_is_not_a_card_target",
         "test_nonbattlefield_tokens_cease_from_the_shared_snapshot",
-        "test_token_cost_cessation_replays_exactly"
+        "test_token_cost_cessation_replays_exactly",
+        "test_generic_compiler_program_drives_runtime_without_name_dispatch",
+        "test_four_player_replacement_choice_is_affected_seat_scoped",
+        "test_additional_token_component_replays_exactly",
+        "test_generic_additional_token_program_replays_exactly"
       ],
       "trust_level": "untrusted"
     },

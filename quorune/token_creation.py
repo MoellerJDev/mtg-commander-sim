@@ -110,14 +110,14 @@ def _creation_subject(
     quantity: int,
     copy_of: str | None,
     characteristics: Mapping[str, Any] | None,
-) -> tuple[set[str], list[Any]]:
+) -> tuple[set[str], set[str], list[Any]]:
     if copy_of:
         copied_source = host._resolve_object(
             controller,
             str(copy_of),
             zones={"battlefield"},
         )
-        created_types, _, _ = host._type_parts(
+        created_types, created_subtypes, _ = host._type_parts(
             str(
                 host._effective_card_data(copied_source).get("type_line")
                 or ""
@@ -132,7 +132,7 @@ def _creation_subject(
                 type_line = host.card_db.lookup(name).type_line
             except KeyError:
                 type_line = ""
-        created_types, _, _ = host._type_parts(type_line)
+        created_types, created_subtypes, _ = host._type_parts(type_line)
     sources = (
         [
             host.state.cards[object_id]
@@ -145,13 +145,14 @@ def _creation_subject(
         if quantity > 0
         else []
     )
-    return created_types, sources
+    return created_types, created_subtypes, sources
 
 
 def _token_replacement_effects(
     host: TokenCreationHost,
     controller: str,
     created_types: set[str],
+    created_subtypes: set[str],
     sources: Sequence[Any],
 ) -> tuple[Any, ...]:
     registry = default_token_creation_replacement_registry()
@@ -174,6 +175,7 @@ def _token_replacement_effects(
                             source_controller=source.controller,
                             event_controller=controller,
                             created_types=tuple(sorted(created_types)),
+                            created_subtypes=tuple(sorted(created_subtypes)),
                             component_id=f"{program.key}:{descriptor_index}",
                         ),
                     )
@@ -188,6 +190,7 @@ def _resolved_token_specs(
     quantity: int,
     token_specs: tuple[Mapping[str, Any], ...],
     created_types: set[str],
+    created_subtypes: set[str],
     replacement_effects: Sequence[Any],
     replacement_selections: Sequence[str | None],
 ) -> tuple[tuple[Mapping[str, Any], ...], tuple[Any, ...]]:
@@ -200,6 +203,7 @@ def _resolved_token_specs(
             controller=controller,
             tokens=token_specs,
             created_types=tuple(sorted(created_types)),
+            created_subtypes=tuple(sorted(created_subtypes)),
             effects=tuple(replacement_effects),
             apnap_order=host.apnap_order(),
             selections=tuple(replacement_selections),
@@ -621,7 +625,7 @@ def create_tokens(
     host._require_seat(controller, in_game=True)
     if quantity < 0:
         raise TokenCreationError("Token quantity cannot be negative")
-    created_types, sources = _creation_subject(
+    created_types, created_subtypes, sources = _creation_subject(
         host,
         controller,
         name=name,
@@ -633,6 +637,7 @@ def create_tokens(
         host,
         controller,
         created_types,
+        created_subtypes,
         sources,
     )
     token_specs, replacement_journal = _resolved_token_specs(
@@ -655,6 +660,7 @@ def create_tokens(
             },
         ),
         created_types=created_types,
+        created_subtypes=created_subtypes,
         replacement_effects=replacement_effects,
         replacement_selections=replacement_selections,
     )

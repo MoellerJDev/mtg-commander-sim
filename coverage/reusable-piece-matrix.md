@@ -2,7 +2,7 @@
 title: "Reusable rules piece matrix"
 status: "generated"
 authoritative_source: "coverage/reusable-piece-matrix.json.gz"
-verified: "e0b73ea9b0cc92071c5eb43cad4df4efd1cc71ca35b2ba6f5b1bc5e274cd2b75"
+verified: "721563eb30f04dc3384e7b00c0e0ef7e98465b7fa4c013833625270cff46452b"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -17,12 +17,12 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 
 - Profile: `commander_review`
 - Ontology: `reusable-pieces-v1`
-- Pieces: 1,066
+- Pieces: 1,070
 - Cards indexed: 31,623
 - Material abilities classified: 59,968
 - Unclassified material spans: 0
 - Mapped pinned rules: 674 / 3,300
-- Applicable piece pairs: 21,156
+- Applicable piece pairs: 21,203
 - Covered piece pairs: 119
 
 ## Ontology classes
@@ -33,7 +33,7 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `card_forms` — Card types and specialized forms | 3 |
 | `choices_continuations` — Modes, targets, choices, and continuations | 6 |
 | `combat` — Combat | 21 |
-| `compiler_cardprogram` — Compiler and CardProgram pieces | 242 |
+| `compiler_cardprogram` — Compiler and CardProgram pieces | 246 |
 | `continuous_effects` — Static abilities and continuous effects | 16 |
 | `costs_mana` — Costs and mana | 7 |
 | `events_mutations` — Typed events and mutations | 64 |
@@ -58,7 +58,7 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `generic_triggers_stack_placement` | `inventoried` | 2 | 2 |
 | `multiplayer_player_leaving_commander` | `represented` | 2 | 0 |
 | `objects_identity_zones_faces_copies` | `compositional` | 29 | 0 |
-| `replacement_prevention` | `inventoried` | 13 | 4 |
+| `replacement_prevention` | `inventoried` | 13 | 3 |
 | `state_turn_loops_stabilization` | `inventoried` | 0 | 0 |
 | `targets_modes_searches_references_choices` | `inventoried` | 8 | 6 |
 | `typed_transactions_events_mutations` | `inventoried` | 158 | 54 |
@@ -84,7 +84,7 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `residual.activated_effect.tap-state` | `one_shot_effects` | 322 | 75 | 75 | `absent` | `untested` |
 | `residual.effect_clause.tap-state` | `one_shot_effects` | 387 | 71 | 71 | `absent` | `untested` |
 | `residual.activated_effect.put-counter` | `one_shot_effects` | 408 | 62 | 62 | `absent` | `untested` |
-| `residual.activated_effect.create-token` | `one_shot_effects` | 487 | 59 | 59 | `absent` | `untested` |
+| `residual.activated_effect.create-token` | `one_shot_effects` | 487 | 60 | 60 | `absent` | `untested` |
 | `residual.effect_clause.look-reveal` | `one_shot_effects` | 579 | 57 | 57 | `absent` | `untested` |
 | `residual.activated_effect.search` | `one_shot_effects` | 236 | 52 | 52 | `absent` | `untested` |
 | `residual.effect_clause.create-token` | `one_shot_effects` | 729 | 43 | 43 | `absent` | `untested` |

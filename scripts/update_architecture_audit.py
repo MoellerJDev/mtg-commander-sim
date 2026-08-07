@@ -410,6 +410,14 @@ def _string_records(
             "_EXILE_MECHANIC": {"exile"},
             "_EXILE_ZONE": {"exile"},
             "_REASON_FIELD": {"reason"},
+            # Closed predefined token names are CR vocabulary used to build
+            # token characteristics.  The structural exemption is limited to
+            # these named constants and still fails if a value participates
+            # in printed-name or other card-identity dispatch.
+            "_TOKEN_TREASURE": {"treasure"},
+            "_TOKEN_FOOD": {"food"},
+            "_TOKEN_MAP": {"map"},
+            "_TOKEN_THOPTER": {"thopter"},
             "_ZONE_CHANGE_DESTINATIONS": {
                 "battlefield",
                 "command",

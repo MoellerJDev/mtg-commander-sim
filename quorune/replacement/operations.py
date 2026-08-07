@@ -339,6 +339,74 @@ class CreateAffectedObjectCounter:
 
 
 @dataclass(frozen=True, slots=True)
+class CreateAdditionalToken:
+    """Add one fixed token specification to a token-creation event.
+
+    The operation is an immutable replacement-event transformation.  It does
+    not create a permanent or inspect mutable game state; the authoritative
+    token-creation owner commits the transformed specification only after the
+    complete replacement batch has resolved.
+    """
+
+    name: str
+    quantity: int
+    characteristics: FrozenMap
+    card_types: tuple[str, ...]
+    subtypes: tuple[str, ...]
+    handler_id: str
+    source_ref: str
+    schema_version: int = OPERATION_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        for field_name in ("name", "handler_id", "source_ref"):
+            value = getattr(self, field_name)
+            if type(value) is not str or not value.strip():
+                raise ReplacementOperationError(
+                    f"Additional tokens require nonempty {field_name}"
+                )
+            object.__setattr__(self, field_name, value.strip())
+        _integer(self.quantity, field="additional token quantity", minimum=1)
+        if not isinstance(self.characteristics, Mapping):
+            raise ReplacementOperationError(
+                "Additional token characteristics must be an object"
+            )
+        object.__setattr__(
+            self,
+            "characteristics",
+            FrozenMap(self.characteristics),
+        )
+        for field_name in ("card_types", "subtypes"):
+            supplied = getattr(self, field_name)
+            if not isinstance(supplied, (list, tuple)) or any(
+                type(value) is not str or not value.strip()
+                for value in supplied
+            ):
+                raise ReplacementOperationError(
+                    f"Additional token {field_name} must be nonempty strings"
+                )
+            normalized = tuple(
+                sorted({value.casefold().strip() for value in supplied})
+            )
+            object.__setattr__(self, field_name, normalized)
+        if not self.card_types:
+            raise ReplacementOperationError(
+                "Additional tokens require at least one card type"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "op": "create_additional_token",
+            "name": self.name,
+            "quantity": self.quantity,
+            "characteristics": thaw_value(self.characteristics),
+            "card_types": list(self.card_types),
+            "subtypes": list(self.subtypes),
+            "handler_id": self.handler_id,
+            "source_ref": self.source_ref,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class ReserveZoneChange:
     objects: tuple[str, ...] = ()
     from_field: str | None = None
@@ -457,6 +525,7 @@ ReplacementOperation: TypeAlias = (
     | UnionValues
     | CreateNestedEvent
     | CreateAffectedObjectCounter
+    | CreateAdditionalToken
     | ReserveZoneChange
     | CapResultLifeLoss
     | PreventDraw
@@ -476,6 +545,7 @@ _TYPED_OPERATION_TYPES = (
     UnionValues,
     CreateNestedEvent,
     CreateAffectedObjectCounter,
+    CreateAdditionalToken,
     ReserveZoneChange,
     CapResultLifeLoss,
     PreventDraw,
@@ -557,6 +627,53 @@ def _affected_object_counter_from_dict(
             field="affected-object counter sequence",
             minimum=0,
         ),
+    )
+
+
+def _additional_token_from_dict(
+    value: Mapping[str, Any],
+    *,
+    operation: str,
+) -> CreateAdditionalToken:
+    _exact_fields(
+        value,
+        {
+            "op",
+            "name",
+            "quantity",
+            "characteristics",
+            "card_types",
+            "subtypes",
+            "handler_id",
+            "source_ref",
+        },
+        operation=operation,
+    )
+    characteristics = value["characteristics"]
+    card_types = value["card_types"]
+    subtypes = value["subtypes"]
+    if not isinstance(characteristics, Mapping):
+        raise ReplacementOperationError(
+            "Additional token characteristics must be an object"
+        )
+    if not isinstance(card_types, (list, tuple)) or not isinstance(
+        subtypes, (list, tuple)
+    ):
+        raise ReplacementOperationError(
+            "Additional token type fields must be arrays"
+        )
+    return CreateAdditionalToken(
+        name=value["name"],
+        quantity=_integer(
+            value["quantity"],
+            field="additional token quantity",
+            minimum=1,
+        ),
+        characteristics=FrozenMap(characteristics),
+        card_types=tuple(card_types),
+        subtypes=tuple(subtypes),
+        handler_id=value["handler_id"],
+        source_ref=value["source_ref"],
     )
 
 
@@ -678,6 +795,8 @@ def operation_from_dict(value: Mapping[str, Any]) -> ReplacementOperation:
         return CreateNestedEvent(FrozenMap(event))
     if op == "create_affected_object_counter":
         return _affected_object_counter_from_dict(value, operation=op)
+    if op == "create_additional_token":
+        return _additional_token_from_dict(value, operation=op)
     if op == "reserve_zone_change":
         if "objects" in value:
             _exact_fields(value, {"op", "objects"}, operation=op)

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Mapping, Protocol, Sequence
 
+from ..replacement import CreateAdditionalToken
 from ..replacement_effects import (
     ReplaceableEvent,
     ReplacementBatchChoice,
@@ -23,6 +24,7 @@ from .context import SemanticNodeError
 
 
 _ADDITIONAL_TOKEN_HANDLER_ID = "replacement.token.additional.v1"
+_GENERIC_ADDITIONAL_TOKEN_HANDLER_ID = "replacement.token.additional.v2"
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +98,7 @@ class TokenDefinition:
 @dataclass(frozen=True, slots=True)
 class AdditionalTokenReplacementNode:
     created_types_all: tuple[str, ...]
+    created_subtypes_all: tuple[str, ...]
     event_controller: str
     quantity: int
     token: TokenDefinition
@@ -107,6 +110,7 @@ class TokenCreationReplacementContext:
     source_controller: str
     event_controller: str
     created_types: tuple[str, ...]
+    created_subtypes: tuple[str, ...] = ()
     component_id: str = ""
 
     def __post_init__(self) -> None:
@@ -116,21 +120,43 @@ class TokenCreationReplacementContext:
             raise SemanticNodeError(
                 "Token replacement controllers must be nonempty"
             )
-        if len(self.created_types) != len(set(self.created_types)):
-            raise SemanticNodeError("Created token types must be unique")
+        for field_name in ("created_types", "created_subtypes"):
+            supplied = getattr(self, field_name)
+            if not isinstance(supplied, (list, tuple)) or any(
+                type(value) is not str or not value.strip()
+                for value in supplied
+            ):
+                raise SemanticNodeError(
+                    f"Token replacement context {field_name} must be "
+                    "nonempty strings"
+                )
+            normalized = tuple(
+                sorted(value.casefold().strip() for value in supplied)
+            )
+            if len(normalized) != len(set(normalized)):
+                raise SemanticNodeError(
+                    f"Token replacement context {field_name} must be unique"
+                )
+            object.__setattr__(self, field_name, normalized)
 
 
-def _token_card_types(type_line: str) -> tuple[str, ...]:
-    left = type_line.split("—", 1)[0].strip().casefold()
-    return tuple(
+def _token_characteristic_parts(
+    type_line: str,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    left, separator, right = type_line.partition("—")
+    card_types = tuple(
         sorted(
             {
                 value
-                for value in left.split()
+                for value in left.strip().casefold().split()
                 if value and value != "token"
             }
         )
     )
+    subtypes = tuple(
+        sorted(set(right.strip().casefold().split()))
+    ) if separator else ()
+    return card_types, subtypes
 
 
 @dataclass(frozen=True, slots=True)
@@ -164,6 +190,7 @@ def resolve_token_creation_replacements(
     controller: str,
     tokens: Sequence[Mapping[str, Any]],
     created_types: Sequence[str],
+    created_subtypes: Sequence[str],
     effects: Sequence[ReplacementEffect],
     apnap_order: Sequence[str],
     selections: Sequence[str | None] = (),
@@ -175,6 +202,7 @@ def resolve_token_creation_replacements(
         payload={
             "event_controller": controller,
             "created_types": sorted(set(created_types)),
+            "created_subtypes": sorted(set(created_subtypes)),
             "tokens": [dict(token) for token in tokens],
         },
     )
@@ -301,6 +329,7 @@ class AdditionalTokenReplacementHandler:
             raise SemanticNodeError("runtime handler token must be an object")
         return AdditionalTokenReplacementNode(
             created_types_all=created_types,
+            created_subtypes_all=(),
             event_controller=event_controller,
             quantity=quantity,
             token=TokenDefinition.from_mapping(token),
@@ -337,7 +366,9 @@ class AdditionalTokenReplacementHandler:
         component_id = context.component_id or (
             f"{node.token.name.casefold()}:{node.quantity}"
         )
-        token_types = _token_card_types(node.token.type_line)
+        token_types, token_subtypes = _token_characteristic_parts(
+            node.token.type_line
+        )
         return ReplacementEffect(
             effect_id=(
                 f"{self.handler_id}:{context.source_ref}:{component_id}"
@@ -351,29 +382,194 @@ class AdditionalTokenReplacementHandler:
                     "contains_all": list(node.created_types_all)
                 },
             },
-            operations=(
-                {
-                    "op": "append",
-                    "field": "tokens",
-                    "values": [
-                        {
-                            "name": node.token.name,
-                            "quantity": node.quantity,
-                            "characteristics": node.token.characteristics(),
-                            "replacement_component": {
-                                "handler_id": self.handler_id,
-                                "source": context.source_ref,
-                                "quantity": node.quantity,
-                            },
-                        }
-                    ],
-                },
-                {
-                    "op": "union",
-                    "field": "created_types",
-                    "values": list(token_types),
-                },
+            operations=(CreateAdditionalToken(
+                name=node.token.name,
+                quantity=node.quantity,
+                characteristics=node.token.characteristics(),
+                card_types=token_types,
+                subtypes=token_subtypes,
+                handler_id=self.handler_id,
+                source_ref=context.source_ref,
+            ),),
+            label=(
+                f"{context.source_ref}: create {node.quantity} additional "
+                f"{node.token.name} token"
+                + ("s" if node.quantity != 1 else "")
             ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class GenericAdditionalTokenReplacementHandler:
+    """Closed compiler-facing fixed additional-token replacement family."""
+
+    handler_id: str = _GENERIC_ADDITIONAL_TOKEN_HANDLER_ID
+    schema_version: int = 1
+    family: str = "replacement.fixed_additional_token"
+    event: str = "token.create"
+    rule_references: tuple[str, ...] = (
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "token.creation.additional_replacement",
+    )
+
+    def validate(
+        self, descriptor: Mapping[str, Any]
+    ) -> AdditionalTokenReplacementNode:
+        exact_fields(
+            descriptor,
+            {
+                "handler_id",
+                "schema_version",
+                "event",
+                "condition",
+                "quantity",
+                "token",
+            },
+            field="runtime handler",
+        )
+        if descriptor["handler_id"] != self.handler_id:
+            raise SemanticNodeError("Runtime handler ID does not match registry")
+        if descriptor["schema_version"] != self.schema_version:
+            raise SemanticNodeError(
+                f"Unsupported {self.handler_id} schema version"
+            )
+        if descriptor["event"] != self.event:
+            raise SemanticNodeError(
+                f"{self.handler_id} must handle {self.event}"
+            )
+        condition = descriptor["condition"]
+        if not isinstance(condition, Mapping):
+            raise SemanticNodeError("runtime handler condition must be an object")
+        exact_fields(
+            condition,
+            {
+                "event_controller",
+                "created_types_all",
+                "created_subtypes_all",
+            },
+            field="runtime handler condition",
+        )
+        event_controller = str(condition["event_controller"])
+        if event_controller != "source_controller":
+            raise SemanticNodeError(
+                "additional token replacement requires "
+                "event_controller=source_controller"
+            )
+        created_types = tuple(
+            sorted(
+                value.casefold()
+                for value in nonempty_strings(
+                    condition["created_types_all"],
+                    field="condition.created_types_all",
+                )
+            )
+        )
+        created_subtypes = tuple(
+            sorted(
+                value.casefold()
+                for value in nonempty_strings(
+                    condition["created_subtypes_all"],
+                    field="condition.created_subtypes_all",
+                )
+            )
+        )
+        if len(created_types) != len(set(created_types)):
+            raise SemanticNodeError(
+                "condition.created_types_all values must be unique"
+            )
+        if len(created_subtypes) != len(set(created_subtypes)):
+            raise SemanticNodeError(
+                "condition.created_subtypes_all values must be unique"
+            )
+        quantity = descriptor["quantity"]
+        if type(quantity) is not int or quantity < 1:
+            raise SemanticNodeError(
+                "additional token replacement quantity must be positive"
+            )
+        token = descriptor["token"]
+        if not isinstance(token, Mapping):
+            raise SemanticNodeError("runtime handler token must be an object")
+        return AdditionalTokenReplacementNode(
+            created_types_all=created_types,
+            created_subtypes_all=created_subtypes,
+            event_controller=event_controller,
+            quantity=quantity,
+            token=TokenDefinition.from_mapping(token),
+        )
+
+    def lower(
+        self,
+        descriptor: Mapping[str, Any],
+        context: TokenCreationReplacementContext,
+    ) -> tuple[AdditionalTokenIntent, ...]:
+        node = self.validate(descriptor)
+        if context.event_controller != context.source_controller:
+            return ()
+        event_types = {value.casefold() for value in context.created_types}
+        event_subtypes = {
+            value.casefold() for value in context.created_subtypes
+        }
+        if not set(node.created_types_all).issubset(event_types):
+            return ()
+        if not set(node.created_subtypes_all).issubset(event_subtypes):
+            return ()
+        return (
+            AdditionalTokenIntent(
+                handler_id=self.handler_id,
+                source_ref=context.source_ref,
+                quantity=node.quantity,
+                token=node.token,
+            ),
+        )
+
+    def replacement_effect(
+        self,
+        descriptor: Mapping[str, Any],
+        context: TokenCreationReplacementContext,
+    ) -> ReplacementEffect:
+        node = self.validate(descriptor)
+        component_id = context.component_id or (
+            f"{node.token.name.casefold()}:{node.quantity}"
+        )
+        token_types, token_subtypes = _token_characteristic_parts(
+            node.token.type_line
+        )
+        conditions: dict[str, Any] = {
+            "event_controller": {"eq": context.source_controller},
+        }
+        if node.created_types_all:
+            conditions["created_types"] = {
+                "contains_all": list(node.created_types_all)
+            }
+        if node.created_subtypes_all:
+            conditions["created_subtypes"] = {
+                "contains_all": list(node.created_subtypes_all)
+            }
+        return ReplacementEffect(
+            effect_id=(
+                f"{self.handler_id}:{context.source_ref}:{component_id}"
+            ),
+            source_id=context.source_ref,
+            event_kind=self.event,
+            replacement_class=ReplacementClass.OTHER,
+            conditions=conditions,
+            operations=(CreateAdditionalToken(
+                name=node.token.name,
+                quantity=node.quantity,
+                characteristics=node.token.characteristics(),
+                card_types=token_types,
+                subtypes=token_subtypes,
+                handler_id=self.handler_id,
+                source_ref=context.source_ref,
+            ),),
             label=(
                 f"{context.source_ref}: create {node.quantity} additional "
                 f"{node.token.name} token"
@@ -407,7 +603,10 @@ class TokenCreationReplacementRegistry(
 def default_token_creation_replacement_registry(
 ) -> TokenCreationReplacementRegistry:
     registry = TokenCreationReplacementRegistry(
-        (AdditionalTokenReplacementHandler(),)
+        (
+            AdditionalTokenReplacementHandler(),
+            GenericAdditionalTokenReplacementHandler(),
+        )
     )
     registry.require_registered_capabilities(
         load_default_capability_registry()

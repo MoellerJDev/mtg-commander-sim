@@ -15,6 +15,7 @@ from .draw_templates import (
     static_draw_restriction_handler,
 )
 from .life_templates import static_life_handler
+from .token_templates import static_additional_token_replacement_handler
 from .zone_templates import static_zone_destination_replacement_handler
 
 
@@ -35,6 +36,17 @@ def static_runtime_template(
     """Select one closed static runtime production for an Oracle line."""
 
     if source_permanent:
+        additional_token = static_additional_token_replacement_handler(text)
+        if additional_token is not None:
+            return StaticRuntimeTemplate(
+                compiled=additional_token,
+                kind="replacement_effect",
+                event="token.create",
+                dependency_reason=(
+                    "generic additional-token replacement depends on an "
+                    "untrusted rules capability"
+                ),
+            )
         zone_replacement = static_zone_destination_replacement_handler(text)
         if zone_replacement is not None:
             return StaticRuntimeTemplate(

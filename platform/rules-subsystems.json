@@ -335,22 +335,20 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "additional-token-replacement-closure",
+    "batch_id": "counter-producer-replacement-closure",
     "subsystem_id": "replacement-prevention",
     "rule_ids": [
       "614.16"
     ],
-    "target_capability_ids": [
-      "token.creation.additional_replacement"
-    ],
-    "rationale": "The immutable universal destination-replacement snapshot is complete for its bounded represented grammar. The next dependency-ready replacement slice is the existing fixed additional-token capability: it already uses the shared nested-event tree and token owner, but remains tested rather than trusted because generic compiler lowering, multiplayer evidence, and focused implementation mutation evidence are incomplete. Closing that bounded family harvests the replacement substrate without taking on optional, multiplying, or state-derived token effects.",
+    "target_capability_ids": [],
+    "rationale": "The bounded mandatory fixed additional-token family is now capability-closed through the shared replacement batch and token owner. The remaining dependency-ready CR 614.16 boundary is counter-producer migration: represented explore, fabricate, proliferate, cumulative-upkeep-style, entry, cost, and rule-generated counters must enter the existing resumable counter-placement transaction rather than bypassing replacement ordering. This is a producer-ownership harvest of an existing trusted counter quantity capability, not a claim that aggregate replacement effects are complete.",
     "exit_criteria": [
-      "Lower one closed, reusable fixed additional-token replacement wording family to the existing typed runtime descriptor with precise CardProgram V2 source spans.",
-      "Create replacement-generated tokens through the same immutable nested-event and authoritative token-creation owner used by ordinary token instructions.",
-      "Resolve simultaneous and contradictory represented token replacements in complete multiplayer APNAP order before mutation.",
-      "Add canonical positive, negative, interaction, multiplayer, rollback, privacy, replay, and killed implementation-mutation evidence for the bounded capability.",
-      "Promote the bounded capability only when its mandatory trust evidence and ambient dependencies close; report the pinned Commander-card delta honestly.",
-      "Leave optional replacements, quantity doublers, mutable-state token definitions, and unrepresented token-entry riders as explicit residuals."
+      "Inventory every represented permanent- and player-counter producer and identify which paths still bypass the canonical counter-placement owner.",
+      "Route one coherent reusable producer family through the immutable resumable counter-placement transaction without adding direct GameState writes.",
+      "Preserve cost timing, entry timing, simultaneous APNAP ordering, rollback, privacy, and exact replay for migrated producers.",
+      "Add generic CardProgram lowering and precise source spans where the migrated family originates in Oracle text.",
+      "Add focused positive, negative, interaction, multiplayer, rollback, replay, and killed implementation-mutation evidence for the migrated boundary.",
+      "Leave unrepresented movement, removal, variable, optional, and linked-choice counter variants as explicit residuals and report actual Commander-card gains."
     ]
   }
 }

@@ -908,7 +908,7 @@ class CardProgramV2Tests(unittest.TestCase):
                 "replacement.life.gain.multiplier.v1": [
                     "life.gain.replacement.static_multiplier"
                 ],
-                "replacement.token.additional.v1": [
+                "replacement.token.additional.v2": [
                     "token.creation.additional_replacement"
                 ],
                 "replacement.zone.destination.v1": [

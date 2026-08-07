@@ -1,5 +1,6 @@
 {
   "blockers": [
+    "mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain residual, while explore, fabricate, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration through the resumable counter-placement owner, so aggregate CR 614.16 is not trusted",
     "fixed simultaneous affected-set damage now snapshots represented public player and permanent groups through the canonical effective-characteristic query and commits one APNAP-ordered, logical-identity-deduplicated damage batch; divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, linked life/draw/scry/conditional riders, and broader source-LKI producers remain explicit blockers, so aggregate mass-damage coverage is not trusted",
     "mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted",
     "ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
@@ -31,7 +32,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "22f688c612f1dbe159330364427fff204e1b3cf1706357bc61f8d01fa21aac88",
+    "evaluated_source_tree_hash": "ac539da6239b77e6fb5bd82ffbfbed2ab5bba31f0da5576ba27147105f46692f",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -357,13 +358,19 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
+      "evidence": "Oracle IR v45 lowers the closed mandatory fixed Treasure-, artifact-, and unqualified additional-token wording family to a source-spanned CardProgram V2 runtime descriptor. One immutable CreateAdditionalToken operation transforms the original token event without mutating GameState; added card types and subtypes participate in same-event replacement rediscovery, each source applies at most once, and the existing token owner commits one timestamped batch only after ordering completes. The legacy v1 descriptor remains registered for historical compatibility while current generated and reviewed descriptors deduplicate on v2. The pinned Commander census makes all six affected abilities exact, promotes two complete cards to exact trusted CardPrograms, reduces unresolved cards by five, and removes six material residuals with no new construction failures. Focused compiler, model, four-player APNAP/privacy, rollback, replay, compatibility, and killed-mutation tests pass locally; exact-head CI remains the broad certification authority. Optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain explicit residuals, and aggregate CR 614.16 stays blocked by remaining counter producers.",
+      "id": "additional_token_replacement_closure",
+      "name": "Typed mandatory fixed additional-token replacements",
+      "status": "implemented_on_current_source_tree"
+    },
+    {
+      "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, the reviewed partial CR 121 draw contract, and the typed bounded CR 614.16 token-replacement slice are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
       "id": "rules_snapshot",
       "name": "Active Comprehensive Rules snapshot",
       "status": "active_on_main"
     },
     {
-      "evidence": "Two exact 100-card regression lists preflight trusted-only; corpus-wide coverage is not claimed.",
+      "evidence": "The current August 6 Commander-legal census covers 31,623 Oracle objects: 2,156 compile exact, 13,235 partial, and 16,232 unresolved; 2,156 CardPrograms are trusted and 29,467 retain material residuals. These measured states are not a claim of corpus-wide rules completeness.",
       "id": "oracle_snapshot",
       "name": "Current Oracle snapshot",
       "status": "partial"
@@ -379,7 +386,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v49_with_79_records_71_trusted_and_705_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "capability_evidence": "implemented_registry_v51_with_80_records_74_trusted_and_740_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -406,11 +413,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 47649,
+      "material_residuals": 47643,
       "status_counts": {
-        "exact": 2154,
-        "partial": 13232,
-        "unresolved": 16237
+        "exact": 2156,
+        "partial": 13235,
+        "unresolved": 16232
       },
       "total": 31623
     },
@@ -428,11 +435,11 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 55317,
+      "material_residuals": 55311,
       "status_counts": {
-        "exact": 5111,
-        "partial": 14386,
-        "unresolved": 19126
+        "exact": 5113,
+        "partial": 14389,
+        "unresolved": 19121
       },
       "total": 38623
     },
@@ -466,7 +473,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5206,
+    "deterministic_cases_discovered": 5219,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -476,31 +483,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 47649,
+        "material_residuals": 47643,
         "status_counts": {
-          "residual": 29469,
-          "trusted": 2154
+          "residual": 29467,
+          "trusted": 2156
         },
         "trust_basis_counts": {
-          "capability_closed": 2150,
-          "legacy_reviewed": 3,
+          "capability_closed": 2151,
+          "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 29469
+          "unresolved": 29467
         }
       },
       "full": {
         "cards_considered": 38623,
-        "material_residuals": 55313,
+        "material_residuals": 55307,
         "status_counts": {
           "failed": 2248,
-          "residual": 33509,
-          "trusted": 2866
+          "residual": 33507,
+          "trusted": 2868
         },
         "trust_basis_counts": {
-          "capability_closed": 2862,
-          "legacy_reviewed": 3,
+          "capability_closed": 2863,
+          "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 33509
+          "unresolved": 33507
         }
       }
     },

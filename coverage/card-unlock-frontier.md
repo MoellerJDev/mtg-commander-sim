@@ -2,7 +2,7 @@
 title: "Commander card-unlock frontier"
 status: "generated"
 authoritative_source: "coverage/card-unlock-frontier.json.gz"
-verified: "75b32604946b3c4f223209d9706fb82855b8f5aaa9e2dc2c933600a18ef8517d"
+verified: "796e7f2ae9b38aee553991406cdf2132a46b04d7123997ea418d68017f379c87"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -14,10 +14,10 @@ This generated report ranks minimum known compiler and rules blockers for the pi
 ## Snapshot
 
 - Cards considered: 31,623
-- Oracle states: `{"exact":2154,"partial":13232,"unresolved":16237}`
-- CardProgram states: `{"residual":29469,"trusted":2154}`
+- Oracle states: `{"exact":2156,"partial":13235,"unresolved":16232}`
+- CardProgram states: `{"residual":29467,"trusted":2156}`
 - Hard construction failures: 0
-- Frontier fingerprint: `75b32604946b3c4f223209d9706fb82855b8f5aaa9e2dc2c933600a18ef8517d`
+- Frontier fingerprint: `796e7f2ae9b38aee553991406cdf2132a46b04d7123997ea418d68017f379c87`
 
 ## Highest-leverage single families
 
@@ -41,7 +41,7 @@ This generated report ranks minimum known compiler and rules blockers for the pi
 | `effect_clause:unparsed-target-creature-gets` | 217 | 214 | 68 | 141 | missing_lowering | high |
 | `activated_effect:unparsed-this-creature-gets` | 132 | 127 | 64 | 86 | missing_lowering | high |
 | `activated_effect:put-counter` | 408 | 397 | 62 | 184 | missing_lowering | high |
-| `activated_effect:create-token` | 487 | 476 | 59 | 204 | missing_lowering | high |
+| `activated_effect:create-token` | 487 | 476 | 60 | 204 | missing_lowering | high |
 | `effect_clause:look-reveal` | 579 | 574 | 57 | 109 | missing_lowering | high |
 | `activated_effect:search` | 236 | 233 | 52 | 69 | missing_lowering | high |
 | `activated_effect:unparsed-target-creature-gains` | 98 | 94 | 49 | 81 | missing_lowering | high |
@@ -72,7 +72,7 @@ This generated report ranks minimum known compiler and rules blockers for the pi
 | `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-509-declare-blockers-step, effect_clause:return` | 3,624 | 10,233 | 10,233 |
 | `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, effect_clause:return` | 3,622 | 10,379 | 10,379 |
 | `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, effect_clause:deal-damage` | 3,622 | 10,378 | 10,378 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:create-token` | 3,615 | 10,144 | 10,221 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:create-token` | 3,616 | 10,144 | 10,221 |
 
 ## Hard construction failures
 
