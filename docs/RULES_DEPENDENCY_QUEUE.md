@@ -2,7 +2,7 @@
 title: "Rules dependency queue"
 status: "generated"
 authoritative_source: "coverage/rules-dependency-queue.json"
-verified: "39e8b27c70c1bad7340217474f2fdfd4dca17ac385ee54147f28d19e5c401b8c"
+verified: "305684a93cce0cc4a54e55077a2571fe2cb89feb9b6031702c5019274536d383"
 audience: "rules, compiler, and engine contributors"
 maintenance: "generated"
 generated_source: "coverage/rules-dependency-queue.json"
@@ -11,12 +11,12 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_rules_scheduler.p
 
 # Rules dependency queue
 
-Source fingerprint: `cca7bf37c087061de0d23664b71b7a916295ba992a5131c6a995e6d8f5c7a3db`
+Source fingerprint: `523a54a6ccd3f30cb9b936c767a992c4c00a4c9de17ece3fb419a7d0df644006`
 
 ## Current top-level state
 
 - Pinned rules: `3300`
-- Queued rules: `2973`
+- Queued rules: `2972`
 - Subsystems: `21`
 - Selected subsystem: `keyword-abilities`
 - Selected batch: `typed-ordinary-cycling-activation`

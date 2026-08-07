@@ -18,6 +18,10 @@ from ...compiled_mana_abilities import (
     compiled_fixed_mana_abilities,
     compiled_fixed_mana_family_present,
 )
+from ...compiled_cycling_abilities import (
+    compiled_ordinary_cycling_abilities,
+    compiled_ordinary_cycling_family_present,
+)
 from ...fixed_mana_abilities import FixedManaMode
 from ...mana import BASIC_LAND_MANA
 from ...util import normalize_mana_bundle
@@ -57,7 +61,12 @@ def activated_abilities(
         card,
         executable_oracle_text=executable_oracle_text,
     )
-    stale_compiled_mana = (
+    compiled_cycling = compiled_ordinary_cycling_abilities(
+        host,
+        card,
+        executable_oracle_text=executable_oracle_text,
+    )
+    stale_compiled_family = (
         (
             not compiled_mana
             and compiled_fixed_mana_family_present(host, card)
@@ -66,17 +75,25 @@ def activated_abilities(
             not compiled_color_set_mana
             and compiled_color_set_mana_family_present(host, card)
         )
+        or (
+            not compiled_cycling
+            and compiled_ordinary_cycling_family_present(host, card)
+        )
     )
     owned_lines = {
         spec.line_index
-        for spec in (*compiled_mana, *compiled_color_set_mana)
+        for spec in (
+            *compiled_mana,
+            *compiled_color_set_mana,
+            *compiled_cycling,
+        )
     }
     runtime_lines = executable_oracle_text.splitlines()
     for line_index in owned_lines:
         if 0 <= line_index < len(runtime_lines):
             runtime_lines[line_index] = ""
     runtime_oracle_text = (
-        "" if stale_compiled_mana else "\n".join(runtime_lines)
+        "" if stale_compiled_family else "\n".join(runtime_lines)
     )
     abilities = list(
         parse_activated_abilities(
@@ -90,6 +107,9 @@ def activated_abilities(
     )
     abilities.extend(
         spec.to_activated_ability() for spec in compiled_color_set_mana
+    )
+    abilities.extend(
+        spec.to_activated_ability() for spec in compiled_cycling
     )
     abilities.sort(key=lambda ability: ability.line_index)
     _append_intrinsic_land_abilities(host, data, abilities)

@@ -64,6 +64,7 @@
       "test_main_phase_rules",
       "test_mana_abilities",
       "test_mana_mode_effects",
+      "test_ordinary_cycling",
       "test_resolution_rules",
       "test_spells_abilities_effects_general",
       "test_stack_rules",

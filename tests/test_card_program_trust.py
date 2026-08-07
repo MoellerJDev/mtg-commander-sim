@@ -139,11 +139,12 @@ class CardProgramTrustTests(unittest.TestCase):
     def test_global_handler_and_component_inventory_is_capability_bound(self):
         status = runtime_component_status("commander_review")
         self.assertEqual(85, len(status["semantic_handlers"]))
-        self.assertEqual(28, len(status["runtime_components"]))
+        self.assertEqual(29, len(status["runtime_components"]))
         self.assertEqual(
             {
                 "ability.activated.mana.color-set",
                 "ability.activated.mana.fixed-output",
+                "ability.activated.cycling",
                 "ability.enchant.linked_graveyard_creature",
                 "ability.static.enchant",
                 "ability.static.flash",

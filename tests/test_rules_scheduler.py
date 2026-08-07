@@ -62,15 +62,15 @@ class RulesSchedulerTests(unittest.TestCase):
             for subsystem in self.queue["subsystems"]
             for rule in subsystem["rules"]
         ]
-        self.assertEqual(2973, len(queued))
+        self.assertEqual(2972, len(queued))
         self.assertEqual(len(queued), len(set(queued)))
         self.assertEqual(expected, set(queued))
         self.assertEqual(
-            373,
+            375,
             self.queue["summary"]["reviewed_behavioral_blocked"],
         )
         self.assertEqual(
-            2600,
+            2597,
             self.queue["summary"]["behavioral_review_required"],
         )
 
@@ -133,7 +133,6 @@ class RulesSchedulerTests(unittest.TestCase):
         )
         self.assertEqual(
             {
-                "702.29",
                 "702.29a",
                 "702.29b",
             },
@@ -141,10 +140,10 @@ class RulesSchedulerTests(unittest.TestCase):
         )
         self.assertTrue(
             all(
-                not rule["reviewed"]
-                and rule["classification"] == "unclassified"
-                and rule["conformance_status"] == "unreviewed"
-                and rule["work_state"] == "behavioral_review_required"
+                rule["reviewed"]
+                and rule["classification"] == "behavioral"
+                and rule["conformance_status"] == "blocked"
+                and rule["work_state"] == "reviewed_behavioral_blocked"
                 for rule in selected["rules"]
             )
         )
