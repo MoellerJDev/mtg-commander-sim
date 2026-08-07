@@ -54,6 +54,7 @@ from .compiler.prevention_templates import (
     prevention_trigger_effect_template,
 )
 from .compiler.runtime_templates import StaticRuntimeTemplate, static_runtime_template
+from .compiler.tap_state_templates import targeted_tap_state_effect_template
 from .declaration_costs import parse_declaration_cost_line
 from .declaration_restrictions import parse_declaration_restriction_line
 from .rules.capabilities import CapabilityRegistry
@@ -62,7 +63,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v37"
+ORACLE_COMPILER_VERSION = "oracle-ir-v38"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
@@ -303,31 +304,9 @@ def _effect_template(
             },
             ("mill", "cr-115-targets"),
         )
-    match = re.fullmatch(
-        r"(?P<action>tap|untap) target (?P<kind>artifact|creature|land|"
-        r"permanent)\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        action = match.group("action").casefold()
-        kind = match.group("kind").casefold()
-        schema = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "count": 1,
-        }
-        if kind != "permanent":
-            schema["types_any"] = [kind]
-        return (
-            f"{action}-target-{kind}-v1",
-            ({"op": action, "card": "$target.0"},),
-            schema,
-            (
-                "cr-701-keyword-actions",
-                "cr-115-targets",
-            ),
-        )
+    tap_state = targeted_tap_state_effect_template(normalized)
+    if tap_state is not None:
+        return tap_state.compiled()
     match = re.fullmatch(
         r"goad target creature"
         r"(?P<relation> an opponent controls| you don't control)?\.?",

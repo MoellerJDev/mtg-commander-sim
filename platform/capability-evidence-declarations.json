@@ -5026,6 +5026,21 @@
     },
     {
       "capability_id": "permanent.tap.effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_tap_activation_is_multiplayer_public_and_replays",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Expose and resolve the same public direct-target tap activation across four seats without widening the target domain."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
       "evidence_class": "mutation",
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_semantic_tap_state_mutants_are_killed",
       "official_rule_ids": [
@@ -5053,6 +5068,36 @@
         "commander_review"
       ],
       "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateCompilerTests.test_targeted_tap_state_shape_mutants_fail_closed",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject altered operations, target references, schemas, and missing rule ownership before capability promotion."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateCompilerTests.test_unsupported_tap_state_variants_remain_material_residuals",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep optional, modal, aggregate, qualified, quantified, and compound tap wording outside the direct-target capability."
     },
     {
       "capability_id": "permanent.tap.effect",
@@ -5086,6 +5131,51 @@
     },
     {
       "capability_id": "permanent.tap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower the same typed direct-target tap clause in spell, trigger, and activated contexts with precise source spans."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_tap_activation_is_multiplayer_public_and_replays",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Offer, validate, pay, stack, and resolve a compiled direct-target tap activation through the canonical mutation owner."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_tap_activation_is_multiplayer_public_and_replays",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project only public battlefield permanent references and never player or hidden-zone references for the direct target."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
       "evidence_class": "replay",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_replay_exactly",
       "official_rule_ids": [
@@ -5098,6 +5188,21 @@
         "commander_review"
       ],
       "applicability_note": "Execute an already-authorized instruction to tap one resolved battlefield permanent through the canonical tap-state path, producing a public change only when it was untapped."
+    },
+    {
+      "capability_id": "permanent.tap.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_tap_activation_is_multiplayer_public_and_replays",
+      "official_rule_ids": [
+        "701.26",
+        "701.26a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the advertised target, paid activation, stack object, and resulting tap transition to the same state hash."
     },
     {
       "capability_id": "permanent.tap.effect",
@@ -5276,6 +5381,22 @@
     },
     {
       "capability_id": "permanent.untap.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_untap_activation_consumes_stun_and_replays",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Route a compiled direct-target untap through the represented mandatory stun-counter replacement without a false untap event."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
       "evidence_class": "mutation",
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_semantic_tap_state_mutants_are_killed",
       "official_rule_ids": [
@@ -5305,6 +5426,38 @@
         "commander_review"
       ],
       "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateCompilerTests.test_targeted_tap_state_shape_mutants_fail_closed",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject altered operations, target references, schemas, and missing rule ownership before capability promotion."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateCompilerTests.test_unsupported_tap_state_variants_remain_material_residuals",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep optional, modal, aggregate, qualified, quantified, and compound untap wording outside the direct-target capability."
     },
     {
       "capability_id": "permanent.untap.effect",
@@ -5340,6 +5493,38 @@
     },
     {
       "capability_id": "permanent.untap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower the same typed direct-target untap clause in spell, trigger, and activated contexts with precise source spans."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_untap_activation_consumes_stun_and_replays",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Offer, validate, pay, stack, and resolve a compiled direct-target untap activation through the canonical mutation owner."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
       "evidence_class": "replay",
       "test_id": "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_replay_exactly",
       "official_rule_ids": [
@@ -5353,6 +5538,22 @@
         "commander_review"
       ],
       "applicability_note": "Execute an already-authorized instruction to untap one resolved battlefield permanent through the canonical tap-state path, including the represented stun-counter replacement."
+    },
+    {
+      "capability_id": "permanent.untap.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_untap_activation_consumes_stun_and_replays",
+      "official_rule_ids": [
+        "122.1d",
+        "701.26",
+        "701.26b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the advertised target, paid activation, stack object, stun replacement, and resulting state hash exactly."
     },
     {
       "capability_id": "permanent.untap.effect",

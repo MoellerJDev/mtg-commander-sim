@@ -11,6 +11,7 @@ from .component_resolution import implementation_component_resolves
 from .node_capability_shapes import (
     fixed_damage_node_capabilities,
     fixed_draw_node_capabilities,
+    targeted_tap_state_node_capabilities,
 )
 
 from ..util import stable_json
@@ -787,6 +788,13 @@ def capability_dependencies_for_node(
             mechanic_ids=mechanics,
         )
     )
+    dependencies.update(
+        targeted_tap_state_node_capabilities(
+            effects=effects,
+            target_schema=target_schema,
+            mechanic_ids=mechanics,
+        )
+    )
     if (
         "create_damage_prevention_shield" in all_operations
         and "cr-615-prevention-effects" in mechanics
@@ -838,6 +846,10 @@ def capability_covered_mechanics(
         covered.add("cr-115-targets")
     if "target.revalidate_resolution" in supplied:
         covered.add("cr-115-targets")
+    if supplied.intersection(
+        {"permanent.tap.effect", "permanent.untap.effect"}
+    ):
+        covered.add("tap-and-untap")
     if supplied.intersection(
         {
             "zone.draw.result_generated_ordering",

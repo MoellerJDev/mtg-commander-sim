@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "tap-and-untap",
   "official_name": "Tap and Untap",
   "effective_date": "2026-06-19",
@@ -61,7 +61,8 @@
       "typed tap-state effects execute during ordinary stack resolution or another authoritative semantic transition"
     ],
     "targets": [
-      "the semantic program supplies an already-validated battlefield permanent reference"
+      "the typed direct-target compiler accepts exactly one artifact, creature, land, or permanent on the battlefield",
+      "target legality is revalidated on resolution before the canonical tap-state effect executes"
     ],
     "choices": [],
     "hidden_information": [
@@ -102,7 +103,8 @@
     "skip phased-out permanents",
     "use represented effective creature types",
     "transaction rollback",
-    "exact command replay"
+    "exact command replay",
+    "closed direct-target tap and untap clauses shared by spell, trigger, and activated contexts"
   ],
   "witness_cards": [
     {
@@ -116,6 +118,14 @@
     {
       "name": "Intruder Alarm",
       "oracle_id": "1e943e04-e213-4781-b1a7-935aad8790e1"
+    },
+    {
+      "name": "Rathi Trapper",
+      "oracle_id": "0920d6aa-eab7-4116-b2f8-b13080d5d7e3"
+    },
+    {
+      "name": "Voltaic Key",
+      "oracle_id": "09aeea91-b1dc-443f-a509-4758f052c0a7"
     }
   ],
   "rulings": [],
@@ -128,14 +138,20 @@
     "test_tap_state_validation_fails_before_mutation",
     "test_tap_state_resolution_rolls_back_atomically",
     "test_tap_state_effects_replay_exactly",
-    "test_semantic_tap_state_mutants_are_killed"
+    "test_semantic_tap_state_mutants_are_killed",
+    "test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering",
+    "test_unsupported_tap_state_variants_remain_material_residuals",
+    "test_targeted_tap_state_shape_mutants_fail_closed",
+    "test_compiled_tap_activation_is_multiplayer_public_and_replays",
+    "test_compiled_untap_activation_consumes_stun_and_replays"
   ],
   "implementation": {
-    "component": "typed tap, untap, and all-creatures semantic handlers with the canonical tap_state mutation port and stun-aware engine primitive",
-    "version": "tap-state-effects-v1"
+    "component": "typed direct-target compiler, tap and untap semantic handlers, canonical tap_state mutation port, and stun-aware engine primitive",
+    "version": "tap-state-effects-v2"
   },
   "known_blockers": [
-    "continuous effects that prohibit tapping or untapping are not represented generically in ambient closure",
+    "optional, modal, aggregate, quantified, relational, qualified, and compound tap-state clauses remain precise compiler residuals",
+    "continuous effects that prohibit tapping or untapping are not represented generically; cards carrying those effects remain material residuals and fail match trust closed",
     "replacement discovery and affected-player ordering beyond the represented stun-counter replacement are incomplete",
     "complete layer dependencies and dynamically granted types are not capability-closed",
     "tap and untap costs and the untap-step selection procedure are separate incomplete capabilities"

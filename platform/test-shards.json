@@ -164,7 +164,8 @@
       "test_fixed_damage_effect_clauses",
       "test_oracle_ir",
       "test_preflight_v080",
-      "test_rule_capabilities"
+      "test_rule_capabilities",
+      "test_targeted_tap_state_effect_clauses"
     ],
     "server-replay-privacy": [
       "test_application_protocol",
