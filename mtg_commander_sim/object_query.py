@@ -31,6 +31,7 @@ class ObjectQueryResult:
     phased_out: bool = False
     known_to_actor: bool = True
     attached_to_ref: str | None = None
+    logical_object_id: str = ""
 
     def __post_init__(self) -> None:
         if not isinstance(self.counters, FrozenMap):
@@ -48,6 +49,7 @@ def object_query_result(
     types, subtypes, supertypes = type_parts
     return ObjectQueryResult(
         object_id=str(card.object_id),
+        logical_object_id=str(card.logical_object_id),
         ref=str(card.ref),
         printed_name=str(card.printed_name),
         owner=str(card.owner),

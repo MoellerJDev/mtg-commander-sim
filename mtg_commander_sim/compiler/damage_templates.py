@@ -5,6 +5,15 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping
 
+from ..fixed_damage_set_model import (
+    FixedDamageSetSpec,
+    PermanentControllerRelation,
+    PermanentDamageGroup,
+    PlayerDamageGroup,
+    PlayerDamageRelation,
+)
+from ..object_predicate import ObjectQuerySpec
+
 
 _ABILITY_WORD = re.compile(
     r"^(?P<word>[A-Za-z][A-Za-z ']+)\s+[—-]\s+(?P<body>.+)$"
@@ -183,11 +192,242 @@ class FixedDamageEffectTemplate:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class FixedMassDamageEffectTemplate:
+    """Typed lowering for one fixed simultaneous affected-set instruction."""
+
+    amount: int
+    spec: FixedDamageSetSpec
+    source_kind: str | None = None
+    target_opponent: bool = False
+
+    def __post_init__(self) -> None:
+        if type(self.amount) is not int or self.amount <= 0:
+            raise ValueError("Fixed mass damage amount must be positive")
+        if not isinstance(self.spec, FixedDamageSetSpec):
+            raise ValueError("Fixed mass damage requires a typed recipient set")
+        if self.source_kind is not None and self.source_kind not in (
+            *_FIXED_DAMAGE_SOURCE_KINDS,
+            "named",
+        ):
+            raise ValueError("Fixed mass damage source kind is unsupported")
+        if type(self.target_opponent) is not bool:
+            raise ValueError("Fixed mass target marker must be boolean")
+
+    @property
+    def template_id(self) -> str:
+        return (
+            "damage-fixed-target-opponent-controlled-set-v1"
+            if self.target_opponent
+            else "damage-fixed-simultaneous-set-v1"
+        )
+
+    @property
+    def effects(self) -> tuple[Mapping[str, Any], ...]:
+        return (
+            {
+                "op": "damage_fixed_set",
+                "source": "$source",
+                "amount": self.amount,
+                "groups": self.spec.to_dict()["groups"],
+            },
+        )
+
+    @property
+    def target_schema(self) -> Mapping[str, Any] | None:
+        if not self.target_opponent:
+            return None
+        return {
+            "zones": ["player"],
+            "categories": ["player"],
+            "player_relation": "opponent",
+            "count": 1,
+        }
+
+    @property
+    def mechanics(self) -> tuple[str, ...]:
+        return (
+            ("cr-120-damage", "cr-115-targets")
+            if self.target_opponent
+            else ("cr-120-damage",)
+        )
+
+    def compiled(
+        self,
+    ) -> tuple[
+        str,
+        tuple[Mapping[str, Any], ...],
+        Mapping[str, Any] | None,
+        tuple[str, ...],
+    ]:
+        return (
+            self.template_id,
+            self.effects,
+            self.target_schema,
+            self.mechanics,
+        )
+
+
+def _permanent_group(
+    *,
+    types_all: tuple[str, ...] = (),
+    types_any: tuple[str, ...] = (),
+    excluded_types: tuple[str, ...] = (),
+    colors_any: tuple[str, ...] = (),
+    keywords_all: tuple[str, ...] = (),
+    token: bool | None = None,
+    controller_relation: PermanentControllerRelation = (
+        PermanentControllerRelation.ANY
+    ),
+    target_controller: str | None = None,
+) -> PermanentDamageGroup:
+    return PermanentDamageGroup(
+        query=ObjectQuerySpec(
+            zones=("battlefield",),
+            types_all=types_all,
+            types_any=types_any,
+            excluded_types=excluded_types,
+            colors_any=colors_any,
+            keywords_all=keywords_all,
+            token=token,
+        ),
+        controller_relation=controller_relation,
+        target_controller=target_controller,
+    )
+
+
+_COLOR_WORDS = {
+    "white": "W",
+    "blue": "U",
+    "black": "B",
+    "red": "R",
+    "green": "G",
+}
+
+
+def _fixed_mass_damage_spec(
+    recipient_text: str,
+) -> tuple[FixedDamageSetSpec, bool] | None:
+    normalized = " ".join(recipient_text.casefold().split())
+    exact: dict[str, tuple[object, ...]] = {
+        "each creature": (_permanent_group(types_all=("creature",)),),
+        "each player": (PlayerDamageGroup(PlayerDamageRelation.ALL),),
+        "each creature and each player": (
+            _permanent_group(types_all=("creature",)),
+            PlayerDamageGroup(PlayerDamageRelation.ALL),
+        ),
+        "each creature and each planeswalker": (
+            _permanent_group(types_any=("creature", "planeswalker")),
+        ),
+        "each opponent and each creature they control": (
+            PlayerDamageGroup(PlayerDamageRelation.OPPONENTS),
+            _permanent_group(
+                types_all=("creature",),
+                controller_relation=PermanentControllerRelation.OPPONENTS,
+            ),
+        ),
+        "each opponent and each creature and planeswalker they control": (
+            PlayerDamageGroup(PlayerDamageRelation.OPPONENTS),
+            _permanent_group(
+                types_any=("creature", "planeswalker"),
+                controller_relation=PermanentControllerRelation.OPPONENTS,
+            ),
+        ),
+        "each opponent and each creature and each planeswalker they control": (
+            PlayerDamageGroup(PlayerDamageRelation.OPPONENTS),
+            _permanent_group(
+                types_any=("creature", "planeswalker"),
+                controller_relation=PermanentControllerRelation.OPPONENTS,
+            ),
+        ),
+        "each creature opponents control": (
+            _permanent_group(
+                types_all=("creature",),
+                controller_relation=PermanentControllerRelation.OPPONENTS,
+            ),
+        ),
+        "each creature your opponents control": (
+            _permanent_group(
+                types_all=("creature",),
+                controller_relation=PermanentControllerRelation.OPPONENTS,
+            ),
+        ),
+        "each creature and planeswalker your opponents control": (
+            _permanent_group(
+                types_any=("creature", "planeswalker"),
+                controller_relation=PermanentControllerRelation.OPPONENTS,
+            ),
+        ),
+        "each creature with flying": (
+            _permanent_group(
+                types_all=("creature",), keywords_all=("flying",)
+            ),
+        ),
+        "each nonartifact creature": (
+            _permanent_group(
+                types_all=("creature",), excluded_types=("artifact",)
+            ),
+        ),
+        "each nontoken creature": (
+            _permanent_group(types_all=("creature",), token=False),
+        ),
+        "each creature with shadow": (
+            _permanent_group(
+                types_all=("creature",), keywords_all=("shadow",)
+            ),
+        ),
+    }
+    if normalized in exact:
+        return FixedDamageSetSpec(exact[normalized]), False
+    if normalized == "each creature target opponent controls":
+        return (
+            FixedDamageSetSpec(
+                (
+                    _permanent_group(
+                        types_all=("creature",),
+                        controller_relation=(
+                            PermanentControllerRelation.TARGET_PLAYER
+                        ),
+                        target_controller="$target.0",
+                    ),
+                )
+            ),
+            True,
+        )
+    color_match = re.fullmatch(
+        r"each (?P<colors>white|blue|black|red|green)"
+        r"(?: and/or (?P<second>white|blue|black|red|green))? creature",
+        normalized,
+    )
+    if color_match is not None:
+        colors = tuple(
+            _COLOR_WORDS[value]
+            for value in (
+                color_match.group("colors"),
+                color_match.group("second"),
+            )
+            if value is not None
+        )
+        if len(colors) != len(set(colors)):
+            return None
+        return (
+            FixedDamageSetSpec(
+                (
+                    _permanent_group(
+                        types_all=("creature",), colors_any=colors
+                    ),
+                )
+            ),
+            False,
+        )
+    return None
+
+
 def fixed_damage_effect_template(
     text: str,
     *,
     card_name: str,
-) -> FixedDamageEffectTemplate | None:
+) -> FixedDamageEffectTemplate | FixedMassDamageEffectTemplate | None:
     """Recognize one whole fixed-damage clause without interpreting riders."""
 
     source = re.fullmatch(
@@ -200,6 +440,15 @@ def fixed_damage_effect_template(
     if source is None:
         return None
     recipient_text = source.group("recipient").casefold()
+    fixed_set = _fixed_mass_damage_spec(recipient_text)
+    if fixed_set is not None:
+        spec, target_opponent = fixed_set
+        return FixedMassDamageEffectTemplate(
+            amount=int(source.group("amount")),
+            spec=spec,
+            source_kind=(source.group("kind") or "named").casefold(),
+            target_opponent=target_opponent,
+        )
     recipient = next(
         (
             value

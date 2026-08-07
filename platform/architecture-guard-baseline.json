@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "59b47ea9e634db4632e6f466885c65c87abb2e42",
+  "baseline_commit": "34a2cc46b94c06187dbaeb9a8fb56402116d5329",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -2275,9 +2275,9 @@
     "physical_lines": 13183
   },
   "exception_binding": {
-    "adr": "docs/adr/0030-typed-stack-counter.md",
-    "allowance_fingerprint": "2b8a233fed455174b270f62c806626eb2e45874973f7a4ea47fb9303a4e922fd",
-    "exception_id": "ARCH-EXC-0012"
+    "adr": "docs/adr/0031-typed-fixed-damage-sets.md",
+    "allowance_fingerprint": "eb5d66f550ddd97f1f7519e2234f5b97bfbbc6c0203ba979662e6668eb76c3a1",
+    "exception_id": "ARCH-EXC-0013"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2416,7 +2416,7 @@
     },
     {
       "file": "mtg_commander_sim/engine.py",
-      "logical_lines": 301,
+      "logical_lines": 300,
       "symbol": "CommanderEngine._prepare_stack_resolution"
     },
     {
@@ -2571,6 +2571,7 @@
     "cumulative_upkeep",
     "damage",
     "damage_each_opponent",
+    "damage_fixed_set",
     "daretti_exchange",
     "delayed_mana",
     "delayed_pact_payment",

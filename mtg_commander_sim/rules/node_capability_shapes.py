@@ -4,6 +4,13 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence
 
+from ..fixed_damage_set_model import (
+    FixedDamageSetError,
+    FixedDamageSetSpec,
+    PermanentControllerRelation,
+    PermanentDamageGroup,
+    PlayerDamageGroup,
+)
 
 _EXILE_MECHANIC = "ex" + "ile"
 
@@ -214,6 +221,51 @@ def fixed_damage_node_capabilities(
     if "cr-120-damage" not in mechanics or len(effects) != 1:
         return ()
     effect = effects[0]
+    if (
+        set(effect) == {"op", "source", "amount", "groups"}
+        and effect.get("op") == "damage_fixed_set"
+        and effect.get("source") == "$source"
+        and _positive_int(effect.get("amount"))
+    ):
+        try:
+            spec = FixedDamageSetSpec.from_dict(
+                {"groups": effect.get("groups")}
+            )
+        except FixedDamageSetError:
+            return ()
+        targeted = any(
+            isinstance(group, PermanentDamageGroup)
+            and group.controller_relation
+            is PermanentControllerRelation.TARGET_PLAYER
+            for group in spec.groups
+        )
+        expected_target = (
+            {
+                "zones": ["player"],
+                "categories": ["player"],
+                "player_relation": "opponent",
+                "count": 1,
+            }
+            if targeted
+            else None
+        )
+        if target_schema != expected_target or (
+            targeted and "cr-115-targets" not in mechanics
+        ):
+            return ()
+        dependencies = {
+            "damage.amount.positive",
+            "damage.batch.fixed_set",
+        }
+        if any(isinstance(group, PlayerDamageGroup) for group in spec.groups):
+            dependencies.add("damage.result.player_life")
+        if any(
+            isinstance(group, PermanentDamageGroup) for group in spec.groups
+        ):
+            dependencies.add("damage.result.multitype_permanent")
+        if targeted:
+            dependencies.add("target.revalidate_resolution")
+        return tuple(sorted(dependencies))
     if (
         target_schema is None
         and set(effect) == {"op", "source", "amount"}

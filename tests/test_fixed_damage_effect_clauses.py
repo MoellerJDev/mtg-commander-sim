@@ -87,7 +87,6 @@ class FixedDamageEffectTemplateTests(unittest.TestCase):
             "Fixture deals X damage to target creature.",
             "Fixture deals 3 damage divided as you choose among two targets.",
             "Fixture deals 3 damage to target creature and you gain 3 life.",
-            "Fixture deals 3 damage to each creature.",
             "If you control a Mountain, Fixture deals 3 damage to any target.",
             "Deal 3 damage to target creature.",
         ):
@@ -351,7 +350,6 @@ class FixedDamageEffectCompilerTests(unittest.TestCase):
             "Fixture deals X damage to target creature.",
             "Fixture deals 3 damage divided as you choose among two targets.",
             "Fixture deals 3 damage to target creature and you gain 3 life.",
-            "Fixture deals 3 damage to each creature.",
             "If you control a Mountain, Fixture deals 3 damage to any target.",
         ):
             with self.subTest(text=text):

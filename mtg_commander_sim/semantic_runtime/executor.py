@@ -19,6 +19,7 @@ from .intents import (
     CopyControlledTokensIntent,
     CopyStackItemIntent,
     CreateTokenIntent,
+    DealFixedDamageSetIntent,
     DomainEffectIntent,
     DestroyPermanentIntent,
     DrawCardsIntent,
@@ -146,6 +147,11 @@ class SemanticIntentSink(
     def add_subtype_intent(self, intent: AddSubtypeIntent) -> str: ...
 
     def proliferate_intent(self, intent: ProliferateIntent) -> None: ...
+
+    def deal_fixed_damage_set_intent(
+        self,
+        intent: DealFixedDamageSetIntent,
+    ) -> Any: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -391,6 +397,10 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
         if isinstance(intent, ProliferateIntent):
             sink.proliferate_intent(intent)
             results.append((intent.actor, None))
+            continue
+        if isinstance(intent, DealFixedDamageSetIntent):
+            result = sink.deal_fixed_damage_set_intent(intent)
+            results.append((intent.source_ref, result))
             continue
         if isinstance(intent, DomainEffectIntent):
             result = sink.apply_domain_effect_intent(intent)

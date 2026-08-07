@@ -1786,6 +1786,34 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/fixed_damage_set.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/fixed_damage_set_model.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/fixed_mana_abilities.py",
       "layer": "rules",
       "owning_subsystem": "mana_rules",
@@ -3443,6 +3471,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/fixed_damage_set_handlers.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_runtime/generic.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_runtime",
@@ -4034,5 +4077,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "141665e4377ab2eb9fd8292d7850276c9e46b4576c99a0c36cdc2b56b5345c0f"
+  "fingerprint": "c30edae8e62c3aa33f70fba533437519e9137a30386ad9b3832f07e40f52e9c0"
 }

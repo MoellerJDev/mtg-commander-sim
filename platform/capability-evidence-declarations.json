@@ -2369,6 +2369,78 @@
       "applicability_note": "Accept a positive integer damage amount and suppress zero while rejecting negative damage."
     },
     {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_fixed_mass_damage.FixedMassDamageInteractionTests.test_fixed_set_damage_uses_effective_types_and_replacement_order",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Use effective creature types and apply a static quantity replacement independently to every event in one simultaneous batch."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_resolves_one_canonical_batch",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Resolve one generated affected-set instruction across four controllers with deterministic participant ordering."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_fixed_mass_damage.FixedDamageSetModelTests.test_fixed_set_snapshot_order_and_predicate_mutants_are_killed",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a query-owner mutant that admits objects outside the typed damageable affected set."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_mass_damage.FixedDamageSetModelTests.test_fixed_set_handler_rejects_malformed_or_unrepresented_groups",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject booleans, unknown fields, nondamageable queries, and malformed typed groups before any authoritative mutation."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_mass_damage.FixedMassDamageCompilerTests.test_unsupported_mass_damage_wording_remains_residual",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Leave negative predicates, subtype qualifiers, variable amounts, divided damage, and linked riders as precise material residuals."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_mass_damage.FixedDamageSetModelTests.test_fixed_set_snapshot_is_immutable_canonical_and_deduplicated",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Materialize one immutable, canonical, APNAP-ordered and identity-deduplicated public recipient set from typed effective-characteristic queries."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_resolves_one_canonical_batch",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Compile and resolve a four-seat fixed creature-damage instruction through one canonical simultaneous damage transaction."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_fixed_set_damage_projects_no_hidden_zone_cards",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project only public damage recipients and results without exposing opposing hand identities."
+    },
+    {
+      "capability_id": "damage.batch.fixed_set",
+      "evidence_class": "replay",
+      "test_id": "tests.test_fixed_mass_damage.FixedMassDamageRuntimeTests.test_compiled_mass_damage_replays_exactly",
+      "official_rule_ids": ["120.1", "120.2", "120.4", "608.2c", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the exact generated instruction, affected-set order, event identities, result journal, and final state hash."
+    },
+    {
       "capability_id": "damage.prevention.aftermath.damage",
       "evidence_class": "interaction",
       "test_id": "tests.test_damage_prevention_aftermath.DamagePreventionAftermathTests.test_other_prevention_applies_to_aftermath_damage",
