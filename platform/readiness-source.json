@@ -7,9 +7,9 @@
   },
   "integration": {
     "active_phase": null,
-    "branch": "ci/reconcile-pr128-main-status",
+    "branch": "ci/stabilize-pr129-main-provenance",
     "branch_ancestry": {
-      "focused_branch_base": "e1f9e6f684438c828b86339266b830a52575666b",
+      "focused_branch_base": "9bffd3c8593a1488c2dff4d0773e803a3c055387",
       "focused_branch_unique_commits_over_main": 1
     },
     "pull_requests": [
@@ -894,6 +894,13 @@
         "number": 128,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/128"
+      },
+      {
+        "base": "main",
+        "head": "ci/reconcile-pr128-main-status",
+        "number": 129,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/129"
       }
     ],
     "tags": [
@@ -910,9 +917,9 @@
   "provenance": {
     "feature_head_sha": "e1f9e6f684438c828b86339266b830a52575666b",
     "feature_head_classification": "historical_integrated",
-    "certified_head_sha": "a2c648faab7232fb90e511a9bac338e0eb251369",
-    "certified_head_classification": "current_main_tree_equivalent",
-    "generation_timestamp": "2026-08-07T12:43:00Z"
+    "certified_head_sha": "9bffd3c8593a1488c2dff4d0773e803a3c055387",
+    "certified_head_classification": "historical_certified",
+    "generation_timestamp": "2026-08-07T13:00:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -1282,14 +1289,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31177947733,
+      "run_id": 31179557853,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31177947733"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31179557853"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_pr128_exact_head_31177947733_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; post_merge_main_smoke_31179161189_passed_all_29_behavioral_tests_then_rejected_only_stale_squash_provenance; certified exact head is tree-equivalent to current squash-merged main",
-      "focused_rules_tests": "typed_stack_counter_changed_modules_compile_pinned_corpus_census_frontier_reusable_piece_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; public exact-head CI passed focused counter legality, no-op resolution, rollback, exact replay provenance, privacy, multiplayer, mutation, package, and browser validation",
+      "deterministic_tests": "certified_pr129_exact_head_31179557853_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; exact PR head 8649d38688cc18f9bdb15c3ea0ae4db12fafd399 and squash merge 9bffd3c8593a1488c2dff4d0773e803a3c055387 have identical Git trees; post_merge_main_smoke_31180127248 passed all 29 behavioral tests before rejecting only the stale pre-PR129 certified-head field corrected here",
+      "focused_rules_tests": "typed_stack_counter_changed_modules_compile_pinned_corpus_census_frontier_reusable_piece_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; public PR129 exact-head CI passed every functional shard plus generated, replay, privacy, multiplayer, mutation, package, Windows, and headless-browser validation",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",

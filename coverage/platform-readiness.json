@@ -33,7 +33,7 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "543584d774d019829041fac494b33dd5dfc645cd0f7217c73cc2b084bb88fefd",
+    "evaluated_source_tree_hash": "1b82dacd53a04a8911a5cd402d49c7f2e5cedc7e3d0b0d86866f5fffd2deeb9e",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -405,11 +405,11 @@
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
-    "certified_head_classification": "current_main_tree_equivalent",
-    "certified_head_sha": "a2c648faab7232fb90e511a9bac338e0eb251369",
+    "certified_head_classification": "historical_certified",
+    "certified_head_sha": "9bffd3c8593a1488c2dff4d0773e803a3c055387",
     "feature_head_classification": "historical_integrated",
     "feature_head_sha": "e1f9e6f684438c828b86339266b830a52575666b",
-    "generation_timestamp": "2026-08-07T12:43:00Z"
+    "generation_timestamp": "2026-08-07T13:00:00Z"
   },
   "repository": {
     "default_branch": "main",
@@ -518,9 +518,9 @@
     },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31177947733,
+      "run_id": 31179557853,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31177947733"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31179557853"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -528,9 +528,9 @@
       "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_pr128_exact_head_31177947733_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; post_merge_main_smoke_31179161189_passed_all_29_behavioral_tests_then_rejected_only_stale_squash_provenance; certified exact head is tree-equivalent to current squash-merged main",
+      "deterministic_tests": "certified_pr129_exact_head_31179557853_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; exact PR head 8649d38688cc18f9bdb15c3ea0ae4db12fafd399 and squash merge 9bffd3c8593a1488c2dff4d0773e803a3c055387 have identical Git trees; post_merge_main_smoke_31180127248 passed all 29 behavioral tests before rejecting only the stale pre-PR129 certified-head field corrected here",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
-      "focused_rules_tests": "typed_stack_counter_changed_modules_compile_pinned_corpus_census_frontier_reusable_piece_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; public exact-head CI passed focused counter legality, no-op resolution, rollback, exact replay provenance, privacy, multiplayer, mutation, package, and browser validation",
+      "focused_rules_tests": "typed_stack_counter_changed_modules_compile_pinned_corpus_census_frontier_reusable_piece_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; public PR129 exact-head CI passed every functional shard plus generated, replay, privacy, multiplayer, mutation, package, Windows, and headless-browser validation",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",
