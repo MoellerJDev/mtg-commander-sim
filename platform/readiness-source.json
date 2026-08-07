@@ -7,10 +7,10 @@
   },
   "integration": {
     "active_phase": null,
-    "branch": "main",
+    "branch": "fix/typed-color-among-mana",
     "branch_ancestry": {
-      "focused_branch_base": "0c229ab9543ae2cb631c9b17326fa15a869f6d97",
-      "focused_branch_unique_commits_over_main": 0
+      "focused_branch_base": "e0e80861bfc3f332146cda91597b901521f47779",
+      "focused_branch_unique_commits_over_main": 6
     },
     "pull_requests": [
       {
@@ -747,6 +747,97 @@
         "number": 105,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/105"
+      },
+      {
+        "base": "main",
+        "head": "docs/current-state-documentation-system",
+        "number": 106,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/106"
+      },
+      {
+        "base": "main",
+        "head": "rules/trample-combat-damage-assignment",
+        "number": 107,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/107"
+      },
+      {
+        "base": "main",
+        "head": "rules/combat-damage-snapshot-canonicalization",
+        "number": 108,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/108"
+      },
+      {
+        "base": "main",
+        "head": "rules/activated-draw-ability-harvest",
+        "number": 109,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/109"
+      },
+      {
+        "base": "main",
+        "head": "rules/draw-result-actions-and-ordering",
+        "number": 110,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/110"
+      },
+      {
+        "base": "main",
+        "head": "rules/draw-hidden-casting-and-reveal-choice",
+        "number": 111,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/111"
+      },
+      {
+        "base": "main",
+        "head": "rules/deathtouch-assignment-result",
+        "number": 112,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/112"
+      },
+      {
+        "base": "main",
+        "head": "rules/defender-attack-restriction",
+        "number": 113,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/113"
+      },
+      {
+        "base": "main",
+        "head": "rules/menace-block-restriction",
+        "number": 114,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/114"
+      },
+      {
+        "base": "main",
+        "head": "rules/basic-landwalk-block-restriction",
+        "number": 115,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/115"
+      },
+      {
+        "base": "main",
+        "head": "rules/typed-combat-evasion-restrictions",
+        "number": 116,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/116"
+      },
+      {
+        "base": "main",
+        "head": "rules/typed-block-transition-keyword-triggers",
+        "number": 117,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/117"
+      },
+      {
+        "base": "main",
+        "head": "fix/deathtouch-marker-and-activation-hardening",
+        "number": 118,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/118"
       }
     ],
     "tags": [
@@ -761,11 +852,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "a84a42af7ec40527754fd1410797963b710c88bb",
+    "feature_head_sha": "578c8dec96d9429e9420320f423531099fcba7c8",
     "feature_head_classification": "active_candidate",
-    "certified_head_sha": "bce3266b86e2b4e63cd89340aa3e02632ba9da14",
-    "certified_head_classification": "historical_certified",
-    "generation_timestamp": "2026-08-06T15:30:17Z"
+    "certified_head_sha": "e0e80861bfc3f332146cda91597b901521f47779",
+    "certified_head_classification": "current_main",
+    "generation_timestamp": "2026-08-07T01:40:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -1048,8 +1139,8 @@
     {
       "id": "deathtouch_marker_and_activation_type_hardening",
       "name": "Deathtouch marker lifetime and activation type hardening",
-      "status": "implemented_current_source_tree",
-      "evidence": "The current source tree consumes each since-last-check Deathtouch marker at the applicable state-based-action check even if the damaged permanent has ceased to be a creature, is phased out, or survives because it is Indestructible. Later creature or phased-in states cannot reuse old damage. The state action remains simultaneous and stale multi-object consumption still rejects before mutation. Activation-condition counts consume the canonical parsed effective card-type set instead of substring matching, so subtype text cannot satisfy a card-type condition and malformed effective type data fails closed. Focused red/green, replay, rollback, multiplayer, interaction, capability, and killed-mutation checks pass; regeneration and broader characteristic producers remain outside this bounded correction."
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 118 consumes each since-last-check Deathtouch marker at the applicable state-based-action check even if the damaged permanent has ceased to be a creature, is phased out, or survives because it is Indestructible. Later creature or phased-in states cannot reuse old damage. The state action remains simultaneous and stale multi-object consumption still rejects before mutation. Activation-condition counts consume the canonical parsed effective card-type set instead of substring matching, so subtype text cannot satisfy a card-type condition and malformed effective type data fails closed. Exact-head run 31137555278 passed every required gate, squash commit e0e8086 is on main, and post-merge main-smoke run 31138335232 passed. Broader characteristic producers remain outside this bounded correction."
     },
     {
       "id": "color_set_activated_mana_harvest",
@@ -1093,14 +1184,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31116075484,
+      "run_id": 31138335232,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31116075484"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31138335232"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr117_exact_head_31114243343_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31116075484_pass",
-      "focused_rules_tests": "deathtouch_noncreature_phased_and_indestructible_one_check_marker_consumption_activation_exact_card_type_matching_malformed_fail_closed_canonical_proposal_identity_rollback_multiplayer_replay_capability_and_mutation_evidence_pass; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
+      "deterministic_tests": "certified_main_through_pr118_exact_head_31137555278_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31138335232_pass",
+      "focused_rules_tests": "color_set_mana_closed_grammar_current_control_effective_colors_phasing_haste_multiplayer_privacy_rollback_replay_offer_command_parity_empty_qualifying_set_and_mutation_evidence_pass; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",

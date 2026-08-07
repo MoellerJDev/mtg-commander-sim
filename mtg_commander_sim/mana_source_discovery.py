@@ -1,6 +1,11 @@
 from __future__ import annotations
 
-"""Read-only discovery of mana sources for authoritative auto-payment."""
+"""Read-only mana-source discovery for authoritative auto-payment.
+
+New component families arrive as typed abilities. Narrow legacy compatibility
+adapters remain here until their corresponding granted-mana families are
+compiled, and are kept separate from typed mode discovery.
+"""
 
 from typing import Any, Mapping, Protocol, Sequence
 
@@ -99,7 +104,7 @@ def available_mana_sources(
     *,
     spend_context: str | None = None,
 ) -> list[ManaSource]:
-    """Discover payable modes without mutating or interpreting Oracle text."""
+    """Discover payable modes without mutating game state."""
 
     identity = host._commander_identity(seat)
     sources: list[ManaSource] = []
