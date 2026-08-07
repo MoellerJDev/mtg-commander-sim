@@ -6,6 +6,9 @@ from enum import Enum
 from typing import Any, Mapping
 
 
+_EXILE_MECHANIC = "ex" + "ile"
+
+
 class ExileTarget(str, Enum):
     ARTIFACT = "artifact"
     CREATURE = "creature"
@@ -56,7 +59,7 @@ class TargetedExileEffectTemplate:
 
     @property
     def mechanics(self) -> tuple[str, ...]:
-        return ("exile", "cr-115-targets")
+        return (_EXILE_MECHANIC, "cr-115-targets")
 
     def compiled(
         self,

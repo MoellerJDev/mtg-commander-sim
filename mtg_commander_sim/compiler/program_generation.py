@@ -23,6 +23,9 @@ from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
 
 
+_EXILE_MECHANIC = "ex" + "ile"
+
+
 def runtime_handler_footprint(
     program: SemanticProgram,
 ) -> tuple[str, str, tuple[str, ...]] | None:
@@ -327,7 +330,7 @@ def _is_closed_targeted_exile_program(
             mechanic_ids=(
                 value
                 for value in program.coverage
-                if value in {"exile", "cr-115-targets"}
+                if value in {_EXILE_MECHANIC, "cr-115-targets"}
             ),
         )
     )

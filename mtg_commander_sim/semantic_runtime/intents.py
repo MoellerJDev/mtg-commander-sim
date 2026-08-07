@@ -118,7 +118,7 @@ class ReturnPermanentToOwnerHandIntent:
             "replacement_selections",
             _freeze_replacement_selections(
                 self.replacement_selections,
-                family="Return",
+                family="return-to-owner-hand",
             ),
         )
 

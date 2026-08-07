@@ -219,6 +219,11 @@ PermanentTransitionIntent = (
     | ExilePermanentIntent
     | ReturnPermanentToOwnerHandIntent
 )
+PERMANENT_TRANSITION_INTENT_TYPES = (
+    DestroyPermanentIntent,
+    ExilePermanentIntent,
+    ReturnPermanentToOwnerHandIntent,
+)
 
 
 def _execute_permanent_transition_intent(
@@ -283,14 +288,7 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
             )
             results.append(("creatures", result))
             continue
-        if isinstance(
-            intent,
-            (
-                DestroyPermanentIntent,
-                ExilePermanentIntent,
-                ReturnPermanentToOwnerHandIntent,
-            ),
-        ):
+        if isinstance(intent, PERMANENT_TRANSITION_INTENT_TYPES):
             result = _execute_permanent_transition_intent(sink, intent)
             results.append((intent.object_ref, result))
             continue

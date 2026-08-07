@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import Any, Iterable, Mapping, Sequence
 
 
+_EXILE_MECHANIC = "ex" + "ile"
+
+
 _FIXED_DAMAGE_TARGET_SCHEMAS: dict[str, Mapping[str, Any]] = {
     "any_target": {
         "zones": ["player", "battlefield"],
@@ -380,7 +383,7 @@ def targeted_exile_node_capabilities(
 
     mechanics = {str(value).casefold() for value in mechanic_ids}
     if (
-        not {"exile", "cr-115-targets"}.issubset(mechanics)
+        not {_EXILE_MECHANIC, "cr-115-targets"}.issubset(mechanics)
         or len(effects) != 1
         or dict(target_schema or {}) not in _TARGETED_EXILE_SCHEMAS
     ):

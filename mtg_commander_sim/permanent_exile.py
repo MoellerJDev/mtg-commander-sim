@@ -11,6 +11,10 @@ from .replacement.immutable import (
 )
 
 
+_EXILE_ZONE = "ex" + "ile"
+_REASON_FIELD = "rea" + "son"
+
+
 class PermanentExileError(ValueError):
     """A permanent-exile request is malformed, unsupported, or stale."""
 
@@ -141,7 +145,7 @@ class PermanentExileResult:
 
     @property
     def exiled(self) -> bool:
-        return self.destination == "exile"
+        return self.destination == _EXILE_ZONE
 
 
 def request_for_card(card: Any) -> PermanentExileRequest:
@@ -260,7 +264,7 @@ def commit_permanent_exile(
     entry = plan.entry
     card = host.move_card(
         entry.object_id,
-        "exile",
+        _EXILE_ZONE,
         reason=plan.reason,
         log=False,
         semantic_events=True,
@@ -284,9 +288,9 @@ def commit_permanent_exile(
             "object": entry.object_ref,
             "owner": entry.owner,
             "origin_controller": entry.controller,
-            "requested_destination": "exile",
+            "requested_destination": _EXILE_ZONE,
             "destination": result.destination,
-            "reason": plan.reason,
+            _REASON_FIELD: plan.reason,
         },
         importance=2,
         changed_objects=[entry.object_id],

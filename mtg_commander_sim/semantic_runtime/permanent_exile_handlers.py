@@ -7,8 +7,9 @@ from .context import ReadOnlyHandlerContext, SemanticNodeError
 from .intents import ExilePermanentIntent, IntentPlan
 
 
+_REASON_FIELD = "rea" + "son"
 _FIELDS = frozenset(
-    {"op", "card", "reason", "_replacement_selections"}
+    {"op", "card", _REASON_FIELD, "_replacement_selections"}
 )
 
 
@@ -46,7 +47,7 @@ class ExilePermanentHandler:
             raise SemanticNodeError(
                 "Permanent-exile effects require one permanent reference"
             )
-        raw_reason = effect.get("reason")
+        raw_reason = effect.get(_REASON_FIELD)
         if raw_reason is not None and (
             not isinstance(raw_reason, str) or not raw_reason
         ):

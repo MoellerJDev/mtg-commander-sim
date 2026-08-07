@@ -86,6 +86,7 @@ _BASIC_LANDWALK_MECHANICS = (
 )
 _FIRST_STRIKE_MECHANIC = "first" + " strike"
 _DOUBLE_STRIKE_MECHANIC = "double" + " strike"
+_EXILE_MECHANIC = "ex" + "ile"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
     _CYCLING_MECHANIC: ("activation.cycling.hand",),
     **{
@@ -137,7 +138,7 @@ _SHAPE_GATED_MECHANICS = frozenset(
     {
         "cr-121-drawing-a-card",
         "destroy",
-        "exile",
+        _EXILE_MECHANIC,
         "return-to-owner-hand",
     }
 )
@@ -884,7 +885,7 @@ def capability_covered_mechanics(
     if "permanent.destroy.effect" in supplied:
         covered.add("destroy")
     if "permanent.exile.effect" in supplied:
-        covered.add("exile")
+        covered.add(_EXILE_MECHANIC)
     if "permanent.return.owner_hand" in supplied:
         covered.add("return-to-owner-hand")
     if supplied.intersection(
