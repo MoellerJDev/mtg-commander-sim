@@ -37,8 +37,8 @@
         },
         "oversized_functions_and_methods": {
           "baseline": 35,
-          "current": 35,
-          "delta": 0
+          "current": 34,
+          "delta": -1
         },
         "oversized_modules": {
           "baseline": 5,
@@ -3386,17 +3386,6 @@
           "visibility": "public"
         },
         {
-          "end_line": 212,
-          "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
-          "kind": "function",
-          "line": 25,
-          "logical_lines": 184,
-          "name": "lower_ability_keyword_fragments",
-          "physical_lines": 188,
-          "symbol": "lower_ability_keyword_fragments",
-          "visibility": "public"
-        },
-        {
           "end_line": 1470,
           "file": "mtg_commander_sim/rules_corpus.py",
           "kind": "function",
@@ -3439,9 +3428,20 @@
           "physical_lines": 188,
           "symbol": "extract_mana_modes",
           "visibility": "public"
+        },
+        {
+          "end_line": 11467,
+          "file": "mtg_commander_sim/engine.py",
+          "kind": "method",
+          "line": 11303,
+          "logical_lines": 164,
+          "name": "_complete_attackers",
+          "physical_lines": 165,
+          "symbol": "CommanderEngine._complete_attackers",
+          "visibility": "private"
         }
       ],
-      "logical_lines": 105249,
+      "logical_lines": 105260,
       "methods": {
         "dunder": 248,
         "private": 648,
@@ -4444,6 +4444,13 @@
           "physical_lines": 233
         },
         {
+          "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
+          "functions_and_methods": 3,
+          "language": "python",
+          "logical_lines": 217,
+          "physical_lines": 234
+        },
+        {
           "file": "mtg_commander_sim/mana_mode_effects.py",
           "functions_and_methods": 13,
           "language": "python",
@@ -4484,13 +4491,6 @@
           "language": "python",
           "logical_lines": 206,
           "physical_lines": 220
-        },
-        {
-          "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
-          "functions_and_methods": 1,
-          "language": "python",
-          "logical_lines": 206,
-          "physical_lines": 218
         },
         {
           "file": "mtg_commander_sim/__init__.py",
@@ -5361,7 +5361,7 @@
           "physical_lines": 1
         }
       ],
-      "oversized_function_and_method_count": 35,
+      "oversized_function_and_method_count": 34,
       "oversized_functions_and_methods": [
         {
           "end_line": 1645,
@@ -5639,17 +5639,6 @@
           "visibility": "public"
         },
         {
-          "end_line": 212,
-          "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
-          "kind": "function",
-          "line": 25,
-          "logical_lines": 184,
-          "name": "lower_ability_keyword_fragments",
-          "physical_lines": 188,
-          "symbol": "lower_ability_keyword_fragments",
-          "visibility": "public"
-        },
-        {
           "end_line": 1470,
           "file": "mtg_commander_sim/rules_corpus.py",
           "kind": "function",
@@ -5787,7 +5776,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 114852,
+      "physical_lines": 114868,
       "python_file_count": 257,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -5805,7 +5794,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1366,
+      "top_level_functions": 1368,
       "web_file_count": 16
     },
     "semantic_handlers": {

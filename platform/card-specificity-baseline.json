@@ -829,18 +829,18 @@
       "column": 12,
       "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
       "in_condition": false,
-      "line": 119,
+      "line": 173,
       "matched_printed_name": "Battle Cry",
-      "symbol": "lower_ability_keyword_fragments",
+      "symbol": "_lower_combat_keyword_fragments",
       "value": "battle cry"
     },
     {
       "column": 12,
       "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
       "in_condition": false,
-      "line": 124,
+      "line": 178,
       "matched_printed_name": "Melee",
-      "symbol": "lower_ability_keyword_fragments",
+      "symbol": "_lower_combat_keyword_fragments",
       "value": "melee"
     },
     {

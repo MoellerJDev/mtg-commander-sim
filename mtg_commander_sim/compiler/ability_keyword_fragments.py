@@ -61,10 +61,64 @@ def lower_ability_keyword_fragments(
                 },
             )
         )
-    handlers: list[Mapping[str, Any]] = []
-    parts = tuple(
+    combat = _lower_combat_keyword_fragments(material_line, mechanics)
+    if combat.residual_kind is not None:
+        return combat
+    handlers = list(combat.handlers)
+
+    if "protection" in mechanics:
+        protection_parts = tuple(
+            part
+            for part in _keyword_parts(material_line)
+            if part.strip().casefold().startswith("protection from ")
+        )
+        parsed = tuple(
+            parse_protection_line(part) for part in protection_parts
+        )
+        if (
+            len(protection_parts) != mechanics.count("protection")
+            or any(not specs for specs in parsed)
+        ):
+            return AbilityKeywordFragmentLowering(
+                handlers=tuple(handlers),
+                residual_kind="unsupported_protection_quality",
+                residual_reason=(
+                    "protection quality is outside the closed typed DEBT "
+                    "grammar"
+                ),
+                residual_blockers=("typed protection quality",),
+            )
+        specs = tuple(
+            spec
+            for values in parsed
+            for spec in (values or ())
+        )
+        handlers.extend(
+            tuple(
+                {
+                    "handler_id": "ability.static.protection.v1",
+                    "schema_version": 1,
+                    "event": "continuous",
+                    "fragment": ability_fragment_to_dict(spec),
+                }
+                for spec in specs
+            )
+        )
+    return AbilityKeywordFragmentLowering(handlers=tuple(handlers))
+
+
+def _keyword_parts(material_line: str) -> tuple[str, ...]:
+    return tuple(
         part.strip() for part in material_line.rstrip(".").split(",")
     )
+
+
+def _lower_combat_keyword_fragments(
+    material_line: str,
+    mechanics: tuple[str, ...],
+) -> AbilityKeywordFragmentLowering:
+    handlers: list[Mapping[str, Any]] = []
+    parts = _keyword_parts(material_line)
     flanking_parts = tuple(
         part for part in parts if part.casefold() == "flanking"
     )
@@ -171,44 +225,6 @@ def lower_ability_keyword_fragments(
             residual_blockers=("positive integer Bushido value",),
         )
 
-    if "protection" in mechanics:
-        protection_parts = tuple(
-            part
-            for part in parts
-            if part.strip().casefold().startswith("protection from ")
-        )
-        parsed = tuple(
-            parse_protection_line(part) for part in protection_parts
-        )
-        if (
-            len(protection_parts) != mechanics.count("protection")
-            or any(not specs for specs in parsed)
-        ):
-            return AbilityKeywordFragmentLowering(
-                handlers=tuple(handlers),
-                residual_kind="unsupported_protection_quality",
-                residual_reason=(
-                    "protection quality is outside the closed typed DEBT "
-                    "grammar"
-                ),
-                residual_blockers=("typed protection quality",),
-            )
-        specs = tuple(
-            spec
-            for values in parsed
-            for spec in (values or ())
-        )
-        handlers.extend(
-            tuple(
-                {
-                    "handler_id": "ability.static.protection.v1",
-                    "schema_version": 1,
-                    "event": "continuous",
-                    "fragment": ability_fragment_to_dict(spec),
-                }
-                for spec in specs
-            )
-        )
     return AbilityKeywordFragmentLowering(handlers=tuple(handlers))
 
 

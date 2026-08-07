@@ -201,7 +201,7 @@ class AbilityFragmentModelTests(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            5,
+            8,
             len(default_ability_fragment_registry().inventory()),
         )
         with self.assertRaisesRegex(ValueError, "unknown"):
