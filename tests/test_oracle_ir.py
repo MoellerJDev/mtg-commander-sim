@@ -152,6 +152,7 @@ class MechanicContractTests(unittest.TestCase):
                 "wither",
                 "bushido",
                 "battle-cry",
+                "cycling",
                 "exalted",
                 "melee",
             },
