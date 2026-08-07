@@ -434,9 +434,11 @@ class PermanentExileRuleTests(unittest.TestCase):
         self.assertTrue(accepted.ok, accepted.summary)
         self.pass_stack(session)
 
-        self.assertEqual("exile", target.zone)
-        self.assertEqual("B", target.owner)
-        self.assertEqual("graveyard", source.zone)
+        committed_target = engine.state.cards[target.object_id]
+        committed_source = engine.state.cards[source.object_id]
+        self.assertEqual("exile", committed_target.zone)
+        self.assertEqual("B", committed_target.owner)
+        self.assertEqual("graveyard", committed_source.zone)
         self.assertIn(
             "permanent.exile",
             [event.code for event in engine.state.events],
@@ -446,7 +448,7 @@ class PermanentExileRuleTests(unittest.TestCase):
                 f"pilot:{seat}"
             )
             self.assertIn(
-                target.ref,
+                committed_target.ref,
                 {
                     row["id"]
                     for row in projected["players"]["B"]["ex"]
