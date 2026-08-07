@@ -1,18 +1,33 @@
 {
   "cached_filename": "MagicCompRules-2026-06-19-e99cd70eb64c.txt",
   "card_data_snapshot": {
-    "available": false
+    "available": true,
+    "database_schema_version": "2",
+    "oracle_bulk": {
+      "download_uri": "https://data.scryfall.io/oracle-cards/oracle-cards-20260806090254.jsonl.gz",
+      "oracle_id_count": 38623,
+      "sha256": "9d44ab29ff15a239d48f190ec59adb8046049d9a18e8010b793a96361749295d",
+      "source_filename": "oracle-cards-20260806090254.jsonl.gz",
+      "updated_at": "2026-08-06T09:02:54.394+00:00"
+    },
+    "rulings_bulk": {
+      "download_uri": "https://data.scryfall.io/rulings/rulings-20260806090037.jsonl.gz",
+      "ruling_count": 77998,
+      "sha256": "8e4f6b41785ce7ca1fd881372598e48410e2643e95aa893668a784827deeb3ea",
+      "source_filename": "rulings-20260806090037.jsonl.gz",
+      "updated_at": "2026-08-06T09:00:37.813+00:00"
+    }
   },
   "derived_hashes": {
-    "conformance-cases.json": "1ffdc7549e67ea13e5dfca50424e2f65937d884c947dba204f6d9446e32b17cb",
+    "conformance-cases.json": "7e4b806c98f3e9aa2831c7c06aba4f332aba50e6840b1612f8efb228ecd15ec3",
     "dependency-graph.json": "0c2c5095e0875c278e26d58d601246bcc597183ab96be167dec64bc0fe0ae956",
     "glossary-index.json": "576fad18aaf10a2f1c0f1f257837eae95057721b668fe38740d2182ce9aebb7d",
     "mechanic-index.json": "72998332705128357f9adc1ba7f20b73a6f5b97ccdda9fc46a95edc5f5ff7fcb",
-    "mechanics/registry.json": "d14429e3beaabdd9ef97c16c65adf3675a2e2fa787757c024eda2bd935111d3a",
+    "mechanics/registry.json": "5d3353f44fc23cc2b1d709a62001ba8da1187d85dc1b5e1a102307a5df806efc",
     "rule-index.json": "ae20b6961f35621fe5f9cec5e784416ca14a7723a4f0ffb5d2326aa5555f4347"
   },
   "effective_date": "2026-06-19",
-  "generated_at": "2026-08-06T14:25:03.666642+00:00",
+  "generated_at": "2026-08-07T02:11:11.317700+00:00",
   "glossary_count": 733,
   "mechanic_count": 425,
   "parser_version": "cr-index-v1",

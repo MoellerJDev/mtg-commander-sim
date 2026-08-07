@@ -120,6 +120,48 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/attack_transition_engine_adapter.py",
+      "layer": "rules",
+      "owning_subsystem": "combat_transitions",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/attack_transition_model.py",
+      "layer": "rules",
+      "owning_subsystem": "combat_transitions",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/attack_transition_resolution.py",
+      "layer": "rules",
+      "owning_subsystem": "combat_transitions",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/aura/__init__.py",
       "layer": "rules",
       "owning_subsystem": "aura_rules",
@@ -215,7 +257,7 @@
       "game_state_access": "none",
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
-      "replay_participation": "none"
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/block_transitions.py",
@@ -229,7 +271,7 @@
       "game_state_access": "none",
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
-      "replay_participation": "none"
+      "replay_participation": "authoritative"
     },
     {
       "file": "mtg_commander_sim/bulk.py",
@@ -3699,5 +3741,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "8e9232bd20fd3031c5a680d8ee2e3fdc86c6a40d045b8621a05f9a96db93d30b"
+  "fingerprint": "3f4705d1a3bf7794ebecd9d594953c057be69d4ceb92951ed3910ff3bb387368"
 }

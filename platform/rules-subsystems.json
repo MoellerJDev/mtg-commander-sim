@@ -335,32 +335,24 @@
     }
   ],
   "selected_batch": {
-    "batch_id": "typed-attack-transition-keyword-triggers",
+    "batch_id": "typed-ordinary-cycling-activation",
     "subsystem_id": "keyword-abilities",
     "rule_ids": [
-      "702.83",
-      "702.83a",
-      "702.83b",
-      "702.91",
-      "702.91a",
-      "702.91b",
-      "702.121",
-      "702.121a",
-      "702.121b"
+      "702.29",
+      "702.29a",
+      "702.29b"
     ],
     "target_capability_ids": [
-      "combat.trigger.battle_cry",
-      "combat.trigger.exalted",
-      "combat.trigger.melee"
+      "activation.cycling.hand"
     ],
-    "rationale": "The current pinned frontier identifies 34 Exalted, 13 Battle Cry, and 12 Melee cards, including 24 sole-blocker opportunities before this branch's final census. These three printed keyword families consume one complete attack-declaration transition, ordinary APNAP trigger placement, and identity-pinned until-end-of-turn layer 7c modifiers while retaining distinct eligibility and affected-object rules.",
+    "rationale": "The refreshed pinned frontier identifies 297 Commander-legal cards with the Cycling dependency, including 46 sole-blocker cards, 98 one-additional-blocker opportunities, and 112 two-additional-blocker opportunities. Ordinary Cycling is a bounded medium-risk hand-zone activated-ability family that can reuse canonical activation costs, discard zone changes, draw transactions, capability closure, and exact replay without taking on typecycling or cycling-trigger grammar.",
     "exit_criteria": [
-      "Introduce one typed immutable completed attack transition shared by attack declarations, Exalted, Battle Cry, Melee, trigger batching, replay, and projection.",
-      "Lower ordinary printed Exalted, Battle Cry, and Melee generically with precise source spans and fine-grained capability closure.",
-      "Derive one occurrence per current ability instance using exact attacks-alone, other-attacker, and distinct-defending-player semantics from the sealed transition.",
-      "Apply resolving power and toughness changes through the canonical continuous-characteristic owner without direct GameState writes or runtime Oracle parsing.",
-      "Preserve multiplayer declaration completion, APNAP trigger ordering, exact replay, rollback, privacy, source departure, multiple-instance, and focused mutation evidence.",
-      "Leave conditional, granted, copied, face-down, trigger-doubling, and broader unsupported attack-trigger variants explicit residuals."
+      "Introduce one immutable typed ordinary-Cycling descriptor that exists in every zone but is activatable only by the card's owner from that player's hand.",
+      "Offer and accept the same seat-scoped Cycling activation, pay its represented cost, discard the exact physical card as a cost, and place the draw ability on the ordinary stack.",
+      "Resolve through the canonical iterative replacement-aware draw transaction without runtime Oracle parsing or direct GameState writes.",
+      "Lower only closed ordinary printed Cycling grammar with precise source spans and one fine-grained capability declaration.",
+      "Preserve rollback, privacy, multiplayer priority, save/load, exact replay, and focused implementation mutation evidence.",
+      "Leave typecycling, cycling-cost modifiers, cycling prohibitions, and triggered 'cycle' or 'cycle or discard' families explicit residuals."
     ]
   }
 }
