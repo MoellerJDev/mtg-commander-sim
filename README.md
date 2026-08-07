@@ -37,7 +37,7 @@ The supported runtime is CPython 3.12.x. From PowerShell at the repository root:
 
 ```powershell
 .\scripts\bootstrap_windows.ps1
-.\.venv\Scripts\python.exe -m server
+.\.venv\Scripts\quorune-server.exe
 ```
 
 The command prepares the browser, checks or builds the managed Scryfall SQLite

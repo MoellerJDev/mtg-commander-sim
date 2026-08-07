@@ -7,14 +7,14 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import CardInstance, GameState, StackItem
-from mtg_commander_sim.record import (
+from quorune.model import CardInstance, GameState, StackItem
+from quorune.record import (
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.targets import TargetGroup
-from mtg_commander_sim.util import stable_json
+from quorune.semantics import SemanticProgram
+from quorune.targets import TargetGroup
+from quorune.util import stable_json
 
 
 class ObjectIdentityAndTokenLifecycleTests(unittest.TestCase):

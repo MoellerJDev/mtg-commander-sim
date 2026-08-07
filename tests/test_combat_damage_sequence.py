@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.combat_damage_assignment import DamageAssignment
-from mtg_commander_sim.combat_damage_sequence import (
+from quorune.combat_damage_assignment import DamageAssignment
+from quorune.combat_damage_sequence import (
     CombatDamageAssignmentSequence,
     CombatDamageSequenceError,
 )

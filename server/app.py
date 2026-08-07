@@ -27,7 +27,8 @@ from pydantic import (
     model_validator,
 )
 
-from mtg_commander_sim import (
+from quorune import (
+    __version__,
     CardDatabase,
     CommandEnvelope,
     CommandReceipt,
@@ -41,14 +42,14 @@ from mtg_commander_sim import (
     deck_list_fingerprint,
     parse_deck_text,
 )
-from mtg_commander_sim.preflight import semantic_preflight
-from mtg_commander_sim.record import database_fingerprint
-from mtg_commander_sim.runtime import (
+from quorune.preflight import semantic_preflight
+from quorune.record import database_fingerprint
+from quorune.runtime import (
     GameActor,
     GameLifecycleConflict,
     GamePersistence,
 )
-from mtg_commander_sim.deck import MoxfieldFetchError, is_moxfield_source
+from quorune.deck import MoxfieldFetchError, is_moxfield_source
 
 from .store import (
     ServerStore,
@@ -624,7 +625,7 @@ def create_app(settings: ServerSettings | None = None) -> FastAPI:
 
     app = FastAPI(
         title="Quorune Server",
-        version="0.8.0",
+        version=__version__,
         lifespan=lifespan,
     )
     app.add_middleware(

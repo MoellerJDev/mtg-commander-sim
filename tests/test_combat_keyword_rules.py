@@ -6,19 +6,19 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session, pass_current
-from mtg_commander_sim.ability_fragments import (
+from quorune.ability_fragments import (
     ProtectionQualityKind,
     ProtectionSpec,
     ability_fragment_to_dict,
 )
-from mtg_commander_sim.combat import (
+from quorune.combat import (
     DOUBLE_STRIKE,
     FIRST_STRIKE,
     assigns_in_damage_step,
     ordinary_second_step_combatants,
 )
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.record import (
+from quorune.model import CombatState
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

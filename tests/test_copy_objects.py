@@ -5,27 +5,27 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.damage import damage_proposal, resolve_damage_batch
-from mtg_commander_sim.damage_modifier_state import (
+from quorune.damage import damage_proposal, resolve_damage_batch
+from quorune.damage_modifier_state import (
     DamageModifierDuration,
     PreventionMode,
 )
-from mtg_commander_sim.damage_prevention_creation import (
+from quorune.damage_prevention_creation import (
     commit_prevention_shield_creation,
     plan_prevention_shield_creation,
     PreventionShieldCreationRequest,
     PreventionSubjectAllocation,
 )
-from mtg_commander_sim.damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
-from mtg_commander_sim.model import GameState, StackItem
-from mtg_commander_sim.object_query import ObjectQuerySpec
-from mtg_commander_sim.record import (
+from quorune.damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
+from quorune.model import GameState, StackItem
+from quorune.object_query import ObjectQuerySpec
+from quorune.record import (
     checkpoint_envelope,
     deck_list_fingerprints,
     replay_record,
 )
-from mtg_commander_sim.targets import TargetGroup
-from mtg_commander_sim.util import stable_json
+from quorune.targets import TargetGroup
+from quorune.util import stable_json
 
 
 class CopyObjectLifecycleTests(unittest.TestCase):

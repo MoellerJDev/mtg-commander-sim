@@ -6,9 +6,9 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import (
+from quorune.engine import GameRuleError
+from quorune.model import StackItem
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

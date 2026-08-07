@@ -9,34 +9,34 @@ from unittest import mock
 
 from common import keep_all, load_assets, make_session
 
-from mtg_commander_sim.cast_timing import type_line_has_card_type
-from mtg_commander_sim.drawing import (
+from quorune.cast_timing import type_line_has_card_type
+from quorune.drawing import (
     DrawError,
     RevealDrawnCardBySource,
     drawn_card_action_from_dict,
 )
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.record import (
+from quorune.engine import CommanderEngine
+from quorune.oracle_ir import compile_oracle_card
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement import (
+from quorune.replacement import (
     PreventDraw,
     ReplacementClass,
     ReplacementEffect,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     DRAW_REVEAL_FIRST_HANDLER_ID,
     DrawRevealFirstHandler,
     DrawRevealSourceContext,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantic_runtime.context import SemanticNodeError
+from quorune.semantics import SemanticProgram
 
 
 def reveal_descriptor(
@@ -468,7 +468,7 @@ class DrawRevealCoordinatorTests(unittest.TestCase):
                 return_value=True,
             ),
             mock.patch(
-                "mtg_commander_sim.drawing.coordinator._replacement_effects",
+                "quorune.drawing.coordinator._replacement_effects",
                 return_value=(effect,),
             ),
         ):

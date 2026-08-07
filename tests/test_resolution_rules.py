@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import StackItem
+from quorune.model import StackItem
 
 
 class ResolutionRuleTests(unittest.TestCase):

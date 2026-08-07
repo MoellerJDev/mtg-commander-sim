@@ -48,7 +48,7 @@ dependencies, and reviewed summaries rather than redistributing the prose.
 - `rules/conformance-reviews/` stores subsystem reviews and evidence mappings.
 - `rules/dependency-graph.json` and `platform/rules-subsystems.json` describe
   dependency and ownership scheduling.
-- `mtg_commander_sim/rules/capability-registry.json` and generated evidence
+- `quorune/rules/capability-registry.json` and generated evidence
   define fine-grained executable trust.
 - CardPrograms bind Oracle spans to required capabilities and runtime
   descriptors.

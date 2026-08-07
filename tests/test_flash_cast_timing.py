@@ -7,30 +7,30 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.card_programs import compile_card_program
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.compiled_cast_timing import (
+from quorune.card_programs import compile_card_program
+from quorune.carddb import CardRecord
+from quorune.compiled_cast_timing import (
     compiled_cast_timing_permissions,
 )
-from mtg_commander_sim.cast_timing import (
+from quorune.cast_timing import (
     CastTimingPermission,
     canonical_cast_timing_permissions,
 )
-from mtg_commander_sim.oracle_ir import generated_programs
-from mtg_commander_sim.record import (
+from quorune.oracle_ir import generated_programs
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.rules.casting.proposal import build_cast_offer
-from mtg_commander_sim.semantic_runtime import SemanticNodeError
-from mtg_commander_sim.semantic_runtime.cast_permissions import (
+from quorune.rules.casting.proposal import build_cast_offer
+from quorune.semantic_runtime import SemanticNodeError
+from quorune.semantic_runtime.cast_permissions import (
     default_cast_permission_registry,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.semantics import SemanticRegistry
 
 
 class _NoRulingsDatabase:
@@ -158,7 +158,7 @@ class FlashCastTimingTests(unittest.TestCase):
         self.assertTrue(record.oracle_text.startswith("Flash"))
 
         with patch(
-            "mtg_commander_sim.rules.casting.proposal."
+            "quorune.rules.casting.proposal."
             "compiled_cast_timing_permissions",
             return_value=(),
         ):

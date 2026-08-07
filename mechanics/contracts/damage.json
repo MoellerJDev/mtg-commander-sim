@@ -181,7 +181,7 @@
     "test_keyword_damage_results_replay_from_combat_assignment"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.damage coordinator plus mtg_commander_sim.damage_results prepare/plan/commit owner",
+    "component": "quorune.damage coordinator plus quorune.damage_results prepare/plan/commit owner",
     "version": "damage-results-v5"
   },
   "known_blockers": [

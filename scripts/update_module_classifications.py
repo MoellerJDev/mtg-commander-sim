@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.util import stable_json
+from quorune.util import stable_json
 from scripts.update_architecture_audit import analyze_production
 
 
@@ -49,140 +49,140 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
     if relative.startswith("server/") or relative == "simctl.py":
         return "transport"
     if relative in {
-        "mtg_commander_sim/ability_fragments.py",
-        "mtg_commander_sim/damage_source.py",
-        "mtg_commander_sim/damage_modifier_state.py",
-        "mtg_commander_sim/continuous_effect_model.py",
-        "mtg_commander_sim/enchant_spec.py",
-        "mtg_commander_sim/model.py",
-        "mtg_commander_sim/object_predicate.py",
-        "mtg_commander_sim/prevention_triggers.py",
-        "mtg_commander_sim/replacement/immutable.py",
-        "mtg_commander_sim/trigger_batches.py",
+        "quorune/ability_fragments.py",
+        "quorune/damage_source.py",
+        "quorune/damage_modifier_state.py",
+        "quorune/continuous_effect_model.py",
+        "quorune/enchant_spec.py",
+        "quorune/model.py",
+        "quorune/object_predicate.py",
+        "quorune/prevention_triggers.py",
+        "quorune/replacement/immutable.py",
+        "quorune/trigger_batches.py",
     }:
         return "domain"
     if relative in {
-        "mtg_commander_sim/python_runtime.py",
-        "mtg_commander_sim/util.py",
-        "mtg_commander_sim/version.py",
+        "quorune/python_runtime.py",
+        "quorune/util.py",
+        "quorune/version.py",
     }:
         return "domain"
     if relative.startswith(
         (
-            "mtg_commander_sim/card_programs/",
-            "mtg_commander_sim/compiler/",
-            "mtg_commander_sim/semantic_runtime/",
-            "mtg_commander_sim/semantic_choices/",
-            "mtg_commander_sim/effect_runtime/",
-            "mtg_commander_sim/reusable_pieces/",
-            "mtg_commander_sim/card_overrides/",
+            "quorune/card_programs/",
+            "quorune/compiler/",
+            "quorune/semantic_runtime/",
+            "quorune/semantic_choices/",
+            "quorune/effect_runtime/",
+            "quorune/reusable_pieces/",
+            "quorune/card_overrides/",
         )
     ) or relative in {
-        "mtg_commander_sim/carddb_characteristics.py",
-        "mtg_commander_sim/effect_contracts.py",
-        "mtg_commander_sim/oracle_ir.py",
-        "mtg_commander_sim/semantics.py",
-        "mtg_commander_sim/ability_fragment_host.py",
-        "mtg_commander_sim/compiled_ability_fragments.py",
-        "mtg_commander_sim/compiled_activated_abilities.py",
-        "mtg_commander_sim/compiled_cast_timing.py",
-        "mtg_commander_sim/compiled_cycling_abilities.py",
-        "mtg_commander_sim/compiled_mana_abilities.py",
+        "quorune/carddb_characteristics.py",
+        "quorune/effect_contracts.py",
+        "quorune/oracle_ir.py",
+        "quorune/semantics.py",
+        "quorune/ability_fragment_host.py",
+        "quorune/compiled_ability_fragments.py",
+        "quorune/compiled_activated_abilities.py",
+        "quorune/compiled_cast_timing.py",
+        "quorune/compiled_cycling_abilities.py",
+        "quorune/compiled_mana_abilities.py",
     }:
         return "semantics"
     if relative in {
-        "mtg_commander_sim/carddb.py",
-        "mtg_commander_sim/deck.py",
-        "mtg_commander_sim/moxfield.py",
-        "mtg_commander_sim/profiles.py",
+        "quorune/carddb.py",
+        "quorune/deck.py",
+        "quorune/moxfield.py",
+        "quorune/profiles.py",
     }:
         return "adapter"
     if relative in protected_rules_modules:
         return "rules"
     if relative.startswith(
         (
-            "mtg_commander_sim/aura/",
-            "mtg_commander_sim/drawing/",
-            "mtg_commander_sim/replacement/",
-            "mtg_commander_sim/rules/",
+            "quorune/aura/",
+            "quorune/drawing/",
+            "quorune/replacement/",
+            "quorune/rules/",
         )
     ) or relative in {
-        "mtg_commander_sim/abilities.py",
-        "mtg_commander_sim/affected_permanents.py",
-        "mtg_commander_sim/ability_fragments.py",
-        "mtg_commander_sim/attachments.py",
-        "mtg_commander_sim/attack_transition_engine_adapter.py",
-        "mtg_commander_sim/attack_transition_model.py",
-        "mtg_commander_sim/attack_transition_resolution.py",
-        "mtg_commander_sim/choice_forms.py",
-        "mtg_commander_sim/combat.py",
-        "mtg_commander_sim/block_transition_engine_adapter.py",
-        "mtg_commander_sim/block_transitions.py",
-        "mtg_commander_sim/combat_damage_assignment.py",
-        "mtg_commander_sim/combat_damage_engine_adapter.py",
-        "mtg_commander_sim/combat_damage_events.py",
-        "mtg_commander_sim/combat_damage_projection.py",
-        "mtg_commander_sim/combat_damage_sequence.py",
-        "mtg_commander_sim/combat_damage_snapshot.py",
-        "mtg_commander_sim/combat_damage_trample.py",
-        "mtg_commander_sim/combat_damage_values.py",
-        "mtg_commander_sim/combat_relationship_state.py",
-        "mtg_commander_sim/combat_constraints.py",
-        "mtg_commander_sim/combat_evasion.py",
-        "mtg_commander_sim/combat_evasion_engine_adapter.py",
-        "mtg_commander_sim/commander.py",
-        "mtg_commander_sim/cast_timing.py",
-        "mtg_commander_sim/continuous_effects.py",
-        "mtg_commander_sim/counter_placement.py",
-        "mtg_commander_sim/counter_state.py",
-        "mtg_commander_sim/damage.py",
-        "mtg_commander_sim/damage_prevention.py",
-        "mtg_commander_sim/damage_transaction.py",
-        "mtg_commander_sim/damage_values.py",
-        "mtg_commander_sim/damage_results.py",
-        "mtg_commander_sim/deathtouch.py",
-        "mtg_commander_sim/defender.py",
-        "mtg_commander_sim/declaration_costs.py",
-        "mtg_commander_sim/declaration_restrictions.py",
-        "mtg_commander_sim/delayed_triggers.py",
-        "mtg_commander_sim/destruction.py",
-        "mtg_commander_sim/destruction_sets.py",
-        "mtg_commander_sim/engine.py",
-        "mtg_commander_sim/errors.py",
-        "mtg_commander_sim/enchant_spec.py",
-        "mtg_commander_sim/life_change.py",
-        "mtg_commander_sim/life_state.py",
-        "mtg_commander_sim/landwalk.py",
-        "mtg_commander_sim/mana.py",
-        "mtg_commander_sim/mana_activation.py",
-        "mtg_commander_sim/color_set_mana_abilities.py",
-        "mtg_commander_sim/fixed_mana_abilities.py",
-        "mtg_commander_sim/mana_ability_runtime.py",
-        "mtg_commander_sim/mana_source_discovery.py",
-        "mtg_commander_sim/mana_undo.py",
-        "mtg_commander_sim/mechanic_contracts.py",
-        "mtg_commander_sim/menace.py",
-        "mtg_commander_sim/permanent_exile.py",
-        "mtg_commander_sim/permissions.py",
-        "mtg_commander_sim/protection.py",
-        "mtg_commander_sim/replacement_decisions.py",
-        "mtg_commander_sim/replacement_effects.py",
-        "mtg_commander_sim/return_to_hand.py",
-        "mtg_commander_sim/rule_conformance.py",
-        "mtg_commander_sim/rules_corpus.py",
-        "mtg_commander_sim/rules_scheduler.py",
-        "mtg_commander_sim/shortcuts.py",
-        "mtg_commander_sim/stack_counter.py",
-        "mtg_commander_sim/stack_resolution.py",
-        "mtg_commander_sim/state_based_actions.py",
-        "mtg_commander_sim/state_based_execution.py",
-        "mtg_commander_sim/state_planner.py",
-        "mtg_commander_sim/tap_state.py",
-        "mtg_commander_sim/targets.py",
-        "mtg_commander_sim/token_creation.py",
-        "mtg_commander_sim/trigger_targeting.py",
-        "mtg_commander_sim/trigger_processing.py",
-        "mtg_commander_sim/object_query.py",
+        "quorune/abilities.py",
+        "quorune/affected_permanents.py",
+        "quorune/ability_fragments.py",
+        "quorune/attachments.py",
+        "quorune/attack_transition_engine_adapter.py",
+        "quorune/attack_transition_model.py",
+        "quorune/attack_transition_resolution.py",
+        "quorune/choice_forms.py",
+        "quorune/combat.py",
+        "quorune/block_transition_engine_adapter.py",
+        "quorune/block_transitions.py",
+        "quorune/combat_damage_assignment.py",
+        "quorune/combat_damage_engine_adapter.py",
+        "quorune/combat_damage_events.py",
+        "quorune/combat_damage_projection.py",
+        "quorune/combat_damage_sequence.py",
+        "quorune/combat_damage_snapshot.py",
+        "quorune/combat_damage_trample.py",
+        "quorune/combat_damage_values.py",
+        "quorune/combat_relationship_state.py",
+        "quorune/combat_constraints.py",
+        "quorune/combat_evasion.py",
+        "quorune/combat_evasion_engine_adapter.py",
+        "quorune/commander.py",
+        "quorune/cast_timing.py",
+        "quorune/continuous_effects.py",
+        "quorune/counter_placement.py",
+        "quorune/counter_state.py",
+        "quorune/damage.py",
+        "quorune/damage_prevention.py",
+        "quorune/damage_transaction.py",
+        "quorune/damage_values.py",
+        "quorune/damage_results.py",
+        "quorune/deathtouch.py",
+        "quorune/defender.py",
+        "quorune/declaration_costs.py",
+        "quorune/declaration_restrictions.py",
+        "quorune/delayed_triggers.py",
+        "quorune/destruction.py",
+        "quorune/destruction_sets.py",
+        "quorune/engine.py",
+        "quorune/errors.py",
+        "quorune/enchant_spec.py",
+        "quorune/life_change.py",
+        "quorune/life_state.py",
+        "quorune/landwalk.py",
+        "quorune/mana.py",
+        "quorune/mana_activation.py",
+        "quorune/color_set_mana_abilities.py",
+        "quorune/fixed_mana_abilities.py",
+        "quorune/mana_ability_runtime.py",
+        "quorune/mana_source_discovery.py",
+        "quorune/mana_undo.py",
+        "quorune/mechanic_contracts.py",
+        "quorune/menace.py",
+        "quorune/permanent_exile.py",
+        "quorune/permissions.py",
+        "quorune/protection.py",
+        "quorune/replacement_decisions.py",
+        "quorune/replacement_effects.py",
+        "quorune/return_to_hand.py",
+        "quorune/rule_conformance.py",
+        "quorune/rules_corpus.py",
+        "quorune/rules_scheduler.py",
+        "quorune/shortcuts.py",
+        "quorune/stack_counter.py",
+        "quorune/stack_resolution.py",
+        "quorune/state_based_actions.py",
+        "quorune/state_based_execution.py",
+        "quorune/state_planner.py",
+        "quorune/tap_state.py",
+        "quorune/targets.py",
+        "quorune/token_creation.py",
+        "quorune/trigger_targeting.py",
+        "quorune/trigger_processing.py",
+        "quorune/object_query.py",
     }:
         return "rules"
     return "application"
@@ -191,150 +191,150 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
 def _owner(relative: str, layer: str) -> str:
     if relative.startswith("server/"):
         return "server_transport"
-    if relative.startswith("mtg_commander_sim/semantic_runtime/"):
+    if relative.startswith("quorune/semantic_runtime/"):
         return "semantic_runtime"
-    if relative.startswith("mtg_commander_sim/semantic_choices/"):
+    if relative.startswith("quorune/semantic_choices/"):
         return "semantic_choices"
-    if relative.startswith("mtg_commander_sim/effect_runtime/"):
+    if relative.startswith("quorune/effect_runtime/"):
         return "effect_runtime"
-    if relative.startswith("mtg_commander_sim/card_overrides/"):
+    if relative.startswith("quorune/card_overrides/"):
         return "game_record_compatibility"
-    if relative == "mtg_commander_sim/effect_contracts.py":
+    if relative == "quorune/effect_contracts.py":
         return "effect_runtime"
-    if relative.startswith("mtg_commander_sim/card_programs/"):
+    if relative.startswith("quorune/card_programs/"):
         return "card_programs"
-    if relative.startswith("mtg_commander_sim/reusable_pieces/"):
+    if relative.startswith("quorune/reusable_pieces/"):
         return "reusable_piece_inventory"
-    if relative.startswith("mtg_commander_sim/compiler/"):
+    if relative.startswith("quorune/compiler/"):
         return "oracle_compiler"
-    if relative.startswith("mtg_commander_sim/rules/"):
+    if relative.startswith("quorune/rules/"):
         return "rules_capabilities"
-    if relative.startswith("mtg_commander_sim/aura/"):
+    if relative.startswith("quorune/aura/"):
         return "aura_rules"
     if relative in {
-        "mtg_commander_sim/ability_fragment_host.py",
-        "mtg_commander_sim/ability_fragments.py",
-        "mtg_commander_sim/compiled_ability_fragments.py",
+        "quorune/ability_fragment_host.py",
+        "quorune/ability_fragments.py",
+        "quorune/compiled_ability_fragments.py",
     }:
         return "ability_fragments"
     if relative in {
-        "mtg_commander_sim/compiled_activated_abilities.py",
-        "mtg_commander_sim/compiled_cycling_abilities.py",
-        "mtg_commander_sim/cycling_abilities.py",
+        "quorune/compiled_activated_abilities.py",
+        "quorune/compiled_cycling_abilities.py",
+        "quorune/cycling_abilities.py",
     }:
         return "activated_abilities"
     if relative in {
-        "mtg_commander_sim/cast_timing.py",
-        "mtg_commander_sim/compiled_cast_timing.py",
+        "quorune/cast_timing.py",
+        "quorune/compiled_cast_timing.py",
     }:
         return "cast_timing"
-    if relative == "mtg_commander_sim/enchant_spec.py":
+    if relative == "quorune/enchant_spec.py":
         return "aura_rules"
-    if relative == "mtg_commander_sim/protection.py":
+    if relative == "quorune/protection.py":
         return "protection"
-    if relative.startswith("mtg_commander_sim/drawing/"):
+    if relative.startswith("quorune/drawing/"):
         return "drawing"
-    if relative.startswith("mtg_commander_sim/replacement/"):
+    if relative.startswith("quorune/replacement/"):
         return "replacement_effects"
-    if relative == "mtg_commander_sim/commander.py":
+    if relative == "quorune/commander.py":
         return "commander_variant"
     if relative in {
-        "mtg_commander_sim/attack_transition_engine_adapter.py",
-        "mtg_commander_sim/attack_transition_model.py",
-        "mtg_commander_sim/attack_transition_resolution.py",
-        "mtg_commander_sim/block_transition_engine_adapter.py",
-        "mtg_commander_sim/block_transitions.py",
+        "quorune/attack_transition_engine_adapter.py",
+        "quorune/attack_transition_model.py",
+        "quorune/attack_transition_resolution.py",
+        "quorune/block_transition_engine_adapter.py",
+        "quorune/block_transitions.py",
     }:
         return "combat_transitions"
     if relative in {
-        "mtg_commander_sim/damage_modifier_state.py",
-        "mtg_commander_sim/damage_source.py",
-        "mtg_commander_sim/prevention_triggers.py",
-        "mtg_commander_sim/replacement/immutable.py",
+        "quorune/damage_modifier_state.py",
+        "quorune/damage_source.py",
+        "quorune/prevention_triggers.py",
+        "quorune/replacement/immutable.py",
     }:
         return "damage"
-    if relative == "mtg_commander_sim/counter_state.py":
+    if relative == "quorune/counter_state.py":
         return "counter_state"
-    if relative == "mtg_commander_sim/attachments.py":
+    if relative == "quorune/attachments.py":
         return "attachments"
     if relative in {
-        "mtg_commander_sim/life_change.py",
-        "mtg_commander_sim/life_state.py",
+        "quorune/life_change.py",
+        "quorune/life_state.py",
     }:
         return "life_state"
-    if relative == "mtg_commander_sim/delayed_triggers.py":
+    if relative == "quorune/delayed_triggers.py":
         return "delayed_triggers"
     if relative in {
-        "mtg_commander_sim/trigger_batches.py",
-        "mtg_commander_sim/trigger_processing.py",
-        "mtg_commander_sim/trigger_targeting.py",
+        "quorune/trigger_batches.py",
+        "quorune/trigger_processing.py",
+        "quorune/trigger_targeting.py",
     }:
         return "trigger_processing"
-    if relative == "mtg_commander_sim/tap_state.py":
+    if relative == "quorune/tap_state.py":
         return "tap_state_effects"
     if relative in {
-        "mtg_commander_sim/mana.py",
-        "mtg_commander_sim/mana_activation.py",
-        "mtg_commander_sim/color_set_mana_abilities.py",
-        "mtg_commander_sim/fixed_mana_abilities.py",
-        "mtg_commander_sim/mana_ability_runtime.py",
-        "mtg_commander_sim/mana_source_discovery.py",
-        "mtg_commander_sim/compiled_mana_abilities.py",
-        "mtg_commander_sim/mana_mode_effects.py",
-        "mtg_commander_sim/mana_payment_continuations.py",
-        "mtg_commander_sim/mana_undo.py",
-        "mtg_commander_sim/semantic_runtime/color_set_mana_abilities.py",
+        "quorune/mana.py",
+        "quorune/mana_activation.py",
+        "quorune/color_set_mana_abilities.py",
+        "quorune/fixed_mana_abilities.py",
+        "quorune/mana_ability_runtime.py",
+        "quorune/mana_source_discovery.py",
+        "quorune/compiled_mana_abilities.py",
+        "quorune/mana_mode_effects.py",
+        "quorune/mana_payment_continuations.py",
+        "quorune/mana_undo.py",
+        "quorune/semantic_runtime/color_set_mana_abilities.py",
     }:
         return "mana_rules"
     if relative in {
-        "mtg_commander_sim/affected_permanents.py",
-        "mtg_commander_sim/object_predicate.py",
-        "mtg_commander_sim/object_query.py",
+        "quorune/affected_permanents.py",
+        "quorune/object_predicate.py",
+        "quorune/object_query.py",
     }:
         return "object_query"
-    if relative == "mtg_commander_sim/state_planner.py":
+    if relative == "quorune/state_planner.py":
         return "state_change_planning"
-    if relative == "mtg_commander_sim/counter_placement.py":
+    if relative == "quorune/counter_placement.py":
         return "counter_placement"
     if relative in {
-        "mtg_commander_sim/destruction.py",
-        "mtg_commander_sim/destruction_sets.py",
-        "mtg_commander_sim/state_based_execution.py",
+        "quorune/destruction.py",
+        "quorune/destruction_sets.py",
+        "quorune/state_based_execution.py",
     }:
         return "destruction"
     if relative in {
-        "mtg_commander_sim/damage.py",
-        "mtg_commander_sim/damage_prevention.py",
-        "mtg_commander_sim/damage_prevention_aftermath.py",
-        "mtg_commander_sim/damage_prevention_creation.py",
-        "mtg_commander_sim/damage_transaction.py",
-        "mtg_commander_sim/damage_values.py",
-        "mtg_commander_sim/damage_results.py",
-        "mtg_commander_sim/deathtouch.py",
+        "quorune/damage.py",
+        "quorune/damage_prevention.py",
+        "quorune/damage_prevention_aftermath.py",
+        "quorune/damage_prevention_creation.py",
+        "quorune/damage_transaction.py",
+        "quorune/damage_values.py",
+        "quorune/damage_results.py",
+        "quorune/deathtouch.py",
     }:
         return "damage"
-    if relative.startswith("mtg_commander_sim/combat_damage_") or relative in {
-        "mtg_commander_sim/combat_relationship_state.py",
+    if relative.startswith("quorune/combat_damage_") or relative in {
+        "quorune/combat_relationship_state.py",
     }:
         return "combat_damage"
-    if relative == "mtg_commander_sim/token_creation.py":
+    if relative == "quorune/token_creation.py":
         return "token_creation"
-    if relative == "mtg_commander_sim/return_to_hand.py":
+    if relative == "quorune/return_to_hand.py":
         return "return_to_hand"
-    if relative == "mtg_commander_sim/permanent_exile.py":
+    if relative == "quorune/permanent_exile.py":
         return "permanent_exile"
     if relative in {
-        "mtg_commander_sim/stack_counter.py",
-        "mtg_commander_sim/stack_resolution.py",
+        "quorune/stack_counter.py",
+        "quorune/stack_resolution.py",
     }:
         return "stack_counter"
-    if relative == "mtg_commander_sim/replacement_decisions.py":
+    if relative == "quorune/replacement_decisions.py":
         return "replacement_effects"
-    if relative == "mtg_commander_sim/rules_scheduler.py":
+    if relative == "quorune/rules_scheduler.py":
         return "rules_governance"
     if relative in {
-        "mtg_commander_sim/record.py",
-        "mtg_commander_sim/record_trust.py",
+        "quorune/record.py",
+        "quorune/record_trust.py",
     }:
         return "game_record"
     return f"legacy_{layer}"
@@ -353,10 +353,10 @@ def build_classifications() -> dict[str, Any]:
         layer = _layer(relative, protected_rules_modules)
         allowed_dependencies = list(ALLOWED_DEPENDENCIES[layer])
         if relative in {
-            "mtg_commander_sim/commander.py",
-            "mtg_commander_sim/engine.py",
-            "mtg_commander_sim/mana.py",
-            "mtg_commander_sim/rules_corpus.py",
+            "quorune/commander.py",
+            "quorune/engine.py",
+            "quorune/mana.py",
+            "quorune/rules_corpus.py",
         } and "adapter" not in allowed_dependencies:
             allowed_dependencies.append("adapter")
             allowed_dependencies.sort()
@@ -458,8 +458,8 @@ def build_classifications() -> dict[str, Any]:
                         )
                     )
                     or relative in {
-                        "mtg_commander_sim/record.py",
-                        "mtg_commander_sim/record_trust.py",
+                        "quorune/record.py",
+                        "quorune/record_trust.py",
                     }
                     else "none"
                 ),

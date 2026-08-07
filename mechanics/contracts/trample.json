@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Aang, Swift Savior // Aang and La, Ocean's Fury", "oracle_id": "cbf09050-39d0-463b-96db-9e22011ae0d8"}],
   "rulings": [],
   "test_ids": ["test_snapshot_and_proposal_have_one_canonical_relationship_order", "test_permuted_combat_assignment_has_identical_replacement_replay", "test_projected_options_and_validation_share_one_proposal", "test_malformed_and_noncanonical_assignments_fail_closed", "test_trample_rejects_spill_before_lethal_atomically", "test_trample_accepts_lethal_then_spill", "test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_trample_assigns_lethal_over_indestructible_blocker", "test_lifelink_counts_only_damage_not_prevented_by_protection", "test_trample_deals_to_defender_after_all_blockers_leave", "test_trample_to_attacked_permanent_never_spills_to_controller", "test_four_player_trample_task_is_seat_scoped_and_replays", "test_double_strike_trample_recomputes_after_blocker_leaves", "test_trample_lethal_assignment_mutant_is_killed", "test_keyword_contracts_trace_the_pinned_rules"],
-  "implementation": {"component": "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "version": "ordinary-trample-assignment-v2"},
+  "implementation": {"component": "quorune.combat_damage_assignment.CombatDamageAssignmentProposal", "version": "ordinary-trample-assignment-v2"},
   "known_blockers": ["the separate Trample over planeswalkers keyword is not implemented", "banding and controller-substitution assignment exceptions are not implemented", "unsupported continuous-effect, copy, face-down, ability-changing, replacement, and prevention producers remain fail-closed"],
   "review_status": "reviewed"
 }

@@ -6,17 +6,17 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.aerial_blocking import (
+from quorune.aerial_blocking import (
     AerialBlockVerdict,
     aerial_block_verdict,
 )
-from mtg_commander_sim.keyword_abilities import (
+from quorune.keyword_abilities import (
     EffectiveKeywordError,
     normalized_characteristic_keywords,
     normalized_effective_keywords,
 )
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.record import (
+from quorune.model import CombatState
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

@@ -8,7 +8,7 @@ import tempfile
 import venv
 import zipfile
 
-from mtg_commander_sim.python_runtime import REQUIRES_PYTHON, require_supported_python
+from quorune.python_runtime import REQUIRES_PYTHON, require_supported_python
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
 
 
@@ -36,15 +36,31 @@ def _requires_python_matches(observed: str | None) -> bool:
         return False
 
 
+def _assert_namespace_contents(wheel: Path) -> None:
+    with zipfile.ZipFile(wheel) as archive:
+        names = set(archive.namelist())
+    if "quorune/__init__.py" not in names:
+        raise SystemExit("Wheel does not contain the quorune package")
+    legacy = sorted(
+        name for name in names if name.startswith("mtg_commander_sim/")
+    )
+    if legacy:
+        raise SystemExit(
+            "Wheel contains the retired mtg_commander_sim namespace: "
+            f"{legacy[0]}"
+        )
+
+
 def main() -> int:
     require_supported_python()
     parser = argparse.ArgumentParser()
     parser.add_argument("--dist", type=Path, default=Path("dist"))
     args = parser.parse_args()
-    wheels = sorted(args.dist.glob("mtg_commander_sim-*.whl"))
+    wheels = sorted(args.dist.glob("quorune-*.whl"))
     if len(wheels) != 1:
         raise SystemExit(f"Expected exactly one project wheel, found {len(wheels)}")
     wheel = wheels[0].resolve()
+    _assert_namespace_contents(wheel)
     observed_requirement = _wheel_requires_python(wheel)
     if not _requires_python_matches(observed_requirement):
         raise SystemExit(
@@ -76,14 +92,38 @@ def main() -> int:
                 str(python),
                 "-c",
                 (
-                    "import mtg_commander_sim as package; "
+                    "import quorune as package; "
                     "print(package.__version__)"
                 ),
             ],
             check=True,
         )
         subprocess.run(
-            [str(python), "-m", "mtg_commander_sim", "--help"],
+            [str(python), "-m", "quorune", "--help"],
+            check=True,
+            stdout=subprocess.DEVNULL,
+        )
+        scripts = environment / ("Scripts" if sys.platform == "win32" else "bin")
+        executable_suffix = ".exe" if sys.platform == "win32" else ""
+        for command in ("quorune", "simctl"):
+            subprocess.run(
+                [str(scripts / f"{command}{executable_suffix}"), "--help"],
+                check=True,
+                stdout=subprocess.DEVNULL,
+            )
+        subprocess.run(
+            [
+                str(python),
+                "-m",
+                "pip",
+                "install",
+                "--upgrade",
+                str(wheel),
+            ],
+            check=True,
+        )
+        subprocess.run(
+            [str(scripts / f"quorune-server{executable_suffix}"), "--help"],
             check=True,
             stdout=subprocess.DEVNULL,
         )
@@ -94,9 +134,13 @@ def main() -> int:
                 (
                     "from importlib.metadata import distribution; "
                     "entries = {entry.name: entry.value for entry in "
-                    "distribution('mtg-commander-sim').entry_points "
+                    "distribution('quorune').entry_points "
                     "if entry.group == 'console_scripts'}; "
-                    "assert entries['commander-server'] == "
+                    "assert entries['quorune'] == "
+                    "'quorune.cli:main', entries; "
+                    "assert entries['simctl'] == "
+                    "'quorune.cli:main', entries; "
+                    "assert entries['quorune-server'] == "
                     "'server.__main__:main', entries"
                 ),
             ],

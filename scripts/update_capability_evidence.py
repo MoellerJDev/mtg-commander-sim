@@ -13,20 +13,20 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.rules.capabilities import CapabilityRegistry
-from mtg_commander_sim.rules.evidence import (
+from quorune.rules.capabilities import CapabilityRegistry
+from quorune.rules.evidence import (
     CAPABILITY_EVIDENCE_SCHEMA_VERSION,
     EVIDENCE_CLASSES,
     capability_evidence_fingerprint,
     validate_capability_evidence_index,
 )
-from mtg_commander_sim.util import stable_json
+from quorune.util import stable_json
 
 
-REGISTRY_PATH = ROOT / "mtg_commander_sim" / "rules" / "capability-registry.json"
+REGISTRY_PATH = ROOT / "quorune" / "rules" / "capability-registry.json"
 DECLARATIONS_PATH = ROOT / "platform" / "capability-evidence-declarations.json"
 OUTPUT_PATH = (
-    ROOT / "mtg_commander_sim" / "rules" / "capability-evidence.json"
+    ROOT / "quorune" / "rules" / "capability-evidence.json"
 )
 RULE_INDEX_PATH = ROOT / "rules" / "rule-index.json"
 LEGACY_EVIDENCE_FIELDS = {
@@ -454,7 +454,7 @@ def main() -> int:
     actual = OUTPUT_PATH.read_text(encoding="utf-8") if OUTPUT_PATH.exists() else ""
     if actual != expected:
         print(
-            "mtg_commander_sim/rules/capability-evidence.json is stale; run "
+            "quorune/rules/capability-evidence.json is stale; run "
             "python scripts/update_capability_evidence.py --write",
             file=sys.stderr,
         )

@@ -29,7 +29,7 @@ class PlatformStatusTests(unittest.TestCase):
 
     def test_report_derives_durable_package_test_and_subsystem_state(self):
         report = build_report()
-        self.assertEqual("0.8.0", report["package"]["version"])
+        self.assertEqual("0.9.0", report["package"]["version"])
         self.assertGreaterEqual(report["tests"]["deterministic_cases_discovered"], 286)
         self.assertGreaterEqual(report["tests"]["server_files"], 4)
         self.assertGreaterEqual(report["tests"]["web_files"], 10)

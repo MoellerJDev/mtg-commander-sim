@@ -681,7 +681,7 @@ def build_rules_dependency_queue_from_root(
         _load(repository / "platform" / "rules-subsystems.json"),
         _load(
             repository
-            / "mtg_commander_sim"
+            / "quorune"
             / "rules"
             / "capability-registry.json"
         ),

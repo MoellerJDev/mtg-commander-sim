@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Akrasan Squire", "oracle_id": "2b8ef83b-1a1d-4299-ab69-e9e296bb224d"}],
   "rulings": [],
   "test_ids": ["test_exalted_triggers_once_per_instance_only_for_attack_alone", "test_exalted_from_noncreature_source_resolves_on_lone_attacker", "test_multiple_attackers_do_not_create_exalted_trigger", "test_attack_keywords_share_one_completed_declaration_batch", "test_attack_transition_is_public_without_hidden_cards", "test_attack_transition_replays_exactly", "test_malformed_transition_rolls_back_attack_declaration", "test_attack_keyword_trigger_mutants_are_killed", "test_attack_keywords_lower_with_precise_closed_spans"],
-  "implementation": {"component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution", "version": "typed-attack-transition-keyword-triggers-v1"},
+  "implementation": {"component": "quorune.attack_transition_model and quorune.attack_transition_resolution", "version": "typed-attack-transition-keyword-triggers-v1"},
   "known_blockers": ["conditional and rules-text-equivalent Exalted wording remains unsupported", "granted, copied, and face-down Exalted requires trusted typed ability fragments", "put-attacking effects and attack costs that remove a declared attacker remain outside this bounded capability", "trigger-doubling policies remain outside this bounded capability"],
   "review_status": "reviewed"
 }

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.delayed_triggers import materialize_delayed_trigger
-from mtg_commander_sim.model import DelayedTrigger
+from quorune.delayed_triggers import materialize_delayed_trigger
+from quorune.model import DelayedTrigger
 
 
 class DelayedTriggerMaterializationTests(unittest.TestCase):

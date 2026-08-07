@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Healer's Hawk", "oracle_id": "28a52ba1-95da-44e1-8ac5-0dc23c902394"}],
   "rulings": [],
   "test_ids": ["test_lifelink_gains_final_damage_across_multiple_recipients", "test_boon_reflection_doubles_lifelink_result", "test_lifelink_counts_only_damage_not_prevented_by_protection", "test_source_pinned_keyword_witnesses_follow_damage_results", "test_keyword_contracts_trace_the_pinned_rules"],
-  "implementation": {"component": "mtg_commander_sim.damage_results.materialize_damage_results", "version": "damage-results-v1"},
+  "implementation": {"component": "quorune.damage_results.materialize_damage_results", "version": "damage-results-v1"},
   "known_blockers": ["unrepresented source last-known-information and continuous ability grants remain fail-closed", "life-total setting, exchange, and the remaining life-gain replacement Oracle families are not yet compiled"],
   "review_status": "reviewed"
 }

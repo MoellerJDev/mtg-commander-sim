@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from mtg_commander_sim.bulk import (
+from quorune.bulk import (
     ScryfallBulkDataError,
     ScryfallBulkItem,
     _download_bulk_item,

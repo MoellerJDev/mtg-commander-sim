@@ -27,31 +27,31 @@ import server frameworks, WebSockets, persistence adapters, AI providers, or
 application/session orchestration. Compiler and metadata code may describe
 rules programs but may not acquire runtime mutation authority.
 
-`mtg_commander_sim/card_programs/` owns the deterministic CardProgram V2 model,
+`quorune/card_programs/` owns the deterministic CardProgram V2 model,
 generated/reviewed adapters, source/trust validation, and inspection commands.
 It may depend on compiler output, semantic value objects, the card database,
 and capability metadata. It must not depend on transport, server, pilot,
 session, or persistence orchestration, and it never mutates `GameState`.
 
-`mtg_commander_sim/semantic_runtime/` owns typed node handlers, their immutable
+`quorune/semantic_runtime/` owns typed node handlers, their immutable
 query context, typed intents, deterministic registry, and canonical intent
 executor. Its scoped architecture policy additionally forbids imports of the
 engine, state model, record, or projection modules. The engine may call inward
 to this pure boundary; handlers cannot call outward to authoritative state.
 The executor may route a typed intent to a classified rules-layer mutation
-port. `mtg_commander_sim/tap_state.py` is such a port. The replacement event
+port. `quorune/tap_state.py` is such a port. The replacement event
 boundary also routes represented counter events to
-`mtg_commander_sim/counter_placement.py`. Represented damage events route to
-`mtg_commander_sim/damage.py` for proposal preparation, replacement/prevention,
+`quorune/counter_placement.py`. Represented damage events route to
+`quorune/damage.py` for proposal preparation, replacement/prevention,
 atomic result commit, and final-event dispatch. Direct destruction,
 permanent-exile, and return-to-owner-hand intents route to
-`mtg_commander_sim/destruction.py`, `mtg_commander_sim/permanent_exile.py`, and
-`mtg_commander_sim/return_to_hand.py`. Exile and return share the closed
+`quorune/destruction.py`, `quorune/permanent_exile.py`, and
+`quorune/return_to_hand.py`. Exile and return share the closed
 `rules/single_object_zone_transition.py` preparation, stale-plan validation, and
 commit substrate while retaining distinct results and journals. Destruction
 remains a separate disposition family. These transaction owners delegate
 authoritative counter or zone writes to existing canonical owners. Direct stack-counter intents route to
-`mtg_commander_sim/stack_counter.py`, which owns counterability, stack removal,
+`quorune/stack_counter.py`, which owns counterability, stack removal,
 replacement-aware physical spell movement, normalized counter-event dispatch,
 telemetry, and public journaling behind a narrow host protocol. These ports depend on narrow
 structural host protocols rather than the engine class and are authorized by

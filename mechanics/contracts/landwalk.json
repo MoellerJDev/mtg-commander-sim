@@ -36,7 +36,7 @@
   "rulings": [],
   "test_ids": ["test_each_basic_variant_uses_current_matching_land_subtype", "test_multiple_variants_are_cumulative_and_repeated_instances_redundant", "test_basic_landwalk_holds_across_the_bounded_keyword_land_grid", "test_malformed_and_unsupported_variants_fail_closed", "test_landwalk_remains_cumulative_with_shadow_and_flying", "test_offer_and_command_share_current_landwalk_legality_and_rollback", "test_legal_nonmatching_block_is_seat_scoped_and_replays", "test_urborg_generated_swamp_activates_opposing_swampwalk", "test_basic_landwalk_keywords_lower_with_precise_closed_spans"],
   "implementation": {
-    "component": "mtg_commander_sim.landwalk.basic_landwalk_block_verdict, mtg_commander_sim.combat_evasion.combat_evasion_verdict, and mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types",
+    "component": "quorune.landwalk.basic_landwalk_block_verdict, quorune.combat_evasion.combat_evasion_verdict, and quorune.combat_evasion_engine_adapter.defending_basic_land_types",
     "version": "basic-landwalk-block-restriction-v1"
   },
   "known_blockers": ["nonbasic, legendary, Desert, snow compound, type, supertype, negative, and other non-basic-land-type variants remain unsupported", "unsupported characteristic producers remain outside the trusted capability", "the aggregate Landwalk mechanic remains untrusted"],

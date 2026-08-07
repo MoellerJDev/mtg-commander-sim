@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 import sys
 
-from mtg_commander_sim import CardDatabase
+from quorune import CardDatabase
 from scripts.build_test_database import build_fixture_database
 from scripts.local_merge_gate import (
     DEFAULT_FOCUSED_TESTS,

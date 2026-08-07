@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.drawing import (
+from quorune.drawing import (
     DrawDecisionContinuation,
     DrawError,
     DrawResume,
     QueuedDraw,
 )
-from mtg_commander_sim.replacement import (
+from quorune.replacement import (
     DredgeDraw,
     FrozenMap,
     ReplacementClass,

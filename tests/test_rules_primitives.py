@@ -5,7 +5,7 @@ from pathlib import Path
 import random
 import unittest
 
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     ContinuousEffect,
     ContinuousOperation,
@@ -13,8 +13,8 @@ from mtg_commander_sim.continuous_effects import (
     evaluate_continuous_effects,
     order_continuous_effects,
 )
-from mtg_commander_sim.object_predicate import ObjectQuerySpec
-from mtg_commander_sim.replacement_effects import (
+from quorune.object_predicate import ObjectQuerySpec
+from quorune.replacement_effects import (
     ReplaceableEvent,
     ReplacementClass,
     ReplacementEffect,

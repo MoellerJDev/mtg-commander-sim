@@ -3,17 +3,17 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets
-from mtg_commander_sim import CommanderSession, GameConfig
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.preflight import (
+from quorune import CommanderSession, GameConfig
+from quorune.engine import GameRuleError
+from quorune.model import StackItem
+from quorune.preflight import (
     _card_source_hashes,
     card_semantic_status,
     semantic_preflight,
 )
-from mtg_commander_sim.record import pause_reason_for_state
-from mtg_commander_sim.report import derive_review
-from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
+from quorune.record import pause_reason_for_state
+from quorune.report import derive_review
+from quorune.semantics import SemanticProgram, SemanticRegistry
 
 
 class SemanticPreflightV2Tests(unittest.TestCase):

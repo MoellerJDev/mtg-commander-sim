@@ -9,7 +9,7 @@ class QuickGatePlanTests(unittest.TestCase):
     def test_changed_test_and_subsystem_are_deduplicated(self):
         plan = build_plan(
             (
-                "mtg_commander_sim/life_change.py",
+                "quorune/life_change.py",
                 "tests/test_life_change.py",
             )
         )
@@ -32,13 +32,13 @@ class QuickGatePlanTests(unittest.TestCase):
         self.assertFalse(any("e2e" in name for name in names))
 
     def test_compiler_plan_checks_card_unlock_frontier(self):
-        plan = build_plan(("mtg_commander_sim/compiler/oracle_parser.py",))
+        plan = build_plan(("quorune/compiler/oracle_parser.py",))
         names = [step.name for step in plan["steps"]]
         self.assertIn("card-unlock-frontier", names)
         self.assertIn("reusable-pieces", names)
 
     def test_reusable_piece_change_checks_inventory(self):
-        plan = build_plan(("mtg_commander_sim/reusable_pieces/generation.py",))
+        plan = build_plan(("quorune/reusable_pieces/generation.py",))
         names = [step.name for step in plan["steps"]]
         self.assertIn("reusable-pieces", names)
 

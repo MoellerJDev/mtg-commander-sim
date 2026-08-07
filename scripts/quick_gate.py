@@ -59,7 +59,7 @@ def build_plan(
                 "-m",
                 "compileall",
                 "-q",
-                "mtg_commander_sim",
+                "quorune",
                 "server",
                 "tests",
                 "scripts",

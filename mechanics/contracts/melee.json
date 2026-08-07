@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Adriana, Captain of the Guard", "oracle_id": "de23275e-e9c1-4151-aed8-f79ead03d5d4"}],
   "rulings": [],
   "test_ids": ["test_melee_counts_distinct_opponents_attacked_as_players", "test_melee_still_triggers_for_zero_opponents_attacked_directly", "test_attack_keywords_share_one_completed_declaration_batch", "test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer", "test_attack_transition_is_public_without_hidden_cards", "test_attack_transition_replays_exactly", "test_malformed_transition_rolls_back_attack_declaration", "test_attack_keyword_trigger_mutants_are_killed", "test_attack_keywords_lower_with_precise_closed_spans"],
-  "implementation": {"component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution", "version": "typed-attack-transition-keyword-triggers-v1"},
+  "implementation": {"component": "quorune.attack_transition_model and quorune.attack_transition_resolution", "version": "typed-attack-transition-keyword-triggers-v1"},
   "known_blockers": ["conditional and rules-text-equivalent Melee wording remains unsupported", "granted, copied, and face-down Melee requires trusted typed ability fragments", "put-attacking effects and attack costs that remove a declared attacker remain outside this bounded capability", "trigger-doubling policies remain outside this bounded capability"],
   "review_status": "reviewed"
 }

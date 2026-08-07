@@ -4,8 +4,8 @@ import json
 import unittest
 from pathlib import Path
 
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.model import StackItem
+from quorune.semantics import SemanticProgram
 
 from common import keep_all, load_assets, make_session
 

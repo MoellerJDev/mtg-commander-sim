@@ -10,9 +10,9 @@ from common import (
     make_session,
     set_fixture_turn,
 )
-from mtg_commander_sim.model import CombatState, StackItem
-from mtg_commander_sim.preflight import card_semantic_status
-from mtg_commander_sim.targets import TargetGroup
+from quorune.model import CombatState, StackItem
+from quorune.preflight import card_semantic_status
+from quorune.targets import TargetGroup
 
 
 class ExactZimoneClosureTests(unittest.TestCase):

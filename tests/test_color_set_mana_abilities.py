@@ -8,9 +8,9 @@ import unittest
 from unittest import mock
 
 from common import ROOT, keep_all, make_session
-from mtg_commander_sim.abilities import parse_activated_abilities
-from mtg_commander_sim.carddb import CardDatabase, CardRecord
-from mtg_commander_sim.color_set_mana_abilities import (
+from quorune.abilities import parse_activated_abilities
+from quorune.carddb import CardDatabase, CardRecord
+from quorune.color_set_mana_abilities import (
     COLOR_SET_MANA_HANDLER_ID,
     ColorSetActivatedManaAbilitySpec,
     ColorSetManaAbilityError,
@@ -18,19 +18,19 @@ from mtg_commander_sim.color_set_mana_abilities import (
     ColorSetSelection,
     compile_color_set_activated_mana_ability,
 )
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.model import CardInstance
-from mtg_commander_sim.oracle_ir import (
+from quorune.deck import DeckLoader
+from quorune.model import CardInstance
+from quorune.oracle_ir import (
     compile_oracle_card,
     generated_programs,
     register_generated_programs,
 )
-from mtg_commander_sim.mana import extract_mana_modes
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.rules.capabilities import (
+from quorune.mana import extract_mana_modes
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime.color_set_mana_abilities import (
+from quorune.semantic_runtime.color_set_mana_abilities import (
     color_set_mana_specs_from_descriptors,
 )
 from scripts.build_test_database import build_fixture_database

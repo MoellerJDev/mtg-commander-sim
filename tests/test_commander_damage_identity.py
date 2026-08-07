@@ -7,16 +7,16 @@ import unittest
 import uuid
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.damage import (
+from quorune.damage import (
     commit_prepared_damage_batch,
     damage_proposal,
     prepare_damage_batch,
     resolve_damage_batch,
 )
-from mtg_commander_sim.deck import DeckDefinition, DeckEntry
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.model import CardInstance, CombatState, GameConfig, GameState
-from mtg_commander_sim.record import (
+from quorune.deck import DeckDefinition, DeckEntry
+from quorune.engine import CommanderEngine
+from quorune.model import CardInstance, CombatState, GameConfig, GameState
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

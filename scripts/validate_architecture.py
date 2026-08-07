@@ -39,8 +39,8 @@ except ModuleNotFoundError:  # Direct `python scripts/...` execution.
         card_specificity_scope,
     )
 
-from mtg_commander_sim.semantics import VALID_EFFECT_OPERATIONS
-from mtg_commander_sim.util import stable_json
+from quorune.semantics import VALID_EFFECT_OPERATIONS
+from quorune.util import stable_json
 
 
 POLICY = ROOT / "platform" / "architecture-policy.json"
@@ -339,7 +339,7 @@ def build_baseline(baseline_commit: str) -> dict[str, Any]:
             "kind": item["kind"],
             "visibility": item["visibility"],
         }
-        for item in analyses["mtg_commander_sim/engine.py"].functions
+        for item in analyses["quorune/engine.py"].functions
         if item["kind"] == "method"
     ]
     result = {
@@ -692,7 +692,7 @@ def _specificity_failures(
         )
     current_methods = {
         (item["name"], item["kind"], item["visibility"])
-        for item in analyses["mtg_commander_sim/engine.py"].functions
+        for item in analyses["quorune/engine.py"].functions
         if item["kind"] == "method"
     }
     baseline_methods = {

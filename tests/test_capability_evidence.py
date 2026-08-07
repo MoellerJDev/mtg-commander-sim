@@ -5,12 +5,12 @@ import json
 from pathlib import Path
 import unittest
 
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     CapabilityRegistry,
     CapabilityRegistryError,
     load_default_capability_registry,
 )
-from mtg_commander_sim.rules.evidence import (
+from quorune.rules.evidence import (
     CapabilityEvidenceError,
     capability_evidence_fingerprint,
     load_capability_evidence_index,

@@ -98,4 +98,4 @@ evidence, and a predeclared multi-game methodology.
 
 See [provider contract](providers.md), [protocol](../reference/protocol.md),
 [Game Record](../reference/game-record.md), and the agent-only
-[Pilot Harness skill](../../.agents/skills/commander-arena/SKILL.md).
+[Pilot Harness skill](../../.agents/skills/quorune-pilot-harness/SKILL.md).

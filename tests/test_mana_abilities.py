@@ -6,12 +6,12 @@ from types import SimpleNamespace
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.abilities import parse_activated_abilities
-from mtg_commander_sim.mana_undo import (
+from quorune.abilities import parse_activated_abilities
+from quorune.mana_undo import (
     available_mana_undo,
     undo_mana_activation,
 )
-from mtg_commander_sim.model import StackItem
+from quorune.model import StackItem
 
 
 class ManaAbilityRuleTests(unittest.TestCase):

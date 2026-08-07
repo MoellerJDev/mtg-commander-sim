@@ -3,8 +3,8 @@ from __future__ import annotations
 import unittest
 
 from common import load_assets, make_session
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.targets import TargetGroup
+from quorune.errors import GameRuleError
+from quorune.targets import TargetGroup
 
 
 class ExactCombatKeywordTests(unittest.TestCase):

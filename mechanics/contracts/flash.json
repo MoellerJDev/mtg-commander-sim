@@ -47,7 +47,7 @@
     "test_flash_cast_replays_exactly"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
+    "component": "quorune.compiled_cast_timing.compiled_cast_timing_permissions",
     "version": "printed-flash-cast-timing-v1"
   },
   "known_blockers": [],

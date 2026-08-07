@@ -50,7 +50,7 @@ def validate_schemas() -> int:
     checked = 0
     paths = [
         *(ROOT / "schemas").glob("*.json"),
-        *(ROOT / "mtg_commander_sim" / "schemas").glob("*.json"),
+        *(ROOT / "quorune" / "schemas").glob("*.json"),
     ]
     for path in sorted(paths):
         schema = json.loads(path.read_text(encoding="utf-8"))

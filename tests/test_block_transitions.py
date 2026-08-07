@@ -4,11 +4,11 @@ import copy
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.ability_fragments import (
+from quorune.ability_fragments import (
     CombatKeywordTriggerKind,
     CombatKeywordTriggerSpec,
 )
-from mtg_commander_sim.block_transitions import (
+from quorune.block_transitions import (
     BlockKeywordTriggerOccurrence,
     BlockTransitionError,
     BlockTransitionEvent,
@@ -18,11 +18,11 @@ from mtg_commander_sim.block_transitions import (
     derive_block_keyword_trigger_occurrences,
     resolve_block_keyword_trigger,
 )
-from mtg_commander_sim.combat_relationship_state import (
+from quorune.combat_relationship_state import (
     BlockDeclarationAssignment,
     commit_block_declaration,
 )
-from mtg_commander_sim.model import CombatState
+from quorune.model import CombatState
 
 
 def _spec(

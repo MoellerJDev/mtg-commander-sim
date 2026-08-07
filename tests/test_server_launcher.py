@@ -11,7 +11,7 @@ class ServerLauncherTests(unittest.TestCase):
     def _run_launcher(self, *arguments: str) -> tuple[MagicMock, MagicMock]:
         timer = MagicMock()
         with (
-            patch.object(sys, "argv", ["commander-server", *arguments]),
+            patch.object(sys, "argv", ["quorune-server", *arguments]),
             patch.object(launcher, "_prepare_browser"),
             patch.object(launcher.uvicorn, "run"),
             patch.object(launcher.threading, "Timer", return_value=timer) as timer_factory,

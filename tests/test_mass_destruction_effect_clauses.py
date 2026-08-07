@@ -8,47 +8,47 @@ import tempfile
 import unittest
 
 from common import ROOT, keep_all, load_assets, make_session
-from mtg_commander_sim.affected_permanents import (
+from quorune.affected_permanents import (
     AffectedPermanentSetError,
     AffectedPermanentSetSpec,
     PermanentControllerRelation,
     select_affected_permanents,
 )
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.destruction_templates import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.destruction_templates import (
     MassDestructionEffectTemplate,
     mass_destruction_effect_template,
 )
-from mtg_commander_sim.destruction import (
+from quorune.destruction import (
     commit_destruction_plan,
     DestructionCause,
     DestructionError,
     prepare_destructions,
     request_for_card,
 )
-from mtg_commander_sim.destruction_sets import (
+from quorune.destruction_sets import (
     resolve_destruction_set,
     snapshot_destruction_set,
 )
-from mtg_commander_sim.object_predicate import ObjectQuerySpec
-from mtg_commander_sim.object_query import ObjectQueryResult
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.record import (
+from quorune.object_predicate import ObjectQuerySpec
+from quorune.object_query import ObjectQueryResult
+from quorune.oracle_ir import compile_oracle_card
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     DestroyPermanentSetIntent,
     ReadOnlyHandlerContext,
     ReadOnlyRulesQuery,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
-from mtg_commander_sim.semantic_runtime.destruction_handlers import (
+from quorune.semantic_runtime.context import SemanticNodeError
+from quorune.semantic_runtime.destruction_handlers import (
     DestroyPermanentSetHandler,
 )
 

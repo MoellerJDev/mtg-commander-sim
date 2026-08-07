@@ -18,7 +18,7 @@
     },
     {
       "id": "python-architecture-sources",
-      "patterns": ["mtg_commander_sim/**", "server/**", "scripts/**"],
+      "patterns": ["quorune/**", "server/**", "scripts/**"],
       "checks": ["architecture", "module-classifications"]
     },
     {
@@ -31,9 +31,9 @@
       "patterns": [
         "rules/**",
         "mechanics/**",
-        "mtg_commander_sim/rules_corpus.py",
-        "mtg_commander_sim/rule_conformance.py",
-        "mtg_commander_sim/rules_scheduler.py",
+        "quorune/rules_corpus.py",
+        "quorune/rule_conformance.py",
+        "quorune/rules_scheduler.py",
         "scripts/update_rules_scheduler.py"
       ],
       "checks": ["rules", "rules-scheduler"]
@@ -51,21 +51,21 @@
     {
       "id": "capability-and-card-program-sources",
       "patterns": [
-        "mtg_commander_sim/rules/capabilities.py",
-        "mtg_commander_sim/rules/capability-*.json",
-        "mtg_commander_sim/card_programs/**",
-        "mtg_commander_sim/compiled_activated_abilities.py",
-        "mtg_commander_sim/compiled_cycling_abilities.py",
-        "mtg_commander_sim/compiled_mana_abilities.py",
-        "mtg_commander_sim/color_set_mana_abilities.py",
-        "mtg_commander_sim/cycling_abilities.py",
-        "mtg_commander_sim/fixed_mana_abilities.py",
-        "mtg_commander_sim/mana_source_discovery.py",
-        "mtg_commander_sim/oracle_ir.py",
-        "mtg_commander_sim/mechanic_contracts.py",
-        "mtg_commander_sim/semantic_runtime/color_set_mana_abilities.py",
-        "mtg_commander_sim/semantic_runtime/cycling_abilities.py",
-        "mtg_commander_sim/semantic_runtime/mana_abilities.py",
+        "quorune/rules/capabilities.py",
+        "quorune/rules/capability-*.json",
+        "quorune/card_programs/**",
+        "quorune/compiled_activated_abilities.py",
+        "quorune/compiled_cycling_abilities.py",
+        "quorune/compiled_mana_abilities.py",
+        "quorune/color_set_mana_abilities.py",
+        "quorune/cycling_abilities.py",
+        "quorune/fixed_mana_abilities.py",
+        "quorune/mana_source_discovery.py",
+        "quorune/oracle_ir.py",
+        "quorune/mechanic_contracts.py",
+        "quorune/semantic_runtime/color_set_mana_abilities.py",
+        "quorune/semantic_runtime/cycling_abilities.py",
+        "quorune/semantic_runtime/mana_abilities.py",
         "mechanics/**",
         "platform/capability-evidence-declarations.json",
         "scripts/update_capability_evidence.py",
@@ -92,21 +92,21 @@
     {
       "id": "compiler-cardprogram-suite",
       "patterns": [
-        "mtg_commander_sim/compiler/**",
-        "mtg_commander_sim/oracle_ir.py",
-        "mtg_commander_sim/card_programs/**",
-        "mtg_commander_sim/compiled_activated_abilities.py",
-        "mtg_commander_sim/compiled_cycling_abilities.py",
-        "mtg_commander_sim/compiled_mana_abilities.py",
-        "mtg_commander_sim/color_set_mana_abilities.py",
-        "mtg_commander_sim/cycling_abilities.py",
-        "mtg_commander_sim/fixed_mana_abilities.py",
-        "mtg_commander_sim/mana_source_discovery.py",
-        "mtg_commander_sim/preflight.py",
-        "mtg_commander_sim/mechanic_contracts.py",
-        "mtg_commander_sim/semantic_runtime/color_set_mana_abilities.py",
-        "mtg_commander_sim/semantic_runtime/cycling_abilities.py",
-        "mtg_commander_sim/semantic_runtime/mana_abilities.py"
+        "quorune/compiler/**",
+        "quorune/oracle_ir.py",
+        "quorune/card_programs/**",
+        "quorune/compiled_activated_abilities.py",
+        "quorune/compiled_cycling_abilities.py",
+        "quorune/compiled_mana_abilities.py",
+        "quorune/color_set_mana_abilities.py",
+        "quorune/cycling_abilities.py",
+        "quorune/fixed_mana_abilities.py",
+        "quorune/mana_source_discovery.py",
+        "quorune/preflight.py",
+        "quorune/mechanic_contracts.py",
+        "quorune/semantic_runtime/color_set_mana_abilities.py",
+        "quorune/semantic_runtime/cycling_abilities.py",
+        "quorune/semantic_runtime/mana_abilities.py"
       ],
       "test_suites": ["compiler-cardprogram"],
       "checks": [
@@ -123,7 +123,7 @@
     {
       "id": "reusable-piece-inventory",
       "patterns": [
-        "mtg_commander_sim/reusable_pieces/**",
+        "quorune/reusable_pieces/**",
         "scripts/update_reusable_piece_matrix.py",
         "platform/reusable-piece-policy.json",
         "schemas/reusable-piece-policy.schema.json",
@@ -137,32 +137,32 @@
     {
       "id": "rules-events-replacements-suite",
       "patterns": [
-        "mtg_commander_sim/replacement/**",
-        "mtg_commander_sim/replacement_effects.py",
-        "mtg_commander_sim/replacement_decisions.py",
-        "mtg_commander_sim/damage_prevention*.py",
-        "mtg_commander_sim/damage_modifier*.py",
-        "mtg_commander_sim/counter_placement.py",
-        "mtg_commander_sim/counter_state.py",
-        "mtg_commander_sim/life_change.py",
-        "mtg_commander_sim/life_state.py",
-        "mtg_commander_sim/effect_runtime/life_effects.py",
-        "mtg_commander_sim/continuous_effect*.py",
-        "mtg_commander_sim/drawing/**",
-        "mtg_commander_sim/semantic_runtime/*replacement*.py",
-        "mtg_commander_sim/prevention_triggers.py"
+        "quorune/replacement/**",
+        "quorune/replacement_effects.py",
+        "quorune/replacement_decisions.py",
+        "quorune/damage_prevention*.py",
+        "quorune/damage_modifier*.py",
+        "quorune/counter_placement.py",
+        "quorune/counter_state.py",
+        "quorune/life_change.py",
+        "quorune/life_state.py",
+        "quorune/effect_runtime/life_effects.py",
+        "quorune/continuous_effect*.py",
+        "quorune/drawing/**",
+        "quorune/semantic_runtime/*replacement*.py",
+        "quorune/prevention_triggers.py"
       ],
       "test_suites": ["rules-events-replacements"]
     },
     {
       "id": "protection-and-attachment-interactions",
       "patterns": [
-        "mtg_commander_sim/protection.py",
-        "mtg_commander_sim/attachments.py",
-        "mtg_commander_sim/enchant_spec.py",
-        "mtg_commander_sim/aura/**",
-        "mtg_commander_sim/ability_fragments.py",
-        "mtg_commander_sim/compiled_ability_fragments.py"
+        "quorune/protection.py",
+        "quorune/attachments.py",
+        "quorune/enchant_spec.py",
+        "quorune/aura/**",
+        "quorune/ability_fragments.py",
+        "quorune/compiled_ability_fragments.py"
       ],
       "test_suites": [
         "compiler-cardprogram",
@@ -174,21 +174,21 @@
     {
       "id": "casting-costs-mana-suite",
       "patterns": [
-        "mtg_commander_sim/rules/casting/**",
-        "mtg_commander_sim/rules/activation/**",
-        "mtg_commander_sim/rules/action_proposals.py",
-        "mtg_commander_sim/compiled_activated_abilities.py",
-        "mtg_commander_sim/compiled_cycling_abilities.py",
-        "mtg_commander_sim/compiled_mana_abilities.py",
-        "mtg_commander_sim/cycling_abilities.py",
-        "mtg_commander_sim/fixed_mana_abilities.py",
-        "mtg_commander_sim/mana*.py",
-        "mtg_commander_sim/semantic_runtime/cycling_abilities.py",
-        "mtg_commander_sim/semantic_runtime/mana_abilities.py",
-        "mtg_commander_sim/declaration_costs.py",
-        "mtg_commander_sim/abilities.py",
-        "mtg_commander_sim/permissions.py",
-        "mtg_commander_sim/stack*.py"
+        "quorune/rules/casting/**",
+        "quorune/rules/activation/**",
+        "quorune/rules/action_proposals.py",
+        "quorune/compiled_activated_abilities.py",
+        "quorune/compiled_cycling_abilities.py",
+        "quorune/compiled_mana_abilities.py",
+        "quorune/cycling_abilities.py",
+        "quorune/fixed_mana_abilities.py",
+        "quorune/mana*.py",
+        "quorune/semantic_runtime/cycling_abilities.py",
+        "quorune/semantic_runtime/mana_abilities.py",
+        "quorune/declaration_costs.py",
+        "quorune/abilities.py",
+        "quorune/permissions.py",
+        "quorune/stack*.py"
       ],
       "test_suites": ["casting-costs-mana"],
       "browser_focuses": ["mana-action"]
@@ -196,36 +196,36 @@
     {
       "id": "targets-choices-continuations-suite",
       "patterns": [
-        "mtg_commander_sim/targets.py",
-        "mtg_commander_sim/choice_forms.py",
-        "mtg_commander_sim/semantic_choices/**",
-        "mtg_commander_sim/aura/decisions.py",
-        "mtg_commander_sim/linked_abilities.py",
-        "mtg_commander_sim/rules/action_catalog.py",
-        "mtg_commander_sim/rules/action_explanations.py"
+        "quorune/targets.py",
+        "quorune/choice_forms.py",
+        "quorune/semantic_choices/**",
+        "quorune/aura/decisions.py",
+        "quorune/linked_abilities.py",
+        "quorune/rules/action_catalog.py",
+        "quorune/rules/action_explanations.py"
       ],
       "test_suites": ["targets-choices-continuations"]
     },
     {
       "id": "triggers-turns-suite",
       "patterns": [
-        "mtg_commander_sim/trigger*.py",
-        "mtg_commander_sim/delayed_triggers.py",
-        "mtg_commander_sim/zone_trigger*.py",
-        "mtg_commander_sim/drawing/coordinator.py"
+        "quorune/trigger*.py",
+        "quorune/delayed_triggers.py",
+        "quorune/zone_trigger*.py",
+        "quorune/drawing/coordinator.py"
       ],
       "test_suites": ["triggers-turns-exact-decks"]
     },
     {
       "id": "draw-browser-journey",
-      "patterns": ["mtg_commander_sim/drawing/**"],
+      "patterns": ["quorune/drawing/**"],
       "browser_focuses": ["turn-draw"]
     },
     {
       "id": "combat-declarations-suite",
       "patterns": [
-        "mtg_commander_sim/declaration_*.py",
-        "mtg_commander_sim/combat_constraints.py"
+        "quorune/declaration_*.py",
+        "quorune/combat_constraints.py"
       ],
       "test_suites": ["combat-declarations"],
       "browser_focuses": ["combat"]
@@ -233,23 +233,23 @@
     {
       "id": "state-actions-damage-suite",
       "patterns": [
-        "mtg_commander_sim/combat.py",
-        "mtg_commander_sim/combat_damage_assignment.py",
-        "mtg_commander_sim/combat_damage_engine_adapter.py",
-        "mtg_commander_sim/combat_damage_events.py",
-        "mtg_commander_sim/combat_damage_projection.py",
-        "mtg_commander_sim/combat_damage_sequence.py",
-        "mtg_commander_sim/combat_damage_snapshot.py",
-        "mtg_commander_sim/combat_damage_trample.py",
-        "mtg_commander_sim/combat_damage_values.py",
-        "mtg_commander_sim/combat_relationship_state.py",
-        "mtg_commander_sim/damage.py",
-        "mtg_commander_sim/damage_results.py",
-        "mtg_commander_sim/damage_source.py",
-        "mtg_commander_sim/damage_transaction.py",
-        "mtg_commander_sim/damage_values.py",
-        "mtg_commander_sim/state_based_actions.py",
-        "mtg_commander_sim/state_planner.py"
+        "quorune/combat.py",
+        "quorune/combat_damage_assignment.py",
+        "quorune/combat_damage_engine_adapter.py",
+        "quorune/combat_damage_events.py",
+        "quorune/combat_damage_projection.py",
+        "quorune/combat_damage_sequence.py",
+        "quorune/combat_damage_snapshot.py",
+        "quorune/combat_damage_trample.py",
+        "quorune/combat_damage_values.py",
+        "quorune/combat_relationship_state.py",
+        "quorune/damage.py",
+        "quorune/damage_results.py",
+        "quorune/damage_source.py",
+        "quorune/damage_transaction.py",
+        "quorune/damage_values.py",
+        "quorune/state_based_actions.py",
+        "quorune/state_planner.py"
       ],
       "test_suites": ["state-actions-damage"],
       "browser_focuses": ["combat"]
@@ -257,31 +257,31 @@
     {
       "id": "natural-winner-critical-path",
       "patterns": [
-        "mtg_commander_sim/commander.py",
-        "mtg_commander_sim/record_commander_identity.py",
-        "mtg_commander_sim/combat.py",
-        "mtg_commander_sim/combat_damage_assignment.py",
-        "mtg_commander_sim/combat_damage_engine_adapter.py",
-        "mtg_commander_sim/combat_damage_events.py",
-        "mtg_commander_sim/combat_damage_projection.py",
-        "mtg_commander_sim/combat_damage_sequence.py",
-        "mtg_commander_sim/combat_damage_snapshot.py",
-        "mtg_commander_sim/combat_damage_trample.py",
-        "mtg_commander_sim/combat_damage_values.py",
-        "mtg_commander_sim/combat_relationship_state.py",
-        "mtg_commander_sim/damage_results.py",
-        "mtg_commander_sim/state_based_actions.py",
-        "mtg_commander_sim/state_planner.py"
+        "quorune/commander.py",
+        "quorune/record_commander_identity.py",
+        "quorune/combat.py",
+        "quorune/combat_damage_assignment.py",
+        "quorune/combat_damage_engine_adapter.py",
+        "quorune/combat_damage_events.py",
+        "quorune/combat_damage_projection.py",
+        "quorune/combat_damage_sequence.py",
+        "quorune/combat_damage_snapshot.py",
+        "quorune/combat_damage_trample.py",
+        "quorune/combat_damage_values.py",
+        "quorune/combat_relationship_state.py",
+        "quorune/damage_results.py",
+        "quorune/state_based_actions.py",
+        "quorune/state_planner.py"
       ],
       "browser_full": true
     },
     {
       "id": "multiplayer-commander-suite",
       "patterns": [
-        "mtg_commander_sim/commander.py",
-        "mtg_commander_sim/record_commander_identity.py",
-        "mtg_commander_sim/arena.py",
-        "mtg_commander_sim/profiles.py"
+        "quorune/commander.py",
+        "quorune/record_commander_identity.py",
+        "quorune/arena.py",
+        "quorune/profiles.py"
       ],
       "test_suites": ["multiplayer-commander"]
     },
@@ -289,14 +289,14 @@
       "id": "server-replay-privacy-suite",
       "patterns": [
         "server/**",
-        "mtg_commander_sim/protocol.py",
-        "mtg_commander_sim/projection.py",
-        "mtg_commander_sim/record*.py",
-        "mtg_commander_sim/runtime.py",
-        "mtg_commander_sim/session.py",
-        "mtg_commander_sim/service.py",
-        "mtg_commander_sim/client.py",
-        "mtg_commander_sim/persistence.py"
+        "quorune/protocol.py",
+        "quorune/projection.py",
+        "quorune/record*.py",
+        "quorune/runtime.py",
+        "quorune/session.py",
+        "quorune/service.py",
+        "quorune/client.py",
+        "quorune/persistence.py"
       ],
       "test_suites": ["server-replay-privacy"]
     },
@@ -321,22 +321,22 @@
       "id": "browser-facing-protocol",
       "patterns": [
         "schemas/**",
-        "mtg_commander_sim/protocol.py",
-        "mtg_commander_sim/projection.py",
-        "mtg_commander_sim/choice_forms.py",
-        "mtg_commander_sim/rules/action_catalog.py",
-        "mtg_commander_sim/rules/action_explanations.py",
-        "mtg_commander_sim/service.py"
+        "quorune/protocol.py",
+        "quorune/projection.py",
+        "quorune/choice_forms.py",
+        "quorune/rules/action_catalog.py",
+        "quorune/rules/action_explanations.py",
+        "quorune/service.py"
       ],
       "browser_full": true
     },
     {
       "id": "browser-lifecycle-persistence",
       "patterns": [
-        "mtg_commander_sim/persistence.py",
-        "mtg_commander_sim/record*.py",
-        "mtg_commander_sim/runtime.py",
-        "mtg_commander_sim/service.py"
+        "quorune/persistence.py",
+        "quorune/record*.py",
+        "quorune/runtime.py",
+        "quorune/service.py"
       ],
       "browser_full": true
     },
@@ -353,10 +353,10 @@
         "pyproject.toml",
         "requirements-dev.txt",
         "scripts/bootstrap_windows.ps1",
-        "mtg_commander_sim/persistence.py",
-        "mtg_commander_sim/record.py",
-        "mtg_commander_sim/carddb.py",
-        "mtg_commander_sim/bulk.py"
+        "quorune/persistence.py",
+        "quorune/record.py",
+        "quorune/carddb.py",
+        "quorune/bulk.py"
       ],
       "windows_full": true
     }
@@ -364,7 +364,7 @@
   "symbol_rules": [
     {
       "id": "browser-facing-priority-and-yield",
-      "patterns": ["mtg_commander_sim/engine.py"],
+      "patterns": ["quorune/engine.py"],
       "symbols": [
         "CommanderEngine._yield_change_epoch",
         "CommanderEngine._increment_yield_change_epoch",
@@ -387,7 +387,7 @@
   "fallback_test_suites": [
     {
       "id": "unclassified-python-core",
-      "patterns": ["mtg_commander_sim/**"],
+      "patterns": ["quorune/**"],
       "test_suite": "core-domain"
     }
   ],

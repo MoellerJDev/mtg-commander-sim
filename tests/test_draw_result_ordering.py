@@ -7,15 +7,15 @@ from unittest import mock
 
 from common import keep_all, load_assets, make_session
 
-from mtg_commander_sim.compiler.runtime_templates import (
+from quorune.compiler.runtime_templates import (
     static_runtime_template,
 )
-from mtg_commander_sim.compiler.draw_templates import (
+from quorune.compiler.draw_templates import (
     fixed_draw_effect_template,
 )
-from mtg_commander_sim.cast_timing import type_line_has_card_type
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.drawing import (
+from quorune.cast_timing import type_line_has_card_type
+from quorune.engine import CommanderEngine
+from quorune.drawing import (
     DiscardDrawnCardUnlessType,
     DrawError,
     DrawEventRequest,
@@ -25,31 +25,31 @@ from mtg_commander_sim.drawing import (
     prepare_draw_event,
     validate_prepared_draw,
 )
-from mtg_commander_sim.replacement import (
+from quorune.replacement import (
     CreateResultDraws,
     ReplacementClass,
     ReplacementEffect,
     operation_from_dict,
     operation_to_dict,
 )
-from mtg_commander_sim.replacement.operations import (
+from quorune.replacement.operations import (
     ReplacementOperationError,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     DRAW_RESULT_MULTIPLIER_HANDLER_ID,
     DrawReplacementSourceContext,
     DrawResultMultiplierHandler,
     default_semantic_interpreter,
 )
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.oracle_ir import generated_programs
-from mtg_commander_sim.record import (
+from quorune.semantics import SemanticProgram
+from quorune.model import StackItem
+from quorune.oracle_ir import generated_programs
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
 

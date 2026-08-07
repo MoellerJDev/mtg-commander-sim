@@ -4,7 +4,7 @@ import json
 import random
 import unittest
 
-from mtg_commander_sim.replacement_effects import (
+from quorune.replacement_effects import (
     AddAmount,
     AffectedObject,
     EntryReplacementScope,

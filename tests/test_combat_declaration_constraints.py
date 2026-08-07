@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.combat_constraints import (
+from quorune.combat_constraints import (
     DeclarationProblem,
     DeclarationRequirement,
     DeclarationRestriction,

@@ -5,10 +5,10 @@ from types import SimpleNamespace
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.model import GameState
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.trigger_batches import (
+from quorune.errors import GameRuleError
+from quorune.model import GameState
+from quorune.semantics import SemanticProgram
+from quorune.trigger_batches import (
     PendingTriggerBatch,
     PendingTriggerItem,
     TriggerBatchError,
@@ -17,7 +17,7 @@ from mtg_commander_sim.trigger_batches import (
     create_pending_trigger_batch,
     merge_pending_trigger_batch,
 )
-from mtg_commander_sim.trigger_processing import (
+from quorune.trigger_processing import (
     collect_trigger_items,
     enqueue_trigger_batch,
 )

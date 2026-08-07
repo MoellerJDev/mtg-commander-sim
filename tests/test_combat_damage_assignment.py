@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.combat_damage_assignment import (
+from quorune.combat_damage_assignment import (
     build_combat_damage_assignment_proposal,
     CombatDamageAssignmentError,
     CombatDamageParticipant,
@@ -11,7 +11,7 @@ from mtg_commander_sim.combat_damage_assignment import (
     CreatureDamageState,
     TrampleDamageSpec,
 )
-from mtg_commander_sim.combat_damage_snapshot import (
+from quorune.combat_damage_snapshot import (
     CombatAttackRelationship,
     CombatBlockRelationship,
     CombatDamageRecipient,

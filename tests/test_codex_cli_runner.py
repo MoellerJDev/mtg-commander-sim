@@ -8,15 +8,15 @@ from pathlib import Path
 from unittest import mock
 
 from common import DB_PATH, load_assets, make_session
-from mtg_commander_sim.codex_cli import (
+from quorune.codex_cli import (
     CodexCliArenaRunner,
     CodexCliError,
     CodexExecClient,
     CodexTurnResult,
 )
-from mtg_commander_sim.record import verify_record_suffix
-from mtg_commander_sim.session import CommanderSession
-from mtg_commander_sim.util import stable_json
+from quorune.record import verify_record_suffix
+from quorune.session import CommanderSession
+from quorune.util import stable_json
 
 
 class FakeCodexClient:
@@ -233,12 +233,12 @@ class CodexCliArenaRunnerTests(unittest.TestCase):
                 client=client,
             )
             with mock.patch(
-                "mtg_commander_sim.codex_cli.refresh_record",
+                "quorune.codex_cli.refresh_record",
                 side_effect=AssertionError(
                     "verified resume must not replay the initial prefix"
                 ),
             ), mock.patch(
-                "mtg_commander_sim.codex_cli.verify_record_suffix",
+                "quorune.codex_cli.verify_record_suffix",
                 wraps=verify_record_suffix,
             ) as suffix_replay:
                 second_result = second.run(
@@ -317,7 +317,7 @@ class CodexCliArenaRunnerTests(unittest.TestCase):
                 client=client,
             )
             with mock.patch(
-                "mtg_commander_sim.codex_cli.refresh_record",
+                "quorune.codex_cli.refresh_record",
                 side_effect=ValueError("replay divergence"),
             ):
                 with self.assertRaisesRegex(

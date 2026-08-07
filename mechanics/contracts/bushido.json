@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Hand of Honor", "oracle_id": "feb65f2e-6f71-4f29-bf31-b210c85f3ab3"}],
   "rulings": [],
   "test_ids": ["test_bushido_triggers_once_for_blocks_or_becomes_blocked_per_instance", "test_keyword_occurrence_counts_hold_across_bounded_grid", "test_unblocked_bushido_creature_does_not_trigger", "test_flanking_and_bushido_share_one_sealed_apnap_batch", "test_four_player_block_declarations_finish_before_apnap_trigger_placement", "test_four_player_block_transition_is_public_without_hidden_cards", "test_four_player_block_transition_replays_exactly", "test_block_keyword_resolution_uses_canonical_eot_continuous_effect", "test_block_keyword_stack_resolution_updates_current_characteristics", "test_malformed_transition_rolls_back_final_block_declaration", "test_bushido_instance_quantity_mutant_is_killed", "test_flanking_and_bushido_lower_with_precise_closed_spans"],
-  "implementation": {"component": "mtg_commander_sim.block_transitions and mtg_commander_sim.block_transition_engine_adapter", "version": "typed-block-transition-keyword-triggers-v1"},
+  "implementation": {"component": "quorune.block_transitions and quorune.block_transition_engine_adapter", "version": "typed-block-transition-keyword-triggers-v1"},
   "known_blockers": ["zero, variable, conditional, and rules-text-equivalent Bushido wording remains unsupported", "granted, copied, and face-down Bushido requires trusted typed ability fragments", "trigger-doubling policies remain outside this bounded capability"],
   "review_status": "reviewed"
 }

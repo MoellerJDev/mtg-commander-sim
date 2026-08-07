@@ -7,9 +7,9 @@ import tempfile
 import unittest
 
 from common import ROOT, keep_all, make_session
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.destruction import (
+from quorune.carddb import CardDatabase
+from quorune.deck import DeckLoader
+from quorune.destruction import (
     commit_destruction_plan,
     DestructionCause,
     DestructionDisposition,
@@ -18,19 +18,19 @@ from mtg_commander_sim.destruction import (
     prepare_destructions,
     request_for_card,
 )
-from mtg_commander_sim.record import (
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement.immutable import thaw_value
-from mtg_commander_sim.semantic_runtime import (
+from quorune.replacement.immutable import thaw_value
+from quorune.semantic_runtime import (
     DestroyPermanentIntent,
     ReadOnlyHandlerContext,
     ReadOnlyRulesQuery,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
-from mtg_commander_sim.semantic_runtime.destruction_handlers import (
+from quorune.semantic_runtime.context import SemanticNodeError
+from quorune.semantic_runtime.destruction_handlers import (
     DestroyPermanentHandler,
 )
 from scripts.build_test_database import build_fixture_database

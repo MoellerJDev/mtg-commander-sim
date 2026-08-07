@@ -5,17 +5,17 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session, pass_current
-from mtg_commander_sim.combat_damage_assignment import (
+from quorune.combat_damage_assignment import (
     CombatDamageAssignmentError,
 )
-from mtg_commander_sim.combat_damage_projection import (
+from quorune.combat_damage_projection import (
     project_combat_damage_assignment,
 )
-from mtg_commander_sim.combat_damage_engine_adapter import (
+from quorune.combat_damage_engine_adapter import (
     EngineCombatDamageQuery,
 )
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.record import (
+from quorune.model import CombatState
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

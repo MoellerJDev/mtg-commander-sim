@@ -3,18 +3,18 @@ from __future__ import annotations
 import unittest
 
 from common import DB_PATH
-from mtg_commander_sim.ability_fragments import (
+from quorune.ability_fragments import (
     CombatKeywordTriggerKind,
     CombatKeywordTriggerSpec,
     ability_fragment_from_dict,
 )
-from mtg_commander_sim.card_programs.adapters import compile_card_program
-from mtg_commander_sim.carddb import CardDatabase, CardRecord
-from mtg_commander_sim.compiler.ability_keyword_fragments import (
+from quorune.card_programs.adapters import compile_card_program
+from quorune.carddb import CardDatabase, CardRecord
+from quorune.compiler.ability_keyword_fragments import (
     lower_ability_keyword_fragments,
 )
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.rules.capabilities import (
+from quorune.oracle_ir import compile_oracle_card
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
 

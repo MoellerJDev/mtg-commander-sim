@@ -7,14 +7,14 @@ import unittest
 from pathlib import Path
 
 from common import ROOT, load_assets
-from mtg_commander_sim.cli import _scripted_choice
-from mtg_commander_sim import GameConfig
-from mtg_commander_sim.pilot import (
+from quorune.cli import _scripted_choice
+from quorune import GameConfig
+from quorune.pilot import (
     ScriptedPilot,
     SequentialPilotRunner,
 )
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.session import CommanderSession
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.session import CommanderSession
 
 
 class Seed20260730RegressionTests(unittest.TestCase):

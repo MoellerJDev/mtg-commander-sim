@@ -21,9 +21,13 @@ maintenance: "hand-maintained"
   optional untrusted clients of the same projected protocol used by humans.
   Current rules compatibility remains focused on Magic: The Gathering
   Commander without presenting that third-party format as the product name.
-- Preserved the `mtg-commander-sim` distribution, `mtg_commander_sim` import
-  namespace, legacy commands, Game Record v3 identifiers, replay hashes, and
-  protocol compatibility keys for the separately certified namespace migration.
+- Renamed the unpublished Python distribution and implementation namespace to
+  `quorune`, installed `quorune`, `simctl`, and `quorune-server`, and migrated
+  the optional pilot skill and agent paths. No transitional import package or
+  executable alias is needed because the previous distribution was not
+  published.
+- Preserved Game Record v3 identifiers, replay hashes, schema IDs, environment
+  variables, and browser protocol/storage keys as durable compatibility data.
 
 ### Typed Flanking and Bushido block-transition triggers
 

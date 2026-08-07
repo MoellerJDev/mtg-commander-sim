@@ -3,8 +3,8 @@ from __future__ import annotations
 import unittest
 import uuid
 
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import StackItem
+from quorune.engine import GameRuleError
+from quorune.model import StackItem
 from common import keep_all, load_assets, make_session, pass_current
 
 

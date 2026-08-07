@@ -11,9 +11,9 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from mtg_commander_sim.bulk import ScryfallBulkItem
-from mtg_commander_sim.carddb import CardDatabase, build_card_database
-from mtg_commander_sim.record import database_fingerprint
+from quorune.bulk import ScryfallBulkItem
+from quorune.carddb import CardDatabase, build_card_database
+from quorune.record import database_fingerprint
 from server.data import CardImageCache, ManagedScryfallData
 
 

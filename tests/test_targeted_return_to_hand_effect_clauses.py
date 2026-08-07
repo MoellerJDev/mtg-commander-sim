@@ -6,22 +6,22 @@ import tempfile
 import unittest
 
 from common import ROOT
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.return_to_hand_templates import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.return_to_hand_templates import (
     ReturnToHandTarget,
     TargetedReturnToHandEffectTemplate,
     targeted_return_to_hand_effect_template,
 )
-from mtg_commander_sim.oracle_ir import (
+from quorune.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
-from mtg_commander_sim.targets import TargetGroup
+from quorune.semantics import SemanticRegistry
+from quorune.targets import TargetGroup
 from scripts.build_test_database import build_fixture_database
 
 

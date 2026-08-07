@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.record import authoritative_state_hash
+from quorune.record import authoritative_state_hash
 
 
 class CastingActivationProposalEquivalenceTests(unittest.TestCase):

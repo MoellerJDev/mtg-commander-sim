@@ -6,21 +6,21 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.model import StackItem
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement_effects import ReplacementChoiceRequired
-from mtg_commander_sim.semantic_runtime import (
+from quorune.replacement_effects import ReplacementChoiceRequired
+from quorune.semantic_runtime import (
     AdditionalTokenReplacementHandler,
     SemanticNodeError,
     TokenCreationReplacementContext,
     default_token_creation_replacement_registry,
 )
-from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
+from quorune.semantics import SemanticProgram, SemanticRegistry
 
 
 def additional_token_descriptor(

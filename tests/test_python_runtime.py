@@ -4,8 +4,9 @@ from dataclasses import dataclass
 from pathlib import Path
 import tempfile
 import unittest
+import zipfile
 
-from mtg_commander_sim.python_runtime import (
+from quorune.python_runtime import (
     UnsupportedPythonRuntime,
     require_supported_python,
     require_supported_runtime,
@@ -15,7 +16,7 @@ from scripts.validate_python_runtime import (
     validate,
     workflow_policy_failures,
 )
-from scripts.verify_wheel import _requires_python_matches
+from scripts.verify_wheel import _assert_namespace_contents, _requires_python_matches
 
 
 @dataclass(frozen=True)
@@ -138,6 +139,20 @@ class PythonRuntimeTests(unittest.TestCase):
         self.assertTrue(_requires_python_matches("<3.13,>=3.12"))
         self.assertFalse(_requires_python_matches(">=3.11"))
         self.assertFalse(_requires_python_matches(None))
+
+    def test_wheel_rejects_retired_namespace_content(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            wheel = Path(temporary) / "fixture.whl"
+            with zipfile.ZipFile(wheel, "w") as archive:
+                archive.writestr("quorune/__init__.py", "")
+                archive.writestr("mtg_commander_sim/__init__.py", "")
+            with self.assertRaises(SystemExit):
+                _assert_namespace_contents(wheel)
+
+            clean = Path(temporary) / "clean.whl"
+            with zipfile.ZipFile(clean, "w") as archive:
+                archive.writestr("quorune/__init__.py", "")
+            _assert_namespace_contents(clean)
 
 
 if __name__ == "__main__":

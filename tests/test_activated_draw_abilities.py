@@ -7,24 +7,24 @@ import tempfile
 import unittest
 
 from common import DB_PATH, keep_all, load_assets, make_session
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.oracle_ir import (
+from quorune.carddb import CardDatabase
+from quorune.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
 )
-from mtg_commander_sim.record import (
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.rules.node_capability_shapes import (
+from quorune.rules.node_capability_shapes import (
     fixed_draw_node_capabilities,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.semantics import SemanticRegistry
 
 
 DRAW_CAPABILITY = "zone.draw.library_to_hand"

@@ -8,32 +8,32 @@ import unittest
 from unittest.mock import patch
 
 from common import ROOT, keep_all, make_session
-from mtg_commander_sim import stack_counter as stack_counter_module
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune import stack_counter as stack_counter_module
+from quorune.carddb import CardDatabase
+from quorune.deck import DeckLoader
+from quorune.errors import GameRuleError
+from quorune.model import StackItem
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     CounterStackIntent,
     ReadOnlyHandlerContext,
     ReadOnlyRulesQuery,
     execute_intent_plan,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
-from mtg_commander_sim.semantic_runtime.stack_counter_handlers import (
+from quorune.semantic_runtime.context import SemanticNodeError
+from quorune.semantic_runtime.stack_counter_handlers import (
     CounterStackTargetHandler,
 )
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.stack_counter import (
+from quorune.semantics import SemanticProgram
+from quorune.stack_counter import (
     INTRINSIC_COUNTER_PROHIBITION_CAPABILITY,
     oracle_has_intrinsic_counter_prohibition,
 )
@@ -672,7 +672,7 @@ class StackCounterRuleTests(unittest.TestCase):
             ref="S-event-mutation-target",
         )
         with patch(
-            "mtg_commander_sim.zone_trigger_processing."
+            "quorune.zone_trigger_processing."
             "normalized_zone_trigger_events",
             return_value=(),
         ), patch.object(
@@ -730,7 +730,7 @@ class StackCounterRuleTests(unittest.TestCase):
         engine.state.players["B"].mana_pool["U"] = 1
 
         with patch(
-            "mtg_commander_sim.rules.casting.commit."
+            "quorune.rules.casting.commit."
             "oracle_has_intrinsic_counter_prohibition",
             return_value=False,
         ):

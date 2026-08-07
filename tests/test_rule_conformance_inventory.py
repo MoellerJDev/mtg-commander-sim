@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from typing import Any, Mapping
 
-from mtg_commander_sim.rule_conformance import (
+from quorune.rule_conformance import (
     case_by_rule_id,
     inventory_case_errors,
 )

@@ -7,19 +7,19 @@ from pathlib import Path
 import unittest
 
 from common import DB_PATH
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.unlock_frontier import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.unlock_frontier import (
     BASE_RESIDUAL_FAMILIES,
     build_card_unlock_frontier,
     canonical_residual_families,
     render_card_unlock_frontier_markdown,
     validate_card_unlock_frontier,
 )
-from mtg_commander_sim.mechanic_contracts import load_mechanic_contracts
-from mtg_commander_sim.rules.capabilities import (
+from quorune.mechanic_contracts import load_mechanic_contracts
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.semantics import SemanticRegistry
 from scripts.update_card_unlock_frontier import _canonical_gzip
 
 

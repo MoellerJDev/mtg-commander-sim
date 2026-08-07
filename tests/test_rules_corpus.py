@@ -9,8 +9,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from mtg_commander_sim.cli import main
-from mtg_commander_sim.rules_corpus import (
+from quorune.cli import main
+from quorune.rules_corpus import (
     RulesCorpusError,
     _trusted_https_url,
     compare_rule_indexes,

@@ -6,13 +6,13 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.declaration_costs import normalized_oracle_line
-from mtg_commander_sim.declaration_restrictions import (
+from quorune.declaration_costs import normalized_oracle_line
+from quorune.declaration_restrictions import (
     parse_declaration_restriction_line,
 )
-from mtg_commander_sim.engine import StateInvariantError
-from mtg_commander_sim.model import CombatState, GameState, TurnEntry
-from mtg_commander_sim.record import (
+from quorune.engine import StateInvariantError
+from quorune.model import CombatState, GameState, TurnEntry
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

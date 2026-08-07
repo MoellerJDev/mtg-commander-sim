@@ -12,8 +12,8 @@ from common import (
     pass_current,
     set_fixture_turn,
 )
-from mtg_commander_sim.engine import TURN_STEPS
-from mtg_commander_sim.record import replay_record
+from quorune.engine import TURN_STEPS
+from quorune.record import replay_record
 
 
 class DrawStepRuleTests(unittest.TestCase):

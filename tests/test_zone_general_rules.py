@@ -5,13 +5,13 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import (
+from quorune.engine import (
     HIDDEN_ZONES,
     PUBLIC_ZONES,
     GameRuleError,
 )
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import authoritative_state_hash
+from quorune.projection import StateProjector
+from quorune.record import authoritative_state_hash
 
 
 class ZoneGeneralRuleTests(unittest.TestCase):

@@ -7,10 +7,10 @@ import uuid
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim import CommanderSession, GameConfig, PilotResponse
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune import CommanderSession, GameConfig, PilotResponse
+from quorune.model import StackItem
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.semantics import SemanticProgram
 
 
 class SemanticPrivateSearchTests(unittest.TestCase):

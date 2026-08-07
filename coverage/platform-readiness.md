@@ -2,7 +2,7 @@
 title: "Platform readiness"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "70b851689829ea4645bb1edb324039fb2aa854adf0bf2298ef22722749bc1de4"
+verified: "bcce19b6cb3db7c618fea20b2abd8a0c94bbcd76467929733eaf4ef794b7a3bc"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 generated_source: "coverage/platform-readiness.json"
@@ -11,11 +11,11 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_platform_status.p
 
 # Platform readiness
 
-Source fingerprint: `70b851689829ea4645bb1edb324039fb2aa854adf0bf2298ef22722749bc1de4`
+Source fingerprint: `bcce19b6cb3db7c618fea20b2abd8a0c94bbcd76467929733eaf4ef794b7a3bc`
 
 ## Current top-level state
 
-- Package: `0.8.0`
+- Package: `0.9.0`
 - Authoritative kernel: `implemented_partial`
 - Server runtime: `implemented_single_process_managed_data_static_browser_restart_terminal_lifecycle_spectator_public_log_and_rules_boundary_recovery`
 - Browser client: `implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause`

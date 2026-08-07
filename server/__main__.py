@@ -10,7 +10,7 @@ import webbrowser
 
 import uvicorn
 
-from mtg_commander_sim.python_runtime import require_supported_python
+from quorune.python_runtime import require_supported_python
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -51,7 +51,7 @@ def _prepare_browser(web_root: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        prog="commander-server",
+        prog="quorune-server",
         description="Start the local Quorune server and browser client.",
     )
     parser.add_argument("--host", default="127.0.0.1")

@@ -48,7 +48,7 @@
     "test_haste_mana_activation_replays_exactly"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.haste",
+    "component": "quorune.haste",
     "version": "haste-summoning-sickness-v1"
   },
   "known_blockers": [],

@@ -14,22 +14,22 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.card_programs.runtime import (
+from quorune.card_programs.runtime import (
     ContinuousEffectCollectionMetrics,
     collect_card_program_continuous_effects,
 )
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     ContinuousEffect,
     ContinuousOperation,
     Layer,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.object_predicate import ObjectQuerySpec
+from quorune.object_predicate import ObjectQuerySpec
 
 
 BASELINE = ROOT / "platform" / "continuous-effect-performance-baseline.json"
-RUNTIME_SOURCE = ROOT / "mtg_commander_sim" / "card_programs" / "runtime.py"
+RUNTIME_SOURCE = ROOT / "quorune" / "card_programs" / "runtime.py"
 
 
 def _descriptor() -> dict[str, Any]:

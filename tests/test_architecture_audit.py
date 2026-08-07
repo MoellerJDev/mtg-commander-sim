@@ -30,7 +30,7 @@ class ArchitectureAuditTests(unittest.TestCase):
         tests = self.report["tests"]
 
         engine_lines = len(
-            (ROOT / "mtg_commander_sim" / "engine.py")
+            (ROOT / "quorune" / "engine.py")
             .read_text(encoding="utf-8")
             .splitlines()
         )

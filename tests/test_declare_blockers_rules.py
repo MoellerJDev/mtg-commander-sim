@@ -6,8 +6,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.record import (
+from quorune.model import CombatState
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

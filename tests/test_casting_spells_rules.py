@@ -6,8 +6,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.record import authoritative_state_hash
+from quorune.engine import GameRuleError
+from quorune.record import authoritative_state_hash
 
 
 class CastingSpellRuleTests(unittest.TestCase):

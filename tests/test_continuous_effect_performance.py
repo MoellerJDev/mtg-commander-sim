@@ -3,18 +3,18 @@ from __future__ import annotations
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.card_programs.runtime import (
+from quorune.card_programs.runtime import (
     ContinuousEffectCollectionMetrics,
     collect_card_program_continuous_effects,
 )
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     ContinuousEffect,
     ContinuousOperation,
     Layer,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.object_predicate import ObjectQuerySpec
+from quorune.object_predicate import ObjectQuerySpec
 
 
 def _descriptor() -> dict:

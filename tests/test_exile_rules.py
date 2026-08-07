@@ -6,9 +6,9 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import StateInvariantError
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.targets import TargetGroup
+from quorune.engine import StateInvariantError
+from quorune.model import StackItem
+from quorune.targets import TargetGroup
 
 
 class ExileRuleTests(unittest.TestCase):

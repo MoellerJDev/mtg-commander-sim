@@ -5,7 +5,7 @@ import tempfile
 import unittest
 import uuid
 
-from mtg_commander_sim import (
+from quorune import (
     CommandEnvelope,
     CommanderSession,
     GameService,
@@ -80,7 +80,7 @@ class PermissionProjectionTests(unittest.TestCase):
             )
 
     def test_public_spell_on_stack_includes_visible_card_definition(self):
-        from mtg_commander_sim.model import StackItem
+        from quorune.model import StackItem
 
         session = make_session(self.db, self.mishra, self.zimone, seed=230)
         object_id = session.state.players["A"].zones["hand"][0]
@@ -240,7 +240,7 @@ class ArbiterBoundaryTests(unittest.TestCase):
         cls.db.close()
 
     def test_arbiter_projection_does_not_receive_private_hands(self):
-        from mtg_commander_sim.model import StackItem
+        from quorune.model import StackItem
         import uuid
         session = make_session(self.db, self.mishra, self.zimone, seed=290)
         keep_all(session)
@@ -268,8 +268,8 @@ class ArbiterBoundaryTests(unittest.TestCase):
         self.assertNotIn("cid", face_down)
 
     def test_cached_semantics_resolve_runtime_target_placeholders(self):
-        from mtg_commander_sim.model import StackItem
-        from mtg_commander_sim.semantics import SemanticProgram
+        from quorune.model import StackItem
+        from quorune.semantics import SemanticProgram
         import uuid
         session = make_session(self.db, self.mishra, self.zimone, seed=291)
         keep_all(session)

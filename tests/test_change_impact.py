@@ -16,7 +16,7 @@ from scripts.change_impact import (
 class ChangeImpactTests(unittest.TestCase):
     def test_rules_compiler_change_selects_compiler_and_evidence(self):
         plan = classify_changes(
-            ["mtg_commander_sim/compiler/prevention_templates.py"]
+            ["quorune/compiler/prevention_templates.py"]
         )
         self.assertIn("compiler-cardprogram", plan.test_suites)
         self.assertIn("capability-evidence", plan.checks)
@@ -41,8 +41,8 @@ class ChangeImpactTests(unittest.TestCase):
 
     def test_internal_action_and_choice_modules_do_not_force_browser(self):
         for path in (
-            "mtg_commander_sim/rules/action_proposals.py",
-            "mtg_commander_sim/semantic_choices/optional_draw.py",
+            "quorune/rules/action_proposals.py",
+            "quorune/semantic_choices/optional_draw.py",
         ):
             with self.subTest(path=path):
                 plan = classify_changes([path])
@@ -50,9 +50,9 @@ class ChangeImpactTests(unittest.TestCase):
 
     def test_rules_paths_select_only_their_focused_browser_journey(self):
         cases = {
-            "mtg_commander_sim/fixed_mana_abilities.py": ("mana-action",),
-            "mtg_commander_sim/declaration_restrictions.py": ("combat",),
-            "mtg_commander_sim/drawing/coordinator.py": ("turn-draw",),
+            "quorune/fixed_mana_abilities.py": ("mana-action",),
+            "quorune/declaration_restrictions.py": ("combat",),
+            "quorune/drawing/coordinator.py": ("turn-draw",),
         }
         for path, expected in cases.items():
             with self.subTest(path=path):
@@ -62,9 +62,9 @@ class ChangeImpactTests(unittest.TestCase):
 
     def test_compiler_and_engine_only_changes_keep_compact_smoke_only(self):
         for path in (
-            "mtg_commander_sim/compiler/damage_templates.py",
-            "mtg_commander_sim/engine.py",
-            "mtg_commander_sim/session.py",
+            "quorune/compiler/damage_templates.py",
+            "quorune/engine.py",
+            "quorune/session.py",
         ):
             with self.subTest(path=path):
                 plan = classify_changes([path])
@@ -79,8 +79,8 @@ class ChangeImpactTests(unittest.TestCase):
         ):
             with self.subTest(symbol=symbol):
                 plan = classify_changes(
-                    ["mtg_commander_sim/engine.py"],
-                    changed_symbols=(f"mtg_commander_sim/engine.py:{symbol}",),
+                    ["quorune/engine.py"],
+                    changed_symbols=(f"quorune/engine.py:{symbol}",),
                 )
                 self.assertTrue(plan.browser_full)
                 self.assertIn(
@@ -117,7 +117,7 @@ class CommanderEngine:
                 cwd=root,
                 check=True,
             )
-            module = root / "mtg_commander_sim" / "engine.py"
+            module = root / "quorune" / "engine.py"
             module.parent.mkdir()
             module.write_text(
                 "class CommanderEngine:\n"
@@ -151,23 +151,23 @@ class CommanderEngine:
             )
 
         self.assertIn(
-            "mtg_commander_sim/engine.py:CommanderEngine._grant_priority",
+            "quorune/engine.py:CommanderEngine._grant_priority",
             symbols,
         )
 
     def test_persistence_and_projection_still_require_complete_browser(self):
         for path in (
-            "mtg_commander_sim/persistence.py",
-            "mtg_commander_sim/projection.py",
+            "quorune/persistence.py",
+            "quorune/projection.py",
         ):
             with self.subTest(path=path):
                 self.assertTrue(classify_changes([path]).browser_full)
 
     def test_natural_winner_rules_owners_require_soak_group(self):
         for path in (
-            "mtg_commander_sim/commander.py",
-            "mtg_commander_sim/damage_results.py",
-            "mtg_commander_sim/state_based_actions.py",
+            "quorune/commander.py",
+            "quorune/damage_results.py",
+            "quorune/state_based_actions.py",
         ):
             with self.subTest(path=path):
                 plan = classify_changes([path])
@@ -177,7 +177,7 @@ class CommanderEngine:
                 )
 
     def test_protection_changes_cover_each_interaction_owner(self):
-        plan = classify_changes(["mtg_commander_sim/protection.py"])
+        plan = classify_changes(["quorune/protection.py"])
 
         self.assertEqual(
             {
@@ -196,9 +196,9 @@ class CommanderEngine:
 
     def test_browser_action_and_choice_contracts_are_explicit(self):
         for path in (
-            "mtg_commander_sim/rules/action_catalog.py",
-            "mtg_commander_sim/choice_forms.py",
-            "mtg_commander_sim/projection.py",
+            "quorune/rules/action_catalog.py",
+            "quorune/choice_forms.py",
+            "quorune/projection.py",
         ):
             with self.subTest(path=path):
                 plan = classify_changes([path])
@@ -216,7 +216,7 @@ class CommanderEngine:
         self.assertIn("generated-validation", plan.test_suites)
 
     def test_unknown_core_module_falls_back_to_core_domain(self):
-        plan = classify_changes(["mtg_commander_sim/example_future.py"])
+        plan = classify_changes(["quorune/example_future.py"])
         self.assertEqual(("core-domain",), plan.test_suites)
 
     def test_labels_can_force_expensive_platform_gates(self):

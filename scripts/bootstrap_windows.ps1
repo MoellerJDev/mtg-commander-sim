@@ -42,4 +42,4 @@ if ($LASTEXITCODE -ne 0) { throw "Could not install project dependencies in .ven
 if ($LASTEXITCODE -ne 0) { throw "Python runtime validation failed." }
 
 Write-Host "Quorune is ready. Start it without opening a browser:"
-Write-Host ".\.venv\Scripts\python.exe -m server --no-open"
+Write-Host ".\.venv\Scripts\quorune-server.exe"

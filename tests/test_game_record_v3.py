@@ -9,18 +9,18 @@ from pathlib import Path
 import jsonschema
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.record import (
+from quorune.record import (
     event_for_trace,
     inspect_game,
     migrate_v2_game,
     replay_record,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID,
     DRAW_MAXIMUM_HANDLER_ID,
     runtime_component_inventory,
 )
-from mtg_commander_sim.session import CommanderSession
+from quorune.session import CommanderSession
 
 
 class GameRecordV3Tests(unittest.TestCase):
@@ -31,6 +31,21 @@ class GameRecordV3Tests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.db.close()
+
+    def test_pre_rebrand_runtime_identity_namespace_remains_stable(self):
+        session = make_session(
+            self.db,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=30,
+            auto_pass_empty=False,
+        )
+        session.engine.state.game_id = "legacy-game"
+        self.assertEqual(
+            "ca79a4cafc575ec88c6e032576fb5bfc",
+            session.engine._stable_runtime_id("stack", "S1"),
+        )
 
     def test_v3_save_omits_raw_capabilities_and_replays(self):
         session = make_session(

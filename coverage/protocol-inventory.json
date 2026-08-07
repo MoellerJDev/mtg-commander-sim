@@ -264,7 +264,7 @@
   ],
   "protocol": {
     "title": "Quorune Server",
-    "version": "0.8.0"
+    "version": "0.9.0"
   },
   "schema_version": 1,
   "schemas": [
@@ -895,7 +895,7 @@
       "type": "object"
     }
   ],
-  "source_fingerprint": "d2ef7e1e0b3c92e4bdad17987eb68f28992a62cdb428ea8cbff1b7cdcfedee2a",
+  "source_fingerprint": "6e5d78063e064197192bf0e13aa4a70e9fa6a809ee4b6402df432ef9deac5b1c",
   "top_blockers": [],
   "websocket_routes": [
     "/api/v1/games/{game_id}/stream"

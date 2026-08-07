@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 from common import load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.record import authoritative_state_hash
+from quorune.engine import GameRuleError
+from quorune.record import authoritative_state_hash
 
 
 def _json_strings(value):

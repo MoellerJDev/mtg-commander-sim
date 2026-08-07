@@ -3,14 +3,14 @@ from __future__ import annotations
 import unittest
 
 from damage_replacement_support import DamageReplacementPipelineBase
-from mtg_commander_sim.life_change import (
+from quorune.life_change import (
     commit_life_change_batch,
     LifeChangeError,
     LifeChangeRequest,
     prepare_life_change_batch,
     summarize_life_change_batch,
 )
-from mtg_commander_sim.replacement import (
+from quorune.replacement import (
     AddAmount,
     MultiplyAmount,
     ReplacementClass,

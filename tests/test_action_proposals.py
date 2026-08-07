@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.rules.action_proposals import (
+from quorune.rules.action_proposals import (
     ActionOffer,
     ActionProposalError,
     ActivationProposal,
@@ -13,11 +13,11 @@ from mtg_commander_sim.rules.action_proposals import (
     freeze_json,
     thaw_json,
 )
-from mtg_commander_sim.rules.activation import (
+from quorune.rules.activation import (
     ActivationProposalError,
     ActivationProposalRequest,
 )
-from mtg_commander_sim.rules.casting import (
+from quorune.rules.casting import (
     CastProposalError,
     CastProposalRequest,
 )

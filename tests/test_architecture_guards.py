@@ -47,18 +47,18 @@ class ArchitectureGuardTests(unittest.TestCase):
         )
 
     def test_typed_handler_cannot_import_authoritative_engine(self):
-        relative = "mtg_commander_sim/semantic_runtime/generic.py"
+        relative = "quorune/semantic_runtime/generic.py"
         analyses = {
-            relative: SimpleNamespace(imports=("mtg_commander_sim.engine",))
+            relative: SimpleNamespace(imports=("quorune.engine",))
         }
         self.assertEqual(
             forbidden_import_violations(analyses, self.policy),
-            [{"file": relative, "import": "mtg_commander_sim.engine"}],
+            [{"file": relative, "import": "quorune.engine"}],
         )
 
     def test_general_life_owner_cannot_depend_on_damage_results(self):
-        relative = "mtg_commander_sim/effect_runtime/life_effects.py"
-        imported = "mtg_commander_sim.semantic_runtime.damage_results"
+        relative = "quorune/effect_runtime/life_effects.py"
+        imported = "quorune.semantic_runtime.damage_results"
         analyses = {relative: SimpleNamespace(imports=(imported,))}
         self.assertEqual(
             forbidden_import_violations(analyses, self.policy),
@@ -66,10 +66,10 @@ class ArchitectureGuardTests(unittest.TestCase):
         )
 
     def test_game_state_access_and_nonowner_mutation_are_rejected(self):
-        tree = ast.parse("from mtg_commander_sim.model import GameState\n")
+        tree = ast.parse("from quorune.model import GameState\n")
         self.assertTrue(_game_state_imports(tree))
         location = {
-            "file": "mtg_commander_sim/rules/zones.py",
+            "file": "quorune/rules/zones.py",
             "symbol": "move",
             "line": 10,
         }
@@ -125,7 +125,7 @@ def bad(card):
         }
         strings, _oracle_ids = _string_records(
             tree,
-            "mtg_commander_sim/fixture.py",
+            "quorune/fixture.py",
             parents,
         )
         words = [

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim import apply_json_patch, json_patch, view_hash
+from quorune import apply_json_patch, json_patch, view_hash
 from common import load_assets, make_session
 
 
@@ -43,7 +43,7 @@ class PilotRunnerTests(unittest.TestCase):
         cls.db.close()
 
     def test_runner_retries_rejected_action_on_same_capability(self):
-        from mtg_commander_sim import SequentialPilotRunner
+        from quorune import SequentialPilotRunner
 
         session = make_session(self.db, self.mishra, self.zimone, seed=700)
         calls = []

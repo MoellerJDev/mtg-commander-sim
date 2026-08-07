@@ -10,7 +10,7 @@ import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 _RUNTIME_POLICY = runpy.run_path(
-    str(ROOT / "mtg_commander_sim" / "python_runtime.py")
+    str(ROOT / "quorune" / "python_runtime.py")
 )
 REQUIRES_PYTHON = _RUNTIME_POLICY["REQUIRES_PYTHON"]
 SUPPORTED_PYTHON_TEXT = _RUNTIME_POLICY["SUPPORTED_PYTHON_TEXT"]

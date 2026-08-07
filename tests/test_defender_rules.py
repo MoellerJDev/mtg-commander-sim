@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.defender import (
+from quorune.defender import (
     defender_prohibits_attack,
     DefenderRuleError,
 )

@@ -9,24 +9,24 @@ import unittest
 import jsonschema
 
 from common import DB_PATH
-from mtg_commander_sim.carddb import CardDatabase, CardRecord
-from mtg_commander_sim.oracle_ir import (
+from quorune.carddb import CardDatabase, CardRecord
+from quorune.oracle_ir import (
     compile_oracle_card,
     generated_programs,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     CapabilityRegistry,
     CapabilityRegistryError,
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = (
     ROOT
-    / "mtg_commander_sim"
+    / "quorune"
     / "rules"
     / "capability-registry.json"
 )

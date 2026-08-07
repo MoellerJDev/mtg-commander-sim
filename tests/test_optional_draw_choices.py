@@ -6,21 +6,21 @@ import unittest
 from unittest import mock
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.drawing import DrawPermission
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantic_choices import (
+from quorune.drawing import DrawPermission
+from quorune.engine import CommanderEngine
+from quorune.model import StackItem
+from quorune.projection import StateProjector
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.semantic_choices import (
     SemanticChoiceContext,
     SemanticChoiceContinuation,
     SemanticChoiceError,
     SemanticChoiceFrame,
     SnapshotSemanticChoiceQuery,
 )
-from mtg_commander_sim.semantic_choices.optional_draw import OptionalDrawHandler
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.semantic_runtime import current_draw_permission
+from quorune.semantic_choices.optional_draw import OptionalDrawHandler
+from quorune.semantics import SemanticProgram
+from quorune.semantic_runtime import current_draw_permission
 
 
 def query(*, permission_a: DrawPermission, permission_b: DrawPermission):

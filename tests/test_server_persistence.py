@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 from common import load_assets, make_session
-from mtg_commander_sim import (
+from quorune import (
     CommandEnvelope,
     DirectoryGamePersistence,
     GameManager,
@@ -16,7 +16,7 @@ from mtg_commander_sim import (
     PROTOCOL_VERSION,
     SqliteIdempotencyRepository,
 )
-from mtg_commander_sim.review_artifacts import write_review_artifacts
+from quorune.review_artifacts import write_review_artifacts
 
 
 class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
@@ -148,7 +148,7 @@ class ServerPersistenceTests(unittest.IsolatedAsyncioTestCase):
             previous = review_path.read_bytes()
             json.loads(previous)
 
-            from mtg_commander_sim import review_artifacts as report_module
+            from quorune import review_artifacts as report_module
 
             real_replace = report_module.os.replace
 

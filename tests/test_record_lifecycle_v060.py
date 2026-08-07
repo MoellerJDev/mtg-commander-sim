@@ -7,21 +7,21 @@ from pathlib import Path
 from unittest.mock import patch
 
 from common import DB_PATH, load_assets, make_session
-from mtg_commander_sim.arena import (
+from quorune.arena import (
     PilotInvocationIdentity,
     SeatScopedPilotTools,
     _record_lock,
     _tool_specs,
 )
-from mtg_commander_sim.record import (
+from quorune.record import (
     finalize_record,
     provider_telemetry,
     refresh_record,
     replay_record,
     verify_record_integrity,
 )
-from mtg_commander_sim.model import Event
-from mtg_commander_sim.report import _semantic_coverage, derive_review
+from quorune.model import Event
+from quorune.report import _semantic_coverage, derive_review
 
 
 class RecordLifecycleAndTypedToolTests(unittest.TestCase):
@@ -297,7 +297,7 @@ class RecordLifecycleAndTypedToolTests(unittest.TestCase):
             record = Path(temporary) / "paused"
             session.save(record)
             with patch(
-                "mtg_commander_sim.record.replay_record",
+                "quorune.record.replay_record",
                 wraps=replay_record,
             ) as replay:
                 finalized = finalize_record(record, self.db)

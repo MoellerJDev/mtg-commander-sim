@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import unittest
 
-from mtg_commander_sim.replacement_effects import (
+from quorune.replacement_effects import (
     AffectedObject,
     AddAmount,
     MultiplyAmount,

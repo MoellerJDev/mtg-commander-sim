@@ -6,18 +6,18 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.combat_evasion import (
+from quorune.combat_evasion import (
     CombatantEvasionCharacteristics,
     combat_evasion_verdict,
 )
-from mtg_commander_sim.landwalk import (
+from quorune.landwalk import (
     BASIC_LANDWALK_TYPES,
     BasicLandwalkBlockVerdict,
     LandwalkRuleError,
     basic_landwalk_block_verdict,
 )
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.record import (
+from quorune.model import CombatState
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

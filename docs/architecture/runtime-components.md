@@ -1,7 +1,7 @@
 ---
 title: "CardProgram runtime components"
 status: "current"
-authoritative_source: "mtg_commander_sim/semantic_runtime component registries and schemas/card-program-v2.schema.json"
+authoritative_source: "quorune/semantic_runtime component registries and schemas/card-program-v2.schema.json"
 verified: "2026-08-06"
 audience: "rules, compiler, runtime, replay, and extension contributors"
 maintenance: "hand-maintained"

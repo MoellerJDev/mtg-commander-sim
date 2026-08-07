@@ -3,8 +3,8 @@ from __future__ import annotations
 import unittest
 from types import SimpleNamespace
 
-from mtg_commander_sim.characteristic_evaluation import type_parts
-from mtg_commander_sim.haste import (
+from quorune.characteristic_evaluation import type_parts
+from quorune.haste import (
     HasteRuleError,
     has_effective_haste,
     is_summoning_sick,

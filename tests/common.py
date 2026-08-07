@@ -3,8 +3,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from mtg_commander_sim import CardDatabase, CommanderSession, DeckLoader, GameConfig
-from mtg_commander_sim.model import TurnHistory
+from quorune import CardDatabase, CommanderSession, DeckLoader, GameConfig
+from quorune.model import TurnHistory
 
 ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = Path(os.environ.get("MTG_CARD_DB", ROOT / "data" / "scryfall-20260728-compact.sqlite3"))

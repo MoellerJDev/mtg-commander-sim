@@ -3,8 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import unittest
 
-from mtg_commander_sim.replacement.immutable import FrozenMap
-from mtg_commander_sim.semantic_choices import (
+from quorune.replacement.immutable import FrozenMap
+from quorune.semantic_choices import (
     AutoContinue,
     ScalarChoice,
     SemanticChoiceCompletion,

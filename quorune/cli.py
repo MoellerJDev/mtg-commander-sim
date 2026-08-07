@@ -512,8 +512,8 @@ def _run_semantic_preflight_command(args: argparse.Namespace) -> int | None:
     return 0
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="simctl", description=_CLI_DESCRIPTION)
+def build_parser(*, prog: str = "simctl") -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog=prog, description=_CLI_DESCRIPTION)
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     new = sub.add_parser("new", help="Create a persistent multiplayer game")
@@ -875,8 +875,12 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _program_name(executable: str) -> str:
+    return "quorune" if Path(executable).stem.lower() in {"quorune", "__main__"} else "simctl"
+
+
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    args = build_parser(prog=_program_name(sys.argv[0])).parse_args(argv)
     if args.cmd == "pilot-mcp":
         if not args.game_dir:
             raise SystemExit(
@@ -1048,7 +1052,7 @@ def main(argv: list[str] | None = None) -> int:
             for seat in "ABCD":
                 registry.register(
                     seat=seat,
-                    thread_label=f"mtg-pilot-{seat.lower()}",
+                    thread_label=f"quorune-pilot-{seat.lower()}",
                     provider="unavailable",
                     model=None,
                     reasoning_effort=None,

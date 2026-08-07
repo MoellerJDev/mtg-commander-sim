@@ -11,15 +11,15 @@ import urllib.parse
 import urllib.request
 from typing import Any
 
-from mtg_commander_sim.bulk import (
+from quorune.bulk import (
     SCRYFALL_BULK_DATA_URL,
     SCRYFALL_USER_AGENT,
     ScryfallBulkDataError,
     fetch_bulk_manifest,
     refresh_scryfall_database,
 )
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.record import database_fingerprint
+from quorune.carddb import CardDatabase
+from quorune.record import database_fingerprint
 
 
 SCRYFALL_IMAGE_HOSTS = frozenset({"cards.scryfall.io"})

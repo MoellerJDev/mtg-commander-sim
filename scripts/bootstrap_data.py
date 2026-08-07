@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.bulk import refresh_scryfall_database
+from quorune.bulk import refresh_scryfall_database
 
 
 def main() -> int:

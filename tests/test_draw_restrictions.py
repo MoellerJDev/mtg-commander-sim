@@ -6,7 +6,7 @@ from unittest import mock
 
 from common import keep_all, load_assets, make_session
 
-from mtg_commander_sim.drawing import (
+from quorune.drawing import (
     DrawError,
     DrawEventRequest,
     DrawPermission,
@@ -16,16 +16,16 @@ from mtg_commander_sim.drawing import (
     require_payable_draw_cost,
     validate_prepared_draw,
 )
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.semantic_runtime import (
+from quorune.engine import CommanderEngine
+from quorune.semantics import SemanticProgram
+from quorune.semantic_runtime import (
     DRAW_MAXIMUM_HANDLER_ID,
     DrawMaximumHandler,
     DrawRestrictionSourceContext,
     default_draw_restriction_registry,
     current_draw_permission,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
+from quorune.semantic_runtime.context import SemanticNodeError
 
 
 ORDER = ("A", "B", "C", "D")

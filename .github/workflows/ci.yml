@@ -103,7 +103,7 @@ jobs:
       - name: Validate Python runtime and compile
         run: |
           python scripts/validate_python_runtime.py
-          python -m compileall -q mtg_commander_sim server tests scripts simctl.py
+          python -m compileall -q quorune server tests scripts simctl.py
       - name: Run generated conformance and governance tests
         run: python scripts/test_shards.py run generated-validation
       - name: Verify generated outputs

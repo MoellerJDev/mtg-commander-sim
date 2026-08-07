@@ -27,10 +27,10 @@ persisted identifier casually.
 | Topics | `card-game`, `deterministic`, `exact-replay`, `fastapi`, `game-engine`, `multiplayer`, `python`, `react`, `rules-engine`, `server-authoritative`, `websocket` |
 | Browser and API title | Quorune / Quorune Server |
 | Package author and maintainer | `MoellerJDev` |
-| Current distribution | `mtg-commander-sim` pending the namespace migration |
-| Current import namespace | `mtg_commander_sim` pending the namespace migration |
-| Current installed commands | `mtg-commander-sim`, `simctl`, and `commander-server` |
-| Target installed commands | `quorune`, `simctl`, and `quorune-server` |
+| Current distribution | `quorune` |
+| Current import namespace | `quorune` |
+| Current installed commands | `quorune`, `simctl`, and `quorune-server` |
+| Migration guide | [Migrating to Quorune](MIGRATING_TO_QUORUNE.md) |
 
 Current compatibility work primarily targets the third-party Magic: The
 Gathering Commander format. Those rules and format names remain where they
@@ -41,10 +41,10 @@ identify actual compatibility; they are not the Quorune product brand.
 | Classification | Treatment in the public-identity slice |
 | --- | --- |
 | `first_party_current_brand` | Changed to Quorune in current product, browser, server, documentation, metadata, and network identification. |
-| `public_distribution_identifier` | Retained for the separately certified Python migration. |
-| `public_command` | `simctl` is the neutral current command; old installed aliases remain until the migration. |
+| `public_distribution_identifier` | The unpublished old distribution was replaced directly by `quorune`. |
+| `public_command` | `quorune`, `simctl`, and `quorune-server` are the installed commands. |
 | `public_product_positioning` | Describes the server-authoritative platform; optional AI and scripted clients are not the product. |
-| `optional_client` | Presented as the Quorune Pilot Harness while compatibility paths remain temporarily. |
+| `optional_client` | Presented as the Quorune Pilot Harness under Quorune-named skill and agent paths. |
 | `third_party_compatibility_reference` | Magic: The Gathering, Commander, Oracle, Comprehensive Rules, Scryfall, and Moxfield remain when technically accurate. |
 | `rules_or_format_identifier` | Format profiles, Commander rule IDs, card fields, and rules terminology remain stable. |
 | `historical_audit_reference` | Existing tags, changelog history, commits, ADR evidence, records, and old external links are not rewritten. |
@@ -57,8 +57,6 @@ identify actual compatibility; they are not the Quorune product brand.
 The following old identifiers remain by design and must not be treated as
 missed search-and-replace results:
 
-- the `mtg-commander-sim` distribution, `mtg_commander_sim` package directory,
-  and old executable aliases, until the Python namespace migration;
 - `MTG_*` environment variables used by automation and existing local setups,
   pending a compatibility-aware environment migration;
 - `$id` values under `https://mtg-commander-sim.local/`, because they identify
@@ -67,9 +65,8 @@ missed search-and-replace results:
   identity prefixes, format-profile values, and capability IDs;
 - the `X-Commander-Tab` header, `commander.tab.*` subprotocol, and existing
   browser storage keys, which are client compatibility identifiers;
-- `.agents/skills/commander-arena`, `.codex/agents/mtg-pilot-*.toml`,
-  `arena-*` commands, and recorded pilot thread labels until optional-client
-  path migration is certified;
+- `arena-*` subcommands and historical recorded pilot thread labels, which are
+  protocol-adjacent compatibility data rather than the product name;
 - historical release, changelog, ADR, record, and audit references that must
   continue to describe the artifact that actually existed.
 
@@ -89,9 +86,12 @@ and must retain a compatibility alias if undertaken.
    checked on the verification date. The repository has version tags but no
    GitHub Release publication. Therefore the namespace migration does not need
    a previously published PyPI compatibility package.
-4. The exact next task is the independently certified Python distribution,
-   import namespace, optional-client path, and command migration. Saved Game
-   Record v3 data and protocol/replay identifiers remain compatible throughout.
+4. The distribution, import namespace, installed commands, and optional-client
+   paths now use Quorune. No compatibility Python package or executable alias
+   is carried because the old distribution was never published.
+5. The exact next task after certification is to resume the dependency-selected
+   Rules Completeness batch. Saved Game Record v3 data and protocol/replay
+   identifiers remain compatible throughout.
 
 Focused local validation covers changed Python compilation, JSON and YAML
 parsing, documentation and repository policy, generated freshness, browser

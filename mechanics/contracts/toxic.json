@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Crawling Chorus", "oracle_id": "99ba0d4f-b2bf-48ea-95d6-b6b85ee077ab"}],
   "rulings": ["Crawling Chorus 2023-02-04 toxic result rulings"],
   "test_ids": ["test_toxic_is_additional_only_for_creature_combat_damage_to_player", "test_multiple_toxic_abilities_are_cumulative", "test_unresolved_toxic_value_fails_before_mutation", "test_source_pinned_keyword_witnesses_follow_damage_results"],
-  "implementation": {"component": "mtg_commander_sim.damage_results.materialize_damage_results", "version": "damage-results-v1"},
+  "implementation": {"component": "quorune.damage_results.materialize_damage_results", "version": "damage-results-v1"},
   "known_blockers": ["dynamic or otherwise unresolved toxic values remain fail-closed", "unrepresented source last-known-information and continuous ability grants remain fail-closed", "the complete counter-replacement Oracle family is not yet compiled"],
   "review_status": "reviewed"
 }

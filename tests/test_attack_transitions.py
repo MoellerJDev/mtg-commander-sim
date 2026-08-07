@@ -4,11 +4,11 @@ from copy import deepcopy
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.ability_fragments import (
+from quorune.ability_fragments import (
     CombatKeywordTriggerKind,
     CombatKeywordTriggerSpec,
 )
-from mtg_commander_sim.attack_transition_model import (
+from quorune.attack_transition_model import (
     AttackKeywordTriggerOccurrence,
     AttackRecipient,
     AttackRecipientKind,
@@ -17,12 +17,12 @@ from mtg_commander_sim.attack_transition_model import (
     build_attack_transition,
     derive_attack_keyword_trigger_occurrences,
 )
-from mtg_commander_sim.combat_relationship_state import (
+from quorune.combat_relationship_state import (
     AttackDeclarationAssignment,
     CombatRelationshipStateError,
     commit_attack_declaration,
 )
-from mtg_commander_sim.model import CombatState
+from quorune.model import CombatState
 
 
 def _spec(kind: CombatKeywordTriggerKind) -> CombatKeywordTriggerSpec:

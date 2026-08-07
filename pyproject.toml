@@ -3,8 +3,8 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mtg-commander-sim"
-version = "0.8.0"
+name = "quorune"
+version = "0.9.0"
 description = "Deterministic, server-authoritative multiplayer card-game platform with private state and exact replay"
 readme = "README.md"
 license = "Apache-2.0"
@@ -29,16 +29,16 @@ Issues = "https://github.com/MoellerJDev/quorune/issues"
 Documentation = "https://github.com/MoellerJDev/quorune#readme"
 
 [project.scripts]
-mtg-commander-sim = "mtg_commander_sim.cli:main"
-simctl = "mtg_commander_sim.cli:main"
-commander-server = "server.__main__:main"
+quorune = "quorune.cli:main"
+simctl = "quorune.cli:main"
+quorune-server = "server.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["mtg_commander_sim*", "server*"]
+include = ["quorune*", "server*"]
 
 [tool.setuptools.package-data]
-mtg_commander_sim = [
+quorune = [
   "deck_profiles/*.json",
   "rules/*.json",
   "semantic_packs/*.json",

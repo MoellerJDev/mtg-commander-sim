@@ -2,7 +2,7 @@
 title: "Generated protocol inventory"
 status: "generated"
 authoritative_source: "server FastAPI OpenAPI output and versioned schemas/*.json"
-verified: "73df81ac7a4cd4897c546dc63858b3c47a42e536015fe43d63b6d597616741d7"
+verified: "54a6b2ab94b96d7e07a48656b79fff306d9d215ab2a31517ae02605a2dab4174"
 audience: "client, server, and protocol contributors"
 maintenance: "generated"
 generated_source: "coverage/protocol-inventory.json"
@@ -11,12 +11,12 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_protocol_referenc
 
 # Generated protocol inventory
 
-Source fingerprint: `d2ef7e1e0b3c92e4bdad17987eb68f28992a62cdb428ea8cbff1b7cdcfedee2a`
+Source fingerprint: `6e5d78063e064197192bf0e13aa4a70e9fa6a809ee4b6402df432ef9deac5b1c`
 
 ## Current top-level state
 
 - API title: `Quorune Server`
-- API version: `0.8.0`
+- API version: `0.9.0`
 - HTTP operations: `24`
 - WebSocket routes: `1`
 - Versioned schemas: `17`

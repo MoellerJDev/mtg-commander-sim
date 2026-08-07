@@ -31,7 +31,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "52cf251569aac0d3502819b6f05547e1e2c91ad584426b45551c2492de98ad73",
+    "evaluated_source_tree_hash": "a30b33e650845ae8b6e5fbc36b3f1d0f8ff8c5d9dcc4aa3da9ce0c7587c33465",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -370,9 +370,9 @@
     }
   ],
   "package": {
-    "name": "mtg-commander-sim",
+    "name": "quorune",
     "python": ">=3.12,<3.13",
-    "version": "0.8.0"
+    "version": "0.9.0"
   },
   "platform": {
     "ai_dependency": "none_for_core_tests_or_runtime",
@@ -466,7 +466,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5195,
+    "deterministic_cases_discovered": 5198,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,

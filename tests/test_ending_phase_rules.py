@@ -6,8 +6,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import TURN_STEPS
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
+from quorune.engine import TURN_STEPS
+from quorune.record import checkpoint_envelope, replay_record
 
 
 class EndingPhaseRuleTests(unittest.TestCase):

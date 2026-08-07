@@ -6,22 +6,22 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     ContinuousEffect,
     ContinuousOperation,
     Layer,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantic_runtime import (
+from quorune.model import StackItem
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.semantic_runtime import (
     ContinuousEffectSourceContext,
     FixedPowerToughnessAnthemHandler,
     SemanticNodeError,
     default_continuous_effect_component_registry,
 )
-from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
+from quorune.semantics import SemanticProgram, SemanticRegistry
 
 
 def anthem_descriptor() -> dict:

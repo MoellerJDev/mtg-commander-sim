@@ -5,10 +5,10 @@ from unittest import mock
 
 from common import keep_all, load_assets, make_session
 
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.replacement import DredgeDraw, MultiplyAmount
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.semantic_runtime import (
+from quorune.engine import CommanderEngine
+from quorune.replacement import DredgeDraw, MultiplyAmount
+from quorune.semantics import SemanticProgram
+from quorune.semantic_runtime import (
     DREDGE_HANDLER_ID,
     DRAW_INSTRUCTION_MULTIPLIER_HANDLER_ID,
     DRAW_RESULT_MULTIPLIER_HANDLER_ID,
@@ -18,7 +18,7 @@ from mtg_commander_sim.semantic_runtime import (
     DrawInstructionReplacementSourceContext,
     DrawReplacementSourceContext,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
+from quorune.semantic_runtime.context import SemanticNodeError
 
 
 def descriptor(count: int = 3):

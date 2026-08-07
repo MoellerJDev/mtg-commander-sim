@@ -16,7 +16,7 @@ From the repository root in PowerShell:
 
 ```powershell
 .\scripts\bootstrap_windows.ps1
-.\.venv\Scripts\python.exe -m server
+.\.venv\Scripts\quorune-server.exe
 ```
 
 Quorune requires CPython 3.12.x. Bootstrap creates a local environment,
@@ -33,10 +33,10 @@ SQLite snapshot locked.
 ## Useful modes
 
 ```powershell
-.\.venv\Scripts\python.exe -m server --open
-.\.venv\Scripts\python.exe -m server --offline
+.\.venv\Scripts\quorune-server.exe --open
+.\.venv\Scripts\quorune-server.exe --offline
 $env:MTG_CARD_DB = "data/test-ci.sqlite3"
-.\.venv\Scripts\python.exe -m server --offline
+.\.venv\Scripts\quorune-server.exe --offline
 ```
 
 `--offline` requires an existing usable database. `--no-build-browser` skips

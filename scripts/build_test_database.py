@@ -10,9 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.carddb import CardDatabase, CardRecord, build_card_database
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.util import stable_json
+from quorune.carddb import CardDatabase, CardRecord, build_card_database
+from quorune.deck import DeckLoader
+from quorune.util import stable_json
 
 
 def _card_payload(card: CardRecord) -> dict:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.abilities import parse_activated_abilities
+from quorune.abilities import parse_activated_abilities
 
 
 class ActivatedAbilityAndCostTests(unittest.TestCase):

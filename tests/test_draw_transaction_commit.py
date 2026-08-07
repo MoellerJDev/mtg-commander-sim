@@ -4,14 +4,14 @@ import unittest
 from types import SimpleNamespace
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.drawing import (
+from quorune.drawing import (
     DrawError,
     DrawEventRequest,
     commit_prepared_draw,
     complete_draw_replacement,
     prepare_draw_event,
 )
-from mtg_commander_sim.replacement import (
+from quorune.replacement import (
     DredgeDraw,
     PreventDraw,
     ReplacementClass,

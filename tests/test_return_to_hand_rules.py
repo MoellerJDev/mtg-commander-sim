@@ -9,33 +9,33 @@ import unittest
 from unittest.mock import patch
 
 from common import ROOT, keep_all, make_session
-from mtg_commander_sim import return_to_hand as return_module
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune import return_to_hand as return_module
+from quorune.carddb import CardDatabase
+from quorune.deck import DeckLoader
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement.immutable import thaw_value
-from mtg_commander_sim.return_to_hand import (
+from quorune.replacement.immutable import thaw_value
+from quorune.return_to_hand import (
     commit_return_to_owner_hand,
     prepare_return_to_owner_hand,
     request_for_card,
     ReturnToHandError,
     return_permanent_to_owner_hand,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     ReadOnlyHandlerContext,
     ReadOnlyRulesQuery,
     ReturnPermanentToOwnerHandIntent,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
-from mtg_commander_sim.semantic_runtime.return_to_hand_handlers import (
+from quorune.semantic_runtime.context import SemanticNodeError
+from quorune.semantic_runtime.return_to_hand_handlers import (
     ReturnPermanentToOwnerHandHandler,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 from scripts.build_test_database import build_fixture_database
 
 

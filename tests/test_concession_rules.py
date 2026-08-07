@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim import GameService
-from mtg_commander_sim.record import (
+from quorune import GameService
+from quorune.record import (
     authoritative_state_hash,
     replay_record,
 )

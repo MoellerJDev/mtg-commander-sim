@@ -25,6 +25,7 @@ belongs in the changelog or `docs/history/`.
 - [Code of Conduct](../CODE_OF_CONDUCT.md)
 - [Agent instructions](../AGENTS.md)
 - [Rebrand and compatibility status](REBRAND_STATUS.md)
+- [Migrating existing checkouts to Quorune](MIGRATING_TO_QUORUNE.md)
 
 ## Product, operations, and protocol
 
@@ -74,7 +75,7 @@ belongs in the changelog or `docs/history/`.
 
 - [Provider adapters](optional-clients/providers.md)
 - [Quorune Pilot Harness adapter](optional-clients/codex-arena.md)
-- [Pilot Harness operational skill](../.agents/skills/commander-arena/SKILL.md)
+- [Pilot Harness operational skill](../.agents/skills/quorune-pilot-harness/SKILL.md)
 
 Optional clients consume the ordinary seat-projected protocol. They do not
 define rules authority or become a production runtime dependency.

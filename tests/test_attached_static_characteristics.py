@@ -8,40 +8,40 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.abilities import parse_activated_abilities
-from mtg_commander_sim.attachments import (
+from quorune.abilities import parse_activated_abilities
+from quorune.attachments import (
     AttachmentRelationError,
     attach_objects,
     attached_object_identity,
     detach_object,
 )
-from mtg_commander_sim.compiler.continuous_templates import (
+from quorune.compiler.continuous_templates import (
     attached_fixed_characteristics_handler,
 )
-from mtg_commander_sim.continuous_effect_model import (
+from quorune.continuous_effect_model import (
     ContinuousEffect,
     ContinuousEffectError,
     ContinuousEffectRelation,
     ContinuousObjectIdentity,
 )
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.model import CardInstance
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.rules.capabilities import (
+from quorune.errors import GameRuleError
+from quorune.model import CardInstance
+from quorune.model import StackItem
+from quorune.oracle_ir import compile_oracle_card
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     AttachedFixedCharacteristicsHandler,
     ContinuousEffectSourceContext,
     SemanticNodeError,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 def descriptor(line: str) -> dict:

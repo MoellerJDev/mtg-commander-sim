@@ -4,9 +4,9 @@ import unittest
 import uuid
 
 from common import keep_all, load_assets, make_session, set_fixture_turn
-from mtg_commander_sim import CommanderSession, GameConfig
-from mtg_commander_sim.deck import DeckDefinition, DeckEntry
-from mtg_commander_sim.model import CardInstance, StackItem
+from quorune import CommanderSession, GameConfig
+from quorune.deck import DeckDefinition, DeckEntry
+from quorune.model import CardInstance, StackItem
 
 
 class CommanderDuelTurnStateTests(unittest.TestCase):

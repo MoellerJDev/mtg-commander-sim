@@ -5,7 +5,7 @@ import threading
 import unittest
 
 from common import load_assets, make_session
-from mtg_commander_sim import (
+from quorune import (
     CommandEnvelope,
     GameActorClosed,
     GameActorUnavailable,
@@ -13,7 +13,7 @@ from mtg_commander_sim import (
     GameService,
     PROTOCOL_VERSION,
 )
-from mtg_commander_sim.runtime import GameLifecycleConflict
+from quorune.runtime import GameLifecycleConflict
 
 
 class GameActorTests(unittest.IsolatedAsyncioTestCase):

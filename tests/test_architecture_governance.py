@@ -45,8 +45,8 @@ class ArchitectureGovernanceTests(unittest.TestCase):
 
     def test_new_production_module_is_default_denied(self):
         analyses = dict(self.analyses)
-        analyses["mtg_commander_sim/unclassified.py"] = SimpleNamespace(
-            module="mtg_commander_sim.unclassified",
+        analyses["quorune/unclassified.py"] = SimpleNamespace(
+            module="quorune.unclassified",
             imports=(),
             tree=ast.parse(""),
         )
@@ -57,7 +57,7 @@ class ArchitectureGovernanceTests(unittest.TestCase):
             if row["guard"] == "module_classification_default_deny"
         )
         self.assertEqual(
-            ["mtg_commander_sim/unclassified.py"],
+            ["quorune/unclassified.py"],
             failure["evidence"]["unclassified"],
         )
 
@@ -69,7 +69,7 @@ class ArchitectureGovernanceTests(unittest.TestCase):
             )
         )
         self.assertEqual(
-            {"mtg_commander_sim/rules_scheduler.py"}, metadata_exempt
+            {"quorune/rules_scheduler.py"}, metadata_exempt
         )
         exempt_prefixes = tuple(
             self.source["scope"].get(
@@ -86,7 +86,7 @@ class ArchitectureGovernanceTests(unittest.TestCase):
         self.assertGreater(len(scope), 7)
 
     def test_state_write_identity_does_not_depend_on_source_line(self):
-        relative = "mtg_commander_sim/example.py"
+        relative = "quorune/example.py"
         source = {
             "scope": {
                 "state_owner_modules": [relative],
@@ -125,11 +125,11 @@ class ArchitectureGovernanceTests(unittest.TestCase):
         baseline = {
             "engine": {"logical_lines": 100},
             "oversized_modules": [
-                {"file": "mtg_commander_sim/engine.py", "logical_lines": 100}
+                {"file": "quorune/engine.py", "logical_lines": 100}
             ],
             "oversized_functions_and_methods": [
                 {
-                    "file": "mtg_commander_sim/engine.py",
+                    "file": "quorune/engine.py",
                     "symbol": "CommanderEngine.large",
                     "logical_lines": 20,
                 }
@@ -137,11 +137,11 @@ class ArchitectureGovernanceTests(unittest.TestCase):
         }
         production = {
             "oversized_modules": [
-                {"file": "mtg_commander_sim/engine.py", "logical_lines": 101}
+                {"file": "quorune/engine.py", "logical_lines": 101}
             ],
             "oversized_functions_and_methods": [
                 {
-                    "file": "mtg_commander_sim/engine.py",
+                    "file": "quorune/engine.py",
                     "symbol": "CommanderEngine.large",
                     "logical_lines": 21,
                 }

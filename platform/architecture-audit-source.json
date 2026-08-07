@@ -24,7 +24,7 @@
   },
   "scope": {
     "production_roots": [
-      "mtg_commander_sim",
+      "quorune",
       "server",
       "web/src"
     ],
@@ -32,52 +32,52 @@
       "simctl.py"
     ],
     "state_owner_modules": [
-      "mtg_commander_sim/engine.py",
-      "mtg_commander_sim/permissions.py",
-      "mtg_commander_sim/counter_placement.py",
-      "mtg_commander_sim/counter_state.py",
-      "mtg_commander_sim/damage.py",
-      "mtg_commander_sim/damage_prevention_creation.py",
-      "mtg_commander_sim/damage_results.py",
-      "mtg_commander_sim/life_change.py",
-      "mtg_commander_sim/life_state.py",
-      "mtg_commander_sim/continuous_effect_state.py",
-      "mtg_commander_sim/tap_state.py",
-      "mtg_commander_sim/stack_counter.py",
-      "mtg_commander_sim/token_creation.py"
-      ,"mtg_commander_sim/mana_activation.py"
-      ,"mtg_commander_sim/semantic_choices/intent_host.py"
-      ,"mtg_commander_sim/effect_runtime/state_and_permissions.py"
-      ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py"
-      ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py"
-      ,"mtg_commander_sim/effect_runtime/damage_modifiers.py"
-      ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py"
-      ,"mtg_commander_sim/rules/casting/commit.py"
-      ,"mtg_commander_sim/rules/activation/commit.py"
+      "quorune/engine.py",
+      "quorune/permissions.py",
+      "quorune/counter_placement.py",
+      "quorune/counter_state.py",
+      "quorune/damage.py",
+      "quorune/damage_prevention_creation.py",
+      "quorune/damage_results.py",
+      "quorune/life_change.py",
+      "quorune/life_state.py",
+      "quorune/continuous_effect_state.py",
+      "quorune/tap_state.py",
+      "quorune/stack_counter.py",
+      "quorune/token_creation.py"
+      ,"quorune/mana_activation.py"
+      ,"quorune/semantic_choices/intent_host.py"
+      ,"quorune/effect_runtime/state_and_permissions.py"
+      ,"quorune/effect_runtime/zones_and_attachments.py"
+      ,"quorune/effect_runtime/damage_life_and_turns.py"
+      ,"quorune/effect_runtime/damage_modifiers.py"
+      ,"quorune/effect_runtime/objects_stack_and_tokens.py"
+      ,"quorune/rules/casting/commit.py"
+      ,"quorune/rules/activation/commit.py"
     ],
     "state_parameter_modules": [
-      "mtg_commander_sim/record.py",
-      "mtg_commander_sim/commander.py",
-      "mtg_commander_sim/state_based_actions.py"
+      "quorune/record.py",
+      "quorune/commander.py",
+      "quorune/state_based_actions.py"
     ],
     "core_card_specificity_files": [
-      "mtg_commander_sim/engine.py",
-      "mtg_commander_sim/oracle_ir.py",
-      "mtg_commander_sim/semantics.py",
-      "mtg_commander_sim/abilities.py",
-      "mtg_commander_sim/replacement_decisions.py",
-      "mtg_commander_sim/replacement_effects.py",
-      "mtg_commander_sim/continuous_effects.py",
-      "mtg_commander_sim/continuous_effect_model.py",
-      "mtg_commander_sim/characteristic_evaluation.py",
-      "mtg_commander_sim/state_based_actions.py",
-      "mtg_commander_sim/token_creation.py"
+      "quorune/engine.py",
+      "quorune/oracle_ir.py",
+      "quorune/semantics.py",
+      "quorune/abilities.py",
+      "quorune/replacement_decisions.py",
+      "quorune/replacement_effects.py",
+      "quorune/continuous_effects.py",
+      "quorune/continuous_effect_model.py",
+      "quorune/characteristic_evaluation.py",
+      "quorune/state_based_actions.py",
+      "quorune/token_creation.py"
     ],
     "card_specificity_exempt_prefixes": [
-      "mtg_commander_sim/card_overrides/"
+      "quorune/card_overrides/"
     ],
     "card_specificity_metadata_exempt_files": [
-      "mtg_commander_sim/rules_scheduler.py"
+      "quorune/rules_scheduler.py"
     ]
   },
   "thresholds": {
@@ -119,8 +119,8 @@
       "id": "application_session",
       "status": "dedicated_modules",
       "owners": [
-        "mtg_commander_sim/service.py",
-        "mtg_commander_sim/session.py"
+        "quorune/service.py",
+        "quorune/session.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -128,8 +128,8 @@
       "id": "turn_priority_and_decisions",
       "status": "embedded_in_commander_engine",
       "owners": [
-        "mtg_commander_sim/engine.py",
-        "mtg_commander_sim/permissions.py"
+        "quorune/engine.py",
+        "quorune/permissions.py"
       ],
       "missing_dedicated_owner": true
     },
@@ -137,8 +137,8 @@
       "id": "zones_and_object_identity",
       "status": "split_with_engine_as_mutation_owner",
       "owners": [
-        "mtg_commander_sim/engine.py",
-        "mtg_commander_sim/model.py"
+        "quorune/engine.py",
+        "quorune/model.py"
       ],
       "missing_dedicated_owner": true
     },
@@ -146,13 +146,13 @@
       "id": "casting_activation_and_costs",
       "status": "typed_proposal_query_and_commit_subsystems_with_engine_facades",
       "owners": [
-        "mtg_commander_sim/engine.py",
-        "mtg_commander_sim/abilities.py",
-        "mtg_commander_sim/mana.py",
-        "mtg_commander_sim/mana_activation.py",
-        "mtg_commander_sim/rules/action_catalog.py",
-        "mtg_commander_sim/rules/casting",
-        "mtg_commander_sim/rules/activation"
+        "quorune/engine.py",
+        "quorune/abilities.py",
+        "quorune/mana.py",
+        "quorune/mana_activation.py",
+        "quorune/rules/action_catalog.py",
+        "quorune/rules/casting",
+        "quorune/rules/activation"
       ],
       "missing_dedicated_owner": false
     },
@@ -160,13 +160,13 @@
       "id": "semantic_effect_execution",
       "status": "incremental_typed_handler_registry_with_legacy_engine_fallback",
       "owners": [
-        "mtg_commander_sim/semantic_runtime",
-        "mtg_commander_sim/destruction.py",
-        "mtg_commander_sim/permanent_exile.py",
-        "mtg_commander_sim/return_to_hand.py",
-        "mtg_commander_sim/stack_counter.py",
-        "mtg_commander_sim/tap_state.py",
-        "mtg_commander_sim/engine.py"
+        "quorune/semantic_runtime",
+        "quorune/destruction.py",
+        "quorune/permanent_exile.py",
+        "quorune/return_to_hand.py",
+        "quorune/stack_counter.py",
+        "quorune/tap_state.py",
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -174,9 +174,9 @@
       "id": "search_target_and_choice",
       "status": "split_with_engine_as_executor",
       "owners": [
-        "mtg_commander_sim/engine.py",
-        "mtg_commander_sim/targets.py",
-        "mtg_commander_sim/choice_forms.py"
+        "quorune/engine.py",
+        "quorune/targets.py",
+        "quorune/choice_forms.py"
       ],
       "missing_dedicated_owner": true
     },
@@ -184,7 +184,7 @@
       "id": "trigger_processing",
       "status": "embedded_in_commander_engine",
       "owners": [
-        "mtg_commander_sim/engine.py"
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": true
     },
@@ -192,9 +192,9 @@
       "id": "tokens_and_token_creation",
       "status": "focused_mutation_owner_with_engine_orchestration",
       "owners": [
-        "mtg_commander_sim/token_creation.py",
-        "mtg_commander_sim/semantic_runtime/token_replacements.py",
-        "mtg_commander_sim/engine.py"
+        "quorune/token_creation.py",
+        "quorune/semantic_runtime/token_replacements.py",
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -202,12 +202,12 @@
       "id": "replacement_and_prevention",
       "status": "split_immutable_model_typed_operations_and_incremental_engine_integration",
       "owners": [
-        "mtg_commander_sim/replacement",
-        "mtg_commander_sim/replacement_effects.py",
-        "mtg_commander_sim/replacement_decisions.py",
-        "mtg_commander_sim/semantic_runtime/token_replacements.py",
-        "mtg_commander_sim/semantic_runtime/zone_replacements.py",
-        "mtg_commander_sim/engine.py"
+        "quorune/replacement",
+        "quorune/replacement_effects.py",
+        "quorune/replacement_decisions.py",
+        "quorune/semantic_runtime/token_replacements.py",
+        "quorune/semantic_runtime/zone_replacements.py",
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -215,10 +215,10 @@
       "id": "damage_results_life_and_counters",
       "status": "typed_precommit_owners_with_damage_coordinator",
       "owners": [
-        "mtg_commander_sim/damage.py",
-        "mtg_commander_sim/damage_results.py",
-        "mtg_commander_sim/counter_state.py",
-        "mtg_commander_sim/life_state.py"
+        "quorune/damage.py",
+        "quorune/damage_results.py",
+        "quorune/counter_state.py",
+        "quorune/life_state.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -226,8 +226,8 @@
       "id": "continuous_effects",
       "status": "partial_dedicated_module_with_engine_integration",
       "owners": [
-        "mtg_commander_sim/continuous_effects.py",
-        "mtg_commander_sim/engine.py"
+        "quorune/continuous_effects.py",
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -235,8 +235,8 @@
       "id": "state_based_actions",
       "status": "dedicated_evaluator_with_engine_mutation",
       "owners": [
-        "mtg_commander_sim/state_based_actions.py",
-        "mtg_commander_sim/engine.py"
+        "quorune/state_based_actions.py",
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -244,12 +244,12 @@
       "id": "combat",
       "status": "split_domain_helpers_with_engine_orchestration",
       "owners": [
-        "mtg_commander_sim/combat.py",
-        "mtg_commander_sim/combat_constraints.py",
-        "mtg_commander_sim/declaration_costs.py",
-        "mtg_commander_sim/declaration_restrictions.py",
-        "mtg_commander_sim/damage.py",
-        "mtg_commander_sim/engine.py"
+        "quorune/combat.py",
+        "quorune/combat_constraints.py",
+        "quorune/declaration_costs.py",
+        "quorune/declaration_restrictions.py",
+        "quorune/damage.py",
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -257,8 +257,8 @@
       "id": "commander_variant",
       "status": "physical_identity_and_initial_state_extracted_with_engine_orchestration",
       "owners": [
-        "mtg_commander_sim/commander.py",
-        "mtg_commander_sim/engine.py"
+        "quorune/commander.py",
+        "quorune/engine.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -266,8 +266,8 @@
       "id": "projection_and_protocol",
       "status": "dedicated_modules",
       "owners": [
-        "mtg_commander_sim/projection.py",
-        "mtg_commander_sim/protocol.py"
+        "quorune/projection.py",
+        "quorune/protocol.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -275,8 +275,8 @@
       "id": "record_and_replay",
       "status": "dedicated_module",
       "owners": [
-        "mtg_commander_sim/record.py",
-        "mtg_commander_sim/record_trust.py"
+        "quorune/record.py",
+        "quorune/record_trust.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -284,8 +284,8 @@
       "id": "oracle_compiler",
       "status": "generated_program_stage_extracted_from_interleaved_ir_compiler",
       "owners": [
-        "mtg_commander_sim/oracle_ir.py",
-        "mtg_commander_sim/compiler/program_generation.py"
+        "quorune/oracle_ir.py",
+        "quorune/compiler/program_generation.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -293,10 +293,10 @@
       "id": "card_program_v2",
       "status": "canonical_schema_adapters_registry_cli_and_replay_pinning",
       "owners": [
-        "mtg_commander_sim/card_programs",
-        "mtg_commander_sim/semantics.py",
-        "mtg_commander_sim/record.py",
-        "mtg_commander_sim/record_trust.py"
+        "quorune/card_programs",
+        "quorune/semantics.py",
+        "quorune/record.py",
+        "quorune/record_trust.py"
       ],
       "missing_dedicated_owner": false
     },
@@ -304,8 +304,8 @@
       "id": "card_overrides",
       "status": "card_program_v2_boundary_with_no_explicit_typed_overrides",
       "owners": [
-        "mtg_commander_sim/card_programs",
-        "mtg_commander_sim/semantic_packs"
+        "quorune/card_programs",
+        "quorune/semantic_packs"
       ],
       "missing_dedicated_owner": false
     }
@@ -399,7 +399,7 @@
   ],
   "card_named_helpers": [
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "symbol": "_create_mishra_warform",
       "reason": "Implements a named token behavior for Mishra, Eminent One inside the universal engine."
     }

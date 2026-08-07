@@ -10,8 +10,8 @@ import unittest
 from fastapi.testclient import TestClient
 
 from common import DB_PATH, ROOT
-from mtg_commander_sim import CardDatabase
-from mtg_commander_sim.record import database_fingerprint, replay_record
+from quorune import CardDatabase
+from quorune.record import database_fingerprint, replay_record
 from server import ServerSettings, create_app
 from server.app import COOKIE_NAME, CSRF_COOKIE_NAME, _websocket_origin_allowed
 

@@ -5,125 +5,125 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim import aerial_blocking as aerial_blocking_module
-from mtg_commander_sim import (
+from quorune import aerial_blocking as aerial_blocking_module
+from quorune import (
     combat_damage_assignment as combat_assignment_module,
 )
-from mtg_commander_sim import combat as combat_module
-from mtg_commander_sim import combat_evasion as combat_evasion_module
-from mtg_commander_sim import block_transitions as block_transitions_module
-from mtg_commander_sim import attack_transition_model as attack_transitions_module
-from mtg_commander_sim import combat_damage_trample as trample_module
-from mtg_commander_sim import deathtouch as deathtouch_module
-from mtg_commander_sim import defender as defender_module
-from mtg_commander_sim import menace as menace_module
-from mtg_commander_sim import landwalk as landwalk_module
-from mtg_commander_sim import damage_results as damage_results_module
-from mtg_commander_sim import destruction as destruction_module
-from mtg_commander_sim import replacement_effects
-from mtg_commander_sim import tap_state
-from mtg_commander_sim import haste as haste_module
-from mtg_commander_sim import trigger_batches as trigger_batches_module
-from mtg_commander_sim import zone_trigger_events as zone_trigger_events_module
-from mtg_commander_sim.rules.activation import resolution as activation_resolution
-from mtg_commander_sim.rules.casting import proposal as casting_proposal
-from mtg_commander_sim.aura import SimpleEnchantSpec
-from mtg_commander_sim.abilities import ActivatedAbility
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim import protection as protection_module
-from mtg_commander_sim.ability_fragments import (
+from quorune import combat as combat_module
+from quorune import combat_evasion as combat_evasion_module
+from quorune import block_transitions as block_transitions_module
+from quorune import attack_transition_model as attack_transitions_module
+from quorune import combat_damage_trample as trample_module
+from quorune import deathtouch as deathtouch_module
+from quorune import defender as defender_module
+from quorune import menace as menace_module
+from quorune import landwalk as landwalk_module
+from quorune import damage_results as damage_results_module
+from quorune import destruction as destruction_module
+from quorune import replacement_effects
+from quorune import tap_state
+from quorune import haste as haste_module
+from quorune import trigger_batches as trigger_batches_module
+from quorune import zone_trigger_events as zone_trigger_events_module
+from quorune.rules.activation import resolution as activation_resolution
+from quorune.rules.casting import proposal as casting_proposal
+from quorune.aura import SimpleEnchantSpec
+from quorune.abilities import ActivatedAbility
+from quorune.model import CombatState
+from quorune import protection as protection_module
+from quorune.ability_fragments import (
     CombatKeywordTriggerKind,
     CombatKeywordTriggerSpec,
     ProtectionQualityKind,
     ProtectionSpec,
     ability_fragment_to_dict,
 )
-from mtg_commander_sim.protection import (
+from quorune.protection import (
     ProtectionSource,
     ProtectionVerdict,
 )
-from mtg_commander_sim.effect_runtime import life_effects
-from mtg_commander_sim.effect_runtime import objects_stack_and_tokens
-from mtg_commander_sim.continuous_effects import (
+from quorune.effect_runtime import life_effects
+from quorune.effect_runtime import objects_stack_and_tokens
+from quorune.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.continuous_effect_model import ContinuousObjectIdentity
-from mtg_commander_sim import damage as damage_module
-from mtg_commander_sim import damage_prevention as damage_prevention_module
-from mtg_commander_sim.drawing import transaction as draw_transaction_module
-from mtg_commander_sim.drawing import (
+from quorune.continuous_effect_model import ContinuousObjectIdentity
+from quorune import damage as damage_module
+from quorune import damage_prevention as damage_prevention_module
+from quorune.drawing import transaction as draw_transaction_module
+from quorune.drawing import (
     DiscardDrawnCardUnlessType,
     DrawCommitResult,
     DrawEventRequest,
     RevealDrawnCard,
     prepare_draw_event,
 )
-from mtg_commander_sim.damage import DamageEvent
-from mtg_commander_sim.damage_prevention import (
+from quorune.damage import DamageEvent
+from quorune.damage_prevention import (
     DamageModifierDuration,
     DamagePreventionShield,
     DamageSubject,
     PreventionMode,
 )
-from mtg_commander_sim.damage_modifier_state import (
+from quorune.damage_modifier_state import (
     ChosenDamageSource,
     DamageAftermathRecipient,
     DealDamagePreventionAftermath,
     GainLifePreventionAftermath,
 )
-from mtg_commander_sim.damage_source import DamageSourceSnapshot
-from mtg_commander_sim.prevention_triggers import (
+from quorune.damage_source import DamageSourceSnapshot
+from quorune.prevention_triggers import (
     DrawCardsPreventionTrigger,
     PreventionTriggeredAbility,
     PreventionTriggerOccurrence,
 )
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim import oracle_ir as oracle_ir_module
-from mtg_commander_sim.rules import capabilities as capabilities_module
-from mtg_commander_sim.rules.capabilities import (
+from quorune.engine import CommanderEngine
+from quorune import oracle_ir as oracle_ir_module
+from quorune.rules import capabilities as capabilities_module
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim import object_predicate as object_predicate_module
-from mtg_commander_sim import object_query as object_query_module
-from mtg_commander_sim.object_query import ObjectQueryError, ObjectQuerySpec
-from mtg_commander_sim.semantic_runtime.counter_replacements import (
+from quorune import object_predicate as object_predicate_module
+from quorune import object_query as object_query_module
+from quorune.object_query import ObjectQueryError, ObjectQuerySpec
+from quorune.semantic_runtime.counter_replacements import (
     CounterPlacementEventSpec,
     CounterQuantityReplacementHandler,
     CounterReplacementSourceContext,
     resolve_counter_placement_replacements,
 )
-from mtg_commander_sim.semantic_runtime import draw_restrictions as draw_restriction_module
-from mtg_commander_sim.semantic_runtime import draw_replacements as draw_replacement_module
-from mtg_commander_sim.semantic_runtime.continuous_components import (
+from quorune.semantic_runtime import draw_restrictions as draw_restriction_module
+from quorune.semantic_runtime import draw_replacements as draw_replacement_module
+from quorune.semantic_runtime.continuous_components import (
     AddBasicLandTypeHandler,
     ContinuousEffectSourceContext,
     FixedQueryPowerToughnessAnthemHandler,
 )
-from mtg_commander_sim.compiler.continuous_templates import (
+from quorune.compiler.continuous_templates import (
     attached_fixed_characteristics_handler,
     fixed_power_toughness_anthem_handler,
 )
-from mtg_commander_sim.semantic_runtime.attached_continuous import (
+from quorune.semantic_runtime.attached_continuous import (
     AttachedFixedCharacteristicsHandler,
 )
-from mtg_commander_sim.semantic_runtime.damage_replacements import (
+from quorune.semantic_runtime.damage_replacements import (
     DamageQuantityReplacementHandler,
     DamageReplacementSourceContext,
     FixedDamagePreventionHandler,
     StaticDamageRedirectionHandler,
 )
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.semantic_runtime.damage_results import (
+from quorune.semantics import SemanticProgram
+from quorune.semantic_runtime.damage_results import (
     DamageResultLifeFloorHandler,
     DamageResultReplacementSourceContext,
 )
-from mtg_commander_sim.semantic_runtime.life_replacements import (
+from quorune.semantic_runtime.life_replacements import (
     LifeGainMultiplierHandler,
     LifeReplacementSourceContext,
 )
-from mtg_commander_sim.targets import PUBLIC_TARGET_ZONES, TargetGroup
-from mtg_commander_sim.zone_trigger_events import ZoneChangeOccurrence
+from quorune.targets import PUBLIC_TARGET_ZONES, TargetGroup
+from quorune.zone_trigger_events import ZoneChangeOccurrence
 
 
 def _event(*, assigned: int, dealt: int, prevented: int) -> DamageEvent:
@@ -178,7 +178,7 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         assert_hidden_target_rejected()
         mutated_zones = set(PUBLIC_TARGET_ZONES) | {"hand"}
         with patch(
-            "mtg_commander_sim.targets.PUBLIC_TARGET_ZONES", mutated_zones
+            "quorune.targets.PUBLIC_TARGET_ZONES", mutated_zones
         ):
             with self.assertRaises(AssertionError):
                 assert_hidden_target_rejected()

@@ -3,8 +3,8 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.zone_trigger_events import (
+from quorune.semantics import SemanticProgram
+from quorune.zone_trigger_events import (
     ZoneChangeOccurrence,
     ZoneTransitionKind,
     ZoneTriggerEventError,

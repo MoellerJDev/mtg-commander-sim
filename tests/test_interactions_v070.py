@@ -3,8 +3,8 @@ from __future__ import annotations
 import unittest
 
 from common import advance_fixture_turn, keep_all, load_assets
-from mtg_commander_sim import CommanderSession, GameConfig
-from mtg_commander_sim.model import StackItem
+from quorune import CommanderSession, GameConfig
+from quorune.model import StackItem
 
 
 class InteractionKernelTests(unittest.TestCase):

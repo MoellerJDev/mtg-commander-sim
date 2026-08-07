@@ -3,14 +3,14 @@ from __future__ import annotations
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.life_state import (
+from quorune.life_state import (
     LifeChange,
     LifeStateError,
     commit_life_changes,
     pay_life_cost,
     plan_life_changes,
 )
-from mtg_commander_sim.model import PlayerState
+from quorune.model import PlayerState
 
 
 class LifeStateTests(unittest.TestCase):

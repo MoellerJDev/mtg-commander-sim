@@ -229,7 +229,7 @@ def build_report() -> dict:
     report["tests"] = {
         "deterministic_cases_discovered": _test_count(),
         "schema_files": _file_count("schemas")
-        + _file_count("mtg_commander_sim/schemas"),
+        + _file_count("quorune/schemas"),
         "server_files": _file_count("server"),
         "web_files": _file_count("web"),
         "migration_files": _file_count("migrations"),

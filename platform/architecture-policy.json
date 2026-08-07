@@ -7,87 +7,87 @@
   "card_name_hash_index": "platform/card-name-hash-index.json",
   "printed_name_allowances": "platform/card-specificity-baseline.json",
   "protected_rules_modules": [
-    "mtg_commander_sim/abilities.py",
-    "mtg_commander_sim/ability_fragments.py",
-    "mtg_commander_sim/aerial_blocking.py",
-    "mtg_commander_sim/choice_forms.py",
-    "mtg_commander_sim/combat.py",
-    "mtg_commander_sim/combat_constraints.py",
-    "mtg_commander_sim/combat_evasion.py",
-    "mtg_commander_sim/combat_evasion_engine_adapter.py",
-    "mtg_commander_sim/commander.py",
-    "mtg_commander_sim/characteristic_evaluation.py",
-    "mtg_commander_sim/continuous_effect_state.py",
-    "mtg_commander_sim/continuous_effects.py",
-    "mtg_commander_sim/continuous_effect_model.py",
-    "mtg_commander_sim/counter_placement.py",
-    "mtg_commander_sim/counter_state.py",
-    "mtg_commander_sim/cycling_abilities.py",
-    "mtg_commander_sim/damage.py",
-    "mtg_commander_sim/damage_prevention.py",
-    "mtg_commander_sim/damage_prevention_aftermath.py",
-    "mtg_commander_sim/damage_prevention_creation.py",
-    "mtg_commander_sim/damage_results.py",
-    "mtg_commander_sim/deathtouch.py",
-    "mtg_commander_sim/defender.py",
-    "mtg_commander_sim/declaration_costs.py",
-    "mtg_commander_sim/declaration_restrictions.py",
-    "mtg_commander_sim/delayed_triggers.py",
-    "mtg_commander_sim/destruction.py",
-    "mtg_commander_sim/deck.py",
-    "mtg_commander_sim/engine.py",
-    "mtg_commander_sim/enchant_spec.py",
-    "mtg_commander_sim/fixed_damage_set.py",
-    "mtg_commander_sim/fixed_damage_set_model.py",
-    "mtg_commander_sim/haste.py",
-    "mtg_commander_sim/keyword_abilities.py",
-    "mtg_commander_sim/life_change.py",
-    "mtg_commander_sim/life_state.py",
-    "mtg_commander_sim/landwalk.py",
-    "mtg_commander_sim/mana.py",
-    "mtg_commander_sim/mana_activation.py",
-    "mtg_commander_sim/mana_mode_effects.py",
-    "mtg_commander_sim/mana_payment_continuations.py",
-    "mtg_commander_sim/mana_undo.py",
-    "mtg_commander_sim/mechanic_contracts.py",
-    "mtg_commander_sim/menace.py",
-    "mtg_commander_sim/model.py",
-    "mtg_commander_sim/oracle_ir.py",
-    "mtg_commander_sim/permanent_exile.py",
-    "mtg_commander_sim/permissions.py",
-    "mtg_commander_sim/protection.py",
-    "mtg_commander_sim/replacement_decisions.py",
-    "mtg_commander_sim/replacement_effects.py",
-    "mtg_commander_sim/return_to_hand.py",
-    "mtg_commander_sim/rule_conformance.py",
-    "mtg_commander_sim/rules_corpus.py",
-    "mtg_commander_sim/semantics.py",
-    "mtg_commander_sim/shortcuts.py",
-    "mtg_commander_sim/stack_counter.py",
-    "mtg_commander_sim/state_based_actions.py",
-    "mtg_commander_sim/state_based_execution.py",
-    "mtg_commander_sim/state_planner.py",
-    "mtg_commander_sim/targets.py",
-    "mtg_commander_sim/token_creation.py",
-    "mtg_commander_sim/trigger_batches.py",
-    "mtg_commander_sim/trigger_discovery.py",
-    "mtg_commander_sim/trigger_processing.py",
-    "mtg_commander_sim/zone_trigger_events.py",
-    "mtg_commander_sim/zone_trigger_processing.py",
-    "mtg_commander_sim/object_query.py"
+    "quorune/abilities.py",
+    "quorune/ability_fragments.py",
+    "quorune/aerial_blocking.py",
+    "quorune/choice_forms.py",
+    "quorune/combat.py",
+    "quorune/combat_constraints.py",
+    "quorune/combat_evasion.py",
+    "quorune/combat_evasion_engine_adapter.py",
+    "quorune/commander.py",
+    "quorune/characteristic_evaluation.py",
+    "quorune/continuous_effect_state.py",
+    "quorune/continuous_effects.py",
+    "quorune/continuous_effect_model.py",
+    "quorune/counter_placement.py",
+    "quorune/counter_state.py",
+    "quorune/cycling_abilities.py",
+    "quorune/damage.py",
+    "quorune/damage_prevention.py",
+    "quorune/damage_prevention_aftermath.py",
+    "quorune/damage_prevention_creation.py",
+    "quorune/damage_results.py",
+    "quorune/deathtouch.py",
+    "quorune/defender.py",
+    "quorune/declaration_costs.py",
+    "quorune/declaration_restrictions.py",
+    "quorune/delayed_triggers.py",
+    "quorune/destruction.py",
+    "quorune/deck.py",
+    "quorune/engine.py",
+    "quorune/enchant_spec.py",
+    "quorune/fixed_damage_set.py",
+    "quorune/fixed_damage_set_model.py",
+    "quorune/haste.py",
+    "quorune/keyword_abilities.py",
+    "quorune/life_change.py",
+    "quorune/life_state.py",
+    "quorune/landwalk.py",
+    "quorune/mana.py",
+    "quorune/mana_activation.py",
+    "quorune/mana_mode_effects.py",
+    "quorune/mana_payment_continuations.py",
+    "quorune/mana_undo.py",
+    "quorune/mechanic_contracts.py",
+    "quorune/menace.py",
+    "quorune/model.py",
+    "quorune/oracle_ir.py",
+    "quorune/permanent_exile.py",
+    "quorune/permissions.py",
+    "quorune/protection.py",
+    "quorune/replacement_decisions.py",
+    "quorune/replacement_effects.py",
+    "quorune/return_to_hand.py",
+    "quorune/rule_conformance.py",
+    "quorune/rules_corpus.py",
+    "quorune/semantics.py",
+    "quorune/shortcuts.py",
+    "quorune/stack_counter.py",
+    "quorune/state_based_actions.py",
+    "quorune/state_based_execution.py",
+    "quorune/state_planner.py",
+    "quorune/targets.py",
+    "quorune/token_creation.py",
+    "quorune/trigger_batches.py",
+    "quorune/trigger_discovery.py",
+    "quorune/trigger_processing.py",
+    "quorune/zone_trigger_events.py",
+    "quorune/zone_trigger_processing.py",
+    "quorune/object_query.py"
   ],
   "protected_future_prefixes": [
-    "mtg_commander_sim/domain/",
-    "mtg_commander_sim/aura/",
-    "mtg_commander_sim/card_programs/",
-    "mtg_commander_sim/compiler/",
-    "mtg_commander_sim/semantic_runtime/",
-    "mtg_commander_sim/semantic_choices/",
-    "mtg_commander_sim/effect_runtime/",
-    "mtg_commander_sim/rules/",
-    "mtg_commander_sim/replacement/",
-    "mtg_commander_sim/semantics/",
-    "mtg_commander_sim/card_overrides/"
+    "quorune/domain/",
+    "quorune/aura/",
+    "quorune/card_programs/",
+    "quorune/compiler/",
+    "quorune/semantic_runtime/",
+    "quorune/semantic_choices/",
+    "quorune/effect_runtime/",
+    "quorune/rules/",
+    "quorune/replacement/",
+    "quorune/semantics/",
+    "quorune/card_overrides/"
   ],
   "forbidden_import_prefixes": [
     "fastapi",
@@ -98,127 +98,127 @@
     "server",
     "openai",
     "anthropic",
-    "mtg_commander_sim.application",
-    "mtg_commander_sim.arena",
-    "mtg_commander_sim.client",
-    "mtg_commander_sim.cli",
-    "mtg_commander_sim.codex_cli",
-    "mtg_commander_sim.persistence",
-    "mtg_commander_sim.pilot",
-    "mtg_commander_sim.report",
-    "mtg_commander_sim.runtime",
-    "mtg_commander_sim.service",
-    "mtg_commander_sim.session"
+    "quorune.application",
+    "quorune.arena",
+    "quorune.client",
+    "quorune.cli",
+    "quorune.codex_cli",
+    "quorune.persistence",
+    "quorune.pilot",
+    "quorune.report",
+    "quorune.runtime",
+    "quorune.service",
+    "quorune.session"
   ],
   "scoped_forbidden_imports": [
     {
-      "path_prefix": "mtg_commander_sim/semantic_runtime/",
+      "path_prefix": "quorune/semantic_runtime/",
       "import_prefixes": [
-        "mtg_commander_sim.engine",
-        "mtg_commander_sim.model",
-        "mtg_commander_sim.record",
-        "mtg_commander_sim.projection"
+        "quorune.engine",
+        "quorune.model",
+        "quorune.record",
+        "quorune.projection"
       ]
     },
     {
-      "path_prefix": "mtg_commander_sim/life_change.py",
+      "path_prefix": "quorune/life_change.py",
       "import_prefixes": [
-        "mtg_commander_sim.semantic_runtime.damage_results"
+        "quorune.semantic_runtime.damage_results"
       ]
     },
     {
-      "path_prefix": "mtg_commander_sim/life_state.py",
+      "path_prefix": "quorune/life_state.py",
       "import_prefixes": [
-        "mtg_commander_sim.semantic_runtime.damage_results"
+        "quorune.semantic_runtime.damage_results"
       ]
     },
     {
-      "path_prefix": "mtg_commander_sim/effect_runtime/life_effects.py",
+      "path_prefix": "quorune/effect_runtime/life_effects.py",
       "import_prefixes": [
-        "mtg_commander_sim.semantic_runtime.damage_results"
+        "quorune.semantic_runtime.damage_results"
       ]
     },
     {
-      "path_prefix": "mtg_commander_sim/semantic_runtime/life_replacements.py",
+      "path_prefix": "quorune/semantic_runtime/life_replacements.py",
       "import_prefixes": [
-        "mtg_commander_sim.semantic_runtime.damage_results"
+        "quorune.semantic_runtime.damage_results"
       ]
     }
   ],
   "game_state_access": {
     "mutable_owners": {
-      "mtg_commander_sim/commander.py": "Commander game setup and stable physical designation state owner",
-      "mtg_commander_sim/engine.py": "legacy authoritative transaction and mutation boundary",
-      "mtg_commander_sim/permissions.py": "decision and capability lifecycle owned by the transaction boundary",
-      "mtg_commander_sim/record.py": "replay hydration, verification copies, and versioned migration",
-      "mtg_commander_sim/counter_placement.py": "typed effect-generated counter-placement replacement and mutation owner behind CommanderEngine",
-      "mtg_commander_sim/damage.py": "typed damage proposal, quantity replacement, prevention, and final-event coordinator behind CommanderEngine",
-      "mtg_commander_sim/damage_prevention.py": "durable typed prevention-shield and damage-redirection state owner behind the damage transaction",
-      "mtg_commander_sim/damage_prevention_creation.py": "typed prevention-shield creation validation and authoritative commit owner",
-      "mtg_commander_sim/damage_results.py": "typed CR 120.3 result-event preparation, validation, and atomic mutation owner behind the damage coordinator",
-      "mtg_commander_sim/destruction.py": "typed permanent-destruction preflight and authoritative commit owner",
-      "mtg_commander_sim/counter_state.py": "canonical typed player and permanent counter mutation owner behind represented rules transactions",
-      "mtg_commander_sim/life_change.py": "replacement-capable typed life-event transaction owner behind represented rules transactions",
-      "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
-      "mtg_commander_sim/continuous_effect_state.py": "typed resolution-created continuous-effect journal and cleanup-expiration mutation owner",
-      "mtg_commander_sim/attachments.py": "typed reciprocal attachment relation and transition owner",
-      "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
-      "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
-      "mtg_commander_sim/permanent_exile.py": "typed identity-pinned permanent-exile transaction delegating mutation to the canonical zone-change owner",
-      "mtg_commander_sim/return_to_hand.py": "typed identity-pinned permanent-return transaction delegating mutation to the canonical zone-change owner",
-      "mtg_commander_sim/stack_counter.py": "typed stack-counter legality, removal, ordinary spell destination, telemetry, and public journal owner",
-      "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine",
-      "mtg_commander_sim/trigger_discovery.py": "normalized semantic trigger detection and immutable ordinary occurrence construction behind CommanderEngine"
-      ,"mtg_commander_sim/mana_activation.py": "activated mana ability and reversible activation transaction owner"
-      ,"mtg_commander_sim/semantic_choices/intent_host.py": "typed semantic-choice intent application behind the immutable choice registry"
-      ,"mtg_commander_sim/effect_runtime/state_and_permissions.py": "registry-owned state and permission effect family"
-      ,"mtg_commander_sim/effect_runtime/zones_and_attachments.py": "registry-owned zone and attachment effect family"
-      ,"mtg_commander_sim/effect_runtime/damage_life_and_turns.py": "registry-owned damage and turn effect family"
-      ,"mtg_commander_sim/effect_runtime/damage_modifiers.py": "registry-owned prevention-shield and redirection creation family"
-      ,"mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py": "registry-owned object, stack, and token effect family"
-      ,"mtg_commander_sim/rules/casting/commit.py": "typed spell-casting transaction owner behind CommanderEngine"
-      ,"mtg_commander_sim/rules/activation/commit.py": "typed activated-ability transaction owner behind CommanderEngine"
-      ,"mtg_commander_sim/drawing/transaction.py": "canonical replacement-aware draw mutation owner behind CommanderEngine"
-      ,"mtg_commander_sim/combat_relationship_state.py": "typed combat participation and relationship mutation owner behind CommanderEngine"
+      "quorune/commander.py": "Commander game setup and stable physical designation state owner",
+      "quorune/engine.py": "legacy authoritative transaction and mutation boundary",
+      "quorune/permissions.py": "decision and capability lifecycle owned by the transaction boundary",
+      "quorune/record.py": "replay hydration, verification copies, and versioned migration",
+      "quorune/counter_placement.py": "typed effect-generated counter-placement replacement and mutation owner behind CommanderEngine",
+      "quorune/damage.py": "typed damage proposal, quantity replacement, prevention, and final-event coordinator behind CommanderEngine",
+      "quorune/damage_prevention.py": "durable typed prevention-shield and damage-redirection state owner behind the damage transaction",
+      "quorune/damage_prevention_creation.py": "typed prevention-shield creation validation and authoritative commit owner",
+      "quorune/damage_results.py": "typed CR 120.3 result-event preparation, validation, and atomic mutation owner behind the damage coordinator",
+      "quorune/destruction.py": "typed permanent-destruction preflight and authoritative commit owner",
+      "quorune/counter_state.py": "canonical typed player and permanent counter mutation owner behind represented rules transactions",
+      "quorune/life_change.py": "replacement-capable typed life-event transaction owner behind represented rules transactions",
+      "quorune/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
+      "quorune/continuous_effect_state.py": "typed resolution-created continuous-effect journal and cleanup-expiration mutation owner",
+      "quorune/attachments.py": "typed reciprocal attachment relation and transition owner",
+      "quorune/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
+      "quorune/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
+      "quorune/permanent_exile.py": "typed identity-pinned permanent-exile transaction delegating mutation to the canonical zone-change owner",
+      "quorune/return_to_hand.py": "typed identity-pinned permanent-return transaction delegating mutation to the canonical zone-change owner",
+      "quorune/stack_counter.py": "typed stack-counter legality, removal, ordinary spell destination, telemetry, and public journal owner",
+      "quorune/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine",
+      "quorune/trigger_discovery.py": "normalized semantic trigger detection and immutable ordinary occurrence construction behind CommanderEngine"
+      ,"quorune/mana_activation.py": "activated mana ability and reversible activation transaction owner"
+      ,"quorune/semantic_choices/intent_host.py": "typed semantic-choice intent application behind the immutable choice registry"
+      ,"quorune/effect_runtime/state_and_permissions.py": "registry-owned state and permission effect family"
+      ,"quorune/effect_runtime/zones_and_attachments.py": "registry-owned zone and attachment effect family"
+      ,"quorune/effect_runtime/damage_life_and_turns.py": "registry-owned damage and turn effect family"
+      ,"quorune/effect_runtime/damage_modifiers.py": "registry-owned prevention-shield and redirection creation family"
+      ,"quorune/effect_runtime/objects_stack_and_tokens.py": "registry-owned object, stack, and token effect family"
+      ,"quorune/rules/casting/commit.py": "typed spell-casting transaction owner behind CommanderEngine"
+      ,"quorune/rules/activation/commit.py": "typed activated-ability transaction owner behind CommanderEngine"
+      ,"quorune/drawing/transaction.py": "canonical replacement-aware draw mutation owner behind CommanderEngine"
+      ,"quorune/combat_relationship_state.py": "typed combat participation and relationship mutation owner behind CommanderEngine"
     },
     "read_only_consumers": {
-      "mtg_commander_sim/projection.py": "principal-scoped projection",
-      "mtg_commander_sim/__init__.py": "public type re-export",
-      "mtg_commander_sim/replacement_decisions.py": "replacement continuation validation and stack lookup",
-      "mtg_commander_sim/aura/decisions.py": "seat-scoped Aura-entry continuation validation and resolution routing",
-      "mtg_commander_sim/aura/runtime.py": "read-only Aura legality and entry planner delegating attachment mutation to the canonical owner",
-      "mtg_commander_sim/record_decks.py": "read-only exact deck-list provenance hashing",
-      "mtg_commander_sim/state_based_actions.py": "pure state-based action detection over an authoritative snapshot",
-      "mtg_commander_sim/state_based_execution.py": "typed state-based execution planner delegating mutation to canonical destruction and zone owners",
-      "mtg_commander_sim/semantic_runtime/zone_replacements.py": "read-only replacement-source discovery and event identity"
-      ,"mtg_commander_sim/semantic_choices/engine_coordination.py": "actor-scoped immutable choice fact materialization and routing"
-      ,"mtg_commander_sim/mana_undo.py": "read-only reversible mana-window validation with commits delegated to canonical owners"
-      ,"mtg_commander_sim/object_query.py": "typed read-only object selection predicates"
-      ,"mtg_commander_sim/zone_trigger_events.py": "immutable normalized CR 603.6 zone-change occurrence and event derivation"
-      ,"mtg_commander_sim/zone_trigger_processing.py": "read-only zone-trigger detection coordinator delegating placement and mutation to canonical owners"
-      ,"mtg_commander_sim/damage_prevention_aftermath.py": "typed prevention-aftermath planner delegating mutation to canonical life and counter owners"
-      ,"mtg_commander_sim/mana_mode_effects.py": "typed mana-mode side-effect coordinator delegating to canonical damage, life, and zone owners"
-      ,"mtg_commander_sim/mana_payment_continuations.py": "atomic mana-payment suspension coordinator"
-      ,"mtg_commander_sim/effect_runtime/life_effects.py": "registry-owned life-effect planner delegating mutation to the canonical life owner"
-      ,"mtg_commander_sim/rules/action_catalog.py": "read-only executable action-offer catalog"
-      ,"mtg_commander_sim/rules/action_explanations.py": "principal-scoped read-only unavailable-action explanations"
-      ,"mtg_commander_sim/rules/casting/costs.py": "read-only casting-cost proposal query"
-      ,"mtg_commander_sim/rules/casting/proposal.py": "read-only immutable casting proposal query"
-      ,"mtg_commander_sim/rules/activation/availability.py": "read-only activation payability query"
-      ,"mtg_commander_sim/rules/activation/conditions.py": "read-only closed activation-condition query"
-      ,"mtg_commander_sim/rules/activation/proposal.py": "read-only immutable activation proposal query"
-      ,"mtg_commander_sim/rules/activation/query.py": "read-only activated-ability compiler query"
-      ,"mtg_commander_sim/drawing/coordinator.py": "replacement-aware draw orchestration delegating mutation to the canonical draw owner"
-      ,"mtg_commander_sim/semantic_runtime/draw_replacements.py": "read-only trusted draw-replacement discovery and lowering"
-      ,"mtg_commander_sim/combat_damage_engine_adapter.py": "narrow read-only CommanderEngine compatibility query for immutable combat-damage snapshots"
-      ,"mtg_commander_sim/attack_transition_engine_adapter.py": "narrow read-only CommanderEngine compatibility query and trigger coordinator for immutable completed attack transitions"
-      ,"mtg_commander_sim/attack_transition_resolution.py": "read-only attack-trigger result coordinator delegating mutation to the canonical continuous-effect owner"
+      "quorune/projection.py": "principal-scoped projection",
+      "quorune/__init__.py": "public type re-export",
+      "quorune/replacement_decisions.py": "replacement continuation validation and stack lookup",
+      "quorune/aura/decisions.py": "seat-scoped Aura-entry continuation validation and resolution routing",
+      "quorune/aura/runtime.py": "read-only Aura legality and entry planner delegating attachment mutation to the canonical owner",
+      "quorune/record_decks.py": "read-only exact deck-list provenance hashing",
+      "quorune/state_based_actions.py": "pure state-based action detection over an authoritative snapshot",
+      "quorune/state_based_execution.py": "typed state-based execution planner delegating mutation to canonical destruction and zone owners",
+      "quorune/semantic_runtime/zone_replacements.py": "read-only replacement-source discovery and event identity"
+      ,"quorune/semantic_choices/engine_coordination.py": "actor-scoped immutable choice fact materialization and routing"
+      ,"quorune/mana_undo.py": "read-only reversible mana-window validation with commits delegated to canonical owners"
+      ,"quorune/object_query.py": "typed read-only object selection predicates"
+      ,"quorune/zone_trigger_events.py": "immutable normalized CR 603.6 zone-change occurrence and event derivation"
+      ,"quorune/zone_trigger_processing.py": "read-only zone-trigger detection coordinator delegating placement and mutation to canonical owners"
+      ,"quorune/damage_prevention_aftermath.py": "typed prevention-aftermath planner delegating mutation to canonical life and counter owners"
+      ,"quorune/mana_mode_effects.py": "typed mana-mode side-effect coordinator delegating to canonical damage, life, and zone owners"
+      ,"quorune/mana_payment_continuations.py": "atomic mana-payment suspension coordinator"
+      ,"quorune/effect_runtime/life_effects.py": "registry-owned life-effect planner delegating mutation to the canonical life owner"
+      ,"quorune/rules/action_catalog.py": "read-only executable action-offer catalog"
+      ,"quorune/rules/action_explanations.py": "principal-scoped read-only unavailable-action explanations"
+      ,"quorune/rules/casting/costs.py": "read-only casting-cost proposal query"
+      ,"quorune/rules/casting/proposal.py": "read-only immutable casting proposal query"
+      ,"quorune/rules/activation/availability.py": "read-only activation payability query"
+      ,"quorune/rules/activation/conditions.py": "read-only closed activation-condition query"
+      ,"quorune/rules/activation/proposal.py": "read-only immutable activation proposal query"
+      ,"quorune/rules/activation/query.py": "read-only activated-ability compiler query"
+      ,"quorune/drawing/coordinator.py": "replacement-aware draw orchestration delegating mutation to the canonical draw owner"
+      ,"quorune/semantic_runtime/draw_replacements.py": "read-only trusted draw-replacement discovery and lowering"
+      ,"quorune/combat_damage_engine_adapter.py": "narrow read-only CommanderEngine compatibility query for immutable combat-damage snapshots"
+      ,"quorune/attack_transition_engine_adapter.py": "narrow read-only CommanderEngine compatibility query and trigger coordinator for immutable completed attack transitions"
+      ,"quorune/attack_transition_resolution.py": "read-only attack-trigger result coordinator delegating mutation to the canonical continuous-effect owner"
     },
-    "model_definition": "mtg_commander_sim/model.py"
+    "model_definition": "quorune/model.py"
   },
   "specificity_scope": "all_generic_production_python",
   "specificity_exempt_prefixes": [
-    "mtg_commander_sim/card_overrides/"
+    "quorune/card_overrides/"
   ],
   "review_thresholds": {
     "module_logical_lines": 1500,
