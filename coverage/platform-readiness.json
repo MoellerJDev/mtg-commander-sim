@@ -9,6 +9,7 @@
     "ordinary printed Exalted, Battle Cry, and Melee now consume one immutable completed attack transition, ordinary APNAP trigger placement, and the canonical identity-pinned layer 7c until-end-of-turn owner; conditional, granted, copied, face-down, put-attacking, trigger-doubling, and broader attack-trigger variants remain explicit residuals, so none of the aggregate mechanics is trusted",
     "fixed ordinary-mana Cycling now consumes one source-pinned hand-only activation, canonical mana payment, exact source discard cost, ordinary stack placement, and iterative replacement-aware draw transaction; variable, hybrid, Phyrexian, snow, and nonmana costs, typecycling, Cycling triggers, modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone activated-ability inspection remain explicit blockers, so the aggregate mechanic is not trusted",
     "direct-target return-to-owner-hand effects now consume one identity-pinned preflight and the canonical replacement-aware zone-change owner with seat-scoped hidden-hand projection; graveyard recursion, reanimation, mass, multi-target, optional, modal, conditional, qualified, linked-result, cost, self-return, controller-hand, and compound forms remain explicit blockers, so the aggregate return family is not trusted",
+    "mandatory direct-target permanent exile now consumes one identity-pinned preflight and the canonical replacement-aware zone-change owner with public multiplayer projection; temporary, linked, face-down, mass, multi-target, optional, modal, conditional, qualified, cost, nonbattlefield, play-permission, and compound forms remain explicit blockers, so the aggregate exile mechanic is not trusted",
     "mandatory direct-target tap and untap clauses now share one source-pinned typed compiler template across spell, trigger, and activated contexts and consume canonical target revalidation, tap-state mutation, stun replacement, and replay owners; optional, modal, aggregate, quantified, relational, qualified, compound, cost, untap-step, prohibition, and wider replacement forms remain explicit residuals, so the aggregate Tap and Untap mechanic is not trusted",
     "mandatory direct-target permanent destruction now shares one source-pinned typed compiler template and one preflighted destruction transaction across spell, trigger, activated, legacy effect, and state-based producers; regeneration, can't-be-regenerated, optional, modal, aggregate, qualified, compound, and unsupported continuous, copy, and replacement interactions remain explicit residuals, so the aggregate destruction mechanic is not trusted",
     "generic face-pinned First Strike and Double Strike now close the represented strike-step participation capability and harvest its sole-blocker cards, but the aggregate mechanics remain partial while ability-changing, copy, face-down, additional-combat or damage-step, and other unsupported participation producers remain reachable",
@@ -31,14 +32,18 @@
     "current_merged_main_git_sha": null,
     "current_runtime_git_sha": null,
     "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "459b2c4f5b143e5f1b3d407b8e35ce2329fb860624b11060a645282d7f8cdb29",
+    "evaluated_source_tree_hash": "e5b0c9a28e26e90b26cb7c7c84b63dddafd2f1a3e00f0f27481d6e0ca6f63fb4",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
   },
   "integration": {
-    "active_phase": null,
+    "active_phase": {
+      "head": "compiler/generic-exile-target-effect-clauses",
+      "id": "typed_permanent_exile_and_direct_target_harvest",
+      "pull_request": 127
+    },
     "tags": [
       {
         "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
@@ -346,9 +351,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "The current feature head introduces one immutable physical/logical-identity return request, preflight plan, and result owner for a phased-in battlefield permanent. It snapshots physical owner and current controller, rejects stale identity or control before mutation, and delegates the requested move to the canonical replacement-aware zone-change owner while preserving the actual replacement destination and seat-scoped hidden-hand projection. One closed source-spanned compiler template covers mandatory direct-target artifact, creature, enchantment, land, nonland permanent, permanent, artifact-or-enchantment, and creature-or-planeswalker returns across spell, trigger, and activated contexts without runtime Oracle parsing or card identity behavior. Oracle IR v40 promotes 18 Commander cards to exact, trusted, capability-closed, reduces partial cards by 11 and unresolved cards by 7, and removes 50 material residuals with zero construction failures. CommanderEngine shrinks by 11 logical lines and direct writes remain flat. Local validation is limited to changed-module compilation, pinned deterministic generators, and static freshness checks; behavioral certification is delegated to public exact-head CI. Graveyard recursion, reanimation, mass, multi-target, optional, modal, conditional, qualified, linked-result, cost, self-return, controller-hand, and compound forms remain explicit residuals.",
+      "evidence": "PR 126 introduces one immutable physical/logical-identity return request, preflight plan, and result owner for a phased-in battlefield permanent. It snapshots physical owner and current controller, rejects stale identity or control before mutation, and delegates the requested move to the canonical replacement-aware zone-change owner while preserving the actual replacement destination and seat-scoped hidden-hand projection. One closed source-spanned compiler template covers mandatory direct-target artifact, creature, enchantment, land, nonland permanent, permanent, artifact-or-enchantment, and creature-or-planeswalker returns across spell, trigger, and activated contexts without runtime Oracle parsing or card identity behavior. Oracle IR v40 promotes 18 Commander cards to exact, trusted, capability-closed, reduces partial cards by 11 and unresolved cards by 7, and removes 50 material residuals with zero construction failures. CommanderEngine shrinks by 11 logical lines and direct writes remain flat. Exact-head run 31164340735 passed every required Python, replay, privacy, multiplayer, mutation, package, Windows, generated, and headless-browser job; squash commit 98cc889801a361921bb10a7f4c7051fa6a8585ad is on main. Graveyard recursion, reanimation, mass, multi-target, optional, modal, conditional, qualified, linked-result, cost, self-return, controller-hand, and compound forms remain explicit residuals.",
       "id": "targeted_return_to_owner_hand_harvest",
       "name": "Typed return-to-owner-hand transaction and direct-target clauses",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "The current feature head introduces one immutable physical/logical-identity exile request, preflight plan, and typed result owner for a phased-in battlefield permanent. It snapshots owner and current controller, rejects stale identity, control, zone, or phasing before mutation, and delegates the requested move to the canonical replacement-aware zone-change owner while preserving the actual replacement destination and public multiplayer projection. One closed source-spanned compiler template covers mandatory direct-target artifact, creature, enchantment, land, nonland permanent, permanent, artifact-or-enchantment, and creature-or-planeswalker exile across spell, trigger, and activated contexts without runtime Oracle parsing or card identity behavior. Oracle IR v41 promotes 20 Commander cards to exact, trusted, capability-closed, reduces partial cards by 14 and unresolved cards by 6, and removes 47 material residuals with zero construction failures. CommanderEngine and direct writes remain flat while the generic printed-name specificity heuristic decreases by two. Local validation is limited to changed-module compilation, pinned deterministic generators, architecture/documentation checks, and static freshness; behavioral certification is delegated to public exact-head CI. Temporary, linked, face-down, mass, multi-target, optional, modal, conditional, qualified, cost, nonbattlefield, play-permission, and compound forms remain explicit residuals.",
+      "id": "targeted_permanent_exile_harvest",
+      "name": "Typed permanent-exile transaction and direct-target clauses",
       "status": "implemented_at_feature_head"
     },
     {
@@ -375,7 +386,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v46_with_75_records_67_trusted_and_663_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "capability_evidence": "implemented_registry_v47_with_83_records_68_trusted_and_675_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -386,15 +397,15 @@
     "reusable_piece_inventory": "implemented_versioned_generated_matrix_card_index_interaction_index_complex_card_benchmark_durable_baseline_delta_and_cli_with_zero_unclassified_material_spans",
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "security": "guest_hash_csrf_origin_capability_and_projection_baseline",
-    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus bounded runtime components and closed effect-runtime families with strict binding and focused tap token counter destruction return_to_hand damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger attack_transition_keyword_trigger fixed_mana_ability color_set_mana_ability ordinary_cycling_ability and cast_permission owners",
+    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus bounded runtime components and closed effect-runtime families with strict binding and focused tap token counter destruction permanent_exile return_to_hand damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger attack_transition_keyword_trigger fixed_mana_ability color_set_mana_ability ordinary_cycling_ability and cast_permission owners",
     "single_writer_game_actor": "implemented_single_process",
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
     "certified_head_classification": "current_main_tree_equivalent",
-    "certified_head_sha": "7fc841330f8aa2b3cc845502c187183fc91ae35e",
+    "certified_head_sha": "5459890c69e4ef09c1cfbf9f87f2bb5b0b6c3013",
     "feature_head_classification": "active_candidate",
-    "feature_head_sha": "db43690509fa17b4a2bc1071a6559e04a1beb8bc",
+    "feature_head_sha": "ec40701e1545734ac45dd6ba03f1657b1803422a",
     "generation_timestamp": "2026-08-07T07:48:44Z"
   },
   "repository": {
@@ -404,11 +415,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 47957,
+      "material_residuals": 47910,
       "status_counts": {
-        "exact": 2036,
-        "partial": 13199,
-        "unresolved": 16388
+        "exact": 2056,
+        "partial": 13185,
+        "unresolved": 16382
       },
       "total": 31623
     },
@@ -426,11 +437,11 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 55547,
+      "material_residuals": 55498,
       "status_counts": {
-        "exact": 4974,
-        "partial": 14322,
-        "unresolved": 19246
+        "exact": 4994,
+        "partial": 14308,
+        "unresolved": 19240
       },
       "total": 38542
     },
@@ -464,7 +475,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5124,
+    "deterministic_cases_discovered": 5138,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -474,39 +485,39 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 47957,
+        "material_residuals": 47910,
         "status_counts": {
-          "residual": 29587,
-          "trusted": 2036
+          "residual": 29567,
+          "trusted": 2056
         },
         "trust_basis_counts": {
-          "capability_closed": 2032,
+          "capability_closed": 2052,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 29587
+          "unresolved": 29567
         }
       },
       "full": {
         "cards_considered": 38542,
-        "material_residuals": 55543,
+        "material_residuals": 55494,
         "status_counts": {
           "failed": 2248,
-          "residual": 33565,
-          "trusted": 2729
+          "residual": 33545,
+          "trusted": 2749
         },
         "trust_basis_counts": {
-          "capability_closed": 2725,
+          "capability_closed": 2745,
           "legacy_reviewed": 3,
           "mixed": 1,
-          "unresolved": 33565
+          "unresolved": 33545
         }
       }
     },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31155294600,
+      "run_id": 31164340735,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31155294600"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31164340735"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -514,9 +525,9 @@
       "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_pr125_exact_head_31155294600_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; certified exact head is tree-equivalent to current squash-merged main",
+      "deterministic_tests": "certified_pr126_exact_head_31164340735_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; certified exact head is tree-equivalent to current squash-merged main",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
-      "focused_rules_tests": "targeted_return_changed_modules_compile_pinned_corpus_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; focused_and_broad regression_replay_privacy_multiplayer_mutation_package_and_browser_validation_deferred_to_public_exact_head_ci_by_repository_policy",
+      "focused_rules_tests": "targeted_exile_changed_modules_compile_pinned_corpus_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; focused_and_broad regression_replay_privacy_multiplayer_mutation_package_and_browser_validation_deferred_to_public_exact_head_ci_by_repository_policy",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

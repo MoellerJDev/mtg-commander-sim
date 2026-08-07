@@ -77,6 +77,7 @@ VALID_EFFECT_OPERATIONS = {
     "fabricate",
     "energy",
     "exile",
+    "exile_permanent",
     "exile_all",
     "exile_graveyard",
     "exile_opponent_graveyards",

@@ -40,6 +40,7 @@
       "test_draw_transaction_model",
       "test_life_change",
       "test_life_effect_runtime",
+      "test_permanent_exile_rules",
       "test_prevention_immediate_sequencing",
       "test_prevention_trigger_stack",
       "test_replacement_event_ordering",
@@ -168,6 +169,7 @@
       "test_preflight_v080",
       "test_rule_capabilities",
       "test_targeted_destruction_effect_clauses",
+      "test_targeted_exile_effect_clauses",
       "test_targeted_return_to_hand_effect_clauses",
       "test_targeted_tap_state_effect_clauses"
     ],

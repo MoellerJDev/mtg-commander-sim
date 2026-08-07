@@ -3,8 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
 
-from .. import destruction, return_to_hand, tap_state
+from .. import destruction, permanent_exile, return_to_hand, tap_state
 from ..destruction import DestructionHost
+from ..permanent_exile import PermanentExileHost
 from ..return_to_hand import ReturnToHandHost
 from ..tap_state import TapStateHost
 from .context import SemanticNodeError
@@ -23,6 +24,7 @@ from .intents import (
     DrawCardsIntent,
     IntentPlan,
     EliminatePlayersIntent,
+    ExilePermanentIntent,
     LifeChangeIntent,
     MoveObjectsSimultaneouslyIntent,
     MoveLibraryCardsToBottomIntent,
@@ -48,6 +50,7 @@ from .intents import (
 class SemanticIntentSink(
     TapStateHost,
     DestructionHost,
+    PermanentExileHost,
     ReturnToHandHost,
     Protocol,
 ):
@@ -212,7 +215,14 @@ def prepare_draw_resolution(
 
 
 PermanentTransitionIntent = (
-    DestroyPermanentIntent | ReturnPermanentToOwnerHandIntent
+    DestroyPermanentIntent
+    | ExilePermanentIntent
+    | ReturnPermanentToOwnerHandIntent
+)
+PERMANENT_TRANSITION_INTENT_TYPES = (
+    DestroyPermanentIntent,
+    ExilePermanentIntent,
+    ReturnPermanentToOwnerHandIntent,
 )
 
 
@@ -224,6 +234,14 @@ def _execute_permanent_transition_intent(
         return destruction.destroy_permanent_refs(
             sink,
             (intent.object_ref,),
+            actor=intent.actor,
+            reason=intent.reason,
+            replacement_selections=intent.replacement_selections,
+        )
+    if isinstance(intent, ExilePermanentIntent):
+        return permanent_exile.exile_permanent(
+            sink,
+            intent.object_ref,
             actor=intent.actor,
             reason=intent.reason,
             replacement_selections=intent.replacement_selections,
@@ -270,10 +288,7 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
             )
             results.append(("creatures", result))
             continue
-        if isinstance(
-            intent,
-            (DestroyPermanentIntent, ReturnPermanentToOwnerHandIntent),
-        ):
+        if isinstance(intent, PERMANENT_TRANSITION_INTENT_TYPES):
             result = _execute_permanent_transition_intent(sink, intent)
             results.append((intent.object_ref, result))
             continue

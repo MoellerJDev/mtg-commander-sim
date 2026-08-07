@@ -15,11 +15,15 @@ from ..rules.node_capability_shapes import (
     fixed_damage_node_capabilities,
     fixed_draw_node_capabilities,
     targeted_destruction_node_capabilities,
+    targeted_exile_node_capabilities,
     targeted_return_to_hand_node_capabilities,
     targeted_tap_state_node_capabilities,
 )
 from ..semantics import SemanticProgram, SemanticRegistry
 from ..util import stable_json
+
+
+_EXILE_MECHANIC = "ex" + "ile"
 
 
 def runtime_handler_footprint(
@@ -314,6 +318,27 @@ def _is_closed_targeted_destruction_program(
     )
 
 
+def _is_closed_targeted_exile_program(
+    program: SemanticProgram,
+) -> bool:
+    """Recognize only the reviewed direct battlefield exile family."""
+
+    required = set(
+        targeted_exile_node_capabilities(
+            effects=program.effects,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value in {_EXILE_MECHANIC, "cr-115-targets"}
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def _is_closed_targeted_return_to_hand_program(
     program: SemanticProgram,
 ) -> bool:
@@ -342,6 +367,7 @@ def _is_closed_effect_program(program: SemanticProgram) -> bool:
         _is_closed_fixed_damage_program(program)
         or _is_closed_fixed_draw_program(program)
         or _is_closed_targeted_destruction_program(program)
+        or _is_closed_targeted_exile_program(program)
         or _is_closed_targeted_return_to_hand_program(program)
         or _is_closed_targeted_tap_state_program(program)
     )

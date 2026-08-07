@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "9d4278417f57290e8f05ef2fcd949da19fbdfec3",
+  "baseline_commit": "9a1819822d505d07266b1989a3c93ad463bd7aed",
   "card_named_helpers": [
     {
       "file": "mtg_commander_sim/engine.py",
@@ -2281,9 +2281,9 @@
     "physical_lines": 13226
   },
   "exception_binding": {
-    "adr": "docs/adr/0028-typed-return-to-owner-hand.md",
-    "allowance_fingerprint": "51ed7fa14113122d2c724026093616395ea7f4f6aabcc79fc40fbe9ec3052d0b",
-    "exception_id": "ARCH-EXC-0010"
+    "adr": "docs/adr/0029-typed-permanent-exile.md",
+    "allowance_fingerprint": "eccfcd08044a84e72d3b7643f666d501f2b9a83a6b4219c48b457602819686c0",
+    "exception_id": "ARCH-EXC-0011"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2457,7 +2457,7 @@
     },
     {
       "file": "mtg_commander_sim/oracle_ir.py",
-      "logical_lines": 370,
+      "logical_lines": 351,
       "symbol": "_effect_template"
     },
     {
@@ -2600,6 +2600,7 @@
     "exile_all",
     "exile_graveyard",
     "exile_opponent_graveyards",
+    "exile_permanent",
     "explore",
     "extra_turn",
     "fabricate",

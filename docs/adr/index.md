@@ -43,3 +43,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0026 — source-pinned targeted tap-state clauses](0026-source-pinned-targeted-tap-state-clauses.md)
 - [ADR 0027 — typed permanent-destruction transaction](0027-typed-permanent-destruction.md)
 - [ADR 0028 — typed return-to-owner-hand transaction](0028-typed-return-to-owner-hand.md)
+- [ADR 0029 — typed permanent-exile transaction](0029-typed-permanent-exile.md)

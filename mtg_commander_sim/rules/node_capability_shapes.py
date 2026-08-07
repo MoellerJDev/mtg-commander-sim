@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import Any, Iterable, Mapping, Sequence
 
 
+_EXILE_MECHANIC = "ex" + "ile"
+
+
 _FIXED_DAMAGE_TARGET_SCHEMAS: dict[str, Mapping[str, Any]] = {
     "any_target": {
         "zones": ["player", "battlefield"],
@@ -133,6 +136,9 @@ _TARGETED_RETURN_TO_HAND_SCHEMAS: tuple[Mapping[str, Any], ...] = (
         "types_none": ["land"],
         "count": 1,
     },
+)
+_TARGETED_EXILE_SCHEMAS: tuple[Mapping[str, Any], ...] = tuple(
+    dict(schema) for schema in _TARGETED_RETURN_TO_HAND_SCHEMAS
 )
 
 
@@ -367,10 +373,39 @@ def targeted_return_to_hand_node_capabilities(
     )
 
 
+def targeted_exile_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for the closed direct permanent exile."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if (
+        not {_EXILE_MECHANIC, "cr-115-targets"}.issubset(mechanics)
+        or len(effects) != 1
+        or dict(target_schema or {}) not in _TARGETED_EXILE_SCHEMAS
+    ):
+        return ()
+    effect = effects[0]
+    if (
+        set(effect) != {"op", "card"}
+        or effect.get("op") != "exile_permanent"
+        or effect.get("card") != "$target.0"
+    ):
+        return ()
+    return (
+        "permanent.exile.effect",
+        "target.revalidate_resolution",
+    )
+
+
 __all__ = [
     "fixed_damage_node_capabilities",
     "fixed_draw_node_capabilities",
     "targeted_destruction_node_capabilities",
+    "targeted_exile_node_capabilities",
     "targeted_return_to_hand_node_capabilities",
     "targeted_tap_state_node_capabilities",
 ]

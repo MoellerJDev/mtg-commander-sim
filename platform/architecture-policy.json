@@ -51,6 +51,7 @@
     "mtg_commander_sim/menace.py",
     "mtg_commander_sim/model.py",
     "mtg_commander_sim/oracle_ir.py",
+    "mtg_commander_sim/permanent_exile.py",
     "mtg_commander_sim/permissions.py",
     "mtg_commander_sim/protection.py",
     "mtg_commander_sim/replacement_decisions.py",
@@ -160,6 +161,7 @@
       "mtg_commander_sim/attachments.py": "typed reciprocal attachment relation and transition owner",
       "mtg_commander_sim/tap_state.py": "typed tap-state effect mutation owner behind the semantic intent executor",
       "mtg_commander_sim/token_creation.py": "typed token-creation and replacement mutation owner behind CommanderEngine",
+      "mtg_commander_sim/permanent_exile.py": "typed identity-pinned permanent-exile transaction delegating mutation to the canonical zone-change owner",
       "mtg_commander_sim/return_to_hand.py": "typed identity-pinned permanent-return transaction delegating mutation to the canonical zone-change owner",
       "mtg_commander_sim/trigger_processing.py": "typed CR 603.3 occurrence batching, APNAP placement, stack commit, and historical continuation owner behind CommanderEngine",
       "mtg_commander_sim/trigger_discovery.py": "normalized semantic trigger detection and immutable ordinary occurrence construction behind CommanderEngine"

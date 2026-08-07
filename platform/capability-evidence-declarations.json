@@ -5137,6 +5137,102 @@
       "applicability_note": "Validate the complete prepared destruction batch before moving a permanent or removing a shield counter."
     },
     {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_exile_destination_replacement_preserves_typed_result",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Commit the exile request through the canonical zone-change replacement boundary and report the actual replaced destination."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_indestructible_and_shield_do_not_prevent_exile",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Prove that destruction-only Indestructible and shield-counter rules do not replace or prohibit ordinary exile."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_compiled_exile_is_multiplayer_public_and_replays",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Advertise, submit, and resolve one compiled direct-target permanent exile in a four-seat game."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_permanent_exile_transaction_mutant_is_killed",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill removal of the physical/logical identity and controller staleness guard before the zone-change commit."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_exile_phased_and_stale_permanents_fail_before_mutation",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject phased-out and stale permanent identities before any authoritative zone mutation."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_exile_effect_clauses.TargetedExileCompilerTests.test_targeted_exile_shape_mutants_fail_closed",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject altered operations, target references, schemas, and missing mechanic ownership before capability promotion."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_exile_effect_clauses.TargetedExileCompilerTests.test_unsupported_exile_variants_remain_material_residuals",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep optional, qualified, aggregate, hidden-zone, linked, temporary, and compound exile wording outside the bounded family."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_control_changed_permanent_exiles_to_owner_public_zone",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Move a permanent controlled by another seat into its physical owner's public exile zone and create a new logical object."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_exile_effect_clauses.TargetedExileCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_exile_lowering",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower the same direct-target permanent-exile instruction in spell, trigger, and activated contexts with precise source spans."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_compiled_exile_is_multiplayer_public_and_replays",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project only public battlefield and face-up exile references while withholding unrelated hidden-zone identities."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_compiled_exile_is_multiplayer_public_and_replays",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the advertised target, paid spell, exile request, public zone result, and final state hash exactly."
+    },
+    {
+      "capability_id": "permanent.exile.effect",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_exile_phased_and_stale_permanents_fail_before_mutation",
+      "official_rule_ids": ["400.2", "400.7", "406.1", "406.2", "608.2c", "701.13", "701.13a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Validate the complete prepared identity and control snapshot before entering the canonical zone-change transaction."
+    },
+    {
       "capability_id": "permanent.return.owner_hand",
       "evidence_class": "interaction",
       "test_id": "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_destination_replacement_preserves_typed_result",

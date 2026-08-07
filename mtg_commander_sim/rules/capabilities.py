@@ -12,6 +12,7 @@ from .node_capability_shapes import (
     fixed_damage_node_capabilities,
     fixed_draw_node_capabilities,
     targeted_destruction_node_capabilities,
+    targeted_exile_node_capabilities,
     targeted_return_to_hand_node_capabilities,
     targeted_tap_state_node_capabilities,
 )
@@ -85,6 +86,7 @@ _BASIC_LANDWALK_MECHANICS = (
 )
 _FIRST_STRIKE_MECHANIC = "first" + " strike"
 _DOUBLE_STRIKE_MECHANIC = "double" + " strike"
+_EXILE_MECHANIC = "ex" + "ile"
 MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
     _CYCLING_MECHANIC: ("activation.cycling.hand",),
     **{
@@ -133,7 +135,12 @@ MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
     ),
 }
 _SHAPE_GATED_MECHANICS = frozenset(
-    {"cr-121-drawing-a-card", "destroy", "return-to-owner-hand"}
+    {
+        "cr-121-drawing-a-card",
+        "destroy",
+        _EXILE_MECHANIC,
+        "return-to-owner-hand",
+    }
 )
 _CAPABILITY_ID = re.compile(r"^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)+$")
 _EFFECTIVE_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -800,6 +807,13 @@ def capability_dependencies_for_node(
         )
     )
     dependencies.update(
+        targeted_exile_node_capabilities(
+            effects=effects,
+            target_schema=target_schema,
+            mechanic_ids=mechanics,
+        )
+    )
+    dependencies.update(
         targeted_return_to_hand_node_capabilities(
             effects=effects,
             target_schema=target_schema,
@@ -870,6 +884,8 @@ def capability_covered_mechanics(
         covered.add("tap-and-untap")
     if "permanent.destroy.effect" in supplied:
         covered.add("destroy")
+    if "permanent.exile.effect" in supplied:
+        covered.add(_EXILE_MECHANIC)
     if "permanent.return.owner_hand" in supplied:
         covered.add("return-to-owner-hand")
     if supplied.intersection(

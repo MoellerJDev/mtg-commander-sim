@@ -11,6 +11,32 @@ from ..drawing.model import (
 from ..replacement.immutable import FrozenMap, freeze_value
 
 
+def _freeze_replacement_selections(
+    values: tuple[str | FrozenMap, ...],
+    *,
+    family: str,
+) -> tuple[str | FrozenMap, ...]:
+    frozen: list[str | FrozenMap] = []
+    for index, value in enumerate(values):
+        if isinstance(value, str):
+            if not value:
+                raise ValueError(
+                    f"{family} replacement selections must be nonempty"
+                )
+            frozen.append(value)
+            continue
+        result = freeze_value(
+            value,
+            field=f"replacement_selections[{index}]",
+        )
+        if not isinstance(result, FrozenMap):
+            raise ValueError(
+                f"{family} replacement selections must be objects"
+            )
+        frozen.append(result)
+    return tuple(frozen)
+
+
 @dataclass(frozen=True, slots=True)
 class DrawCardsIntent:
     player: str
@@ -65,25 +91,14 @@ class DestroyPermanentIntent:
             raise ValueError(
                 "Destruction intents require actor, object, and reason"
             )
-        frozen: list[str | FrozenMap] = []
-        for index, value in enumerate(self.replacement_selections):
-            if isinstance(value, str):
-                if not value:
-                    raise ValueError(
-                        "Destruction replacement selections must be nonempty"
-                    )
-                frozen.append(value)
-                continue
-            result = freeze_value(
-                value,
-                field=f"replacement_selections[{index}]",
-            )
-            if not isinstance(result, FrozenMap):
-                raise ValueError(
-                    "Destruction replacement selections must be objects"
-                )
-            frozen.append(result)
-        object.__setattr__(self, "replacement_selections", tuple(frozen))
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                self.replacement_selections,
+                family="Destruction",
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,25 +113,36 @@ class ReturnPermanentToOwnerHandIntent:
             raise ValueError(
                 "Return intents require actor, object, and reason"
             )
-        frozen: list[str | FrozenMap] = []
-        for index, value in enumerate(self.replacement_selections):
-            if isinstance(value, str):
-                if not value:
-                    raise ValueError(
-                        "Return replacement selections must be nonempty"
-                    )
-                frozen.append(value)
-                continue
-            result = freeze_value(
-                value,
-                field=f"replacement_selections[{index}]",
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                self.replacement_selections,
+                family="return-to-owner-hand",
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class ExilePermanentIntent:
+    actor: str
+    object_ref: str
+    reason: str
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not all((self.actor, self.object_ref, self.reason)):
+            raise ValueError(
+                "Permanent-exile intents require actor, object, and reason"
             )
-            if not isinstance(result, FrozenMap):
-                raise ValueError(
-                    "Return replacement selections must be objects"
-                )
-            frozen.append(result)
-        object.__setattr__(self, "replacement_selections", tuple(frozen))
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                self.replacement_selections,
+                family="Permanent-exile",
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -451,6 +477,7 @@ SemanticIntent: TypeAlias = (
     | UntapAllCreaturesIntent
     | DestroyPermanentIntent
     | ReturnPermanentToOwnerHandIntent
+    | ExilePermanentIntent
     | AddManaIntent
     | SetCardDesignationIntent
     | RecordChoiceIntent
