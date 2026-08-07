@@ -202,7 +202,7 @@
     {
       "mechanic_id": "cr-406-exile",
       "path": "mechanics/contracts/exile.json",
-      "sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
+      "sha256": "dc4b5009a4dd0a1899c53abc0f67c7dfacf8f30db258441cee0815ceb8f6f3c7",
       "version": 1
     },
     {
@@ -6973,12 +6973,12 @@
     {
       "category": "zones",
       "contract_path": "mechanics/contracts/exile.json",
-      "contract_sha256": "b14115d08b3ba68d0120dbc44d825ced9b19810582a7dd9a59e118c29af82fee",
+      "contract_sha256": "dc4b5009a4dd0a1899c53abc0f67c7dfacf8f30db258441cee0815ceb8f6f3c7",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine exile movement, stack removal, logical incarnations, scoped play permissions and targets; StateProjector public/face-down exile projection",
-      "implementation_version": "exile-foundation-v1",
+      "implementation_component": "Typed direct-target permanent-exile compiler, semantic handler, identity-pinned transaction, and canonical zone-change owner; CommanderEngine broad exile movement, stack removal, logical incarnations, and scoped play permissions; StateProjector public/face-down exile projection",
+      "implementation_version": "exile-foundation-v2",
       "kind": "rules_section",
       "known_blockers": [
         "generic exile-face-down instruction and persistent look authorization are missing",
@@ -7002,6 +7002,12 @@
         "test_face_down_exile_piles_and_random_selection_are_not_represented",
         "test_reexiling_creates_a_new_object_and_moves_it_to_exile_top",
         "test_pinned_oracle_data_uses_exile_not_legacy_removed_terms",
+        "test_spell_trigger_and_activated_contexts_share_targeted_exile_lowering",
+        "test_control_changed_permanent_exiles_to_owner_public_zone",
+        "test_exile_destination_replacement_preserves_typed_result",
+        "test_indestructible_and_shield_do_not_prevent_exile",
+        "test_exile_phased_and_stale_permanents_fail_before_mutation",
+        "test_compiled_exile_is_multiplayer_public_and_replays",
         "test_bojuka_bog_targets_and_exiles_one_graveyard",
         "test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free",
         "test_sundial_ends_turn_and_exiles_stack"

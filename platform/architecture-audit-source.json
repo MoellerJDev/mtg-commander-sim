@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "322be25dc2bbf838ad89c7eb79c86a431671e2f4",
+    "baseline_main_commit": "98cc889801a361921bb10a7f4c7051fa6a8585ad",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-07",
-    "phase": "typed_return_to_owner_hand_and_direct_target_harvest",
-    "scope_note": "Certified main through PR 125 includes typed permanent destruction and direct-target destruction harvest. The current focused branch adds an immutable identity-pinned return-to-owner-hand transaction, one closed direct-target compiler family shared by spell, trigger, and activated contexts, replacement-aware result ownership, hidden-zone projection evidence, Oracle IR v40 harvest, and current generated status."
+    "phase": "typed_permanent_exile_and_direct_target_harvest",
+    "scope_note": "Certified main through PR 126 includes typed return-to-owner-hand ownership and direct-target harvest. The current focused branch adds an immutable identity-pinned permanent-exile transaction, one closed direct-target compiler family shared by spell, trigger, and activated contexts, replacement-aware result ownership, public multiplayer projection, Oracle IR v41 harvest, and current generated status."
   },
   "ci": {
     "workflow": "PR",
-    "run_id": 31155294600,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31155294600",
+    "run_id": 31164340735,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31164340735",
     "status": "pass",
     "python_versions": [
       "3.12"
@@ -160,6 +160,9 @@
       "status": "incremental_typed_handler_registry_with_legacy_engine_fallback",
       "owners": [
         "mtg_commander_sim/semantic_runtime",
+        "mtg_commander_sim/destruction.py",
+        "mtg_commander_sim/permanent_exile.py",
+        "mtg_commander_sim/return_to_hand.py",
         "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/engine.py"
       ],

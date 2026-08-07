@@ -56,5 +56,6 @@ path. Registration does not itself raise the trust level of any CardProgram.
 See [ADR 0006](../adr/0006-typed-semantic-handler-boundary.md),
 [ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md), and
 [ADR 0014](../adr/0014-typed-semantic-choice-and-effect-ownership.md),
-[ADR 0027](../adr/0027-typed-permanent-destruction.md), and
-[ADR 0028](../adr/0028-typed-return-to-owner-hand.md).
+[ADR 0027](../adr/0027-typed-permanent-destruction.md),
+[ADR 0028](../adr/0028-typed-return-to-owner-hand.md), and
+[ADR 0029](../adr/0029-typed-permanent-exile.md).
