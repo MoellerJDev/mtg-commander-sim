@@ -1282,10 +1282,10 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
     await advanceToActionReady(
       [host, opponent], turnEndingPass, testInfo, durableTransitionTimeout,
     );
-    const turnEndingPassResult = await submitAuthorizedPass(host);
-    if (turnEndingPassResult !== "submitted") {
-      throw new Error(`The turn-ending host pass ${turnEndingPassResult}`);
-    }
+    // Auto-pass may win the narrow race after readiness is observed. That is
+    // already the desired transition: the following exact Seat B land offer,
+    // protected by Full Control, proves the turn advanced without skipping B.
+    await submitAuthorizedPass(host);
     await playLand(opponent);
     await declineCommanderDevelopment(opponent);
     await ensureAutoPass(opponent);

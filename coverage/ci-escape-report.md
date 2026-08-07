@@ -2,7 +2,7 @@
 title: "CI escape report"
 status: "generated"
 authoritative_source: "platform/ci-escape-source.json"
-verified: "4052d56216416abf3c0c557ec2d17c0e660f632f385328edb5f912d8fccf6748"
+verified: "154f9ac18d712699dcf6348e7d077cf54fd3b4a21d27da3e45018776b2293edf"
 audience: "maintainers and contributors"
 maintenance: "generated"
 ---
@@ -38,7 +38,7 @@ This report classifies observed deterministic failures that escaped the local qu
 | `ci-20260805-10` | [30998174979](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30998174979) | `missing_affected_test` | `added` | Both handler inventories now ratchet at nineteen and the handoff links to generated frontier and architecture reports instead of copying grouped numerical metrics. |
 | `ci-20260805-11` | [30987626101](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/30987626101) | `infrastructure` | `not_applicable` | The provenance-validating nightly mutation-and-soak job now fetches complete history, and the workflow policy test ratchets that exact job boundary. |
 | `ci-20260806-12` | [31099433278](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31099433278) | `flaky_test` | `not_applicable` | The seat-opportunity helper now anchors the expected active seat and exact projected phase while its strategic offer settles, preventing the test driver from consuming the opportunity under observation or matching the next player's same-named main phase. |
-| `ci-20260806-13` | [31132735817](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31132735817) | `flaky_test` | `not_applicable` | The journey now arms the defender's stop before each preceding turn-transition command, advances only the intervening stack response, and waits for the exact host pass to become enabled after durability serialization before submitting it. |
+| `ci-20260806-13` | [31132735817](https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31132735817) | `flaky_test` | `not_applicable` | The journey now arms the defender's stop before each preceding turn-transition command, advances only the intervening stack response, and treats Auto-pass winning the post-serialization host-pass race as success only when the next exact defender land opportunity is observed. |
 
 ## Measurement limitations
 

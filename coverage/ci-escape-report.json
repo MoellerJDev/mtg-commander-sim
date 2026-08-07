@@ -219,7 +219,7 @@
       "regressions": [
         "four-player.spec.ts: natural commander-damage winner"
       ],
-      "resolution": "The journey now arms the defender's stop before each preceding turn-transition command, advances only the intervening stack response, and waits for the exact host pass to become enabled after durability serialization before submitting it.",
+      "resolution": "The journey now arms the defender's stop before each preceding turn-transition command, advances only the intervening stack response, and treats Auto-pass winning the post-serialization host-pass race as success only when the next exact defender land opportunity is observed.",
       "run_id": 31132735817,
       "summary": "The natural-winner journey armed Full Control only after a preceding command could auto-advance through the defender's next precombat main phase, so the test driver searched for an opportunity that had already passed."
     }
@@ -274,7 +274,7 @@
   ],
   "repository": "MoellerJDev/mtg-commander-sim",
   "schema_version": 1,
-  "source_fingerprint": "4052d56216416abf3c0c557ec2d17c0e660f632f385328edb5f912d8fccf6748",
+  "source_fingerprint": "154f9ac18d712699dcf6348e7d077cf54fd3b4a21d27da3e45018776b2293edf",
   "summary": {
     "average_critical_path_seconds": 840.5,
     "average_pushes_per_merged_pr": null,
