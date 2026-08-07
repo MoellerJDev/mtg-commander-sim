@@ -1,5 +1,5 @@
 {
-  "contract_count": 80,
+  "contract_count": 81,
   "contracts": [
     {
       "mechanic_id": "cr-602-activating-activated-abilities",
@@ -146,6 +146,12 @@
       "version": 2
     },
     {
+      "mechanic_id": "destroy",
+      "path": "mechanics/contracts/destroy.json",
+      "sha256": "43727e9ea1e7ec94d89012f77a62bc1ab6d5ac1539c4bbde75e1917ee4442e96",
+      "version": 1
+    },
+    {
       "mechanic_id": "double-strike",
       "path": "mechanics/contracts/double-strike.json",
       "sha256": "bc901e82b63c66ba8341dcb9afaebef443572bebff09e30c41ce7b7b2dee0a66",
@@ -274,8 +280,8 @@
     {
       "mechanic_id": "indestructible",
       "path": "mechanics/contracts/indestructible.json",
-      "sha256": "fc1453174fb7763f76ced9ea75963a2cd9c0538cfd0f85770be21cefc2ebb974",
-      "version": 1
+      "sha256": "e46c533ec2c19f626e632062ca0f4b36fba8b71b122bdcb67ccf47e802f26cdc",
+      "version": 2
     },
     {
       "mechanic_id": "infect",
@@ -2521,19 +2527,19 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/indestructible.json",
-      "contract_sha256": "fc1453174fb7763f76ced9ea75963a2cd9c0538cfd0f85770be21cefc2ebb974",
-      "contract_version": 1,
+      "contract_sha256": "e46c533ec2c19f626e632062ca0f4b36fba8b71b122bdcb67ccf47e802f26cdc",
+      "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions",
-      "implementation_version": "indestructible-partial-v1",
+      "implementation_component": "mtg_commander_sim.destruction typed transaction plus mtg_commander_sim.state_based_actions producer",
+      "implementation_version": "indestructible-partial-v2",
       "kind": "keyword_ability",
       "known_blockers": [
-        "the universal destroy-event path is not yet a single typed owner",
         "ability-changing, copy, face-down, and dependency interactions are incomplete",
-        "the contract is partial and does not promote a trusted indestructible capability"
+        "regeneration and competing destruction replacements remain unsupported",
+        "the contract is partial and does not promote a broad trusted Indestructible capability"
       ],
       "mechanic_id": "indestructible",
       "official_name": "Indestructible",
@@ -2543,6 +2549,10 @@
       "test_ids": [
         "test_snapshot_distinguishes_put_into_graveyard_from_destroy",
         "test_trample_assigns_lethal_over_indestructible_blocker",
+        "test_indestructible_consumes_deathtouch_at_the_first_sba_check",
+        "test_indestructible_and_phased_objects_are_not_destroyed",
+        "test_simultaneous_multiplayer_batch_has_disjoint_results",
+        "test_destruction_disposition_mutants_are_killed",
         "test_keyword_contracts_trace_the_pinned_rules"
       ],
       "trust_level": "untrusted"
@@ -4758,19 +4768,43 @@
     },
     {
       "category": "additional_rules",
-      "contract_path": null,
-      "coverage_status": "unclassified",
+      "contract_path": "mechanics/contracts/destroy.json",
+      "contract_sha256": "43727e9ea1e7ec94d89012f77a62bc1ab6d5ac1539c4bbde75e1917ee4442e96",
+      "contract_version": 1,
+      "coverage_status": "tested",
       "dependencies": [
         "701"
       ],
-      "implementation_component": null,
+      "implementation_component": "typed direct-target compiler, strict destruction semantic handler, canonical destruction transaction, counter owner, and zone-transition owner",
+      "implementation_version": "destruction-v1",
       "kind": "keyword_action",
+      "known_blockers": [
+        "regeneration and effects that say a permanent cannot be regenerated are not represented",
+        "competing destruction replacement ordering beyond shield counters is incomplete",
+        "optional, modal, aggregate, quantified, relational, qualified, and compound destruction clauses remain precise compiler residuals",
+        "complete ability-changing, copy, face-down, and continuous-effect dependency interactions remain blocked",
+        "the mechanic contract is broader than the trusted bounded direct-target effect capability"
+      ],
       "mechanic_id": "destroy",
       "official_name": "Destroy",
       "rule_references": [
         "701.8"
       ],
-      "test_ids": [],
+      "test_ids": [
+        "test_plan_is_immutable_canonical_and_caller_copy_isolated",
+        "test_handler_lowers_one_strict_typed_intent",
+        "test_effect_destruction_consumes_shield_instead",
+        "test_state_based_destruction_ignores_shield_counter",
+        "test_indestructible_and_phased_objects_are_not_destroyed",
+        "test_indestructible_can_move_for_a_nondestruction_companion_sba",
+        "test_stale_destruction_plan_rolls_back_without_mutation",
+        "test_simultaneous_multiplayer_batch_has_disjoint_results",
+        "test_effect_destruction_uses_typed_owner_and_replays",
+        "test_destruction_disposition_mutants_are_killed",
+        "test_spell_trigger_and_activated_contexts_share_targeted_destruction_lowering",
+        "test_unsupported_destruction_variants_remain_material_residuals",
+        "test_targeted_destruction_shape_mutants_fail_closed"
+      ],
       "trust_level": "untrusted"
     },
     {

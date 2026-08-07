@@ -2,7 +2,7 @@
 title: "Reusable rules piece matrix"
 status: "generated"
 authoritative_source: "coverage/reusable-piece-matrix.json.gz"
-verified: "153faf04941d7fd2c82ccc635293a75df8095bb982853ca3b9a684eb4cd7c78b"
+verified: "c485c41420f13cd8429f7ae5c2ae3e55602fe990d3689782c856218cdc164433"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -17,11 +17,11 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 
 - Profile: `commander_review`
 - Ontology: `reusable-pieces-v1`
-- Pieces: 1,009
+- Pieces: 1,010
 - Cards indexed: 31,623
 - Material abilities classified: 59,968
 - Unclassified material spans: 0
-- Mapped pinned rules: 660 / 3,300
+- Mapped pinned rules: 663 / 3,300
 - Applicable piece pairs: 20,091
 - Covered piece pairs: 110
 
@@ -36,11 +36,11 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `compiler_cardprogram` — Compiler and CardProgram pieces | 195 |
 | `continuous_effects` — Static abilities and continuous effects | 16 |
 | `costs_mana` — Costs and mana | 7 |
-| `events_mutations` — Typed events and mutations | 58 |
+| `events_mutations` — Typed events and mutations | 59 |
 | `keyword_mechanics` — Keyword actions and keyword abilities | 557 |
 | `multiplayer_commander` — Multiplayer, Commander, and profile pieces | 1 |
-| `object_identity` — Object identity and lifetime | 29 |
-| `one_shot_effects` — One-shot semantic effects | 89 |
+| `object_identity` — Object identity and lifetime | 28 |
+| `one_shot_effects` — One-shot semantic effects | 90 |
 | `players_format` — Players, relationships, and format state | 1 |
 | `proposals` — Casting and activation proposals | 5 |
 | `quantities` — Quantity and value expressions | 1 |
@@ -57,11 +57,11 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `derived_characteristics_static_layers` | `inventoried` | 16 | 5 |
 | `generic_triggers_stack_placement` | `inventoried` | 2 | 2 |
 | `multiplayer_player_leaving_commander` | `represented` | 2 | 0 |
-| `objects_identity_zones_faces_copies` | `represented` | 32 | 0 |
+| `objects_identity_zones_faces_copies` | `represented` | 31 | 0 |
 | `replacement_prevention` | `inventoried` | 13 | 5 |
 | `state_turn_loops_stabilization` | `inventoried` | 0 | 0 |
 | `targets_modes_searches_references_choices` | `inventoried` | 8 | 6 |
-| `typed_transactions_events_mutations` | `inventoried` | 147 | 54 |
+| `typed_transactions_events_mutations` | `inventoried` | 149 | 54 |
 
 ## Highest current blocker leverage
 

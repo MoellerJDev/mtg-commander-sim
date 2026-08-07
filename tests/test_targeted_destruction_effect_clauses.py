@@ -58,7 +58,7 @@ class TargetedDestructionTemplateTests(unittest.TestCase):
                 "creature"
             )
 
-    def test_whole_clause_parser_accepts_only_closed_direct_targets(self):
+    def test_destruction_whole_clause_parser_accepts_only_closed_direct_targets(self):
         for target in DestructionTarget:
             with self.subTest(target=target):
                 template = targeted_destruction_effect_template(
