@@ -293,6 +293,17 @@ def mass_destruction_effect_template(
     )
 
 
+def destruction_effect_template(
+    text: str,
+) -> MassDestructionEffectTemplate | TargetedDestructionEffectTemplate | None:
+    """Lower the closed targeted or fixed-set destruction grammar."""
+
+    return (
+        mass_destruction_effect_template(text)
+        or targeted_destruction_effect_template(text)
+    )
+
+
 def targeted_destruction_effect_template(
     text: str,
 ) -> TargetedDestructionEffectTemplate | None:

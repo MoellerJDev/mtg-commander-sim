@@ -91,11 +91,9 @@
     },
     {
       "file": "mtg_commander_sim/affected_permanents.py",
-      "layer": "application",
-      "owning_subsystem": "legacy_application",
+      "layer": "rules",
+      "owning_subsystem": "object_query",
       "allowed_dependency_layers": [
-        "adapter",
-        "application",
         "domain",
         "rules",
         "semantics"
@@ -1543,11 +1541,9 @@
     },
     {
       "file": "mtg_commander_sim/destruction_sets.py",
-      "layer": "application",
-      "owning_subsystem": "legacy_application",
+      "layer": "rules",
+      "owning_subsystem": "destruction",
       "allowed_dependency_layers": [
-        "adapter",
-        "application",
         "domain",
         "rules",
         "semantics"
@@ -4109,5 +4105,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "43251b10cc8dbb3ffbe95caee6c6e0cf6d2c069e9921d46bbe1b2edabcf26e6e"
+  "fingerprint": "620024768ebe25cad4216a43a6b9139b9e3945cbb859c068b67d31813ea7b539"
 }

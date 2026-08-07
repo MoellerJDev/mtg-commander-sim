@@ -43,8 +43,7 @@ from .compiler.draw_templates import (
 )
 from .compiler.damage_templates import fixed_damage_effect_template
 from .compiler.destruction_templates import (
-    mass_destruction_effect_template,
-    targeted_destruction_effect_template,
+    destruction_effect_template,
 )
 from .compiler.exile_templates import targeted_exile_effect_template
 from .compiler.return_to_hand_templates import (
@@ -213,10 +212,7 @@ def _effect_template(
     )
     if fixed_damage is not None:
         return fixed_damage.compiled()
-    destruction = (
-        mass_destruction_effect_template(normalized)
-        or targeted_destruction_effect_template(normalized)
-    )
+    destruction = destruction_effect_template(normalized)
     if destruction is not None:
         return destruction.compiled()
     exiled = targeted_exile_effect_template(normalized)

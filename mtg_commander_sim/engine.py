@@ -2143,9 +2143,7 @@ class CommanderEngine(
         *,
         reason: str,
         log: bool = False,
-        replacement_selections: Sequence[
-            str | None | Mapping[str, Any]
-        ] = (),
+        replacement_selections: Sequence[str | None | Mapping[str, Any]] = (),
     ) -> list[CardInstance]:
         """Move a set of objects before emitting any resulting trigger event."""
 

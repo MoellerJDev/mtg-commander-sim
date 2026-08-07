@@ -108,6 +108,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         )
     ) or relative in {
         "mtg_commander_sim/abilities.py",
+        "mtg_commander_sim/affected_permanents.py",
         "mtg_commander_sim/ability_fragments.py",
         "mtg_commander_sim/attachments.py",
         "mtg_commander_sim/attack_transition_engine_adapter.py",
@@ -145,6 +146,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/declaration_restrictions.py",
         "mtg_commander_sim/delayed_triggers.py",
         "mtg_commander_sim/destruction.py",
+        "mtg_commander_sim/destruction_sets.py",
         "mtg_commander_sim/engine.py",
         "mtg_commander_sim/errors.py",
         "mtg_commander_sim/enchant_spec.py",
@@ -285,6 +287,7 @@ def _owner(relative: str, layer: str) -> str:
     }:
         return "mana_rules"
     if relative in {
+        "mtg_commander_sim/affected_permanents.py",
         "mtg_commander_sim/object_predicate.py",
         "mtg_commander_sim/object_query.py",
     }:
@@ -295,6 +298,7 @@ def _owner(relative: str, layer: str) -> str:
         return "counter_placement"
     if relative in {
         "mtg_commander_sim/destruction.py",
+        "mtg_commander_sim/destruction_sets.py",
         "mtg_commander_sim/state_based_execution.py",
     }:
         return "destruction"
