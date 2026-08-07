@@ -38,6 +38,9 @@ from .compiler.draw_templates import (
     fixed_draw_effect_template,
 )
 from .compiler.damage_templates import fixed_damage_effect_template
+from .compiler.destruction_templates import (
+    targeted_destruction_effect_template,
+)
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.keyword_nodes import dredge_keyword_node
@@ -63,7 +66,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v38"
+ORACLE_COMPILER_VERSION = "oracle-ir-v39"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
@@ -201,28 +204,9 @@ def _effect_template(
     )
     if fixed_damage is not None:
         return fixed_damage.compiled()
-    match = re.fullmatch(
-        r"destroy target (?P<kinds>artifact|creature|enchantment|land|"
-        r"permanent|artifact or enchantment|creature or planeswalker)\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        kinds = match.group("kinds").casefold().split(" or ")
-        kind = "-or-".join(kinds)
-        schema: dict[str, Any] = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "count": 1,
-        }
-        if kinds != ["permanent"]:
-            schema["types_any"] = kinds
-        return (
-            f"destroy-target-{kind}-v1",
-            ({"op": "destroy", "card": "$target.0"},),
-            schema,
-            ("destroy", "cr-115-targets"),
-        )
+    destruction = targeted_destruction_effect_template(normalized)
+    if destruction is not None:
+        return destruction.compiled()
     match = re.fullmatch(
         r"exile target (?P<kinds>artifact|creature|enchantment|land|"
         r"permanent|artifact or enchantment|creature or planeswalker)\.?",

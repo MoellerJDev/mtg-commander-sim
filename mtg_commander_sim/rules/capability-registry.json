@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 44,
+  "registry_version": 45,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -69,6 +69,12 @@
         "continuous.attached.fixed_characteristics",
         "continuous.basic_land_type.add_all_lands",
         "continuous.power_toughness.fixed_anthem"
+      ]
+    },
+    {
+      "mechanic_id": "destroy",
+      "capabilities": [
+        "permanent.destroy.effect"
       ]
     },
     {
@@ -1212,6 +1218,33 @@
       "dependency_fail_closed_rationale": "The bounded result consumes the authoritative effective-keyword snapshot after declaration legality and has no optional capability dependency.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_combat_vigilance_mutant_is_killed changes the recognized effective keyword and the unchanged-tap assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "permanent.destroy.effect",
+      "version": 1,
+      "official_rules": ["122.1c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and execute one mandatory direct-target destruction instruction through target revalidation and a typed precommit transaction that distinguishes actual destruction, Indestructible prohibition, and the intrinsic shield-counter replacement.",
+        "inputs": ["closed typed direct-target clause", "revalidated phased-in battlefield permanent", "current represented effective keywords", "current shield-counter count", "physical and logical object identity"],
+        "outputs": ["canonical destruction zone event", "one removed shield counter instead of effect destruction", "Indestructible no-change result", "public typed result journal"],
+        "exclusions": ["regeneration and effects that say a permanent cannot be regenerated", "optional, modal, aggregate, quantified, relational, qualified, or compound destruction clauses", "complete ability-changing, copy, face-down, and dependency interactions", "unrepresented destruction replacement effects; cards representing those interactions remain material residuals and fail match trust closed"]
+      },
+      "dependencies": ["target.revalidate_resolution"],
+      "implementation_components": ["mtg_commander_sim.compiler.destruction_templates.TargetedDestructionEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_destruction_node_capabilities", "mtg_commander_sim.semantic_runtime.destruction_handlers.DestroyPermanentHandler", "mtg_commander_sim.destruction.prepare_destructions", "mtg_commander_sim.destruction.commit_destruction_plan"],
+      "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_destruction_lowering", "test_effect_destruction_uses_typed_owner_and_replays", "test_state_based_destruction_ignores_shield_counter"],
+      "negative_tests": ["test_unsupported_destruction_variants_remain_material_residuals", "test_targeted_destruction_shape_mutants_fail_closed", "test_indestructible_and_phased_objects_are_not_destroyed", "test_stale_destruction_plan_rolls_back_without_mutation"],
+      "interaction_tests": ["test_effect_destruction_consumes_shield_instead", "test_state_based_destruction_ignores_shield_counter"],
+      "multiplayer_tests": ["test_effect_destruction_uses_typed_owner_and_replays"],
+      "privacy_tests": ["test_effect_destruction_uses_typed_owner_and_replays"],
+      "replay_tests": ["test_effect_destruction_uses_typed_owner_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The exact direct-target compiler shape requires resolution-time target revalidation; blocking that dependency prevents the destruction node and its CardProgram from becoming trusted.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_destruction_disposition_mutants_are_killed changes shield, Indestructible, and state-based disposition boundaries; the focused assertions reject each mutant.",
       "blockers": [],
       "status": "trusted"
     },

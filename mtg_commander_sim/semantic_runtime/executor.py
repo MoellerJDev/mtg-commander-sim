@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping, Protocol
 
-from .. import tap_state
+from .. import destruction, tap_state
+from ..destruction import DestructionHost
 from ..tap_state import TapStateHost
 from .context import SemanticNodeError
 from .intents import (
@@ -17,6 +18,7 @@ from .intents import (
     CopyStackItemIntent,
     CreateTokenIntent,
     DomainEffectIntent,
+    DestroyPermanentIntent,
     DrawCardsIntent,
     IntentPlan,
     EliminatePlayersIntent,
@@ -41,7 +43,7 @@ from .intents import (
 )
 
 
-class SemanticIntentSink(TapStateHost, Protocol):
+class SemanticIntentSink(TapStateHost, DestructionHost, Protocol):
     def apply_domain_effect_intent(self, intent: DomainEffectIntent) -> Any: ...
 
     def draw(
@@ -202,6 +204,19 @@ def prepare_draw_resolution(
     )
 
 
+def _execute_destruction_intent(
+    sink: SemanticIntentSink,
+    intent: DestroyPermanentIntent,
+) -> object:
+    return destruction.destroy_permanent_refs(
+        sink,
+        (intent.object_ref,),
+        actor=intent.actor,
+        reason=intent.reason,
+        replacement_selections=intent.replacement_selections,
+    )
+
+
 def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
     if any(isinstance(intent, DrawCardsIntent) for intent in plan.intents):
         raise SemanticNodeError(
@@ -234,6 +249,11 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
                 reason=intent.reason,
             )
             results.append(("creatures", result))
+            continue
+        if isinstance(intent, DestroyPermanentIntent):
+            results.append(
+                (intent.object_ref, _execute_destruction_intent(sink, intent))
+            )
             continue
         if isinstance(intent, AddManaIntent):
             result = sink.apply_mana_intent(intent)

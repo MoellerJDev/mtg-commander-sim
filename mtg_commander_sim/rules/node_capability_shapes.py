@@ -92,6 +92,23 @@ _TARGETED_TAP_STATE_SCHEMAS: tuple[Mapping[str, Any], ...] = tuple(
     }
     for kind in ("artifact", "creature", "land", "permanent")
 )
+_TARGETED_DESTRUCTION_SCHEMAS: tuple[Mapping[str, Any], ...] = tuple(
+    {
+        "zones": ["battlefield"],
+        "categories": ["permanent"],
+        **({"types_any": list(kinds)} if kinds else {}),
+        "count": 1,
+    }
+    for kinds in (
+        ("artifact",),
+        ("creature",),
+        ("enchantment",),
+        ("land",),
+        (),
+        ("artifact", "enchantment"),
+        ("creature", "planeswalker"),
+    )
+)
 
 
 def _positive_int(value: Any) -> bool:
@@ -269,8 +286,37 @@ def targeted_tap_state_node_capabilities(
     )
 
 
+def targeted_destruction_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for the closed direct destruction grammar."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if (
+        not {"destroy", "cr-115-targets"}.issubset(mechanics)
+        or len(effects) != 1
+        or dict(target_schema or {}) not in _TARGETED_DESTRUCTION_SCHEMAS
+    ):
+        return ()
+    effect = effects[0]
+    if (
+        set(effect) != {"op", "card"}
+        or effect.get("op") != "destroy"
+        or effect.get("card") != "$target.0"
+    ):
+        return ()
+    return (
+        "permanent.destroy.effect",
+        "target.revalidate_resolution",
+    )
+
+
 __all__ = [
     "fixed_damage_node_capabilities",
     "fixed_draw_node_capabilities",
+    "targeted_destruction_node_capabilities",
     "targeted_tap_state_node_capabilities",
 ]

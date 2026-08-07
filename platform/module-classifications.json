@@ -997,6 +997,21 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/compiler/destruction_templates.py",
+      "layer": "semantics",
+      "owning_subsystem": "oracle_compiler",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/compiler/draw_templates.py",
       "layer": "semantics",
       "owning_subsystem": "oracle_compiler",
@@ -1450,6 +1465,20 @@
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "authoritative"
+    },
+    {
+      "file": "mtg_commander_sim/destruction.py",
+      "layer": "rules",
+      "owning_subsystem": "destruction",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
     },
     {
       "file": "mtg_commander_sim/drawing/__init__.py",
@@ -3251,6 +3280,21 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "mtg_commander_sim/semantic_runtime/destruction_handlers.py",
+      "layer": "semantics",
+      "owning_subsystem": "semantic_runtime",
+      "allowed_dependency_layers": [
+        "adapter",
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "mtg_commander_sim/semantic_runtime/draw_replacements.py",
       "layer": "semantics",
       "owning_subsystem": "semantic_runtime",
@@ -3566,6 +3610,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/state_based_execution.py",
+      "layer": "rules",
+      "owning_subsystem": "destruction",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "read_only",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/state_planner.py",
       "layer": "rules",
       "owning_subsystem": "state_change_planning",
@@ -3830,5 +3888,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "bbd9b45b273b9f3e5babc9017be0e6c5ac895cbd224962748c21db615efa4a20"
+  "fingerprint": "d9e6c8a6f8d4bda69d06ba33493f25f73128752e6601f9be3a403ae684d4918e"
 }

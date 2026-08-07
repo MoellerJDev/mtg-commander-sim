@@ -144,6 +144,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/declaration_costs.py",
         "mtg_commander_sim/declaration_restrictions.py",
         "mtg_commander_sim/delayed_triggers.py",
+        "mtg_commander_sim/destruction.py",
         "mtg_commander_sim/engine.py",
         "mtg_commander_sim/errors.py",
         "mtg_commander_sim/enchant_spec.py",
@@ -168,6 +169,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/rules_scheduler.py",
         "mtg_commander_sim/shortcuts.py",
         "mtg_commander_sim/state_based_actions.py",
+        "mtg_commander_sim/state_based_execution.py",
         "mtg_commander_sim/state_planner.py",
         "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/targets.py",
@@ -287,6 +289,11 @@ def _owner(relative: str, layer: str) -> str:
         return "state_change_planning"
     if relative == "mtg_commander_sim/counter_placement.py":
         return "counter_placement"
+    if relative in {
+        "mtg_commander_sim/destruction.py",
+        "mtg_commander_sim/state_based_execution.py",
+    }:
+        return "destruction"
     if relative in {
         "mtg_commander_sim/damage.py",
         "mtg_commander_sim/damage_prevention.py",

@@ -81066,7 +81066,7 @@
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_check_destroys_only_destructible_positive_toughness_creature",
+        "tests.test_deathtouch_rules.DeathtouchStateBasedActionTests.test_check_proposes_destruction_before_typed_prohibitions",
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_indestructible_consumes_deathtouch_at_the_first_sba_check",
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays"
       ],

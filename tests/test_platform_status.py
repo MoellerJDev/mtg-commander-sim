@@ -307,6 +307,29 @@ class PlatformStatusTests(unittest.TestCase):
         )
         _validate_provenance(source)
 
+    def test_squash_merged_exact_head_must_match_current_main_tree(self):
+        source = json.loads(
+            (ROOT / "platform" / "readiness-source.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        source["integration"]["pull_requests"] = []
+        source["provenance"]["certified_head_classification"] = (
+            "current_main_tree_equivalent"
+        )
+        with mock.patch(
+            "scripts.update_platform_status._git_tree_sha",
+            side_effect=("same-tree", "same-tree"),
+        ):
+            _validate_provenance(source)
+
+        with mock.patch(
+            "scripts.update_platform_status._git_tree_sha",
+            side_effect=("certified-tree", "main-tree"),
+        ):
+            with self.assertRaisesRegex(ValueError, "not tree-equivalent"):
+                _validate_provenance(source)
+
     def test_current_card_baseline_is_derived_not_hand_copied(self):
         source = json.loads(
             (ROOT / "platform" / "readiness-source.json").read_text(

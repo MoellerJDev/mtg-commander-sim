@@ -254,8 +254,10 @@ class StateBasedActionPrimitiveTests(unittest.TestCase):
             ]
         )
         self.assertEqual(("walker", "zero"), batch.put_in_graveyard)
-        self.assertEqual(("deathtouch", "lethal"), batch.destroy)
-        self.assertNotIn("indestructible", batch.destroy)
+        self.assertEqual(
+            ("deathtouch", "indestructible", "lethal"),
+            batch.destroy,
+        )
 
     def test_zero_defense_battle_waits_for_its_pending_trigger(self):
         batch = evaluate_permanent_state_based_actions(

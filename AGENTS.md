@@ -112,13 +112,13 @@ Use the worktree-local CPython 3.12 environment, never a global `python` alias.
 Keep one substantive branch under certification and at most one independent
 next-batch worktree. Do not mix their changes.
 
-As the default development policy, do not run broad suites, gates, or historical
-regression journeys locally. During implementation, run only changed-module
-compilation, applicable generated checks, and the smallest directly affected
-unit or subsystem tests needed for a useful red/green loop. Push the coherent
-head so public CI runs exact regressions, replay and privacy shards, the broad
-suite, packaging, and headless browser certification. Inspect the deterministic
-impact plan without executing the broad gate:
+As the default development policy, do not run behavioral tests, broad suites,
+gates, or historical regression journeys locally. During implementation, run
+changed-module compilation, JSON/schema parsing, applicable deterministic
+generators and freshness checks, and diff hygiene. Push the coherent head so
+public CI runs the exact affected regressions, replay and privacy shards, the
+broad suite, packaging, and headless browser certification. Inspect the
+deterministic impact plan without executing the broad gate:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\quick_gate.py --dry-run
@@ -127,10 +127,11 @@ impact plan without executing the broad gate:
 Push the coherent exact head and let public pull-request CI run the broad
 Python, generated, package, platform and headless-browser checks. Use that CI
 window for independent Slot B work instead of repeating the same suite
-locally. A broader local gate is exceptional: use it only when the user asks or
-when diagnosing a CI-only/release-critical persistence, replay, privacy or
-packaging failure. Browser automation remains headless. The complete workflow
-and recovery commands are in
+locally. A local behavioral test or broader gate is exceptional: use it only
+when the user asks or when diagnosing a specific CI-only or release-critical
+failure that cannot be isolated from the Actions evidence. Run only the
+directly relevant test in that case. Browser automation remains headless. The
+complete workflow and recovery commands are in
 [`docs/development/ci-pipeline.md`](docs/development/ci-pipeline.md).
 
 Never stage `run/`, `local/`, SQLite databases, Scryfall archives, image or deck

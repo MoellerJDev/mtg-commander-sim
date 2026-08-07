@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "c6ea08fcfc45e9d50c3c7a6094f7a4813f709a9ddb4eca4c9809bb8c4d249eff",
-  "declaration_source_fingerprint": "75fcf83fad5cf881ee123042da002f2ca55d89e3f4a058c0949fa2bc98ab8ca1",
+  "registry_fingerprint": "5ce0ecbb4bead25cda6bfbf10fc29a48594c2aee4290ca501e9c70011d4a74da",
+  "declaration_source_fingerprint": "041ed22fc726007a72621c1036796d63b10061b4e4a0fa9908d761397587e9db",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -9187,6 +9187,272 @@
       "applicability_note": "Replay the exact activation command and typed fixed mana result from the initial checkpoint."
     },
     {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_effect_destruction_consumes_shield_instead",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replace represented effect destruction by removing exactly one shield counter through the canonical counter owner."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_state_based_destruction_ignores_shield_counter",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep lethal-damage and deathtouch state-based destruction outside the effect-only shield-counter replacement."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_effect_destruction_uses_typed_owner_and_replays",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Advertise, submit, and resolve the same public direct-target destruction action in a four-seat game."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_destruction_disposition_mutants_are_killed",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill mutations that bypass Indestructible, consume no shield, or incorrectly apply shields to state-based destruction."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_indestructible_and_phased_objects_are_not_destroyed",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Prohibit destruction of an Indestructible permanent and reject phased-out objects before mutation."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_stale_destruction_plan_rolls_back_without_mutation",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a destruction plan whose effective disposition changed after preparation and leave state unchanged."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_destruction_effect_clauses.TargetedDestructionCompilerTests.test_targeted_destruction_shape_mutants_fail_closed",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject altered operations, target references, schemas, and missing rule ownership before capability promotion."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_targeted_destruction_effect_clauses.TargetedDestructionCompilerTests.test_unsupported_destruction_variants_remain_material_residuals",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep optional, qualified, modal, aggregate, regeneration, and compound destruction wording outside the bounded family."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_effect_destruction_uses_typed_owner_and_replays",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute a compiled direct-target destruction spell through the canonical typed transaction."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_state_based_destruction_ignores_shield_counter",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Execute represented state-based destruction through the same typed disposition owner without consuming a shield counter."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_targeted_destruction_effect_clauses.TargetedDestructionCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_destruction_lowering",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower the same typed direct-target destruction clause in spell, trigger, and activated contexts with precise source spans."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_effect_destruction_uses_typed_owner_and_replays",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project only public battlefield permanent references and never player or hidden-zone references for the direct target."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_effect_destruction_uses_typed_owner_and_replays",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the advertised target, paid spell, destruction disposition, zone result, and final state hash exactly."
+    },
+    {
+      "capability_id": "permanent.destroy.effect",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_destruction_rules.DestructionRuleTests.test_stale_destruction_plan_rolls_back_without_mutation",
+      "official_rule_ids": [
+        "122.1c",
+        "701.8",
+        "701.8a",
+        "701.8b",
+        "701.8c",
+        "702.12b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Validate the complete prepared destruction batch before moving a permanent or removing a shield counter."
+    },
+    {
       "capability_id": "permanent.tap.effect",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_tap_activation_is_multiplayer_public_and_replays",
@@ -12154,5 +12420,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "48d7c6bdc510aab3d642d1c3fc079264d88351212de91f947846d41b5db62227"
+  "fingerprint": "556266518a664c4db8cf4294877e0b24a743657ea710fdd3c020f4c8bd4cafba"
 }

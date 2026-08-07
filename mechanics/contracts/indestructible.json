@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 1,
+  "contract_version": 2,
   "mechanic_id": "indestructible",
   "official_name": "Indestructible",
   "effective_date": "2026-06-19",
@@ -32,11 +32,11 @@
   "variants": ["lethal marked damage", "deathtouch damage", "zero toughness", "destroy effect", "ordinary trample assignment"],
   "witness_cards": [],
   "rulings": [],
-  "test_ids": ["test_snapshot_distinguishes_put_into_graveyard_from_destroy", "test_trample_assigns_lethal_over_indestructible_blocker", "test_keyword_contracts_trace_the_pinned_rules"],
+  "test_ids": ["test_snapshot_distinguishes_put_into_graveyard_from_destroy", "test_trample_assigns_lethal_over_indestructible_blocker", "test_indestructible_consumes_deathtouch_at_the_first_sba_check", "test_indestructible_and_phased_objects_are_not_destroyed", "test_simultaneous_multiplayer_batch_has_disjoint_results", "test_destruction_disposition_mutants_are_killed", "test_keyword_contracts_trace_the_pinned_rules"],
   "implementation": {
-    "component": "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions",
-    "version": "indestructible-partial-v1"
+    "component": "mtg_commander_sim.destruction typed transaction plus mtg_commander_sim.state_based_actions producer",
+    "version": "indestructible-partial-v2"
   },
-  "known_blockers": ["the universal destroy-event path is not yet a single typed owner", "ability-changing, copy, face-down, and dependency interactions are incomplete", "the contract is partial and does not promote a trusted indestructible capability"],
-  "review_status": "draft"
+  "known_blockers": ["ability-changing, copy, face-down, and dependency interactions are incomplete", "regeneration and competing destruction replacements remain unsupported", "the contract is partial and does not promote a broad trusted Indestructible capability"],
+  "review_status": "reviewed"
 }

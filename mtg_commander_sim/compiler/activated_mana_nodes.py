@@ -257,6 +257,7 @@ def _activated_effect_dependency_gate(
             "draw",
             "draw_each_player",
             "draw_with_actions",
+            "destroy",
             "offer_draw",
             "tap",
             "untap",

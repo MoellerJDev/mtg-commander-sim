@@ -63,6 +63,10 @@ def _git_is_ancestor(ancestor: str, descendant: str) -> bool:
     return completed.returncode == 0
 
 
+def _git_tree_sha(commit: str) -> str:
+    return _git("show", "-s", "--format=%T", commit)
+
+
 def _git_ref_or_none(ref: str) -> str | None:
     completed = subprocess.run(
         ["git", "rev-parse", "--verify", f"{ref}^{{commit}}"],
@@ -227,6 +231,7 @@ def _validate_provenance(source: dict) -> None:
     certified_classification = provenance["certified_head_classification"]
     if certified_classification not in {
         "current_main",
+        "current_main_tree_equivalent",
         "historical_certified",
     }:
         raise ValueError("certified_head_classification is unsupported")
@@ -249,15 +254,22 @@ def _validate_provenance(source: dict) -> None:
         raise ValueError("active feature head is already reachable from current main")
     if feature_classification == "historical_integrated" and not feature_on_main:
         raise ValueError("historical feature head is not reachable from current main")
-    if not _git_is_ancestor(provenance["certified_head_sha"], current_main):
-        raise ValueError("certified head is not reachable from current main")
-    if (
-        certified_classification == "current_main"
-        and provenance["certified_head_sha"] != current_main
+    if certified_classification == "current_main":
+        if provenance["certified_head_sha"] != current_main:
+            raise ValueError(
+                "certified head trails current main without historical classification"
+            )
+    elif certified_classification == "current_main_tree_equivalent":
+        if _git_tree_sha(provenance["certified_head_sha"]) != _git_tree_sha(
+            current_main
+        ):
+            raise ValueError(
+                "certified exact head is not tree-equivalent to current main"
+            )
+    elif not _git_is_ancestor(
+        provenance["certified_head_sha"], current_main
     ):
-        raise ValueError(
-            "certified head trails current main without historical classification"
-        )
+        raise ValueError("certified head is not reachable from current main")
     integration = source.get("integration")
     if not isinstance(integration, dict):
         raise ValueError("platform readiness source requires integration")

@@ -33,6 +33,7 @@
     "mtg_commander_sim/declaration_costs.py",
     "mtg_commander_sim/declaration_restrictions.py",
     "mtg_commander_sim/delayed_triggers.py",
+    "mtg_commander_sim/destruction.py",
     "mtg_commander_sim/deck.py",
     "mtg_commander_sim/engine.py",
     "mtg_commander_sim/enchant_spec.py",
@@ -59,6 +60,7 @@
     "mtg_commander_sim/semantics.py",
     "mtg_commander_sim/shortcuts.py",
     "mtg_commander_sim/state_based_actions.py",
+    "mtg_commander_sim/state_based_execution.py",
     "mtg_commander_sim/state_planner.py",
     "mtg_commander_sim/targets.py",
     "mtg_commander_sim/token_creation.py",
@@ -149,6 +151,7 @@
       "mtg_commander_sim/damage_prevention.py": "durable typed prevention-shield and damage-redirection state owner behind the damage transaction",
       "mtg_commander_sim/damage_prevention_creation.py": "typed prevention-shield creation validation and authoritative commit owner",
       "mtg_commander_sim/damage_results.py": "typed CR 120.3 result-event preparation, validation, and atomic mutation owner behind the damage coordinator",
+      "mtg_commander_sim/destruction.py": "typed permanent-destruction preflight and authoritative commit owner",
       "mtg_commander_sim/counter_state.py": "canonical typed player and permanent counter mutation owner behind represented rules transactions",
       "mtg_commander_sim/life_change.py": "replacement-capable typed life-event transaction owner behind represented rules transactions",
       "mtg_commander_sim/life_state.py": "canonical typed life-total mutation owner behind represented rules transactions",
@@ -178,6 +181,7 @@
       "mtg_commander_sim/aura/runtime.py": "read-only Aura legality and entry planner delegating attachment mutation to the canonical owner",
       "mtg_commander_sim/record_decks.py": "read-only exact deck-list provenance hashing",
       "mtg_commander_sim/state_based_actions.py": "pure state-based action detection over an authoritative snapshot",
+      "mtg_commander_sim/state_based_execution.py": "typed state-based execution planner delegating mutation to canonical destruction and zone owners",
       "mtg_commander_sim/semantic_runtime/zone_replacements.py": "read-only replacement-source discovery and event identity"
       ,"mtg_commander_sim/semantic_choices/engine_coordination.py": "actor-scoped immutable choice fact materialization and routing"
       ,"mtg_commander_sim/mana_undo.py": "read-only reversible mana-window validation with commits delegated to canonical owners"
