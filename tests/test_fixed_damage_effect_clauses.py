@@ -474,12 +474,13 @@ class FixedDamageEffectCompilerTests(unittest.TestCase):
             unrelated["exact_fixed_damage_programs_promoted"],
         )
         self.assertEqual(
-            {"provisional"},
+            {"trusted"},
             {
                 program.trust_level
                 for program in unrelated_registry.programs()
             },
         )
+        self.assertFalse(unrelated_registry.programs()[0].requires_arbiter)
 
 
 class FixedDamageEffectRuntimeTests(unittest.TestCase):

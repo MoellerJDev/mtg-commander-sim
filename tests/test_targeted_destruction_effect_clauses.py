@@ -74,7 +74,6 @@ class TargetedDestructionTemplateTests(unittest.TestCase):
             "Destroy target tapped creature.",
             "Destroy target nonland permanent.",
             "Destroy target creature. It can't be regenerated.",
-            "Destroy target creature or planeswalker.",
             "Destroy all creatures.",
             "Sacrifice target creature.",
         ):
