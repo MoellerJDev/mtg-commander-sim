@@ -7,10 +7,10 @@
   },
   "integration": {
     "active_phase": null,
-    "branch": "rules/typed-attack-transition-keyword-triggers",
+    "branch": "rules/typed-ordinary-cycling-activation",
     "branch_ancestry": {
-      "focused_branch_base": "ad15194cbe4fc8c8cd8958f3d3fc3c88cc2c3bb4",
-      "focused_branch_unique_commits_over_main": 6
+      "focused_branch_base": "05e0d99818cc7c98747cb6cf88e75e3fd9c941f7",
+      "focused_branch_unique_commits_over_main": 2
     },
     "pull_requests": [
       {
@@ -845,6 +845,13 @@
         "number": 121,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/121"
+      },
+      {
+        "base": "main",
+        "head": "rules/typed-attack-transition-keyword-triggers",
+        "number": 122,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/122"
       }
     ],
     "tags": [
@@ -859,11 +866,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "43a9299de9e2e0be74bd4c9b68077c888d44036d",
+    "feature_head_sha": "75389d3a5b9017859a626db5560fd8ade2f62a80",
     "feature_head_classification": "active_candidate",
-    "certified_head_sha": "ad15194cbe4fc8c8cd8958f3d3fc3c88cc2c3bb4",
+    "certified_head_sha": "05e0d99818cc7c98747cb6cf88e75e3fd9c941f7",
     "certified_head_classification": "current_main",
-    "generation_timestamp": "2026-08-07T02:37:00Z"
+    "generation_timestamp": "2026-08-07T04:13:29Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -1158,8 +1165,14 @@
     {
       "id": "attack_transition_keyword_trigger_harvest",
       "name": "Typed attack-transition Exalted, Battle Cry, and Melee triggers",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 122 seals one immutable completed attack transition after the full declaration, derives ordinary printed Exalted, Battle Cry, and Melee occurrences from current typed ability fragments, places them through the ordinary APNAP trigger owner, and resolves exact logical-object bonuses through the canonical layer 7c until-end-of-turn owner. The relationship mutation owner preflights the complete eligible batch before its first write. Closed compiler lowering preserves precise source spans and every printed keyword instance without runtime Oracle parsing or printed-name behavior. The Commander census promotes the predicted 24 exact, trusted, capability-closed cards, reduces material residuals by 59, and keeps zero Commander construction failures; CommanderEngine shrinks by three logical lines and direct writes remain 130. Exact-head run 31145100111 passed every required gate and squash commit 05e0d99818cc7c98747cb6cf88e75e3fd9c941f7 is on main. Conditional, granted, copied, face-down, put-attacking, trigger-doubling, and broader attack-trigger variants remain explicit residuals."
+    },
+    {
+      "id": "ordinary_cycling_activation_harvest",
+      "name": "Typed ordinary Cycling activation and generic harvest",
       "status": "implemented_current_source_tree",
-      "evidence": "The current source tree seals one immutable completed attack transition after the full declaration, derives ordinary printed Exalted, Battle Cry, and Melee occurrences from current typed ability fragments, places them through the ordinary APNAP trigger owner, and resolves exact logical-object bonuses through the canonical layer 7c until-end-of-turn owner. The relationship mutation owner preflights the complete eligible batch before its first write. Closed compiler lowering preserves precise source spans and every printed keyword instance without runtime Oracle parsing or printed-name behavior. The refreshed Commander census promotes the predicted 24 exact, trusted, capability-closed cards, reduces material residuals by 59, and keeps zero Commander construction failures; CommanderEngine shrinks by three logical lines and direct writes remain 132. Focused compilation and 66 attack, replay, privacy, rollback, malformed-input, multiplier, and implementation-mutation tests pass. Conditional, granted, copied, face-down, put-attacking, trigger-doubling, and broader attack-trigger variants remain explicit residuals pending public exact-head CI."
+      "evidence": "The current source tree lowers fixed ordinary-mana Cycling once into an immutable source-spanned CardProgram descriptor. Advertisement and command validation consume the same hand-only owner activation, canonical fixed mana payment, exact physical-card discard cost, ordinary nonmana stack placement, and iterative replacement-aware draw transaction. The descriptor is discoverable in every zone but executable only from its owner's hand; changed Oracle text, unsupported costs, and unpayable activations fail closed before mutation. Focused compiler, capability, stack, replay, privacy, rollback, multiplayer, and implementation-mutation evidence passes. The Commander census promotes 46 exact cards, closes 46 additional CardPrograms by capability, and removes 288 material residuals while keeping zero construction failures. CommanderEngine, direct writes, printed-name behavior, and Oracle-ID behavior remain flat. Variable, hybrid, Phyrexian, snow, and nonmana Cycling costs, typecycling, Cycling triggers, modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone activated-ability inspection remain explicit residuals pending public exact-head CI."
     },
     {
       "id": "rules_snapshot",
@@ -1185,8 +1198,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty-eight bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger attack_transition_keyword_trigger fixed_mana_ability color_set_mana_ability and cast_permission owners",
-    "capability_evidence": "implemented_registry_v42_with_72_records_62_trusted_and_616_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty-nine bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger attack_transition_keyword_trigger fixed_mana_ability color_set_mana_ability ordinary_cycling_ability and cast_permission owners",
+    "capability_evidence": "implemented_registry_v43_with_73_records_63_trusted_and_625_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -1197,14 +1210,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31139677134,
+      "run_id": 31145100111,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31139677134"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31145100111"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr121_exact_head_31139677134_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31140060336_passed_29_integration_tests_then_failed_only_stale_certified_head_provenance_corrected_in_current_source_tree",
-      "focused_rules_tests": "attack_transition_keyword_compiler_event_identity_multiplicity_exalted_battle_cry_melee_source_lki_apnap_multiplayer_privacy_rollback_replay_malformed_input_batch_preflight_and_implementation_mutation_evidence_66_tests_pass; changed_modules_compile; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
+      "deterministic_tests": "certified_main_through_pr122_exact_head_31145100111_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31145507505_passed_29_integration_tests_then_failed_only_stale_certified_head_provenance_corrected_in_current_source_tree",
+      "focused_rules_tests": "ordinary_cycling_descriptor_compiler_residual_capability_mutation_payment_stack_replay_source_pin_zone_payability_multiplayer_and_privacy_evidence_10_tests_pass; affected_activated_and_mana_ability_tests_60_pass; changed_modules_compile; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
@@ -1230,6 +1243,7 @@
     "ordinary Basic Landwalk, Fear, Horsemanship, Intimidate, Shadow, and Skulk now consume one shared typed current-characteristics block-legality boundary, while nonbasic or qualified landwalk, conditional or rules-text-equivalent evasion, unresolved variable power, additional-block permissions, and unsupported characteristic producers remain explicit blockers",
     "ordinary printed Flanking and positive-integer Bushido now consume one immutable complete multiplayer block transition, ordinary APNAP trigger placement, and the canonical identity-pinned layer 7c until-end-of-turn owner; conditional, variable, granted, copied, face-down, trigger-doubling, and multi-attacker-blocking variants remain explicit residuals, so neither aggregate mechanic is trusted",
     "ordinary printed Exalted, Battle Cry, and Melee now consume one immutable completed attack transition, ordinary APNAP trigger placement, and the canonical identity-pinned layer 7c until-end-of-turn owner; conditional, granted, copied, face-down, put-attacking, trigger-doubling, and broader attack-trigger variants remain explicit residuals, so none of the aggregate mechanics is trusted",
+    "fixed ordinary-mana Cycling now consumes one source-pinned hand-only activation, canonical mana payment, exact source discard cost, ordinary stack placement, and iterative replacement-aware draw transaction; variable, hybrid, Phyrexian, snow, and nonmana costs, typecycling, Cycling triggers, modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone activated-ability inspection remain explicit blockers, so the aggregate mechanic is not trusted",
     "generic face-pinned First Strike and Double Strike now close the represented strike-step participation capability and harvest its sole-blocker cards, but the aggregate mechanics remain partial while ability-changing, copy, face-down, additional-combat or damage-step, and other unsupported participation producers remain reachable",
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "generic Vigilance, Haste, Flying, and Reach consume current represented effective keywords through canonical attack, tap-state, activation, mana-payment, and block-legality owners; unsupported ability-changing and copy producers, conditional haste acquisition, other evasion and declaration requirements or costs, and complete effective-characteristic closure remain explicit blockers",
@@ -1246,5 +1260,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Implement the selected ordinary Cycling family as one typed hand-zone activation that pays the represented cost, discards the exact card as a cost, and resolves through the canonical iterative draw transaction. The refreshed frontier identifies 297 affected Commander cards, 46 sole-blocker cards, 98 one-additional-blocker opportunities, and 112 two-additional-blocker opportunities; typecycling, cycling triggers, cost modifiers, and cycling prohibitions remain outside the bounded batch."
+  "next_task": "Certify and merge the typed ordinary Cycling activation candidate. The pinned Commander census now promotes 46 exact cards, closes 46 additional CardPrograms by capability, and removes 288 material residuals; variable, hybrid, Phyrexian, snow, and nonmana Cycling costs, typecycling, Cycling triggers, cost modifiers, prohibitions, granted or copied Cycling, and arbitrary-zone ability inspection remain separate work."
 }

@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..cycling_abilities import (
+    CYCLING_MECHANIC_ID,
     compile_ordinary_cycling_ability,
     ordinary_cycling_handler_descriptor,
 )
@@ -23,7 +24,7 @@ def ordinary_cycling_keyword_node(
     capability_profile: str,
     residuals: list[OracleResidual],
 ) -> OracleNode | None:
-    if mechanics != ("cycling",):
+    if mechanics != (CYCLING_MECHANIC_ID,):
         return None
     spec = compile_ordinary_cycling_ability(
         material_line=material_line,

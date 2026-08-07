@@ -338,7 +338,6 @@
     "batch_id": "typed-ordinary-cycling-activation",
     "subsystem_id": "keyword-abilities",
     "rule_ids": [
-      "702.29",
       "702.29a",
       "702.29b"
     ],

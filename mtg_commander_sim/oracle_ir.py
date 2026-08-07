@@ -21,6 +21,7 @@ from .compiler.continuous_templates import (
     controlled_creature_until_end_of_turn_effect,
 )
 from .compiler.cycling_nodes import ordinary_cycling_keyword_node
+from .cycling_abilities import CYCLING_MECHANIC_ID
 from .compiler.activated_mana_nodes import (
     activated_oracle_node,
 )
@@ -702,7 +703,7 @@ def _keyword_nodes(
         material_line,
         re.IGNORECASE,
     ):
-        mechanics = ("cycling",)
+        mechanics = (CYCLING_MECHANIC_ID,)
     if mechanics is None:
         return ()
 
