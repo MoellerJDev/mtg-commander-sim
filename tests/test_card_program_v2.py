@@ -12,28 +12,28 @@ from unittest.mock import patch
 import jsonschema
 
 from common import DB_PATH
-from mtg_commander_sim.card_programs import CardProgram, CardProgramError
-from mtg_commander_sim.card_programs.commands import (
+from quorune.card_programs import CardProgram, CardProgramError
+from quorune.card_programs.commands import (
     _compile_best_available,
     audit_card_program,
     card_program_coverage,
     explain_card_program,
 )
-from mtg_commander_sim.card_programs.adapters import (
+from quorune.card_programs.adapters import (
     card_program_from_semantic_programs,
     card_programs_from_semantic_programs,
     compile_card_program,
 )
-from mtg_commander_sim.carddb import CardDatabase, CardRecord
-from mtg_commander_sim.cli import main as cli_main
-from mtg_commander_sim.oracle_ir import register_generated_programs
-from mtg_commander_sim.rules.capabilities import (
+from quorune.carddb import CardDatabase, CardRecord
+from quorune.cli import main as cli_main
+from quorune.oracle_ir import register_generated_programs
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.card_programs.validation import (
+from quorune.card_programs.validation import (
     canonical_program_fingerprint,
 )
-from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
+from quorune.semantics import SemanticProgram, SemanticRegistry
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -936,7 +936,7 @@ class CardProgramV2Tests(unittest.TestCase):
 
     def test_cli_does_not_downgrade_unexpected_compiler_errors(self):
         with patch(
-            "mtg_commander_sim.card_programs.adapters.compile_card_program",
+            "quorune.card_programs.adapters.compile_card_program",
             side_effect=ValueError("broken CardProgram structure"),
         ) as compile_program:
             with self.assertRaisesRegex(ValueError, "broken CardProgram"):
@@ -963,12 +963,12 @@ class CardProgramV2Tests(unittest.TestCase):
 
         with (
             patch(
-                "mtg_commander_sim.card_programs.commands."
+                "quorune.card_programs.commands."
                 "load_default_capability_registry",
                 return_value=self.capabilities,
             ) as load_capabilities,
             patch(
-                "mtg_commander_sim.card_programs.commands."
+                "quorune.card_programs.commands."
                 "_compile_best_available",
                 return_value=program,
             ) as compile_best,

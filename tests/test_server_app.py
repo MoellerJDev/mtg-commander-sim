@@ -10,8 +10,8 @@ import unittest
 from fastapi.testclient import TestClient
 
 from common import DB_PATH, ROOT
-from mtg_commander_sim import CardDatabase
-from mtg_commander_sim.record import database_fingerprint, replay_record
+from quorune import CardDatabase
+from quorune.record import database_fingerprint, replay_record
 from server import ServerSettings, create_app
 from server.app import COOKIE_NAME, CSRF_COOKIE_NAME, _websocket_origin_allowed
 
@@ -23,7 +23,7 @@ class ServerApplicationTests(unittest.TestCase):
         static_dir = root / "browser"
         static_dir.mkdir()
         (static_dir / "index.html").write_text(
-            "<!doctype html><title>Commander Arena test</title>",
+            "<!doctype html><title>Quorune test</title>",
             encoding="utf-8",
         )
         card_db = root / "cards.sqlite3"
@@ -267,7 +267,7 @@ class ServerApplicationTests(unittest.TestCase):
         self.assertNotIn(str(self.settings.card_db), response.text)
         browser = self.client.get("/")
         self.assertEqual(200, browser.status_code, browser.text)
-        self.assertIn("Commander Arena test", browser.text)
+        self.assertIn("Quorune test", browser.text)
         disabled = self.client.post("/api/v1/system/refresh")
         self.assertEqual(409, disabled.status_code, disabled.text)
 

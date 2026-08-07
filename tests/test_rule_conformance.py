@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from mtg_commander_sim.rule_conformance import (
+from quorune.rule_conformance import (
     build_rule_conformance,
     discover_unittest_ids,
     inventory_case_errors,
@@ -13,7 +13,7 @@ from mtg_commander_sim.rule_conformance import (
     rule_conformance_coverage,
     validate_rule_conformance,
 )
-from mtg_commander_sim.rules_corpus import parse_comprehensive_rules
+from quorune.rules_corpus import parse_comprehensive_rules
 
 from tests.test_rules_corpus import RULES_FIXTURE
 

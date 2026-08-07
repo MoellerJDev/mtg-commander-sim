@@ -1,7 +1,7 @@
 ---
 title: "Drawing-card transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/drawing, semantic_runtime/draw_replacements.py, semantic_runtime/draw_reveals.py, and CR 121 contract/conformance artifacts"
+authoritative_source: "quorune/drawing, semantic_runtime/draw_replacements.py, semantic_runtime/draw_reveals.py, and CR 121 contract/conformance artifacts"
 verified: "2026-08-06"
 audience: "rules, compiler, replay, and engine contributors"
 maintenance: "hand-maintained"

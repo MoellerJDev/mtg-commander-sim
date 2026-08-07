@@ -55,10 +55,12 @@
     "contributor-contract": "CONTRIBUTING.md",
     "game-record": "docs/reference/game-record.md",
     "local-operations": "docs/operations/local-app.md",
+    "namespace-migration": "docs/MIGRATING_TO_QUORUNE.md",
     "network-protocol": "docs/reference/protocol.md",
     "optional-provider-contract": "docs/optional-clients/providers.md",
     "oracle-ir": "docs/reference/oracle-ir.md",
     "project-overview": "README.md",
+    "rebrand-status": "docs/REBRAND_STATUS.md",
     "rules-assurance": "docs/rules/assurance-model.md"
   },
   "retired_documents": [

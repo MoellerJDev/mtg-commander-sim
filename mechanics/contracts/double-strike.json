@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Adorned Pouncer", "oracle_id": "28f3c157-e004-4fd3-9302-f18ab0bf18ed"}],
   "rulings": [],
   "test_ids": ["test_second_step_uses_the_first_step_snapshot_and_current_double_strike", "test_double_strike_creates_two_real_damage_steps_and_replays", "test_double_strike_does_not_hit_player_after_its_blocker_dies", "test_double_strike_trample_recomputes_after_blocker_leaves", "test_damage_step_identity_is_stable_and_distinguishes_extra_combats", "test_strike_step_participation_mutant_is_killed", "test_first_and_double_strike_keywords_lower_with_precise_capabilities", "test_keyword_contracts_trace_the_pinned_rules"],
-  "implementation": {"component": "mtg_commander_sim.combat.assigns_in_damage_step", "version": "strike-step-participation-v1"},
+  "implementation": {"component": "quorune.combat.assigns_in_damage_step", "version": "strike-step-participation-v1"},
   "known_blockers": ["full continuous-effect dependencies, copy, and face-down characteristic evaluation remain incomplete", "the universal simultaneous damage replacement/prevention pipeline remains incomplete", "combat-damage trigger batching before priority remains incomplete"],
   "review_status": "reviewed"
 }

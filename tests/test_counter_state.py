@@ -3,13 +3,13 @@ from __future__ import annotations
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.counter_state import (
+from quorune.counter_state import (
     CounterChange,
     CounterStateError,
     commit_counter_changes,
     plan_counter_changes,
 )
-from mtg_commander_sim.model import CardInstance, PlayerState
+from quorune.model import CardInstance, PlayerState
 
 
 class CounterStateTests(unittest.TestCase):

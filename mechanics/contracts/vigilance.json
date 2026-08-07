@@ -44,7 +44,7 @@
     "test_vigilance_is_defender_independent_in_four_player_combat"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.tap_state.tap_declared_attackers",
+    "component": "quorune.tap_state.tap_declared_attackers",
     "version": "combat-vigilance-v1"
   },
   "known_blockers": [],

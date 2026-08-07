@@ -6,13 +6,13 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.ability_fragments import ability_fragment_to_dict
-from mtg_commander_sim.aura import SimpleEnchantSpec
-from mtg_commander_sim.engine import (
+from quorune.ability_fragments import ability_fragment_to_dict
+from quorune.aura import SimpleEnchantSpec
+from quorune.engine import (
     GameRuleError,
     StateInvariantError,
 )
-from mtg_commander_sim.targets import TargetGroup
+from quorune.targets import TargetGroup
 
 
 class BattlefieldRuleTests(unittest.TestCase):

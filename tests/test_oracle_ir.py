@@ -12,42 +12,42 @@ import unittest
 from pathlib import Path
 
 from common import DB_PATH, keep_all
-from mtg_commander_sim import (
+from quorune import (
     CardDatabase,
     CommanderSession,
     GameConfig,
 )
-from mtg_commander_sim.cli import main
-from mtg_commander_sim.deck import DeckDefinition, DeckEntry
-from mtg_commander_sim.damage import (
+from quorune.cli import main
+from quorune.deck import DeckDefinition, DeckEntry
+from quorune.damage import (
     commit_prepared_damage_batch,
     damage_proposal,
     prepare_damage_batch,
 )
-from mtg_commander_sim.mechanic_contracts import (
+from quorune.mechanic_contracts import (
     MechanicContractError,
     apply_contracts_to_registry,
     load_mechanic_contracts,
     validate_mechanic_contract,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.oracle_ir import (
+from quorune.model import StackItem
+from quorune.oracle_ir import (
     ORACLE_COMPILER_VERSION,
     compile_oracle_card,
     generated_programs,
     oracle_corpus_coverage,
     register_generated_programs,
 )
-from mtg_commander_sim.rules_corpus import verify_rules_corpus
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules_corpus import verify_rules_corpus
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantics import (
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.semantics import (
     SemanticProgram,
     SemanticRegistry,
 )
-from mtg_commander_sim.util import normalize_card_name
+from quorune.util import normalize_card_name
 
 
 ROOT = Path(__file__).resolve().parents[1]

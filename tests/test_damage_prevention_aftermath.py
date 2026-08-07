@@ -6,13 +6,13 @@ import tempfile
 import unittest
 
 from damage_replacement_support import DamageReplacementPipelineBase
-from mtg_commander_sim.damage import (
+from quorune.damage import (
     commit_prepared_damage_batch,
     prepare_damage_batch,
     resolve_damage_batch,
     source_snapshot,
 )
-from mtg_commander_sim.damage_modifier_state import (
+from quorune.damage_modifier_state import (
     DamageAftermathRecipient,
     DamageModifierDuration,
     DamagePreventionShield,
@@ -22,17 +22,17 @@ from mtg_commander_sim.damage_modifier_state import (
     PlaceCountersPreventionAftermath,
     PreventionMode,
 )
-from mtg_commander_sim.damage_prevention_aftermath import (
+from quorune.damage_prevention_aftermath import (
     prevention_applications,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import (
+from quorune.model import StackItem
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement import ReplaceableEvent
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.replacement import ReplaceableEvent
+from quorune.semantics import SemanticProgram
 
 
 class DamagePreventionAftermathTests(DamageReplacementPipelineBase):

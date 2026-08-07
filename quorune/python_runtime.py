@@ -34,7 +34,7 @@ def require_supported_runtime(
     observed = (version_info.major, version_info.minor)
     if observed != SUPPORTED_PYTHON or implementation != "CPython" or maxsize <= 2**32:
         raise UnsupportedPythonRuntime(
-            "MTG Commander Sim requires 64-bit CPython 3.12.x exactly; "
+            "Quorune requires 64-bit CPython 3.12.x exactly; "
             f"found {implementation} {version_info.major}.{version_info.minor} "
             f"({64 if maxsize > 2**32 else 32}-bit). "
             "On Windows, create the project environment with "

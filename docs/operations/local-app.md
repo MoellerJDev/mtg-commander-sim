@@ -2,7 +2,7 @@
 title: "Local application operations"
 status: "current"
 authoritative_source: "server launcher, settings, managed data service, and browser build"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "local users and contributors"
 maintenance: "hand-maintained"
 concern: "local-operations"
@@ -16,10 +16,10 @@ From the repository root in PowerShell:
 
 ```powershell
 .\scripts\bootstrap_windows.ps1
-.\.venv\Scripts\python.exe -m server
+.\.venv\Scripts\quorune-server.exe
 ```
 
-The project requires CPython 3.12.x. Bootstrap creates a local environment,
+Quorune requires CPython 3.12.x. Bootstrap creates a local environment,
 installs project and browser dependencies, and validates the runtime without
 changing global `PATH`, elevating, or removing another Python. The server builds
 the browser when needed, prepares card data, serves same-origin HTTP/WebSocket
@@ -33,10 +33,10 @@ SQLite snapshot locked.
 ## Useful modes
 
 ```powershell
-.\.venv\Scripts\python.exe -m server --open
-.\.venv\Scripts\python.exe -m server --offline
+.\.venv\Scripts\quorune-server.exe --open
+.\.venv\Scripts\quorune-server.exe --offline
 $env:MTG_CARD_DB = "data/test-ci.sqlite3"
-.\.venv\Scripts\python.exe -m server --offline
+.\.venv\Scripts\quorune-server.exe --offline
 ```
 
 `--offline` requires an existing usable database. `--no-build-browser` skips

@@ -7,19 +7,19 @@ import tempfile
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.compiler.continuous_templates import (
+from quorune.compiler.continuous_templates import (
     controlled_creature_fixed_modifier,
     controlled_creature_until_end_of_turn_effect,
     fixed_power_toughness_anthem_handler,
 )
-from mtg_commander_sim.characteristic_evaluation import (
+from quorune.characteristic_evaluation import (
     evaluate_card_characteristics,
     type_parts,
 )
-from mtg_commander_sim.continuous_effect_state import (
+from quorune.continuous_effect_state import (
     expire_end_of_turn_continuous_effects,
 )
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     ContinuousEffect,
     ContinuousEffectDuration,
@@ -30,21 +30,21 @@ from mtg_commander_sim.continuous_effects import (
     Layer,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.model import CardInstance, GameState, StackItem
-from mtg_commander_sim.object_predicate import ObjectQuerySpec
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantic_runtime import (
+from quorune.model import CardInstance, GameState, StackItem
+from quorune.object_predicate import ObjectQuerySpec
+from quorune.projection import StateProjector
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.semantic_runtime import (
     ContinuousEffectSourceContext,
     FixedQueryPowerToughnessAnthemHandler,
     SemanticSourceContext,
     SemanticNodeError,
     default_semantic_interpreter,
 )
-from mtg_commander_sim.semantic_runtime.intents import (
+from quorune.semantic_runtime.intents import (
     SetCardDesignationIntent,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 def locked_effect(

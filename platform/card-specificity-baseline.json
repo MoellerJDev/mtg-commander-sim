@@ -8,7 +8,7 @@
   "exact_printed_name_literals": [
     {
       "column": 8,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 52,
       "matched_printed_name": "Six",
@@ -17,7 +17,7 @@
     },
     {
       "column": 19,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 149,
       "matched_printed_name": "Life",
@@ -26,7 +26,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 203,
       "matched_printed_name": "Channel",
@@ -35,7 +35,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 203,
       "matched_printed_name": "Channel",
@@ -44,7 +44,7 @@
     },
     {
       "column": 82,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 203,
       "matched_printed_name": "Channel",
@@ -53,7 +53,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 205,
       "matched_printed_name": "Cycling",
@@ -62,7 +62,7 @@
     },
     {
       "column": 56,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 207,
       "matched_printed_name": "Channel",
@@ -71,7 +71,7 @@
     },
     {
       "column": 50,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 217,
       "matched_printed_name": "Unearth",
@@ -80,7 +80,7 @@
     },
     {
       "column": 62,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 218,
       "matched_printed_name": "Unearth",
@@ -89,7 +89,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 221,
       "matched_printed_name": "Exile",
@@ -98,7 +98,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 374,
       "matched_printed_name": "Exile",
@@ -107,7 +107,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 405,
       "matched_printed_name": "Sacrifice",
@@ -116,7 +116,7 @@
     },
     {
       "column": 51,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 405,
       "matched_printed_name": "Exile",
@@ -125,7 +125,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 414,
       "matched_printed_name": "Sacrifice",
@@ -134,7 +134,7 @@
     },
     {
       "column": 14,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 418,
       "matched_printed_name": "Sacrifice",
@@ -143,7 +143,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 420,
       "matched_printed_name": "Exile",
@@ -152,7 +152,7 @@
     },
     {
       "column": 14,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 422,
       "matched_printed_name": "Exile",
@@ -161,7 +161,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": true,
       "line": 443,
       "matched_printed_name": "Channel",
@@ -170,7 +170,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 471,
       "matched_printed_name": "Sacrifice",
@@ -179,7 +179,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 472,
       "matched_printed_name": "Exile",
@@ -188,7 +188,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 485,
       "matched_printed_name": "Sacrifice",
@@ -197,7 +197,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 502,
       "matched_printed_name": "Return",
@@ -206,7 +206,7 @@
     },
     {
       "column": 9,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 513,
       "matched_printed_name": "Cycling",
@@ -215,7 +215,7 @@
     },
     {
       "column": 58,
-      "file": "mtg_commander_sim/abilities.py",
+      "file": "quorune/abilities.py",
       "in_condition": false,
       "line": 526,
       "matched_printed_name": "Cycling",
@@ -224,7 +224,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/ability_fragments.py",
+      "file": "quorune/ability_fragments.py",
       "in_condition": false,
       "line": 35,
       "matched_printed_name": "Melee",
@@ -233,7 +233,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 320,
       "matched_printed_name": "Error",
@@ -242,7 +242,7 @@
     },
     {
       "column": 38,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": true,
       "line": 343,
       "matched_printed_name": "Reason",
@@ -251,7 +251,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 344,
       "matched_printed_name": "Reason",
@@ -260,7 +260,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 373,
       "matched_printed_name": "Error",
@@ -269,7 +269,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 462,
       "matched_printed_name": "Pilot",
@@ -278,7 +278,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 476,
       "matched_printed_name": "Reason",
@@ -287,7 +287,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 476,
       "matched_printed_name": "Reason",
@@ -296,7 +296,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 561,
       "matched_printed_name": "Turn",
@@ -305,7 +305,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 574,
       "matched_printed_name": "Error",
@@ -314,7 +314,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": true,
       "line": 589,
       "matched_printed_name": "Library",
@@ -323,7 +323,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 603,
       "matched_printed_name": "Exile",
@@ -332,7 +332,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 699,
       "matched_printed_name": "Error",
@@ -341,7 +341,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 703,
       "matched_printed_name": "Error",
@@ -350,7 +350,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 926,
       "matched_printed_name": "Reason",
@@ -359,7 +359,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 963,
       "matched_printed_name": "Reason",
@@ -368,7 +368,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/arena.py",
+      "file": "quorune/arena.py",
       "in_condition": false,
       "line": 1103,
       "matched_printed_name": "Error",
@@ -377,7 +377,7 @@
     },
     {
       "column": 49,
-      "file": "mtg_commander_sim/attack_transition_model.py",
+      "file": "quorune/attack_transition_model.py",
       "in_condition": false,
       "line": 703,
       "matched_printed_name": "Battle Cry",
@@ -386,7 +386,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/attack_transition_model.py",
+      "file": "quorune/attack_transition_model.py",
       "in_condition": false,
       "line": 704,
       "matched_printed_name": "Melee",
@@ -395,7 +395,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/card_programs/commands.py",
+      "file": "quorune/card_programs/commands.py",
       "in_condition": true,
       "line": 303,
       "matched_printed_name": "Override",
@@ -404,7 +404,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/card_programs/commands.py",
+      "file": "quorune/card_programs/commands.py",
       "in_condition": true,
       "line": 304,
       "matched_printed_name": "Override",
@@ -413,7 +413,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/card_programs/commands.py",
+      "file": "quorune/card_programs/commands.py",
       "in_condition": false,
       "line": 365,
       "matched_printed_name": "Error",
@@ -422,7 +422,7 @@
     },
     {
       "column": 11,
-      "file": "mtg_commander_sim/card_programs/model.py",
+      "file": "quorune/card_programs/model.py",
       "in_condition": false,
       "line": 225,
       "matched_printed_name": "Copy",
@@ -431,7 +431,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/card_programs/trust.py",
+      "file": "quorune/card_programs/trust.py",
       "in_condition": false,
       "line": 47,
       "matched_printed_name": "Status",
@@ -440,7 +440,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/carddb.py",
+      "file": "quorune/carddb.py",
       "in_condition": false,
       "line": 87,
       "matched_printed_name": "Vigilance",
@@ -449,7 +449,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/choice_forms.py",
+      "file": "quorune/choice_forms.py",
       "in_condition": true,
       "line": 190,
       "matched_printed_name": "Order",
@@ -458,7 +458,7 @@
     },
     {
       "column": 18,
-      "file": "mtg_commander_sim/choice_forms.py",
+      "file": "quorune/choice_forms.py",
       "in_condition": false,
       "line": 192,
       "matched_printed_name": "Order",
@@ -467,7 +467,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/choice_forms.py",
+      "file": "quorune/choice_forms.py",
       "in_condition": false,
       "line": 192,
       "matched_printed_name": "Order",
@@ -476,7 +476,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/choice_forms.py",
+      "file": "quorune/choice_forms.py",
       "in_condition": false,
       "line": 232,
       "matched_printed_name": "Order",
@@ -485,7 +485,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/choice_forms.py",
+      "file": "quorune/choice_forms.py",
       "in_condition": false,
       "line": 232,
       "matched_printed_name": "Order",
@@ -494,7 +494,7 @@
     },
     {
       "column": 59,
-      "file": "mtg_commander_sim/choice_forms.py",
+      "file": "quorune/choice_forms.py",
       "in_condition": true,
       "line": 379,
       "matched_printed_name": "Order",
@@ -503,7 +503,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 88,
       "matched_printed_name": "Reason",
@@ -512,7 +512,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 96,
       "matched_printed_name": "Reason",
@@ -521,7 +521,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 119,
       "matched_printed_name": "Reason",
@@ -530,7 +530,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 151,
       "matched_printed_name": "Sensei's Divining Top",
@@ -539,7 +539,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 165,
       "matched_printed_name": "Reason",
@@ -548,7 +548,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 172,
       "matched_printed_name": "Recover",
@@ -557,7 +557,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 173,
       "matched_printed_name": "Reason",
@@ -566,7 +566,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 180,
       "matched_printed_name": "Reason",
@@ -575,7 +575,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 187,
       "matched_printed_name": "Reason",
@@ -584,7 +584,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 195,
       "matched_printed_name": "Recover",
@@ -593,7 +593,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 196,
       "matched_printed_name": "Reason",
@@ -602,7 +602,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 215,
       "matched_printed_name": "Reason",
@@ -611,7 +611,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 226,
       "matched_printed_name": "Reason",
@@ -620,7 +620,7 @@
     },
     {
       "column": 33,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": true,
       "line": 287,
       "matched_printed_name": "X",
@@ -629,7 +629,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 288,
       "matched_printed_name": "X",
@@ -638,7 +638,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 289,
       "matched_printed_name": "X",
@@ -647,7 +647,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 319,
       "matched_printed_name": "Reason",
@@ -656,7 +656,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 334,
       "matched_printed_name": "Reason",
@@ -665,7 +665,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 340,
       "matched_printed_name": "Reason",
@@ -674,7 +674,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 634,
       "matched_printed_name": "Oracle",
@@ -683,7 +683,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 824,
       "matched_printed_name": "Status",
@@ -692,7 +692,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 849,
       "matched_printed_name": "Arena",
@@ -701,7 +701,7 @@
     },
     {
       "column": 22,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 852,
       "matched_printed_name": "Status",
@@ -710,7 +710,7 @@
     },
     {
       "column": 19,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": true,
       "line": 977,
       "matched_printed_name": "Arena",
@@ -719,7 +719,7 @@
     },
     {
       "column": 33,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": true,
       "line": 980,
       "matched_printed_name": "Status",
@@ -728,7 +728,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": false,
       "line": 983,
       "matched_printed_name": "Integrity",
@@ -737,7 +737,7 @@
     },
     {
       "column": 33,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": true,
       "line": 1115,
       "matched_printed_name": "Status",
@@ -746,7 +746,7 @@
     },
     {
       "column": 19,
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "in_condition": true,
       "line": 1136,
       "matched_printed_name": "Oracle",
@@ -755,7 +755,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "in_condition": false,
       "line": 213,
       "matched_printed_name": "Error",
@@ -764,7 +764,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "in_condition": false,
       "line": 215,
       "matched_printed_name": "Error",
@@ -773,7 +773,7 @@
     },
     {
       "column": 33,
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "in_condition": true,
       "line": 587,
       "matched_printed_name": "Status",
@@ -782,7 +782,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "in_condition": true,
       "line": 587,
       "matched_printed_name": "Ready",
@@ -791,7 +791,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "in_condition": false,
       "line": 857,
       "matched_printed_name": "Reason",
@@ -800,7 +800,7 @@
     },
     {
       "column": 38,
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "in_condition": false,
       "line": 857,
       "matched_printed_name": "Reason",
@@ -809,7 +809,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "in_condition": false,
       "line": 1006,
       "matched_printed_name": "Error",
@@ -818,7 +818,7 @@
     },
     {
       "column": 11,
-      "file": "mtg_commander_sim/combat.py",
+      "file": "quorune/combat.py",
       "in_condition": false,
       "line": 10,
       "matched_printed_name": "Lifelink",
@@ -827,7 +827,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
+      "file": "quorune/compiler/ability_keyword_fragments.py",
       "in_condition": false,
       "line": 173,
       "matched_printed_name": "Battle Cry",
@@ -836,7 +836,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/compiler/ability_keyword_fragments.py",
+      "file": "quorune/compiler/ability_keyword_fragments.py",
       "in_condition": false,
       "line": 178,
       "matched_printed_name": "Melee",
@@ -845,7 +845,7 @@
     },
     {
       "column": 22,
-      "file": "mtg_commander_sim/damage.py",
+      "file": "quorune/damage.py",
       "in_condition": true,
       "line": 434,
       "matched_printed_name": "Toxic",
@@ -854,7 +854,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/damage.py",
+      "file": "quorune/damage.py",
       "in_condition": false,
       "line": 437,
       "matched_printed_name": "Toxic",
@@ -863,7 +863,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/damage.py",
+      "file": "quorune/damage.py",
       "in_condition": false,
       "line": 438,
       "matched_printed_name": "Toxic",
@@ -872,7 +872,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/damage.py",
+      "file": "quorune/damage.py",
       "in_condition": true,
       "line": 499,
       "matched_printed_name": "Toxic",
@@ -881,7 +881,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/damage.py",
+      "file": "quorune/damage.py",
       "in_condition": false,
       "line": 500,
       "matched_printed_name": "Toxic",
@@ -890,7 +890,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/damage.py",
+      "file": "quorune/damage.py",
       "in_condition": false,
       "line": 1442,
       "matched_printed_name": "Lifelink",
@@ -899,7 +899,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": false,
       "line": 35,
       "matched_printed_name": "Loss",
@@ -908,7 +908,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": true,
       "line": 554,
       "matched_printed_name": "Toxic",
@@ -917,7 +917,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": false,
       "line": 570,
       "matched_printed_name": "Toxic",
@@ -926,7 +926,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": true,
       "line": 659,
       "matched_printed_name": "Lifelink",
@@ -935,7 +935,7 @@
     },
     {
       "column": 22,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": false,
       "line": 682,
       "matched_printed_name": "Loss",
@@ -944,7 +944,7 @@
     },
     {
       "column": 18,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": false,
       "line": 699,
       "matched_printed_name": "Lifelink",
@@ -953,7 +953,7 @@
     },
     {
       "column": 46,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": false,
       "line": 801,
       "matched_printed_name": "Loss",
@@ -962,7 +962,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/damage_results.py",
+      "file": "quorune/damage_results.py",
       "in_condition": true,
       "line": 912,
       "matched_printed_name": "Loss",
@@ -971,7 +971,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 51,
       "matched_printed_name": "Companion",
@@ -980,7 +980,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 125,
       "matched_printed_name": "Companion",
@@ -989,7 +989,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 125,
       "matched_printed_name": "Companion",
@@ -998,7 +998,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 263,
       "matched_printed_name": "Companion",
@@ -1007,7 +1007,7 @@
     },
     {
       "column": 22,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 274,
       "matched_printed_name": "Companion",
@@ -1016,7 +1016,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 275,
       "matched_printed_name": "Companion",
@@ -1025,7 +1025,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 275,
       "matched_printed_name": "Companion",
@@ -1034,7 +1034,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/deck.py",
+      "file": "quorune/deck.py",
       "in_condition": false,
       "line": 587,
       "matched_printed_name": "Companion",
@@ -1043,7 +1043,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/declaration_costs.py",
+      "file": "quorune/declaration_costs.py",
       "in_condition": false,
       "line": 424,
       "matched_printed_name": "Attacking",
@@ -1052,7 +1052,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 23,
       "matched_printed_name": "Prohibit",
@@ -1061,7 +1061,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 245,
       "matched_printed_name": "Elves",
@@ -1070,7 +1070,7 @@
     },
     {
       "column": 13,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 245,
       "matched_printed_name": "Elf",
@@ -1079,7 +1079,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 246,
       "matched_printed_name": "Dwarf",
@@ -1088,7 +1088,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 247,
       "matched_printed_name": "Mouse",
@@ -1097,7 +1097,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 248,
       "matched_printed_name": "Ox",
@@ -1106,7 +1106,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 267,
       "matched_printed_name": "Six",
@@ -1115,7 +1115,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 353,
       "matched_printed_name": "Enchanted",
@@ -1124,7 +1124,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 500,
       "matched_printed_name": "Prohibit",
@@ -1133,7 +1133,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 693,
       "matched_printed_name": "Snow",
@@ -1142,7 +1142,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 1161,
       "matched_printed_name": "The Monarch",
@@ -1151,7 +1151,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 1815,
       "matched_printed_name": "Enchanted",
@@ -1160,7 +1160,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "in_condition": false,
       "line": 1821,
       "matched_printed_name": "Enchanted",
@@ -1169,7 +1169,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/destruction.py",
+      "file": "quorune/destruction.py",
       "in_condition": false,
       "line": 562,
       "matched_printed_name": "Reason",
@@ -1178,7 +1178,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/destruction.py",
+      "file": "quorune/destruction.py",
       "in_condition": false,
       "line": 577,
       "matched_printed_name": "Reason",
@@ -1187,7 +1187,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/destruction.py",
+      "file": "quorune/destruction.py",
       "in_condition": false,
       "line": 592,
       "matched_printed_name": "Reason",
@@ -1196,7 +1196,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_contracts.py",
+      "file": "quorune/effect_contracts.py",
       "in_condition": false,
       "line": 49,
       "matched_printed_name": "Exile",
@@ -1205,7 +1205,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_contracts.py",
+      "file": "quorune/effect_contracts.py",
       "in_condition": false,
       "line": 62,
       "matched_printed_name": "Sacrifice",
@@ -1214,7 +1214,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_contracts.py",
+      "file": "quorune/effect_contracts.py",
       "in_condition": false,
       "line": 111,
       "matched_printed_name": "Life",
@@ -1223,7 +1223,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 113,
       "matched_printed_name": "Reason",
@@ -1232,7 +1232,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 198,
       "matched_printed_name": "Reason",
@@ -1241,7 +1241,7 @@
     },
     {
       "column": 13,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 237,
       "matched_printed_name": "Treasure",
@@ -1250,7 +1250,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 273,
       "matched_printed_name": "Sacrifice",
@@ -1259,7 +1259,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 281,
       "matched_printed_name": "Sacrifice",
@@ -1268,7 +1268,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 503,
       "matched_printed_name": "Reason",
@@ -1277,7 +1277,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 536,
       "matched_printed_name": "Reason",
@@ -1286,7 +1286,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 612,
       "matched_printed_name": "Reason",
@@ -1295,7 +1295,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
+      "file": "quorune/effect_runtime/damage_life_and_turns.py",
       "in_condition": false,
       "line": 634,
       "matched_printed_name": "Exile",
@@ -1304,7 +1304,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 103,
       "matched_printed_name": "Attacking",
@@ -1313,7 +1313,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 203,
       "matched_printed_name": "Reason",
@@ -1322,7 +1322,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 263,
       "matched_printed_name": "Reason",
@@ -1331,7 +1331,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 322,
       "matched_printed_name": "Reason",
@@ -1340,7 +1340,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 401,
       "matched_printed_name": "Reason",
@@ -1349,7 +1349,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 449,
       "matched_printed_name": "Reason",
@@ -1358,7 +1358,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 491,
       "matched_printed_name": "Reason",
@@ -1367,7 +1367,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 551,
       "matched_printed_name": "Reason",
@@ -1376,7 +1376,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 572,
       "matched_printed_name": "Exile",
@@ -1385,7 +1385,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": true,
       "line": 578,
       "matched_printed_name": "Void",
@@ -1394,7 +1394,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 584,
       "matched_printed_name": "Exile",
@@ -1403,7 +1403,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 601,
       "matched_printed_name": "Exile",
@@ -1412,7 +1412,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 604,
       "matched_printed_name": "Reason",
@@ -1421,7 +1421,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 671,
       "matched_printed_name": "Reason",
@@ -1430,7 +1430,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 794,
       "matched_printed_name": "Library",
@@ -1439,7 +1439,7 @@
     },
     {
       "column": 59,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 822,
       "matched_printed_name": "Library",
@@ -1448,7 +1448,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 823,
       "matched_printed_name": "Library",
@@ -1457,7 +1457,7 @@
     },
     {
       "column": 67,
-      "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
+      "file": "quorune/effect_runtime/objects_stack_and_tokens.py",
       "in_condition": false,
       "line": 876,
       "matched_printed_name": "Reason",
@@ -1466,7 +1466,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/state_and_permissions.py",
+      "file": "quorune/effect_runtime/state_and_permissions.py",
       "in_condition": false,
       "line": 45,
       "matched_printed_name": "Reason",
@@ -1475,7 +1475,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/state_and_permissions.py",
+      "file": "quorune/effect_runtime/state_and_permissions.py",
       "in_condition": false,
       "line": 66,
       "matched_printed_name": "Reason",
@@ -1484,7 +1484,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/effect_runtime/state_and_permissions.py",
+      "file": "quorune/effect_runtime/state_and_permissions.py",
       "in_condition": false,
       "line": 120,
       "matched_printed_name": "Reason",
@@ -1493,7 +1493,7 @@
     },
     {
       "column": 36,
-      "file": "mtg_commander_sim/effect_runtime/state_and_permissions.py",
+      "file": "quorune/effect_runtime/state_and_permissions.py",
       "in_condition": false,
       "line": 267,
       "matched_printed_name": "Reason",
@@ -1502,7 +1502,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 39,
       "matched_printed_name": "Sacrifice",
@@ -1511,7 +1511,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 61,
       "matched_printed_name": "Sacrifice",
@@ -1520,7 +1520,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 63,
       "matched_printed_name": "Exile",
@@ -1529,7 +1529,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 63,
       "matched_printed_name": "Exile",
@@ -1538,7 +1538,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 118,
       "matched_printed_name": "Reason",
@@ -1547,7 +1547,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 151,
       "matched_printed_name": "Reason",
@@ -1556,7 +1556,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 311,
       "matched_printed_name": "Returned",
@@ -1565,7 +1565,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 367,
       "matched_printed_name": "Reason",
@@ -1574,7 +1574,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 385,
       "matched_printed_name": "Reason",
@@ -1583,7 +1583,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 428,
       "matched_printed_name": "Reason",
@@ -1592,7 +1592,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 512,
       "matched_printed_name": "Library",
@@ -1601,7 +1601,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 527,
       "matched_printed_name": "Reason",
@@ -1610,7 +1610,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 621,
       "matched_printed_name": "Exile",
@@ -1619,7 +1619,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 643,
       "matched_printed_name": "Exile",
@@ -1628,7 +1628,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 668,
       "matched_printed_name": "Exile",
@@ -1637,7 +1637,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 917,
       "matched_printed_name": "Exile",
@@ -1646,7 +1646,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 924,
       "matched_printed_name": "Library",
@@ -1655,7 +1655,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 970,
       "matched_printed_name": "Library",
@@ -1664,7 +1664,7 @@
     },
     {
       "column": 49,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 976,
       "matched_printed_name": "Library",
@@ -1673,7 +1673,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 998,
       "matched_printed_name": "Reason",
@@ -1682,7 +1682,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 1018,
       "matched_printed_name": "Library",
@@ -1691,7 +1691,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 1066,
       "matched_printed_name": "Exile",
@@ -1700,7 +1700,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
+      "file": "quorune/effect_runtime/zones_and_attachments.py",
       "in_condition": false,
       "line": 1076,
       "matched_printed_name": "Sacrifice",
@@ -1709,7 +1709,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 327,
       "matched_printed_name": "Exile",
@@ -1718,7 +1718,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 328,
       "matched_printed_name": "Library",
@@ -1727,7 +1727,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 711,
       "matched_printed_name": "Reason",
@@ -1736,7 +1736,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 815,
       "matched_printed_name": "Library",
@@ -1745,7 +1745,7 @@
     },
     {
       "column": 52,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 815,
       "matched_printed_name": "Exile",
@@ -1754,7 +1754,7 @@
     },
     {
       "column": 63,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 924,
       "matched_printed_name": "Life",
@@ -1763,7 +1763,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 1261,
       "matched_printed_name": "Exile",
@@ -1772,7 +1772,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1574,
       "matched_printed_name": "Library",
@@ -1781,7 +1781,7 @@
     },
     {
       "column": 78,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1574,
       "matched_printed_name": "Exile",
@@ -1790,7 +1790,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1580,
       "matched_printed_name": "Library",
@@ -1799,7 +1799,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1584,
       "matched_printed_name": "Library",
@@ -1808,7 +1808,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1584,
       "matched_printed_name": "Exile",
@@ -1817,7 +1817,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1658,
       "matched_printed_name": "Library",
@@ -1826,7 +1826,7 @@
     },
     {
       "column": 60,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1658,
       "matched_printed_name": "Library",
@@ -1835,7 +1835,7 @@
     },
     {
       "column": 59,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 1659,
       "matched_printed_name": "Library",
@@ -1844,7 +1844,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 1679,
       "matched_printed_name": "Reason",
@@ -1853,7 +1853,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 1798,
       "matched_printed_name": "Library",
@@ -1862,7 +1862,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 1835,
       "matched_printed_name": "Reason",
@@ -1871,7 +1871,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 1856,
       "matched_printed_name": "Reason",
@@ -1880,7 +1880,7 @@
     },
     {
       "column": 70,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 1868,
       "matched_printed_name": "Reason",
@@ -1889,7 +1889,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 1949,
       "matched_printed_name": "Exile",
@@ -1898,7 +1898,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2106,
       "matched_printed_name": "Reason",
@@ -1907,7 +1907,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2254,
       "matched_printed_name": "Library",
@@ -1916,7 +1916,7 @@
     },
     {
       "column": 38,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2255,
       "matched_printed_name": "Library",
@@ -1925,7 +1925,7 @@
     },
     {
       "column": 65,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2259,
       "matched_printed_name": "Reason",
@@ -1934,7 +1934,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2490,
       "matched_printed_name": "Lands",
@@ -1943,7 +1943,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2567,
       "matched_printed_name": "Pilot",
@@ -1952,7 +1952,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2575,
       "matched_printed_name": "Index",
@@ -1961,7 +1961,7 @@
     },
     {
       "column": 51,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2631,
       "matched_printed_name": "Index",
@@ -1970,7 +1970,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2647,
       "matched_printed_name": "Library",
@@ -1979,7 +1979,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2667,
       "matched_printed_name": "Pilot",
@@ -1988,7 +1988,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2708,
       "matched_printed_name": "Library",
@@ -1997,7 +1997,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2734,
       "matched_printed_name": "X",
@@ -2006,7 +2006,7 @@
     },
     {
       "column": 99,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2742,
       "matched_printed_name": "Turn",
@@ -2015,7 +2015,7 @@
     },
     {
       "column": 14,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2808,
       "matched_printed_name": "Turn",
@@ -2024,7 +2024,7 @@
     },
     {
       "column": 93,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2856,
       "matched_printed_name": "Reason",
@@ -2033,7 +2033,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2867,
       "matched_printed_name": "Stun",
@@ -2042,7 +2042,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2870,
       "matched_printed_name": "Stun",
@@ -2051,7 +2051,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2872,
       "matched_printed_name": "Stun",
@@ -2060,7 +2060,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2879,
       "matched_printed_name": "Stun",
@@ -2069,7 +2069,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 2880,
       "matched_printed_name": "Reason",
@@ -2078,7 +2078,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 3065,
       "matched_printed_name": "Seedborn Muse",
@@ -2087,7 +2087,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3084,
       "matched_printed_name": "Reason",
@@ -2096,7 +2096,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3084,
       "matched_printed_name": "Seedborn Muse",
@@ -2105,7 +2105,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3098,
       "matched_printed_name": "Reason",
@@ -2114,7 +2114,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3131,
       "matched_printed_name": "Pilot",
@@ -2123,7 +2123,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3180,
       "matched_printed_name": "Reason",
@@ -2132,7 +2132,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3376,
       "matched_printed_name": "Reason",
@@ -2141,7 +2141,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3602,
       "matched_printed_name": "Exile",
@@ -2150,7 +2150,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3628,
       "matched_printed_name": "Reason",
@@ -2159,7 +2159,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3689,
       "matched_printed_name": "Pilot",
@@ -2168,7 +2168,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3792,
       "matched_printed_name": "X",
@@ -2177,7 +2177,7 @@
     },
     {
       "column": 47,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 3976,
       "matched_printed_name": "Lands",
@@ -2186,7 +2186,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 4310,
       "matched_printed_name": "Pilot",
@@ -2195,7 +2195,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 4312,
       "matched_printed_name": "Order",
@@ -2204,7 +2204,7 @@
     },
     {
       "column": 107,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 4327,
       "matched_printed_name": "Order",
@@ -2213,7 +2213,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 4750,
       "matched_printed_name": "Life",
@@ -2222,7 +2222,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 4819,
       "matched_printed_name": "Life",
@@ -2231,7 +2231,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 4979,
       "matched_printed_name": "Zombie",
@@ -2240,7 +2240,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5150,
       "matched_printed_name": "Return",
@@ -2249,7 +2249,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5151,
       "matched_printed_name": "Exile",
@@ -2258,7 +2258,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5151,
       "matched_printed_name": "Exile",
@@ -2267,7 +2267,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5248,
       "matched_printed_name": "Plains",
@@ -2276,7 +2276,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5249,
       "matched_printed_name": "Island",
@@ -2285,7 +2285,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5250,
       "matched_printed_name": "Swamp",
@@ -2294,7 +2294,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5251,
       "matched_printed_name": "Mountain",
@@ -2303,7 +2303,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5252,
       "matched_printed_name": "Forest",
@@ -2312,7 +2312,7 @@
     },
     {
       "column": 56,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5258,
       "matched_printed_name": "Library",
@@ -2321,7 +2321,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 5865,
       "matched_printed_name": "X",
@@ -2330,7 +2330,7 @@
     },
     {
       "column": 60,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 5946,
       "matched_printed_name": "X",
@@ -2339,7 +2339,7 @@
     },
     {
       "column": 55,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 5955,
       "matched_printed_name": "X",
@@ -2348,7 +2348,7 @@
     },
     {
       "column": 58,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 6120,
       "matched_printed_name": "Lands",
@@ -2357,7 +2357,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 6317,
       "matched_printed_name": "Exile",
@@ -2366,7 +2366,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 6561,
       "matched_printed_name": "Exile",
@@ -2375,7 +2375,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 6562,
       "matched_printed_name": "Void",
@@ -2384,7 +2384,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7085,
       "matched_printed_name": "Pilot",
@@ -2393,7 +2393,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7086,
       "matched_printed_name": "Reason",
@@ -2402,7 +2402,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7120,
       "matched_printed_name": "Pilot",
@@ -2411,7 +2411,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7221,
       "matched_printed_name": "Pilot",
@@ -2420,7 +2420,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7376,
       "matched_printed_name": "Exile",
@@ -2429,7 +2429,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 7380,
       "matched_printed_name": "Exile",
@@ -2438,7 +2438,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7442,
       "matched_printed_name": "Reason",
@@ -2447,7 +2447,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7509,
       "matched_printed_name": "Pilot",
@@ -2456,7 +2456,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 7577,
       "matched_printed_name": "Exile",
@@ -2465,7 +2465,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7626,
       "matched_printed_name": "Exile",
@@ -2474,7 +2474,7 @@
     },
     {
       "column": 33,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7634,
       "matched_printed_name": "Exile",
@@ -2483,7 +2483,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7685,
       "matched_printed_name": "Pilot",
@@ -2492,7 +2492,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7792,
       "matched_printed_name": "Return",
@@ -2501,7 +2501,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7801,
       "matched_printed_name": "Return",
@@ -2510,7 +2510,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 7852,
       "matched_printed_name": "Reason",
@@ -2519,7 +2519,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8004,
       "matched_printed_name": "Pilot",
@@ -2528,7 +2528,7 @@
     },
     {
       "column": 62,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8101,
       "matched_printed_name": "Copy",
@@ -2537,7 +2537,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 8182,
       "matched_printed_name": "Library",
@@ -2546,7 +2546,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 8186,
       "matched_printed_name": "Exile",
@@ -2555,7 +2555,7 @@
     },
     {
       "column": 63,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8196,
       "matched_printed_name": "Copy",
@@ -2564,7 +2564,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8339,
       "matched_printed_name": "Copy",
@@ -2573,7 +2573,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8381,
       "matched_printed_name": "Copied",
@@ -2582,7 +2582,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8386,
       "matched_printed_name": "Reason",
@@ -2591,7 +2591,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8465,
       "matched_printed_name": "Library",
@@ -2600,7 +2600,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8658,
       "matched_printed_name": "Reason",
@@ -2609,7 +2609,7 @@
     },
     {
       "column": 46,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8771,
       "matched_printed_name": "Index",
@@ -2618,7 +2618,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8786,
       "matched_printed_name": "Index",
@@ -2627,7 +2627,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8825,
       "matched_printed_name": "Reason",
@@ -2636,7 +2636,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 8938,
       "matched_printed_name": "Copy",
@@ -2645,7 +2645,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9080,
       "matched_printed_name": "Plains",
@@ -2654,7 +2654,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9080,
       "matched_printed_name": "Island",
@@ -2663,7 +2663,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9080,
       "matched_printed_name": "Swamp",
@@ -2672,7 +2672,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9080,
       "matched_printed_name": "Mountain",
@@ -2681,7 +2681,7 @@
     },
     {
       "column": 66,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9080,
       "matched_printed_name": "Forest",
@@ -2690,7 +2690,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9091,
       "matched_printed_name": "Library",
@@ -2699,7 +2699,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 9099,
       "matched_printed_name": "Library",
@@ -2708,7 +2708,7 @@
     },
     {
       "column": 57,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 9099,
       "matched_printed_name": "Exile",
@@ -2717,7 +2717,7 @@
     },
     {
       "column": 48,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9150,
       "matched_printed_name": "Library",
@@ -2726,7 +2726,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9158,
       "matched_printed_name": "Library",
@@ -2735,7 +2735,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9214,
       "matched_printed_name": "Pilot",
@@ -2744,7 +2744,7 @@
     },
     {
       "column": 48,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9320,
       "matched_printed_name": "Library",
@@ -2753,7 +2753,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9328,
       "matched_printed_name": "Library",
@@ -2762,7 +2762,7 @@
     },
     {
       "column": 36,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9377,
       "matched_printed_name": "Library",
@@ -2771,7 +2771,7 @@
     },
     {
       "column": 36,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9379,
       "matched_printed_name": "Library",
@@ -2780,7 +2780,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 9384,
       "matched_printed_name": "Exile",
@@ -2789,7 +2789,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 9385,
       "matched_printed_name": "Library",
@@ -2798,7 +2798,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9456,
       "matched_printed_name": "Exile",
@@ -2807,7 +2807,7 @@
     },
     {
       "column": 50,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9471,
       "matched_printed_name": "Library",
@@ -2816,7 +2816,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9608,
       "matched_printed_name": "Pilot",
@@ -2825,7 +2825,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9646,
       "matched_printed_name": "Sacrifice",
@@ -2834,7 +2834,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9655,
       "matched_printed_name": "Sacrifice",
@@ -2843,7 +2843,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9657,
       "matched_printed_name": "Exile",
@@ -2852,7 +2852,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9657,
       "matched_printed_name": "Exile",
@@ -2861,7 +2861,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 9665,
       "matched_printed_name": "Exile",
@@ -2870,7 +2870,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": true,
       "line": 9803,
       "matched_printed_name": "Prohibit",
@@ -2879,7 +2879,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 11046,
       "matched_printed_name": "Pilot",
@@ -2888,7 +2888,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 11519,
       "matched_printed_name": "Pilot",
@@ -2897,7 +2897,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 11712,
       "matched_printed_name": "Pilot",
@@ -2906,7 +2906,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12346,
       "matched_printed_name": "Reason",
@@ -2915,7 +2915,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12394,
       "matched_printed_name": "Reason",
@@ -2924,7 +2924,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12402,
       "matched_printed_name": "Pilot",
@@ -2933,7 +2933,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12765,
       "matched_printed_name": "Pilot",
@@ -2942,7 +2942,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12846,
       "matched_printed_name": "Reason",
@@ -2951,7 +2951,7 @@
     },
     {
       "column": 55,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12907,
       "matched_printed_name": "Exile",
@@ -2960,7 +2960,7 @@
     },
     {
       "column": 86,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12911,
       "matched_printed_name": "Reason",
@@ -2969,7 +2969,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12925,
       "matched_printed_name": "Reason",
@@ -2978,7 +2978,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 12980,
       "matched_printed_name": "Reason",
@@ -2987,7 +2987,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 13099,
       "matched_printed_name": "Reason",
@@ -2996,7 +2996,7 @@
     },
     {
       "column": 160,
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "in_condition": false,
       "line": 13156,
       "matched_printed_name": "Reason",
@@ -3005,7 +3005,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/mana.py",
+      "file": "quorune/mana.py",
       "in_condition": false,
       "line": 172,
       "matched_printed_name": "Sacrifice",
@@ -3014,7 +3014,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/mechanic_contracts.py",
+      "file": "quorune/mechanic_contracts.py",
       "in_condition": false,
       "line": 169,
       "matched_printed_name": "Copy",
@@ -3023,7 +3023,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/model.py",
+      "file": "quorune/model.py",
       "in_condition": false,
       "line": 18,
       "matched_printed_name": "Library",
@@ -3032,7 +3032,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/model.py",
+      "file": "quorune/model.py",
       "in_condition": false,
       "line": 22,
       "matched_printed_name": "Exile",
@@ -3041,7 +3041,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/model.py",
+      "file": "quorune/model.py",
       "in_condition": false,
       "line": 36,
       "matched_printed_name": "Pilot",
@@ -3050,7 +3050,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/model.py",
+      "file": "quorune/model.py",
       "in_condition": false,
       "line": 275,
       "matched_printed_name": "Library",
@@ -3059,7 +3059,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/model.py",
+      "file": "quorune/model.py",
       "in_condition": false,
       "line": 279,
       "matched_printed_name": "Exile",
@@ -3068,7 +3068,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/object_query.py",
+      "file": "quorune/object_query.py",
       "in_condition": false,
       "line": 37,
       "matched_printed_name": "Counters",
@@ -3077,7 +3077,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/oracle_ir.py",
+      "file": "quorune/oracle_ir.py",
       "in_condition": false,
       "line": 181,
       "matched_printed_name": "Life",
@@ -3086,7 +3086,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "in_condition": true,
       "line": 69,
       "matched_printed_name": "Pilot",
@@ -3095,7 +3095,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "in_condition": true,
       "line": 153,
       "matched_printed_name": "Pilot",
@@ -3104,7 +3104,7 @@
     },
     {
       "column": 50,
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "in_condition": false,
       "line": 184,
       "matched_printed_name": "Pilot",
@@ -3113,7 +3113,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "in_condition": true,
       "line": 187,
       "matched_printed_name": "Pilot",
@@ -3122,7 +3122,7 @@
     },
     {
       "column": 48,
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "in_condition": false,
       "line": 202,
       "matched_printed_name": "Pilot",
@@ -3131,7 +3131,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/pilot.py",
+      "file": "quorune/pilot.py",
       "in_condition": false,
       "line": 27,
       "matched_printed_name": "Recover",
@@ -3140,7 +3140,7 @@
     },
     {
       "column": 70,
-      "file": "mtg_commander_sim/pilot.py",
+      "file": "quorune/pilot.py",
       "in_condition": false,
       "line": 84,
       "matched_printed_name": "Reason",
@@ -3149,7 +3149,7 @@
     },
     {
       "column": 33,
-      "file": "mtg_commander_sim/pilot.py",
+      "file": "quorune/pilot.py",
       "in_condition": false,
       "line": 104,
       "matched_printed_name": "Reason",
@@ -3158,7 +3158,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/pilot.py",
+      "file": "quorune/pilot.py",
       "in_condition": false,
       "line": 189,
       "matched_printed_name": "Reason",
@@ -3167,7 +3167,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/pilot.py",
+      "file": "quorune/pilot.py",
       "in_condition": false,
       "line": 295,
       "matched_printed_name": "Memory",
@@ -3176,7 +3176,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/pilot.py",
+      "file": "quorune/pilot.py",
       "in_condition": false,
       "line": 347,
       "matched_printed_name": "Memory",
@@ -3185,7 +3185,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/pilot.py",
+      "file": "quorune/pilot.py",
       "in_condition": false,
       "line": 614,
       "matched_printed_name": "Error",
@@ -3194,7 +3194,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 40,
       "matched_printed_name": "Flash",
@@ -3203,7 +3203,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 46,
       "matched_printed_name": "Lifelink",
@@ -3212,7 +3212,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 51,
       "matched_printed_name": "Toxic",
@@ -3221,7 +3221,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 52,
       "matched_printed_name": "Vigilance",
@@ -3230,7 +3230,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 58,
       "matched_printed_name": "Channel",
@@ -3239,7 +3239,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 60,
       "matched_printed_name": "Flash",
@@ -3248,7 +3248,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 63,
       "matched_printed_name": "Overload",
@@ -3257,7 +3257,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 72,
       "matched_printed_name": "Cycling",
@@ -3266,7 +3266,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 74,
       "matched_printed_name": "Delirium",
@@ -3275,7 +3275,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 76,
       "matched_printed_name": "Dredge",
@@ -3284,7 +3284,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 80,
       "matched_printed_name": "Explore",
@@ -3293,7 +3293,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 81,
       "matched_printed_name": "Fabricate",
@@ -3302,7 +3302,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 88,
       "matched_printed_name": "Lifelink",
@@ -3311,7 +3311,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 97,
       "matched_printed_name": "Toxic",
@@ -3320,7 +3320,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 98,
       "matched_printed_name": "Vigilance",
@@ -3329,7 +3329,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 179,
       "matched_printed_name": "When",
@@ -3338,7 +3338,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": true,
       "line": 201,
       "matched_printed_name": "When",
@@ -3347,7 +3347,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": true,
       "line": 213,
       "matched_printed_name": "Cycling",
@@ -3356,7 +3356,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": true,
       "line": 304,
       "matched_printed_name": "X",
@@ -3365,7 +3365,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 334,
       "matched_printed_name": "When",
@@ -3374,7 +3374,7 @@
     },
     {
       "column": 7,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": true,
       "line": 338,
       "matched_printed_name": "When",
@@ -3383,7 +3383,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": true,
       "line": 399,
       "matched_printed_name": "Overload",
@@ -3392,7 +3392,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": true,
       "line": 651,
       "matched_printed_name": "When",
@@ -3401,7 +3401,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 713,
       "matched_printed_name": "Status",
@@ -3410,7 +3410,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 727,
       "matched_printed_name": "Status",
@@ -3419,7 +3419,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 734,
       "matched_printed_name": "Reason",
@@ -3428,7 +3428,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 847,
       "matched_printed_name": "Status",
@@ -3437,7 +3437,7 @@
     },
     {
       "column": 36,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 861,
       "matched_printed_name": "Status",
@@ -3446,7 +3446,7 @@
     },
     {
       "column": 49,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 863,
       "matched_printed_name": "Status",
@@ -3455,7 +3455,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 876,
       "matched_printed_name": "Status",
@@ -3464,7 +3464,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "in_condition": false,
       "line": 975,
       "matched_printed_name": "Status",
@@ -3473,7 +3473,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": true,
       "line": 155,
       "matched_printed_name": "Exile",
@@ -3482,7 +3482,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": false,
       "line": 353,
       "matched_printed_name": "Protect",
@@ -3491,7 +3491,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": false,
       "line": 414,
       "matched_printed_name": "Life",
@@ -3500,7 +3500,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": false,
       "line": 419,
       "matched_printed_name": "Library",
@@ -3509,7 +3509,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": false,
       "line": 421,
       "matched_printed_name": "Lands",
@@ -3518,7 +3518,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": false,
       "line": 424,
       "matched_printed_name": "Exile",
@@ -3527,7 +3527,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": false,
       "line": 457,
       "matched_printed_name": "Library",
@@ -3536,7 +3536,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/projection.py",
+      "file": "quorune/projection.py",
       "in_condition": false,
       "line": 543,
       "matched_printed_name": "Turn",
@@ -3545,7 +3545,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/protocol.py",
+      "file": "quorune/protocol.py",
       "in_condition": false,
       "line": 59,
       "matched_printed_name": "Remove",
@@ -3554,7 +3554,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/protocol.py",
+      "file": "quorune/protocol.py",
       "in_condition": false,
       "line": 87,
       "matched_printed_name": "Remove",
@@ -3563,7 +3563,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/protocol.py",
+      "file": "quorune/protocol.py",
       "in_condition": true,
       "line": 141,
       "matched_printed_name": "Remove",
@@ -3572,7 +3572,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/protocol.py",
+      "file": "quorune/protocol.py",
       "in_condition": true,
       "line": 155,
       "matched_printed_name": "Remove",
@@ -3581,7 +3581,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/protocol.py",
+      "file": "quorune/protocol.py",
       "in_condition": true,
       "line": 172,
       "matched_printed_name": "Remove",
@@ -3590,7 +3590,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 41,
       "matched_printed_name": "Corrupt",
@@ -3599,7 +3599,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 155,
       "matched_printed_name": "Turn",
@@ -3608,7 +3608,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 176,
       "matched_printed_name": "Turn",
@@ -3617,7 +3617,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 246,
       "matched_printed_name": "Pilot",
@@ -3626,7 +3626,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 313,
       "matched_printed_name": "Reason",
@@ -3635,7 +3635,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 348,
       "matched_printed_name": "Reason",
@@ -3644,7 +3644,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": true,
       "line": 354,
       "matched_printed_name": "Pilot",
@@ -3653,7 +3653,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 651,
       "matched_printed_name": "Pilot",
@@ -3662,7 +3662,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 768,
       "matched_printed_name": "Status",
@@ -3671,7 +3671,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1206,
       "matched_printed_name": "Status",
@@ -3680,7 +3680,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1373,
       "matched_printed_name": "Status",
@@ -3689,7 +3689,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1373,
       "matched_printed_name": "Status",
@@ -3698,7 +3698,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": true,
       "line": 1475,
       "matched_printed_name": "Status",
@@ -3707,7 +3707,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1507,
       "matched_printed_name": "Status",
@@ -3716,7 +3716,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1507,
       "matched_printed_name": "Status",
@@ -3725,7 +3725,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1600,
       "matched_printed_name": "Pilot",
@@ -3734,7 +3734,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1610,
       "matched_printed_name": "Reason",
@@ -3743,7 +3743,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1620,
       "matched_printed_name": "Turn",
@@ -3752,7 +3752,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1653,
       "matched_printed_name": "Status",
@@ -3761,7 +3761,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1653,
       "matched_printed_name": "Status",
@@ -3770,7 +3770,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1681,
       "matched_printed_name": "Status",
@@ -3779,7 +3779,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "in_condition": false,
       "line": 1705,
       "matched_printed_name": "Warning",
@@ -3788,7 +3788,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/replacement/application.py",
+      "file": "quorune/replacement/application.py",
       "in_condition": false,
       "line": 277,
       "matched_printed_name": "Reason",
@@ -3797,7 +3797,7 @@
     },
     {
       "column": 38,
-      "file": "mtg_commander_sim/replacement/application.py",
+      "file": "quorune/replacement/application.py",
       "in_condition": false,
       "line": 277,
       "matched_printed_name": "Reason",
@@ -3806,7 +3806,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 115,
       "matched_printed_name": "Forest",
@@ -3815,7 +3815,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 131,
       "matched_printed_name": "Turn",
@@ -3824,7 +3824,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 187,
       "matched_printed_name": "Status",
@@ -3833,7 +3833,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": true,
       "line": 216,
       "matched_printed_name": "When",
@@ -3842,7 +3842,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": true,
       "line": 232,
       "matched_printed_name": "When",
@@ -3851,7 +3851,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 253,
       "matched_printed_name": "Status",
@@ -3860,7 +3860,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 254,
       "matched_printed_name": "Reason",
@@ -3869,7 +3869,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 277,
       "matched_printed_name": "Status",
@@ -3878,7 +3878,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 299,
       "matched_printed_name": "Life",
@@ -3887,7 +3887,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 335,
       "matched_printed_name": "X",
@@ -3896,7 +3896,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 336,
       "matched_printed_name": "X",
@@ -3905,7 +3905,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 367,
       "matched_printed_name": "Life",
@@ -3914,7 +3914,7 @@
     },
     {
       "column": 68,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 393,
       "matched_printed_name": "Reason",
@@ -3923,7 +3923,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 398,
       "matched_printed_name": "Life",
@@ -3932,7 +3932,7 @@
     },
     {
       "column": 53,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 435,
       "matched_printed_name": "Reason",
@@ -3941,7 +3941,7 @@
     },
     {
       "column": 60,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 441,
       "matched_printed_name": "Reason",
@@ -3950,7 +3950,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 508,
       "matched_printed_name": "Reason",
@@ -3959,7 +3959,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": true,
       "line": 530,
       "matched_printed_name": "Reason",
@@ -3968,7 +3968,7 @@
     },
     {
       "column": 9,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 552,
       "matched_printed_name": "Turn",
@@ -3977,7 +3977,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 572,
       "matched_printed_name": "Lands",
@@ -3986,7 +3986,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 572,
       "matched_printed_name": "Spells",
@@ -3995,7 +3995,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 585,
       "matched_printed_name": "Turn",
@@ -4004,7 +4004,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": true,
       "line": 603,
       "matched_printed_name": "Reason",
@@ -4013,7 +4013,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 609,
       "matched_printed_name": "Lands",
@@ -4022,7 +4022,7 @@
     },
     {
       "column": 65,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 609,
       "matched_printed_name": "Spells",
@@ -4031,7 +4031,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 613,
       "matched_printed_name": "Turn",
@@ -4040,7 +4040,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 629,
       "matched_printed_name": "Turn",
@@ -4049,7 +4049,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 644,
       "matched_printed_name": "Smoke",
@@ -4058,7 +4058,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": true,
       "line": 744,
       "matched_printed_name": "Status",
@@ -4067,7 +4067,7 @@
     },
     {
       "column": 54,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 765,
       "matched_printed_name": "Pilot",
@@ -4076,7 +4076,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 771,
       "matched_printed_name": "Reason",
@@ -4085,7 +4085,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 772,
       "matched_printed_name": "Reason",
@@ -4094,7 +4094,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": true,
       "line": 857,
       "matched_printed_name": "Status",
@@ -4103,7 +4103,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 932,
       "matched_printed_name": "Turn",
@@ -4112,7 +4112,7 @@
     },
     {
       "column": 47,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 936,
       "matched_printed_name": "Turn",
@@ -4121,7 +4121,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 944,
       "matched_printed_name": "Reason",
@@ -4130,7 +4130,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 944,
       "matched_printed_name": "Reason",
@@ -4139,7 +4139,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1013,
       "matched_printed_name": "Turn",
@@ -4148,7 +4148,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1026,
       "matched_printed_name": "Why",
@@ -4157,7 +4157,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1051,
       "matched_printed_name": "Turn",
@@ -4166,7 +4166,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1051,
       "matched_printed_name": "Turn",
@@ -4175,7 +4175,7 @@
     },
     {
       "column": 46,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1070,
       "matched_printed_name": "Status",
@@ -4184,7 +4184,7 @@
     },
     {
       "column": 59,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1121,
       "matched_printed_name": "Pilot",
@@ -4193,7 +4193,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1204,
       "matched_printed_name": "Status",
@@ -4202,7 +4202,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1239,
       "matched_printed_name": "Status",
@@ -4211,7 +4211,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1240,
       "matched_printed_name": "Status",
@@ -4220,7 +4220,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1251,
       "matched_printed_name": "Turn",
@@ -4229,7 +4229,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1252,
       "matched_printed_name": "Reason",
@@ -4238,7 +4238,7 @@
     },
     {
       "column": 48,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1252,
       "matched_printed_name": "Reason",
@@ -4247,7 +4247,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1344,
       "matched_printed_name": "Development",
@@ -4256,7 +4256,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1370,
       "matched_printed_name": "Turn",
@@ -4265,7 +4265,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1392,
       "matched_printed_name": "Turn",
@@ -4274,7 +4274,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1550,
       "matched_printed_name": "Warning",
@@ -4283,7 +4283,7 @@
     },
     {
       "column": 69,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1654,
       "matched_printed_name": "Status",
@@ -4292,7 +4292,7 @@
     },
     {
       "column": 64,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1687,
       "matched_printed_name": "Status",
@@ -4301,7 +4301,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": true,
       "line": 1691,
       "matched_printed_name": "Status",
@@ -4310,7 +4310,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1728,
       "matched_printed_name": "Turn",
@@ -4319,7 +4319,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1737,
       "matched_printed_name": "Turn",
@@ -4328,7 +4328,7 @@
     },
     {
       "column": 52,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1737,
       "matched_printed_name": "Turn",
@@ -4337,7 +4337,7 @@
     },
     {
       "column": 63,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1737,
       "matched_printed_name": "Turn",
@@ -4346,7 +4346,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "in_condition": false,
       "line": 1785,
       "matched_printed_name": "Reason",
@@ -4355,7 +4355,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/return_to_hand.py",
+      "file": "quorune/return_to_hand.py",
       "in_condition": false,
       "line": 277,
       "matched_printed_name": "Reason",
@@ -4364,7 +4364,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 59,
       "matched_printed_name": "Bound",
@@ -4373,7 +4373,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 358,
       "matched_printed_name": "Status",
@@ -4382,7 +4382,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 477,
       "matched_printed_name": "Status",
@@ -4391,7 +4391,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 827,
       "matched_printed_name": "Status",
@@ -4400,7 +4400,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 873,
       "matched_printed_name": "Status",
@@ -4409,7 +4409,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 876,
       "matched_printed_name": "Status",
@@ -4418,7 +4418,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 894,
       "matched_printed_name": "Status",
@@ -4427,7 +4427,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 899,
       "matched_printed_name": "Status",
@@ -4436,7 +4436,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 902,
       "matched_printed_name": "Status",
@@ -4445,7 +4445,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 918,
       "matched_printed_name": "Status",
@@ -4454,7 +4454,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 919,
       "matched_printed_name": "Status",
@@ -4463,7 +4463,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 922,
       "matched_printed_name": "Status",
@@ -4472,7 +4472,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 934,
       "matched_printed_name": "Status",
@@ -4481,7 +4481,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 1049,
       "matched_printed_name": "Sentinel",
@@ -4490,7 +4490,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 1060,
       "matched_printed_name": "Sentinel",
@@ -4499,7 +4499,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 1108,
       "matched_printed_name": "Status",
@@ -4508,7 +4508,7 @@
     },
     {
       "column": 39,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 1121,
       "matched_printed_name": "Oracle",
@@ -4517,7 +4517,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 1214,
       "matched_printed_name": "Status",
@@ -4526,7 +4526,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": true,
       "line": 1279,
       "matched_printed_name": "Oracle",
@@ -4535,7 +4535,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 1285,
       "matched_printed_name": "Oracle",
@@ -4544,7 +4544,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/reusable_pieces/generation.py",
+      "file": "quorune/reusable_pieces/generation.py",
       "in_condition": false,
       "line": 1501,
       "matched_printed_name": "Oracle",
@@ -4553,7 +4553,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 99,
       "matched_printed_name": "Status",
@@ -4562,7 +4562,7 @@
     },
     {
       "column": 25,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 113,
       "matched_printed_name": "Status",
@@ -4571,7 +4571,7 @@
     },
     {
       "column": 66,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 121,
       "matched_printed_name": "Status",
@@ -4580,7 +4580,7 @@
     },
     {
       "column": 19,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": true,
       "line": 147,
       "matched_printed_name": "Status",
@@ -4589,7 +4589,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 348,
       "matched_printed_name": "Sentinel",
@@ -4598,7 +4598,7 @@
     },
     {
       "column": 58,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 353,
       "matched_printed_name": "Sentinel",
@@ -4607,7 +4607,7 @@
     },
     {
       "column": 38,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 469,
       "matched_printed_name": "Status",
@@ -4616,7 +4616,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 495,
       "matched_printed_name": "Status",
@@ -4625,7 +4625,7 @@
     },
     {
       "column": 51,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 495,
       "matched_printed_name": "Status",
@@ -4634,7 +4634,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 619,
       "matched_printed_name": "Status",
@@ -4643,7 +4643,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 620,
       "matched_printed_name": "Status",
@@ -4652,7 +4652,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 623,
       "matched_printed_name": "Status",
@@ -4661,7 +4661,7 @@
     },
     {
       "column": 55,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 623,
       "matched_printed_name": "Status",
@@ -4670,7 +4670,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 794,
       "matched_printed_name": "Status",
@@ -4679,7 +4679,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/reusable_pieces/reporting.py",
+      "file": "quorune/reusable_pieces/reporting.py",
       "in_condition": false,
       "line": 794,
       "matched_printed_name": "Status",
@@ -4688,7 +4688,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/rule_conformance.py",
+      "file": "quorune/rule_conformance.py",
       "in_condition": false,
       "line": 47,
       "matched_printed_name": "Status",
@@ -4697,7 +4697,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/rule_conformance.py",
+      "file": "quorune/rule_conformance.py",
       "in_condition": false,
       "line": 79,
       "matched_printed_name": "Status",
@@ -4706,7 +4706,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/rule_conformance.py",
+      "file": "quorune/rule_conformance.py",
       "in_condition": false,
       "line": 350,
       "matched_printed_name": "Status",
@@ -4715,7 +4715,7 @@
     },
     {
       "column": 36,
-      "file": "mtg_commander_sim/rule_conformance.py",
+      "file": "quorune/rule_conformance.py",
       "in_condition": false,
       "line": 482,
       "matched_printed_name": "Status",
@@ -4724,7 +4724,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/rule_conformance.py",
+      "file": "quorune/rule_conformance.py",
       "in_condition": false,
       "line": 508,
       "matched_printed_name": "Status",
@@ -4733,7 +4733,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 51,
       "matched_printed_name": "Exile",
@@ -4742,7 +4742,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 84,
       "matched_printed_name": "Status",
@@ -4751,7 +4751,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 85,
       "matched_printed_name": "Reason",
@@ -4760,7 +4760,7 @@
     },
     {
       "column": 38,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 107,
       "matched_printed_name": "Exile",
@@ -4769,7 +4769,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 157,
       "matched_printed_name": "Life",
@@ -4778,7 +4778,7 @@
     },
     {
       "column": 53,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 211,
       "matched_printed_name": "Exile",
@@ -4787,7 +4787,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 230,
       "matched_printed_name": "Status",
@@ -4796,7 +4796,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 231,
       "matched_printed_name": "Reason",
@@ -4805,7 +4805,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 294,
       "matched_printed_name": "Lands",
@@ -4814,7 +4814,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 302,
       "matched_printed_name": "Status",
@@ -4823,7 +4823,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/rules/action_catalog.py",
+      "file": "quorune/rules/action_catalog.py",
       "in_condition": false,
       "line": 307,
       "matched_printed_name": "Status",
@@ -4832,7 +4832,7 @@
     },
     {
       "column": 33,
-      "file": "mtg_commander_sim/rules/activation/availability.py",
+      "file": "quorune/rules/activation/availability.py",
       "in_condition": true,
       "line": 145,
       "matched_printed_name": "Stun",
@@ -4841,7 +4841,7 @@
     },
     {
       "column": 22,
-      "file": "mtg_commander_sim/rules/activation/commit.py",
+      "file": "quorune/rules/activation/commit.py",
       "in_condition": false,
       "line": 242,
       "matched_printed_name": "Exile",
@@ -4850,7 +4850,7 @@
     },
     {
       "column": 57,
-      "file": "mtg_commander_sim/rules/activation/model.py",
+      "file": "quorune/rules/activation/model.py",
       "in_condition": false,
       "line": 81,
       "matched_printed_name": "Exile",
@@ -4859,7 +4859,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/rules/activation/proposal.py",
+      "file": "quorune/rules/activation/proposal.py",
       "in_condition": false,
       "line": 411,
       "matched_printed_name": "Life",
@@ -4868,7 +4868,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/rules/activation/resolution.py",
+      "file": "quorune/rules/activation/resolution.py",
       "in_condition": false,
       "line": 46,
       "matched_printed_name": "Explore",
@@ -4877,7 +4877,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/rules/activation/resolution.py",
+      "file": "quorune/rules/activation/resolution.py",
       "in_condition": false,
       "line": 85,
       "matched_printed_name": "Life",
@@ -4886,7 +4886,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/rules/activation/resolution.py",
+      "file": "quorune/rules/activation/resolution.py",
       "in_condition": false,
       "line": 88,
       "matched_printed_name": "Reason",
@@ -4895,7 +4895,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/rules/capabilities.py",
+      "file": "quorune/rules/capabilities.py",
       "in_condition": false,
       "line": 179,
       "matched_printed_name": "Status",
@@ -4904,7 +4904,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/rules/capabilities.py",
+      "file": "quorune/rules/capabilities.py",
       "in_condition": false,
       "line": 416,
       "matched_printed_name": "Status",
@@ -4913,7 +4913,7 @@
     },
     {
       "column": 19,
-      "file": "mtg_commander_sim/rules/capabilities.py",
+      "file": "quorune/rules/capabilities.py",
       "in_condition": true,
       "line": 642,
       "matched_printed_name": "Status",
@@ -4922,7 +4922,7 @@
     },
     {
       "column": 59,
-      "file": "mtg_commander_sim/rules/capabilities.py",
+      "file": "quorune/rules/capabilities.py",
       "in_condition": false,
       "line": 643,
       "matched_printed_name": "Status",
@@ -4931,7 +4931,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/rules/capabilities.py",
+      "file": "quorune/rules/capabilities.py",
       "in_condition": false,
       "line": 661,
       "matched_printed_name": "Status",
@@ -4940,7 +4940,7 @@
     },
     {
       "column": 64,
-      "file": "mtg_commander_sim/rules/capabilities.py",
+      "file": "quorune/rules/capabilities.py",
       "in_condition": false,
       "line": 661,
       "matched_printed_name": "Status",
@@ -4949,7 +4949,7 @@
     },
     {
       "column": 30,
-      "file": "mtg_commander_sim/rules/casting/commit.py",
+      "file": "quorune/rules/casting/commit.py",
       "in_condition": false,
       "line": 158,
       "matched_printed_name": "X",
@@ -4958,7 +4958,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/rules/casting/commit.py",
+      "file": "quorune/rules/casting/commit.py",
       "in_condition": false,
       "line": 199,
       "matched_printed_name": "Exile",
@@ -4967,7 +4967,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/rules/casting/commit.py",
+      "file": "quorune/rules/casting/commit.py",
       "in_condition": false,
       "line": 460,
       "matched_printed_name": "X",
@@ -4976,7 +4976,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/rules/casting/commit.py",
+      "file": "quorune/rules/casting/commit.py",
       "in_condition": false,
       "line": 556,
       "matched_printed_name": "X",
@@ -4985,7 +4985,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 108,
       "matched_printed_name": "X",
@@ -4994,7 +4994,7 @@
     },
     {
       "column": 38,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 398,
       "matched_printed_name": "X",
@@ -5003,7 +5003,7 @@
     },
     {
       "column": 60,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 398,
       "matched_printed_name": "X",
@@ -5012,7 +5012,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 403,
       "matched_printed_name": "X",
@@ -5021,7 +5021,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 407,
       "matched_printed_name": "Life",
@@ -5030,7 +5030,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": true,
       "line": 410,
       "matched_printed_name": "Sacrifice",
@@ -5039,7 +5039,7 @@
     },
     {
       "column": 64,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 441,
       "matched_printed_name": "Index",
@@ -5048,7 +5048,7 @@
     },
     {
       "column": 22,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 499,
       "matched_printed_name": "X",
@@ -5057,7 +5057,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/rules/casting/costs.py",
+      "file": "quorune/rules/casting/costs.py",
       "in_condition": false,
       "line": 516,
       "matched_printed_name": "Exile",
@@ -5066,7 +5066,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/rules/casting/model.py",
+      "file": "quorune/rules/casting/model.py",
       "in_condition": false,
       "line": 104,
       "matched_printed_name": "X",
@@ -5075,7 +5075,7 @@
     },
     {
       "column": 22,
-      "file": "mtg_commander_sim/rules/evidence.py",
+      "file": "quorune/rules/evidence.py",
       "in_condition": true,
       "line": 211,
       "matched_printed_name": "Status",
@@ -5084,7 +5084,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/rules_corpus.py",
+      "file": "quorune/rules_corpus.py",
       "in_condition": false,
       "line": 900,
       "matched_printed_name": "Manifest",
@@ -5093,7 +5093,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/rules_corpus.py",
+      "file": "quorune/rules_corpus.py",
       "in_condition": false,
       "line": 934,
       "matched_printed_name": "Oracle",
@@ -5102,7 +5102,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/runtime.py",
+      "file": "quorune/runtime.py",
       "in_condition": false,
       "line": 177,
       "matched_printed_name": "Status",
@@ -5111,7 +5111,7 @@
     },
     {
       "column": 51,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 171,
       "matched_printed_name": "Returned",
@@ -5120,7 +5120,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 224,
       "matched_printed_name": "Sacrifice",
@@ -5129,7 +5129,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": true,
       "line": 225,
       "matched_printed_name": "Sacrifice",
@@ -5138,7 +5138,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 255,
       "matched_printed_name": "Library",
@@ -5147,7 +5147,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 262,
       "matched_printed_name": "Library",
@@ -5156,7 +5156,7 @@
     },
     {
       "column": 57,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 279,
       "matched_printed_name": "Library",
@@ -5165,7 +5165,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 296,
       "matched_printed_name": "Library",
@@ -5174,7 +5174,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": true,
       "line": 332,
       "matched_printed_name": "Sacrifice",
@@ -5183,7 +5183,7 @@
     },
     {
       "column": 43,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 359,
       "matched_printed_name": "Sacrifice",
@@ -5192,7 +5192,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": true,
       "line": 361,
       "matched_printed_name": "Sacrifice",
@@ -5201,7 +5201,7 @@
     },
     {
       "column": 48,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 401,
       "matched_printed_name": "Library",
@@ -5210,7 +5210,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 425,
       "matched_printed_name": "Library",
@@ -5219,7 +5219,7 @@
     },
     {
       "column": 69,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 440,
       "matched_printed_name": "Library",
@@ -5228,7 +5228,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/semantic_choices/artifact_exchange.py",
+      "file": "quorune/semantic_choices/artifact_exchange.py",
       "in_condition": false,
       "line": 470,
       "matched_printed_name": "Library",
@@ -5237,7 +5237,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/semantic_choices/engine_coordination.py",
+      "file": "quorune/semantic_choices/engine_coordination.py",
       "in_condition": false,
       "line": 38,
       "matched_printed_name": "Exile",
@@ -5246,7 +5246,7 @@
     },
     {
       "column": 69,
-      "file": "mtg_commander_sim/semantic_choices/engine_coordination.py",
+      "file": "quorune/semantic_choices/engine_coordination.py",
       "in_condition": false,
       "line": 370,
       "matched_printed_name": "Library",
@@ -5255,7 +5255,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/semantic_choices/engine_coordination.py",
+      "file": "quorune/semantic_choices/engine_coordination.py",
       "in_condition": false,
       "line": 568,
       "matched_printed_name": "Pilot",
@@ -5264,7 +5264,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 119,
       "matched_printed_name": "Reason",
@@ -5273,7 +5273,7 @@
     },
     {
       "column": 58,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 223,
       "matched_printed_name": "Library",
@@ -5282,7 +5282,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 228,
       "matched_printed_name": "Library",
@@ -5291,7 +5291,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 297,
       "matched_printed_name": "Library",
@@ -5300,7 +5300,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 339,
       "matched_printed_name": "Reason",
@@ -5309,7 +5309,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 360,
       "matched_printed_name": "Reason",
@@ -5318,7 +5318,7 @@
     },
     {
       "column": 58,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 373,
       "matched_printed_name": "Library",
@@ -5327,7 +5327,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 386,
       "matched_printed_name": "Library",
@@ -5336,7 +5336,7 @@
     },
     {
       "column": 58,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 418,
       "matched_printed_name": "Library",
@@ -5345,7 +5345,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 424,
       "matched_printed_name": "Library",
@@ -5354,7 +5354,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 457,
       "matched_printed_name": "Library",
@@ -5363,7 +5363,7 @@
     },
     {
       "column": 58,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 461,
       "matched_printed_name": "Library",
@@ -5372,7 +5372,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 636,
       "matched_printed_name": "Sacrifice",
@@ -5381,7 +5381,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 640,
       "matched_printed_name": "Sacrifice",
@@ -5390,7 +5390,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 752,
       "matched_printed_name": "Reason",
@@ -5399,7 +5399,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/semantic_choices/intent_host.py",
+      "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
       "line": 863,
       "matched_printed_name": "Reason",
@@ -5408,7 +5408,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 38,
       "matched_printed_name": "Explore",
@@ -5417,7 +5417,7 @@
     },
     {
       "column": 51,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 84,
       "matched_printed_name": "Library",
@@ -5426,7 +5426,7 @@
     },
     {
       "column": 40,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 104,
       "matched_printed_name": "Library",
@@ -5435,7 +5435,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 106,
       "matched_printed_name": "Explore",
@@ -5444,7 +5444,7 @@
     },
     {
       "column": 36,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 177,
       "matched_printed_name": "Library",
@@ -5453,7 +5453,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 179,
       "matched_printed_name": "Explore",
@@ -5462,7 +5462,7 @@
     },
     {
       "column": 57,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 258,
       "matched_printed_name": "Library",
@@ -5471,7 +5471,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 270,
       "matched_printed_name": "Library",
@@ -5480,7 +5480,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": true,
       "line": 314,
       "matched_printed_name": "Library",
@@ -5489,7 +5489,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 465,
       "matched_printed_name": "Reason",
@@ -5498,7 +5498,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/semantic_choices/library_and_hand.py",
+      "file": "quorune/semantic_choices/library_and_hand.py",
       "in_condition": false,
       "line": 544,
       "matched_printed_name": "Order",
@@ -5507,7 +5507,7 @@
     },
     {
       "column": 51,
-      "file": "mtg_commander_sim/semantic_choices/ordering.py",
+      "file": "quorune/semantic_choices/ordering.py",
       "in_condition": false,
       "line": 71,
       "matched_printed_name": "Library",
@@ -5516,7 +5516,7 @@
     },
     {
       "column": 23,
-      "file": "mtg_commander_sim/semantic_choices/ordering.py",
+      "file": "quorune/semantic_choices/ordering.py",
       "in_condition": false,
       "line": 89,
       "matched_printed_name": "Library",
@@ -5525,7 +5525,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/semantic_choices/ordering.py",
+      "file": "quorune/semantic_choices/ordering.py",
       "in_condition": false,
       "line": 106,
       "matched_printed_name": "Order",
@@ -5534,7 +5534,7 @@
     },
     {
       "column": 60,
-      "file": "mtg_commander_sim/semantic_choices/ordering.py",
+      "file": "quorune/semantic_choices/ordering.py",
       "in_condition": false,
       "line": 169,
       "matched_printed_name": "Order",
@@ -5543,7 +5543,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/semantic_choices/public_selection.py",
+      "file": "quorune/semantic_choices/public_selection.py",
       "in_condition": false,
       "line": 167,
       "matched_printed_name": "Reason",
@@ -5552,7 +5552,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/semantic_choices/public_selection.py",
+      "file": "quorune/semantic_choices/public_selection.py",
       "in_condition": false,
       "line": 261,
       "matched_printed_name": "Insect",
@@ -5561,7 +5561,7 @@
     },
     {
       "column": 41,
-      "file": "mtg_commander_sim/semantic_choices/registry.py",
+      "file": "quorune/semantic_choices/registry.py",
       "in_condition": true,
       "line": 75,
       "matched_printed_name": "Prepare",
@@ -5570,7 +5570,7 @@
     },
     {
       "column": 42,
-      "file": "mtg_commander_sim/semantic_choices/stack_targets.py",
+      "file": "quorune/semantic_choices/stack_targets.py",
       "in_condition": false,
       "line": 80,
       "matched_printed_name": "Copy",
@@ -5579,7 +5579,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/semantic_choices/stack_targets.py",
+      "file": "quorune/semantic_choices/stack_targets.py",
       "in_condition": true,
       "line": 88,
       "matched_printed_name": "Copy",
@@ -5588,7 +5588,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/semantic_choices/stack_targets.py",
+      "file": "quorune/semantic_choices/stack_targets.py",
       "in_condition": false,
       "line": 133,
       "matched_printed_name": "Copy",
@@ -5597,7 +5597,7 @@
     },
     {
       "column": 24,
-      "file": "mtg_commander_sim/semantic_choices/stack_targets.py",
+      "file": "quorune/semantic_choices/stack_targets.py",
       "in_condition": true,
       "line": 190,
       "matched_printed_name": "Copy",
@@ -5606,7 +5606,7 @@
     },
     {
       "column": 13,
-      "file": "mtg_commander_sim/semantic_choices/stack_targets.py",
+      "file": "quorune/semantic_choices/stack_targets.py",
       "in_condition": false,
       "line": 214,
       "matched_printed_name": "Copy",
@@ -5615,7 +5615,7 @@
     },
     {
       "column": 21,
-      "file": "mtg_commander_sim/semantic_choices/token_and_copy.py",
+      "file": "quorune/semantic_choices/token_and_copy.py",
       "in_condition": false,
       "line": 141,
       "matched_printed_name": "Servo",
@@ -5624,7 +5624,7 @@
     },
     {
       "column": 19,
-      "file": "mtg_commander_sim/semantic_runtime/destruction_handlers.py",
+      "file": "quorune/semantic_runtime/destruction_handlers.py",
       "in_condition": false,
       "line": 11,
       "matched_printed_name": "Reason",
@@ -5633,7 +5633,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/semantic_runtime/destruction_handlers.py",
+      "file": "quorune/semantic_runtime/destruction_handlers.py",
       "in_condition": false,
       "line": 48,
       "matched_printed_name": "Reason",
@@ -5642,7 +5642,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/semantic_runtime/effect_handlers.py",
+      "file": "quorune/semantic_runtime/effect_handlers.py",
       "in_condition": false,
       "line": 41,
       "matched_printed_name": "Reason",
@@ -5651,7 +5651,7 @@
     },
     {
       "column": 8,
-      "file": "mtg_commander_sim/semantic_runtime/executor.py",
+      "file": "quorune/semantic_runtime/executor.py",
       "in_condition": false,
       "line": 188,
       "matched_printed_name": "Reason",
@@ -5660,7 +5660,7 @@
     },
     {
       "column": 28,
-      "file": "mtg_commander_sim/semantic_runtime/executor.py",
+      "file": "quorune/semantic_runtime/executor.py",
       "in_condition": false,
       "line": 357,
       "matched_printed_name": "Counters",
@@ -5669,7 +5669,7 @@
     },
     {
       "column": 26,
-      "file": "mtg_commander_sim/semantic_runtime/generic.py",
+      "file": "quorune/semantic_runtime/generic.py",
       "in_condition": false,
       "line": 34,
       "matched_printed_name": "Reason",
@@ -5678,7 +5678,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/semantic_runtime/generic.py",
+      "file": "quorune/semantic_runtime/generic.py",
       "in_condition": false,
       "line": 141,
       "matched_printed_name": "Reason",
@@ -5687,7 +5687,7 @@
     },
     {
       "column": 35,
-      "file": "mtg_commander_sim/semantic_runtime/return_to_hand_handlers.py",
+      "file": "quorune/semantic_runtime/return_to_hand_handlers.py",
       "in_condition": false,
       "line": 10,
       "matched_printed_name": "Reason",
@@ -5696,7 +5696,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/semantic_runtime/return_to_hand_handlers.py",
+      "file": "quorune/semantic_runtime/return_to_hand_handlers.py",
       "in_condition": false,
       "line": 48,
       "matched_printed_name": "Reason",
@@ -5705,7 +5705,7 @@
     },
     {
       "column": 36,
-      "file": "mtg_commander_sim/semantic_runtime/stack_counter_handlers.py",
+      "file": "quorune/semantic_runtime/stack_counter_handlers.py",
       "in_condition": false,
       "line": 10,
       "matched_printed_name": "Reason",
@@ -5714,7 +5714,7 @@
     },
     {
       "column": 32,
-      "file": "mtg_commander_sim/semantic_runtime/stack_counter_handlers.py",
+      "file": "quorune/semantic_runtime/stack_counter_handlers.py",
       "in_condition": false,
       "line": 45,
       "matched_printed_name": "Reason",
@@ -5723,7 +5723,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/semantics.py",
+      "file": "quorune/semantics.py",
       "in_condition": false,
       "line": 77,
       "matched_printed_name": "Explore",
@@ -5732,7 +5732,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/semantics.py",
+      "file": "quorune/semantics.py",
       "in_condition": false,
       "line": 78,
       "matched_printed_name": "Fabricate",
@@ -5741,7 +5741,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/semantics.py",
+      "file": "quorune/semantics.py",
       "in_condition": false,
       "line": 80,
       "matched_printed_name": "Exile",
@@ -5750,7 +5750,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/semantics.py",
+      "file": "quorune/semantics.py",
       "in_condition": false,
       "line": 88,
       "matched_printed_name": "Life",
@@ -5759,7 +5759,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/semantics.py",
+      "file": "quorune/semantics.py",
       "in_condition": false,
       "line": 112,
       "matched_printed_name": "Sacrifice",
@@ -5768,7 +5768,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/semantics.py",
+      "file": "quorune/semantics.py",
       "in_condition": false,
       "line": 126,
       "matched_printed_name": "Reanimate",
@@ -5777,7 +5777,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 43,
       "matched_printed_name": "X",
@@ -5786,7 +5786,7 @@
     },
     {
       "column": 11,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 49,
       "matched_printed_name": "Order",
@@ -5795,7 +5795,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 144,
       "matched_printed_name": "Status",
@@ -5804,7 +5804,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 150,
       "matched_printed_name": "Warning",
@@ -5813,7 +5813,7 @@
     },
     {
       "column": 61,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 232,
       "matched_printed_name": "Pilot",
@@ -5822,7 +5822,7 @@
     },
     {
       "column": 31,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 305,
       "matched_printed_name": "Reason",
@@ -5831,7 +5831,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 457,
       "matched_printed_name": "Reason",
@@ -5840,7 +5840,7 @@
     },
     {
       "column": 34,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 575,
       "matched_printed_name": "Reason",
@@ -5849,7 +5849,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 591,
       "matched_printed_name": "Reason",
@@ -5858,7 +5858,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 646,
       "matched_printed_name": "Turn",
@@ -5867,7 +5867,7 @@
     },
     {
       "column": 27,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 715,
       "matched_printed_name": "Reason",
@@ -5876,7 +5876,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 731,
       "matched_printed_name": "Reason",
@@ -5885,7 +5885,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 778,
       "matched_printed_name": "Turn",
@@ -5894,7 +5894,7 @@
     },
     {
       "column": 20,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 835,
       "matched_printed_name": "X",
@@ -5903,7 +5903,7 @@
     },
     {
       "column": 37,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 835,
       "matched_printed_name": "X",
@@ -5912,7 +5912,7 @@
     },
     {
       "column": 29,
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "in_condition": false,
       "line": 1084,
       "matched_printed_name": "Status",
@@ -5921,7 +5921,7 @@
     },
     {
       "column": 44,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 44,
       "matched_printed_name": "Response",
@@ -5930,7 +5930,7 @@
     },
     {
       "column": 17,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 78,
       "matched_printed_name": "Treasure",
@@ -5939,7 +5939,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 112,
       "matched_printed_name": "Exile",
@@ -5948,7 +5948,7 @@
     },
     {
       "column": 16,
-      "file": "mtg_commander_sim/stack_counter.py",
+      "file": "quorune/stack_counter.py",
       "in_condition": false,
       "line": 98,
       "matched_printed_name": "Reason",
@@ -5957,7 +5957,7 @@
     },
     {
       "column": 12,
-      "file": "mtg_commander_sim/stack_counter.py",
+      "file": "quorune/stack_counter.py",
       "in_condition": false,
       "line": 135,
       "matched_printed_name": "Reason",
@@ -5966,7 +5966,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/state_based_actions.py",
+      "file": "quorune/state_based_actions.py",
       "in_condition": false,
       "line": 18,
       "matched_printed_name": "Six",
@@ -5975,7 +5975,7 @@
     },
     {
       "column": 4,
-      "file": "mtg_commander_sim/targets.py",
+      "file": "quorune/targets.py",
       "in_condition": false,
       "line": 11,
       "matched_printed_name": "Exile",
@@ -5984,7 +5984,7 @@
     },
     {
       "column": 45,
-      "file": "mtg_commander_sim/targets.py",
+      "file": "quorune/targets.py",
       "in_condition": false,
       "line": 202,
       "matched_printed_name": "Attacking",
@@ -6357,273 +6357,273 @@
   "review_adr": "docs/adr/0030-typed-stack-counter.md",
   "schema_version": 1,
   "scope": [
-    "mtg_commander_sim/__init__.py",
-    "mtg_commander_sim/__main__.py",
-    "mtg_commander_sim/abilities.py",
-    "mtg_commander_sim/ability_fragment_host.py",
-    "mtg_commander_sim/ability_fragments.py",
-    "mtg_commander_sim/aerial_blocking.py",
-    "mtg_commander_sim/arena.py",
-    "mtg_commander_sim/attachments.py",
-    "mtg_commander_sim/attack_transition_engine_adapter.py",
-    "mtg_commander_sim/attack_transition_model.py",
-    "mtg_commander_sim/attack_transition_resolution.py",
-    "mtg_commander_sim/aura/__init__.py",
-    "mtg_commander_sim/aura/compiler.py",
-    "mtg_commander_sim/aura/decisions.py",
-    "mtg_commander_sim/aura/grammar.py",
-    "mtg_commander_sim/aura/model.py",
-    "mtg_commander_sim/aura/runtime.py",
-    "mtg_commander_sim/block_transition_engine_adapter.py",
-    "mtg_commander_sim/block_transitions.py",
-    "mtg_commander_sim/bulk.py",
-    "mtg_commander_sim/card_programs/__init__.py",
-    "mtg_commander_sim/card_programs/adapters.py",
-    "mtg_commander_sim/card_programs/binding.py",
-    "mtg_commander_sim/card_programs/commands.py",
-    "mtg_commander_sim/card_programs/model.py",
-    "mtg_commander_sim/card_programs/runtime.py",
-    "mtg_commander_sim/card_programs/trust.py",
-    "mtg_commander_sim/card_programs/validation.py",
-    "mtg_commander_sim/carddb.py",
-    "mtg_commander_sim/carddb_characteristics.py",
-    "mtg_commander_sim/cast_timing.py",
-    "mtg_commander_sim/characteristic_evaluation.py",
-    "mtg_commander_sim/choice_forms.py",
-    "mtg_commander_sim/cli.py",
-    "mtg_commander_sim/client.py",
-    "mtg_commander_sim/codex_cli.py",
-    "mtg_commander_sim/color_set_mana_abilities.py",
-    "mtg_commander_sim/combat.py",
-    "mtg_commander_sim/combat_constraints.py",
-    "mtg_commander_sim/combat_damage_assignment.py",
-    "mtg_commander_sim/combat_damage_engine_adapter.py",
-    "mtg_commander_sim/combat_damage_events.py",
-    "mtg_commander_sim/combat_damage_projection.py",
-    "mtg_commander_sim/combat_damage_sequence.py",
-    "mtg_commander_sim/combat_damage_snapshot.py",
-    "mtg_commander_sim/combat_damage_trample.py",
-    "mtg_commander_sim/combat_damage_values.py",
-    "mtg_commander_sim/combat_evasion.py",
-    "mtg_commander_sim/combat_evasion_engine_adapter.py",
-    "mtg_commander_sim/combat_relationship_state.py",
-    "mtg_commander_sim/commander.py",
-    "mtg_commander_sim/compiled_ability_fragments.py",
-    "mtg_commander_sim/compiled_activated_abilities.py",
-    "mtg_commander_sim/compiled_cast_timing.py",
-    "mtg_commander_sim/compiled_cycling_abilities.py",
-    "mtg_commander_sim/compiled_mana_abilities.py",
-    "mtg_commander_sim/compiler/__init__.py",
-    "mtg_commander_sim/compiler/ability_keyword_fragments.py",
-    "mtg_commander_sim/compiler/activated_costs.py",
-    "mtg_commander_sim/compiler/activated_mana_nodes.py",
-    "mtg_commander_sim/compiler/continuous_templates.py",
-    "mtg_commander_sim/compiler/corpus_reporting.py",
-    "mtg_commander_sim/compiler/counter_templates.py",
-    "mtg_commander_sim/compiler/creature_subtypes.py",
-    "mtg_commander_sim/compiler/cycling_nodes.py",
-    "mtg_commander_sim/compiler/damage_templates.py",
-    "mtg_commander_sim/compiler/dependency_gate.py",
-    "mtg_commander_sim/compiler/destruction_templates.py",
-    "mtg_commander_sim/compiler/draw_templates.py",
-    "mtg_commander_sim/compiler/exile_templates.py",
-    "mtg_commander_sim/compiler/fixed_numbers.py",
-    "mtg_commander_sim/compiler/ir_model.py",
-    "mtg_commander_sim/compiler/keyword_nodes.py",
-    "mtg_commander_sim/compiler/keyword_templates.py",
-    "mtg_commander_sim/compiler/life_templates.py",
-    "mtg_commander_sim/compiler/prevention_templates.py",
-    "mtg_commander_sim/compiler/program_generation.py",
-    "mtg_commander_sim/compiler/return_to_hand_templates.py",
-    "mtg_commander_sim/compiler/runtime_templates.py",
-    "mtg_commander_sim/compiler/tap_state_templates.py",
-    "mtg_commander_sim/compiler/unlock_frontier.py",
-    "mtg_commander_sim/continuous_effect_model.py",
-    "mtg_commander_sim/continuous_effect_state.py",
-    "mtg_commander_sim/continuous_effects.py",
-    "mtg_commander_sim/counter_placement.py",
-    "mtg_commander_sim/counter_state.py",
-    "mtg_commander_sim/cycling_abilities.py",
-    "mtg_commander_sim/damage.py",
-    "mtg_commander_sim/damage_modifier_state.py",
-    "mtg_commander_sim/damage_prevention.py",
-    "mtg_commander_sim/damage_prevention_aftermath.py",
-    "mtg_commander_sim/damage_prevention_creation.py",
-    "mtg_commander_sim/damage_results.py",
-    "mtg_commander_sim/damage_source.py",
-    "mtg_commander_sim/damage_transaction.py",
-    "mtg_commander_sim/damage_values.py",
-    "mtg_commander_sim/deathtouch.py",
-    "mtg_commander_sim/deck.py",
-    "mtg_commander_sim/declaration_costs.py",
-    "mtg_commander_sim/declaration_restrictions.py",
-    "mtg_commander_sim/defender.py",
-    "mtg_commander_sim/delayed_triggers.py",
-    "mtg_commander_sim/destruction.py",
-    "mtg_commander_sim/drawing/__init__.py",
-    "mtg_commander_sim/drawing/continuation.py",
-    "mtg_commander_sim/drawing/coordinator.py",
-    "mtg_commander_sim/drawing/model.py",
-    "mtg_commander_sim/drawing/restrictions.py",
-    "mtg_commander_sim/drawing/transaction.py",
-    "mtg_commander_sim/effect_contracts.py",
-    "mtg_commander_sim/effect_runtime/__init__.py",
-    "mtg_commander_sim/effect_runtime/damage_life_and_turns.py",
-    "mtg_commander_sim/effect_runtime/damage_modifiers.py",
-    "mtg_commander_sim/effect_runtime/life_effects.py",
-    "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
-    "mtg_commander_sim/effect_runtime/registry.py",
-    "mtg_commander_sim/effect_runtime/state_and_permissions.py",
-    "mtg_commander_sim/effect_runtime/zones_and_attachments.py",
-    "mtg_commander_sim/enchant_spec.py",
-    "mtg_commander_sim/engine.py",
-    "mtg_commander_sim/errors.py",
-    "mtg_commander_sim/fixed_mana_abilities.py",
-    "mtg_commander_sim/haste.py",
-    "mtg_commander_sim/keyword_abilities.py",
-    "mtg_commander_sim/landwalk.py",
-    "mtg_commander_sim/life_change.py",
-    "mtg_commander_sim/life_state.py",
-    "mtg_commander_sim/mana.py",
-    "mtg_commander_sim/mana_ability_runtime.py",
-    "mtg_commander_sim/mana_activation.py",
-    "mtg_commander_sim/mana_mode_effects.py",
-    "mtg_commander_sim/mana_payment_continuations.py",
-    "mtg_commander_sim/mana_source_discovery.py",
-    "mtg_commander_sim/mana_undo.py",
-    "mtg_commander_sim/mechanic_contracts.py",
-    "mtg_commander_sim/menace.py",
-    "mtg_commander_sim/model.py",
-    "mtg_commander_sim/object_predicate.py",
-    "mtg_commander_sim/object_query.py",
-    "mtg_commander_sim/oracle_ir.py",
-    "mtg_commander_sim/permanent_exile.py",
-    "mtg_commander_sim/permissions.py",
-    "mtg_commander_sim/persistence.py",
-    "mtg_commander_sim/pilot.py",
-    "mtg_commander_sim/preflight.py",
-    "mtg_commander_sim/prevention_triggers.py",
-    "mtg_commander_sim/profiles.py",
-    "mtg_commander_sim/projection.py",
-    "mtg_commander_sim/protection.py",
-    "mtg_commander_sim/protocol.py",
-    "mtg_commander_sim/python_runtime.py",
-    "mtg_commander_sim/record.py",
-    "mtg_commander_sim/record_commander_identity.py",
-    "mtg_commander_sim/record_decks.py",
-    "mtg_commander_sim/record_trust.py",
-    "mtg_commander_sim/replacement/__init__.py",
-    "mtg_commander_sim/replacement/applicability.py",
-    "mtg_commander_sim/replacement/application.py",
-    "mtg_commander_sim/replacement/immutable.py",
-    "mtg_commander_sim/replacement/model.py",
-    "mtg_commander_sim/replacement/operations.py",
-    "mtg_commander_sim/replacement/ordering.py",
-    "mtg_commander_sim/replacement/replay.py",
-    "mtg_commander_sim/replacement_decisions.py",
-    "mtg_commander_sim/replacement_effects.py",
-    "mtg_commander_sim/report.py",
-    "mtg_commander_sim/return_to_hand.py",
-    "mtg_commander_sim/reusable_pieces/__init__.py",
-    "mtg_commander_sim/reusable_pieces/generation.py",
-    "mtg_commander_sim/reusable_pieces/interactions.py",
-    "mtg_commander_sim/reusable_pieces/reporting.py",
-    "mtg_commander_sim/review_artifacts.py",
-    "mtg_commander_sim/rule_conformance.py",
-    "mtg_commander_sim/rules/__init__.py",
-    "mtg_commander_sim/rules/action_catalog.py",
-    "mtg_commander_sim/rules/action_explanations.py",
-    "mtg_commander_sim/rules/action_proposals.py",
-    "mtg_commander_sim/rules/activation/__init__.py",
-    "mtg_commander_sim/rules/activation/availability.py",
-    "mtg_commander_sim/rules/activation/commit.py",
-    "mtg_commander_sim/rules/activation/conditions.py",
-    "mtg_commander_sim/rules/activation/model.py",
-    "mtg_commander_sim/rules/activation/proposal.py",
-    "mtg_commander_sim/rules/activation/query.py",
-    "mtg_commander_sim/rules/activation/resolution.py",
-    "mtg_commander_sim/rules/capabilities.py",
-    "mtg_commander_sim/rules/casting/__init__.py",
-    "mtg_commander_sim/rules/casting/commit.py",
-    "mtg_commander_sim/rules/casting/costs.py",
-    "mtg_commander_sim/rules/casting/model.py",
-    "mtg_commander_sim/rules/casting/proposal.py",
-    "mtg_commander_sim/rules/component_resolution.py",
-    "mtg_commander_sim/rules/evidence.py",
-    "mtg_commander_sim/rules/node_capability_shapes.py",
-    "mtg_commander_sim/rules_corpus.py",
-    "mtg_commander_sim/runtime.py",
-    "mtg_commander_sim/semantic_choices/__init__.py",
-    "mtg_commander_sim/semantic_choices/artifact_exchange.py",
-    "mtg_commander_sim/semantic_choices/conditional_draw.py",
-    "mtg_commander_sim/semantic_choices/context.py",
-    "mtg_commander_sim/semantic_choices/damage_prevention.py",
-    "mtg_commander_sim/semantic_choices/defaults.py",
-    "mtg_commander_sim/semantic_choices/engine_coordination.py",
-    "mtg_commander_sim/semantic_choices/intent_host.py",
-    "mtg_commander_sim/semantic_choices/library_and_hand.py",
-    "mtg_commander_sim/semantic_choices/model.py",
-    "mtg_commander_sim/semantic_choices/object_selection.py",
-    "mtg_commander_sim/semantic_choices/optional_draw.py",
-    "mtg_commander_sim/semantic_choices/ordering.py",
-    "mtg_commander_sim/semantic_choices/payments.py",
-    "mtg_commander_sim/semantic_choices/public_selection.py",
-    "mtg_commander_sim/semantic_choices/registry.py",
-    "mtg_commander_sim/semantic_choices/scalar.py",
-    "mtg_commander_sim/semantic_choices/stack_targets.py",
-    "mtg_commander_sim/semantic_choices/token_and_copy.py",
-    "mtg_commander_sim/semantic_runtime/__init__.py",
-    "mtg_commander_sim/semantic_runtime/ability_fragments.py",
-    "mtg_commander_sim/semantic_runtime/attached_continuous.py",
-    "mtg_commander_sim/semantic_runtime/cast_permissions.py",
-    "mtg_commander_sim/semantic_runtime/color_set_mana_abilities.py",
-    "mtg_commander_sim/semantic_runtime/component_registry.py",
-    "mtg_commander_sim/semantic_runtime/components.py",
-    "mtg_commander_sim/semantic_runtime/context.py",
-    "mtg_commander_sim/semantic_runtime/continuous_components.py",
-    "mtg_commander_sim/semantic_runtime/counter_replacements.py",
-    "mtg_commander_sim/semantic_runtime/cycling_abilities.py",
-    "mtg_commander_sim/semantic_runtime/damage_replacements.py",
-    "mtg_commander_sim/semantic_runtime/damage_results.py",
-    "mtg_commander_sim/semantic_runtime/destruction_handlers.py",
-    "mtg_commander_sim/semantic_runtime/draw_replacements.py",
-    "mtg_commander_sim/semantic_runtime/draw_restrictions.py",
-    "mtg_commander_sim/semantic_runtime/draw_reveals.py",
-    "mtg_commander_sim/semantic_runtime/effect_handlers.py",
-    "mtg_commander_sim/semantic_runtime/executor.py",
-    "mtg_commander_sim/semantic_runtime/generic.py",
-    "mtg_commander_sim/semantic_runtime/handlers.py",
-    "mtg_commander_sim/semantic_runtime/intents.py",
-    "mtg_commander_sim/semantic_runtime/interpreter.py",
-    "mtg_commander_sim/semantic_runtime/life_replacements.py",
-    "mtg_commander_sim/semantic_runtime/mana_abilities.py",
-    "mtg_commander_sim/semantic_runtime/nodes.py",
-    "mtg_commander_sim/semantic_runtime/permanent_exile_handlers.py",
-    "mtg_commander_sim/semantic_runtime/registry.py",
-    "mtg_commander_sim/semantic_runtime/return_to_hand_handlers.py",
-    "mtg_commander_sim/semantic_runtime/stack_counter_handlers.py",
-    "mtg_commander_sim/semantic_runtime/tap_state_handlers.py",
-    "mtg_commander_sim/semantic_runtime/token_replacements.py",
-    "mtg_commander_sim/semantic_runtime/zone_replacements.py",
-    "mtg_commander_sim/semantics.py",
-    "mtg_commander_sim/service.py",
-    "mtg_commander_sim/session.py",
-    "mtg_commander_sim/shortcuts.py",
-    "mtg_commander_sim/stack_counter.py",
-    "mtg_commander_sim/state_based_actions.py",
-    "mtg_commander_sim/state_based_execution.py",
-    "mtg_commander_sim/state_planner.py",
-    "mtg_commander_sim/tap_state.py",
-    "mtg_commander_sim/targets.py",
-    "mtg_commander_sim/token_creation.py",
-    "mtg_commander_sim/trigger_batches.py",
-    "mtg_commander_sim/trigger_discovery.py",
-    "mtg_commander_sim/trigger_processing.py",
-    "mtg_commander_sim/trigger_targeting.py",
-    "mtg_commander_sim/util.py",
-    "mtg_commander_sim/version.py",
-    "mtg_commander_sim/zone_trigger_events.py",
-    "mtg_commander_sim/zone_trigger_processing.py",
+    "quorune/__init__.py",
+    "quorune/__main__.py",
+    "quorune/abilities.py",
+    "quorune/ability_fragment_host.py",
+    "quorune/ability_fragments.py",
+    "quorune/aerial_blocking.py",
+    "quorune/arena.py",
+    "quorune/attachments.py",
+    "quorune/attack_transition_engine_adapter.py",
+    "quorune/attack_transition_model.py",
+    "quorune/attack_transition_resolution.py",
+    "quorune/aura/__init__.py",
+    "quorune/aura/compiler.py",
+    "quorune/aura/decisions.py",
+    "quorune/aura/grammar.py",
+    "quorune/aura/model.py",
+    "quorune/aura/runtime.py",
+    "quorune/block_transition_engine_adapter.py",
+    "quorune/block_transitions.py",
+    "quorune/bulk.py",
+    "quorune/card_programs/__init__.py",
+    "quorune/card_programs/adapters.py",
+    "quorune/card_programs/binding.py",
+    "quorune/card_programs/commands.py",
+    "quorune/card_programs/model.py",
+    "quorune/card_programs/runtime.py",
+    "quorune/card_programs/trust.py",
+    "quorune/card_programs/validation.py",
+    "quorune/carddb.py",
+    "quorune/carddb_characteristics.py",
+    "quorune/cast_timing.py",
+    "quorune/characteristic_evaluation.py",
+    "quorune/choice_forms.py",
+    "quorune/cli.py",
+    "quorune/client.py",
+    "quorune/codex_cli.py",
+    "quorune/color_set_mana_abilities.py",
+    "quorune/combat.py",
+    "quorune/combat_constraints.py",
+    "quorune/combat_damage_assignment.py",
+    "quorune/combat_damage_engine_adapter.py",
+    "quorune/combat_damage_events.py",
+    "quorune/combat_damage_projection.py",
+    "quorune/combat_damage_sequence.py",
+    "quorune/combat_damage_snapshot.py",
+    "quorune/combat_damage_trample.py",
+    "quorune/combat_damage_values.py",
+    "quorune/combat_evasion.py",
+    "quorune/combat_evasion_engine_adapter.py",
+    "quorune/combat_relationship_state.py",
+    "quorune/commander.py",
+    "quorune/compiled_ability_fragments.py",
+    "quorune/compiled_activated_abilities.py",
+    "quorune/compiled_cast_timing.py",
+    "quorune/compiled_cycling_abilities.py",
+    "quorune/compiled_mana_abilities.py",
+    "quorune/compiler/__init__.py",
+    "quorune/compiler/ability_keyword_fragments.py",
+    "quorune/compiler/activated_costs.py",
+    "quorune/compiler/activated_mana_nodes.py",
+    "quorune/compiler/continuous_templates.py",
+    "quorune/compiler/corpus_reporting.py",
+    "quorune/compiler/counter_templates.py",
+    "quorune/compiler/creature_subtypes.py",
+    "quorune/compiler/cycling_nodes.py",
+    "quorune/compiler/damage_templates.py",
+    "quorune/compiler/dependency_gate.py",
+    "quorune/compiler/destruction_templates.py",
+    "quorune/compiler/draw_templates.py",
+    "quorune/compiler/exile_templates.py",
+    "quorune/compiler/fixed_numbers.py",
+    "quorune/compiler/ir_model.py",
+    "quorune/compiler/keyword_nodes.py",
+    "quorune/compiler/keyword_templates.py",
+    "quorune/compiler/life_templates.py",
+    "quorune/compiler/prevention_templates.py",
+    "quorune/compiler/program_generation.py",
+    "quorune/compiler/return_to_hand_templates.py",
+    "quorune/compiler/runtime_templates.py",
+    "quorune/compiler/tap_state_templates.py",
+    "quorune/compiler/unlock_frontier.py",
+    "quorune/continuous_effect_model.py",
+    "quorune/continuous_effect_state.py",
+    "quorune/continuous_effects.py",
+    "quorune/counter_placement.py",
+    "quorune/counter_state.py",
+    "quorune/cycling_abilities.py",
+    "quorune/damage.py",
+    "quorune/damage_modifier_state.py",
+    "quorune/damage_prevention.py",
+    "quorune/damage_prevention_aftermath.py",
+    "quorune/damage_prevention_creation.py",
+    "quorune/damage_results.py",
+    "quorune/damage_source.py",
+    "quorune/damage_transaction.py",
+    "quorune/damage_values.py",
+    "quorune/deathtouch.py",
+    "quorune/deck.py",
+    "quorune/declaration_costs.py",
+    "quorune/declaration_restrictions.py",
+    "quorune/defender.py",
+    "quorune/delayed_triggers.py",
+    "quorune/destruction.py",
+    "quorune/drawing/__init__.py",
+    "quorune/drawing/continuation.py",
+    "quorune/drawing/coordinator.py",
+    "quorune/drawing/model.py",
+    "quorune/drawing/restrictions.py",
+    "quorune/drawing/transaction.py",
+    "quorune/effect_contracts.py",
+    "quorune/effect_runtime/__init__.py",
+    "quorune/effect_runtime/damage_life_and_turns.py",
+    "quorune/effect_runtime/damage_modifiers.py",
+    "quorune/effect_runtime/life_effects.py",
+    "quorune/effect_runtime/objects_stack_and_tokens.py",
+    "quorune/effect_runtime/registry.py",
+    "quorune/effect_runtime/state_and_permissions.py",
+    "quorune/effect_runtime/zones_and_attachments.py",
+    "quorune/enchant_spec.py",
+    "quorune/engine.py",
+    "quorune/errors.py",
+    "quorune/fixed_mana_abilities.py",
+    "quorune/haste.py",
+    "quorune/keyword_abilities.py",
+    "quorune/landwalk.py",
+    "quorune/life_change.py",
+    "quorune/life_state.py",
+    "quorune/mana.py",
+    "quorune/mana_ability_runtime.py",
+    "quorune/mana_activation.py",
+    "quorune/mana_mode_effects.py",
+    "quorune/mana_payment_continuations.py",
+    "quorune/mana_source_discovery.py",
+    "quorune/mana_undo.py",
+    "quorune/mechanic_contracts.py",
+    "quorune/menace.py",
+    "quorune/model.py",
+    "quorune/object_predicate.py",
+    "quorune/object_query.py",
+    "quorune/oracle_ir.py",
+    "quorune/permanent_exile.py",
+    "quorune/permissions.py",
+    "quorune/persistence.py",
+    "quorune/pilot.py",
+    "quorune/preflight.py",
+    "quorune/prevention_triggers.py",
+    "quorune/profiles.py",
+    "quorune/projection.py",
+    "quorune/protection.py",
+    "quorune/protocol.py",
+    "quorune/python_runtime.py",
+    "quorune/record.py",
+    "quorune/record_commander_identity.py",
+    "quorune/record_decks.py",
+    "quorune/record_trust.py",
+    "quorune/replacement/__init__.py",
+    "quorune/replacement/applicability.py",
+    "quorune/replacement/application.py",
+    "quorune/replacement/immutable.py",
+    "quorune/replacement/model.py",
+    "quorune/replacement/operations.py",
+    "quorune/replacement/ordering.py",
+    "quorune/replacement/replay.py",
+    "quorune/replacement_decisions.py",
+    "quorune/replacement_effects.py",
+    "quorune/report.py",
+    "quorune/return_to_hand.py",
+    "quorune/reusable_pieces/__init__.py",
+    "quorune/reusable_pieces/generation.py",
+    "quorune/reusable_pieces/interactions.py",
+    "quorune/reusable_pieces/reporting.py",
+    "quorune/review_artifacts.py",
+    "quorune/rule_conformance.py",
+    "quorune/rules/__init__.py",
+    "quorune/rules/action_catalog.py",
+    "quorune/rules/action_explanations.py",
+    "quorune/rules/action_proposals.py",
+    "quorune/rules/activation/__init__.py",
+    "quorune/rules/activation/availability.py",
+    "quorune/rules/activation/commit.py",
+    "quorune/rules/activation/conditions.py",
+    "quorune/rules/activation/model.py",
+    "quorune/rules/activation/proposal.py",
+    "quorune/rules/activation/query.py",
+    "quorune/rules/activation/resolution.py",
+    "quorune/rules/capabilities.py",
+    "quorune/rules/casting/__init__.py",
+    "quorune/rules/casting/commit.py",
+    "quorune/rules/casting/costs.py",
+    "quorune/rules/casting/model.py",
+    "quorune/rules/casting/proposal.py",
+    "quorune/rules/component_resolution.py",
+    "quorune/rules/evidence.py",
+    "quorune/rules/node_capability_shapes.py",
+    "quorune/rules_corpus.py",
+    "quorune/runtime.py",
+    "quorune/semantic_choices/__init__.py",
+    "quorune/semantic_choices/artifact_exchange.py",
+    "quorune/semantic_choices/conditional_draw.py",
+    "quorune/semantic_choices/context.py",
+    "quorune/semantic_choices/damage_prevention.py",
+    "quorune/semantic_choices/defaults.py",
+    "quorune/semantic_choices/engine_coordination.py",
+    "quorune/semantic_choices/intent_host.py",
+    "quorune/semantic_choices/library_and_hand.py",
+    "quorune/semantic_choices/model.py",
+    "quorune/semantic_choices/object_selection.py",
+    "quorune/semantic_choices/optional_draw.py",
+    "quorune/semantic_choices/ordering.py",
+    "quorune/semantic_choices/payments.py",
+    "quorune/semantic_choices/public_selection.py",
+    "quorune/semantic_choices/registry.py",
+    "quorune/semantic_choices/scalar.py",
+    "quorune/semantic_choices/stack_targets.py",
+    "quorune/semantic_choices/token_and_copy.py",
+    "quorune/semantic_runtime/__init__.py",
+    "quorune/semantic_runtime/ability_fragments.py",
+    "quorune/semantic_runtime/attached_continuous.py",
+    "quorune/semantic_runtime/cast_permissions.py",
+    "quorune/semantic_runtime/color_set_mana_abilities.py",
+    "quorune/semantic_runtime/component_registry.py",
+    "quorune/semantic_runtime/components.py",
+    "quorune/semantic_runtime/context.py",
+    "quorune/semantic_runtime/continuous_components.py",
+    "quorune/semantic_runtime/counter_replacements.py",
+    "quorune/semantic_runtime/cycling_abilities.py",
+    "quorune/semantic_runtime/damage_replacements.py",
+    "quorune/semantic_runtime/damage_results.py",
+    "quorune/semantic_runtime/destruction_handlers.py",
+    "quorune/semantic_runtime/draw_replacements.py",
+    "quorune/semantic_runtime/draw_restrictions.py",
+    "quorune/semantic_runtime/draw_reveals.py",
+    "quorune/semantic_runtime/effect_handlers.py",
+    "quorune/semantic_runtime/executor.py",
+    "quorune/semantic_runtime/generic.py",
+    "quorune/semantic_runtime/handlers.py",
+    "quorune/semantic_runtime/intents.py",
+    "quorune/semantic_runtime/interpreter.py",
+    "quorune/semantic_runtime/life_replacements.py",
+    "quorune/semantic_runtime/mana_abilities.py",
+    "quorune/semantic_runtime/nodes.py",
+    "quorune/semantic_runtime/permanent_exile_handlers.py",
+    "quorune/semantic_runtime/registry.py",
+    "quorune/semantic_runtime/return_to_hand_handlers.py",
+    "quorune/semantic_runtime/stack_counter_handlers.py",
+    "quorune/semantic_runtime/tap_state_handlers.py",
+    "quorune/semantic_runtime/token_replacements.py",
+    "quorune/semantic_runtime/zone_replacements.py",
+    "quorune/semantics.py",
+    "quorune/service.py",
+    "quorune/session.py",
+    "quorune/shortcuts.py",
+    "quorune/stack_counter.py",
+    "quorune/state_based_actions.py",
+    "quorune/state_based_execution.py",
+    "quorune/state_planner.py",
+    "quorune/tap_state.py",
+    "quorune/targets.py",
+    "quorune/token_creation.py",
+    "quorune/trigger_batches.py",
+    "quorune/trigger_discovery.py",
+    "quorune/trigger_processing.py",
+    "quorune/trigger_targeting.py",
+    "quorune/util.py",
+    "quorune/version.py",
+    "quorune/zone_trigger_events.py",
+    "quorune/zone_trigger_processing.py",
     "server/__init__.py",
     "server/__main__.py",
     "server/app.py",

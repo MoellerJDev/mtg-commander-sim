@@ -458,7 +458,7 @@ def derive_codex_arena_metadata(
                     next(iter(labels))
                     if len(labels) == 1
                     else prior_thread.get("thread_label")
-                    or f"mtg-pilot-{seat.lower()}"
+                    or f"quorune-pilot-{seat.lower()}"
                 ),
                 "thread_handle": (
                     next(iter(handles)) if len(handles) == 1 else None

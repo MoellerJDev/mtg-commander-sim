@@ -1,13 +1,13 @@
 ---
-title: "Security policy"
+title: "Quorune security policy"
 status: "current"
 authoritative_source: "implemented security controls and disclosure policy"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "users, contributors, and security reporters"
 maintenance: "hand-maintained"
 ---
 
-# Security policy
+# Quorune security policy
 
 ## Reporting
 

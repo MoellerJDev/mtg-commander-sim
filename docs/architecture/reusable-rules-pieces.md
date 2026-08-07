@@ -1,7 +1,7 @@
 ---
 title: "Reusable rules-piece inventory"
 status: "current"
-authoritative_source: "platform/reusable-piece-policy.json and mtg_commander_sim/reusable_pieces"
+authoritative_source: "platform/reusable-piece-policy.json and quorune/reusable_pieces"
 verified: "2026-08-05"
 audience: "compiler, rules, assurance, and architecture contributors"
 maintenance: "hand-maintained"

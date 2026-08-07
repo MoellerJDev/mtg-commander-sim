@@ -8,24 +8,24 @@ from unittest.mock import patch
 import uuid
 
 from damage_replacement_support import DamageReplacementPipelineBase
-from mtg_commander_sim.damage import damage_proposal, resolve_damage_batch
-from mtg_commander_sim.damage_prevention import (
+from quorune.damage import damage_proposal, resolve_damage_batch
+from quorune.damage_prevention import (
     expire_end_of_turn_damage_modifiers,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.oracle_ir import (
+from quorune.model import StackItem
+from quorune.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
 )
-from mtg_commander_sim.record import (
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 _ORACLE_TEXT = (
@@ -303,7 +303,7 @@ class PreventionImmediateSequencingTests(DamageReplacementPipelineBase):
 
         assert_resolution_stops()
         with patch(
-            "mtg_commander_sim.engine.CommanderEngine."
+            "quorune.engine.CommanderEngine."
             "_revalidate_resolution_targets",
             return_value=True,
         ):

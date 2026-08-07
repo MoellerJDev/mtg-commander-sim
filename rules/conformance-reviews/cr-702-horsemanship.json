@@ -32,7 +32,7 @@
       "assertion_kind": "static_traceability",
       "reviewed": true,
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
         "mechanics/contracts/horsemanship.json"
       ],
       "executable_test_ids": [
@@ -53,9 +53,9 @@
       "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
-        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "quorune.combat_evasion.CombatantEvasionCharacteristics",
+        "quorune.combat_evasion.combat_evasion_verdict",
+        "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics",
         "CommanderEngine._can_block"
       ],
       "executable_test_ids": [
@@ -93,8 +93,8 @@
       "assertion_kind": "executable_engine",
       "reviewed": true,
       "implementation_components": [
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.keyword_abilities.normalized_characteristic_keywords",
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "executable_test_ids": [
         "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_keyword_bundle_holds_across_bounded_blocker_grid",

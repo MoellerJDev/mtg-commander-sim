@@ -4,27 +4,27 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from mtg_commander_sim import CardDatabase, CommanderSession, GameConfig
-from mtg_commander_sim.carddb import build_card_database
-from mtg_commander_sim.compiler.continuous_templates import (
+from quorune import CardDatabase, CommanderSession, GameConfig
+from quorune.carddb import build_card_database
+from quorune.compiler.continuous_templates import (
     basic_land_type_addition_handler,
 )
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.deck import DeckDefinition, DeckEntry
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.rules.capabilities import (
+from quorune.deck import DeckDefinition, DeckEntry
+from quorune.model import CombatState
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     AddBasicLandTypeHandler,
     ContinuousEffectSourceContext,
     SemanticNodeError,
 )
-from mtg_commander_sim.util import stable_json
+from quorune.util import stable_json
 
 
 def _card(

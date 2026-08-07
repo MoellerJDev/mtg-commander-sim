@@ -5,12 +5,12 @@ import json
 from pathlib import Path
 import unittest
 
-from mtg_commander_sim.rules_corpus import (
+from quorune.rules_corpus import (
     CORPUS_OPERATIONS,
     execute_rules_corpus_operation,
     rules_next,
 )
-from mtg_commander_sim.rules_scheduler import (
+from quorune.rules_scheduler import (
     RulesSchedulerError,
     build_rules_dependency_queue,
     build_rules_dependency_queue_from_root,
@@ -33,7 +33,7 @@ class RulesSchedulerTests(unittest.TestCase):
         cls.conformance = _json("rules/conformance-cases.json")
         cls.catalog = _json("platform/rules-subsystems.json")
         cls.capabilities = _json(
-            "mtg_commander_sim/rules/capability-registry.json"
+            "quorune/rules/capability-registry.json"
         )
         cls.queue = load_rules_dependency_queue(ROOT)
 

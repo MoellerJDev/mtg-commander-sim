@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.rules.activation import activation_condition_status
+from quorune.rules.activation import activation_condition_status
 
 
 class ExactManaFamilyTests(unittest.TestCase):

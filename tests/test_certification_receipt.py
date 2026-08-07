@@ -36,7 +36,7 @@ def required_needs() -> dict[str, dict[str, str]]:
 
 def receipt() -> CertificationReceipt:
     return CertificationReceipt(
-        repository="MoellerJDev/mtg-commander-sim",
+        repository="MoellerJDev/quorune",
         pull_request=132,
         exact_head_sha="a" * 40,
         workflow_run_id=12345,

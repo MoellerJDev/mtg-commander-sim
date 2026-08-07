@@ -8,21 +8,21 @@ import unittest
 from unittest import mock
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.abilities import parse_activated_abilities
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.fixed_mana_abilities import (
+from quorune.abilities import parse_activated_abilities
+from quorune.carddb import CardRecord
+from quorune.fixed_mana_abilities import (
     FixedActivatedManaAbilitySpec,
     FixedManaAbilityError,
     FixedManaMode,
     compile_fixed_activated_mana_ability,
     fixed_mana_modes_from_effect,
 )
-from mtg_commander_sim.oracle_ir import compile_oracle_card, generated_programs
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.rules.capabilities import (
+from quorune.oracle_ir import compile_oracle_card, generated_programs
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime.mana_abilities import (
+from quorune.semantic_runtime.mana_abilities import (
     fixed_mana_specs_from_descriptors,
 )
 
@@ -256,7 +256,7 @@ class FixedManaCompilerTests(unittest.TestCase):
 
         assert_exact_modes()
         with mock.patch(
-            "mtg_commander_sim.fixed_mana_abilities._symbol_bundle",
+            "quorune.fixed_mana_abilities._symbol_bundle",
             side_effect=lambda text: FixedManaMode.from_bundle(
                 {"U" if "G" in text else "G": 1}
             ),
@@ -332,7 +332,7 @@ class FixedManaRuntimeTests(unittest.TestCase):
         ring, ability = self._ring(session)
         engine = session.engine
         original = __import__(
-            "mtg_commander_sim.rules.activation.query",
+            "quorune.rules.activation.query",
             fromlist=["parse_activated_abilities"],
         ).parse_activated_abilities
 
@@ -341,7 +341,7 @@ class FixedManaRuntimeTests(unittest.TestCase):
             return original(**kwargs)
 
         with mock.patch(
-            "mtg_commander_sim.rules.activation.query.parse_activated_abilities",
+            "quorune.rules.activation.query.parse_activated_abilities",
             side_effect=reject_owned_oracle,
         ):
             rediscovered = engine._activated_abilities(ring)
@@ -386,7 +386,7 @@ class FixedManaRuntimeTests(unittest.TestCase):
         changed = dict(engine._effective_card_data(ring))
         changed["executable_oracle_text"] = "{T}: Add {U}."
         original = __import__(
-            "mtg_commander_sim.rules.activation.query",
+            "quorune.rules.activation.query",
             fromlist=["parse_activated_abilities"],
         ).parse_activated_abilities
 
@@ -399,7 +399,7 @@ class FixedManaRuntimeTests(unittest.TestCase):
             "_effective_card_data",
             return_value=changed,
         ), mock.patch(
-            "mtg_commander_sim.rules.activation.query.parse_activated_abilities",
+            "quorune.rules.activation.query.parse_activated_abilities",
             side_effect=reject_stale_oracle,
         ):
             abilities = engine._activated_abilities(ring)

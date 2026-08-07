@@ -3,17 +3,17 @@ from __future__ import annotations
 import unittest
 from types import SimpleNamespace
 
-from mtg_commander_sim.damage_results import (
+from quorune.damage_results import (
     consume_deathtouch_damage_checks,
     DamageResultError,
 )
-from mtg_commander_sim.deathtouch import (
+from quorune.deathtouch import (
     deathtouch_assignment_is_lethal,
     deathtouch_damage_result_applies,
     DeathtouchError,
 )
-from mtg_commander_sim.model import CardInstance
-from mtg_commander_sim.state_based_actions import (
+from quorune.model import CardInstance
+from quorune.state_based_actions import (
     evaluate_permanent_state_based_actions,
     PermanentSnapshot,
 )

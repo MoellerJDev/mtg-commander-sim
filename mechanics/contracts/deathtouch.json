@@ -33,7 +33,7 @@
   "witness_cards": [],
   "rulings": [],
   "test_ids": ["test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_deathtouch_damage_from_another_attacker_is_lethal", "test_zero_deathtouch_assignment_is_not_lethal", "test_noncombat_deathtouch_uses_pinned_source_lki", "test_legacy_event_flag_cannot_grant_deathtouch", "test_persisted_marker_and_check_collection_fail_closed", "test_wither_damage_still_records_deathtouch_result", "test_indestructible_consumes_deathtouch_at_the_first_sba_check", "test_stale_check_batch_rolls_back_without_consuming_any_marker", "test_four_player_deathtouch_result_is_source_derived_and_replays", "test_deathtouch_assignment_and_result_mutants_are_killed"],
-  "implementation": {"component": "mtg_commander_sim.deathtouch", "version": "deathtouch-assignment-result-v1"},
+  "implementation": {"component": "quorune.deathtouch", "version": "deathtouch-assignment-result-v1"},
   "known_blockers": ["regeneration is not implemented", "unsupported continuous-effect, copy, face-down, and ability-changing producers remain fail-closed"],
   "review_status": "reviewed"
 }

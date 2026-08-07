@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.deck import (
+from quorune.deck import (
     DeckDefinition,
     DeckEntry,
     DeckLoader,

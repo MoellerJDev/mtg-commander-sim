@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.abilities import parse_activated_abilities
-from mtg_commander_sim.model import CardInstance, StackItem
+from quorune.abilities import parse_activated_abilities
+from quorune.model import CardInstance, StackItem
 
 
 class LoyaltyAbilityRuleTests(unittest.TestCase):

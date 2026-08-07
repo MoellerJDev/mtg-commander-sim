@@ -7,10 +7,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.engine import GameRuleError, TURN_STEPS
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
+from quorune.carddb import CardRecord
+from quorune.engine import GameRuleError, TURN_STEPS
+from quorune.model import StackItem
+from quorune.record import checkpoint_envelope, replay_record
 
 
 class MainPhaseRuleTests(unittest.TestCase):

@@ -13,18 +13,18 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.unlock_frontier import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.unlock_frontier import (
     build_card_unlock_frontier,
     render_card_unlock_frontier_markdown,
     validate_card_unlock_frontier,
 )
-from mtg_commander_sim.mechanic_contracts import load_mechanic_contracts
-from mtg_commander_sim.rules.capabilities import (
+from quorune.mechanic_contracts import load_mechanic_contracts
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
-from mtg_commander_sim.util import stable_json
+from quorune.semantics import SemanticRegistry
+from quorune.util import stable_json
 from scripts.validate_python_runtime import require_supported_python
 
 

@@ -6,13 +6,13 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from mtg_commander_sim.abilities import (
+from quorune.abilities import (
     ActivatedAbility,
     parse_activated_abilities,
 )
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
+from quorune.record import checkpoint_envelope, replay_record
 
 
 class ActivatingAbilityRuleTests(unittest.TestCase):

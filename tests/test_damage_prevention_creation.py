@@ -3,35 +3,35 @@ from __future__ import annotations
 import unittest
 
 from damage_replacement_support import DamageReplacementPipelineBase
-from mtg_commander_sim.damage import resolve_damage_batch
-from mtg_commander_sim.damage_modifier_state import (
+from quorune.damage import resolve_damage_batch
+from quorune.damage_modifier_state import (
     DamagePreventionShield,
     DamageModifierDuration,
     PreventionMode,
 )
-from mtg_commander_sim.damage_prevention_creation import (
+from quorune.damage_prevention_creation import (
     DealDamageAftermathRequest,
     PreventionShieldCreationRequest,
     PreventionSubjectAllocation,
     commit_prevention_shield_creation,
     plan_prevention_shield_creation,
 )
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
-from mtg_commander_sim.object_query import ObjectQuerySpec
-from mtg_commander_sim.semantic_choices.context import (
+from quorune.errors import GameRuleError
+from quorune.damage_source import REPRESENTED_DAMAGE_SOURCE_ZONES
+from quorune.object_query import ObjectQuerySpec
+from quorune.semantic_choices.context import (
     SemanticChoiceContext,
     SnapshotSemanticChoiceQuery,
 )
-from mtg_commander_sim.semantic_choices.damage_prevention import (
+from quorune.semantic_choices.damage_prevention import (
     ChooseDamageSourceHandler,
 )
-from mtg_commander_sim.semantic_choices.model import (
+from quorune.semantic_choices.model import (
     SemanticChoiceContinuation,
     SemanticChoiceFrame,
     SemanticChoiceError,
 )
-from mtg_commander_sim.replacement.immutable import FrozenMap
+from quorune.replacement.immutable import FrozenMap
 
 
 class DamagePreventionCreationTests(DamageReplacementPipelineBase):
@@ -529,7 +529,7 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
         )
 
     def test_source_choice_exposes_only_rule_legal_public_candidates(self):
-        from mtg_commander_sim.object_query import ObjectQueryResult
+        from quorune.object_query import ObjectQueryResult
 
         rows = (
             ObjectQueryResult(
@@ -582,7 +582,7 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
         self.assertNotIn("grave-source", serialized)
 
     def test_source_choice_exposes_only_explicitly_referred_public_zone_objects(self):
-        from mtg_commander_sim.object_query import ObjectQueryResult
+        from quorune.object_query import ObjectQueryResult
 
         rows = (
             ObjectQueryResult(
@@ -641,7 +641,7 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
         )
 
     def test_materialized_empty_source_universe_does_not_use_legacy_fallback(self):
-        from mtg_commander_sim.object_query import ObjectQueryResult
+        from quorune.object_query import ObjectQueryResult
 
         query = SnapshotSemanticChoiceQuery(
             seat_order=("A", "B"),
@@ -678,7 +678,7 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
             )
 
     def test_source_choice_revalidates_and_prepends_resolved_shield(self):
-        from mtg_commander_sim.object_query import ObjectQueryResult
+        from quorune.object_query import ObjectQueryResult
 
         row = ObjectQueryResult(
             "source-id", "chosen-source", "Source", "A", "A", "battlefield",
@@ -722,7 +722,7 @@ class DamageSourceChoiceHandlerTests(unittest.TestCase):
             )
 
     def test_source_choice_any_color_and_extended_characteristics_are_exact(self):
-        from mtg_commander_sim.object_query import ObjectQueryResult
+        from quorune.object_query import ObjectQueryResult
 
         matching = ObjectQueryResult(
             "matching-id",

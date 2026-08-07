@@ -34365,7 +34365,7 @@
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_double_strike_does_not_hit_player_after_its_blocker_dies"
       ],
       "implementation_components": [
-        "mtg_commander_sim.combat.assigns_in_damage_step",
+        "quorune.combat.assigns_in_damage_step",
         "CommanderEngine._begin_combat_damage",
         "CommanderEngine._advance_step"
       ],
@@ -35676,9 +35676,9 @@
         "tests.test_flash_cast_timing.FlashCastTimingTests.test_flash_permission_is_face_pinned"
       ],
       "implementation_components": [
-        "mtg_commander_sim.cast_timing.cast_timing_is_legal",
-        "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
-        "mtg_commander_sim.rules.casting.proposal.build_cast_proposal"
+        "quorune.cast_timing.cast_timing_is_legal",
+        "quorune.compiled_cast_timing.compiled_cast_timing_permissions",
+        "quorune.rules.casting.proposal.build_cast_proposal"
       ],
       "notes": [
         "Face-pinned printed Flash is compiled before runtime and uses the same verdict for offers and proposals; proposal-dependent as-though timing is not generic."
@@ -36017,9 +36017,9 @@
         "tests.test_casting_spells_rules.CastingSpellRuleTests.test_contract_traces_every_cr_601_rule"
       ],
       "implementation_components": [
-        "mtg_commander_sim.cast_timing.cast_timing_is_legal",
-        "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
-        "mtg_commander_sim.rules.casting.proposal.build_cast_proposal"
+        "quorune.cast_timing.cast_timing_is_legal",
+        "quorune.compiled_cast_timing.compiled_cast_timing_permissions",
+        "quorune.rules.casting.proposal.build_cast_proposal"
       ],
       "notes": [
         "No complete conditional-flash persistence claim is made."
@@ -37200,8 +37200,8 @@
         "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly"
       ],
       "implementation_components": [
-        "mtg_commander_sim.zone_trigger_events.normalized_zone_trigger_events",
-        "mtg_commander_sim.trigger_discovery.dispatch_semantic_event",
+        "quorune.zone_trigger_events.normalized_zone_trigger_events",
+        "quorune.trigger_discovery.dispatch_semantic_event",
         "oracle_ir.OracleIRCompiler"
       ],
       "notes": [
@@ -38609,8 +38609,8 @@
       ],
       "implementation_components": [
         "CommanderEngine._move_cards_simultaneously",
-        "mtg_commander_sim.zone_trigger_events.ZoneChangeOccurrence",
-        "mtg_commander_sim.zone_trigger_processing.dispatch_zone_change_occurrence"
+        "quorune.zone_trigger_events.ZoneChangeOccurrence",
+        "quorune.zone_trigger_processing.dispatch_zone_change_occurrence"
       ],
       "notes": [
         "Self-departure and simultaneous creature-death triggers use one pre-event source and effective-characteristic snapshot, including the source leaving in the same event."
@@ -38780,9 +38780,9 @@
         "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_countered_spell_replaced_to_exile_has_no_graveyard_event"
       ],
       "implementation_components": [
-        "mtg_commander_sim.stack_counter.counter_stack_item",
-        "mtg_commander_sim.zone_trigger_events.normalized_zone_trigger_events",
-        "mtg_commander_sim.zone_trigger_processing.dispatch_zone_change_occurrence"
+        "quorune.stack_counter.counter_stack_item",
+        "quorune.zone_trigger_events.normalized_zone_trigger_events",
+        "quorune.zone_trigger_processing.dispatch_zone_change_occurrence"
       ],
       "notes": [
         "The physical countered-spell slice now has a typed pre-counter event and replacement-aware post-move graveyard event; the broader spell-or-ability rule remains blocked."
@@ -43312,8 +43312,8 @@
         "tests.test_continuous_effect_duration.ContinuousEffectModelTests.test_malformed_models_fail_closed"
       ],
       "implementation_components": [
-        "mtg_commander_sim.continuous_effects",
-        "mtg_commander_sim.continuous_effect_state"
+        "quorune.continuous_effects",
+        "quorune.continuous_effect_state"
       ],
       "notes": [
         "Section heading; the reviewed clauses below distinguish resolution-created locked sets from live static-ability applicability without claiming every continuous-effect family."
@@ -43381,7 +43381,7 @@
         "tests.test_continuous_effect_duration.ContinuousEffectEngineTests.test_temporary_effect_command_replays_exactly"
       ],
       "implementation_components": [
-        "mtg_commander_sim.continuous_effect_state.create_resolution_continuous_effect",
+        "quorune.continuous_effect_state.create_resolution_continuous_effect",
         "GameState.continuous_effects"
       ],
       "notes": [
@@ -43426,7 +43426,7 @@
       ],
       "implementation_components": [
         "ContinuousEffectDuration",
-        "mtg_commander_sim.continuous_effect_state.expire_end_of_turn_continuous_effects"
+        "quorune.continuous_effect_state.expire_end_of_turn_continuous_effects"
       ],
       "notes": [
         "Until-end-of-turn, source-presence, and zone-object durations are closed typed values; cleanup deterministically expires the represented temporary family."
@@ -43515,8 +43515,8 @@
       ],
       "implementation_components": [
         "ContinuousObjectIdentity",
-        "mtg_commander_sim.continuous_effect_state.matching_battlefield_objects",
-        "mtg_commander_sim.continuous_effect_state.create_resolution_continuous_effect"
+        "quorune.continuous_effect_state.matching_battlefield_objects",
+        "quorune.continuous_effect_state.create_resolution_continuous_effect"
       ],
       "notes": [
         "Represented characteristic effects snapshot physical and logical battlefield identities once; later entrants and later characteristic changes do not join, while leave-and-return creates a new logical object that is not affected."
@@ -43602,7 +43602,7 @@
         "tests.test_continuous_effect_duration.ContinuousEffectModelTests.test_resolution_set_is_locked_to_logical_objects"
       ],
       "implementation_components": [
-        "mtg_commander_sim.characteristic_evaluation.evaluate_card_characteristics"
+        "quorune.characteristic_evaluation.evaluate_card_characteristics"
       ],
       "notes": [
         "The ordinary post-resolution journal must not be mistaken for the simultaneous-entry exception."
@@ -43644,7 +43644,7 @@
         "tests.test_continuous_effect_duration.ContinuousEffectModelTests.test_malformed_models_fail_closed"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.casting"
+        "quorune.rules.casting"
       ],
       "notes": [
         "This family remains residual and is not lowered as an immediate battlefield characteristic effect."
@@ -43690,8 +43690,8 @@
         "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_multiple_anthem_components_stack_and_respect_control"
       ],
       "implementation_components": [
-        "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects",
-        "mtg_commander_sim.semantic_runtime.continuous_components"
+        "quorune.card_programs.runtime.collect_card_program_continuous_effects",
+        "quorune.semantic_runtime.continuous_components"
       ],
       "notes": [
         "Trusted typed static components are collected from each public source and evaluated live; incomplete Oracle wording remains residual."
@@ -43736,7 +43736,7 @@
       ],
       "implementation_components": [
         "ContinuousEffectOrigin.STATIC_ABILITY",
-        "mtg_commander_sim.object_query.object_matches_query"
+        "quorune.object_query.object_matches_query"
       ],
       "notes": [
         "Every represented typed static effect evaluates its ObjectQuerySpec against the current intermediate-layer characteristics; it never stores a locked affected set."
@@ -43780,7 +43780,7 @@
       ],
       "implementation_components": [
         "ContinuousEffectDuration.WHILE_SOURCE_PRESENT",
-        "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects"
+        "quorune.card_programs.runtime.collect_card_program_continuous_effects"
       ],
       "notes": [
         "Represented static effects are collected only while their source is present in the descriptor's active public zone; source departure or phasing removes the effect immediately."
@@ -43821,7 +43821,7 @@
         "tests.test_continuous_effect_components.ContinuousEffectComponentTests.test_anthem_component_replays_exactly"
       ],
       "implementation_components": [
-        "mtg_commander_sim.characteristic_evaluation.evaluate_card_characteristics",
+        "quorune.characteristic_evaluation.evaluate_card_characteristics",
         "CommanderEngine._effective_card_data"
       ],
       "notes": [
@@ -43863,8 +43863,8 @@
         "tests.test_continuous_effect_duration.ContinuousEffectModelTests.test_malformed_models_fail_closed"
       ],
       "implementation_components": [
-        "mtg_commander_sim.permissions",
-        "mtg_commander_sim.rules.casting"
+        "quorune.permissions",
+        "quorune.rules.casting"
       ],
       "notes": [
         "Characteristic components cannot grant cast or play authority; unsupported permission wording remains residual."
@@ -52626,7 +52626,7 @@
       "implementation_components": [
         "TapPermanentHandler",
         "SetPermanentTappedIntent",
-        "mtg_commander_sim.tap_state.set_permanent_tapped"
+        "quorune.tap_state.set_permanent_tapped"
       ],
       "notes": [
         "An already-authorized one-shot instruction changes only an untapped battlefield permanent, emits no false event for an already tapped permanent, rolls back atomically, and replays exactly. Complete continuous prohibitions and replacement interactions remain blocked."
@@ -52680,8 +52680,8 @@
         "UntapAllCreaturesHandler",
         "SetPermanentTappedIntent",
         "UntapAllCreaturesIntent",
-        "mtg_commander_sim.tap_state.set_permanent_tapped",
-        "mtg_commander_sim.tap_state.untap_all_creatures"
+        "quorune.tap_state.set_permanent_tapped",
+        "quorune.tap_state.untap_all_creatures"
       ],
       "notes": [
         "Typed one-shot and all-creature instructions untap only tapped phased-in permanents, use represented effective creature types, handle the bounded stun replacement, roll back atomically, and replay exactly. Broader replacement ordering, prohibitions, and characteristic closure remain blocked."
@@ -57761,7 +57761,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_keyword_programs_declare_exact_damage_result_capabilities"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
       ],
       "notes": [
         "A printed Deathtouch keyword node requests the fine-grained assignment and result capabilities."
@@ -57801,9 +57801,9 @@
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays"
       ],
       "implementation_components": [
-        "mtg_commander_sim.damage_results.materialize_damage_results",
-        "mtg_commander_sim.damage_results.consume_deathtouch_damage_checks",
-        "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions"
+        "quorune.damage_results.materialize_damage_results",
+        "quorune.damage_results.consume_deathtouch_damage_checks",
+        "quorune.state_based_actions.evaluate_permanent_state_based_actions"
       ],
       "notes": [
         "Positive damage creates a source-derived marker consumed after exactly one state-based-action check; indestructible prevents destruction without preserving the marker."
@@ -57845,8 +57845,8 @@
         "tests.test_combat_damage_assignment.CombatDamageAssignmentProposalTests.test_zero_deathtouch_assignment_is_not_lethal"
       ],
       "implementation_components": [
-        "mtg_commander_sim.deathtouch.deathtouch_assignment_is_lethal",
-        "mtg_commander_sim.combat_damage_trample.trample_assignment_error"
+        "quorune.deathtouch.deathtouch_assignment_is_lethal",
+        "quorune.combat_damage_trample.trample_assignment_error"
       ],
       "notes": [
         "Only a positive assignment from a current represented deathtouch source supplies the lethal-assignment contribution."
@@ -57885,8 +57885,8 @@
         "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"
       ],
       "implementation_components": [
-        "mtg_commander_sim.damage_source.DamageSourceSnapshot",
-        "mtg_commander_sim.deathtouch.deathtouch_damage_result_applies"
+        "quorune.damage_source.DamageSourceSnapshot",
+        "quorune.deathtouch.deathtouch_damage_result_applies"
       ],
       "notes": [
         "Every represented source zone uses the same pinned source keyword snapshot."
@@ -57924,8 +57924,8 @@
         "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"
       ],
       "implementation_components": [
-        "mtg_commander_sim.damage_source.DamageSourceSnapshot",
-        "mtg_commander_sim.damage_results.materialize_damage_results"
+        "quorune.damage_source.DamageSourceSnapshot",
+        "quorune.damage_results.materialize_damage_results"
       ],
       "notes": [
         "The prepared event retains deathtouch when the physical source leaves before commit."
@@ -57964,8 +57964,8 @@
         "tests.test_damage_result_events.DamageResultEventTests.test_noncombat_deathtouch_uses_pinned_source_lki"
       ],
       "implementation_components": [
-        "mtg_commander_sim.deathtouch.source_has_deathtouch",
-        "mtg_commander_sim.deathtouch.deathtouch_damage_result_applies"
+        "quorune.deathtouch.source_has_deathtouch",
+        "quorune.deathtouch.deathtouch_damage_result_applies"
       ],
       "notes": [
         "Normalized keyword sets make duplicate instances redundant for both assignment and damage results."
@@ -58032,7 +58032,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_defender_keyword_lowers_with_precise_capability_closed_span"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
       ],
       "notes": [
         "A printed Defender keyword node requests the fine-grained attack-restriction capability."
@@ -58073,7 +58073,7 @@
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_defender_restriction_is_seat_scoped_and_replays"
       ],
       "implementation_components": [
-        "mtg_commander_sim.defender.defender_prohibits_attack",
+        "quorune.defender.defender_prohibits_attack",
         "CommanderEngine._attack_declaration_error",
         "CommanderEngine._attack_declaration_components",
         "CommanderEngine._complete_attackers"
@@ -58120,7 +58120,7 @@
         "tests.test_defender_rules.DefenderRuleTests.test_defender_verdict_holds_across_bounded_characteristic_grid"
       ],
       "implementation_components": [
-        "mtg_commander_sim.defender.defender_prohibits_attack"
+        "quorune.defender.defender_prohibits_attack"
       ],
       "notes": [
         "Case-insensitive keyword normalization collapses multiple current Defender instances to one prohibition."
@@ -59575,7 +59575,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
         "mechanics/contracts/intimidate.json"
       ],
       "notes": [
@@ -59618,9 +59618,9 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
       ],
       "implementation_components": [
-        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
-        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "quorune.combat_evasion.CombatantEvasionCharacteristics",
+        "quorune.combat_evasion.combat_evasion_verdict",
+        "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics",
         "CommanderEngine._can_block"
       ],
       "notes": [
@@ -59665,8 +59665,8 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
       ],
       "implementation_components": [
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.keyword_abilities.normalized_characteristic_keywords",
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "notes": [
         "Canonical case-folded keyword sets make multiple current Intimidate instances redundant without weakening other evasion restrictions."
@@ -59734,7 +59734,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_basic_landwalk_keywords_lower_with_precise_closed_spans"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
         "mechanics/contracts/landwalk.json"
       ],
       "notes": [
@@ -59768,7 +59768,7 @@
       ],
       "implementation_components": [
         "mechanics/contracts/landwalk.json",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "notes": [
         "The represented basic-type family participates in the shared block-evasion boundary."
@@ -59811,8 +59811,8 @@
         "tests.test_basic_land_type_mana.BasicLandTypeManaTests.test_urborg_generated_swamp_activates_opposing_swampwalk"
       ],
       "implementation_components": [
-        "mtg_commander_sim.landwalk.basic_landwalk_block_verdict",
-        "mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types",
+        "quorune.landwalk.basic_landwalk_block_verdict",
+        "quorune.combat_evasion_engine_adapter.defending_basic_land_types",
         "CommanderEngine._can_block"
       ],
       "notes": [
@@ -59857,8 +59857,8 @@
         "tests.test_landwalk.BasicLandwalkTests.test_landwalk_remains_cumulative_with_shadow_and_flying"
       ],
       "implementation_components": [
-        "mtg_commander_sim.landwalk.basic_landwalk_block_verdict",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.landwalk.basic_landwalk_block_verdict",
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "notes": [
         "Different represented basic-type variants are cumulative and no evasion keyword cancels another."
@@ -59899,8 +59899,8 @@
         "tests.test_landwalk.BasicLandwalkIntegrationTests.test_offer_and_command_share_current_landwalk_legality_and_rollback"
       ],
       "implementation_components": [
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
-        "mtg_commander_sim.landwalk.basic_landwalk_block_verdict"
+        "quorune.keyword_abilities.normalized_characteristic_keywords",
+        "quorune.landwalk.basic_landwalk_block_verdict"
       ],
       "notes": [
         "Canonical current keyword sets collapse duplicate instances of each represented variant."
@@ -61843,10 +61843,10 @@
         "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_final_block_declaration"
       ],
       "implementation_components": [
-        "mtg_commander_sim.block_transitions.BlockTransitionEvent",
-        "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences",
-        "mtg_commander_sim.block_transitions.resolve_block_keyword_trigger",
-        "mtg_commander_sim.block_transition_engine_adapter.enqueue_block_transition_triggers"
+        "quorune.block_transitions.BlockTransitionEvent",
+        "quorune.block_transitions.derive_block_keyword_trigger_occurrences",
+        "quorune.block_transitions.resolve_block_keyword_trigger",
+        "quorune.block_transition_engine_adapter.enqueue_block_transition_triggers"
       ],
       "notes": [
         "The engine seals one public transition after every attacked defender declares blocks, excludes blockers with current typed Flanking, and resolves through the canonical identity-locked layer 7c effect owner."
@@ -61891,8 +61891,8 @@
         "tests.test_block_keyword_compiler.BlockKeywordCompilerTests.test_closed_keyword_lowering_preserves_instances_and_values"
       ],
       "implementation_components": [
-        "mtg_commander_sim.ability_fragments.CombatKeywordTriggerSpec",
-        "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences"
+        "quorune.ability_fragments.CombatKeywordTriggerSpec",
+        "quorune.block_transitions.derive_block_keyword_trigger_occurrences"
       ],
       "notes": [
         "Typed fragments preserve repeated printed instances and derive one stable occurrence for each instance and qualifying blocker."
@@ -62436,7 +62436,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
         "mechanics/contracts/shadow.json"
       ],
       "notes": [
@@ -62479,9 +62479,9 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
       ],
       "implementation_components": [
-        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
-        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "quorune.combat_evasion.CombatantEvasionCharacteristics",
+        "quorune.combat_evasion.combat_evasion_verdict",
+        "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics",
         "CommanderEngine._can_block"
       ],
       "notes": [
@@ -62526,8 +62526,8 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
       ],
       "implementation_components": [
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.keyword_abilities.normalized_characteristic_keywords",
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "notes": [
         "Canonical case-folded keyword sets make multiple current Shadow instances redundant without weakening other evasion restrictions."
@@ -62608,10 +62608,10 @@
         "tests.test_ordinary_cycling.OrdinaryCyclingCompilerTests.test_unsupported_cycling_variants_remain_precise_residuals"
       ],
       "implementation_components": [
-        "mtg_commander_sim.cycling_abilities.OrdinaryCyclingAbilitySpec",
-        "mtg_commander_sim.compiler.cycling_nodes.ordinary_cycling_keyword_node",
-        "mtg_commander_sim.rules.activation.commit.commit_activation",
-        "mtg_commander_sim.drawing.coordinator.begin_draw_sequence"
+        "quorune.cycling_abilities.OrdinaryCyclingAbilitySpec",
+        "quorune.compiler.cycling_nodes.ordinary_cycling_keyword_node",
+        "quorune.rules.activation.commit.commit_activation",
+        "quorune.drawing.coordinator.begin_draw_sequence"
       ],
       "notes": [
         "The trusted fine-grained capability pays fixed ordinary mana and discards the same physical source as costs, then places one ordinary ability on the stack and resolves one canonical draw.",
@@ -62657,8 +62657,8 @@
         "tests.test_ordinary_cycling.OrdinaryCyclingRuntimeTests.test_changed_cycling_oracle_fails_closed_without_runtime_reparse"
       ],
       "implementation_components": [
-        "mtg_commander_sim.compiled_cycling_abilities.compiled_ordinary_cycling_abilities",
-        "mtg_commander_sim.rules.activation.query.activated_abilities"
+        "quorune.compiled_cycling_abilities.compiled_ordinary_cycling_abilities",
+        "quorune.rules.activation.query.activated_abilities"
       ],
       "notes": [
         "The source-pinned descriptor remains discoverable as an object characteristic after zone changes, while its activation zone remains exactly hand.",
@@ -62922,7 +62922,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
         "mechanics/contracts/horsemanship.json"
       ],
       "notes": [
@@ -62965,9 +62965,9 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
       ],
       "implementation_components": [
-        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
-        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "quorune.combat_evasion.CombatantEvasionCharacteristics",
+        "quorune.combat_evasion.combat_evasion_verdict",
+        "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics",
         "CommanderEngine._can_block"
       ],
       "notes": [
@@ -63012,8 +63012,8 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
       ],
       "implementation_components": [
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.keyword_abilities.normalized_characteristic_keywords",
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "notes": [
         "Canonical case-folded keyword sets make multiple current Horsemanship instances redundant without weakening other evasion restrictions."
@@ -63557,7 +63557,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
         "mechanics/contracts/fear.json"
       ],
       "notes": [
@@ -63600,9 +63600,9 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
       ],
       "implementation_components": [
-        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
-        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "quorune.combat_evasion.CombatantEvasionCharacteristics",
+        "quorune.combat_evasion.combat_evasion_verdict",
+        "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics",
         "CommanderEngine._can_block"
       ],
       "notes": [
@@ -63647,8 +63647,8 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
       ],
       "implementation_components": [
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.keyword_abilities.normalized_characteristic_keywords",
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "notes": [
         "Canonical case-folded keyword sets make multiple current Fear instances redundant without weakening other evasion restrictions."
@@ -64598,10 +64598,10 @@
         "tests.test_block_keyword_triggers.BlockKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_final_block_declaration"
       ],
       "implementation_components": [
-        "mtg_commander_sim.block_transitions.BlockTransitionEvent",
-        "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences",
-        "mtg_commander_sim.block_transitions.resolve_block_keyword_trigger",
-        "mtg_commander_sim.block_transition_engine_adapter.enqueue_block_transition_triggers"
+        "quorune.block_transitions.BlockTransitionEvent",
+        "quorune.block_transitions.derive_block_keyword_trigger_occurrences",
+        "quorune.block_transitions.resolve_block_keyword_trigger",
+        "quorune.block_transition_engine_adapter.enqueue_block_transition_triggers"
       ],
       "notes": [
         "The engine derives one positive-integer Bushido occurrence when a typed source blocks or becomes blocked and resolves through the canonical identity-locked layer 7c effect owner."
@@ -64646,8 +64646,8 @@
         "tests.test_block_keyword_compiler.BlockKeywordCompilerTests.test_closed_keyword_lowering_preserves_instances_and_values"
       ],
       "implementation_components": [
-        "mtg_commander_sim.ability_fragments.CombatKeywordTriggerSpec",
-        "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences"
+        "quorune.ability_fragments.CombatKeywordTriggerSpec",
+        "quorune.block_transitions.derive_block_keyword_trigger_occurrences"
       ],
       "notes": [
         "Typed fragments preserve repeated printed instances and derive one stable occurrence for each instance."
@@ -68280,10 +68280,10 @@
         "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_attack_declaration"
       ],
       "implementation_components": [
-        "mtg_commander_sim.attack_transition_model.AttackTransitionEvent",
-        "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences",
-        "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger",
-        "mtg_commander_sim.attack_transition_engine_adapter.attack_transition_stack_items"
+        "quorune.attack_transition_model.AttackTransitionEvent",
+        "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences",
+        "quorune.attack_transition_resolution.resolve_attack_keyword_trigger",
+        "quorune.attack_transition_engine_adapter.attack_transition_stack_items"
       ],
       "notes": [
         "One sealed attack transition derives one occurrence per current typed Exalted instance and resolves the exact lone attacker through the canonical layer 7c owner."
@@ -68327,7 +68327,7 @@
         "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed"
       ],
       "implementation_components": [
-        "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences"
+        "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences"
       ],
       "notes": [
         "The immutable assignment set counts creatures declared as attackers, independent of recipient and source type."
@@ -69234,10 +69234,10 @@
         "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_attack_declaration"
       ],
       "implementation_components": [
-        "mtg_commander_sim.attack_transition_model.AttackTransitionEvent",
-        "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences",
-        "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger",
-        "mtg_commander_sim.attack_transition_engine_adapter.attack_transition_stack_items"
+        "quorune.attack_transition_model.AttackTransitionEvent",
+        "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences",
+        "quorune.attack_transition_resolution.resolve_attack_keyword_trigger",
+        "quorune.attack_transition_engine_adapter.attack_transition_stack_items"
       ],
       "notes": [
         "One sealed attack transition excludes the source, snapshots every other declared attacker, and resolves each surviving logical identity through the canonical layer 7c owner."
@@ -69280,8 +69280,8 @@
         "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed"
       ],
       "implementation_components": [
-        "mtg_commander_sim.ability_fragments.CombatKeywordTriggerSpec",
-        "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences"
+        "quorune.ability_fragments.CombatKeywordTriggerSpec",
+        "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences"
       ],
       "notes": [
         "Typed fragments preserve each printed Battle Cry instance and stable instance index."
@@ -71279,7 +71279,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_menace_keyword_lowers_with_precise_capability_closed_span"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES"
       ],
       "notes": [
         "A printed Menace keyword node requests the fine-grained blocker-restriction capability."
@@ -71322,8 +71322,8 @@
         "tests.test_declare_blockers_rules.DeclareBlockersRuleTests.test_two_blockers_satisfy_menace_and_the_block_requirement"
       ],
       "implementation_components": [
-        "mtg_commander_sim.menace.current_menace_restriction",
-        "mtg_commander_sim.menace.MenaceBlockRestriction",
+        "quorune.menace.current_menace_restriction",
+        "quorune.menace.MenaceBlockRestriction",
         "CommanderEngine._block_declaration_components",
         "CommanderEngine._issue_next_blocker",
         "CommanderEngine._complete_blockers"
@@ -71370,8 +71370,8 @@
         "tests.test_menace_rules.MenaceRuleTests.test_menace_verdict_holds_across_bounded_characteristic_grid"
       ],
       "implementation_components": [
-        "mtg_commander_sim.menace.current_menace_restriction",
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords"
+        "quorune.menace.current_menace_restriction",
+        "quorune.keyword_abilities.normalized_characteristic_keywords"
       ],
       "notes": [
         "Case-insensitive keyword normalization collapses multiple current Menace instances to one conditional minimum."
@@ -71915,7 +71915,7 @@
         "tests.test_card_program_v2.CardProgramV2Tests.test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
       ],
       "implementation_components": [
-        "mtg_commander_sim.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
+        "quorune.rules.capabilities.MECHANIC_CAPABILITY_DEPENDENCIES",
         "mechanics/contracts/skulk.json"
       ],
       "notes": [
@@ -71958,9 +71958,9 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionIntegrationTests.test_legal_block_replays_exactly_in_four_player_combat"
       ],
       "implementation_components": [
-        "mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict",
-        "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics",
+        "quorune.combat_evasion.CombatantEvasionCharacteristics",
+        "quorune.combat_evasion.combat_evasion_verdict",
+        "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics",
         "CommanderEngine._can_block"
       ],
       "notes": [
@@ -72005,8 +72005,8 @@
         "tests.test_combat_evasion_restrictions.CombatEvasionRestrictionTests.test_all_represented_restrictions_are_cumulative"
       ],
       "implementation_components": [
-        "mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords",
-        "mtg_commander_sim.combat_evasion.combat_evasion_verdict"
+        "quorune.keyword_abilities.normalized_characteristic_keywords",
+        "quorune.combat_evasion.combat_evasion_verdict"
       ],
       "notes": [
         "Canonical case-folded keyword sets make multiple current Skulk instances redundant without weakening other evasion restrictions."
@@ -72255,10 +72255,10 @@
         "tests.test_attack_keyword_triggers.AttackKeywordTriggerIntegrationTests.test_malformed_transition_rolls_back_attack_declaration"
       ],
       "implementation_components": [
-        "mtg_commander_sim.attack_transition_model.AttackTransitionEvent",
-        "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences",
-        "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger",
-        "mtg_commander_sim.attack_transition_engine_adapter.attack_transition_stack_items"
+        "quorune.attack_transition_model.AttackTransitionEvent",
+        "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences",
+        "quorune.attack_transition_resolution.resolve_attack_keyword_trigger",
+        "quorune.attack_transition_engine_adapter.attack_transition_stack_items"
       ],
       "notes": [
         "The sealed recipient set counts each directly attacked player once, excludes planeswalker and Battle recipients, and resolves the exact Melee source through the canonical layer 7c owner."
@@ -72301,8 +72301,8 @@
         "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_attack_keyword_trigger_mutants_are_killed"
       ],
       "implementation_components": [
-        "mtg_commander_sim.ability_fragments.CombatKeywordTriggerSpec",
-        "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences"
+        "quorune.ability_fragments.CombatKeywordTriggerSpec",
+        "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences"
       ],
       "notes": [
         "Typed fragments preserve each printed Melee instance and stable instance index."
@@ -81091,8 +81091,8 @@
         "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays"
       ],
       "implementation_components": [
-        "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions",
-        "mtg_commander_sim.damage_results.consume_deathtouch_damage_checks"
+        "quorune.state_based_actions.evaluate_permanent_state_based_actions",
+        "quorune.damage_results.consume_deathtouch_damage_checks"
       ],
       "notes": [
         "Destructible positive-toughness creatures are destroyed; indestructible creatures survive and the since-last-check marker is consumed atomically."

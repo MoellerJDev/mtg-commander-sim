@@ -7,9 +7,9 @@ from itertools import groupby
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError, TURN_STEPS
-from mtg_commander_sim.model import TurnEntry
-from mtg_commander_sim.record import (
+from quorune.engine import GameRuleError, TURN_STEPS
+from quorune.model import TurnEntry
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

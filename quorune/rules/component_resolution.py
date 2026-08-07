@@ -7,7 +7,7 @@ from pathlib import Path
 def implementation_component_resolves(component: str) -> bool:
     """Resolve a package component without importing runtime game modules."""
 
-    prefix = "mtg_commander_sim."
+    prefix = "quorune."
     if not component.startswith(prefix):
         return False
     parts = component.removeprefix(prefix).split(".")

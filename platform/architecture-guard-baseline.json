@@ -2,731 +2,731 @@
   "baseline_commit": "34a2cc46b94c06187dbaeb9a8fb56402116d5329",
   "card_named_helpers": [
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "reason": "Implements a named token behavior for Mishra, Eminent One inside the universal engine.",
       "symbol": "_create_mishra_warform"
     }
   ],
   "direct_game_state_write_identities": [
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "__init__"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.damage_step_index",
       "symbol": "_advance_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "phase_index",
       "symbol": "_advance_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "phase_index",
       "symbol": "_advance_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:extend",
       "state_path": "combat.damage_assignments",
       "symbol": "_apply_combat_assignments"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "players.mana_pool",
       "symbol": "_apply_mana_spend"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "players.stats",
       "symbol": "_apply_mana_spend"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.blocker_cursor",
       "symbol": "_begin_blocker_decisions"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.blockers_declared",
       "symbol": "_begin_blocker_decisions"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "active_player",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "current_turn",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "last_normal_turn_player",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "phase_index",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "turn_history",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "turn_sequence",
       "symbol": "_begin_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "players.yield_policy",
       "symbol": "_can_auto_pass"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.attackers_declared",
       "symbol": "_complete_attackers"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.defending_players",
       "symbol": "_complete_attackers"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.had_attacking_creature",
       "symbol": "_complete_attackers"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "combat.blocker_cursor",
       "symbol": "_complete_blockers"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:extend",
       "state_path": "stack",
       "symbol": "_complete_storm_choice"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:remove",
       "state_path": "stack",
       "symbol": "_complete_storm_choice"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:remove",
       "state_path": "stack",
       "symbol": "_continue_resolution"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "stack",
       "symbol": "_copy_stack_item"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "cards",
       "symbol": "_create_copy_object"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "players.zones",
       "symbol": "_create_copy_object"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.defending_players",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "draw",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "extra_turns",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "game_over",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "monarch",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "stack",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "winner",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "eliminated_players",
       "symbol": "_eliminate_players"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat",
       "symbol": "_end_turn_now"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "phase_index",
       "symbol": "_end_turn_now"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_end_turn_now"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_end_turn_now"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:clear",
       "state_path": "pending_trigger_batches",
       "symbol": "_end_turn_now"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:clear",
       "state_path": "stack",
       "symbol": "_end_turn_now"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat",
       "symbol": "_enter_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "phase",
       "symbol": "_enter_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_enter_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_enter_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "step",
       "symbol": "_enter_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "annotations",
       "symbol": "_finish_cleanup"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:pop",
       "state_path": "players.stats",
       "symbol": "_finish_cleanup"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat",
       "symbol": "_finish_combat_phase"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:remove",
       "state_path": "stack",
       "symbol": "_finish_siege_defeated_resolution"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_grant_priority"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_grant_priority"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "priority_epoch",
       "symbol": "_grant_priority"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "ref_counters",
       "symbol": "_increment_yield_change_epoch"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.attackers_declared",
       "symbol": "_issue_attackers"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.defending_players",
       "symbol": "_issue_attackers"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "mulligan_round",
       "symbol": "_issue_mulligan_declaration"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "combat.blockers_declared",
       "symbol": "_issue_next_blocker"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "combat.blocker_cursor",
       "symbol": "_issue_next_blocker"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "event_sequence",
       "symbol": "_log"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "events",
       "symbol": "_log"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "ref_counters",
       "symbol": "_next_ref"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "timestamp_sequence",
       "symbol": "_next_zone_timestamp"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:setdefault",
       "state_path": "players.stats",
       "symbol": "_optimization_stats"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_pass_priority"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_pass_priority"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "priority_passes",
       "symbol": "_pass_priority"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_pause_for_unsupported_semantic"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "annotations",
       "symbol": "_pause_for_unsupported_semantic"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_passes",
       "symbol": "_play_land"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "priority_player",
       "symbol": "_play_land"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:remove",
       "state_path": "stack",
       "symbol": "_prepare_stack_resolution"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:remove",
       "state_path": "stack",
       "symbol": "_prepare_storm_resolution"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "stack",
       "symbol": "_queue_ward_triggers_for_targets"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "opportunity_sequence",
       "symbol": "_record_action_opportunity"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "action_opportunities",
       "symbol": "_record_action_opportunity"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "turn_history",
       "symbol": "_record_turn_history"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "annotations",
       "symbol": "_remove_cleanup_frames"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:setdefault",
       "state_path": "players.stats",
       "symbol": "_restricted_mana"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:pop",
       "state_path": "extra_turns",
       "symbol": "_select_next_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "players.yield_policy",
       "symbol": "_set_yield"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "stack",
       "symbol": "_stabilize"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "started",
       "symbol": "_start_game"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "players.stats",
       "symbol": "_store_restricted_mana"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:pop",
       "state_path": "players.stats",
       "symbol": "_store_restricted_mana"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "monarch",
       "symbol": "become_monarch"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "players.zones",
       "symbol": "change_control"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:remove",
       "state_path": "players.zones",
       "symbol": "change_control"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "cards",
       "symbol": "create_emblem"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "players.stats",
       "symbol": "create_emblem"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "players.zones",
       "symbol": "create_emblem"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "stack",
       "symbol": "move_card"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "players.zones",
       "symbol": "move_card"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:append",
       "state_path": "delayed_triggers",
       "symbol": "schedule_delayed_trigger"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "mutating_call:insert",
       "state_path": "extra_turns",
       "symbol": "schedule_extra_turn"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "augmented_assignment",
       "state_path": "revision",
       "symbol": "submit"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "transaction"
     },
     {
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "__init__"
     },
     {
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "kind": "assignment",
       "state_path": "pending_decision",
       "symbol": "close_decision"
     },
     {
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "kind": "assignment",
       "state_path": "pending_decision",
       "symbol": "invalidate_current"
     },
     {
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "kind": "assignment",
       "state_path": "capabilities",
       "symbol": "issue"
     },
     {
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "kind": "assignment",
       "state_path": "pending_decision",
       "symbol": "issue"
     },
     {
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "kind": "assignment",
       "state_path": "ref_counters",
       "symbol": "issue"
     },
     {
-      "file": "mtg_commander_sim/permissions.py",
+      "file": "quorune/permissions.py",
       "kind": "assignment",
       "state_path": "capabilities",
       "symbol": "reissue_pending"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "finalize_record"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "inspect_game"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "load_record_state"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "events",
       "symbol": "load_record_state"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "migrate_v2_game"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "config.profile",
       "symbol": "migrate_v2_game"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "config.trace_level",
       "symbol": "migrate_v2_game"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "mutating_call:append",
       "state_path": "annotations",
       "symbol": "migrate_v2_game"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "replay_record"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "verify_record_integrity"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "kind": "assignment",
       "state_path": "<state-root>",
       "symbol": "verify_record_suffix"
     }
   ],
   "direct_game_state_writes_by_file": {
-    "mtg_commander_sim/engine.py": 110,
-    "mtg_commander_sim/permissions.py": 8,
-    "mtg_commander_sim/record.py": 11
+    "quorune/engine.py": 110,
+    "quorune/permissions.py": 8,
+    "quorune/record.py": 11
   },
   "engine": {
     "logical_lines": 12449,
@@ -2276,7 +2276,7 @@
   },
   "exception_binding": {
     "adr": "docs/adr/0031-typed-fixed-damage-sets.md",
-    "allowance_fingerprint": "eb5d66f550ddd97f1f7519e2234f5b97bfbbc6c0203ba979662e6668eb76c3a1",
+    "allowance_fingerprint": "21be8087788fd140fa8f95d61debf397944f181a648ab5b509980cd2af3c7a41",
     "exception_id": "ARCH-EXC-0013"
   },
   "legacy_card_specific_operations": [
@@ -2289,7 +2289,7 @@
   "oracle_id_literals": [
     {
       "column": 13,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 8,
       "oracle_id": "ace86e56-efde-4eb7-8815-71456a4c3abe",
@@ -2298,7 +2298,7 @@
     },
     {
       "column": 15,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 9,
       "oracle_id": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f",
@@ -2307,7 +2307,7 @@
     },
     {
       "column": 11,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 10,
       "oracle_id": "76b003e0-15af-4f22-bdf2-1ade5430964a",
@@ -2316,7 +2316,7 @@
     },
     {
       "column": 9,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 11,
       "oracle_id": "d3438037-3efd-4ce0-88ec-6d48ab521992",
@@ -2325,7 +2325,7 @@
     },
     {
       "column": 14,
-      "file": "mtg_commander_sim/shortcuts.py",
+      "file": "quorune/shortcuts.py",
       "in_condition": false,
       "line": 12,
       "oracle_id": "69428825-3c40-486d-b051-14e97a598ce6",
@@ -2335,167 +2335,167 @@
   ],
   "oversized_functions_and_methods": [
     {
-      "file": "mtg_commander_sim/card_programs/trust.py",
+      "file": "quorune/card_programs/trust.py",
       "logical_lines": 153,
       "symbol": "build_program_trust_closure"
     },
     {
-      "file": "mtg_commander_sim/carddb.py",
+      "file": "quorune/carddb.py",
       "logical_lines": 201,
       "symbol": "build_card_database"
     },
     {
-      "file": "mtg_commander_sim/choice_forms.py",
+      "file": "quorune/choice_forms.py",
       "logical_lines": 151,
       "symbol": "_field"
     },
     {
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "logical_lines": 266,
       "symbol": "_scripted_choice"
     },
     {
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "logical_lines": 337,
       "symbol": "build_parser"
     },
     {
-      "file": "mtg_commander_sim/cli.py",
+      "file": "quorune/cli.py",
       "logical_lines": 583,
       "symbol": "main"
     },
     {
-      "file": "mtg_commander_sim/codex_cli.py",
+      "file": "quorune/codex_cli.py",
       "logical_lines": 156,
       "symbol": "CodexCliArenaRunner.run"
     },
     {
-      "file": "mtg_commander_sim/declaration_costs.py",
+      "file": "quorune/declaration_costs.py",
       "logical_lines": 249,
       "symbol": "parse_declaration_cost_line"
     },
     {
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "logical_lines": 881,
       "symbol": "parse_declaration_restriction_line"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 193,
       "symbol": "CommanderEngine._begin_siege_defeated_resolution"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 164,
       "symbol": "CommanderEngine._complete_attackers"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 249,
       "symbol": "CommanderEngine._complete_semantic_search"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 168,
       "symbol": "CommanderEngine._continue_resolution"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 232,
       "symbol": "CommanderEngine._declaration_restrictions"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 194,
       "symbol": "CommanderEngine._effective_card_data"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 282,
       "symbol": "CommanderEngine._enter_step"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 300,
       "symbol": "CommanderEngine._prepare_stack_resolution"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 328,
       "symbol": "CommanderEngine._stabilize"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 235,
       "symbol": "CommanderEngine._target_row_matches"
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 341,
       "symbol": "CommanderEngine.move_card"
     },
     {
-      "file": "mtg_commander_sim/mana.py",
+      "file": "quorune/mana.py",
       "logical_lines": 168,
       "symbol": "extract_mana_modes"
     },
     {
-      "file": "mtg_commander_sim/mechanic_contracts.py",
+      "file": "quorune/mechanic_contracts.py",
       "logical_lines": 197,
       "symbol": "validate_mechanic_contract"
     },
     {
-      "file": "mtg_commander_sim/oracle_ir.py",
+      "file": "quorune/oracle_ir.py",
       "logical_lines": 453,
       "symbol": "_compile_face"
     },
     {
-      "file": "mtg_commander_sim/oracle_ir.py",
+      "file": "quorune/oracle_ir.py",
       "logical_lines": 338,
       "symbol": "_effect_template"
     },
     {
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "logical_lines": 302,
       "symbol": "card_semantic_status"
     },
     {
-      "file": "mtg_commander_sim/preflight.py",
+      "file": "quorune/preflight.py",
       "logical_lines": 161,
       "symbol": "semantic_preflight"
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "logical_lines": 234,
       "symbol": "derive_codex_arena_metadata"
     },
     {
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "logical_lines": 233,
       "symbol": "_event_description"
     },
     {
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "logical_lines": 1085,
       "symbol": "derive_review"
     },
     {
-      "file": "mtg_commander_sim/rule_conformance.py",
+      "file": "quorune/rule_conformance.py",
       "logical_lines": 190,
       "symbol": "validate_rule_conformance"
     },
     {
-      "file": "mtg_commander_sim/rules_corpus.py",
+      "file": "quorune/rules_corpus.py",
       "logical_lines": 169,
       "symbol": "verify_rules_corpus"
     },
     {
-      "file": "mtg_commander_sim/service.py",
+      "file": "quorune/service.py",
       "logical_lines": 169,
       "symbol": "GameService.command"
     },
     {
-      "file": "mtg_commander_sim/session.py",
+      "file": "quorune/session.py",
       "logical_lines": 362,
       "symbol": "CommanderSession.act"
     },
@@ -2507,19 +2507,19 @@
   ],
   "oversized_modules": [
     {
-      "file": "mtg_commander_sim/declaration_restrictions.py",
+      "file": "quorune/declaration_restrictions.py",
       "logical_lines": 1679
     },
     {
-      "file": "mtg_commander_sim/engine.py",
+      "file": "quorune/engine.py",
       "logical_lines": 12449
     },
     {
-      "file": "mtg_commander_sim/record.py",
+      "file": "quorune/record.py",
       "logical_lines": 1605
     },
     {
-      "file": "mtg_commander_sim/report.py",
+      "file": "quorune/report.py",
       "logical_lines": 1782
     },
     {
@@ -2654,6 +2654,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "80860714b832eb26d92e9d3ade811d0eb05f9d007a8d722a313ff7e9f536e9af"
+    "printed_name_allowances_sha256": "78e1f47e8767e94684b3942563c921a8b19cdbc0cc30b06b4496dcebcc167e6c"
   }
 }

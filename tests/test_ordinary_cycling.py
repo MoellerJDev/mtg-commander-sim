@@ -8,29 +8,29 @@ import unittest
 from unittest import mock
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.compiler import cycling_nodes as cycling_nodes_module
-from mtg_commander_sim.cycling_abilities import (
+from quorune.carddb import CardRecord
+from quorune.compiler import cycling_nodes as cycling_nodes_module
+from quorune.cycling_abilities import (
     CyclingAbilityError,
     OrdinaryCyclingAbilitySpec,
     compile_ordinary_cycling_ability,
 )
-from mtg_commander_sim.oracle_ir import (
+from quorune.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
 )
-from mtg_commander_sim.record import (
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime.cycling_abilities import (
+from quorune.semantic_runtime.cycling_abilities import (
     ordinary_cycling_specs_from_descriptors,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.semantics import SemanticRegistry
 
 
 def cycling_record(
@@ -328,7 +328,7 @@ class OrdinaryCyclingRuntimeTests(unittest.TestCase):
             return data
 
         query = __import__(
-            "mtg_commander_sim.rules.activation.query",
+            "quorune.rules.activation.query",
             fromlist=["parse_activated_abilities"],
         )
         original_parse = query.parse_activated_abilities

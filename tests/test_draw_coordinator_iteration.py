@@ -7,14 +7,14 @@ from types import SimpleNamespace
 from unittest import mock
 
 from common import keep_all, load_assets, make_session
-import mtg_commander_sim.drawing.coordinator as coordinator
-from mtg_commander_sim.drawing import (
+import quorune.drawing.coordinator as coordinator
+from quorune.drawing import (
     DrawPermission,
     QueuedDraw,
     validate_prepared_draw,
 )
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.replacement import (
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.replacement import (
     PreventDraw,
     ReplacementClass,
     ReplacementEffect,

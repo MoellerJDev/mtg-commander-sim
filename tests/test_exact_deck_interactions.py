@@ -4,8 +4,8 @@ import json
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.rules.activation import activation_condition_status
+from quorune.model import StackItem
+from quorune.rules.activation import activation_condition_status
 
 
 class ExactDeckInteractionFamilyTests(unittest.TestCase):

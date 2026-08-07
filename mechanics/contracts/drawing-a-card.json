@@ -172,7 +172,7 @@
     "test_draw_reveal_policy_mutant_is_killed"
   ],
   "implementation": {
-    "component": "strict fixed-draw, specifically-drawn-card, and reveal-as-drawn compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement/reveal components, and optional-choice handlers",
+    "component": "strict fixed-draw, specifically-drawn-card, and reveal-as-drawn compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the quorune.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement/reveal components, and optional-choice handlers",
     "version": "draw-transaction-v6"
   },
   "known_blockers": [

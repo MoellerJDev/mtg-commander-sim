@@ -7,18 +7,18 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import StateInvariantError
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.replacement_effects import ReplacementChoiceRequired
-from mtg_commander_sim.record import (
+from quorune.engine import StateInvariantError
+from quorune.model import StackItem
+from quorune.replacement_effects import ReplacementChoiceRequired
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.semantic_runtime import SemanticNodeError
-from mtg_commander_sim.semantic_runtime.zone_replacements import (
+from quorune.semantics import SemanticProgram, SemanticRegistry
+from quorune.projection import StateProjector
+from quorune.semantic_runtime import SemanticNodeError
+from quorune.semantic_runtime.zone_replacements import (
     ZoneDestinationReplacementHandler,
     collect_zone_change_replacement_effects,
 )

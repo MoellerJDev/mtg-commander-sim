@@ -15,6 +15,20 @@ SPEC.loader.exec_module(MODULE)
 
 
 class DocumentationPolicyTests(unittest.TestCase):
+    def test_current_public_identity_is_quorune(self) -> None:
+        surfaces = (
+            ROOT / "README.md",
+            ROOT / "CONTRIBUTING.md",
+            ROOT / "docs" / "LEGAL_CONTENT_BOUNDARY.md",
+            ROOT / "docs" / "optional-clients" / "codex-arena.md",
+            ROOT / "web" / "index.html",
+            ROOT / "web" / "src" / "App.tsx",
+        )
+        combined = "\n".join(path.read_text(encoding="utf-8") for path in surfaces)
+        self.assertIn("Quorune", combined)
+        self.assertNotIn("MTG Commander Sim", combined)
+        self.assertNotIn("Commander Arena", combined)
+
     def test_repository_documentation_passes(self) -> None:
         failures = MODULE.validate(ROOT)
         self.assertEqual([], failures, "\n".join(failures))

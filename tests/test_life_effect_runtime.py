@@ -4,9 +4,9 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 
-from mtg_commander_sim.effect_runtime import life_effects
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.replacement import (
+from quorune.effect_runtime import life_effects
+from quorune.errors import GameRuleError
+from quorune.replacement import (
     MultiplyAmount,
     ReplacementClass,
     ReplacementEffect,

@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.card_programs.commands import runtime_component_status
-from mtg_commander_sim.reusable_pieces import (
+from quorune.card_programs.commands import runtime_component_status
+from quorune.reusable_pieces import (
     build_reusable_piece_artifacts,
     load_json,
     load_reusable_piece_policy,
@@ -25,10 +25,10 @@ from mtg_commander_sim.reusable_pieces import (
     render_reusable_piece_matrix_markdown,
     validate_reusable_piece_artifacts,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.util import stable_json
+from quorune.util import stable_json
 from scripts.validate_python_runtime import require_supported_python
 
 
@@ -48,7 +48,7 @@ BASELINE_OUTPUT = ROOT / "coverage" / "program-baseline.json"
 
 FRONTIER_INPUT = ROOT / "coverage" / "card-unlock-frontier.json.gz"
 CAPABILITY_INPUT = (
-    ROOT / "mtg_commander_sim" / "rules" / "capability-registry.json"
+    ROOT / "quorune" / "rules" / "capability-registry.json"
 )
 MECHANICS_INPUT = ROOT / "mechanics" / "registry.json"
 RULES_INPUT = ROOT / "rules" / "rule-index.json"

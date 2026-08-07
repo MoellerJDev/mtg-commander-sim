@@ -5,12 +5,12 @@ import unittest
 from pathlib import Path
 
 from common import load_assets, make_session
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.deck import DeckDefinition, DeckEntry, DeckLoader
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import GameConfig
-from mtg_commander_sim.record import authoritative_state_hash
-from mtg_commander_sim.session import CommanderSession
+from quorune.carddb import CardRecord
+from quorune.deck import DeckDefinition, DeckEntry, DeckLoader
+from quorune.engine import GameRuleError
+from quorune.model import GameConfig
+from quorune.record import authoritative_state_hash
+from quorune.session import CommanderSession
 
 
 class _CardLookup:

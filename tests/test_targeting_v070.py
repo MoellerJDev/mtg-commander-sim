@@ -5,12 +5,12 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets
-from mtg_commander_sim import CommanderSession, GameConfig
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.targets import TargetGroup
+from quorune import CommanderSession, GameConfig
+from quorune.engine import GameRuleError
+from quorune.model import StackItem
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.semantics import SemanticProgram
+from quorune.targets import TargetGroup
 
 
 class ExactTargetingTests(unittest.TestCase):

@@ -4,18 +4,18 @@ import copy
 import unittest
 
 from common import DB_PATH
-from mtg_commander_sim.card_programs import (
+from quorune.card_programs import (
     bind_card_program_runtime,
     bind_semantic_program_runtime,
     compute_match_trust_closure,
 )
-from mtg_commander_sim.card_programs.adapters import compile_card_program
-from mtg_commander_sim.card_programs.commands import runtime_component_status
-from mtg_commander_sim.carddb import CardDatabase, CardRecord
-from mtg_commander_sim.rules.capabilities import (
+from quorune.card_programs.adapters import compile_card_program
+from quorune.card_programs.commands import runtime_component_status
+from quorune.carddb import CardDatabase, CardRecord
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.semantics import SemanticRegistry
 
 
 def _bolt() -> CardRecord:

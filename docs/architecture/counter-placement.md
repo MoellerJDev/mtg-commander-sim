@@ -1,7 +1,7 @@
 ---
 title: "Counter-placement transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/counter_placement.py, semantic_runtime/counter_replacements.py, and ADR 0011"
+authoritative_source: "quorune/counter_placement.py, semantic_runtime/counter_replacements.py, and ADR 0011"
 verified: "2026-08-05"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"

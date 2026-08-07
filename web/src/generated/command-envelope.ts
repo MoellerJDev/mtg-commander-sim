@@ -8,7 +8,7 @@
 /**
  * The authenticated principal is transport metadata and MUST NOT be accepted from this client-controlled body.
  */
-export interface MTGCommanderSimClientCommandEnvelopeV30 {
+export interface QuoruneClientCommandEnvelopeV30 {
   protocol_version: "3.0";
   game_id: string;
   command_id: string;

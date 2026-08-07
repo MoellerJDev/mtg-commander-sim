@@ -6,20 +6,20 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.combat_damage_engine_adapter import (
+from quorune.combat_damage_engine_adapter import (
     EngineCombatDamageQuery,
 )
-from mtg_commander_sim.combat_damage_snapshot import (
+from quorune.combat_damage_snapshot import (
     CombatDamageSnapshotError,
 )
-from mtg_commander_sim.engine import TURN_STEPS
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.record import (
+from quorune.engine import TURN_STEPS
+from quorune.model import CombatState
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 class CombatDamageRuleTests(unittest.TestCase):

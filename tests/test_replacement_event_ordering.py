@@ -5,15 +5,15 @@ import tempfile
 import unittest
 
 from damage_replacement_support import DamageReplacementPipelineBase
-from mtg_commander_sim.damage import commit_prepared_damage_batch, prepare_damage_batch
-from mtg_commander_sim.damage_modifier_state import (
+from quorune.damage import commit_prepared_damage_batch, prepare_damage_batch
+from quorune.damage_modifier_state import (
     DamageModifierDuration,
     DamagePreventionShield,
     DamageSubject,
     PreventionMode,
 )
-from mtg_commander_sim.replacement_effects import ReplacementChoiceRequired
-from mtg_commander_sim.record import (
+from quorune.replacement_effects import ReplacementChoiceRequired
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

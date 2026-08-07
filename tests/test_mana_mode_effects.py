@@ -3,8 +3,8 @@ from __future__ import annotations
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.mana_mode_effects import (
+from quorune.errors import GameRuleError
+from quorune.mana_mode_effects import (
     apply_mana_mode_effects,
     compile_mana_mode_effects,
     DealDamageToController,

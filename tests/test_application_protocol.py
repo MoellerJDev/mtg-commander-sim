@@ -10,7 +10,7 @@ import unittest
 from jsonschema import Draft202012Validator
 
 from common import load_assets, make_session
-from mtg_commander_sim import (
+from quorune import (
     CommandEnvelope,
     GameService,
     PROTOCOL_VERSION,

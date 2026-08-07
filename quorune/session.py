@@ -66,7 +66,7 @@ FIELD_ALIASES = {
 
 @dataclass(slots=True)
 class CommanderSession:
-    """ChatGPT-oriented client over the authoritative Commander engine.
+    """Untrusted client facade over the authoritative rules engine.
 
     A single conversation may route all principals sequentially. For strict
     hidden information, run one session client per pilot context against the

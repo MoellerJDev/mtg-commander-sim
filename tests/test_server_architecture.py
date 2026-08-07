@@ -7,14 +7,14 @@ import tempfile
 import unittest
 
 from common import ROOT
-from mtg_commander_sim.persistence import initialize_sqlite
+from quorune.persistence import initialize_sqlite
 
 
 class ServerArchitectureTests(unittest.TestCase):
     def test_engine_package_does_not_depend_on_transport_framework(self):
         forbidden = {"fastapi", "starlette", "uvicorn", "server"}
         violations: list[str] = []
-        for path in (ROOT / "mtg_commander_sim").rglob("*.py"):
+        for path in (ROOT / "quorune").rglob("*.py"):
             tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
             for node in ast.walk(tree):
                 names: list[str] = []

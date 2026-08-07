@@ -10,17 +10,17 @@ from unittest.mock import patch
 
 from common import DB_PATH, keep_all, load_assets, make_session
 from damage_replacement_support import DamageReplacementPipelineBase
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.damage_templates import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.damage_templates import (
     FixedMassDamageEffectTemplate,
     fixed_damage_effect_template,
 )
-from mtg_commander_sim.fixed_damage_set import (
+from quorune.fixed_damage_set import (
     resolve_fixed_damage_set,
     snapshot_fixed_damage_set,
 )
-from mtg_commander_sim import fixed_damage_set as fixed_damage_set_module
-from mtg_commander_sim.fixed_damage_set_model import (
+from quorune import fixed_damage_set as fixed_damage_set_module
+from quorune.fixed_damage_set_model import (
     FixedDamageSetError,
     FixedDamageSetSpec,
     PermanentControllerRelation,
@@ -28,26 +28,26 @@ from mtg_commander_sim.fixed_damage_set_model import (
     PlayerDamageGroup,
     PlayerDamageRelation,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.object_query import ObjectQueryResult
-from mtg_commander_sim.object_predicate import ObjectQuerySpec
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.model import StackItem
+from quorune.object_query import ObjectQueryResult
+from quorune.object_predicate import ObjectQuerySpec
+from quorune.oracle_ir import compile_oracle_card
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     DealFixedDamageSetIntent,
     ReadOnlyHandlerContext,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
-from mtg_commander_sim.semantic_runtime.fixed_damage_set_handlers import (
+from quorune.semantic_runtime.context import SemanticNodeError
+from quorune.semantic_runtime.fixed_damage_set_handlers import (
     FixedDamageSetHandler,
 )
 

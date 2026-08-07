@@ -8,52 +8,52 @@ from pathlib import Path
 from common import ROOT, keep_all, make_session
 from property_budget import property_transitions
 from scripts.build_test_database import build_fixture_database
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.damage import (
+from quorune.carddb import CardDatabase
+from quorune.damage import (
     DamageError,
     commit_prepared_damage_batch,
     damage_proposal,
     prepare_damage_batch,
 )
-from mtg_commander_sim.damage_modifier_state import (
+from quorune.damage_modifier_state import (
     DamageModifierDuration,
     DamagePreventionShield,
     DamageSubject,
     GainLifePreventionAftermath,
     PreventionMode,
 )
-from mtg_commander_sim.damage_results import (
+from quorune.damage_results import (
     PreparedDamageResults,
     commit_damage_result_plan,
     plan_damage_result_commit,
     prepare_damage_results,
 )
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.model import CardInstance, CombatState, StackItem
-from mtg_commander_sim.oracle_ir import register_generated_programs
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.deck import DeckLoader
+from quorune.model import CardInstance, CombatState, StackItem
+from quorune.oracle_ir import register_generated_programs
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement_effects import (
+from quorune.replacement_effects import (
     ReplaceableEvent,
     ReplacementClass,
     ReplacementEffect,
     resolve_replacements,
 )
-from mtg_commander_sim.semantic_runtime.damage_results import (
+from quorune.semantic_runtime.damage_results import (
     DamageResultReplacementSourceContext,
     collect_damage_result_replacement_effects,
 )
-from mtg_commander_sim.semantic_runtime.life_replacements import (
+from quorune.semantic_runtime.life_replacements import (
     LifeGainMultiplierHandler,
     LifeReplacementSourceContext,
 )
-from mtg_commander_sim.semantic_runtime.context import SemanticNodeError
-from mtg_commander_sim.rules.capabilities import load_default_capability_registry
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantic_runtime.context import SemanticNodeError
+from quorune.rules.capabilities import load_default_capability_registry
+from quorune.semantics import SemanticProgram
 
 
 def result_effect(

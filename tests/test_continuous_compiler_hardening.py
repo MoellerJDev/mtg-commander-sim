@@ -5,19 +5,19 @@ from types import SimpleNamespace
 import unittest
 
 from common import load_assets
-from mtg_commander_sim.compiler.continuous_templates import (
+from quorune.compiler.continuous_templates import (
     controlled_creature_fixed_modifier,
     fixed_power_toughness_anthem_handler,
 )
-from mtg_commander_sim.compiler.program_generation import (
+from quorune.compiler.program_generation import (
     register_generated_programs,
     runtime_handler_footprint,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.semantics import SemanticProgram, SemanticRegistry
+from quorune.oracle_ir import compile_oracle_card
+from quorune.semantics import SemanticProgram, SemanticRegistry
 
 
 def _anthem_program(

@@ -34,7 +34,7 @@
       "implementation_components": [
         "TapPermanentHandler",
         "SetPermanentTappedIntent",
-        "mtg_commander_sim.tap_state.set_permanent_tapped"
+        "quorune.tap_state.set_permanent_tapped"
       ],
       "executable_test_ids": [
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_change_only_eligible_state",
@@ -73,8 +73,8 @@
         "UntapAllCreaturesHandler",
         "SetPermanentTappedIntent",
         "UntapAllCreaturesIntent",
-        "mtg_commander_sim.tap_state.set_permanent_tapped",
-        "mtg_commander_sim.tap_state.untap_all_creatures"
+        "quorune.tap_state.set_permanent_tapped",
+        "quorune.tap_state.untap_all_creatures"
       ],
       "executable_test_ids": [
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_change_only_eligible_state",

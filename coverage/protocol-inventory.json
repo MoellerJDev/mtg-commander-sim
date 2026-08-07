@@ -263,8 +263,8 @@
     }
   ],
   "protocol": {
-    "title": "Commander Arena Server",
-    "version": "0.8.0"
+    "title": "Quorune Server",
+    "version": "0.9.0"
   },
   "schema_version": 1,
   "schemas": [
@@ -329,7 +329,7 @@
         "expected_view_revision",
         "choices"
       ],
-      "title": "MTG Commander Sim client command envelope v3.0",
+      "title": "Quorune client command envelope v3.0",
       "type": "object"
     },
     {
@@ -361,7 +361,7 @@
         "view_revision",
         "decision"
       ],
-      "title": "MTG Commander Sim projected decision packet v3.0",
+      "title": "Quorune projected decision packet v3.0",
       "type": "object"
     },
     {
@@ -895,7 +895,7 @@
       "type": "object"
     }
   ],
-  "source_fingerprint": "59b592525d78457dbace88d8fa26f1ce2e31d9087a9443e06db8fb1d19822afa",
+  "source_fingerprint": "6e5d78063e064197192bf0e13aa4a70e9fa6a809ee4b6402df432ef9deac5b1c",
   "top_blockers": [],
   "websocket_routes": [
     "/api/v1/games/{game_id}/stream"

@@ -1,7 +1,7 @@
 ---
 title: "Damage transaction"
 status: "current"
-authoritative_source: "mtg_commander_sim/damage.py, mtg_commander_sim/damage_values.py, mtg_commander_sim/damage_results.py, mtg_commander_sim/fixed_damage_set*, and mtg_commander_sim/combat_damage_*"
+authoritative_source: "quorune/damage.py, quorune/damage_values.py, quorune/damage_results.py, quorune/fixed_damage_set*, and quorune/combat_damage_*"
 verified: "2026-08-07"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"

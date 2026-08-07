@@ -1,6 +1,6 @@
 """Compatibility facade for the decomposed CR 614-616 subsystem.
 
-New implementation belongs under :mod:`mtg_commander_sim.replacement`. This
+New implementation belongs under :mod:`quorune.replacement`. This
 module remains import-stable for Game Record v3 code and external clients.
 """
 

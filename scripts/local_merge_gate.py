@@ -154,7 +154,7 @@ def build_steps(
                 "-m",
                 "compileall",
                 "-q",
-                "mtg_commander_sim",
+                "quorune",
                 "tests",
                 "scripts",
                 "simctl.py",
@@ -470,7 +470,7 @@ def main() -> int:
     database = output / "test-ci.sqlite3"
     wheel_output = output / "dist"
     wheel_output.mkdir(parents=True, exist_ok=True)
-    for old_wheel in wheel_output.glob("mtg_commander_sim-*.whl"):
+    for old_wheel in wheel_output.glob("quorune-*.whl"):
         old_wheel.unlink()
 
     focused_tests = tuple(

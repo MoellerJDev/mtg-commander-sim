@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.preflight import card_semantic_status
+from quorune.preflight import card_semantic_status
 
 
 class ExactArtifactEngineTests(unittest.TestCase):

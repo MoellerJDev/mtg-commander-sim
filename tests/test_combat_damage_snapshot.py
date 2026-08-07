@@ -3,20 +3,20 @@ from __future__ import annotations
 from dataclasses import replace
 import unittest
 
-from mtg_commander_sim.combat_damage_assignment import (
+from quorune.combat_damage_assignment import (
     build_combat_damage_assignment_proposal,
 )
-from mtg_commander_sim.combat_damage_snapshot import (
+from quorune.combat_damage_snapshot import (
     build_combat_damage_snapshot,
     CombatDamageParticipant,
     CombatDamageRecipient,
     CombatDamageSnapshot,
     CombatDamageSnapshotError,
 )
-from mtg_commander_sim.combat_relationship_state import (
+from quorune.combat_relationship_state import (
     remove_combat_relationships,
 )
-from mtg_commander_sim.model import CombatState
+from quorune.model import CombatState
 
 
 class _Query:

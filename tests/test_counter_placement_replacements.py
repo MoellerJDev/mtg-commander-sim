@@ -9,24 +9,24 @@ import unittest
 from common import ROOT, keep_all, make_session
 from property_budget import property_transitions
 from scripts.build_test_database import build_fixture_database
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.counter_placement import (
+from quorune.carddb import CardDatabase
+from quorune.counter_placement import (
     commit_prepared_counter_placements,
     CounterPlacementError,
     CounterPlacementRequest,
     place_counters,
     prepare_counter_placements,
 )
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.model import CardInstance, StackItem
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.deck import DeckLoader
+from quorune.model import CardInstance, StackItem
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement_effects import ReplacementChoiceRequired
-from mtg_commander_sim.semantic_runtime import (
+from quorune.replacement_effects import ReplacementChoiceRequired
+from quorune.semantic_runtime import (
     CounterPlacementEventSpec,
     CounterQuantityReplacementHandler,
     CounterReplacementSourceContext,
@@ -37,7 +37,7 @@ from mtg_commander_sim.semantic_runtime import (
     resolve_counter_placement_replacements,
     resolve_zone_change_replacements,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 def counter_descriptor(

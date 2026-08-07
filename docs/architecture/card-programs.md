@@ -1,7 +1,7 @@
 ---
 title: "CardProgram architecture"
 status: "current"
-authoritative_source: "mtg_commander_sim/card_programs and schemas/card-program-v2.schema.json"
+authoritative_source: "quorune/card_programs and schemas/card-program-v2.schema.json"
 verified: "2026-08-06"
 audience: "compiler, rules, replay, and extension contributors"
 maintenance: "hand-maintained"
@@ -17,7 +17,7 @@ artifact fingerprint. The versioned JSON schema is the serialization authority.
 
 ## Ownership and flow
 
-`mtg_commander_sim/card_programs/` owns validation, deterministic
+`quorune/card_programs/` owns validation, deterministic
 serialization, adapters, inspection, and source-identity checks. It does not
 own `GameState` and cannot mutate a game. The compiler produces typed nodes and
 residuals; the registry combines generated and reviewed inputs; strict

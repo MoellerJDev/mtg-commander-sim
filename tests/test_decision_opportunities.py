@@ -5,10 +5,10 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim import CommanderSession, GameConfig
-from mtg_commander_sim.model import YieldPolicy
-from mtg_commander_sim.pilot import PilotResponse
-from mtg_commander_sim.report import derive_review
+from quorune import CommanderSession, GameConfig
+from quorune.model import YieldPolicy
+from quorune.pilot import PilotResponse
+from quorune.report import derive_review
 
 
 class DecisionOpportunityTests(unittest.TestCase):

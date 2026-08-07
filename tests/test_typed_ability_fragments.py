@@ -3,9 +3,9 @@ from __future__ import annotations
 import unittest
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.attachments import attach_objects
-from mtg_commander_sim.abilities import ActivatedAbility
-from mtg_commander_sim.ability_fragments import (
+from quorune.attachments import attach_objects
+from quorune.abilities import ActivatedAbility
+from quorune.ability_fragments import (
     AbilityFragmentError,
     GrantedActivatedAbilitySpec,
     GrantedTriggeredAbilitySpec,
@@ -16,42 +16,42 @@ from mtg_commander_sim.ability_fragments import (
     canonical_ability_fragments,
     parse_protection_line,
 )
-from mtg_commander_sim.aura import (
+from quorune.aura import (
     LinkedGraveyardCreatureEnchantSpec,
     SimpleEnchantSpec,
     enchant_spec_from_dict,
     enchant_spec_to_dict,
 )
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.compiler.continuous_templates import (
+from quorune.carddb import CardRecord
+from quorune.compiler.continuous_templates import (
     attached_fixed_characteristics_handler,
 )
-from mtg_commander_sim.continuous_effect_model import (
+from quorune.continuous_effect_model import (
     ContinuousEffect,
     ContinuousEffectOrigin,
     ContinuousOperation,
     Layer,
 )
-from mtg_commander_sim.continuous_effects import (
+from quorune.continuous_effects import (
     CharacteristicState,
     evaluate_continuous_effects,
 )
-from mtg_commander_sim.model import CardInstance
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.protection import (
+from quorune.model import CardInstance
+from quorune.oracle_ir import compile_oracle_card
+from quorune.protection import (
     ProtectionSource,
     ProtectionVerdict,
     protection_verdict,
 )
-from mtg_commander_sim.rules.activation.query import activated_abilities
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.activation.query import activated_abilities
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantic_runtime.ability_fragments import (
+from quorune.semantic_runtime.ability_fragments import (
     default_ability_fragment_registry,
     fragments_from_descriptors,
 )
-from mtg_commander_sim.targets import TargetGroup
+from quorune.targets import TargetGroup
 
 
 def wrapped(fragment):

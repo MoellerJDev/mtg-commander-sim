@@ -111,7 +111,7 @@
         "exclusions": ["Cycling costs containing X, hybrid, Phyrexian, snow, or nonmana costs", "typecycling", "Cycling triggers", "Cycling cost modifiers", "Cycling prohibitions", "granted or copied Cycling outside a trusted typed descriptor", "abilities activated from zones other than hand"]
       },
       "dependencies": ["trigger.event.normalized_zone_change", "zone.draw.library_to_hand"],
-      "implementation_components": ["mtg_commander_sim.cycling_abilities.OrdinaryCyclingAbilitySpec", "mtg_commander_sim.compiler.cycling_nodes.ordinary_cycling_keyword_node", "mtg_commander_sim.semantic_runtime.cycling_abilities.OrdinaryCyclingAbilityHandler", "mtg_commander_sim.compiled_cycling_abilities.compiled_ordinary_cycling_abilities", "mtg_commander_sim.rules.activation.query.activated_abilities", "mtg_commander_sim.rules.activation.commit.commit_activation", "mtg_commander_sim.drawing.coordinator.begin_draw_sequence"],
+      "implementation_components": ["quorune.cycling_abilities.OrdinaryCyclingAbilitySpec", "quorune.compiler.cycling_nodes.ordinary_cycling_keyword_node", "quorune.semantic_runtime.cycling_abilities.OrdinaryCyclingAbilityHandler", "quorune.compiled_cycling_abilities.compiled_ordinary_cycling_abilities", "quorune.rules.activation.query.activated_abilities", "quorune.rules.activation.commit.commit_activation", "quorune.drawing.coordinator.begin_draw_sequence"],
       "positive_tests": ["test_fixed_ordinary_cycling_compiles_typed_hand_activation", "test_generic_cycling_discards_before_stack_draw_and_replays_exactly", "test_cycling_descriptor_exists_in_every_zone_but_activates_only_from_hand"],
       "negative_tests": ["test_unsupported_cycling_variants_remain_precise_residuals", "test_changed_cycling_oracle_fails_closed_without_runtime_reparse", "test_unpayable_cycling_is_not_offered_and_rejects_without_mutation"],
       "interaction_tests": ["test_generic_cycling_discards_before_stack_draw_and_replays_exactly"],
@@ -138,7 +138,7 @@
         "exclusions": ["Auras enchanting players", "Auras enchanting cards outside the battlefield", "multiple Enchant abilities", "quality, color, subtype, state, and compound Enchant restrictions", "bestow, reconfigure, and face-up attachment", "protection qualities beyond represented everything, Aura, enchantment, and color protection"]
       },
       "dependencies": ["target.revalidate_resolution"],
-      "implementation_components": ["mtg_commander_sim.aura.grammar.parse_simple_enchant_line", "mtg_commander_sim.aura.runtime.prepare_aura_entry", "mtg_commander_sim.aura.runtime.simple_aura_attachment_is_legal", "mtg_commander_sim.rules.casting.proposal._aura_spell_target_schema", "mtg_commander_sim.token_creation._preflight_aura_token_specs", "mtg_commander_sim.attachments.attach_objects"],
+      "implementation_components": ["quorune.aura.grammar.parse_simple_enchant_line", "quorune.aura.runtime.prepare_aura_entry", "quorune.aura.runtime.simple_aura_attachment_is_legal", "quorune.rules.casting.proposal._aura_spell_target_schema", "quorune.token_creation._preflight_aura_token_specs", "quorune.attachments.attach_objects"],
       "positive_tests": ["test_aura_offer_requires_and_projects_one_legal_spell_target", "test_spell_resolution_attaches_and_illegal_target_counters_by_rule", "test_aura_tokens_preflight_attachment_and_no_legal_object_is_not_created"],
       "negative_tests": ["test_unsupported_enchant_grammar_fails_before_mutation", "test_nonspell_entry_with_no_legal_object_stays_in_origin_zone"],
       "interaction_tests": ["test_nonspell_entry_pauses_for_choice_and_resumes_exact_effect", "test_control_relation_and_protection_are_live_attachment_legality"],
@@ -165,7 +165,7 @@
         "exclusions": ["Equip costs containing X, hybrid, Phyrexian, snow, or nonmana costs", "Equip variants with different target restrictions", "instant-speed Equip permissions", "Equipment controlled by another player", "attachment legality beyond creature control and represented protection", "static characteristics granted by the Equipment"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.abilities.parse_activated_abilities", "mtg_commander_sim.rules.activation.resolution.builtin_activation_resolution", "mtg_commander_sim.effect_runtime.zones_and_attachments._apply_attach", "mtg_commander_sim.attachments.attach_objects"],
+      "implementation_components": ["quorune.abilities.parse_activated_abilities", "quorune.rules.activation.resolution.builtin_activation_resolution", "quorune.effect_runtime.zones_and_attachments._apply_attach", "quorune.attachments.attach_objects"],
       "positive_tests": ["test_fixed_equip_parser_exposes_only_executable_target_contract", "test_generic_fixed_equip_activation_attaches_and_applies_characteristics"],
       "negative_tests": ["test_fixed_equip_keyword_has_exact_bounded_capability", "test_equip_resolves_without_effect_after_equipment_leaves"],
       "interaction_tests": ["test_live_generic_equipment_effect_moves_detaches_and_tracks_control", "test_generic_fixed_equip_activation_attaches_and_applies_characteristics"],
@@ -192,7 +192,7 @@
         "exclusions": ["protection quality conjunctions and comma lists", "qualities other than everything, colors, represented card types, and Aura", "effects that remove protection from damage", "effects that redefine a quality dynamically", "untrusted or text-only granted protection"]
       },
       "dependencies": ["attachment.aura.simple_object", "damage.prevention.static_fixed", "target.revalidate_resolution"],
-      "implementation_components": ["mtg_commander_sim.ability_fragments.ProtectionSpec", "mtg_commander_sim.semantic_runtime.ability_fragments.ProtectionAbilityFragmentHandler", "mtg_commander_sim.compiler.continuous_templates.attached_fixed_characteristics_handler", "mtg_commander_sim.protection.protection_verdict", "mtg_commander_sim.damage._protection_prevention_effects", "mtg_commander_sim.engine.CommanderEngine._target_row_matches", "mtg_commander_sim.engine.CommanderEngine._can_block", "mtg_commander_sim.engine.CommanderEngine._attachment_is_legal"],
+      "implementation_components": ["quorune.ability_fragments.ProtectionSpec", "quorune.semantic_runtime.ability_fragments.ProtectionAbilityFragmentHandler", "quorune.compiler.continuous_templates.attached_fixed_characteristics_handler", "quorune.protection.protection_verdict", "quorune.damage._protection_prevention_effects", "quorune.engine.CommanderEngine._target_row_matches", "quorune.engine.CommanderEngine._can_block", "quorune.engine.CommanderEngine._attachment_is_legal"],
       "positive_tests": ["test_typed_protection_blocks_target_attachment_and_block_operations", "test_lifelink_counts_only_damage_not_prevented_by_protection"],
       "negative_tests": ["test_untyped_and_unsupported_protection_fail_closed"],
       "interaction_tests": ["test_layer_six_granted_protection_uses_typed_fragment"],
@@ -219,7 +219,7 @@
         "exclusions": ["paying life costs", "setting or exchanging life totals", "dynamic life amounts", "life-gain prevention not represented by a trusted component"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.effect_runtime.life_effects._commit", "mtg_commander_sim.life_change.prepare_life_change_batch", "mtg_commander_sim.life_change.commit_life_change_batch", "mtg_commander_sim.life_state.plan_life_changes", "mtg_commander_sim.life_state.apply_life_changes"],
+      "implementation_components": ["quorune.effect_runtime.life_effects._commit", "quorune.life_change.prepare_life_change_batch", "quorune.life_change.commit_life_change_batch", "quorune.life_state.plan_life_changes", "quorune.life_state.apply_life_changes"],
       "positive_tests": ["test_life_and_loss_commit_through_the_typed_batch_owner", "test_fixed_life_self_enter_trigger_replays_exactly"],
       "negative_tests": ["test_invalid_batch_member_rolls_back_every_life_change"],
       "interaction_tests": ["test_drain_log_reports_final_replacement_adjusted_values"],
@@ -246,7 +246,7 @@
         "exclusions": ["shared-team turn ordering", "draw effects with unresolved dynamic counts", "conditional or first-draw count multipliers", "uncompiled draw replacement wording other than represented Dredge and unconditional controller doubling", "effects that move a library card to hand without drawing it", "complete skip-draw and draw-step replacement grammar", "casting-process face-down draws", "no current Oracle producer pays a draw-as-cost through the exposed feasibility boundary"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.rules.node_capability_shapes.fixed_draw_node_capabilities", "mtg_commander_sim.compiler.activated_mana_nodes.activated_oracle_node", "mtg_commander_sim.compiler.program_generation.register_generated_programs", "mtg_commander_sim.drawing.model.prepare_draw_instruction", "mtg_commander_sim.drawing.model.prepare_draw_event", "mtg_commander_sim.drawing.restrictions.DrawPermission", "mtg_commander_sim.drawing.transaction.commit_prepared_draw", "mtg_commander_sim.drawing.coordinator.begin_draw_sequence", "mtg_commander_sim.drawing.coordinator.begin_draw_batch", "mtg_commander_sim.semantic_runtime.draw_replacements.DrawInstructionMultiplierHandler", "mtg_commander_sim.semantic_runtime.draw_replacements.DredgeReplacementHandler", "mtg_commander_sim.semantic_runtime.draw_restrictions.DrawMaximumHandler", "mtg_commander_sim.semantic_choices.optional_draw.OptionalDrawHandler", "mtg_commander_sim.semantic_choices.conditional_draw.OpponentCastColorDrawHandler"],
+      "implementation_components": ["quorune.rules.node_capability_shapes.fixed_draw_node_capabilities", "quorune.compiler.activated_mana_nodes.activated_oracle_node", "quorune.compiler.program_generation.register_generated_programs", "quorune.drawing.model.prepare_draw_instruction", "quorune.drawing.model.prepare_draw_event", "quorune.drawing.restrictions.DrawPermission", "quorune.drawing.transaction.commit_prepared_draw", "quorune.drawing.coordinator.begin_draw_sequence", "quorune.drawing.coordinator.begin_draw_batch", "quorune.semantic_runtime.draw_replacements.DrawInstructionMultiplierHandler", "quorune.semantic_runtime.draw_replacements.DredgeReplacementHandler", "quorune.semantic_runtime.draw_restrictions.DrawMaximumHandler", "quorune.semantic_choices.optional_draw.OptionalDrawHandler", "quorune.semantic_choices.conditional_draw.OpponentCastColorDrawHandler"],
       "positive_tests": ["test_ordinary_draw_commits_zone_history_and_events_once", "test_dredge_mills_top_cards_and_returns_the_pinned_source", "test_draw_handler_lowers_typed_intent_through_read_only_context", "test_mandatory_multi_draw_partially_occurs_under_maximum_one", "test_two_draw_doublers_modify_instruction_before_individual_draws", "test_optional_empty_library_draw_remains_legal_without_a_prohibition", "test_two_thousand_replacement_free_draws_do_not_recurse", "test_two_thousand_prevented_draws_do_not_recurse", "test_ordinary_activated_draw_is_exact_and_source_spanned"],
       "negative_tests": ["test_changed_library_or_source_fails_before_draw_mutation", "test_prevented_empty_draw_does_not_mark_empty_library_loss", "test_registered_node_validation_fails_before_mutation", "test_draw_prohibition_is_checked_before_dredge_replacements", "test_max_one_removes_optional_multi_draw_before_task_issue", "test_draw_past_library_records_each_empty_attempt", "test_fixed_draw_shapes_are_strict_and_capability_scoped"],
       "interaction_tests": ["test_trusted_draw_replacement_finishes_before_priority", "test_draw_prevention_applies_even_to_an_empty_library", "test_semantic_choice_preparation_draw_uses_replacement_coordinator", "test_veil_conditional_draw_pauses_for_dredge_before_permissions", "test_dredge_does_not_consume_maximum_one_draw_allowance", "test_restriction_rechecks_control_phasing_and_source_zone", "test_large_sequence_suspends_and_resumes_from_remaining_count", "test_large_zero_count_batch_is_trampolined", "test_draw_replacement_completes_after_cost_and_before_resolution", "test_target_player_draw_validates_target_resolves_privately_and_replays"],
@@ -273,7 +273,7 @@
         "exclusions": ["replacement results other than fixed draw instructions", "dynamic result counts", "result effects with additional actions", "complete draw replacement Oracle grammar"]
       },
       "dependencies": ["zone.draw.library_to_hand"],
-      "implementation_components": ["mtg_commander_sim.compiler.draw_templates.static_draw_result_handler", "mtg_commander_sim.drawing.model.DrawEventResolution", "mtg_commander_sim.drawing.coordinator.begin_draw_sequence", "mtg_commander_sim.replacement.operations.CreateResultDraws", "mtg_commander_sim.semantic_runtime.draw_replacements.DrawResultMultiplierHandler"],
+      "implementation_components": ["quorune.compiler.draw_templates.static_draw_result_handler", "quorune.drawing.model.DrawEventResolution", "quorune.drawing.coordinator.begin_draw_sequence", "quorune.replacement.operations.CreateResultDraws", "quorune.semantic_runtime.draw_replacements.DrawResultMultiplierHandler"],
       "positive_tests": ["test_result_draws_are_typed_and_exclude_the_producing_effect"],
       "negative_tests": ["test_result_draw_operation_is_closed_and_strict"],
       "interaction_tests": ["test_result_draws_finish_before_the_original_sequence_resumes"],
@@ -300,7 +300,7 @@
         "exclusions": ["specifically-drawn-card actions other than public reveal followed by discard unless land", "hidden-zone continuous type changes", "conditional characteristics", "optional reveal-as-drawn choices"]
       },
       "dependencies": ["zone.draw.library_to_hand"],
-      "implementation_components": ["mtg_commander_sim.compiler.draw_templates.fixed_draw_effect_template", "mtg_commander_sim.drawing.model.DrawnCardAction", "mtg_commander_sim.drawing.transaction.commit_prepared_draw_result", "mtg_commander_sim.rules.node_capability_shapes.fixed_draw_node_capabilities", "mtg_commander_sim.semantic_runtime.generic.DrawWithActionsHandler"],
+      "implementation_components": ["quorune.compiler.draw_templates.fixed_draw_effect_template", "quorune.drawing.model.DrawnCardAction", "quorune.drawing.transaction.commit_prepared_draw_result", "quorune.rules.node_capability_shapes.fixed_draw_node_capabilities", "quorune.semantic_runtime.generic.DrawWithActionsHandler"],
       "positive_tests": ["test_drawn_nonland_is_revealed_then_that_exact_card_is_discarded"],
       "negative_tests": ["test_compiler_leaves_unrepresented_draw_action_variants_residual"],
       "interaction_tests": ["test_replacement_result_draws_do_not_inherit_original_post_actions"],
@@ -327,7 +327,7 @@
         "exclusions": ["draws replaced by non-draw results", "reveal policies after the first draw each turn", "qualities other than basic land and creature for linked draw riders", "copy-and-cast, token-creation, damage, and multi-rider reveal triggers", "shared-team turn draw ordinals", "hidden-zone continuous type changes"]
       },
       "dependencies": ["zone.draw.library_to_hand"],
-      "implementation_components": ["mtg_commander_sim.compiler.draw_templates.static_draw_reveal_handler", "mtg_commander_sim.compiler.draw_templates.linked_draw_reveal_condition", "mtg_commander_sim.semantic_runtime.draw_reveals.DrawRevealFirstHandler", "mtg_commander_sim.drawing.continuation.DrawRevealDecisionContinuation", "mtg_commander_sim.drawing.coordinator.complete_draw_reveal", "mtg_commander_sim.drawing.transaction.commit_prepared_draw_result"],
+      "implementation_components": ["quorune.compiler.draw_templates.static_draw_reveal_handler", "quorune.compiler.draw_templates.linked_draw_reveal_condition", "quorune.semantic_runtime.draw_reveals.DrawRevealFirstHandler", "quorune.drawing.continuation.DrawRevealDecisionContinuation", "quorune.drawing.coordinator.complete_draw_reveal", "quorune.drawing.transaction.commit_prepared_draw_result"],
       "positive_tests": ["test_mandatory_first_draw_reveals_and_dispatches_only_its_linked_trigger"],
       "negative_tests": ["test_second_draw_and_non_draw_replacement_do_not_apply_reveal"],
       "interaction_tests": ["test_optional_sources_are_chosen_sequentially_and_linked_by_physical_source"],
@@ -354,7 +354,7 @@
         "exclusions": ["combat-damage transfer trigger", "monarch end-step draw", "player-leaves transfer"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.generic.BecomeMonarchHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "CommanderEngine.become_monarch"],
+      "implementation_components": ["quorune.semantic_runtime.generic.BecomeMonarchHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "CommanderEngine.become_monarch"],
       "positive_tests": ["test_monarch_handler_uses_canonical_engine_mutation_path"],
       "negative_tests": ["test_nonqualifying_damage_does_not_create_a_transfer_trigger"],
       "interaction_tests": ["test_creature_combat_damage_transfers_only_on_trigger_resolution"],
@@ -381,7 +381,7 @@
         "exclusions": ["optional runtime descriptors", "effects that change or double the original token quantity", "effects whose output depends on mutable state", "replacement-created counter placement"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.token_replacements.AdditionalTokenReplacementHandler", "mtg_commander_sim.semantic_runtime.token_replacements.resolve_token_creation_replacements", "mtg_commander_sim.token_creation.create_tokens", "CommanderEngine.create_token"],
+      "implementation_components": ["quorune.semantic_runtime.token_replacements.AdditionalTokenReplacementHandler", "quorune.semantic_runtime.token_replacements.resolve_token_creation_replacements", "quorune.token_creation.create_tokens", "CommanderEngine.create_token"],
       "positive_tests": ["test_registered_additional_token_components_replace_without_name_dispatch"],
       "negative_tests": ["test_additional_token_component_rejects_malformed_or_nonmatching_events"],
       "interaction_tests": ["test_multiple_additional_token_components_share_one_creation_timestamp", "test_additional_token_does_not_inherit_original_entry_modifiers", "test_source_created_by_event_does_not_replace_its_own_creation", "test_resolution_suspends_for_seat_scoped_replacement_order"],
@@ -408,7 +408,7 @@
         "exclusions": ["optional zone descriptors", "entry-zone choices", "commander command-zone replacement", "unregistered destination predicates", "replacement processing for emitted counter intents"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.zone_replacements.ZoneDestinationReplacementHandler", "mtg_commander_sim.replacement_effects", "CommanderEngine.move_card"],
+      "implementation_components": ["quorune.semantic_runtime.zone_replacements.ZoneDestinationReplacementHandler", "quorune.replacement_effects", "CommanderEngine.move_card"],
       "positive_tests": ["test_dauthi_replaces_graveyard_moves_and_casts_opponent_card_for_free"],
       "negative_tests": ["test_dauthi_does_not_replace_tokens_or_its_controllers_cards", "test_zone_replacement_descriptor_rejects_unknown_destinations"],
       "interaction_tests": ["test_graveyard_replacement_is_decided_before_the_move", "test_competing_zone_replacements_suspend_resume_and_replay_exactly", "test_simultaneous_replacement_uses_the_sources_pre_move_controller", "test_stack_object_controller_chooses_zone_replacement_order", "test_complete_legacy_registry_uses_pinned_zone_compatibility"],
@@ -435,7 +435,7 @@
         "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "cost and rule-generated placements", "complete enters-with-counter ordering"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.counter_replacements.CounterQuantityReplacementHandler", "mtg_commander_sim.counter_placement.prepare_counter_placements", "mtg_commander_sim.counter_placement.plan_prepared_counter_placement_commit", "mtg_commander_sim.counter_placement.commit_counter_placement_plan", "mtg_commander_sim.damage_prevention_aftermath.prepare_prevention_aftermath"],
+      "implementation_components": ["quorune.semantic_runtime.counter_replacements.CounterQuantityReplacementHandler", "quorune.counter_placement.prepare_counter_placements", "quorune.counter_placement.plan_prepared_counter_placement_commit", "quorune.counter_placement.commit_counter_placement_plan", "quorune.damage_prevention_aftermath.prepare_prevention_aftermath"],
       "positive_tests": ["test_counter_quantity_component_changes_effect_generated_placement", "test_counter_aftermath_reuses_counter_replacement_pipeline"],
       "negative_tests": ["test_counter_quantity_component_rejects_malformed_and_nonmatching_events", "test_stale_counter_aftermath_fails_before_life_or_damage_mutation"],
       "interaction_tests": ["test_counter_replacements_apply_in_affected_players_chosen_order", "test_zone_replacement_counter_is_a_nested_precommit_event", "test_counter_aftermath_reuses_counter_replacement_pipeline"],
@@ -462,7 +462,7 @@
         "exclusions": ["dynamic or conditional quantities", "rules-text grants without separately trusted semantic behavior", "state-derived modifiers", "attachment legality and attach costs", "characteristic-defining abilities", "unimplemented granted keyword rules"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.attached_continuous.AttachedFixedCharacteristicsHandler", "mtg_commander_sim.attachments.attach_objects", "mtg_commander_sim.attachments.attached_object_identity", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects"],
+      "implementation_components": ["quorune.semantic_runtime.attached_continuous.AttachedFixedCharacteristicsHandler", "quorune.attachments.attach_objects", "quorune.attachments.attached_object_identity", "quorune.card_programs.runtime.collect_card_program_continuous_effects", "quorune.continuous_effects.evaluate_continuous_effects"],
       "positive_tests": ["test_fixed_modifier_and_keyword_apply_only_to_exact_logical_object", "test_animate_dead_and_bestow_modifiers_use_generic_attached_handler", "test_thornbite_staff_grants_damage_death_untap_and_shaman_attach"],
       "negative_tests": ["test_relation_model_and_descriptor_fail_closed", "test_compiler_rejects_dynamic_conditional_and_unrepresented_text", "test_malformed_relation_fails_before_mutation"],
       "interaction_tests": ["test_live_generic_equipment_effect_moves_detaches_and_tracks_control", "test_target_departure_and_source_departure_end_effect_without_stale_identity", "test_type_and_ability_removal_use_their_canonical_layers"],
@@ -489,7 +489,7 @@
         "exclusions": ["type-setting effects", "conditional or restricted object sets", "dependency interactions that alter the source text", "effects that remove abilities or land types"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.continuous_components.AddBasicLandTypeHandler", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects", "CommanderEngine._activated_abilities"],
+      "implementation_components": ["quorune.semantic_runtime.continuous_components.AddBasicLandTypeHandler", "quorune.card_programs.runtime.collect_card_program_continuous_effects", "quorune.continuous_effects.evaluate_continuous_effects", "CommanderEngine._activated_abilities"],
       "positive_tests": ["test_urborg_adds_swamp_and_intrinsic_black_mana_to_darksteel_citadel"],
       "negative_tests": ["test_basic_land_type_component_rejects_malformed_descriptors"],
       "interaction_tests": ["test_additive_basic_land_type_preserves_existing_types_text_and_mana"],
@@ -516,7 +516,7 @@
         "exclusions": ["power/toughness setting effects", "characteristic-defining abilities", "layer dependencies within 7c", "ability-removal dependency interactions", "conditional and state-derived modifiers", "combat-state, attached, token, color-exclusion, and multi-subtype-union predicates"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.continuous_components.FixedPowerToughnessAnthemHandler", "mtg_commander_sim.semantic_runtime.continuous_components.FixedQueryPowerToughnessAnthemHandler", "mtg_commander_sim.card_programs.runtime.collect_card_program_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects"],
+      "implementation_components": ["quorune.semantic_runtime.continuous_components.FixedPowerToughnessAnthemHandler", "quorune.semantic_runtime.continuous_components.FixedQueryPowerToughnessAnthemHandler", "quorune.card_programs.runtime.collect_card_program_continuous_effects", "quorune.continuous_effects.evaluate_continuous_effects"],
       "positive_tests": ["test_registered_anthem_component_replaces_name_dispatch"],
       "negative_tests": ["test_anthem_component_rejects_malformed_descriptors"],
       "interaction_tests": ["test_multiple_anthem_components_stack_and_respect_control", "test_layer_four_subtype_change_enables_layer_seven_anthem"],
@@ -543,7 +543,7 @@
         "exclusions": ["control-changing effects", "copy effects", "text and color changes", "dynamic quantities", "effects without a represented duration", "dependency interactions among same-layer effects"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.continuous_effect_state.create_resolution_continuous_effect", "mtg_commander_sim.continuous_effect_state.active_resolution_effects", "mtg_commander_sim.continuous_effect_state.expire_end_of_turn_continuous_effects", "mtg_commander_sim.continuous_effects.evaluate_continuous_effects", "mtg_commander_sim.effect_runtime.objects_stack_and_tokens._commit_temporary_characteristic_effect", "mtg_commander_sim.effect_runtime.zones_and_attachments._apply_modify_all_matching_permanents_until_end_of_turn"],
+      "implementation_components": ["quorune.continuous_effect_state.create_resolution_continuous_effect", "quorune.continuous_effect_state.active_resolution_effects", "quorune.continuous_effect_state.expire_end_of_turn_continuous_effects", "quorune.continuous_effects.evaluate_continuous_effects", "quorune.effect_runtime.objects_stack_and_tokens._commit_temporary_characteristic_effect", "quorune.effect_runtime.zones_and_attachments._apply_modify_all_matching_permanents_until_end_of_turn"],
       "positive_tests": ["test_mass_resolution_locks_set_across_entry_control_and_zone_change"],
       "negative_tests": ["test_malformed_models_fail_closed", "test_malformed_mass_predicate_rolls_back_without_effect"],
       "interaction_tests": ["test_resolution_set_is_locked_to_logical_objects"],
@@ -570,7 +570,7 @@
         "exclusions": ["blocker eligibility unrelated to Flying", "other evasion and blocking restrictions or requirements", "block declaration costs", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords", "mtg_commander_sim.aerial_blocking.aerial_block_verdict", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.keyword_abilities.normalized_characteristic_keywords", "quorune.aerial_blocking.aerial_block_verdict", "CommanderEngine._can_block"],
       "positive_tests": ["test_flying_attacker_requires_flying_or_reach_blocker", "test_current_flying_and_reach_share_offer_and_command_legality"],
       "negative_tests": ["test_malformed_keyword_snapshot_fails_closed"],
       "interaction_tests": ["test_current_keywords_are_case_insensitive_and_redundant", "test_current_flying_and_reach_share_offer_and_command_legality"],
@@ -597,7 +597,7 @@
         "exclusions": ["blocker eligibility unrelated to Flying", "other evasion and blocking restrictions or requirements", "block declaration costs", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": ["combat.block.reach"],
-      "implementation_components": ["mtg_commander_sim.keyword_abilities.normalized_characteristic_keywords", "mtg_commander_sim.aerial_blocking.aerial_block_verdict", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.keyword_abilities.normalized_characteristic_keywords", "quorune.aerial_blocking.aerial_block_verdict", "CommanderEngine._can_block"],
       "positive_tests": ["test_flying_attacker_requires_flying_or_reach_blocker", "test_current_flying_and_reach_share_offer_and_command_legality"],
       "negative_tests": ["test_ground_attacker_is_outside_aerial_restriction", "test_malformed_keyword_snapshot_fails_closed"],
       "interaction_tests": ["test_current_keywords_are_case_insensitive_and_redundant", "test_current_flying_and_reach_share_offer_and_command_legality"],
@@ -624,7 +624,7 @@
         "exclusions": ["effects that add combat damage steps outside First Strike and Double Strike", "banding and assignment-controller substitution", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.combat.first_strike_step_required", "mtg_commander_sim.combat.ordinary_second_step_combatants", "mtg_commander_sim.combat.assigns_in_damage_step"],
+      "implementation_components": ["quorune.combat.first_strike_step_required", "quorune.combat.ordinary_second_step_combatants", "quorune.combat.assigns_in_damage_step"],
       "positive_tests": ["test_first_strike_creates_the_initial_combat_damage_step"],
       "negative_tests": ["test_second_step_uses_the_first_step_snapshot_and_current_double_strike"],
       "interaction_tests": ["test_double_strike_trample_recomputes_after_blocker_leaves"],
@@ -651,7 +651,7 @@
         "exclusions": ["banding and effects that change who assigns combat damage", "damage assignment modifiers other than represented deathtouch and Trample", "unsupported combat recipient kinds", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": ["combat.damage.participation.strike_steps"],
-      "implementation_components": ["mtg_commander_sim.combat_damage_snapshot.CombatDamageSnapshot", "mtg_commander_sim.combat_damage_snapshot.build_combat_damage_snapshot", "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "mtg_commander_sim.combat_damage_sequence.CombatDamageAssignmentSequence", "mtg_commander_sim.damage.combat_damage_proposals"],
+      "implementation_components": ["quorune.combat_damage_snapshot.CombatDamageSnapshot", "quorune.combat_damage_snapshot.build_combat_damage_snapshot", "quorune.combat_damage_assignment.CombatDamageAssignmentProposal", "quorune.combat_damage_sequence.CombatDamageAssignmentSequence", "quorune.damage.combat_damage_proposals"],
       "positive_tests": ["test_snapshot_and_proposal_have_one_canonical_relationship_order"],
       "negative_tests": ["test_malformed_internal_relationships_fail_before_projection"],
       "interaction_tests": ["test_permuted_combat_assignment_has_identical_replacement_replay"],
@@ -678,7 +678,7 @@
         "exclusions": ["banding and effects that change who assigns damage", "unsupported continuous-effect, copy, face-down, and ability-changing producers", "damage assignment modifiers other than represented deathtouch and Trample"]
       },
       "dependencies": ["combat.damage.assignment.canonical"],
-      "implementation_components": ["mtg_commander_sim.deathtouch.deathtouch_assignment_is_lethal", "mtg_commander_sim.combat_damage_assignment.build_combat_damage_assignment_proposal", "mtg_commander_sim.combat_damage_trample.trample_assignment_error"],
+      "implementation_components": ["quorune.deathtouch.deathtouch_assignment_is_lethal", "quorune.combat_damage_assignment.build_combat_damage_assignment_proposal", "quorune.combat_damage_trample.trample_assignment_error"],
       "positive_tests": ["test_deathtouch_and_marked_damage_each_reduce_trample_lethal"],
       "negative_tests": ["test_zero_deathtouch_assignment_is_not_lethal", "test_malformed_amounts_and_keyword_values_fail_closed"],
       "interaction_tests": ["test_deathtouch_damage_from_another_attacker_is_lethal", "test_indestructible_consumes_deathtouch_at_the_first_sba_check"],
@@ -705,7 +705,7 @@
         "exclusions": ["the separate Trample over planeswalkers keyword", "banding and effects that change who assigns combat damage", "damage assignment modifiers other than ordinary deathtouch and marked damage", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": ["combat.damage.assignment.canonical", "combat.damage.assignment.deathtouch"],
-      "implementation_components": ["mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal", "mtg_commander_sim.combat_damage_assignment.build_combat_damage_assignment_proposal", "mtg_commander_sim.combat_damage_assignment.trample_assignment_error", "mtg_commander_sim.combat_damage_snapshot.CombatDamageSnapshot", "mtg_commander_sim.combat_damage_projection.project_combat_damage_assignment"],
+      "implementation_components": ["quorune.combat_damage_assignment.CombatDamageAssignmentProposal", "quorune.combat_damage_assignment.build_combat_damage_assignment_proposal", "quorune.combat_damage_assignment.trample_assignment_error", "quorune.combat_damage_snapshot.CombatDamageSnapshot", "quorune.combat_damage_projection.project_combat_damage_assignment"],
       "positive_tests": ["test_trample_accepts_lethal_then_spill", "test_trample_to_attacked_permanent_never_spills_to_controller"],
       "negative_tests": ["test_trample_rejects_spill_before_lethal_atomically", "test_malformed_and_noncanonical_assignments_fail_closed"],
       "interaction_tests": ["test_deathtouch_and_marked_damage_each_reduce_trample_lethal", "test_trample_assigns_lethal_over_indestructible_blocker", "test_lifelink_counts_only_damage_not_prevented_by_protection", "test_double_strike_trample_recomputes_after_blocker_leaves"],
@@ -732,7 +732,7 @@
         "exclusions": ["effects that put a creature onto the battlefield attacking", "permissions that allow a creature with Defender to attack", "the broader CR 508 restrictions-and-requirements solver", "unrepresented continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.defender.defender_prohibits_attack", "CommanderEngine._attack_declaration_error", "CommanderEngine._attack_declaration_components", "CommanderEngine._complete_attackers"],
+      "implementation_components": ["quorune.defender.defender_prohibits_attack", "CommanderEngine._attack_declaration_error", "CommanderEngine._attack_declaration_components", "CommanderEngine._complete_attackers"],
       "positive_tests": ["test_defender_is_not_offered_and_cannot_be_injected_as_an_attacker", "test_current_effective_defender_is_case_insensitive_and_redundant"],
       "negative_tests": ["test_noncreature_and_nondefender_are_not_restricted", "test_malformed_current_creature_characteristics_fail_closed"],
       "interaction_tests": ["test_effective_defender_gain_and_loss_change_shared_legality"],
@@ -759,7 +759,7 @@
         "exclusions": ["conditional or rules-text-equivalent Fear", "block declaration costs and unrelated restrictions or requirements", "unsupported continuous-effect, copy, face-down, color, type, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics", "mtg_commander_sim.combat_evasion.combat_evasion_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.combat_evasion.CombatantEvasionCharacteristics", "quorune.combat_evasion.combat_evasion_verdict", "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
       "positive_tests": ["test_fear_accepts_black_or_artifact_blockers"],
       "negative_tests": ["test_malformed_and_unresolved_inputs_fail_closed"],
       "interaction_tests": ["test_all_represented_restrictions_are_cumulative"],
@@ -786,7 +786,7 @@
         "exclusions": ["conditional or rules-text-equivalent Horsemanship", "block declaration costs and unrelated restrictions or requirements", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics", "mtg_commander_sim.combat_evasion.combat_evasion_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.combat_evasion.CombatantEvasionCharacteristics", "quorune.combat_evasion.combat_evasion_verdict", "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
       "positive_tests": ["test_shadow_is_symmetric_and_horsemanship_is_not"],
       "negative_tests": ["test_malformed_and_unresolved_inputs_fail_closed"],
       "interaction_tests": ["test_all_represented_restrictions_are_cumulative"],
@@ -813,7 +813,7 @@
         "exclusions": ["conditional or rules-text-equivalent Intimidate", "block declaration costs and unrelated restrictions or requirements", "unsupported continuous-effect, copy, face-down, color, type, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics", "mtg_commander_sim.combat_evasion.combat_evasion_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.combat_evasion.CombatantEvasionCharacteristics", "quorune.combat_evasion.combat_evasion_verdict", "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
       "positive_tests": ["test_intimidate_accepts_artifacts_or_a_shared_color"],
       "negative_tests": ["test_malformed_and_unresolved_inputs_fail_closed"],
       "interaction_tests": ["test_all_represented_restrictions_are_cumulative"],
@@ -840,7 +840,7 @@
         "exclusions": ["conditional or rules-text-equivalent Shadow", "block declaration costs and unrelated restrictions or requirements", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics", "mtg_commander_sim.combat_evasion.combat_evasion_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.combat_evasion.CombatantEvasionCharacteristics", "quorune.combat_evasion.combat_evasion_verdict", "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
       "positive_tests": ["test_shadow_is_symmetric_and_horsemanship_is_not"],
       "negative_tests": ["test_malformed_and_unresolved_inputs_fail_closed"],
       "interaction_tests": ["test_all_represented_restrictions_are_cumulative"],
@@ -867,7 +867,7 @@
         "exclusions": ["conditional or rules-text-equivalent Skulk", "unresolved variable characteristic definitions", "block declaration costs and unrelated restrictions or requirements", "unsupported continuous-effect, copy, face-down, power, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.combat_evasion.CombatantEvasionCharacteristics", "mtg_commander_sim.combat_evasion.combat_evasion_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.combat_evasion.CombatantEvasionCharacteristics", "quorune.combat_evasion.combat_evasion_verdict", "quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics", "CommanderEngine._can_block"],
       "positive_tests": ["test_skulk_compares_exact_current_power"],
       "negative_tests": ["test_malformed_and_unresolved_inputs_fail_closed"],
       "interaction_tests": ["test_all_represented_restrictions_are_cumulative"],
@@ -894,7 +894,7 @@
         "exclusions": ["nonbasic landwalk", "legendary landwalk", "Desertwalk and other non-basic-land-type variants", "compound or quality-qualified landwalk predicates", "unsupported continuous-effect, copy, face-down, and ability-changing producers", "block declaration costs and unrelated restrictions or requirements"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.landwalk.basic_landwalk_block_verdict", "mtg_commander_sim.combat_evasion.combat_evasion_verdict", "mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types", "CommanderEngine._can_block"],
+      "implementation_components": ["quorune.landwalk.basic_landwalk_block_verdict", "quorune.combat_evasion.combat_evasion_verdict", "quorune.combat_evasion_engine_adapter.defending_basic_land_types", "CommanderEngine._can_block"],
       "positive_tests": ["test_each_basic_variant_uses_current_matching_land_subtype", "test_offer_and_command_share_current_landwalk_legality_and_rollback"],
       "negative_tests": ["test_malformed_and_unsupported_variants_fail_closed", "test_legal_nonmatching_block_is_seat_scoped_and_replays"],
       "interaction_tests": ["test_landwalk_remains_cumulative_with_shadow_and_flying", "test_urborg_generated_swamp_activates_opposing_swampwalk"],
@@ -921,7 +921,7 @@
         "exclusions": ["creatures allowed to block additional attackers", "the broader CR 509 restrictions-and-requirements solver", "unrepresented continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.menace.current_menace_restriction", "mtg_commander_sim.menace.MenaceBlockRestriction", "CommanderEngine._block_declaration_components", "CommanderEngine._issue_next_blocker", "CommanderEngine._complete_blockers"],
+      "implementation_components": ["quorune.menace.current_menace_restriction", "quorune.menace.MenaceBlockRestriction", "CommanderEngine._block_declaration_components", "CommanderEngine._issue_next_blocker", "CommanderEngine._complete_blockers"],
       "positive_tests": ["test_current_attacking_creature_has_one_redundant_restriction", "test_menace_requires_zero_or_two_blockers_and_projects_the_minimum"],
       "negative_tests": ["test_nonattacker_noncreature_and_nonmenace_have_no_restriction", "test_malformed_current_characteristics_and_identity_fail_closed"],
       "interaction_tests": ["test_effective_menace_gain_and_loss_change_the_shared_restriction", "test_menace_can_make_a_block_requirement_impossible", "test_two_blockers_satisfy_menace_and_the_block_requirement"],
@@ -948,7 +948,7 @@
         "exclusions": ["conditional or rules-text-equivalent Flanking wording", "granted, copied, or face-down Flanking outside trusted typed fragments", "creatures that block more than one attacker", "trigger doubling and countering policies beyond the ordinary trigger subsystem"]
       },
       "dependencies": ["continuous.resolution.fixed_characteristics_until_end_of_turn", "trigger.placement.apnap"],
-      "implementation_components": ["mtg_commander_sim.block_transitions.BlockTransitionEvent", "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences", "mtg_commander_sim.block_transitions.resolve_block_keyword_trigger", "mtg_commander_sim.semantic_runtime.ability_fragments.FlankingAbilityFragmentHandler"],
+      "implementation_components": ["quorune.block_transitions.BlockTransitionEvent", "quorune.block_transitions.derive_block_keyword_trigger_occurrences", "quorune.block_transitions.resolve_block_keyword_trigger", "quorune.semantic_runtime.ability_fragments.FlankingAbilityFragmentHandler"],
       "positive_tests": ["test_flanking_triggers_once_per_instance_and_nonflanking_blocker"],
       "negative_tests": ["test_flanking_does_not_trigger_for_a_blocker_with_flanking", "test_malformed_transition_and_occurrence_fail_closed"],
       "interaction_tests": ["test_flanking_and_bushido_share_one_sealed_apnap_batch"],
@@ -975,7 +975,7 @@
         "exclusions": ["zero, negative, variable, conditional, or rules-text-equivalent Bushido wording", "granted, copied, or face-down Bushido outside trusted typed fragments", "trigger doubling and countering policies beyond the ordinary trigger subsystem"]
       },
       "dependencies": ["continuous.resolution.fixed_characteristics_until_end_of_turn", "trigger.placement.apnap"],
-      "implementation_components": ["mtg_commander_sim.block_transitions.BlockTransitionEvent", "mtg_commander_sim.block_transitions.derive_block_keyword_trigger_occurrences", "mtg_commander_sim.block_transitions.resolve_block_keyword_trigger", "mtg_commander_sim.semantic_runtime.ability_fragments.BushidoAbilityFragmentHandler"],
+      "implementation_components": ["quorune.block_transitions.BlockTransitionEvent", "quorune.block_transitions.derive_block_keyword_trigger_occurrences", "quorune.block_transitions.resolve_block_keyword_trigger", "quorune.semantic_runtime.ability_fragments.BushidoAbilityFragmentHandler"],
       "positive_tests": ["test_bushido_triggers_once_for_blocks_or_becomes_blocked_per_instance"],
       "negative_tests": ["test_unblocked_bushido_creature_does_not_trigger", "test_malformed_transition_and_occurrence_fail_closed"],
       "interaction_tests": ["test_flanking_and_bushido_share_one_sealed_apnap_batch"],
@@ -1002,7 +1002,7 @@
         "exclusions": ["conditional or rules-text-equivalent Exalted wording", "granted, copied, or face-down Exalted outside trusted typed fragments", "put-onto-the-battlefield-attacking effects", "unsupported attack costs that remove a declared attacker", "trigger doubling and countering policies beyond the ordinary trigger subsystem"]
       },
       "dependencies": ["continuous.resolution.fixed_characteristics_until_end_of_turn", "trigger.placement.apnap"],
-      "implementation_components": ["mtg_commander_sim.attack_transition_model.AttackTransitionEvent", "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences", "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger", "mtg_commander_sim.semantic_runtime.ability_fragments.ExaltedAbilityFragmentHandler"],
+      "implementation_components": ["quorune.attack_transition_model.AttackTransitionEvent", "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences", "quorune.attack_transition_resolution.resolve_attack_keyword_trigger", "quorune.semantic_runtime.ability_fragments.ExaltedAbilityFragmentHandler"],
       "positive_tests": ["test_exalted_triggers_once_per_instance_only_for_attack_alone", "test_exalted_from_noncreature_source_resolves_on_lone_attacker"],
       "negative_tests": ["test_multiple_attackers_do_not_create_exalted_trigger"],
       "interaction_tests": ["test_attack_keywords_share_one_completed_declaration_batch", "test_exalted_from_noncreature_source_resolves_on_lone_attacker"],
@@ -1029,7 +1029,7 @@
         "exclusions": ["conditional or rules-text-equivalent Battle Cry wording", "granted, copied, or face-down Battle Cry outside trusted typed fragments", "put-onto-the-battlefield-attacking effects", "unsupported attack costs that remove a declared attacker", "trigger doubling and countering policies beyond the ordinary trigger subsystem"]
       },
       "dependencies": ["continuous.resolution.fixed_characteristics_until_end_of_turn", "trigger.placement.apnap"],
-      "implementation_components": ["mtg_commander_sim.attack_transition_model.AttackTransitionEvent", "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences", "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger", "mtg_commander_sim.semantic_runtime.ability_fragments.BattleCryAbilityFragmentHandler"],
+      "implementation_components": ["quorune.attack_transition_model.AttackTransitionEvent", "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences", "quorune.attack_transition_resolution.resolve_attack_keyword_trigger", "quorune.semantic_runtime.ability_fragments.BattleCryAbilityFragmentHandler"],
       "positive_tests": ["test_battle_cry_triggers_per_instance_and_affects_other_attackers"],
       "negative_tests": ["test_malformed_attack_transition_and_occurrence_fail_closed"],
       "interaction_tests": ["test_attack_keywords_share_one_completed_declaration_batch", "test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer"],
@@ -1056,7 +1056,7 @@
         "exclusions": ["conditional or rules-text-equivalent Melee wording", "granted, copied, or face-down Melee outside trusted typed fragments", "put-onto-the-battlefield-attacking effects", "unsupported attack costs that remove a declared attacker", "trigger doubling and countering policies beyond the ordinary trigger subsystem"]
       },
       "dependencies": ["continuous.resolution.fixed_characteristics_until_end_of_turn", "trigger.placement.apnap"],
-      "implementation_components": ["mtg_commander_sim.attack_transition_model.AttackTransitionEvent", "mtg_commander_sim.attack_transition_model.derive_attack_keyword_trigger_occurrences", "mtg_commander_sim.attack_transition_resolution.resolve_attack_keyword_trigger", "mtg_commander_sim.semantic_runtime.ability_fragments.MeleeAbilityFragmentHandler"],
+      "implementation_components": ["quorune.attack_transition_model.AttackTransitionEvent", "quorune.attack_transition_model.derive_attack_keyword_trigger_occurrences", "quorune.attack_transition_resolution.resolve_attack_keyword_trigger", "quorune.semantic_runtime.ability_fragments.MeleeAbilityFragmentHandler"],
       "positive_tests": ["test_melee_counts_distinct_opponents_attacked_as_players", "test_melee_still_triggers_for_zero_opponents_attacked_directly"],
       "negative_tests": ["test_malformed_attack_transition_and_occurrence_fail_closed"],
       "interaction_tests": ["test_attack_keywords_share_one_completed_declaration_batch", "test_attack_keyword_resolution_uses_source_lki_and_identity_pinned_layer"],
@@ -1083,7 +1083,7 @@
         "exclusions": ["other attack restrictions, requirements, and declaration costs", "effects that put a creature onto the battlefield attacking", "unrepresented continuous-effect, copy, face-down, or control-history semantics", "attack permissions that say as though a creature had haste"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.haste.is_summoning_sick", "mtg_commander_sim.haste.summoning_sickness_prohibits_attack", "CommanderEngine._attack_declaration_error"],
+      "implementation_components": ["quorune.haste.is_summoning_sick", "quorune.haste.summoning_sickness_prohibits_attack", "CommanderEngine._attack_declaration_error"],
       "positive_tests": ["test_haste_attack_permission_uses_current_effective_keywords"],
       "negative_tests": ["test_only_currently_eligible_creatures_are_offered", "test_malformed_effective_keywords_fail_closed"],
       "interaction_tests": ["test_control_timestamp_restricts_only_current_creatures", "test_haste_attack_permission_uses_current_effective_keywords"],
@@ -1110,7 +1110,7 @@
         "exclusions": ["tap or untap instructions that are not activation costs", "costs that tap other creatures", "attack permissions", "unrepresented continuous-effect, copy, face-down, or control-history semantics", "uncompiled activation costs"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.haste.is_summoning_sick", "mtg_commander_sim.haste.summoning_sickness_prohibits_tap_or_untap_cost", "mtg_commander_sim.rules.activation.availability._source_cost_availability", "mtg_commander_sim.rules.activation.proposal._validate_activation_timing_costs", "mtg_commander_sim.mana_activation.complete_mana_plan_activations", "CommanderEngine.available_mana_sources"],
+      "implementation_components": ["quorune.haste.is_summoning_sick", "quorune.haste.summoning_sickness_prohibits_tap_or_untap_cost", "quorune.rules.activation.availability._source_cost_availability", "quorune.rules.activation.proposal._validate_activation_timing_costs", "quorune.mana_activation.complete_mana_plan_activations", "CommanderEngine.available_mana_sources"],
       "positive_tests": ["test_untap_symbol_obeys_summoning_sickness_and_haste", "test_sick_mana_creature_requires_haste_or_as_though_permission"],
       "negative_tests": ["test_untap_symbol_obeys_summoning_sickness_and_haste", "test_malformed_control_snapshot_fails_closed"],
       "interaction_tests": ["test_sick_mana_creature_requires_haste_or_as_though_permission"],
@@ -1137,7 +1137,7 @@
         "exclusions": ["conditional Flash", "Flash granted to or removed from a card", "player-wide as-though-Flash permissions", "land play timing", "casting without priority", "zone-casting permission", "prohibitions and timing restrictions imposed by other effects"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.cast_timing.cast_timing_is_legal", "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions", "mtg_commander_sim.semantic_runtime.cast_permissions.FlashCastPermissionHandler", "mtg_commander_sim.rules.casting.proposal.build_cast_offer"],
+      "implementation_components": ["quorune.cast_timing.cast_timing_is_legal", "quorune.compiled_cast_timing.compiled_cast_timing_permissions", "quorune.semantic_runtime.cast_permissions.FlashCastPermissionHandler", "quorune.rules.casting.proposal.build_cast_offer"],
       "positive_tests": ["test_flash_offer_and_cast_use_same_compiled_permission"],
       "negative_tests": ["test_raw_flash_keyword_without_compiled_permission_fails_closed", "test_flash_handler_rejects_malformed_descriptors", "test_flash_permission_is_face_pinned"],
       "interaction_tests": ["test_flash_offer_and_cast_use_same_compiled_permission", "test_multiple_flash_instances_are_redundant"],
@@ -1164,7 +1164,7 @@
         "exclusions": ["triggered mana abilities", "dynamic or conditional output", "restricted mana", "mana-production replacement and trigger effects", "arbitrary rule or resolving-effect payment windows", "targeted or loyalty abilities", "parenthesized reminder text and intrinsic basic-land-type abilities"]
       },
       "dependencies": ["activation.tap_untap_cost.haste"],
-      "implementation_components": ["mtg_commander_sim.fixed_mana_abilities.compile_fixed_activated_mana_ability", "mtg_commander_sim.semantic_runtime.mana_abilities.FixedActivatedManaAbilityHandler", "mtg_commander_sim.compiled_mana_abilities.compiled_fixed_mana_abilities", "mtg_commander_sim.mana_activation.complete_mana_activation"],
+      "implementation_components": ["quorune.fixed_mana_abilities.compile_fixed_activated_mana_ability", "quorune.semantic_runtime.mana_abilities.FixedActivatedManaAbilityHandler", "quorune.compiled_mana_abilities.compiled_fixed_mana_abilities", "quorune.mana_activation.complete_mana_activation"],
       "positive_tests": ["test_fixed_output_compiler_lowers_source_spanned_cardprogram", "test_compiled_alternative_output_is_advertised_accepted_and_replayed", "test_compiled_fixed_output_can_pay_during_casting", "test_compiled_fixed_output_offer_and_activation_share_modes", "test_fixed_mandatory_costs_commit_through_canonical_owners"],
       "negative_tests": ["test_fixed_output_compiler_leaves_dynamic_and_restricted_variants_residual", "test_parenthesized_basic_land_reminder_is_not_an_executable_program", "test_changed_executable_oracle_fails_closed_instead_of_reparsing_mana", "test_invalid_compiled_mana_mode_rolls_back", "test_invalid_mode_rolls_back_fixed_mandatory_costs"],
       "interaction_tests": ["test_compiled_fixed_output_creature_respects_haste_cost_dependency"],
@@ -1191,7 +1191,7 @@
         "exclusions": ["triggered mana abilities", "monocolored-only queries", "linked or exiled-card queries", "restricted mana", "conditional clauses beyond the represented object query", "mana-production replacement and trigger effects", "arbitrary rule or resolving-effect payment windows", "targeted or loyalty abilities"]
       },
       "dependencies": ["activation.tap_untap_cost.haste"],
-      "implementation_components": ["mtg_commander_sim.color_set_mana_abilities.compile_color_set_activated_mana_ability", "mtg_commander_sim.semantic_runtime.color_set_mana_abilities.ColorSetActivatedManaAbilityHandler", "mtg_commander_sim.compiled_mana_abilities.compiled_color_set_mana_abilities", "mtg_commander_sim.mana_ability_runtime.mana_modes_for_ability", "mtg_commander_sim.mana_source_discovery.available_mana_sources", "mtg_commander_sim.mana_activation.complete_mana_activation"],
+      "implementation_components": ["quorune.color_set_mana_abilities.compile_color_set_activated_mana_ability", "quorune.semantic_runtime.color_set_mana_abilities.ColorSetActivatedManaAbilityHandler", "quorune.compiled_mana_abilities.compiled_color_set_mana_abilities", "quorune.mana_ability_runtime.mana_modes_for_ability", "quorune.mana_source_discovery.available_mana_sources", "quorune.mana_activation.complete_mana_activation"],
       "positive_tests": ["test_color_set_compiler_lowers_each_closed_template", "test_actual_mox_amber_auto_mana_uses_only_qualifying_colors", "test_actual_mox_amber_program_offers_no_colored_mode_without_legendary", "test_mox_amber_without_qualifying_legendary_adds_no_mana", "test_mox_amber_advertises_only_current_qualifying_colors", "test_bloom_tender_adds_one_of_each_current_permanent_color", "test_legendary_permanent_query_includes_noncreature_permanents", "test_graveyard_query_uses_owner_and_ignores_other_graveyards"],
       "negative_tests": ["test_color_set_compiler_leaves_unrepresented_variants_residual", "test_color_set_handler_rejects_malformed_descriptors", "test_legacy_parser_does_not_widen_color_set_output", "test_changed_color_set_oracle_fails_closed", "test_invalid_color_set_choice_rolls_back"],
       "interaction_tests": ["test_actual_mox_offer_and_command_share_current_color_modes", "test_mox_amber_uses_current_control_and_effective_colors", "test_color_set_mana_respects_haste_cost_dependency"],
@@ -1218,7 +1218,7 @@
         "exclusions": ["attack declaration eligibility, restrictions, requirements, and costs", "unrepresented continuous-effect or copy semantics", "effects that put creatures onto the battlefield attacking", "replacement effects that modify tapping"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.tap_state.tap_declared_attackers"],
+      "implementation_components": ["quorune.tap_state.tap_declared_attackers"],
       "positive_tests": ["test_attackers_tap_except_vigilance_then_active_player_gets_priority", "test_vigilance_tap_owner_uses_current_effective_keywords"],
       "negative_tests": ["test_vigilance_tap_owner_fails_closed_before_batch_mutation"],
       "interaction_tests": ["test_vigilance_tap_owner_uses_current_effective_keywords"],
@@ -1245,7 +1245,7 @@
         "exclusions": ["regeneration and effects that say a permanent cannot be regenerated", "optional, modal, aggregate, quantified, relational, qualified, or compound destruction clauses", "complete ability-changing, copy, face-down, and dependency interactions", "unrepresented destruction replacement effects; cards representing those interactions remain material residuals and fail match trust closed"]
       },
       "dependencies": ["target.revalidate_resolution"],
-      "implementation_components": ["mtg_commander_sim.compiler.destruction_templates.TargetedDestructionEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_destruction_node_capabilities", "mtg_commander_sim.semantic_runtime.destruction_handlers.DestroyPermanentHandler", "mtg_commander_sim.destruction.prepare_destructions", "mtg_commander_sim.destruction.commit_destruction_plan"],
+      "implementation_components": ["quorune.compiler.destruction_templates.TargetedDestructionEffectTemplate", "quorune.rules.node_capability_shapes.targeted_destruction_node_capabilities", "quorune.semantic_runtime.destruction_handlers.DestroyPermanentHandler", "quorune.destruction.prepare_destructions", "quorune.destruction.commit_destruction_plan"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_destruction_lowering", "test_effect_destruction_uses_typed_owner_and_replays", "test_state_based_destruction_ignores_shield_counter"],
       "negative_tests": ["test_unsupported_destruction_variants_remain_material_residuals", "test_targeted_destruction_shape_mutants_fail_closed", "test_indestructible_and_phased_objects_are_not_destroyed", "test_stale_destruction_plan_rolls_back_without_mutation"],
       "interaction_tests": ["test_effect_destruction_consumes_shield_instead", "test_state_based_destruction_ignores_shield_counter"],
@@ -1272,7 +1272,7 @@
         "exclusions": ["regeneration and cannot-be-regenerated riders", "variable, quantified, comparative, chosen, named, or history-dependent predicates", "negative color, subtype, or keyword predicates", "linked destroyed-this-way results, costs, modes, choices, and delayed destruction", "unrepresented continuous-effect, copy, face-down, and replacement interactions; cards representing those interactions remain material residuals and fail match trust closed"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.affected_permanents.AffectedPermanentSetSpec", "mtg_commander_sim.destruction_sets.snapshot_destruction_set", "mtg_commander_sim.destruction_sets.resolve_destruction_set", "mtg_commander_sim.compiler.destruction_templates.MassDestructionEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.mass_destruction_node_capabilities", "mtg_commander_sim.semantic_runtime.destruction_handlers.DestroyPermanentSetHandler", "mtg_commander_sim.destruction.prepare_destructions", "mtg_commander_sim.destruction.commit_destruction_plan"],
+      "implementation_components": ["quorune.affected_permanents.AffectedPermanentSetSpec", "quorune.destruction_sets.snapshot_destruction_set", "quorune.destruction_sets.resolve_destruction_set", "quorune.compiler.destruction_templates.MassDestructionEffectTemplate", "quorune.rules.node_capability_shapes.mass_destruction_node_capabilities", "quorune.semantic_runtime.destruction_handlers.DestroyPermanentSetHandler", "quorune.destruction.prepare_destructions", "quorune.destruction.commit_destruction_plan"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_mass_destruction_lowering", "test_mass_destruction_apnap_shield_indestructible_and_replay"],
       "negative_tests": ["test_unsupported_mass_destruction_variants_remain_residuals", "test_mass_destruction_shape_mutants_fail_closed", "test_mass_destruction_stale_snapshot_rolls_back"],
       "interaction_tests": ["test_mass_destruction_apnap_shield_indestructible_and_replay", "test_mass_destruction_uses_typed_query_and_source_exclusion"],
@@ -1299,7 +1299,7 @@
         "exclusions": ["exile from hand, library, graveyard, command, or stack", "mass, multi-target, optional, modal, conditional, qualified, linked-result, cost, or temporary-exile clauses", "face-down exile, linked exile piles, return permissions, and cast-from-exile permissions", "complete type-changing, copy, token, commander-replacement, and dependency interactions beyond the represented zone-change owner; cards representing those interactions remain material residuals and fail match trust closed"]
       },
       "dependencies": ["target.revalidate_resolution"],
-      "implementation_components": ["mtg_commander_sim.compiler.exile_templates.TargetedExileEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_exile_node_capabilities", "mtg_commander_sim.semantic_runtime.permanent_exile_handlers.ExilePermanentHandler", "mtg_commander_sim.rules.single_object_zone_transition.prepare_single_object_zone_transition", "mtg_commander_sim.rules.single_object_zone_transition.validate_single_object_zone_transition_plan", "mtg_commander_sim.rules.single_object_zone_transition.commit_prevalidated_single_object_zone_transition", "mtg_commander_sim.permanent_exile.prepare_permanent_exile", "mtg_commander_sim.permanent_exile.commit_permanent_exile"],
+      "implementation_components": ["quorune.compiler.exile_templates.TargetedExileEffectTemplate", "quorune.rules.node_capability_shapes.targeted_exile_node_capabilities", "quorune.semantic_runtime.permanent_exile_handlers.ExilePermanentHandler", "quorune.rules.single_object_zone_transition.prepare_single_object_zone_transition", "quorune.rules.single_object_zone_transition.validate_single_object_zone_transition_plan", "quorune.rules.single_object_zone_transition.commit_prevalidated_single_object_zone_transition", "quorune.permanent_exile.prepare_permanent_exile", "quorune.permanent_exile.commit_permanent_exile"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_exile_lowering", "test_control_changed_permanent_exiles_to_owner_public_zone", "test_exile_destination_replacement_preserves_typed_result"],
       "negative_tests": ["test_unsupported_exile_variants_remain_material_residuals", "test_targeted_exile_shape_mutants_fail_closed", "test_exile_phased_and_stale_permanents_fail_before_mutation"],
       "interaction_tests": ["test_exile_destination_replacement_preserves_typed_result", "test_indestructible_and_shield_do_not_prevent_exile"],
@@ -1326,7 +1326,7 @@
         "exclusions": ["graveyard-to-hand recursion and graveyard-to-battlefield reanimation", "mass, multi-target, optional, modal, conditional, qualified, linked-result, cost, or self-return clauses", "complete type-changing, copy, face-down, and dependency interactions", "unrepresented zone-change replacement effects; cards representing those interactions remain material residuals and fail match trust closed"]
       },
       "dependencies": ["target.revalidate_resolution"],
-      "implementation_components": ["mtg_commander_sim.compiler.return_to_hand_templates.TargetedReturnToHandEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_return_to_hand_node_capabilities", "mtg_commander_sim.semantic_runtime.return_to_hand_handlers.ReturnPermanentToOwnerHandHandler", "mtg_commander_sim.rules.single_object_zone_transition.prepare_single_object_zone_transition", "mtg_commander_sim.rules.single_object_zone_transition.validate_single_object_zone_transition_plan", "mtg_commander_sim.rules.single_object_zone_transition.commit_prevalidated_single_object_zone_transition", "mtg_commander_sim.return_to_hand.prepare_return_to_owner_hand", "mtg_commander_sim.return_to_hand.commit_return_to_owner_hand"],
+      "implementation_components": ["quorune.compiler.return_to_hand_templates.TargetedReturnToHandEffectTemplate", "quorune.rules.node_capability_shapes.targeted_return_to_hand_node_capabilities", "quorune.semantic_runtime.return_to_hand_handlers.ReturnPermanentToOwnerHandHandler", "quorune.rules.single_object_zone_transition.prepare_single_object_zone_transition", "quorune.rules.single_object_zone_transition.validate_single_object_zone_transition_plan", "quorune.rules.single_object_zone_transition.commit_prevalidated_single_object_zone_transition", "quorune.return_to_hand.prepare_return_to_owner_hand", "quorune.return_to_hand.commit_return_to_owner_hand"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_return_lowering", "test_controlled_permanent_returns_to_owners_hand", "test_destination_replacement_preserves_typed_result"],
       "negative_tests": ["test_unsupported_return_variants_remain_material_residuals", "test_targeted_return_shape_mutants_fail_closed", "test_phased_and_stale_permanents_fail_before_mutation"],
       "interaction_tests": ["test_destination_replacement_preserves_typed_result", "test_controlled_permanent_returns_to_owners_hand"],
@@ -1353,7 +1353,7 @@
         "exclusions": ["optional, modal, aggregate, quantified, relational, qualified, or compound tap clauses", "tap-symbol costs", "combat declaration tapping", "continuous prohibitions against tapping", "replacement effects that modify tapping; cards representing those interactions remain material residuals and fail match trust closed"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.compiler.tap_state_templates.TargetedTapStateEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_tap_state_node_capabilities", "mtg_commander_sim.semantic_runtime.tap_state_handlers.TapPermanentHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "mtg_commander_sim.tap_state.set_permanent_tapped"],
+      "implementation_components": ["quorune.compiler.tap_state_templates.TargetedTapStateEffectTemplate", "quorune.rules.node_capability_shapes.targeted_tap_state_node_capabilities", "quorune.semantic_runtime.tap_state_handlers.TapPermanentHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "quorune.tap_state.set_permanent_tapped"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering", "test_compiled_tap_activation_is_multiplayer_public_and_replays", "test_tap_state_handlers_lower_typed_intents_through_read_only_context", "test_tap_state_effects_change_only_eligible_state"],
       "negative_tests": ["test_unsupported_tap_state_variants_remain_material_residuals", "test_targeted_tap_state_shape_mutants_fail_closed", "test_tap_state_validation_fails_before_mutation"],
       "interaction_tests": [],
@@ -1380,7 +1380,7 @@
         "exclusions": ["optional, modal, aggregate, quantified, relational, qualified, or compound untap clauses", "untap-symbol costs", "untap-step selection", "replacement ordering beyond stun counters", "continuous prohibitions against untapping; cards representing those interactions remain material residuals and fail match trust closed"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.compiler.tap_state_templates.TargetedTapStateEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_tap_state_node_capabilities", "mtg_commander_sim.semantic_runtime.tap_state_handlers.UntapPermanentHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "mtg_commander_sim.tap_state.set_permanent_tapped", "CommanderEngine._untap_permanent"],
+      "implementation_components": ["quorune.compiler.tap_state_templates.TargetedTapStateEffectTemplate", "quorune.rules.node_capability_shapes.targeted_tap_state_node_capabilities", "quorune.semantic_runtime.tap_state_handlers.UntapPermanentHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "quorune.tap_state.set_permanent_tapped", "CommanderEngine._untap_permanent"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering", "test_compiled_untap_activation_consumes_stun_and_replays", "test_tap_state_handlers_lower_typed_intents_through_read_only_context", "test_tap_state_effects_change_only_eligible_state"],
       "negative_tests": ["test_unsupported_tap_state_variants_remain_material_residuals", "test_targeted_tap_state_shape_mutants_fail_closed", "test_tap_state_validation_fails_before_mutation"],
       "interaction_tests": ["test_compiled_untap_activation_consumes_stun_and_replays", "test_stun_counter_replaces_typed_untap_without_false_event"],
@@ -1407,7 +1407,7 @@
         "exclusions": ["arbitrary selectors", "complete layer dependencies", "other untap replacements", "player choices", "noncreature permanent sets"]
       },
       "dependencies": ["permanent.untap.effect"],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.tap_state_handlers.UntapAllCreaturesHandler", "mtg_commander_sim.semantic_runtime.executor.execute_intent_plan", "mtg_commander_sim.tap_state.untap_all_creatures", "CommanderEngine._untap_permanent"],
+      "implementation_components": ["quorune.semantic_runtime.tap_state_handlers.UntapAllCreaturesHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "quorune.tap_state.untap_all_creatures", "CommanderEngine._untap_permanent"],
       "positive_tests": ["test_untap_all_creatures_uses_effective_types_and_canonical_state_path"],
       "negative_tests": ["test_tap_state_validation_fails_before_mutation", "test_untap_all_dependency_fails_closed"],
       "interaction_tests": ["test_stun_counter_replaces_typed_untap_without_false_event"],
@@ -1434,7 +1434,7 @@
         "exclusions": ["counter unless a player pays or performs another action", "conditional, optional, modal, mass, multi-target, or linked-result counter clauses", "intrinsic alternate countered-spell destinations other than a represented zone replacement", "countering by a game rule as compiler grammar", "countered ability or spell-copy look-back trigger grammar", "conditional, source-qualified, name-qualified, target-qualified, or variable-mana-value stack predicates"]
       },
       "dependencies": ["stack.counter.prohibition.intrinsic", "target.revalidate_resolution", "trigger.event.normalized_zone_change"],
-      "implementation_components": ["mtg_commander_sim.compiler.counter_templates.TargetedCounterEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_counter_node_capabilities", "mtg_commander_sim.semantic_runtime.stack_counter_handlers.CounterStackTargetHandler", "mtg_commander_sim.stack_counter.counter_stack_item", "mtg_commander_sim.zone_trigger_events.ZoneTransitionKind"],
+      "implementation_components": ["quorune.compiler.counter_templates.TargetedCounterEffectTemplate", "quorune.rules.node_capability_shapes.targeted_counter_node_capabilities", "quorune.semantic_runtime.stack_counter_handlers.CounterStackTargetHandler", "quorune.stack_counter.counter_stack_item", "quorune.zone_trigger_events.ZoneTransitionKind"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_counter_lowering", "test_handler_lowers_one_strict_typed_counter_intent", "test_compiled_counter_targets_exact_stack_domains_and_replays", "test_countered_ability_leaves_card_zones_unchanged"],
       "negative_tests": ["test_unsupported_counter_variants_remain_material_residuals", "test_targeted_counter_shape_mutants_fail_closed", "test_counter_source_cannot_target_its_own_stack_object"],
       "interaction_tests": ["test_intrinsic_uncounterable_spell_survives_typed_counter", "test_counter_target_that_leaves_stack_invalidates_resolution", "test_counter_destination_replacement_emits_only_pre_counter_event"],
@@ -1461,7 +1461,7 @@
         "exclusions": ["conditional counter prohibitions", "prohibitions limited by counter source or quality", "dynamically granted prohibitions other than already represented cast context", "Oracle text inspection during a game transition"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.compiler.counter_templates.is_intrinsically_uncounterable_spell", "mtg_commander_sim.oracle_ir._compile_face", "mtg_commander_sim.stack_counter.oracle_has_intrinsic_counter_prohibition", "mtg_commander_sim.rules.casting.commit._create_spell_item"],
+      "implementation_components": ["quorune.compiler.counter_templates.is_intrinsically_uncounterable_spell", "quorune.oracle_ir._compile_face", "quorune.stack_counter.oracle_has_intrinsic_counter_prohibition", "quorune.rules.casting.commit._create_spell_item"],
       "positive_tests": ["test_intrinsic_uncounterable_compiles_as_stack_capability", "test_intrinsic_uncounterable_spell_survives_typed_counter"],
       "negative_tests": ["test_conditional_counter_prohibitions_remain_residuals", "test_untrusted_counter_prohibition_declaration_is_ignored"],
       "interaction_tests": ["test_intrinsic_uncounterable_spell_survives_typed_counter"],
@@ -1488,7 +1488,7 @@
         "exclusions": ["intervening-if and reflexive grammar", "state triggers", "delayed trigger creation", "visibility-dependent hidden-zone triggers", "countered abilities and spell copies without physical card movement", "enters-as and enters-with replacement effects"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.zone_trigger_events.ZoneChangeOccurrence", "mtg_commander_sim.zone_trigger_events.normalized_zone_trigger_events", "mtg_commander_sim.zone_trigger_processing.dispatch_zone_change_occurrence", "mtg_commander_sim.trigger_discovery.dispatch_semantic_event"],
+      "implementation_components": ["quorune.zone_trigger_events.ZoneChangeOccurrence", "quorune.zone_trigger_events.normalized_zone_trigger_events", "quorune.zone_trigger_processing.dispatch_zone_change_occurrence", "quorune.trigger_discovery.dispatch_semantic_event"],
       "positive_tests": ["test_derives_exact_enter_and_death_events", "test_countered_physical_spell_derives_exact_normalized_events", "test_self_dies_trigger_uses_last_known_battlefield_zone"],
       "negative_tests": ["test_occurrence_rejects_malformed_and_non_event_moves_are_empty", "test_counter_transition_kind_is_closed_and_typed"],
       "interaction_tests": ["test_self_dies_trigger_uses_last_known_controller", "test_source_that_leaves_still_observes_simultaneous_death", "test_countered_spell_replaced_to_exile_has_no_graveyard_event"],
@@ -1515,7 +1515,7 @@
         "exclusions": ["trigger detection grammar", "hidden-zone target schemas", "reflexive and state triggers", "modal or divided trigger choices", "the second CR 603.3b placement pass for abilities triggered by trigger placement"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.trigger_batches.PendingTriggerBatch", "mtg_commander_sim.trigger_batches.group_pending_trigger_items", "mtg_commander_sim.trigger_batches.complete_pending_trigger_group", "mtg_commander_sim.trigger_processing.collect_trigger_items", "mtg_commander_sim.trigger_processing.enqueue_trigger_batch", "mtg_commander_sim.trigger_processing.begin_pending_trigger_batch", "mtg_commander_sim.trigger_targeting.begin_pending_trigger_target_selection"],
+      "implementation_components": ["quorune.trigger_batches.PendingTriggerBatch", "quorune.trigger_batches.group_pending_trigger_items", "quorune.trigger_batches.complete_pending_trigger_group", "quorune.trigger_processing.collect_trigger_items", "quorune.trigger_processing.enqueue_trigger_batch", "quorune.trigger_processing.begin_pending_trigger_batch", "quorune.trigger_targeting.begin_pending_trigger_target_selection"],
       "positive_tests": ["test_trigger_waits_for_stabilization_then_becomes_top_stack_object", "test_dynamic_trigger_without_registry_program_issues_seat_choice", "test_same_controller_uses_one_order_continuation_for_all_sources"],
       "negative_tests": ["test_invalid_mandatory_trigger_is_removed_before_next_choice", "test_malformed_checkpoint_batch_fails_without_mutating_live_state"],
       "interaction_tests": ["test_damage_and_resulting_death_triggers_share_one_order_batch", "test_semantic_and_delayed_occurrences_share_one_apnap_batch"],
@@ -1542,7 +1542,7 @@
         "exclusions": ["retargeting", "targets in hidden zones", "spells with zero targets"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.targets", "CommanderEngine semantic target revalidation"],
+      "implementation_components": ["quorune.targets", "CommanderEngine semantic target revalidation"],
       "positive_tests": ["test_count_distinct_and_partial_resolution"],
       "negative_tests": ["test_all_targets_illegal_counters_by_rules", "test_target_that_leaves_and_returns_is_a_new_illegal_object"],
       "interaction_tests": ["test_modes_reb_and_pyroblast_use_actual_target_rules", "test_target_player_draw_validates_target_resolves_privately_and_replays"],
@@ -1569,7 +1569,7 @@
         "exclusions": ["hidden-zone objects", "non-damageable permanents", "target-changing effects"]
       },
       "dependencies": ["target.revalidate_resolution"],
-      "implementation_components": ["mtg_commander_sim.targets", "semantic target candidate generation"],
+      "implementation_components": ["quorune.targets", "semantic target candidate generation"],
       "positive_tests": ["test_sunscorched_desert_prompts_for_target_and_deals_damage"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_stasis_coffin_protection_blocks_targeting_and_damage"],
@@ -1596,7 +1596,7 @@
         "exclusions": ["variable amount evaluation", "replacement and prevention ordering"]
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.damage.DamageEvent", "CommanderEngine represented damage paths"],
+      "implementation_components": ["quorune.damage.DamageEvent", "CommanderEngine represented damage paths"],
       "positive_tests": ["test_damage_results_do_not_destroy_before_state_actions"],
       "negative_tests": ["test_zero_damage_creates_no_results_or_damage_event", "test_negative_damage_fails_closed"],
       "interaction_tests": ["test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack"],
@@ -1623,7 +1623,7 @@
         "exclusions": ["variable or divided amounts", "negative keyword or subtype predicates", "multiple independent damage instructions", "linked life, draw, scry, or conditional riders", "unpreventable wording"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.fixed_damage_set_model.FixedDamageSetSpec", "mtg_commander_sim.fixed_damage_set.snapshot_fixed_damage_set", "mtg_commander_sim.fixed_damage_set.resolve_fixed_damage_set", "mtg_commander_sim.semantic_runtime.fixed_damage_set_handlers.FixedDamageSetHandler"],
+      "implementation_components": ["quorune.fixed_damage_set_model.FixedDamageSetSpec", "quorune.fixed_damage_set.snapshot_fixed_damage_set", "quorune.fixed_damage_set.resolve_fixed_damage_set", "quorune.semantic_runtime.fixed_damage_set_handlers.FixedDamageSetHandler"],
       "positive_tests": ["test_fixed_set_snapshot_is_immutable_canonical_and_deduplicated", "test_compiled_mass_damage_resolves_one_canonical_batch"],
       "negative_tests": ["test_fixed_set_handler_rejects_malformed_or_unrepresented_groups", "test_unsupported_mass_damage_wording_remains_residual"],
       "interaction_tests": ["test_fixed_set_damage_uses_effective_types_and_replacement_order"],
@@ -1650,7 +1650,7 @@
         "exclusions": ["infect", "damage replacement", "damage prevention", "commander combat attribution"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.life_state.plan_life_changes", "mtg_commander_sim.life_state.apply_life_changes"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.life_state.plan_life_changes", "quorune.life_state.apply_life_changes"],
       "positive_tests": ["test_sunscorched_desert_prompts_for_target_and_deals_damage"],
       "negative_tests": ["test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack"],
       "interaction_tests": ["test_lifelink_counts_only_damage_not_prevented_by_protection"],
@@ -1677,7 +1677,7 @@
         "exclusions": ["wither", "infect", "regeneration", "damage prevention"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.damage_results.plan_damage_result_commit", "quorune.damage_results.commit_damage_result_plan"],
       "positive_tests": ["test_damage_results_do_not_destroy_before_state_actions"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_marked_damage_survives_type_loss_until_cleanup"],
@@ -1704,7 +1704,7 @@
         "exclusions": ["regeneration", "unsupported source-characteristic producers", "unsupported continuous-effect, copy, face-down, and ability-changing producers"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.deathtouch.deathtouch_damage_result_applies", "mtg_commander_sim.damage_source.DamageSourceSnapshot", "mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.consume_deathtouch_damage_checks", "mtg_commander_sim.state_based_actions.evaluate_permanent_state_based_actions"],
+      "implementation_components": ["quorune.deathtouch.deathtouch_damage_result_applies", "quorune.damage_source.DamageSourceSnapshot", "quorune.damage_results.materialize_damage_results", "quorune.damage_results.consume_deathtouch_damage_checks", "quorune.state_based_actions.evaluate_permanent_state_based_actions"],
       "positive_tests": ["test_noncombat_deathtouch_uses_pinned_source_lki", "test_four_player_deathtouch_result_is_source_derived_and_replays"],
       "negative_tests": ["test_result_requires_positive_damage_to_a_creature", "test_malformed_amounts_and_keyword_values_fail_closed", "test_legacy_event_flag_cannot_grant_deathtouch", "test_stale_check_batch_rolls_back_without_consuming_any_marker"],
       "interaction_tests": ["test_wither_damage_still_records_deathtouch_result", "test_indestructible_consumes_deathtouch_at_the_first_sba_check", "test_old_deathtouch_marker_cannot_apply_after_type_or_phase_returns"],
@@ -1731,7 +1731,7 @@
         "exclusions": ["damage prevention", "counter replacement", "redirection under obsolete rules"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.counter_state.plan_counter_changes", "quorune.counter_state.apply_counter_changes"],
       "positive_tests": ["test_planeswalker_damage_removes_loyalty_counters"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_lethal_planeswalker_combat_damage_applies_state_action"],
@@ -1758,7 +1758,7 @@
         "exclusions": ["damage prevention", "counter replacement", "defeated-battle cast permission"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.counter_state.plan_counter_changes", "quorune.counter_state.apply_counter_changes"],
       "positive_tests": ["test_battle_damage_removes_defense_instead_of_marking_damage"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_damage_to_battle_creature_applies_both_results"],
@@ -1785,7 +1785,7 @@
         "exclusions": ["replacement effects", "prevention effects", "infect", "wither"]
       },
       "dependencies": ["damage.result.creature_mark", "damage.result.planeswalker_loyalty", "damage.result.battle_defense"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.damage_results.plan_damage_result_commit", "mtg_commander_sim.damage_results.commit_damage_result_plan"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.damage_results.plan_damage_result_commit", "quorune.damage_results.commit_damage_result_plan"],
       "positive_tests": ["test_damage_to_multityped_permanent_applies_every_result"],
       "negative_tests": ["test_damage_rejects_nondamageable_permanent"],
       "interaction_tests": ["test_damage_to_battle_creature_applies_both_results"],
@@ -1812,7 +1812,7 @@
         "exclusions": ["replacement with a non-damage event", "persistent prevention shields", "damage-result replacement", "mana-result damage requiring an explicit replacement choice"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.DamageQuantityReplacementHandler", "mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.oracle_ir._static_damage_handler"],
+      "implementation_components": ["quorune.damage.prepare_damage_batch", "quorune.semantic_runtime.damage_replacements.DamageQuantityReplacementHandler", "quorune.replacement.ordering.advance_replacement_batch", "quorune.oracle_ir._static_damage_handler"],
       "positive_tests": ["test_furnace_and_daunting_order_changes_final_damage", "test_exact_generic_damage_handler_is_trusted_and_active_in_session"],
       "negative_tests": ["test_validation_failure_is_atomic_before_any_damage_result", "test_static_damage_replacement_wording_lowers_to_generic_handlers"],
       "interaction_tests": ["test_static_prevention_applies_to_each_simultaneous_event"],
@@ -1839,7 +1839,7 @@
         "exclusions": ["next-damage shields", "divisible prevention shields", "redirection", "damage-result replacement", "mana-result damage requiring an explicit replacement choice"]
       },
       "dependencies": ["damage.amount.positive", "damage.replacement.static_quantity"],
-      "implementation_components": ["mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.semantic_runtime.damage_replacements.FixedDamagePreventionHandler", "mtg_commander_sim.oracle_ir._static_damage_handler"],
+      "implementation_components": ["quorune.damage.prepare_damage_batch", "quorune.damage.commit_prepared_damage_batch", "quorune.semantic_runtime.damage_replacements.FixedDamagePreventionHandler", "quorune.oracle_ir._static_damage_handler"],
       "positive_tests": ["test_static_prevention_applies_to_each_simultaneous_event", "test_static_damage_replacement_wording_lowers_to_generic_handlers"],
       "negative_tests": ["test_unpreventable_damage_applies_prevention_without_reducing_damage", "test_static_damage_replacement_wording_lowers_to_generic_handlers"],
       "interaction_tests": ["test_furnace_and_daunting_order_changes_final_damage", "test_protection_prevents_player_and_colored_permanent_damage"],
@@ -1866,7 +1866,7 @@
         "exclusions": ["combat-only prevention filters", "damage-dealing or redirection aftermath", "conditional draw aftermath", "life-gain prevention", "divided casting declarations whose targets and division were not represented during announcement"]
       },
       "dependencies": ["damage.amount.positive", "damage.prevention.static_fixed"],
-      "implementation_components": ["mtg_commander_sim.damage_modifier_state.DamagePreventionShield", "mtg_commander_sim.damage_modifier_state.ChosenDamageSource", "mtg_commander_sim.damage_prevention_creation.plan_prevention_shield_creation", "mtg_commander_sim.damage_prevention_aftermath.prepare_prevention_aftermath", "mtg_commander_sim.life_change.prepare_life_change_batch", "mtg_commander_sim.effect_runtime.life_effects._commit", "mtg_commander_sim.semantic_choices.damage_prevention.ChooseDamageSourceHandler", "mtg_commander_sim.semantic_choices.engine_coordination.SemanticChoiceCoordinationMixin", "mtg_commander_sim.replacement.operations.PreventUsingShield", "mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.mana_payment_continuations.execute_mana_choice_capable_priority_action", "mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.compiler.prevention_templates.fixed_prevention_effect_template"],
+      "implementation_components": ["quorune.damage_modifier_state.DamagePreventionShield", "quorune.damage_modifier_state.ChosenDamageSource", "quorune.damage_prevention_creation.plan_prevention_shield_creation", "quorune.damage_prevention_aftermath.prepare_prevention_aftermath", "quorune.life_change.prepare_life_change_batch", "quorune.effect_runtime.life_effects._commit", "quorune.semantic_choices.damage_prevention.ChooseDamageSourceHandler", "quorune.semantic_choices.engine_coordination.SemanticChoiceCoordinationMixin", "quorune.replacement.operations.PreventUsingShield", "quorune.replacement.ordering.advance_replacement_batch", "quorune.mana_payment_continuations.execute_mana_choice_capable_priority_action", "quorune.damage.prepare_damage_batch", "quorune.damage.commit_prepared_damage_batch", "quorune.compiler.prevention_templates.fixed_prevention_effect_template"],
       "positive_tests": ["test_amount_shield_is_prepared_without_mutation_then_consumed", "test_until_end_of_turn_shields_expire_at_the_cleanup_boundary", "test_dynamic_amount_and_divided_allocations_create_independent_shields", "test_one_amount_is_applied_independently_to_each_selected_object", "test_each_untargeted_creature_uses_its_own_prevention_shield", "test_dynamic_and_aftermath_prevention_compile_generically", "test_fixed_post_prevention_life_is_a_sequential_instruction", "test_life_is_gained_immediately_and_unused_shield_remains", "test_chosen_permanent_spell_continues_to_the_permanent_it_becomes", "test_source_choice_any_color_and_extended_characteristics_are_exact", "test_chosen_source_prevention_filters_compile_generically"],
       "negative_tests": ["test_unpreventable_damage_does_not_consume_shield", "test_changed_modifier_value_fails_before_damage_mutation", "test_divided_and_combat_only_prevention_remain_unresolved", "test_event_order_selection_fails_closed_for_unknown_event", "test_chosen_source_snapshot_is_canonical_and_does_not_follow_reentry", "test_chosen_source_versions_preserve_historical_shapes", "test_all_targets_illegal_stops_before_choice_shield_and_life", "test_only_explicit_prevention_dependency_lowers_as_aftermath"],
       "interaction_tests": ["test_chosen_source_identity_and_property_mismatch_preserve_shield", "test_prevention_dispatches_one_aggregate_event_per_effect", "test_life_aftermath_uses_one_aggregate_prevented_amount", "test_boon_reflection_doubles_prevention_aftermath_life_gain", "test_immediate_life_gain_uses_static_replacement_once", "test_later_damage_uses_shield_without_gaining_life_again", "test_counter_aftermath_reuses_counter_replacement_pipeline", "test_mana_ability_damage_choice_resumes_exact_activation"],
@@ -1893,7 +1893,7 @@
         "exclusions": ["explicit-target damage aftermath", "conditional source-characteristic branches", "triggered rather than immediate prevention results", "mixed damage and non-damage aftermath on one shield", "mandatory loops beyond the fail-closed cycle boundary"]
       },
       "dependencies": ["damage.amount.positive", "damage.prevention.persistent_amount", "damage.result.player_life"],
-      "implementation_components": ["mtg_commander_sim.damage_modifier_state.DealDamagePreventionAftermath", "mtg_commander_sim.damage_prevention.project_damage_modifier_snapshot", "mtg_commander_sim.damage_prevention_aftermath.prepare_prevention_aftermath", "mtg_commander_sim.damage_prevention_aftermath.commit_prevention_aftermath", "mtg_commander_sim.compiler.prevention_templates.fixed_prevention_effect_template"],
+      "implementation_components": ["quorune.damage_modifier_state.DealDamagePreventionAftermath", "quorune.damage_prevention.project_damage_modifier_snapshot", "quorune.damage_prevention_aftermath.prepare_prevention_aftermath", "quorune.damage_prevention_aftermath.commit_prevention_aftermath", "quorune.compiler.prevention_templates.fixed_prevention_effect_template"],
       "positive_tests": ["test_damage_aftermath_uses_lki_and_projected_consumed_shield", "test_runtime_lowers_typed_damage_aftermath_without_card_name_logic", "test_source_controller_damage_aftermath_compiles_generically"],
       "negative_tests": ["test_unpreventable_damage_does_not_create_scaled_damage_aftermath", "test_recursive_all_damage_aftermath_fails_before_mutation"],
       "interaction_tests": ["test_other_prevention_applies_to_aftermath_damage"],
@@ -1920,7 +1920,7 @@
         "exclusions": ["static this-way prevention triggers not represented by a durable shield", "conditional per-source characteristic branches within one simultaneous batch", "reflexive triggers", "optional trigger results"]
       },
       "dependencies": ["damage.prevention.persistent_amount", "trigger.placement.apnap"],
-      "implementation_components": ["mtg_commander_sim.prevention_triggers.PreventionTriggeredAbility", "mtg_commander_sim.prevention_triggers.PreventionTriggerOccurrence", "mtg_commander_sim.prevention_triggers.prevention_trigger_stack_item", "mtg_commander_sim.damage._prevention_applied_events", "mtg_commander_sim.trigger_processing.enqueue_trigger_batch"],
+      "implementation_components": ["quorune.prevention_triggers.PreventionTriggeredAbility", "quorune.prevention_triggers.PreventionTriggerOccurrence", "quorune.prevention_triggers.prevention_trigger_stack_item", "quorune.damage._prevention_applied_events", "quorune.trigger_processing.enqueue_trigger_batch"],
       "positive_tests": ["test_runtime_lowers_trigger_descriptor_and_rejects_bad_shape_atomically", "test_one_trigger_is_created_per_effect_for_simultaneous_damage"],
       "negative_tests": ["test_unpreventable_damage_creates_no_prevention_trigger", "test_trigger_model_is_immutable_strict_and_checkpoint_safe"],
       "interaction_tests": ["test_trigger_uses_source_lki_resolves_on_stack_and_replays"],
@@ -1947,7 +1947,7 @@
         "exclusions": ["finite partial redirection", "chosen-source redirection", "combat-only redirection", "attached or equipped destinations", "several alternate destinations"]
       },
       "dependencies": ["damage.amount.positive", "damage.replacement.static_quantity"],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.damage_replacements.StaticDamageRedirectionHandler", "mtg_commander_sim.replacement.operations.RedirectDamage", "mtg_commander_sim.damage.prepare_damage_batch", "mtg_commander_sim.compiler.damage_templates.static_damage_handler"],
+      "implementation_components": ["quorune.semantic_runtime.damage_replacements.StaticDamageRedirectionHandler", "quorune.replacement.operations.RedirectDamage", "quorune.damage.prepare_damage_batch", "quorune.compiler.damage_templates.static_damage_handler"],
       "positive_tests": ["test_runtime_components_validate_exact_bounded_shapes", "test_static_redirection_compiles_and_runs_from_card_program"],
       "negative_tests": ["test_departed_destination_makes_redirection_do_nothing", "test_static_redirection_stops_when_source_leaves"],
       "interaction_tests": ["test_static_redirection_uses_complete_recipient_snapshot"],
@@ -1974,7 +1974,7 @@
         "exclusions": []
       },
       "dependencies": [],
-      "implementation_components": ["mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.replacement.application.apply_replacement"],
+      "implementation_components": ["quorune.replacement.ordering.advance_replacement_batch", "quorune.replacement.application.apply_replacement"],
       "positive_tests": ["test_prevention_produces_a_modified_damage_event"],
       "negative_tests": [],
       "interaction_tests": [],
@@ -2001,7 +2001,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.replacement.order"],
-      "implementation_components": ["mtg_commander_sim.replacement.ordering.advance_replacement_batch", "mtg_commander_sim.replacement.application.apply_replacement"],
+      "implementation_components": ["quorune.replacement.ordering.advance_replacement_batch", "quorune.replacement.application.apply_replacement"],
       "positive_tests": ["test_prevention_never_prevents_more_than_remaining_damage", "test_prevention_applies_only_to_matching_damage_events"],
       "negative_tests": ["test_negative_damage_amount_fails_closed_in_prevention"],
       "interaction_tests": ["test_unpreventable_damage_applies_effect_once_without_preventing"],
@@ -2028,7 +2028,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.counter_state.plan_counter_changes", "quorune.counter_state.apply_counter_changes"],
       "positive_tests": ["test_infect_player_damage_is_poison_not_life_loss", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_prevented_infect_and_toxic_create_no_counter_results"],
       "interaction_tests": ["test_infect_and_wither_use_minus_counters_only_on_creatures", "test_multitype_permanent_receives_every_applicable_result"],
@@ -2055,7 +2055,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.counter_state.plan_counter_changes", "quorune.counter_state.apply_counter_changes"],
       "positive_tests": ["test_infect_and_wither_use_minus_counters_only_on_creatures", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_infect_and_wither_use_minus_counters_only_on_creatures"],
       "interaction_tests": ["test_wither_damage_still_records_deathtouch_result"],
@@ -2082,7 +2082,7 @@
         "exclusions": []
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.life_state.plan_life_changes", "mtg_commander_sim.life_state.apply_life_changes"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.life_state.plan_life_changes", "quorune.life_state.apply_life_changes"],
       "positive_tests": ["test_lifelink_counts_only_damage_not_prevented_by_protection", "test_lifelink_gains_final_damage_across_multiple_recipients", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_prevented_infect_and_toxic_create_no_counter_results"],
       "interaction_tests": ["test_boon_reflection_doubles_lifelink_result"],
@@ -2109,7 +2109,7 @@
         "exclusions": ["unresolved or dynamic toxic values", "unrepresented ability-granting continuous effects"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.materialize_damage_results", "mtg_commander_sim.counter_state.plan_counter_changes", "mtg_commander_sim.counter_state.apply_counter_changes"],
+      "implementation_components": ["quorune.damage_results.materialize_damage_results", "quorune.counter_state.plan_counter_changes", "quorune.counter_state.apply_counter_changes"],
       "positive_tests": ["test_toxic_is_additional_only_for_creature_combat_damage_to_player", "test_multiple_toxic_abilities_are_cumulative", "test_source_pinned_keyword_witnesses_follow_damage_results"],
       "negative_tests": ["test_unresolved_toxic_value_fails_before_mutation", "test_prevented_infect_and_toxic_create_no_counter_results"],
       "interaction_tests": ["test_source_pinned_keyword_witnesses_follow_damage_results"],
@@ -2136,7 +2136,7 @@
         "exclusions": ["ordinary copies without a designation", "noncombat damage", "historical records explicitly using legacy Oracle-ID attribution"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.commander.commander_damage_key", "mtg_commander_sim.damage.commit_prepared_damage_batch", "mtg_commander_sim.commander.commander_damage_losers"],
+      "implementation_components": ["quorune.commander.commander_damage_key", "quorune.damage.commit_prepared_damage_batch", "quorune.commander.commander_damage_losers"],
       "positive_tests": ["test_same_named_commanders_remain_separate_and_drive_four_player_sba"],
       "negative_tests": ["test_ordinary_copy_of_commander_has_no_designation"],
       "interaction_tests": ["test_designation_survives_zone_and_control_changes", "test_prepared_damage_uses_source_snapshot_after_source_leaves"],
@@ -2163,7 +2163,7 @@
         "exclusions": ["uncompiled life or counter replacement families", "damage-result transformations outside registered typed operations"]
       },
       "dependencies": ["damage.amount.positive"],
-      "implementation_components": ["mtg_commander_sim.damage_results.prepare_damage_results", "mtg_commander_sim.replacement.ordering.advance_replacement_batch"],
+      "implementation_components": ["quorune.damage_results.prepare_damage_results", "quorune.replacement.ordering.advance_replacement_batch"],
       "positive_tests": ["test_life_floor_caps_damage_result_without_an_offsetting_gain", "test_worship_caps_damage_result_at_one"],
       "negative_tests": ["test_invalid_result_leaf_keeps_the_whole_batch_atomic"],
       "interaction_tests": ["test_containing_result_replacement_precedes_life_gain_replacement", "test_worship_and_boon_follow_containing_event_order"],
@@ -2190,7 +2190,7 @@
         "exclusions": ["dynamic multipliers", "life-gain prevention", "life-total exchange and setting"]
       },
       "dependencies": ["damage.result.replacement_order"],
-      "implementation_components": ["mtg_commander_sim.semantic_runtime.life_replacements.LifeGainMultiplierHandler", "mtg_commander_sim.life_change.prepare_life_change_batch", "mtg_commander_sim.life_change.commit_life_change_batch", "mtg_commander_sim.effect_runtime.life_effects._commit", "mtg_commander_sim.compiler.life_templates.static_life_handler"],
+      "implementation_components": ["quorune.semantic_runtime.life_replacements.LifeGainMultiplierHandler", "quorune.life_change.prepare_life_change_batch", "quorune.life_change.commit_life_change_batch", "quorune.effect_runtime.life_effects._commit", "quorune.compiler.life_templates.static_life_handler"],
       "positive_tests": ["test_boon_reflection_doubles_lifelink_result", "test_boon_reflection_doubles_prevention_aftermath_life_gain", "test_immediate_life_gain_uses_static_replacement_once", "test_life_gain_replacement_uses_typed_precommit_plan", "test_static_life_gain_multiplier_lowers_generically"],
       "negative_tests": ["test_life_gain_multiplier_ignores_losses_and_rejects_bad_shape", "test_stale_life_plan_rolls_back_without_additional_mutation"],
       "interaction_tests": ["test_worship_and_boon_follow_containing_event_order", "test_life_replacement_choice_and_replay_are_canonical", "test_immediate_life_gain_uses_static_replacement_once"],

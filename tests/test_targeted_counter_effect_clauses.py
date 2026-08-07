@@ -6,26 +6,26 @@ import tempfile
 import unittest
 
 from common import ROOT
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.counter_templates import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.counter_templates import (
     CounterTarget,
     TargetedCounterEffectTemplate,
     is_intrinsically_uncounterable_spell,
     targeted_counter_effect_template,
 )
-from mtg_commander_sim.compiler.direct_target import (
+from quorune.compiler.direct_target import (
     permanent_target_schema,
     stack_target_schema,
 )
-from mtg_commander_sim.oracle_ir import (
+from quorune.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.semantics import SemanticRegistry
 from scripts.build_test_database import build_fixture_database
 
 

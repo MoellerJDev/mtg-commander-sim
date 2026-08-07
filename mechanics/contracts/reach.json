@@ -43,7 +43,7 @@
     "test_current_keywords_are_case_insensitive_and_redundant"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.aerial_blocking.aerial_block_verdict",
+    "component": "quorune.aerial_blocking.aerial_block_verdict",
     "version": "aerial-blocking-v1"
   },
   "known_blockers": [],

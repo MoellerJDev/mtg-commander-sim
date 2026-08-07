@@ -4,7 +4,7 @@ DB ?= data/scryfall-20260728-compact.sqlite3
 .PHONY: test demo compile wheel clean
 
 compile:
-	$(PYTHON) -m compileall -q mtg_commander_sim tests scripts simctl.py
+	$(PYTHON) -m compileall -q quorune tests scripts simctl.py
 
 test: compile
 	MTG_CARD_DB=$(DB) $(PYTHON) -m unittest discover -s tests -p 'test_*.py' -v

@@ -45,11 +45,11 @@ ARCHITECTURE_STATUS = ROOT / "docs" / "ARCHITECTURE_DEBT_STATUS.md"
 COMPILER_STATUS = ROOT / "docs" / "COMPILER_COVERAGE_STATUS.md"
 GUARD_BASELINE = ROOT / "platform" / "architecture-guard-baseline.json"
 CAPABILITY_REGISTRY = (
-    ROOT / "mtg_commander_sim" / "rules" / "capability-registry.json"
+    ROOT / "quorune" / "rules" / "capability-registry.json"
 )
 CARD_PROGRAM_SCHEMA = ROOT / "schemas" / "card-program-v2.schema.json"
 CAPABILITY_EVIDENCE = (
-    ROOT / "mtg_commander_sim" / "rules" / "capability-evidence.json"
+    ROOT / "quorune" / "rules" / "capability-evidence.json"
 )
 CONTINUOUS_PERFORMANCE_BASELINE = (
     ROOT / "platform" / "continuous-effect-performance-baseline.json"
@@ -698,7 +698,7 @@ def _import_metrics(analyses: Mapping[str, SourceAnalysis]) -> dict[str, Any]:
 def _engine_metrics(
     analyses: Mapping[str, SourceAnalysis], source: Mapping[str, Any]
 ) -> dict[str, Any]:
-    engine = analyses["mtg_commander_sim/engine.py"]
+    engine = analyses["quorune/engine.py"]
     methods = [item for item in engine.functions if item["kind"] == "method"]
     responsibilities: list[dict[str, Any]] = []
     assigned: set[str] = set()
@@ -776,7 +776,7 @@ def _state_and_dispatch_metrics(
 def _semantic_handler_metrics(
     state_dispatch: Mapping[str, Any],
 ) -> dict[str, Any]:
-    from mtg_commander_sim.semantic_runtime import (
+    from quorune.semantic_runtime import (
         default_semantic_handler_registry,
         runtime_component_inventory,
         runtime_component_registry_fingerprint,
@@ -790,7 +790,7 @@ def _semantic_handler_metrics(
         for branch in state_dispatch["semantic_operation_branches"][
             "locations"
         ]
-        if branch["file"] == "mtg_commander_sim/engine.py"
+        if branch["file"] == "quorune/engine.py"
     ]
     legacy_apply_effect_branches = [
         branch
@@ -825,11 +825,11 @@ def _semantic_handler_metrics(
             registered_operations & engine_dispatch_operations
         ),
         "read_only_context": (
-            "mtg_commander_sim.semantic_runtime.context."
+            "quorune.semantic_runtime.context."
             "ReadOnlyHandlerContext"
         ),
         "typed_intent_executor": (
-            "mtg_commander_sim.semantic_runtime.executor."
+            "quorune.semantic_runtime.executor."
             "execute_intent_plan"
         ),
     }
@@ -1031,7 +1031,7 @@ def _walk_operations(value: Any) -> Iterable[str]:
 
 
 def _semantic_pack_metrics(source: Mapping[str, Any]) -> dict[str, Any]:
-    files = sorted((ROOT / "mtg_commander_sim" / "semantic_packs").glob("*.json"))
+    files = sorted((ROOT / "quorune" / "semantic_packs").glob("*.json"))
     programs: list[tuple[str, dict[str, Any]]] = []
     pack_rows: list[dict[str, Any]] = []
     operations: Counter[str] = Counter()
@@ -1085,7 +1085,7 @@ def _semantic_pack_metrics(source: Mapping[str, Any]) -> dict[str, Any]:
         "configured_card_specific_operations_not_observed": sorted(card_specific - observed),
         "unclassified_operation_count": len(observed - card_specific),
         "typed_card_override_boundary_present": (
-            ROOT / "mtg_commander_sim" / "card_programs" / "model.py"
+            ROOT / "quorune" / "card_programs" / "model.py"
         ).is_file(),
         "explicit_typed_override_count": 0,
     }
@@ -1100,7 +1100,7 @@ def _compiler_metrics(
     capabilities = _load_json(CAPABILITY_REGISTRY)
     capability_evidence = _load_json(CAPABILITY_EVIDENCE)
     card_program_schema = _load_json(CARD_PROGRAM_SCHEMA)
-    from mtg_commander_sim.semantics import SemanticRegistry
+    from quorune.semantics import SemanticRegistry
 
     semantic_card_programs = SemanticRegistry().card_programs()
     trust_basis_counts = Counter(
@@ -1188,9 +1188,9 @@ def _compiler_metrics(
                 card_program_schema["$defs"]["ability"]["required"]
             ),
             "schema": CARD_PROGRAM_SCHEMA.relative_to(ROOT).as_posix(),
-            "model": "mtg_commander_sim/card_programs/model.py",
-            "adapter": "mtg_commander_sim/card_programs/adapters.py",
-            "validator": "mtg_commander_sim/card_programs/validation.py",
+            "model": "quorune/card_programs/model.py",
+            "adapter": "quorune/card_programs/adapters.py",
+            "validator": "quorune/card_programs/validation.py",
             "semantic_registry_program_count": len(semantic_card_programs),
             "trust_basis_counts": dict(sorted(trust_basis_counts.items())),
             "strict_capability_ready_count": sum(
@@ -1199,12 +1199,12 @@ def _compiler_metrics(
             ),
         },
         "compiler_version": oracle.get("compiler_version"),
-        "compiler_module": "mtg_commander_sim/oracle_ir.py",
+        "compiler_module": "quorune/oracle_ir.py",
         "compiler_module_physical_lines": len(
-            analyses["mtg_commander_sim/oracle_ir.py"].text.splitlines()
+            analyses["quorune/oracle_ir.py"].text.splitlines()
         ),
         "compiler_module_logical_lines": len(
-            analyses["mtg_commander_sim/oracle_ir.py"].logical_lines
+            analyses["quorune/oracle_ir.py"].logical_lines
         ),
         "stages": stages,
         "full_oracle": {
@@ -1462,7 +1462,7 @@ def _rules_metrics() -> dict[str, Any]:
 def _coordinates(source: Mapping[str, Any]) -> dict[str, Any]:
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     return {
-        "repository": "MoellerJDev/mtg-commander-sim",
+        "repository": "MoellerJDev/quorune",
         "default_branch": "main",
         "baseline_main_commit": source["audit"]["baseline_main_commit"],
         "baseline_worktree_clean": source["audit"]["baseline_worktree_clean"],

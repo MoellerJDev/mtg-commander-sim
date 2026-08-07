@@ -10,8 +10,8 @@ import sqlite3
 from typing import Any, Iterator
 import uuid
 
-from mtg_commander_sim import DeckDefinition
-from mtg_commander_sim.persistence import initialize_sqlite
+from quorune import DeckDefinition
+from quorune.persistence import initialize_sqlite
 
 
 SEATS = ("A", "B", "C", "D")

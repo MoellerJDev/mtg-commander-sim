@@ -2,7 +2,7 @@
 title: "Rules assurance model"
 status: "current"
 authoritative_source: "pinned rules corpus, conformance records, capability registry, CardPrograms, and generated coverage"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "rules, compiler, engine, and assurance contributors"
 maintenance: "hand-maintained"
 concern: "rules-assurance"
@@ -15,7 +15,7 @@ snapshot to reusable implemented behavior and executable evidence. It controls
 claims; it is not a checklist whose completion can be inferred from a parser
 match, witness card, test name, or generated row.
 
-MTG Commander Sim is a partial, snapshot-scoped implementation. Current states,
+Quorune's current rules support is a partial, snapshot-scoped implementation. Current states,
 counts, fingerprints, and blockers are generated in
 [rules status](../RULES_COMPLETENESS_STATUS.md),
 [compiler status](../COMPILER_COVERAGE_STATUS.md),
@@ -48,7 +48,7 @@ dependencies, and reviewed summaries rather than redistributing the prose.
 - `rules/conformance-reviews/` stores subsystem reviews and evidence mappings.
 - `rules/dependency-graph.json` and `platform/rules-subsystems.json` describe
   dependency and ownership scheduling.
-- `mtg_commander_sim/rules/capability-registry.json` and generated evidence
+- `quorune/rules/capability-registry.json` and generated evidence
   define fine-grained executable trust.
 - CardPrograms bind Oracle spans to required capabilities and runtime
   descriptors.

@@ -6,14 +6,14 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.ability_fragments import ability_fragment_to_dict
-from mtg_commander_sim.aura import SimpleEnchantSpec
-from mtg_commander_sim.declaration_restrictions import (
+from quorune.ability_fragments import ability_fragment_to_dict
+from quorune.aura import SimpleEnchantSpec
+from quorune.declaration_restrictions import (
     parse_declaration_restriction_line,
 )
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.record import (
+from quorune.model import CombatState
+from quorune.oracle_ir import compile_oracle_card
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

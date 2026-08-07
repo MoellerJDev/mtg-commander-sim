@@ -8,14 +8,14 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import (
+from quorune.engine import GameRuleError
+from quorune.model import StackItem
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     BecomeMonarchIntent,
     DrawCardsIntent,
     ReadOnlyHandlerContext,
@@ -26,25 +26,25 @@ from mtg_commander_sim.semantic_runtime import (
     UntapAllCreaturesIntent,
     default_semantic_handler_registry,
 )
-from mtg_commander_sim.semantic_runtime.generic import (
+from quorune.semantic_runtime.generic import (
     BecomeMonarchHandler,
     DrawEachPlayerHandler,
     DrawHandler,
 )
-from mtg_commander_sim.semantic_choices import (
+from quorune.semantic_choices import (
     SemanticChoiceContext,
     SemanticChoiceError,
     SnapshotSemanticChoiceQuery,
 )
-from mtg_commander_sim.semantic_choices.conditional_draw import (
+from quorune.semantic_choices.conditional_draw import (
     OpponentCastColorDrawHandler,
 )
-from mtg_commander_sim.semantic_runtime.tap_state_handlers import (
+from quorune.semantic_runtime.tap_state_handlers import (
     TapPermanentHandler,
     UntapAllCreaturesHandler,
     UntapPermanentHandler,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 class TypedSemanticHandlerTests(unittest.TestCase):

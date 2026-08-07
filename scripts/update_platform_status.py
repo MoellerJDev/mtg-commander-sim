@@ -222,14 +222,14 @@ def build_report() -> dict:
     }
     project = _project_metadata()
     report["package"] = {
-        "name": "mtg-commander-sim",
+        "name": str(project["name"]),
         "version": str(project["version"]),
         "python": str(project["requires-python"]),
     }
     report["tests"] = {
         "deterministic_cases_discovered": _test_count(),
         "schema_files": _file_count("schemas")
-        + _file_count("mtg_commander_sim/schemas"),
+        + _file_count("quorune/schemas"),
         "server_files": _file_count("server"),
         "web_files": _file_count("web"),
         "migration_files": _file_count("migrations"),

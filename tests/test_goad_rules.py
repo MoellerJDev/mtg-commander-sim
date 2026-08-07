@@ -7,14 +7,14 @@ from dataclasses import replace
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import CombatState, TurnEntry
-from mtg_commander_sim.oracle_ir import (
+from quorune.engine import GameRuleError
+from quorune.model import CombatState, TurnEntry
+from quorune.oracle_ir import (
     compile_oracle_card,
     generated_programs,
 )
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,

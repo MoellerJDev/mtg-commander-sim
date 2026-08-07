@@ -173,7 +173,7 @@
       "status": "passing",
       "assertion_kind": "executable_engine",
       "reviewed": true,
-      "implementation_components": ["mtg_commander_sim.combat.assigns_in_damage_step", "CommanderEngine._begin_combat_damage", "CommanderEngine._advance_step"],
+      "implementation_components": ["quorune.combat.assigns_in_damage_step", "CommanderEngine._begin_combat_damage", "CommanderEngine._advance_step"],
       "executable_test_ids": [
         "tests.test_combat_damage_rules.CombatDamageRuleTests.test_first_strike_creates_the_initial_combat_damage_step",
         "tests.test_combat_keyword_rules.CombatDamageStepUnitTests.test_second_step_uses_the_first_step_snapshot_and_current_double_strike",

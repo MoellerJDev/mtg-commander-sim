@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.combat_constraints import DeclarationProblem
-from mtg_commander_sim.menace import (
+from quorune.combat_constraints import DeclarationProblem
+from quorune.menace import (
     MenaceBlockRestriction,
     MenaceRuleError,
     current_menace_restriction,

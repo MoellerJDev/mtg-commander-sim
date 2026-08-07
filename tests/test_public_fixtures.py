@@ -7,8 +7,8 @@ import tempfile
 import unittest
 
 from common import ROOT, load_assets
-from mtg_commander_sim import CommanderSession, GameConfig
-from mtg_commander_sim.record import replay_record
+from quorune import CommanderSession, GameConfig
+from quorune.record import replay_record
 
 
 class PublicFixturePolicyTests(unittest.TestCase):

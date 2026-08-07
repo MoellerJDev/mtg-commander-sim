@@ -76,10 +76,10 @@ def _forbidden_response_paths(
 def primary_session_prompt(game_dir: str | Path) -> str:
     directory = Path(game_dir).resolve()
     return (
-        "Use $commander-arena as the neutral coordinator for the Commander "
+        "Use $quorune-pilot-harness as the neutral coordinator for the Commander "
         f"record at {directory}. Run this primary session with GPT-5.6 Sol "
         "Ultra. Validate all four exact-list profiles, then use "
-        "arena-codex-run to start mtg_pilot_a through mtg_pilot_d exactly "
+        "arena-codex-run to start quorune_pilot_a through quorune_pilot_d exactly "
         "once with gpt-5.6-sol/low/priority and route every later seat task "
         "to its original persistent session through the fixed-seat broker. "
         "Confirm semantic_policy is trusted_only before the first pilot call. "
@@ -846,7 +846,7 @@ class CodexThreadRegistry:
             registry.register(
                 seat=seat,
                 thread_label=str(
-                    identity["thread_label"] or f"mtg-pilot-{seat.lower()}"
+                    identity["thread_label"] or f"quorune-pilot-{seat.lower()}"
                 ),
                 provider=str(identity["provider"] or "unavailable"),
                 model=identity["model"],
@@ -1059,7 +1059,7 @@ def run_pilot_mcp_stdio(
                     "protocolVersion": "2025-06-18",
                     "capabilities": {"tools": {}},
                     "serverInfo": {
-                        "name": f"mtg-pilot-{tools.seat}",
+                        "name": f"quorune-pilot-{tools.seat}",
                         "version": ENGINE_VERSION,
                     },
                 }

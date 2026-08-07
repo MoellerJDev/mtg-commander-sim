@@ -28,7 +28,7 @@
     {
       "mechanic_id": "battle-cry",
       "path": "mechanics/contracts/battle-cry.json",
-      "sha256": "2ce1041a9cd9cce85dd489153a9bd2fafa18ec1265e0f0bcc489632757dfe3a8",
+      "sha256": "13f70e183196a3a175b887d0220a13e90904e2fdb3a4f3c9d7ba583de7233d31",
       "version": 1
     },
     {
@@ -58,7 +58,7 @@
     {
       "mechanic_id": "bushido",
       "path": "mechanics/contracts/bushido.json",
-      "sha256": "6039d50dee517a61855456dd5b55dd18749dea2085215c1085bf376f3748eaa1",
+      "sha256": "9c9b69c620ab84e9d3fd3a1d9fd173e7dfbf97c56ae947d0b2ef30b55e588126",
       "version": 1
     },
     {
@@ -118,13 +118,13 @@
     {
       "mechanic_id": "cr-120-damage",
       "path": "mechanics/contracts/damage.json",
-      "sha256": "4e1c4200b72202e949a90d672555046bf741fdebcf3150cf9c70eeec319722e0",
+      "sha256": "465622ab6df8c5d65d2f55a104a64d6b7ace73976e5a766f4fe2973d8f602e7f",
       "version": 4
     },
     {
       "mechanic_id": "deathtouch",
       "path": "mechanics/contracts/deathtouch.json",
-      "sha256": "fbcbb443817b5946dbdac31657fecbe041e25ba8c521f7ccf9dfc4a9220a1c93",
+      "sha256": "d2a8a82e2458d3762f26346aee470b8e84c27506ea8aab28b7b31182ef0282b6",
       "version": 3
     },
     {
@@ -142,7 +142,7 @@
     {
       "mechanic_id": "defender",
       "path": "mechanics/contracts/defender.json",
-      "sha256": "14ee50461a0cc87af25b654ea0c399360dba5634f45eda36b0a537bc23888545",
+      "sha256": "2f3eeca28c8c52d6d570c5bda58c08c025a24ba1c5392888576fc0aef2fc814b",
       "version": 2
     },
     {
@@ -160,7 +160,7 @@
     {
       "mechanic_id": "double-strike",
       "path": "mechanics/contracts/double-strike.json",
-      "sha256": "bc901e82b63c66ba8341dcb9afaebef443572bebff09e30c41ce7b7b2dee0a66",
+      "sha256": "254d727ff5d7c67e20c6f262eb7a7dc8fa65620ae6dd3b01f54cfa8674bf6dfb",
       "version": 2
     },
     {
@@ -172,7 +172,7 @@
     {
       "mechanic_id": "cr-121-drawing-a-card",
       "path": "mechanics/contracts/drawing-a-card.json",
-      "sha256": "69f89bdbc27e0d5ede0a99db4f5bd1231cdce0365f5543222b25eda584f3cfee",
+      "sha256": "7d67e3f9c63d53c991cd90f526f947441b055878685b7b124fb60ee042cd0b9a",
       "version": 6
     },
     {
@@ -202,7 +202,7 @@
     {
       "mechanic_id": "exalted",
       "path": "mechanics/contracts/exalted.json",
-      "sha256": "038eaeed0daac519d42d5349a6085a3594e4a4d2ef4fdbe2f93b0088486cd431",
+      "sha256": "05080c8d613f0f2a95f4d4b1955a81dd0ccb022a14e1d5e9928c1a8779a3a453",
       "version": 1
     },
     {
@@ -214,31 +214,31 @@
     {
       "mechanic_id": "fear",
       "path": "mechanics/contracts/fear.json",
-      "sha256": "5da1913cb8779f8139e29ffc3ce06e64bbeed0bde6870ca6ce065bb531772145",
+      "sha256": "974ece294c219d7b444a40f74da927a434bbd0b1bc0e6cf4657f9216005940b9",
       "version": 1
     },
     {
       "mechanic_id": "first-strike",
       "path": "mechanics/contracts/first-strike.json",
-      "sha256": "d3aceae406047544a03da280e6ac410114007a92844b88f62dd459b071c41f58",
+      "sha256": "d38c2a1a836d3dea4c28a537cfd9aa539b93724e08d8f4cbe539b9e1feebb07e",
       "version": 2
     },
     {
       "mechanic_id": "flanking",
       "path": "mechanics/contracts/flanking.json",
-      "sha256": "61bc7ed5f57eac1150d908c5302877704bbd918e93b437823b36062880b15cf7",
+      "sha256": "87cb3514931493d1e062b15127f3ae577530dfde4d4c9bbbc5ce1e2bf8dbfd11",
       "version": 1
     },
     {
       "mechanic_id": "flash",
       "path": "mechanics/contracts/flash.json",
-      "sha256": "cd972f70971eb100f8c398b2297cbc101acb89bda271c1fc02eb77b7d9a46c27",
+      "sha256": "3c85957f4f67f02de145291c5c69d987b8e421dc899c0dae575c47e05579ad3a",
       "version": 1
     },
     {
       "mechanic_id": "flying",
       "path": "mechanics/contracts/flying.json",
-      "sha256": "0badd9bd97dce55a7c62b62171ad8141d1968237a90c99f339fd49b29ea611d9",
+      "sha256": "f4686e2bdee8beb5e6e30fb4ab9968c18814225e96e423c584266756cb096115",
       "version": 2
     },
     {
@@ -274,37 +274,37 @@
     {
       "mechanic_id": "haste",
       "path": "mechanics/contracts/haste.json",
-      "sha256": "b2daa74366864dc833bdc141b61645fc2d02de15daf8b7bfa7b5e04d6c6d006c",
+      "sha256": "9d9081b990e09f6fd956fc9be6dc3cc715ad46f803f2b4f7437f3c4cd16f76ec",
       "version": 1
     },
     {
       "mechanic_id": "horsemanship",
       "path": "mechanics/contracts/horsemanship.json",
-      "sha256": "bd1ef2d980bc79b8923fdf9f1cabd084fc37cd300cadf37a676983207c99995e",
+      "sha256": "3bdab7e786a6163610a88c71f6a826c56447f301279b609d04175cb1a257867c",
       "version": 1
     },
     {
       "mechanic_id": "indestructible",
       "path": "mechanics/contracts/indestructible.json",
-      "sha256": "e46c533ec2c19f626e632062ca0f4b36fba8b71b122bdcb67ccf47e802f26cdc",
+      "sha256": "1f10d250850fc804c9dfd46a0ee89c6868434653d10a691b53e2d1c40aa14bfb",
       "version": 2
     },
     {
       "mechanic_id": "infect",
       "path": "mechanics/contracts/infect.json",
-      "sha256": "dc529cfa4f57a97aa16d86fd62d079e1dc2c90a6e502bba000b44db69a6ca0c8",
+      "sha256": "26986bcfb5df9a38ec13785aa966b45f8394ac3cf228e41af3ce82300f30507f",
       "version": 1
     },
     {
       "mechanic_id": "intimidate",
       "path": "mechanics/contracts/intimidate.json",
-      "sha256": "063d287a4290b1730a5bf42c0ca8fe5f640236fa1ae61da7b4761e22b7baadd9",
+      "sha256": "8d0de73960a3a0a97f4e384626bedefdea3c2b61369b0da67baa7c4034a1b914",
       "version": 1
     },
     {
       "mechanic_id": "landwalk",
       "path": "mechanics/contracts/landwalk.json",
-      "sha256": "73717f39e79c0b04dcf41aaeab8ad25f87c3b45e0d893f1a2620e6122747c584",
+      "sha256": "5c15294065071b8d2f9e2087adf7a0c1fc46356fdedcb7c9722bf218b5a0e073",
       "version": 1
     },
     {
@@ -316,7 +316,7 @@
     {
       "mechanic_id": "lifelink",
       "path": "mechanics/contracts/lifelink.json",
-      "sha256": "ce87b1fa49465b145e3b8a5d0036f10815871cd56caa0fcde196bf78bbd9794d",
+      "sha256": "bc65ee200118db9c0b708d6bcb55abaf12ea46518923bc4536e6280f7b0da928",
       "version": 2
     },
     {
@@ -346,13 +346,13 @@
     {
       "mechanic_id": "melee",
       "path": "mechanics/contracts/melee.json",
-      "sha256": "cd02dc5ab35697135a7650004412617df7f3f1da3e770921b3d6cfb4ac550bea",
+      "sha256": "5285bf88f7d76f75b4ee762c7c3c51365fa85cfa65de67a3720b32cd2a0e2931",
       "version": 1
     },
     {
       "mechanic_id": "menace",
       "path": "mechanics/contracts/menace.json",
-      "sha256": "86307912f30fbbe9788ff8ee20dfd4a1965e7d9884afc896a80fa3575202040c",
+      "sha256": "4921c3920c6cda1b2944b655390d29422d922d8825ee5c41a086d9f78e18a0d5",
       "version": 2
     },
     {
@@ -388,7 +388,7 @@
     {
       "mechanic_id": "reach",
       "path": "mechanics/contracts/reach.json",
-      "sha256": "79572c28213ee85e804a1eb932080e0d328553d0388246d7180f274bdcc5d53d",
+      "sha256": "0f0771f3524d538b74046a68a3683d77fdf6e018e4caff94be8ea142904b806e",
       "version": 1
     },
     {
@@ -406,7 +406,7 @@
     {
       "mechanic_id": "shadow",
       "path": "mechanics/contracts/shadow.json",
-      "sha256": "3a7000a7f45d0317fa63ae44ce586961074c38c6c4edee88d1d3f25d82d85935",
+      "sha256": "0afd9512e3ec1f66d25277d1d1a9b660e8f817368e1047249cd388a30ad7ac2c",
       "version": 1
     },
     {
@@ -418,7 +418,7 @@
     {
       "mechanic_id": "skulk",
       "path": "mechanics/contracts/skulk.json",
-      "sha256": "3de0986a87833711b869fd6c5b2300b41873c03f6783c5049c974c1fb778a873",
+      "sha256": "643d1c6ebcae37be7eae03b81f69bd8a1caa234268f47e9903fa9b3517568bdd",
       "version": 1
     },
     {
@@ -448,13 +448,13 @@
     {
       "mechanic_id": "toxic",
       "path": "mechanics/contracts/toxic.json",
-      "sha256": "9947e2e4ad61adca2cb33caf8678a9774fab4c38fb0badac2d6eadd17a9c2395",
+      "sha256": "17d33279bb510c210334e997ad8d68b38a3192aeae016ef0d5843e1cff179eeb",
       "version": 1
     },
     {
       "mechanic_id": "trample",
       "path": "mechanics/contracts/trample.json",
-      "sha256": "45b414c073ebcf04cba44a6e03f0c1d69588be1c07afd405ca25d76b3d2f9fe5",
+      "sha256": "43d266c6795679b4560610529e0423c79db8d7f6dc524c9dd90ecb130c62f485",
       "version": 3
     },
     {
@@ -484,13 +484,13 @@
     {
       "mechanic_id": "vigilance",
       "path": "mechanics/contracts/vigilance.json",
-      "sha256": "015e44655510dbcc7b7e4b45e608faebd97feeb670c4c081c8fed96d6c33a807",
+      "sha256": "a349f667cb340f27c61a59d6f9807f562d5c779db5612c591118b7e0265ecd02",
       "version": 1
     },
     {
       "mechanic_id": "wither",
       "path": "mechanics/contracts/wither.json",
-      "sha256": "0f56793cba9277b5aff1457074be2a5835e09024928d989a00686a1e5e3e29c8",
+      "sha256": "a6706c931cd774ef775fe934baf6a052f15e03a3c721cd2e3ad7aeeecbabb814",
       "version": 1
     }
   ],
@@ -772,13 +772,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/battle-cry.json",
-      "contract_sha256": "2ce1041a9cd9cce85dd489153a9bd2fafa18ec1265e0f0bcc489632757dfe3a8",
+      "contract_sha256": "13f70e183196a3a175b887d0220a13e90904e2fdb3a4f3c9d7ba583de7233d31",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution",
+      "implementation_component": "quorune.attack_transition_model and quorune.attack_transition_resolution",
       "implementation_version": "typed-attack-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -875,13 +875,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/bushido.json",
-      "contract_sha256": "6039d50dee517a61855456dd5b55dd18749dea2085215c1085bf376f3748eaa1",
+      "contract_sha256": "9c9b69c620ab84e9d3fd3a1d9fd173e7dfbf97c56ae947d0b2ef30b55e588126",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.block_transitions and mtg_commander_sim.block_transition_engine_adapter",
+      "implementation_component": "quorune.block_transitions and quorune.block_transition_engine_adapter",
       "implementation_version": "typed-block-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1241,13 +1241,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/deathtouch.json",
-      "contract_sha256": "fbcbb443817b5946dbdac31657fecbe041e25ba8c521f7ccf9dfc4a9220a1c93",
+      "contract_sha256": "d2a8a82e2458d3762f26346aee470b8e84c27506ea8aab28b7b31182ef0282b6",
       "contract_version": 3,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.deathtouch",
+      "implementation_component": "quorune.deathtouch",
       "implementation_version": "deathtouch-assignment-result-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1294,13 +1294,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/defender.json",
-      "contract_sha256": "14ee50461a0cc87af25b654ea0c399360dba5634f45eda36b0a537bc23888545",
+      "contract_sha256": "2f3eeca28c8c52d6d570c5bda58c08c025a24ba1c5392888576fc0aef2fc814b",
       "contract_version": 2,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.defender.defender_prohibits_attack and CommanderEngine._attack_declaration_error",
+      "implementation_component": "quorune.defender.defender_prohibits_attack and CommanderEngine._attack_declaration_error",
       "implementation_version": "defender-attack-restriction-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1448,13 +1448,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/double-strike.json",
-      "contract_sha256": "bc901e82b63c66ba8341dcb9afaebef443572bebff09e30c41ce7b7b2dee0a66",
+      "contract_sha256": "254d727ff5d7c67e20c6f262eb7a7dc8fa65620ae6dd3b01f54cfa8674bf6dfb",
       "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat.assigns_in_damage_step",
+      "implementation_component": "quorune.combat.assigns_in_damage_step",
       "implementation_version": "strike-step-participation-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1737,13 +1737,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/exalted.json",
-      "contract_sha256": "038eaeed0daac519d42d5349a6085a3594e4a4d2ef4fdbe2f93b0088486cd431",
+      "contract_sha256": "05080c8d613f0f2a95f4d4b1955a81dd0ccb022a14e1d5e9928c1a8779a3a453",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution",
+      "implementation_component": "quorune.attack_transition_model and quorune.attack_transition_resolution",
       "implementation_version": "typed-attack-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1858,13 +1858,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/fear.json",
-      "contract_sha256": "5da1913cb8779f8139e29ffc3ce06e64bbeed0bde6870ca6ce065bb531772145",
+      "contract_sha256": "974ece294c219d7b444a40f74da927a434bbd0b1bc0e6cf4657f9216005940b9",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_component": "quorune.combat_evasion.combat_evasion_verdict, quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
       "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1906,13 +1906,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/first-strike.json",
-      "contract_sha256": "d3aceae406047544a03da280e6ac410114007a92844b88f62dd459b071c41f58",
+      "contract_sha256": "d38c2a1a836d3dea4c28a537cfd9aa539b93724e08d8f4cbe539b9e1feebb07e",
       "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat.assigns_in_damage_step",
+      "implementation_component": "quorune.combat.assigns_in_damage_step",
       "implementation_version": "strike-step-participation-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1939,13 +1939,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/flanking.json",
-      "contract_sha256": "61bc7ed5f57eac1150d908c5302877704bbd918e93b437823b36062880b15cf7",
+      "contract_sha256": "87cb3514931493d1e062b15127f3ae577530dfde4d4c9bbbc5ce1e2bf8dbfd11",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.block_transitions and mtg_commander_sim.block_transition_engine_adapter",
+      "implementation_component": "quorune.block_transitions and quorune.block_transition_engine_adapter",
       "implementation_version": "typed-block-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -1976,13 +1976,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/flash.json",
-      "contract_sha256": "cd972f70971eb100f8c398b2297cbc101acb89bda271c1fc02eb77b7d9a46c27",
+      "contract_sha256": "3c85957f4f67f02de145291c5c69d987b8e421dc899c0dae575c47e05579ad3a",
       "contract_version": 1,
       "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.compiled_cast_timing.compiled_cast_timing_permissions",
+      "implementation_component": "quorune.compiled_cast_timing.compiled_cast_timing_permissions",
       "implementation_version": "printed-flash-cast-timing-v1",
       "kind": "keyword_ability",
       "known_blockers": [],
@@ -2022,13 +2022,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/flying.json",
-      "contract_sha256": "0badd9bd97dce55a7c62b62171ad8141d1968237a90c99f339fd49b29ea611d9",
+      "contract_sha256": "f4686e2bdee8beb5e6e30fb4ab9968c18814225e96e423c584266756cb096115",
       "contract_version": 2,
       "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.aerial_blocking.aerial_block_verdict",
+      "implementation_component": "quorune.aerial_blocking.aerial_block_verdict",
       "implementation_version": "aerial-blocking-v1",
       "kind": "keyword_ability",
       "known_blockers": [],
@@ -2336,13 +2336,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/haste.json",
-      "contract_sha256": "b2daa74366864dc833bdc141b61645fc2d02de15daf8b7bfa7b5e04d6c6d006c",
+      "contract_sha256": "9d9081b990e09f6fd956fc9be6dc3cc715ad46f803f2b4f7437f3c4cd16f76ec",
       "contract_version": 1,
       "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.haste",
+      "implementation_component": "quorune.haste",
       "implementation_version": "haste-summoning-sickness-v1",
       "kind": "keyword_ability",
       "known_blockers": [],
@@ -2434,13 +2434,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/horsemanship.json",
-      "contract_sha256": "bd1ef2d980bc79b8923fdf9f1cabd084fc37cd300cadf37a676983207c99995e",
+      "contract_sha256": "3bdab7e786a6163610a88c71f6a826c56447f301279b609d04175cb1a257867c",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_component": "quorune.combat_evasion.combat_evasion_verdict, quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
       "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -2533,13 +2533,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/indestructible.json",
-      "contract_sha256": "e46c533ec2c19f626e632062ca0f4b36fba8b71b122bdcb67ccf47e802f26cdc",
+      "contract_sha256": "1f10d250850fc804c9dfd46a0ee89c6868434653d10a691b53e2d1c40aa14bfb",
       "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.destruction typed transaction plus mtg_commander_sim.state_based_actions producer",
+      "implementation_component": "quorune.destruction typed transaction plus quorune.state_based_actions producer",
       "implementation_version": "indestructible-partial-v2",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -2566,13 +2566,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/infect.json",
-      "contract_sha256": "dc529cfa4f57a97aa16d86fd62d079e1dc2c90a6e502bba000b44db69a6ca0c8",
+      "contract_sha256": "26986bcfb5df9a38ec13785aa966b45f8394ac3cf228e41af3ce82300f30507f",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.damage_results.materialize_damage_results",
+      "implementation_component": "quorune.damage_results.materialize_damage_results",
       "implementation_version": "damage-results-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -2629,13 +2629,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/intimidate.json",
-      "contract_sha256": "063d287a4290b1730a5bf42c0ca8fe5f640236fa1ae61da7b4761e22b7baadd9",
+      "contract_sha256": "8d0de73960a3a0a97f4e384626bedefdea3c2b61369b0da67baa7c4034a1b914",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_component": "quorune.combat_evasion.combat_evasion_verdict, quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
       "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -2711,13 +2711,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/landwalk.json",
-      "contract_sha256": "73717f39e79c0b04dcf41aaeab8ad25f87c3b45e0d893f1a2620e6122747c584",
+      "contract_sha256": "5c15294065071b8d2f9e2087adf7a0c1fc46356fdedcb7c9722bf218b5a0e073",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.landwalk.basic_landwalk_block_verdict, mtg_commander_sim.combat_evasion.combat_evasion_verdict, and mtg_commander_sim.combat_evasion_engine_adapter.defending_basic_land_types",
+      "implementation_component": "quorune.landwalk.basic_landwalk_block_verdict, quorune.combat_evasion.combat_evasion_verdict, and quorune.combat_evasion_engine_adapter.defending_basic_land_types",
       "implementation_version": "basic-landwalk-block-restriction-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -2763,13 +2763,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/lifelink.json",
-      "contract_sha256": "ce87b1fa49465b145e3b8a5d0036f10815871cd56caa0fcde196bf78bbd9794d",
+      "contract_sha256": "bc65ee200118db9c0b708d6bcb55abaf12ea46518923bc4536e6280f7b0da928",
       "contract_version": 2,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.damage_results.materialize_damage_results",
+      "implementation_component": "quorune.damage_results.materialize_damage_results",
       "implementation_version": "damage-results-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -2878,13 +2878,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/melee.json",
-      "contract_sha256": "cd02dc5ab35697135a7650004412617df7f3f1da3e770921b3d6cfb4ac550bea",
+      "contract_sha256": "5285bf88f7d76f75b4ee762c7c3c51365fa85cfa65de67a3720b32cd2a0e2931",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.attack_transition_model and mtg_commander_sim.attack_transition_resolution",
+      "implementation_component": "quorune.attack_transition_model and quorune.attack_transition_resolution",
       "implementation_version": "typed-attack-transition-keyword-triggers-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -2914,13 +2914,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/menace.json",
-      "contract_sha256": "86307912f30fbbe9788ff8ee20dfd4a1965e7d9884afc896a80fa3575202040c",
+      "contract_sha256": "4921c3920c6cda1b2944b655390d29422d922d8825ee5c41a086d9f78e18a0d5",
       "contract_version": 2,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.menace, CommanderEngine._block_declaration_components, and the generic declaration solver",
+      "implementation_component": "quorune.menace, CommanderEngine._block_declaration_components, and the generic declaration solver",
       "implementation_version": "menace-block-restriction-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -3440,13 +3440,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/reach.json",
-      "contract_sha256": "79572c28213ee85e804a1eb932080e0d328553d0388246d7180f274bdcc5d53d",
+      "contract_sha256": "0f0771f3524d538b74046a68a3683d77fdf6e018e4caff94be8ea142904b806e",
       "contract_version": 1,
       "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.aerial_blocking.aerial_block_verdict",
+      "implementation_component": "quorune.aerial_blocking.aerial_block_verdict",
       "implementation_version": "aerial-blocking-v1",
       "kind": "keyword_ability",
       "known_blockers": [],
@@ -3669,13 +3669,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/shadow.json",
-      "contract_sha256": "3a7000a7f45d0317fa63ae44ce586961074c38c6c4edee88d1d3f25d82d85935",
+      "contract_sha256": "0afd9512e3ec1f66d25277d1d1a9b660e8f817368e1047249cd388a30ad7ac2c",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_component": "quorune.combat_evasion.combat_evasion_verdict, quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
       "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -3717,13 +3717,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/skulk.json",
-      "contract_sha256": "3de0986a87833711b869fd6c5b2300b41873c03f6783c5049c974c1fb778a873",
+      "contract_sha256": "643d1c6ebcae37be7eae03b81f69bd8a1caa234268f47e9903fa9b3517568bdd",
       "contract_version": 1,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+      "implementation_component": "quorune.combat_evasion.combat_evasion_verdict, quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
       "implementation_version": "ordinary-combat-evasion-restrictions-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -4055,13 +4055,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/toxic.json",
-      "contract_sha256": "9947e2e4ad61adca2cb33caf8678a9774fab4c38fb0badac2d6eadd17a9c2395",
+      "contract_sha256": "17d33279bb510c210334e997ad8d68b38a3192aeae016ef0d5843e1cff179eeb",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.damage_results.materialize_damage_results",
+      "implementation_component": "quorune.damage_results.materialize_damage_results",
       "implementation_version": "damage-results-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -4102,13 +4102,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/trample.json",
-      "contract_sha256": "45b414c073ebcf04cba44a6e03f0c1d69588be1c07afd405ca25d76b3d2f9fe5",
+      "contract_sha256": "43d266c6795679b4560610529e0423c79db8d7f6dc524c9dd90ecb130c62f485",
       "contract_version": 3,
       "coverage_status": "tested",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.combat_damage_assignment.CombatDamageAssignmentProposal",
+      "implementation_component": "quorune.combat_damage_assignment.CombatDamageAssignmentProposal",
       "implementation_version": "ordinary-trample-assignment-v2",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -4296,13 +4296,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/vigilance.json",
-      "contract_sha256": "015e44655510dbcc7b7e4b45e608faebd97feeb670c4c081c8fed96d6c33a807",
+      "contract_sha256": "a349f667cb340f27c61a59d6f9807f562d5c779db5612c591118b7e0265ecd02",
       "contract_version": 1,
       "coverage_status": "trusted",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.tap_state.tap_declared_attackers",
+      "implementation_component": "quorune.tap_state.tap_declared_attackers",
       "implementation_version": "combat-vigilance-v1",
       "kind": "keyword_ability",
       "known_blockers": [],
@@ -4390,13 +4390,13 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/wither.json",
-      "contract_sha256": "0f56793cba9277b5aff1457074be2a5835e09024928d989a00686a1e5e3e29c8",
+      "contract_sha256": "a6706c931cd774ef775fe934baf6a052f15e03a3c721cd2e3ad7aeeecbabb814",
       "contract_version": 1,
       "coverage_status": "partial",
       "dependencies": [
         "702"
       ],
-      "implementation_component": "mtg_commander_sim.damage_results.materialize_damage_results",
+      "implementation_component": "quorune.damage_results.materialize_damage_results",
       "implementation_version": "damage-results-v1",
       "kind": "keyword_ability",
       "known_blockers": [
@@ -6091,11 +6091,11 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/damage.json",
-      "contract_sha256": "4e1c4200b72202e949a90d672555046bf741fdebcf3150cf9c70eeec319722e0",
+      "contract_sha256": "465622ab6df8c5d65d2f55a104a64d6b7ace73976e5a766f4fe2973d8f602e7f",
       "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "mtg_commander_sim.damage coordinator plus mtg_commander_sim.damage_results prepare/plan/commit owner",
+      "implementation_component": "quorune.damage coordinator plus quorune.damage_results prepare/plan/commit owner",
       "implementation_version": "damage-results-v5",
       "kind": "rules_section",
       "known_blockers": [
@@ -6140,11 +6140,11 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/drawing-a-card.json",
-      "contract_sha256": "69f89bdbc27e0d5ede0a99db4f5bd1231cdce0365f5543222b25eda584f3cfee",
+      "contract_sha256": "7d67e3f9c63d53c991cd90f526f947441b055878685b7b124fb60ee042cd0b9a",
       "contract_version": 6,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "strict fixed-draw, specifically-drawn-card, and reveal-as-drawn compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the mtg_commander_sim.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement/reveal components, and optional-choice handlers",
+      "implementation_component": "strict fixed-draw, specifically-drawn-card, and reveal-as-drawn compiler shapes plus CardProgram lowering, typed result-draw replacement operations, and the quorune.drawing immutable model, restrictions, transaction, continuation, coordinator, runtime restriction/replacement/reveal components, and optional-choice handlers",
       "implementation_version": "draw-transaction-v6",
       "kind": "rules_section",
       "known_blockers": [

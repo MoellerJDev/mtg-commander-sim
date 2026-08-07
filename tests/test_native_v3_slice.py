@@ -6,15 +6,15 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim import (
+from quorune import (
     PilotMemory,
     PilotResponse,
     ScriptedPilot,
     SequentialPilotRunner,
     semantic_preflight,
 )
-from mtg_commander_sim.record import replay_record
-from mtg_commander_sim.report import derive_review, review_markdown
+from quorune.record import replay_record
+from quorune.report import derive_review, review_markdown
 
 
 class NativeV3AuditAndPilotTests(unittest.TestCase):

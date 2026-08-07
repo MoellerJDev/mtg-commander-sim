@@ -1,7 +1,7 @@
 ---
 title: "Game Record v3"
 status: "current"
-authoritative_source: "mtg_commander_sim/record.py, persistence implementation, and Game Record schemas"
+authoritative_source: "quorune/record.py, persistence implementation, and Game Record schemas"
 verified: "2026-08-06"
 audience: "engine, persistence, replay, and analyst contributors"
 maintenance: "hand-maintained"

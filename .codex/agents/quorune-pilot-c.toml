@@ -1,4 +1,4 @@
-name = "mtg_pilot_c"
+name = "quorune_pilot_c"
 description = "Persistent, seat-isolated strategic Commander pilot for seat C."
 model = "gpt-5.6-sol"
 model_reasoning_effort = "low"
@@ -30,9 +30,9 @@ Stop a plan when the state or stack changes materially.
 [agents]
 enabled = false
 
-[mcp_servers.mtg_pilot]
+[mcp_servers.quorune_pilot]
 command = "simctl"
-args = ["pilot-mcp", "--seat", "C", "--provider", "codex_subagent", "--model", "gpt-5.6-sol", "--reasoning-effort", "low", "--thread-label", "mtg-pilot-c", "--provider-invoked"]
+args = ["pilot-mcp", "--seat", "C", "--provider", "codex_subagent", "--model", "gpt-5.6-sol", "--reasoning-effort", "low", "--thread-label", "quorune-pilot-c", "--provider-invoked"]
 required = true
 enabled_tools = ["get_task", "submit_action", "get_rules", "get_profile", "get_memory", "update_memory"]
 env_vars = ["MTG_GAME_DIR"]

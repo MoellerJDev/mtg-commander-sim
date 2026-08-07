@@ -1,11 +1,11 @@
 ---
-name: commander-arena
-description: Coordinate, resume, inspect, or review a four-seat Commander match through fixed-seat projected pilot sessions.
+name: quorune-pilot-harness
+description: Coordinate, resume, inspect, or review a four-seat match through Quorune's optional fixed-seat pilot harness.
 ---
 
-# Commander arena
+# Quorune Pilot Harness
 
-Use this skill only for the optional arena adapter. Read the canonical
+Use this skill only for the optional pilot-harness adapter. Read the canonical
 [arena operations](../../../docs/optional-clients/codex-arena.md),
 [provider contract](../../../docs/optional-clients/providers.md), and
 [Game Record contract](../../../docs/reference/game-record.md) before acting.
@@ -14,7 +14,7 @@ Use this skill only for the optional arena adapter. Read the canonical
 
 1. Validate the requested decks, exact profiles, pinned card snapshot, and
    semantic policy.
-2. Create or load the record with the current `simctl.py arena-* --help`
+2. Create or load the record with the current `simctl arena-* --help`
    contract.
 3. Start each requested seat provider once and retain its actual provider,
    model, reasoning, service, and stable session identity when exposed.

@@ -6,15 +6,15 @@ import tempfile
 import unittest
 
 from tests.common import load_assets
-from mtg_commander_sim import (
+from quorune import (
     CommanderSession,
     GameConfig,
     ScriptedPilot,
     SequentialPilotRunner,
 )
-from mtg_commander_sim.cli import _scripted_choice
-from mtg_commander_sim.deck import DeckDefinition, DeckEntry
-from mtg_commander_sim.record import replay_record
+from quorune.cli import _scripted_choice
+from quorune.deck import DeckDefinition, DeckEntry
+from quorune.record import replay_record
 
 
 class DeterministicFourPlayerSoakTests(unittest.TestCase):

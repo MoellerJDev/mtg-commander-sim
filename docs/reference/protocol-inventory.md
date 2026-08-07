@@ -2,7 +2,7 @@
 title: "Generated protocol inventory"
 status: "generated"
 authoritative_source: "server FastAPI OpenAPI output and versioned schemas/*.json"
-verified: "f751ea128f1ff0d6b02c3fa6f95f7df9ba3f8fbe26b0d4e0642428b1ade7e905"
+verified: "54a6b2ab94b96d7e07a48656b79fff306d9d215ab2a31517ae02605a2dab4174"
 audience: "client, server, and protocol contributors"
 maintenance: "generated"
 generated_source: "coverage/protocol-inventory.json"
@@ -11,12 +11,12 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_protocol_referenc
 
 # Generated protocol inventory
 
-Source fingerprint: `59b592525d78457dbace88d8fa26f1ce2e31d9087a9443e06db8fb1d19822afa`
+Source fingerprint: `6e5d78063e064197192bf0e13aa4a70e9fa6a809ee4b6402df432ef9deac5b1c`
 
 ## Current top-level state
 
-- API title: `Commander Arena Server`
-- API version: `0.8.0`
+- API title: `Quorune Server`
+- API version: `0.9.0`
 - HTTP operations: `24`
 - WebSocket routes: `1`
 - Versioned schemas: `17`

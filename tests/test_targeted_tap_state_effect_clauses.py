@@ -7,29 +7,29 @@ import tempfile
 import unittest
 
 from common import ROOT, keep_all, make_session
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.tap_state_templates import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.tap_state_templates import (
     TapStateAction,
     TapStateTarget,
     TargetedTapStateEffectTemplate,
     targeted_tap_state_effect_template,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.oracle_ir import (
+from quorune.model import StackItem
+from quorune.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
 )
-from mtg_commander_sim.record import (
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.deck import DeckLoader
+from quorune.semantics import SemanticRegistry
 from scripts.build_test_database import build_fixture_database
 
 

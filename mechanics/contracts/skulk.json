@@ -87,7 +87,7 @@
     "test_ordinary_evasion_keywords_lower_with_precise_closed_spans"
   ],
   "implementation": {
-    "component": "mtg_commander_sim.combat_evasion.combat_evasion_verdict, mtg_commander_sim.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
+    "component": "quorune.combat_evasion.combat_evasion_verdict, quorune.combat_evasion_engine_adapter.combatant_evasion_characteristics, and CommanderEngine._can_block",
     "version": "ordinary-combat-evasion-restrictions-v1"
   },
   "known_blockers": [

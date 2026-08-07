@@ -33,7 +33,7 @@
   "witness_cards": [{"name": "Boggart Ram-Gang", "oracle_id": "30d2437a-87c9-4f88-8fb8-b686d6522677"}],
   "rulings": [],
   "test_ids": ["test_infect_and_wither_use_minus_counters_only_on_creatures", "test_source_pinned_keyword_witnesses_follow_damage_results", "test_wither_damage_still_records_deathtouch_result"],
-  "implementation": {"component": "mtg_commander_sim.damage_results.materialize_damage_results", "version": "damage-results-v1"},
+  "implementation": {"component": "quorune.damage_results.materialize_damage_results", "version": "damage-results-v1"},
   "known_blockers": ["unrepresented source last-known-information and continuous ability grants remain fail-closed", "the complete counter-replacement Oracle family is not yet compiled"],
   "review_status": "reviewed"
 }

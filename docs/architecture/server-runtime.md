@@ -14,7 +14,7 @@ deterministic game service. It owns guest authentication, room membership,
 deck intake, HTTP/WebSocket delivery, one serialized actor per loaded game,
 SQLite control-plane persistence, managed card snapshots, local images, and
 static browser assets. Transport dependencies do not enter
-`mtg_commander_sim/`.
+`quorune/`.
 
 ## Lifecycle and ownership
 

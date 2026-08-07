@@ -11,10 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from mtg_commander_sim.rules_scheduler import (
+from quorune.rules_scheduler import (
     build_rules_dependency_queue_from_root,
 )
-from mtg_commander_sim.util import stable_json
+from quorune.util import stable_json
 
 
 JSON_OUTPUT = ROOT / "coverage" / "rules-dependency-queue.json"

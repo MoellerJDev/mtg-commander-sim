@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from mtg_commander_sim.object_query import (
+from quorune.object_query import (
     ObjectQueryError,
     ObjectQueryResult,
     ObjectQuerySpec,

@@ -9,29 +9,29 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.aura import (
+from quorune.aura import (
     SimpleEnchantSpec,
     simple_enchant_spec_from_oracle,
 )
-from mtg_commander_sim.ability_fragments import (
+from quorune.ability_fragments import (
     ProtectionQualityKind,
     ProtectionSpec,
     ability_fragment_to_dict,
 )
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.damage import (
+from quorune.carddb import CardRecord
+from quorune.damage import (
     DamageError,
     apply_damage_results_to_permanent,
 )
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import DecisionGroup, StackItem
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.engine import GameRuleError
+from quorune.model import DecisionGroup, StackItem
+from quorune.projection import StateProjector
+from quorune.record import (
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.state_based_actions import (
+from quorune.semantics import SemanticProgram
+from quorune.state_based_actions import (
     ObjectSnapshot,
     PermanentSnapshot,
     counter_maximums_from_oracle,

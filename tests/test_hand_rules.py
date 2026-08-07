@@ -5,8 +5,8 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim import CommanderSession, GameConfig
-from mtg_commander_sim.engine import TURN_STEPS
+from quorune import CommanderSession, GameConfig
+from quorune.engine import TURN_STEPS
 
 
 class HandRuleTests(unittest.TestCase):

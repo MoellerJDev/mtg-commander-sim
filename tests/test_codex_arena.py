@@ -10,8 +10,8 @@ import unittest
 from pathlib import Path
 
 from common import DB_PATH, keep_all, load_assets, make_session
-from mtg_commander_sim import __version__
-from mtg_commander_sim.arena import (
+from quorune import __version__
+from quorune.arena import (
     CodexThreadRegistry,
     CoordinatorTools,
     PILOT_TOOL_NAMES,
@@ -19,12 +19,12 @@ from mtg_commander_sim.arena import (
     SeatScopedPilotTools,
     primary_session_prompt,
 )
-from mtg_commander_sim.bulk import SCRYFALL_USER_AGENT
-from mtg_commander_sim.cli import main as cli_main
-from mtg_commander_sim.deck import DeckDefinition
-from mtg_commander_sim.profiles import DeckProfileCache
-from mtg_commander_sim.record import ENGINE_VERSION
-from mtg_commander_sim.session import CommanderSession
+from quorune.bulk import SCRYFALL_USER_AGENT
+from quorune.cli import build_parser, main as cli_main
+from quorune.deck import DeckDefinition
+from quorune.profiles import DeckProfileCache
+from quorune.record import ENGINE_VERSION
+from quorune.session import CommanderSession
 
 
 class CodexArenaBoundaryTests(unittest.TestCase):
@@ -42,9 +42,28 @@ class CodexArenaBoundaryTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        self.assertEqual("quorune", project["project"]["name"])
         self.assertEqual(project["project"]["version"], __version__)
         self.assertEqual(__version__, ENGINE_VERSION)
         self.assertIn(f"/{__version__} ", SCRYFALL_USER_AGENT)
+        self.assertEqual(
+            {
+                "quorune": "quorune.cli:main",
+                "simctl": "quorune.cli:main",
+                "quorune-server": "server.__main__:main",
+            },
+            project["project"]["scripts"],
+        )
+        root = Path(__file__).parents[1]
+        self.assertTrue((root / "quorune" / "__init__.py").is_file())
+        self.assertFalse((root / "mtg_commander_sim").exists())
+
+    def test_primary_command_help_uses_quorune_name(self):
+        self.assertTrue(
+            build_parser(prog="quorune").format_usage().startswith(
+                "usage: quorune"
+            )
+        )
 
     def test_pilot_parent_responses_forbid_private_packet_echoes(self):
         root = Path(__file__).parents[1]
@@ -57,7 +76,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         for seat in "abcd":
             config = tomllib.loads(
                 (
-                    root / ".codex" / "agents" / f"mtg-pilot-{seat}.toml"
+                    root / ".codex" / "agents" / f"quorune-pilot-{seat}.toml"
                 ).read_text(encoding="utf-8")
             )
             instructions = config["developer_instructions"]
@@ -66,7 +85,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
             self.assertEqual("low", config["model_reasoning_effort"])
             self.assertEqual("priority", config["service_tier"])
         skill = (
-            root / ".agents" / "skills" / "commander-arena" / "SKILL.md"
+            root / ".agents" / "skills" / "quorune-pilot-harness" / "SKILL.md"
         ).read_text(encoding="utf-8")
         self.assertIn("parent-message channel", skill)
         self.assertIn("fidelity failure", skill)
@@ -160,7 +179,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
             provider="trusted-test-provider",
             model="trusted-model",
             thread_id="thread-a",
-            thread_label="mtg-pilot-a",
+            thread_label="quorune-pilot-a",
             provider_invoked=True,
         )
         tools = SeatScopedPilotTools(session, "A", identity=identity)
@@ -300,7 +319,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
                 model="gpt-5.6-sol",
                 reasoning_effort="max",
                 thread_id="thread-a",
-                thread_label="mtg-pilot-a",
+                thread_label="quorune-pilot-a",
                 provider_invoked=True,
             ),
         )
@@ -323,7 +342,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
                 model="gpt-5.6-sol",
                 reasoning_effort="max",
                 thread_id="/root/pilot-a",
-                thread_label="mtg-pilot-a",
+                thread_label="quorune-pilot-a",
                 provider_invoked=False,
             ),
         )
@@ -350,7 +369,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
                 "model": "gpt-5.6-sol",
                 "reasoning_effort": "max",
                 "thread_id": "/root/pilot-a",
-                "thread_label": "mtg-pilot-a",
+                "thread_label": "quorune-pilot-a",
                 "provider_invoked": True,
                 "provider_identity_verified": True,
                 "model_identity_verified": True,
@@ -364,7 +383,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
                 model="gpt-5.6-sol",
                 reasoning_effort="max",
                 thread_id=None,
-                thread_label="mtg-pilot-a",
+                thread_label="quorune-pilot-a",
                 provider_invoked=True,
                 provider_identity_verified=True,
                 model_identity_verified=True,
@@ -444,7 +463,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         for seat in "ABCD":
             registry.register(
                 seat=seat,
-                thread_label=f"mtg-pilot-{seat.lower()}",
+                thread_label=f"quorune-pilot-{seat.lower()}",
                 provider="codex_subagent",
                 model="gpt-5.6-sol",
                 reasoning_effort="max",
@@ -468,7 +487,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
                         "model": "gpt-5.6-sol",
                         "reasoning_effort": "max",
                         "thread_id": f"thread-{seat}",
-                        "thread_label": f"mtg-pilot-{seat.lower()}",
+                        "thread_label": f"quorune-pilot-{seat.lower()}",
                         "provider_invoked": True,
                         "retry_count": index,
                         "accepted": index != 0,
@@ -487,7 +506,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         registry = CodexThreadRegistry()
         registry.register(
             seat="A",
-            thread_label="mtg-pilot-a",
+            thread_label="quorune-pilot-a",
             provider="codex_subagent",
             model="gpt-5.6-sol",
             reasoning_effort="max",
@@ -496,7 +515,7 @@ class CodexArenaBoundaryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             registry.register(
                 seat="B",
-                thread_label="mtg-pilot-b",
+                thread_label="quorune-pilot-b",
                 provider="codex_subagent",
                 model="gpt-5.6-sol",
                 reasoning_effort="max",

@@ -1,4 +1,4 @@
-"""Deterministic, server-authoritative multiplayer Commander kernel."""
+"""Quorune's deterministic, server-authoritative multiplayer rules package."""
 
 from .python_runtime import require_supported_python
 

@@ -6,10 +6,10 @@ import uuid
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import CommanderEngine
-from mtg_commander_sim.model import DelayedTrigger, StackItem
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.engine import CommanderEngine
+from quorune.model import DelayedTrigger, StackItem
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.semantics import SemanticProgram
 
 
 class SemanticChoiceCharacterizationTests(unittest.TestCase):

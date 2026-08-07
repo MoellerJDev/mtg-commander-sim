@@ -8,29 +8,29 @@ import unittest
 from unittest.mock import patch
 
 from common import DB_PATH, keep_all, load_assets, make_session
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.compiler.damage_templates import (
+from quorune.carddb import CardDatabase
+from quorune.compiler.damage_templates import (
     FixedDamageEffectTemplate,
     FixedDamageRecipient,
     fixed_damage_effect_template,
 )
-from mtg_commander_sim.compiler import damage_templates
-from mtg_commander_sim.oracle_ir import (
+from quorune.compiler import damage_templates
+from quorune.oracle_ir import (
     compile_oracle_card,
     register_generated_programs,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.record import (
+from quorune.model import StackItem
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.rules.capabilities import (
+from quorune.rules.capabilities import (
     capability_dependencies_for_node,
     load_default_capability_registry,
 )
-from mtg_commander_sim.rules import node_capability_shapes
-from mtg_commander_sim.semantics import SemanticRegistry
+from quorune.rules import node_capability_shapes
+from quorune.semantics import SemanticRegistry
 
 
 class FixedDamageEffectTemplateTests(unittest.TestCase):

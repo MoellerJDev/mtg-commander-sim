@@ -6,14 +6,14 @@ import unittest
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session, pass_current
-from mtg_commander_sim.ability_fragments import (
+from quorune.ability_fragments import (
     CombatKeywordTriggerKind,
     CombatKeywordTriggerSpec,
     ability_fragment_to_dict,
 )
-from mtg_commander_sim.model import CombatState
-from mtg_commander_sim.errors import StateInvariantError
-from mtg_commander_sim.record import (
+from quorune.model import CombatState
+from quorune.errors import StateInvariantError
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
@@ -283,7 +283,7 @@ class BlockKeywordTriggerIntegrationTests(unittest.TestCase):
 
         with patch(
             (
-                "mtg_commander_sim.block_transition_engine_adapter."
+                "quorune.block_transition_engine_adapter."
                 "enqueue_block_transition_triggers"
             ),
             side_effect=StateInvariantError("malformed transition"),

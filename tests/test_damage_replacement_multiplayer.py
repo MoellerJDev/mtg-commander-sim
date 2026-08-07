@@ -8,8 +8,8 @@ import unittest
 
 from common import ROOT, keep_all, make_session
 from scripts.build_test_database import build_fixture_database
-from mtg_commander_sim.carddb import CardDatabase
-from mtg_commander_sim.damage import (
+from quorune.carddb import CardDatabase
+from quorune.damage import (
     commit_prepared_damage_batch,
     damage_proposal,
     DamageEvent,
@@ -17,27 +17,27 @@ from mtg_commander_sim.damage import (
     DamageRecipientSnapshot,
     prepare_damage_batch,
 )
-from mtg_commander_sim.deck import DeckLoader
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import CardInstance, StackItem
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.deck import DeckLoader
+from quorune.engine import GameRuleError
+from quorune.model import CardInstance, StackItem
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.replacement_effects import (
+from quorune.replacement_effects import (
     ReplacementChoiceRequired,
     resolve_replacements,
 )
-from mtg_commander_sim.semantic_runtime import (
+from quorune.semantic_runtime import (
     DamageQuantityReplacementHandler,
     DamageReplacementSourceContext,
     FixedDamagePreventionHandler,
     SemanticNodeError,
     default_damage_replacement_registry,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 from damage_replacement_support import (

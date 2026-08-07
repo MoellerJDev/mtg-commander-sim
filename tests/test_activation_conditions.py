@@ -3,9 +3,9 @@ from __future__ import annotations
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.abilities import ActivatedAbility
-from mtg_commander_sim.characteristic_evaluation import type_parts
-from mtg_commander_sim.rules.activation import activation_condition_status
+from quorune.abilities import ActivatedAbility
+from quorune.characteristic_evaluation import type_parts
+from quorune.rules.activation import activation_condition_status
 
 
 class _Host:

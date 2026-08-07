@@ -6,15 +6,15 @@ import unittest
 from pathlib import Path
 
 from common import keep_all, load_assets, make_session
-from mtg_commander_sim.engine import GameRuleError
-from mtg_commander_sim.model import GameConfig, GameState
-from mtg_commander_sim.projection import StateProjector
-from mtg_commander_sim.record import (
+from quorune.engine import GameRuleError
+from quorune.model import GameConfig, GameState
+from quorune.projection import StateProjector
+from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
     replay_record,
 )
-from mtg_commander_sim.session import CommanderSession
+from quorune.session import CommanderSession
 
 
 class CommandZoneRuleTests(unittest.TestCase):

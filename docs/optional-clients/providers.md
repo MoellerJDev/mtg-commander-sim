@@ -2,8 +2,8 @@
 title: "Optional pilot providers"
 status: "current"
 authoritative_source: "pilot interfaces, response schemas, fixed-seat tools, and provider tests"
-verified: "2026-08-06"
-audience: "pilot-provider implementers and arena operators"
+verified: "2026-08-07"
+audience: "pilot-provider implementers and Pilot Harness operators"
 maintenance: "hand-maintained"
 concern: "optional-provider-contract"
 ---
@@ -36,7 +36,7 @@ The built-in adapters are:
 - `ManualJsonPilot` for one validated file/stdin response;
 - `SubprocessJsonPilot` for one JSON request on stdin and one JSON response on
   stdout; and
-- the optional Codex adapter described in [Codex arena](codex-arena.md).
+- the optional Codex adapter described in the [Quorune Pilot Harness](codex-arena.md).
 
 Timeout, nonzero exit, empty output, invalid JSON, schema failure, or identity
 drift is visible and fail-closed. Strict authoritative play does not invoke a

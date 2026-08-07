@@ -3,7 +3,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 import unittest
 
-from mtg_commander_sim.trigger_targeting import (
+from quorune.trigger_targeting import (
     begin_pending_trigger_target_selection,
 )
 

@@ -3,9 +3,9 @@ from __future__ import annotations
 import unittest
 
 from common import advance_fixture_turn, keep_all, load_assets, make_session
-from mtg_commander_sim.model import StackItem, TurnEntry
-from mtg_commander_sim.preflight import card_semantic_status
-from mtg_commander_sim.projection import ProjectionCursor, StateProjector
+from quorune.model import StackItem, TurnEntry
+from quorune.preflight import card_semantic_status
+from quorune.projection import ProjectionCursor, StateProjector
 
 
 class ExactMishraClosureTests(unittest.TestCase):

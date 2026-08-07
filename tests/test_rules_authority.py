@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 
 from common import load_assets, make_session
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
+from quorune.record import checkpoint_envelope, replay_record
 
 
 class RulesAuthorityRegressionTests(unittest.TestCase):

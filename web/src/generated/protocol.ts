@@ -1,7 +1,7 @@
 // Application-facing refinements over the generated JSON Schema bindings.
 
-import type { MTGCommanderSimClientCommandEnvelopeV30 } from "./command-envelope";
-import type { MTGCommanderSimProjectedDecisionPacketV30 } from "./decision-packet";
+import type { QuoruneClientCommandEnvelopeV30 } from "./command-envelope";
+import type { QuoruneProjectedDecisionPacketV30 } from "./decision-packet";
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
@@ -40,7 +40,7 @@ export interface PatchOperation {
 }
 
 export interface DecisionPacket
-  extends MTGCommanderSimProjectedDecisionPacketV30 {
+  extends QuoruneProjectedDecisionPacketV30 {
   state?: Record<string, JsonValue>;
   patch?: PatchOperation[];
   decision: Decision | null;
@@ -49,7 +49,7 @@ export interface DecisionPacket
 }
 
 export interface CommandEnvelope
-  extends MTGCommanderSimClientCommandEnvelopeV30 {
+  extends QuoruneClientCommandEnvelopeV30 {
   choices: Record<string, JsonValue>;
 }
 

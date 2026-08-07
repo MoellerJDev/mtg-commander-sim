@@ -10,7 +10,7 @@ import uuid
 from unittest.mock import patch
 
 from common import keep_all, load_assets, make_session, set_fixture_turn
-from mtg_commander_sim.aura import (
+from quorune.aura import (
     AuraControllerRelation,
     AuraEntryChoiceRequired,
     AuraEntryContinuation,
@@ -19,24 +19,24 @@ from mtg_commander_sim.aura import (
     parse_simple_enchant_line,
     simple_enchant_spec_from_oracle,
 )
-from mtg_commander_sim.ability_fragments import (
+from quorune.ability_fragments import (
     ProtectionQualityKind,
     ProtectionSpec,
     ability_fragment_to_dict,
 )
-from mtg_commander_sim.carddb import CardRecord
-from mtg_commander_sim.compiler.program_generation import (
+from quorune.carddb import CardRecord
+from quorune.compiler.program_generation import (
     register_generated_programs,
 )
-from mtg_commander_sim.model import CardInstance
-from mtg_commander_sim.oracle_ir import compile_oracle_card
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.rules.capabilities import (
+from quorune.model import CardInstance
+from quorune.oracle_ir import compile_oracle_card
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticProgram
-from mtg_commander_sim.errors import GameRuleError
-from mtg_commander_sim.model import StackItem
+from quorune.semantics import SemanticProgram
+from quorune.errors import GameRuleError
+from quorune.model import StackItem
 
 
 def aura_record(oracle_id: str, *, restriction: str = "creature") -> CardRecord:
@@ -479,7 +479,7 @@ class AuraTargetingEntryEngineTests(unittest.TestCase):
         engine = session.engine
         engine.state.players["A"].mana_pool["U"] = 1
         with records, patch(
-            "mtg_commander_sim.aura.grammar.simple_enchant_spec_from_oracle",
+            "quorune.aura.grammar.simple_enchant_spec_from_oracle",
             side_effect=AssertionError("runtime Oracle compiler invoked"),
         ):
             hints = engine._priority_action_hints("A")

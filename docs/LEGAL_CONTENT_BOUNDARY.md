@@ -2,7 +2,7 @@
 title: "Legal and third-party content boundary"
 status: "current"
 authoritative_source: "repository policy and runtime content adapter"
-verified: "2026-08-06"
+verified: "2026-08-07"
 audience: "maintainers, deployers, and contributors"
 maintenance: "hand-maintained"
 ---
@@ -12,7 +12,7 @@ maintenance: "hand-maintained"
 This document records product-engineering constraints. It is not legal advice
 and does not authorize a public or commercial deployment.
 
-Commander Arena is an independent project and is not endorsed by or affiliated
+Quorune is an independent, unofficial project and is not endorsed by or affiliated
 with Wizards of the Coast. Magic: The Gathering card names, rules text, card
 imagery, frames, symbols, and related game content belong to their respective
 rights holders. Scryfall supplies the card-data and image references used by

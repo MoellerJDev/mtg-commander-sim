@@ -1,7 +1,7 @@
 ---
 title: "Damage prevention"
 status: "current"
-authoritative_source: "mtg_commander_sim/damage_prevention.py, mtg_commander_sim/damage_prevention_creation.py, mtg_commander_sim/damage_prevention_aftermath.py, and mtg_commander_sim/semantic_runtime/damage_replacements.py"
+authoritative_source: "quorune/damage_prevention.py, quorune/damage_prevention_creation.py, quorune/damage_prevention_aftermath.py, and quorune/semantic_runtime/damage_replacements.py"
 verified: "2026-08-06"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"

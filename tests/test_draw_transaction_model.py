@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import unittest
 
-from mtg_commander_sim.drawing import (
+from quorune.drawing import (
     DrawError,
     DrawEventRequest,
     DrawInstructionRequest,
@@ -14,7 +14,7 @@ from mtg_commander_sim.drawing import (
     prepare_ordinary_draw,
     validate_prepared_draw,
 )
-from mtg_commander_sim.replacement import (
+from quorune.replacement import (
     DredgeDraw,
     MultiplyAmount,
     PreventDraw,
@@ -23,7 +23,7 @@ from mtg_commander_sim.replacement import (
     operation_from_dict,
     operation_to_dict,
 )
-from mtg_commander_sim.replacement.operations import ReplacementOperationError
+from quorune.replacement.operations import ReplacementOperationError
 
 
 ORDER = ("A", "B", "C", "D")

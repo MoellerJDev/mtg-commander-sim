@@ -1,7 +1,7 @@
 ---
 title: "Oracle compiler architecture"
 status: "current"
-authoritative_source: "mtg_commander_sim/oracle_ir.py, mtg_commander_sim/compiler, and mtg_commander_sim/card_programs"
+authoritative_source: "quorune/oracle_ir.py, quorune/compiler, and quorune/card_programs"
 verified: "2026-08-07"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"

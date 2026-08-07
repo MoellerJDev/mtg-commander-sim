@@ -1,0 +1,4 @@
+interface:
+  display_name: "Quorune Pilot Harness"
+  short_description: "Coordinate four persistent seat-isolated pilots"
+  default_prompt: "Use $quorune-pilot-harness to run this match with four seat-isolated persistent pilots."

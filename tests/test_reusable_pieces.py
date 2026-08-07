@@ -7,7 +7,7 @@ import unittest
 
 from jsonschema import Draft202012Validator
 
-from mtg_commander_sim.reusable_pieces import (
+from quorune.reusable_pieces import (
     build_reusable_piece_artifacts,
     card_piece_relations,
     execute_reusable_piece_operation,

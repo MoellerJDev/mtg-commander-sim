@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import unittest
 
-from mtg_commander_sim.choice_forms import (
+from quorune.choice_forms import (
     build_action_form,
     delegated_choice_fields,
 )

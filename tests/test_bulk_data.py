@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from mtg_commander_sim.bulk import (
+from quorune.bulk import (
     ScryfallBulkDataError,
     ScryfallBulkItem,
     _download_bulk_item,
@@ -76,7 +76,7 @@ class ScryfallBulkDataTests(unittest.TestCase):
         self.assertIn("rulings", items)
         self.assertEqual("https://api.scryfall.com/bulk-data", calls[0][0])
         self.assertEqual(7, calls[0][1])
-        self.assertIn("mtg-commander-sim", calls[0][2])
+        self.assertIn("quorune", calls[0][2])
 
     def test_invalid_manifest_fails_closed(self):
         with self.assertRaises(ScryfallBulkDataError):

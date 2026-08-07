@@ -14,7 +14,7 @@ from .util import stable_json
 from .version import __version__
 
 SCRYFALL_BULK_DATA_URL = "https://api.scryfall.com/bulk-data"
-SCRYFALL_USER_AGENT = f"mtg-commander-sim/{__version__} (local bulk-data importer)"
+SCRYFALL_USER_AGENT = f"quorune/{__version__} (local bulk-data importer)"
 ALLOWED_DOWNLOAD_HOSTS = frozenset({"data.scryfall.io"})
 
 

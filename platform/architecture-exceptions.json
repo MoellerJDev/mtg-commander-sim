@@ -259,7 +259,7 @@
       "exception_id": "ARCH-EXC-0013",
       "adr": "docs/adr/0031-typed-fixed-damage-sets.md",
       "artifact": "platform/architecture-guard-baseline.json",
-      "allowance_fingerprint": "eb5d66f550ddd97f1f7519e2234f5b97bfbbc6c0203ba979662e6668eb76c3a1",
+      "allowance_fingerprint": "21be8087788fd140fa8f95d61debf397944f181a648ab5b509980cd2af3c7a41",
       "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after typed fixed affected-set damage extraction.",
       "rationale": "The immutable fixed affected-set owner adds one closed universal semantic operation while keeping CommanderEngine, direct GameState writes, oversized symbols, Oracle-ID literals, and printed-name specificity flat. It snapshots effective public recipients through a narrow query port and commits every recipient through one existing canonical damage batch.",
       "owner": "rules architecture maintainers",

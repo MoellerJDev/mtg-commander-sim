@@ -5,23 +5,23 @@ import tempfile
 import unittest
 
 from damage_replacement_support import DamageReplacementPipelineBase
-from mtg_commander_sim.damage import (
+from quorune.damage import (
     commit_prepared_damage_batch,
     prepare_damage_batch,
 )
-from mtg_commander_sim.damage_prevention import (
+from quorune.damage_prevention import (
     ChosenDamageSource,
     DamageModifierDuration,
     DamageRedirectionEffect,
     DamageSubject,
 )
-from mtg_commander_sim.model import StackItem
-from mtg_commander_sim.oracle_ir import register_generated_programs
-from mtg_commander_sim.record import checkpoint_envelope, replay_record
-from mtg_commander_sim.rules.capabilities import (
+from quorune.model import StackItem
+from quorune.oracle_ir import register_generated_programs
+from quorune.record import checkpoint_envelope, replay_record
+from quorune.rules.capabilities import (
     load_default_capability_registry,
 )
-from mtg_commander_sim.semantics import SemanticProgram
+from quorune.semantics import SemanticProgram
 
 
 class DamageRedirectionTests(DamageReplacementPipelineBase):
