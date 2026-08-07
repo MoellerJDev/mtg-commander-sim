@@ -127,7 +127,12 @@ deterministic impact plan without executing the broad gate:
 Push the coherent exact head and let public pull-request CI run the broad
 Python, generated, package, platform and headless-browser checks. Use that CI
 window for independent Slot B work instead of repeating the same suite
-locally. A local behavioral test or broader gate is exceptional: use it only
+locally. A successful `PR / Certification` publishes the ephemeral exact-head
+receipt; Main smoke validates the squash-merged source tree against that
+receipt. Never put PR numbers, branch names, exact heads, merge SHAs or workflow
+run IDs into `platform/readiness-source.json`, and never create a follow-up
+commit solely to reconcile squash-merge identity. A local behavioral test or
+broader gate is exceptional: use it only
 when the user asks or when diagnosing a specific CI-only or release-critical
 failure that cannot be isolated from the Actions evidence. Run only the
 directly relevant test in that case. Browser automation remains headless. The

@@ -46,3 +46,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0029 — typed permanent-exile transaction](0029-typed-permanent-exile.md)
 - [ADR 0030 — typed direct stack-counter ownership](0030-typed-stack-counter.md)
 - [ADR 0031 — typed fixed affected-set damage](0031-typed-fixed-damage-sets.md)
+- [ADR 0032 — durable certification receipts](0032-durable-certification-receipts.md)
