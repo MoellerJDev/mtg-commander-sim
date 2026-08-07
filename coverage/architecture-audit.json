@@ -3506,7 +3506,7 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 107384,
+      "logical_lines": 107385,
       "methods": {
         "dunder": 262,
         "private": 654,
@@ -4085,8 +4085,8 @@
           "file": "mtg_commander_sim/compiler/activated_mana_nodes.py",
           "functions_and_methods": 6,
           "language": "python",
-          "logical_lines": 418,
-          "physical_lines": 436
+          "logical_lines": 419,
+          "physical_lines": 437
         },
         {
           "file": "mtg_commander_sim/semantic_choices/scalar.py",
@@ -5932,7 +5932,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 117272,
+      "physical_lines": 117273,
       "python_file_count": 270,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -9523,13 +9523,13 @@
     "card_program_v2_present": true,
     "commander_legal_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.064162,
-      "material_residuals": 47968,
+      "exact_fraction": 0.064384,
+      "material_residuals": 47957,
       "residual_kinds": {
         "cost": 1779,
         "declaration_cost": 10,
         "declaration_restriction": 153,
-        "dependency_contract": 5436,
+        "dependency_contract": 5425,
         "effect": 6461,
         "mana_ability": 671,
         "replacement_effect": 1523,
@@ -9550,8 +9550,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 2029,
-        "partial": 13206,
+        "exact": 2036,
+        "partial": 13199,
         "unresolved": 16388
       },
       "template_count": 188,
@@ -9565,13 +9565,13 @@
     "current_ir": "OracleCardIR lowered to canonical CardProgram V2 with a derived SemanticProgram compatibility index",
     "full_oracle": {
       "current_snapshot_complete": false,
-      "exact_fraction": 0.128846,
-      "material_residuals": 55559,
+      "exact_fraction": 0.129054,
+      "material_residuals": 55547,
       "residual_kinds": {
         "cost": 2015,
         "declaration_cost": 11,
         "declaration_restriction": 170,
-        "dependency_contract": 5833,
+        "dependency_contract": 5821,
         "effect": 7168,
         "mana_ability": 766,
         "replacement_effect": 1758,
@@ -9592,8 +9592,8 @@
         "scryfall_rulings_updated_at": "2026-08-04T09:00:38.847+00:00"
       },
       "status_counts": {
-        "exact": 4966,
-        "partial": 14330,
+        "exact": 4974,
+        "partial": 14322,
         "unresolved": 19246
       },
       "template_count": 188,
@@ -10369,7 +10369,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "140baf97a26ecaba7c520b44db8d284568169221ed1dfd072fbb312e66ff4fe0"
+          "verified": "7dc151cfeb7a69e5cd7ae5cdbff85b65a04eee088e021929247ca18251c12058"
         },
         "metadata_complete": true,
         "missing_metadata": [],

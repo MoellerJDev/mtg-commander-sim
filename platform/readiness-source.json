@@ -880,11 +880,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "62dfd0ba6da79e2ed60c3bb713a6725f87e01dd5",
+    "feature_head_sha": "db43690509fa17b4a2bc1071a6559e04a1beb8bc",
     "feature_head_classification": "active_candidate",
     "certified_head_sha": "7fc841330f8aa2b3cc845502c187183fc91ae35e",
     "certified_head_classification": "current_main_tree_equivalent",
-    "generation_timestamp": "2026-08-07T07:45:00Z"
+    "generation_timestamp": "2026-08-07T07:48:44Z"
   },
   "snapshots": {
     "comprehensive_rules": {
