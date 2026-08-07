@@ -210,6 +210,28 @@
         "tests.test_return_to_hand_rules.ReturnToOwnerHandRuleTests.test_compiled_return_is_multiplayer_private_and_replays",
         "tests.test_targeted_return_to_hand_effect_clauses.TargetedReturnToHandCompilerTests.test_unsupported_return_variants_remain_material_residuals"
       ]
+    },
+    {
+      "exception_id": "ARCH-EXC-0011",
+      "adr": "docs/adr/0029-typed-permanent-exile.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "eccfcd08044a84e72d3b7643f666d501f2b9a83a6b4219c48b457602819686c0",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after typed permanent-exile extraction.",
+      "rationale": "The permanent-exile transaction adds one closed universal operation while keeping CommanderEngine and direct writes flat, reducing printed-name specificity, and preventing the shared semantic executor from crossing its function-size threshold.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing serialized residual allowances plus the reviewed exile_permanent operation described by ADR 0029; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; retain exile_permanent only while it remains the closed identity-pinned battlefield transition defined by ADR 0029.",
+      "target_milestone": "typed zone-transition, public projection, and shared direct-target exile closure",
+      "replay_implications": "Game Record v3 remains compatible; identity-pinned exile plans, replacement-aware results, and canonical public journals preserve exact command replay.",
+      "privacy_implications": "The represented transition starts and ends in public zones and exposes no hidden hand, library, face-down exile, or cross-seat choice information.",
+      "security_implications": "The typed owner accepts closed requests, revalidates live identity before commit, and grants no callback, arbitrary mutation, transport access, or card-identity dispatch.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
+        "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_exile_phased_and_stale_permanents_fail_before_mutation",
+        "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_compiled_exile_is_multiplayer_public_and_replays",
+        "tests.test_targeted_exile_effect_clauses.TargetedExileCompilerTests.test_unsupported_exile_variants_remain_material_residuals"
+      ]
     }
   ]
 }
