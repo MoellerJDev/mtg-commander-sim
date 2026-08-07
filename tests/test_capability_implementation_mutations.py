@@ -19,6 +19,7 @@ from mtg_commander_sim import defender as defender_module
 from mtg_commander_sim import menace as menace_module
 from mtg_commander_sim import landwalk as landwalk_module
 from mtg_commander_sim import damage_results as damage_results_module
+from mtg_commander_sim import destruction as destruction_module
 from mtg_commander_sim import replacement_effects
 from mtg_commander_sim import tap_state
 from mtg_commander_sim import haste as haste_module
@@ -1289,6 +1290,61 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_aggregate_untap()
+
+    def test_destruction_disposition_mutants_are_killed(self):
+        def assert_dispositions() -> None:
+            self.assertEqual(
+                destruction_module.DestructionDisposition.INDESTRUCTIBLE,
+                destruction_module._destruction_disposition(
+                    cause=destruction_module.DestructionCause.EFFECT,
+                    indestructible=True,
+                    shield_counters=1,
+                ),
+            )
+            self.assertEqual(
+                destruction_module.DestructionDisposition.SHIELD_COUNTER,
+                destruction_module._destruction_disposition(
+                    cause=destruction_module.DestructionCause.EFFECT,
+                    indestructible=False,
+                    shield_counters=1,
+                ),
+            )
+            self.assertEqual(
+                destruction_module.DestructionDisposition.DESTROY,
+                destruction_module._destruction_disposition(
+                    cause=(
+                        destruction_module.DestructionCause.STATE_BASED_ACTION
+                    ),
+                    indestructible=False,
+                    shield_counters=1,
+                ),
+            )
+
+        assert_dispositions()
+        with patch.object(
+            destruction_module,
+            "_destruction_disposition",
+            lambda **_kwargs: (
+                destruction_module.DestructionDisposition.DESTROY
+            ),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_dispositions()
+
+        def shield_every_destruction(*, cause, indestructible, shield_counters):
+            if indestructible:
+                return destruction_module.DestructionDisposition.INDESTRUCTIBLE
+            if shield_counters:
+                return destruction_module.DestructionDisposition.SHIELD_COUNTER
+            return destruction_module.DestructionDisposition.DESTROY
+
+        with patch.object(
+            destruction_module,
+            "_destruction_disposition",
+            shield_every_destruction,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_dispositions()
 
     def test_combat_vigilance_mutant_is_killed(self):
         session = make_session(

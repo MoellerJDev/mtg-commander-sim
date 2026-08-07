@@ -9,6 +9,7 @@ from ..damage import (
     source_snapshot,
 )
 from ..damage_source import DamageSourceSnapshot
+from ..destruction import destroy_permanent_refs
 from ..errors import GameRuleError
 from ..effect_contracts import effect_family_contract
 from ..semantic_runtime.intents import PlaceCountersIntent
@@ -403,13 +404,13 @@ def _apply_counter_or_destroy_blue(
     record = host.card_record(card)
     if not record or "U" not in record.colors:
         return None
-    host.move_card(
-        card.object_id,
-        "graveyard",
+    result = destroy_permanent_refs(
+        host,
+        (card.ref,),
+        actor=actor,
         reason="Red/Pyroblast semantic",
-        semantic_events=True,
     )
-    return card.ref
+    return card.ref if result.destroyed_object_ids else None
 
 
 
@@ -662,8 +663,8 @@ def _apply_destroy_selected_and_reward_source(
         actor,
         str(effect.get("source") or ""),
     )
-    changes: list[tuple[str, str]] = []
-    destroyed_controlled = False
+    candidates: list[str] = []
+    controlled_candidates: set[str] = set()
     for raw_ref in effect.get("cards") or []:
         if raw_ref is None:
             continue
@@ -683,28 +684,21 @@ def _apply_destroy_selected_and_reward_source(
                 or ""
             )
         )
-        keywords = {
-            str(value).casefold()
-            for value in host._effective_card_data(creature).get(
-                "keywords", []
-            )
-        }
-        if (
-            "creature" not in types
-            or "indestructible" in keywords
-        ):
+        if "creature" not in types:
             continue
-        destroyed_controlled = (
-            destroyed_controlled
-            or creature.controller == actor
-        )
-        changes.append((creature.object_id, "graveyard"))
-    if changes:
-        host._move_cards_simultaneously(
-            changes,
-            reason=reason,
-            log=True,
-        )
+        candidates.append(creature.ref)
+        if creature.controller == actor:
+            controlled_candidates.add(creature.object_id)
+    result = destroy_permanent_refs(
+        host,
+        candidates,
+        actor=actor,
+        reason=reason,
+    )
+    destroyed_controlled = any(
+        object_id in controlled_candidates
+        for object_id in result.destroyed_object_ids
+    )
     if (
         destroyed_controlled
         and source.zone == "battlefield"
@@ -724,7 +718,7 @@ def _apply_destroy_selected_and_reward_source(
         )
     return [
         host.state.cards[object_id].ref
-        for object_id, _ in changes
+        for object_id in result.destroyed_object_ids
     ]
 
 

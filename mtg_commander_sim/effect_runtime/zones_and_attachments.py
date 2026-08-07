@@ -11,6 +11,7 @@ from ..continuous_effect_state import (
     matching_battlefield_objects,
     resolution_effect_source,
 )
+from ..destruction import destroy_permanent_refs
 from ..errors import GameRuleError
 from ..effect_contracts import (
     effect_family_contract,
@@ -46,21 +47,16 @@ def _apply_bounce_or_destroy_or_discard_or_exile_or_move_or_sacrifice(
         zones=implicit_zones.get(op),
     )
     if op == "destroy":
-        keywords = {
-            str(value).casefold()
-            for value in host._effective_card_data(card).get(
-                "keywords", []
-            )
-        }
-        if "indestructible" in keywords:
-            host._log(
-                actor,
-                "effect.destroy.prevented",
-                f"{card.ref} was not destroyed because it is indestructible.",
-                {"object": card.ref, "reason": reason},
-                importance=1,
-            )
-            return None
+        result = destroy_permanent_refs(
+            host,
+            (card.ref,),
+            actor=actor,
+            reason=reason,
+            replacement_selections=tuple(
+                effect.get("_replacement_selections") or ()
+            ),
+        )
+        return card if result.destroyed_object_ids else None
     destination = {
         "sacrifice": "graveyard",
         "destroy": "graveyard",
@@ -602,7 +598,7 @@ def _apply_destroy_all_or_exile_all(
             as_target=False,
         )
     ]
-    changes: list[tuple[str, str]] = []
+    cards: list[CardInstance] = []
     for ref in refs:
         try:
             card = host._resolve_object(
@@ -610,26 +606,20 @@ def _apply_destroy_all_or_exile_all(
             )
         except GameRuleError:
             continue
-        if op == "destroy_all":
-            keywords = {
-                str(value).casefold()
-                for value in host._effective_card_data(card).get(
-                    "keywords", []
-                )
-            }
-            if "indestructible" in keywords:
-                continue
-        changes.append(
-            (
-                card.object_id,
-                "graveyard" if op == "destroy_all" else "exile",
-            )
+        cards.append(card)
+    if op == "destroy_all":
+        result = destroy_permanent_refs(
+            host,
+            tuple(card.ref for card in cards),
+            actor=actor,
+            reason=reason,
         )
-    host._move_cards_simultaneously(
-        changes,
-        reason=reason,
-        log=True,
-    )
+        return [
+            host.state.cards[object_id].ref
+            for object_id in result.destroyed_object_ids
+        ]
+    changes = [(card.object_id, "exile") for card in cards]
+    host._move_cards_simultaneously(changes, reason=reason, log=True)
     return [host.state.cards[object_id].ref for object_id, _ in changes]
 
 
@@ -701,7 +691,7 @@ def _apply_destroy_selected(
     reason: str,
 ) -> Any:
     op = operation
-    changes: list[tuple[str, str]] = []
+    refs: list[str] = []
     for raw_ref in effect.get("cards") or []:
         if raw_ref is None:
             continue
@@ -713,21 +703,17 @@ def _apply_destroy_selected(
             )
         except GameRuleError:
             continue
-        keywords = {
-            str(value).casefold()
-            for value in host._effective_card_data(card).get(
-                "keywords", []
-            )
-        }
-        if "indestructible" in keywords:
-            continue
-        changes.append((card.object_id, "graveyard"))
-    host._move_cards_simultaneously(
-        changes,
+        refs.append(card.ref)
+    result = destroy_permanent_refs(
+        host,
+        refs,
+        actor=actor,
         reason=reason,
-        log=True,
     )
-    return [host.state.cards[object_id].ref for object_id, _ in changes]
+    return [
+        host.state.cards[object_id].ref
+        for object_id in result.destroyed_object_ids
+    ]
 
 
 

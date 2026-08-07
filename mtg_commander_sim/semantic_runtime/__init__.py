@@ -140,6 +140,10 @@ from .executor import (
     prepare_draw_resolution,
 )
 from .effect_handlers import DOMAIN_EFFECT_HANDLERS, DomainEffectHandler
+from .destruction_handlers import (
+    DESTRUCTION_HANDLERS,
+    DestroyPermanentHandler,
+)
 from .generic import GENERIC_HANDLERS
 from .handlers import SemanticNodeHandler
 from .intents import (
@@ -154,6 +158,7 @@ from .intents import (
     CreateTokenIntent,
     DrawCardsIntent,
     DomainEffectIntent,
+    DestroyPermanentIntent,
     IntentPlan,
     EliminatePlayersIntent,
     LifeChangeIntent,
@@ -219,7 +224,12 @@ from .zone_replacements import (
 @lru_cache(maxsize=1)
 def default_semantic_handler_registry() -> SemanticHandlerRegistry:
     registry = SemanticHandlerRegistry(
-        (*GENERIC_HANDLERS, *TAP_STATE_HANDLERS, *DOMAIN_EFFECT_HANDLERS)
+        (
+            *GENERIC_HANDLERS,
+            *TAP_STATE_HANDLERS,
+            *DESTRUCTION_HANDLERS,
+            *DOMAIN_EFFECT_HANDLERS,
+        )
     )
     capabilities = load_default_capability_registry()
     missing = sorted(
@@ -263,6 +273,8 @@ __all__ = [
     "DrawCardsIntent",
     "DomainEffectHandler",
     "DomainEffectIntent",
+    "DestroyPermanentHandler",
+    "DestroyPermanentIntent",
     "DrawEachPlayerNode",
     "DrawNode",
     "DrawResolutionBatch",

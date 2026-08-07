@@ -29,6 +29,7 @@
       "test_damage_replacement_integration",
       "test_damage_replacement_model",
       "test_damage_replacement_multiplayer",
+      "test_destruction_rules",
       "test_draw_continuation",
       "test_draw_coordinator_iteration",
       "test_draw_replacement_components",
@@ -165,6 +166,7 @@
       "test_oracle_ir",
       "test_preflight_v080",
       "test_rule_capabilities",
+      "test_targeted_destruction_effect_clauses",
       "test_targeted_tap_state_effect_clauses"
     ],
     "server-replay-privacy": [

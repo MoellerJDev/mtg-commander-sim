@@ -223,6 +223,11 @@ MUTATION_TESTS = {
         "CapabilityImplementationMutationTests."
         "test_damage_result_replacement_component_mutants_are_killed"
     ),
+    "permanent.destroy.effect": (
+        "tests.test_capability_implementation_mutations."
+        "CapabilityImplementationMutationTests."
+        "test_destruction_disposition_mutants_are_killed"
+    ),
     "permanent.tap.effect": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

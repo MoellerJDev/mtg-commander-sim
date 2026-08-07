@@ -149,7 +149,7 @@ class DeathtouchStateBasedActionTests(unittest.TestCase):
         with self.assertRaisesRegex(DamageResultError, "must be a collection"):
             consume_deathtouch_damage_checks(host, "creature")
 
-    def test_check_destroys_only_destructible_positive_toughness_creature(self):
+    def test_check_proposes_destruction_before_typed_prohibitions(self):
         batch = evaluate_permanent_state_based_actions(
             (
                 PermanentSnapshot(
@@ -176,7 +176,7 @@ class DeathtouchStateBasedActionTests(unittest.TestCase):
             )
         )
 
-        self.assertEqual(("ordinary",), batch.destroy)
+        self.assertEqual(("indestructible", "ordinary"), batch.destroy)
         self.assertEqual(("zero-toughness",), batch.put_in_graveyard)
         self.assertEqual(
             ("indestructible", "ordinary", "zero-toughness"),

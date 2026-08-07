@@ -190,7 +190,7 @@ def evaluate_permanent_state_based_actions(
             elif (
                 permanent.marked_damage >= permanent.toughness
                 or permanent.deathtouch_damage
-            ) and not permanent.indestructible:
+            ):
                 destroy.add(permanent.object_id)
 
         if (

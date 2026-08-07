@@ -284,6 +284,10 @@ from .state_based_actions import (
     evaluate_state_based_actions,
     player_loss_seats,
 )
+from .state_based_execution import (
+    commit_state_based_zone_changes,
+    prepare_state_based_execution,
+)
 from .targets import (
     TargetGroup,
     TargetPlan,
@@ -12509,19 +12513,11 @@ class CommanderEngine(
                 permanents=self._permanent_sba_snapshots(),
                 objects=self._object_sba_snapshots(),
             )
+            execution = prepare_state_based_execution(self, sba_batch)
             consume_deathtouch_damage_checks(
                 self, sba_batch.deathtouch_checks
             )
-            ordinary_move_to_grave = unique_preserving_order(
-                (*sba_batch.put_in_graveyard, *sba_batch.destroy)
-            )
-            move_to_grave = unique_preserving_order(
-                [
-                    *ordinary_move_to_grave,
-                    *sba_batch.world_rule,
-                ]
-            )
-            if sba_batch.changed:
+            if execution.state_changed:
                 world_rule_rows = [
                     {
                         "object": self.state.cards[object_id].ref,
@@ -12539,17 +12535,7 @@ class CommanderEngine(
                     and card.world_supertype_timestamp is not None
                     and card.object_id not in world_rule_ids
                 ]
-                simultaneous = [
-                    (object_id, "graveyard")
-                    for object_id in move_to_grave
-                    if self.state.cards[object_id].zone == "battlefield"
-                ]
-                if simultaneous:
-                    self._move_cards_simultaneously(
-                        simultaneous,
-                        reason="state-based action",
-                        log=False,
-                    )
+                commit_state_based_zone_changes(self, execution)
                 detached: list[str] = []
                 for object_id in sba_batch.detach:
                     card = self.state.cards[object_id]
@@ -12687,19 +12673,21 @@ class CommanderEngine(
                         }
                     )
                     ceased_object_ids.append(card.object_id)
-                if ordinary_move_to_grave:
+                if execution.ordinary_move_to_grave:
                     self._log(
                         None,
                         "state.creatures_died",
                         (
                             "State-based actions moved "
-                            f"{len(move_to_grave)} permanent(s) to "
+                            f"{len(execution.move_to_grave)} permanent(s) to "
                             "graveyards."
                         ),
                         {
                             "objects": [
                                 self.state.cards[object_id].ref
-                                for object_id in ordinary_move_to_grave
+                                for object_id in (
+                                    execution.ordinary_move_to_grave
+                                )
                             ],
                             "put_in_graveyard": [
                                 self.state.cards[object_id].ref
@@ -12709,11 +12697,13 @@ class CommanderEngine(
                             ],
                             "destroyed": [
                                 self.state.cards[object_id].ref
-                                for object_id in sba_batch.destroy
+                                for object_id in (
+                                    execution.destruction.destroyed_object_ids
+                                )
                             ],
                         },
                         importance=2,
-                        changed_objects=ordinary_move_to_grave,
+                        changed_objects=execution.ordinary_move_to_grave,
                     )
                 if world_rule_rows:
                     self._log(

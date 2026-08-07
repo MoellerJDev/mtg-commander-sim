@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "contract_version": 1,
+  "mechanic_id": "destroy",
+  "official_name": "Destroy",
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "rule_references": [
+    "122.1c",
+    "701.8",
+    "701.8a",
+    "701.8b",
+    "701.8c",
+    "702.12b",
+    "704.5g",
+    "704.5h"
+  ],
+  "glossary_references": [
+    "destroy",
+    "indestructible",
+    "shield-counter"
+  ],
+  "dependencies": [
+    "permanents",
+    "zone-changes",
+    "state-based-actions",
+    "replacement-effects",
+    "continuous-effects",
+    "replay"
+  ],
+  "coverage_status": "tested",
+  "trust_level": "untrusted",
+  "behavior": {
+    "zones": ["battlefield", "graveyard"],
+    "objects": ["phased-in permanent with stable physical and logical identity"],
+    "events": [
+      "effect destruction",
+      "lethal-damage state-based destruction",
+      "deathtouch state-based destruction",
+      "shield-counter replacement",
+      "Indestructible prohibition"
+    ],
+    "state_reads": [
+      "permanent physical and logical identity",
+      "current controller",
+      "represented effective Indestructible ability",
+      "shield-counter quantity",
+      "destruction cause"
+    ],
+    "state_writes": [
+      "canonical battlefield-to-graveyard zone change",
+      "one shield-counter removal through the canonical counter owner",
+      "public typed destruction result journal"
+    ],
+    "costs": [],
+    "timing": [
+      "one-shot destruction executes during resolution",
+      "lethal-damage and deathtouch destruction execute during stabilization"
+    ],
+    "targets": [
+      "the bounded compiler accepts one artifact, creature, enchantment, land, permanent, artifact or enchantment, or creature or planeswalker target",
+      "resolution-time target legality is revalidated before preparation"
+    ],
+    "choices": [
+      "represented destination replacement choices remain owned by the canonical zone-change transaction"
+    ],
+    "hidden_information": [
+      "the bounded family targets only public phased-in battlefield permanents"
+    ],
+    "apnap": [
+      "simultaneous multiplayer destruction uses deterministic physical-object ordering before the canonical zone batch"
+    ],
+    "layers": [
+      "represented effective keywords determine Indestructible at preparation and commit",
+      "complete ability-changing and dependency closure remains blocked"
+    ],
+    "replacement_effects": [
+      "one shield counter replaces destruction caused by an effect",
+      "shield counters do not replace lethal-damage or deathtouch state-based destruction",
+      "destination replacements remain a separate canonical zone-change boundary",
+      "regeneration and competing destruction replacements remain unsupported"
+    ],
+    "copy": [
+      "copiable characteristics may supply Indestructible but ordinary copies do not share physical identity"
+    ],
+    "control_change": [
+      "a prepared transaction fails stale if the logged controller changes before commit"
+    ],
+    "zone_change": [
+      "a permanent is destroyed only by moving it from the battlefield to its owner's graveyard",
+      "a changed logical identity fails before mutation"
+    ],
+    "source_leaves": [
+      "one-shot destruction uses the resolved instruction and does not require its source to remain unless another rule says otherwise"
+    ]
+  },
+  "variants": [
+    "ordinary effect destruction",
+    "effect destruction replaced by one shield counter",
+    "effect destruction prohibited by Indestructible",
+    "lethal-damage destruction",
+    "deathtouch destruction",
+    "simultaneous multiplayer destruction",
+    "transaction rollback",
+    "exact command replay",
+    "closed direct-target grammar shared by spell, trigger, and activated contexts"
+  ],
+  "witness_cards": [
+    {
+      "name": "Murder",
+      "oracle_id": "938b4e2c-88d9-4637-bc00-e228920c9a78"
+    },
+    {
+      "name": "Darksteel Citadel",
+      "oracle_id": "8dc067bf-f78f-4ac4-b6e7-b305c42cf0bc"
+    }
+  ],
+  "rulings": [],
+  "test_ids": [
+    "test_plan_is_immutable_canonical_and_caller_copy_isolated",
+    "test_handler_lowers_one_strict_typed_intent",
+    "test_effect_destruction_consumes_shield_instead",
+    "test_state_based_destruction_ignores_shield_counter",
+    "test_indestructible_and_phased_objects_are_not_destroyed",
+    "test_indestructible_can_move_for_a_nondestruction_companion_sba",
+    "test_stale_destruction_plan_rolls_back_without_mutation",
+    "test_simultaneous_multiplayer_batch_has_disjoint_results",
+    "test_effect_destruction_uses_typed_owner_and_replays",
+    "test_destruction_disposition_mutants_are_killed",
+    "test_spell_trigger_and_activated_contexts_share_targeted_destruction_lowering",
+    "test_unsupported_destruction_variants_remain_material_residuals",
+    "test_targeted_destruction_shape_mutants_fail_closed"
+  ],
+  "implementation": {
+    "component": "typed direct-target compiler, strict destruction semantic handler, canonical destruction transaction, counter owner, and zone-transition owner",
+    "version": "destruction-v1"
+  },
+  "known_blockers": [
+    "regeneration and effects that say a permanent cannot be regenerated are not represented",
+    "competing destruction replacement ordering beyond shield counters is incomplete",
+    "optional, modal, aggregate, quantified, relational, qualified, and compound destruction clauses remain precise compiler residuals",
+    "complete ability-changing, copy, face-down, and continuous-effect dependency interactions remain blocked",
+    "the mechanic contract is broader than the trusted bounded direct-target effect capability"
+  ],
+  "review_status": "reviewed"
+}
