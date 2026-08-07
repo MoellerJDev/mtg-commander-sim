@@ -182,7 +182,7 @@
       "failed_surfaces": ["browser-soak"],
       "regressions": ["four-player.spec.ts: natural commander-damage winner"],
       "impact_edge_status": "not_applicable",
-      "resolution": "The journey now arms the defender's stop before each preceding turn-transition command, advances only the intervening stack response, and treats Auto-pass winning the post-serialization host-pass race as success only when the next exact defender land opportunity is observed."
+      "resolution": "The journey now arms the defender's stop before each preceding turn-transition command, advances only intervening responses, and holds a seat-qualified precombat main phase while its exact land action settles instead of submitting the pass under observation."
     }
   ],
   "recent_pull_requests": [

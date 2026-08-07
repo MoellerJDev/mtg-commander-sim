@@ -230,6 +230,7 @@ async function advanceToActionReady(
   action: Locator,
   testInfo: TestInfo,
   durabilityTimeout = 45_000,
+  holdWindow?: () => Promise<boolean>,
 ) {
   // Stop advancing as soon as the exact capability exists, even if React still
   // has it disabled behind the previous command's serialization lock. A goal
@@ -241,6 +242,7 @@ async function advanceToActionReady(
     advance: async () => {
       await new Promise((resolve) => setTimeout(resolve, 200));
       if (await action.count()) return true;
+      if (holdWindow && await holdWindow()) return true;
       for (const page of pages) {
         const result = await submitAuthorizedPass(page);
         if (result !== "unavailable") return true;
@@ -1150,8 +1152,14 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
       // Use the exact current capability instead of accepting an unrelated
       // delayed pass revision as evidence that a drag command was submitted.
       const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      const expectedActiveSeat = page === host ? "A" : "B";
+      const table = page.locator(".game-shell");
       await advanceToActionReady(
         [host, opponent], playAction, testInfo, durableTransitionTimeout,
+        async () => (
+          (await table.getAttribute("data-active-player")) === expectedActiveSeat
+          && (await table.getAttribute("data-phase")) === "precombat_main"
+        ),
       );
       await playAction.click();
       const dialog = page.getByTestId("choice-dialog");
