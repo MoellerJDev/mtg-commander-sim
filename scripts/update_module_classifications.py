@@ -84,7 +84,9 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/semantics.py",
         "mtg_commander_sim/ability_fragment_host.py",
         "mtg_commander_sim/compiled_ability_fragments.py",
+        "mtg_commander_sim/compiled_activated_abilities.py",
         "mtg_commander_sim/compiled_cast_timing.py",
+        "mtg_commander_sim/compiled_cycling_abilities.py",
         "mtg_commander_sim/compiled_mana_abilities.py",
     }:
         return "semantics"
@@ -207,6 +209,12 @@ def _owner(relative: str, layer: str) -> str:
         "mtg_commander_sim/compiled_ability_fragments.py",
     }:
         return "ability_fragments"
+    if relative in {
+        "mtg_commander_sim/compiled_activated_abilities.py",
+        "mtg_commander_sim/compiled_cycling_abilities.py",
+        "mtg_commander_sim/cycling_abilities.py",
+    }:
+        return "activated_abilities"
     if relative in {
         "mtg_commander_sim/cast_timing.py",
         "mtg_commander_sim/compiled_cast_timing.py",
@@ -412,6 +420,9 @@ def build_classifications() -> dict[str, Any]:
                             "prevention_triggers.py",
                             "protection.py",
                             "compiled_ability_fragments.py",
+                            "compiled_activated_abilities.py",
+                            "compiled_cycling_abilities.py",
+                            "cycling_abilities.py",
                             "compiled_mana_abilities.py",
                             "fixed_mana_abilities.py",
                             "mana_ability_runtime.py",

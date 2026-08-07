@@ -22,6 +22,7 @@
     "mtg_commander_sim/continuous_effect_model.py",
     "mtg_commander_sim/counter_placement.py",
     "mtg_commander_sim/counter_state.py",
+    "mtg_commander_sim/cycling_abilities.py",
     "mtg_commander_sim/damage.py",
     "mtg_commander_sim/damage_prevention.py",
     "mtg_commander_sim/damage_prevention_aftermath.py",
