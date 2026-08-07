@@ -9,6 +9,7 @@ from .replacement import (
     AffectedObject,
     AppendValues,
     CapResultLifeLoss,
+    CreateAffectedObjectCounter,
     CreateNestedEvent,
     EntryReplacementScope,
     FrozenMap,

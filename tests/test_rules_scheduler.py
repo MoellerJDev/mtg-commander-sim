@@ -125,14 +125,14 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "universal-zone-change-replacement-discovery",
+            "additional-token-replacement-closure",
             selected["batch_id"],
         )
         self.assertEqual(
-            "zones", selected["subsystem_id"]
+            "replacement-prevention", selected["subsystem_id"]
         )
         self.assertEqual(
-            {"400.6"},
+            {"614.16"},
             set(selected["rule_ids"]),
         )
         self.assertTrue(

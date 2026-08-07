@@ -1573,8 +1573,6 @@ class CommanderEngine(
         reason: str = "",
         log: bool = True,
         semantic_events: bool = False,
-        replacement_sources: Sequence[CardInstance] | None = None,
-        replacement_source_zones: Mapping[str, str] | None = None,
         replacement_selections: Sequence[str | None | Mapping[str, Any]] = (),
         prepared_replacement: PreparedZoneChange | None = None,
         transition_kind: ZoneTransitionKind = ZoneTransitionKind.ORDINARY,
@@ -1694,8 +1692,7 @@ class CommanderEngine(
             self,
             card,
             destination,
-            sources=replacement_sources,
-            source_zones=replacement_source_zones,
+            destination_controller=controller,
             selections=tuple(replacement_selections),
             prepared=prepared_replacement,
             error_type=GameRuleError,
@@ -2200,8 +2197,6 @@ class CommanderEngine(
                 reason=reason,
                 log=log,
                 semantic_events=False,
-                replacement_sources=sources,
-                replacement_source_zones=source_zones,
                 prepared_replacement=prepared_replacements[object_id],
             )
         trigger_batch: list[StackItem] = []

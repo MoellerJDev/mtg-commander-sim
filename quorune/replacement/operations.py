@@ -292,6 +292,53 @@ class CreateNestedEvent:
 
 
 @dataclass(frozen=True, slots=True)
+class CreateAffectedObjectCounter:
+    """Create a counter-placement child for a zone event's affected object.
+
+    Unlike ``CreateNestedEvent``, this operation carries no object-specific
+    state.  One immutable replacement effect can therefore participate in a
+    simultaneous batch without being duplicated or rebound per object.
+    """
+
+    counter_name: str
+    amount: int
+    placing_player: str
+    source_ref: str
+    sequence: int = 0
+    schema_version: int = OPERATION_SCHEMA_VERSION
+
+    def __post_init__(self) -> None:
+        if type(self.counter_name) is not str:
+            raise ReplacementOperationError(
+                "Affected-object counter name must be a string"
+            )
+        normalized = " ".join(self.counter_name.casefold().split())
+        if not normalized:
+            raise ReplacementOperationError(
+                "Affected-object counters require a counter name"
+            )
+        object.__setattr__(self, "counter_name", normalized)
+        _integer(self.amount, field="affected-object counter amount", minimum=1)
+        for field_name in ("placing_player", "source_ref"):
+            value = getattr(self, field_name)
+            if type(value) is not str or not value:
+                raise ReplacementOperationError(
+                    f"Affected-object counters require string {field_name}"
+                )
+        _integer(self.sequence, field="affected-object counter sequence", minimum=0)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "op": "create_affected_object_counter",
+            "counter_name": self.counter_name,
+            "amount": self.amount,
+            "placing_player": self.placing_player,
+            "source_ref": self.source_ref,
+            "sequence": self.sequence,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class ReserveZoneChange:
     objects: tuple[str, ...] = ()
     from_field: str | None = None
@@ -409,6 +456,7 @@ ReplacementOperation: TypeAlias = (
     | AppendValues
     | UnionValues
     | CreateNestedEvent
+    | CreateAffectedObjectCounter
     | ReserveZoneChange
     | CapResultLifeLoss
     | PreventDraw
@@ -427,6 +475,7 @@ _TYPED_OPERATION_TYPES = (
     AppendValues,
     UnionValues,
     CreateNestedEvent,
+    CreateAffectedObjectCounter,
     ReserveZoneChange,
     CapResultLifeLoss,
     PreventDraw,
@@ -473,6 +522,40 @@ def _dredge_draw_from_dict(
             value["mill_count"],
             field="Dredge mill count",
             minimum=1,
+        ),
+    )
+
+
+def _affected_object_counter_from_dict(
+    value: Mapping[str, Any],
+    *,
+    operation: str,
+) -> CreateAffectedObjectCounter:
+    _exact_fields(
+        value,
+        {
+            "op",
+            "counter_name",
+            "amount",
+            "placing_player",
+            "source_ref",
+            "sequence",
+        },
+        operation=operation,
+    )
+    return CreateAffectedObjectCounter(
+        counter_name=value["counter_name"],
+        amount=_integer(
+            value["amount"],
+            field="affected-object counter amount",
+            minimum=1,
+        ),
+        placing_player=value["placing_player"],
+        source_ref=value["source_ref"],
+        sequence=_integer(
+            value["sequence"],
+            field="affected-object counter sequence",
+            minimum=0,
         ),
     )
 
@@ -593,6 +676,8 @@ def operation_from_dict(value: Mapping[str, Any]) -> ReplacementOperation:
                 "Nested replacement operation requires an event object"
             )
         return CreateNestedEvent(FrozenMap(event))
+    if op == "create_affected_object_counter":
+        return _affected_object_counter_from_dict(value, operation=op)
     if op == "reserve_zone_change":
         if "objects" in value:
             _exact_fields(value, {"op", "objects"}, operation=op)

@@ -225,21 +225,27 @@ from .token_replacements import (
     resolve_token_creation_replacements,
 )
 from .tap_state_handlers import TAP_STATE_HANDLERS
-from .zone_replacements import (
-    collect_zone_change_replacement_effects,
-    log_applied_zone_replacements,
+from .zone_replacement_model import (
     PreparedZoneChange,
     ZoneChangeReplacementContext,
-    ZoneChangeReplacementRegistry,
     ZoneChangeReplacementResolution,
+    ZoneChangeReplacementSnapshot,
+    ZoneChangeSubjectSnapshot,
     ZoneDestinationIntent,
-    ZoneDestinationReplacementHandler,
     ZoneDestinationReplacementNode,
     ZoneReplacementError,
+)
+from .zone_replacements import (
+    capture_zone_change_replacement_snapshot,
+    collect_zone_change_replacement_effects,
+    log_applied_zone_replacements,
+    ZoneChangeReplacementRegistry,
+    ZoneDestinationReplacementHandler,
     default_zone_change_replacement_registry,
     resolve_zone_change_replacements,
     prepare_zone_change_replacement,
     prepare_zone_change_replacement_batch,
+    prepare_zone_change_replacement_snapshot,
 )
 
 
@@ -408,6 +414,8 @@ __all__ = [
     "ProliferateIntent",
     "UntapAllCreaturesNode",
     "ZoneChangeReplacementContext",
+    "ZoneChangeReplacementSnapshot",
+    "ZoneChangeSubjectSnapshot",
     "ZoneChangeReplacementRegistry",
     "ZoneChangeReplacementResolution",
     "ZoneDestinationIntent",
@@ -433,6 +441,7 @@ __all__ = [
     "resolve_counter_placement_replacements",
     "resolve_zone_change_replacements",
     "collect_zone_change_replacement_effects",
+    "capture_zone_change_replacement_snapshot",
     "collect_counter_placement_replacement_effects",
     "collect_damage_replacement_effects",
     "collect_damage_result_replacement_effects",
@@ -444,6 +453,7 @@ __all__ = [
     "log_applied_zone_replacements",
     "prepare_zone_change_replacement",
     "prepare_zone_change_replacement_batch",
+    "prepare_zone_change_replacement_snapshot",
     "PreparedZoneChange",
     "ZoneReplacementError",
     "describe_runtime_handler",

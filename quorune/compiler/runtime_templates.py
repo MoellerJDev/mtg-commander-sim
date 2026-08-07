@@ -15,6 +15,7 @@ from .draw_templates import (
     static_draw_restriction_handler,
 )
 from .life_templates import static_life_handler
+from .zone_templates import static_zone_destination_replacement_handler
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +35,17 @@ def static_runtime_template(
     """Select one closed static runtime production for an Oracle line."""
 
     if source_permanent:
+        zone_replacement = static_zone_destination_replacement_handler(text)
+        if zone_replacement is not None:
+            return StaticRuntimeTemplate(
+                compiled=zone_replacement,
+                kind="replacement_effect",
+                event="zone.change",
+                dependency_reason=(
+                    "generic destination replacement depends on an untrusted "
+                    "rules capability"
+                ),
+            )
         draw_reveal = static_draw_reveal_handler(text)
         if draw_reveal is not None:
             return StaticRuntimeTemplate(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import json
 import inspect
 import tempfile
@@ -9,7 +10,11 @@ from pathlib import Path
 from common import keep_all, load_assets, make_session
 from quorune.engine import StateInvariantError
 from quorune.model import StackItem
-from quorune.replacement_effects import ReplacementChoiceRequired
+from quorune.replacement_effects import (
+    ReplacementChoiceRequired,
+    ReplacementEffectError,
+    ReplacementEventBatch,
+)
 from quorune.record import (
     authoritative_state_hash,
     checkpoint_envelope,
@@ -20,7 +25,11 @@ from quorune.projection import StateProjector
 from quorune.semantic_runtime import SemanticNodeError
 from quorune.semantic_runtime.zone_replacements import (
     ZoneDestinationReplacementHandler,
+    ZoneReplacementError,
+    capture_zone_change_replacement_snapshot,
     collect_zone_change_replacement_effects,
+    prepare_zone_change_replacement,
+    prepare_zone_change_replacement_snapshot,
 )
 
 
@@ -488,6 +497,191 @@ class GraveyardRuleTests(unittest.TestCase):
         self.assertEqual("exile", victim.zone)
         self.assertEqual(1, voidwalker.counters["void"])
         self.assertEqual(1, victim.counters["void"])
+
+    def test_simultaneous_competing_replacements_follow_four_player_apnap(self):
+        session = self.make_session(40412, players=4)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        engine.create_token(
+            "B",
+            name="",
+            copy_of=voidwalker.ref,
+            reason="four-player replacement ordering witness",
+        )
+        victim_a = self.card(engine, "A", "Sol Ring")
+        victim_c = self.card(engine, "C", "Sol Ring")
+        changes = (
+            (victim_c.object_id, "graveyard"),
+            (victim_a.object_id, "graveyard"),
+        )
+        before = authoritative_state_hash(engine.state)
+
+        with self.assertRaises(ReplacementChoiceRequired) as first:
+            engine._move_cards_simultaneously(
+                changes,
+                reason="four-player replacement ordering witness",
+                log=False,
+            )
+
+        self.assertEqual("A", first.exception.pending.choice.chooser)
+        self.assertEqual(2, len(first.exception.batch.events))
+        self.assertEqual(
+            first.exception.batch,
+            ReplacementEventBatch.from_dict(
+                first.exception.batch.to_dict()
+            ),
+        )
+        self.assertEqual(before, authoritative_state_hash(engine.state))
+        first_selection = first.exception.pending.choice.options[0]
+
+        with self.assertRaises(ReplacementChoiceRequired) as second:
+            engine._move_cards_simultaneously(
+                changes,
+                reason="four-player replacement ordering witness",
+                log=False,
+                replacement_selections=(first_selection,),
+            )
+
+        self.assertEqual("C", second.exception.pending.choice.chooser)
+        self.assertEqual(before, authoritative_state_hash(engine.state))
+        second_selection = second.exception.pending.choice.options[0]
+        engine._move_cards_simultaneously(
+            changes,
+            reason="four-player replacement ordering witness",
+            log=False,
+            replacement_selections=(first_selection, second_selection),
+        )
+
+        self.assertEqual("exile", victim_a.zone)
+        self.assertEqual("exile", victim_c.zone)
+        self.assertEqual(1, victim_a.counters["void"])
+        self.assertEqual(1, victim_c.counters["void"])
+
+    def test_zone_replacement_snapshot_mutant_is_killed(self):
+        session = self.make_session(40413, players=4)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        victim = self.card(engine, "A", "Sol Ring")
+        victim_origin = victim.zone
+        sources = [
+            copy.deepcopy(source)
+            for source in engine._semantic_event_sources()
+        ]
+        source_zones = {
+            source.object_id: source.zone for source in sources
+        }
+        snapshot = capture_zone_change_replacement_snapshot(
+            engine,
+            ((victim.object_id, "graveyard"),),
+            sources=sources,
+            source_zones=source_zones,
+        )
+        reordered = capture_zone_change_replacement_snapshot(
+            engine,
+            ((victim.object_id, "graveyard"),),
+            sources=tuple(reversed(sources)),
+            source_zones=source_zones,
+        )
+        self.assertEqual(snapshot, reordered)
+
+        for source in sources:
+            source.zone = "outside"
+            source.controller = "D"
+        prepared = prepare_zone_change_replacement_snapshot(snapshot)
+
+        self.assertEqual(victim_origin, victim.zone)
+        self.assertEqual("exile", prepared[victim.object_id].destination)
+        self.assertEqual(1, len(prepared[victim.object_id].counter_events))
+
+    def test_zone_replacement_preflight_rejects_malformed_and_stale_moves(self):
+        session = self.make_session(40414)
+        engine = session.engine
+        victim = self.card(engine, "A", "Sol Ring")
+        before = authoritative_state_hash(engine.state)
+
+        for changes, message in (
+            (
+                (
+                    (victim.object_id, "graveyard"),
+                    (victim.object_id, "exile"),
+                ),
+                "repeat one object",
+            ),
+            (((victim.object_id, "sideboard"),), "supported destination"),
+            ((("missing-object", "graveyard"),), "unknown object"),
+        ):
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(ZoneReplacementError, message):
+                    capture_zone_change_replacement_snapshot(engine, changes)
+                self.assertEqual(before, authoritative_state_hash(engine.state))
+
+        prepared = prepare_zone_change_replacement(
+            engine,
+            victim,
+            "graveyard",
+        )
+        stale_card = copy.deepcopy(victim)
+        stale_card.zone_change_counter += 1
+        with self.assertRaisesRegex(
+            ZoneReplacementError,
+            "does not match the proposed move",
+        ):
+            prepare_zone_change_replacement(
+                engine,
+                stale_card,
+                "graveyard",
+                prepared=prepared,
+            )
+        self.assertEqual(before, authoritative_state_hash(engine.state))
+
+    def test_inapplicable_replacement_does_not_require_an_eliminated_chooser(self):
+        session = self.make_session(40415)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        departing_commander = self.card(engine, "A", "Mishra, Eminent One")
+        engine.state.players["A"].in_game = False
+
+        snapshot = capture_zone_change_replacement_snapshot(
+            engine,
+            ((departing_commander.object_id, "outside"),),
+        )
+        prepared = prepare_zone_change_replacement_snapshot(snapshot)
+
+        self.assertTrue(snapshot.effects)
+        self.assertEqual(["B"], list(snapshot.apnap_order))
+        self.assertEqual(
+            "outside",
+            prepared[departing_commander.object_id].destination,
+        )
+        self.assertEqual((), prepared[departing_commander.object_id].journal)
+
+        applicable = capture_zone_change_replacement_snapshot(
+            engine,
+            ((departing_commander.object_id, "graveyard"),),
+        )
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "missing from APNAP order",
+        ):
+            prepare_zone_change_replacement_snapshot(applicable)
 
     def test_dauthi_replacement_replays_without_oracle_id_dispatch(self):
         session = self.make_session(40408)

@@ -248,13 +248,20 @@
       "implementation_components": [
         "CommanderEngine.move_card",
         "CommanderEngine._move_cards_simultaneously",
-        "semantic_runtime.zone_replacements.prepare_zone_change_replacement",
-        "replacement_effects"
+        "compiler.zone_templates.static_zone_destination_replacement_handler",
+        "semantic_runtime.zone_replacement_model.ZoneChangeReplacementSnapshot",
+        "semantic_runtime.zone_replacements.prepare_zone_change_replacement_snapshot",
+        "replacement.ordering.advance_replacement_batch"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_simultaneous_move_captures_all_lki_before_mutation",
         "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_replacement_uses_the_sources_pre_move_controller",
-        "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly"
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_competing_zone_replacements_suspend_resume_and_replay_exactly",
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_simultaneous_competing_replacements_follow_four_player_apnap",
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_preflight_rejects_malformed_and_stale_moves",
+        "tests.test_graveyard_rules.GraveyardRuleTests.test_zone_replacement_snapshot_mutant_is_killed",
+        "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_closed_family_lowers_to_capability_closed_card_program",
+        "tests.test_zone_replacement_compiler.ZoneReplacementCompilerTests.test_unrepresented_destination_variants_remain_residual"
       ],
       "required_scenarios": [
         "positive",
@@ -266,18 +273,19 @@
       ],
       "covered_scenarios": [
         "positive",
+        "negative",
         "interaction",
         "multiplayer",
         "hidden_information",
         "replay"
       ],
       "blockers": [
-        "universal_zone_move_replacement_discovery_not_implemented",
-        "contradictory_effect_choice_not_integrated",
-        "complete_apnap_replacement_collection_not_integrated"
+        "moving_object_self_inspection_not_implemented",
+        "destination_zone_viewer_inspection_not_implemented",
+        "entry_and_command_zone_replacement_families_not_implemented"
       ],
       "notes": [
-        "Represented simultaneous moves capture all pre-move information and selected graveyard replacements before mutation. Universal self-inspection, battlefield destination inspection, contradictory effect choice, and CR 616 ordering are not wired into every zone event."
+        "The bounded destination-replacement capability captures represented ambient sources and every affected object once, resolves contradictory single and simultaneous events in multiplayer APNAP order, and commits only after choice-complete preparation. A closed opponent-card graveyard-to-exile-with-counter wording family lowers to the same typed handler. Aggregate CR 400.6 remains blocked on moving-object self-inspection, destination-viewer inspection, and unrepresented entry and command-zone families."
       ]
     },
     {

@@ -19,15 +19,15 @@
     }
   },
   "derived_hashes": {
-    "conformance-cases.json": "8180af4375ca32d544ca87e5d926ea9e3bfb4156f47c4851e19b6e42c74df312",
+    "conformance-cases.json": "daccc845b03578fa0691c0e8b6d483a80330016635937a1eec9ea738ca9b021b",
     "dependency-graph.json": "0c2c5095e0875c278e26d58d601246bcc597183ab96be167dec64bc0fe0ae956",
     "glossary-index.json": "576fad18aaf10a2f1c0f1f257837eae95057721b668fe38740d2182ce9aebb7d",
     "mechanic-index.json": "72998332705128357f9adc1ba7f20b73a6f5b97ccdda9fc46a95edc5f5ff7fcb",
-    "mechanics/registry.json": "1aa7892ba809b5985b849566ba2942b7aa9f9f33e2447f6b5786276c9e011d7d",
+    "mechanics/registry.json": "c20a2892b92c6c147bbb63c8f7a921ad1341c0aefe9e312a064ca5c96d48702c",
     "rule-index.json": "ae20b6961f35621fe5f9cec5e784416ca14a7723a4f0ffb5d2326aa5555f4347"
   },
   "effective_date": "2026-06-19",
-  "generated_at": "2026-08-07T20:05:03.142171+00:00",
+  "generated_at": "2026-08-07T21:41:20.262777+00:00",
   "glossary_count": 733,
   "mechanic_count": 425,
   "parser_version": "cr-index-v1",
