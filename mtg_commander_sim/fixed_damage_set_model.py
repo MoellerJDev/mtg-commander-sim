@@ -5,6 +5,7 @@ from enum import Enum
 import hashlib
 from typing import Any, Mapping
 
+from .affected_permanents import PermanentControllerRelation
 from .object_predicate import ObjectQueryError, ObjectQuerySpec
 from .util import stable_json
 
@@ -16,12 +17,6 @@ class FixedDamageSetError(ValueError):
 class PlayerDamageRelation(str, Enum):
     ALL = "all"
     OPPONENTS = "opponents"
-
-
-class PermanentControllerRelation(str, Enum):
-    ANY = "any"
-    OPPONENTS = "opponents"
-    TARGET_PLAYER = "target_player"
 
 
 _DAMAGEABLE_TYPES = frozenset({"battle", "creature", "planeswalker"})
@@ -87,6 +82,10 @@ class PermanentDamageGroup:
         if self.query.exclude_ref is not None:
             raise FixedDamageSetError(
                 "Fixed permanent damage does not support source exclusions"
+            )
+        if self.controller_relation is PermanentControllerRelation.ACTOR:
+            raise FixedDamageSetError(
+                "Fixed permanent damage does not support actor-only groups"
             )
         represented_by_all = bool(
             set(self.query.types_all).intersection(_DAMAGEABLE_TYPES)

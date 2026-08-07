@@ -16,6 +16,10 @@ from ..fixed_damage_set import (
     FixedDamageSetError,
     resolve_fixed_damage_set,
 )
+from ..destruction_sets import (
+    DestructionSetError,
+    resolve_destruction_set,
+)
 from ..effect_runtime import dispatch_effect
 from ..life_state import (
     LifeChange,
@@ -33,6 +37,7 @@ from ..semantic_runtime import (
     CopyStackItemIntent,
     CounterStackIntent,
     DealFixedDamageSetIntent,
+    DestroyPermanentSetIntent,
     CreateTokenIntent,
     DomainEffectIntent,
     EliminatePlayersIntent,
@@ -57,6 +62,15 @@ from ..util import unique_preserving_order
 
 
 class SemanticChoiceIntentHostMixin:
+    def affected_permanent_active_seats(self) -> tuple[str, ...]:
+        return tuple(self.active_seats)
+
+    def affected_permanent_apnap_order(self) -> tuple[str, ...]:
+        return tuple(self.apnap_order())
+
+    def affected_permanent_object_rows(self, actor: str):
+        return tuple(self._semantic_choice_object_rows(actor))
+
     def fixed_damage_active_seats(self) -> tuple[str, ...]:
         return tuple(self.active_seats)
 
@@ -85,6 +99,25 @@ class SemanticChoiceIntentHostMixin:
                 replacement_event_ids=intent.replacement_event_ids,
             )
         except FixedDamageSetError as exc:
+            raise GameRuleError(str(exc)) from exc
+
+    def destroy_permanent_set_intent(
+        self,
+        intent: DestroyPermanentSetIntent,
+    ):
+        try:
+            return resolve_destruction_set(
+                self,
+                actor=intent.actor,
+                spec=intent.spec,
+                reason=intent.reason,
+                source_ref=intent.source_ref,
+                replacement_selections=tuple(
+                    thaw_value(value)
+                    for value in intent.replacement_selections
+                ),
+            )
+        except DestructionSetError as exc:
             raise GameRuleError(str(exc)) from exc
 
     def apply_domain_effect_intent(self, intent: DomainEffectIntent) -> Any:

@@ -22,6 +22,7 @@ from .intents import (
     DealFixedDamageSetIntent,
     DomainEffectIntent,
     DestroyPermanentIntent,
+    DestroyPermanentSetIntent,
     DrawCardsIntent,
     IntentPlan,
     EliminatePlayersIntent,
@@ -153,6 +154,11 @@ class SemanticIntentSink(
         intent: DealFixedDamageSetIntent,
     ) -> Any: ...
 
+    def destroy_permanent_set_intent(
+        self,
+        intent: DestroyPermanentSetIntent,
+    ) -> Any: ...
+
 
 @dataclass(frozen=True, slots=True)
 class DrawResolutionBatch:
@@ -222,11 +228,13 @@ def prepare_draw_resolution(
 
 PermanentTransitionIntent = (
     DestroyPermanentIntent
+    | DestroyPermanentSetIntent
     | ExilePermanentIntent
     | ReturnPermanentToOwnerHandIntent
 )
 PERMANENT_TRANSITION_INTENT_TYPES = (
     DestroyPermanentIntent,
+    DestroyPermanentSetIntent,
     ExilePermanentIntent,
     ReturnPermanentToOwnerHandIntent,
 )
@@ -235,29 +243,40 @@ PERMANENT_TRANSITION_INTENT_TYPES = (
 def _execute_permanent_transition_intent(
     sink: SemanticIntentSink,
     intent: PermanentTransitionIntent,
-) -> object:
+) -> tuple[str, object]:
     if isinstance(intent, DestroyPermanentIntent):
-        return destruction.destroy_permanent_refs(
-            sink,
-            (intent.object_ref,),
-            actor=intent.actor,
-            reason=intent.reason,
-            replacement_selections=intent.replacement_selections,
+        return (
+            intent.object_ref,
+            destruction.destroy_permanent_refs(
+                sink,
+                (intent.object_ref,),
+                actor=intent.actor,
+                reason=intent.reason,
+                replacement_selections=intent.replacement_selections,
+            ),
         )
+    if isinstance(intent, DestroyPermanentSetIntent):
+        return intent.actor, sink.destroy_permanent_set_intent(intent)
     if isinstance(intent, ExilePermanentIntent):
-        return permanent_exile.exile_permanent(
+        return (
+            intent.object_ref,
+            permanent_exile.exile_permanent(
+                sink,
+                intent.object_ref,
+                actor=intent.actor,
+                reason=intent.reason,
+                replacement_selections=intent.replacement_selections,
+            ),
+        )
+    return (
+        intent.object_ref,
+        return_to_hand.return_permanent_to_owner_hand(
             sink,
             intent.object_ref,
             actor=intent.actor,
             reason=intent.reason,
             replacement_selections=intent.replacement_selections,
-        )
-    return return_to_hand.return_permanent_to_owner_hand(
-        sink,
-        intent.object_ref,
-        actor=intent.actor,
-        reason=intent.reason,
-        replacement_selections=intent.replacement_selections,
+        ),
     )
 
 
@@ -295,8 +314,7 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
             results.append(("creatures", result))
             continue
         if isinstance(intent, PERMANENT_TRANSITION_INTENT_TYPES):
-            result = _execute_permanent_transition_intent(sink, intent)
-            results.append((intent.object_ref, result))
+            results.append(_execute_permanent_transition_intent(sink, intent))
             continue
         if isinstance(intent, AddManaIntent):
             result = sink.apply_mana_intent(intent)

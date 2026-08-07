@@ -90,6 +90,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "mtg_commander_sim/affected_permanents.py",
+      "layer": "rules",
+      "owning_subsystem": "object_query",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "mtg_commander_sim/arena.py",
       "layer": "application",
       "owning_subsystem": "legacy_application",
@@ -1521,6 +1535,20 @@
         "semantics"
       ],
       "game_state_access": "mutable_owner",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
+      "file": "mtg_commander_sim/destruction_sets.py",
+      "layer": "rules",
+      "owning_subsystem": "destruction",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
       "card_specificity_policy": "generic_no_growth",
       "visibility_sensitivity": "authoritative_internal",
       "replay_participation": "none"
@@ -4077,5 +4105,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "c30edae8e62c3aa33f70fba533437519e9137a30386ad9b3832f07e40f52e9c0"
+  "fingerprint": "620024768ebe25cad4216a43a6b9139b9e3945cbb859c068b67d31813ea7b539"
 }

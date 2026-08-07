@@ -549,6 +549,71 @@ def prepare_zone_change_replacement(
     )
 
 
+def prepare_zone_change_replacement_batch(
+    host: ZoneReplacementHost,
+    changes: Sequence[tuple[str, str]],
+    *,
+    sources: Sequence[Any] | None = None,
+    source_zones: Mapping[str, str] | None = None,
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
+    error_type: type[Exception] = ZoneReplacementError,
+) -> dict[str, PreparedZoneChange]:
+    """Preflight an ordered simultaneous batch without mutating any object.
+
+    A single external selection journal is consumed in batch order. Each
+    object's complete replacement tree resolves before the next object begins,
+    matching CR 616.1 while preserving APNAP order supplied by the caller.
+    """
+
+    supplied = tuple(changes)
+    if any(
+        not isinstance(change, tuple)
+        or len(change) != 2
+        or any(type(value) is not str or not value for value in change)
+        for change in supplied
+    ):
+        raise error_type(
+            "Zone replacement batches require object and destination pairs"
+        )
+    object_ids = tuple(object_id for object_id, _ in supplied)
+    if len(object_ids) != len(set(object_ids)):
+        raise error_type(
+            "Zone replacement batches cannot repeat one object"
+        )
+    journal = tuple(selections)
+    cursor = 0
+    prepared: dict[str, PreparedZoneChange] = {}
+    for object_id, destination in supplied:
+        card = host.state.cards.get(object_id)
+        if card is None:
+            raise error_type(
+                "Zone replacement batch references an unknown object"
+            )
+        object_selections: list[str | None | Mapping[str, Any]] = []
+        while True:
+            try:
+                prepared[object_id] = prepare_zone_change_replacement(
+                    host,
+                    card,
+                    destination,
+                    sources=sources,
+                    source_zones=source_zones,
+                    selections=tuple(object_selections),
+                    error_type=error_type,
+                )
+                break
+            except ReplacementChoiceRequired:
+                if cursor >= len(journal):
+                    raise
+                object_selections.append(journal[cursor])
+                cursor += 1
+    if cursor != len(journal):
+        raise error_type(
+            "Zone replacement selections exceed the batch's pending choices"
+        )
+    return prepared
+
+
 def log_applied_zone_replacements(
     host: ZoneReplacementHost,
     prepared: PreparedZoneChange,

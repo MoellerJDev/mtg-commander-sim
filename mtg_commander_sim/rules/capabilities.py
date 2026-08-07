@@ -10,6 +10,7 @@ from typing import Any, Iterable, Mapping, Sequence
 from .component_resolution import implementation_component_resolves
 from .node_capability_shapes import (
     fixed_damage_node_capabilities,
+    mass_destruction_node_capabilities,
     fixed_draw_node_capabilities,
     targeted_counter_node_capabilities,
     targeted_destruction_node_capabilities,
@@ -715,6 +716,7 @@ def _targeted_effect_capabilities(
     dependencies: set[str] = set()
     for resolver in (
         fixed_damage_node_capabilities,
+        mass_destruction_node_capabilities,
         fixed_draw_node_capabilities,
         targeted_counter_node_capabilities,
         targeted_destruction_node_capabilities,
@@ -875,8 +877,12 @@ def capability_covered_mechanics(
         {"permanent.tap.effect", "permanent.untap.effect"}
     ):
         covered.add("tap-and-untap")
-    if "permanent.destroy.effect" in supplied:
+    if supplied.intersection(
+        {"permanent.destroy.effect", "permanent.destroy.fixed_set"}
+    ):
         covered.add("destroy")
+    if "permanent.destroy.fixed_set" in supplied:
+        covered.add("destroy-fixed-set")
     if "permanent.exile.effect" in supplied:
         covered.add(_EXILE_MECHANIC)
     if "permanent.return.owner_hand" in supplied:

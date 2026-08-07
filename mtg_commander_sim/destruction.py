@@ -65,6 +65,9 @@ class DestructionHost(Protocol):
         *,
         reason: str,
         log: bool = False,
+        replacement_selections: Sequence[
+            str | None | Mapping[str, Any]
+        ] = (),
     ) -> list[Any]: ...
 
     def _log(
@@ -137,6 +140,7 @@ class DestructionPlan:
     reason: str
     entries: tuple[DestructionEntry, ...]
     shield_counter_plan: CounterStatePlan
+    destruction_event_order: tuple[str, ...] = ()
     replacement_selections: tuple[str | FrozenMap, ...] = ()
 
     def __post_init__(self) -> None:
@@ -209,12 +213,20 @@ class DestructionPlan:
             raise DestructionError(
                 "Destruction replacement selections must be immutable"
             )
-        selections = _canonical_selections(self.replacement_selections)
-        if selections and len(self.destroyed_object_ids) != 1:
+        order = tuple(self.destruction_event_order)
+        if any(type(value) is not str or not value for value in order):
             raise DestructionError(
-                "Replacement selections require exactly one destruction "
-                "zone event"
+                "Destruction event order requires object identities"
             )
+        destroyed = self.destroyed_object_ids
+        if order and (
+            len(order) != len(set(order)) or set(order) != set(destroyed)
+        ):
+            raise DestructionError(
+                "Destruction event order must cover each destroyed object once"
+            )
+        selections = _canonical_selections(self.replacement_selections)
+        object.__setattr__(self, "destruction_event_order", order)
         object.__setattr__(self, "replacement_selections", selections)
 
     @property
@@ -329,6 +341,7 @@ def prepare_destructions(
     cause: DestructionCause,
     actor: str | None,
     reason: str,
+    event_order: Sequence[str] = (),
     replacement_selections: Sequence[str | Mapping[str, Any]] = (),
 ) -> DestructionPlan:
     """Snapshot one simultaneous destruction family before any mutation."""
@@ -412,14 +425,26 @@ def prepare_destructions(
             "Destruction replacement selections must be a list"
         )
     selections = _canonical_selections(replacement_selections)
-    destroyed_count = sum(
-        entry.disposition is DestructionDisposition.DESTROY
-        for entry in entries
-    )
-    if selections and destroyed_count != 1:
+    supplied_order = tuple(event_order)
+    if any(type(value) is not str or not value for value in supplied_order):
         raise DestructionError(
-            "Replacement selections require exactly one destruction zone event"
+            "Destruction event order requires object identities"
         )
+    if supplied_order and (
+        len(supplied_order) != len(set(supplied_order))
+        or set(supplied_order) != set(object_ids)
+    ):
+        raise DestructionError(
+            "Destruction event order must cover each requested object once"
+        )
+    destroyed_set = {
+        entry.object_id
+        for entry in entries
+        if entry.disposition is DestructionDisposition.DESTROY
+    }
+    destruction_order = tuple(
+        value for value in supplied_order if value in destroyed_set
+    )
     try:
         shield_plan = plan_counter_changes(host, shield_changes)
     except CounterStateError as exc:
@@ -430,6 +455,7 @@ def prepare_destructions(
         reason=reason,
         entries=tuple(entries),
         shield_counter_plan=shield_plan,
+        destruction_event_order=destruction_order,
         replacement_selections=selections,
     )
 
@@ -517,32 +543,24 @@ def commit_destruction_plan(
 
     validate_destruction_plan(host, plan)
     destroyed = plan.destroyed_object_ids
+    event_order = plan.destruction_event_order or destroyed
     companions = _canonical_companion_changes(plan, companion_changes)
     changes = (
-        tuple((object_id, "graveyard") for object_id in destroyed)
+        tuple((object_id, "graveyard") for object_id in event_order)
         + companions
     )
-    if plan.replacement_selections:
-        if companions or len(changes) != 1:
-            raise DestructionError(
-                "Replacement selections do not support a compound move batch"
-            )
-        object_id, destination = changes[0]
-        host.move_card(
-            object_id,
-            destination,
-            reason=plan.reason,
-            log=False,
-            semantic_events=True,
-            replacement_selections=tuple(
-                thaw_value(value) for value in plan.replacement_selections
-            ),
+    if plan.replacement_selections and companions:
+        raise DestructionError(
+            "Replacement selections do not support a compound move batch"
         )
-    elif changes:
+    if changes:
         host._move_cards_simultaneously(
             changes,
             reason=plan.reason,
             log=False,
+            replacement_selections=tuple(
+                thaw_value(value) for value in plan.replacement_selections
+            ),
         )
     apply_counter_changes(host, plan.shield_counter_plan)
 

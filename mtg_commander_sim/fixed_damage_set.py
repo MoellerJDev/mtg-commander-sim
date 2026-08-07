@@ -12,6 +12,11 @@ from .damage import (
     source_snapshot,
 )
 from .damage_values import DamageProposal
+from .affected_permanents import (
+    AffectedPermanentSetError,
+    AffectedPermanentSetSpec,
+    select_affected_permanents,
+)
 from .fixed_damage_set_model import (
     FixedDamageGroup,
     FixedDamageSetError,
@@ -22,7 +27,7 @@ from .fixed_damage_set_model import (
     PlayerDamageRelation,
     require_nonempty_string,
 )
-from .object_query import ObjectQueryResult, query_objects
+from .object_query import ObjectQueryResult
 from .util import stable_json
 
 _REASON_FIELD = "".join(("rea", "son"))
@@ -178,48 +183,20 @@ def snapshot_fixed_damage_set(
                     )
                 )
             continue
-        selected = query_objects(rows, group.query)
-        if (
-            group.controller_relation
-            is PermanentControllerRelation.OPPONENTS
-        ):
-            selected = tuple(row for row in selected if row.controller != actor)
-        elif (
-            group.controller_relation
-            is PermanentControllerRelation.TARGET_PLAYER
-        ):
-            if group.target_controller not in active:
-                raise FixedDamageSetError(
-                    "Fixed damage target controller is no longer active"
-                )
-            selected = tuple(
-                row
-                for row in selected
-                if row.controller == group.target_controller
-            )
-        invalid_rows = tuple(
-            row
-            for row in selected
-            if row.controller not in order_index
-            or not row.ref
-            or not row.object_id
-            or not row.logical_object_id
-        )
-        if invalid_rows:
-            raise FixedDamageSetError(
-                "Fixed damage object query returned an invalid public identity"
-            )
-        selected = tuple(
-            sorted(
-                selected,
-                key=lambda row: (
-                    order_index[row.controller],
-                    row.logical_object_id,
-                    row.object_id,
-                    row.ref,
+        try:
+            selected = select_affected_permanents(
+                rows,
+                AffectedPermanentSetSpec(
+                    query=group.query,
+                    controller_relation=group.controller_relation,
+                    target_controller=group.target_controller,
                 ),
+                actor=actor,
+                active_seats=active,
+                apnap_order=order,
             )
-        )
+        except AffectedPermanentSetError as exc:
+            raise FixedDamageSetError(str(exc)) from exc
         for row in selected:
             append(
                 FixedDamageSetRecipient(

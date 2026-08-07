@@ -160,7 +160,6 @@ class TargetedDestructionCompilerTests(unittest.TestCase):
             "Destroy target tapped creature.",
             "Destroy target nonland permanent.",
             "Destroy target creature. It can't be regenerated.",
-            "Destroy all creatures.",
         ):
             with self.subTest(text=text):
                 ir = self.compile(text)

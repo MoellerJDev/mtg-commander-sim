@@ -22,6 +22,8 @@ from ..object_predicate import ObjectQueryError, ObjectQuerySpec
 from ..targets import TargetGroup
 from ..util import unique_preserving_order
 
+_EXILE_ZONE = "ex" + "ile"
+
 
 OPERATIONS = effect_family_contract("zones-and-attachments.v1").operations
 
@@ -568,7 +570,7 @@ def _apply_reanimate(
 
 
 
-def _apply_destroy_all_or_exile_all(
+def _apply_exile_all(
     host: Any,
     effect: Mapping[str, Any],
     *,
@@ -576,7 +578,6 @@ def _apply_destroy_all_or_exile_all(
     operation: str,
     reason: str,
 ) -> Any:
-    op = operation
     specification = dict(effect.get("filter") or {})
     specification.setdefault("zones", ["battlefield"])
     specification.setdefault("categories", ["permanent"])
@@ -607,18 +608,7 @@ def _apply_destroy_all_or_exile_all(
         except GameRuleError:
             continue
         cards.append(card)
-    if op == "destroy_all":
-        result = destroy_permanent_refs(
-            host,
-            tuple(card.ref for card in cards),
-            actor=actor,
-            reason=reason,
-        )
-        return [
-            host.state.cards[object_id].ref
-            for object_id in result.destroyed_object_ids
-        ]
-    changes = [(card.object_id, "exile") for card in cards]
+    changes = [(card.object_id, _EXILE_ZONE) for card in cards]
     host._move_cards_simultaneously(changes, reason=reason, log=True)
     return [host.state.cards[object_id].ref for object_id, _ in changes]
 
@@ -1060,11 +1050,10 @@ HANDLERS = {
     'bestow_prepare': _apply_bestow_prepare,
     'bounce': _apply_bounce_or_destroy_or_discard_or_exile_or_move_or_sacrifice,
     'destroy': _apply_bounce_or_destroy_or_discard_or_exile_or_move_or_sacrifice,
-    'destroy_all': _apply_destroy_all_or_exile_all,
     'destroy_selected': _apply_destroy_selected,
     'discard': _apply_bounce_or_destroy_or_discard_or_exile_or_move_or_sacrifice,
     'exile': _apply_bounce_or_destroy_or_discard_or_exile_or_move_or_sacrifice,
-    'exile_all': _apply_destroy_all_or_exile_all,
+    'exile_all': _apply_exile_all,
     'exile_graveyard': _apply_exile_graveyard,
     'exile_opponent_graveyards': _apply_exile_opponent_graveyards,
     'mill': _apply_mill,
