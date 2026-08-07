@@ -175,6 +175,7 @@ from .stack_counter import (
     counter_stack_item,
     stack_item_can_be_countered,
 )
+from .stack_resolution import trusted_generic_empty_resolution
 from .mana_payment_continuations import (
     execute_mana_choice_capable_priority_action,
 )
@@ -7856,18 +7857,9 @@ class CommanderEngine(
                 if not self._stabilize():
                     self._grant_priority(self.state.active_player)
                 return
-        trusted_generic_resolution = False
-        if program is None and item.kind == "spell" and item.card_object_id:
-            record = self.card_record(item.card_object_id)
-            trusted_generic_resolution = bool(
-                record and self._trusted_generic_spell(record)
-            )
-        elif (
-            program is None
-            and item.kind == "spell_copy"
-            and item.context.get("copy_permanent_spell")
-        ):
-            trusted_generic_resolution = True
+        trusted_generic_resolution = trusted_generic_empty_resolution(
+            self, item, program
+        )
         if (
             self.state.config.semantic_policy == "trusted_only"
             and (
@@ -7934,6 +7926,14 @@ class CommanderEngine(
                 list(item.context.get("dynamic_effects") or []),
                 item.default_destination,
                 note=item.notes,
+            )
+            return
+        if trusted_generic_resolution is not None:
+            self._begin_resolve_item(
+                item,
+                [],
+                trusted_generic_resolution.destination,
+                note=trusted_generic_resolution.note,
             )
             return
         if self._program_can_auto_resolve(item):

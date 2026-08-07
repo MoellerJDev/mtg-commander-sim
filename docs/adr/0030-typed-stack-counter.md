@@ -46,6 +46,12 @@ stack-active capability declaration. Cast commit consumes only a current
 trusted CardProgram declaration and pins the result to the created stack
 object. Runtime Oracle-text parsing is not an authority.
 
+The generated runtime registry materializes that closed static declaration;
+it is not merely an Oracle-coverage fact. A separate immutable stack-resolution
+query recognizes an exact spell with no executable resolution node and plans
+its empty resolution. This keeps capability-only spells out of arbiter fallback
+without adding another decision path to `CommanderEngine`.
+
 ## Alternatives
 
 - Extend the string-based general effect switch. Rejected because target
@@ -65,7 +71,9 @@ object. Runtime Oracle-text parsing is not an authority.
 - Countered abilities leave the stack without moving a physical card;
   countered physical spells use the existing canonical zone-transition owner.
 - Exact intrinsic prohibitions participate in capability closure and replay
-  fingerprints. Conditional and granted prohibitions remain fail-closed.
+  fingerprints. An exact capability-only spell resolves as a verified no-op
+  to its ordinary destination. Conditional and granted prohibitions remain
+  fail-closed.
 - The broad Counter keyword action remains untrusted. Conditional-payment,
   optional, modal, aggregate, linked-result, alternate-destination, and other
   unsupported variants remain material residuals.
