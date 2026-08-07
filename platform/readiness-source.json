@@ -7,14 +7,14 @@
   },
   "integration": {
     "active_phase": {
-      "id": "typed_permanent_exile_and_direct_target_harvest",
-      "pull_request": 127,
-      "head": "compiler/generic-exile-target-effect-clauses"
+      "id": "typed_direct_stack_counter_and_intrinsic_prohibition_harvest",
+      "pull_request": 128,
+      "head": "compiler/generic-counter-target-effect-clauses"
     },
-    "branch": "compiler/generic-exile-target-effect-clauses",
+    "branch": "compiler/generic-counter-target-effect-clauses",
     "branch_ancestry": {
-      "focused_branch_base": "98cc889801a361921bb10a7f4c7051fa6a8585ad",
-      "focused_branch_unique_commits_over_main": 5
+      "focused_branch_base": "8d9b1b170c4a9d2ade0cdcdf52505a0974febce2",
+      "focused_branch_unique_commits_over_main": 2
     },
     "pull_requests": [
       {
@@ -889,8 +889,15 @@
         "base": "main",
         "head": "compiler/generic-exile-target-effect-clauses",
         "number": 127,
-        "state": "open",
+        "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/127"
+      },
+      {
+        "base": "main",
+        "head": "compiler/generic-counter-target-effect-clauses",
+        "number": 128,
+        "state": "open",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/128"
       }
     ],
     "tags": [
@@ -905,11 +912,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "ec40701e1545734ac45dd6ba03f1657b1803422a",
+    "feature_head_sha": "59b47ea9e634db4632e6f466885c65c87abb2e42",
     "feature_head_classification": "active_candidate",
-    "certified_head_sha": "5459890c69e4ef09c1cfbf9f87f2bb5b0b6c3013",
+    "certified_head_sha": "36ac91e68672245eec2866820b1c0154b3dcd7e3",
     "certified_head_classification": "current_main_tree_equivalent",
-    "generation_timestamp": "2026-08-07T07:48:44Z"
+    "generation_timestamp": "2026-08-07T11:01:02Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -1234,8 +1241,14 @@
     {
       "id": "targeted_permanent_exile_harvest",
       "name": "Typed permanent-exile transaction and direct-target clauses",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 127 introduces one immutable physical/logical-identity exile request, preflight plan, and typed result owner for a phased-in battlefield permanent. It snapshots owner and current controller, rejects stale identity, control, zone, or phasing before mutation, and delegates the requested move to the canonical replacement-aware zone-change owner while preserving the actual replacement destination and public multiplayer projection. One closed source-spanned compiler template covers mandatory direct-target artifact, creature, enchantment, land, nonland permanent, permanent, artifact-or-enchantment, and creature-or-planeswalker exile across spell, trigger, and activated contexts without runtime Oracle parsing or card identity behavior. Oracle IR v41 promotes 20 Commander cards to exact, trusted, capability-closed, reduces partial cards by 14 and unresolved cards by 6, and removes 47 material residuals with zero construction failures. CommanderEngine and direct writes remain flat while the generic printed-name specificity heuristic decreases by two. Exact-head run 31168367380 passed every required Python, replay, privacy, multiplayer, mutation, package, Windows, generated, and headless-browser job; squash commit 8d9b1b170c4a9d2ade0cdcdf52505a0974febce2 is on main. Temporary, linked, face-down, mass, multi-target, optional, modal, conditional, qualified, cost, nonbattlefield, play-permission, and compound forms remain explicit residuals."
+    },
+    {
+      "id": "typed_direct_stack_counter_harvest",
+      "name": "Typed direct stack-counter effects and intrinsic prohibition",
       "status": "implemented_at_feature_head",
-      "evidence": "The current feature head introduces one immutable physical/logical-identity exile request, preflight plan, and typed result owner for a phased-in battlefield permanent. It snapshots owner and current controller, rejects stale identity, control, zone, or phasing before mutation, and delegates the requested move to the canonical replacement-aware zone-change owner while preserving the actual replacement destination and public multiplayer projection. One closed source-spanned compiler template covers mandatory direct-target artifact, creature, enchantment, land, nonland permanent, permanent, artifact-or-enchantment, and creature-or-planeswalker exile across spell, trigger, and activated contexts without runtime Oracle parsing or card identity behavior. Oracle IR v41 promotes 20 Commander cards to exact, trusted, capability-closed, reduces partial cards by 14 and unresolved cards by 6, and removes 47 material residuals with zero construction failures. CommanderEngine and direct writes remain flat while the generic printed-name specificity heuristic decreases by two. Local validation is limited to changed-module compilation, pinned deterministic generators, architecture/documentation checks, and static freshness; behavioral certification is delegated to public exact-head CI. Temporary, linked, face-down, mass, multi-target, optional, modal, conditional, qualified, cost, nonbattlefield, play-permission, and compound forms remain explicit residuals."
+      "evidence": "The current feature head lowers complete mandatory direct counter clauses over a closed set of spell, activated-ability, and triggered-ability targets into one source-spanned CardProgram V2 operation. Advertisement and command acceptance share the same target schema, resolution revalidates the exact public stack identity, and one typed owner performs represented counterability, stack removal, ordinary spell destination, telemetry, and public journaling. Exact trusted 'This spell can't be countered' declarations are pinned at cast commit without runtime Oracle parsing. Oracle IR v42 promotes 42 Commander cards to exact, trusted, capability-closed and removes 165 material residuals with zero Commander construction failures. CommanderEngine shrinks by 43 logical lines, direct-write identities fall by one, oversized symbols stay flat, and card-specific behavior does not grow. Local validation is limited to changed-module compilation, pinned corpus/census/frontier/reusable-piece generation, architecture/documentation checks, and static freshness; all behavioral, replay, privacy, multiplayer, rollback, and mutation certification is delegated to public exact-head CI. Conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, and conditional or granted prohibition variants remain explicit residuals."
     },
     {
       "id": "rules_snapshot",
@@ -1261,8 +1274,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus bounded runtime components and closed effect-runtime families with strict binding and focused tap token counter destruction permanent_exile return_to_hand damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger attack_transition_keyword_trigger fixed_mana_ability color_set_mana_ability ordinary_cycling_ability and cast_permission owners",
-    "capability_evidence": "implemented_registry_v47_with_83_records_68_trusted_and_675_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus bounded runtime components and closed effect-runtime families with strict binding and focused tap token counter stack_counter destruction permanent_exile return_to_hand damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger attack_transition_keyword_trigger fixed_mana_ability color_set_mana_ability ordinary_cycling_ability and cast_permission owners",
+    "capability_evidence": "implemented_registry_v48_with_78_records_70_trusted_and_696_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -1273,14 +1286,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31164340735,
+      "run_id": 31168367380,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31164340735"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31168367380"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_pr126_exact_head_31164340735_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; certified exact head is tree-equivalent to current squash-merged main",
-      "focused_rules_tests": "targeted_exile_changed_modules_compile_pinned_corpus_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; focused_and_broad regression_replay_privacy_multiplayer_mutation_package_and_browser_validation_deferred_to_public_exact_head_ci_by_repository_policy",
+      "deterministic_tests": "certified_pr127_exact_head_31168367380_sharded_public_ubuntu_windows_package_generated_replay_privacy_multiplayer_mutation_and_headless_browser_pass; certified exact head is tree-equivalent to current squash-merged main",
+      "focused_rules_tests": "typed_stack_counter_changed_modules_compile_pinned_corpus_census_frontier_reusable_piece_generation_architecture_documentation_and_repository_static_checks_pass; no local behavioral regression suite executed; focused_and_broad regression_replay_privacy_multiplayer_rollback_mutation_package_and_browser validation deferred to public exact-head CI by repository policy",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
@@ -1299,6 +1312,7 @@
     "semantic_preflight": "reviewed_compatibility_ready_for_two_pinned_exact_lists; capability_only_strict_match_creation_blocks_on_incomplete_format_capability_inventory"
   },
   "blockers": [
+    "mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted",
     "ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
     "ordinary Deathtouch now has separate typed positive-assignment and final-damage-result capabilities with immutable source snapshots, one-check marker consumption even when the permanent ceases to be a creature, phases out, or survives because it is Indestructible, canonical rollback, multiplayer replay, and generic CardProgram lowering; regeneration, unsupported ability-changing/copy/face-down characteristic producers, and broader damage-assignment modifiers remain blocked, so the aggregate mechanic is not trusted",
     "ordinary Defender now has one typed current-characteristic attack restriction shared by advertised candidates and accepted declarations plus generic CardProgram lowering; permissions that allow Defender creatures to attack, put-attacking effects, unsupported ability-changing/copy/face-down producers, and the broader CR 508 restrictions-and-requirements solver remain blocked, so the aggregate mechanic is not trusted",
@@ -1327,5 +1341,5 @@
     "production accounts, PostgreSQL, multi-process actor ownership, expiry/rate limits, containers, and deployment hardening are incomplete",
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
-  "next_task": "Certify and merge the typed permanent-destruction transaction and direct-target effect-clause candidate. The pinned Commander census promotes 95 exact, trusted, capability-closed cards and removes 190 material residuals; regeneration, can't-be-regenerated, optional, modal, aggregate, qualified, compound, and unsupported continuous, copy, and replacement variants remain separate work."
+  "next_task": "Certify and merge the typed direct stack-counter and intrinsic-prohibition family. The pinned Commander census promotes 42 exact, trusted, capability-closed cards and removes 165 material residuals; conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, and wider counter-prohibition variants remain separate work."
 }

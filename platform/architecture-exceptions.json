@@ -232,6 +232,28 @@
         "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_compiled_exile_is_multiplayer_public_and_replays",
         "tests.test_targeted_exile_effect_clauses.TargetedExileCompilerTests.test_unsupported_exile_variants_remain_material_residuals"
       ]
+    },
+    {
+      "exception_id": "ARCH-EXC-0012",
+      "adr": "docs/adr/0030-typed-stack-counter.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "2b8a233fed455174b270f62c806626eb2e45874973f7a4ea47fb9303a4e922fd",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after typed direct stack-counter extraction.",
+      "rationale": "The typed stack-counter owner removes canonical stack mutation and Oracle-text counterability inspection from CommanderEngine, reduces direct writes, keeps the oversized-symbol count flat, and adds only one closed generic semantic operation plus reviewed generic reason-field literals that the printed-name scanner conservatively matches to the card Reason.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing serialized residual allowances plus counter_stack_target and the reviewed generic reason-field literals described by ADR 0030; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; remove counter_stack_target only if its closed typed handler is retired, and remove reason-field allowances if the specificity scanner gains a canonical structural-field classification.",
+      "target_milestone": "typed public stack targeting, intrinsic counter prohibition, and direct-counter effect-clause closure",
+      "replay_implications": "Game Record v3 remains compatible; source-spanned counter programs, pinned counterability context, canonical stack removal, and public journals preserve exact command replay.",
+      "privacy_implications": "The represented counter family reads only public stack objects and ordinary public destinations and exposes no hidden zones or cross-seat choices.",
+      "security_implications": "The strict handler accepts one closed stack reference, emits a typed intent, revalidates the target at resolution, and grants no callback, arbitrary mutation, transport access, or card-identity dispatch.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
+        "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
+        "tests.test_stack_counter_rules.StackCounterRuleTests.test_intrinsic_uncounterable_spell_survives_typed_counter",
+        "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_unsupported_counter_variants_remain_material_residuals"
+      ]
     }
   ]
 }

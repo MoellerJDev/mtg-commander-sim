@@ -8,7 +8,7 @@
       }
     ],
     "debt_trend": {
-      "baseline_commit": "9a1819822d505d07266b1989a3c93ad463bd7aed",
+      "baseline_commit": "59b47ea9e634db4632e6f466885c65c87abb2e42",
       "dimensions": {
         "card_named_helpers": {
           "baseline": 1,
@@ -16,14 +16,14 @@
           "delta": 0
         },
         "direct_game_state_writes": {
-          "baseline": 130,
+          "baseline": 129,
           "current": 129,
-          "delta": -1
+          "delta": 0
         },
         "engine_logical_lines": {
-          "baseline": 12492,
+          "baseline": 12449,
           "current": 12449,
-          "delta": -43
+          "delta": 0
         },
         "legacy_card_specific_operations": {
           "baseline": 5,
@@ -37,8 +37,8 @@
         },
         "oversized_functions_and_methods": {
           "baseline": 34,
-          "current": 35,
-          "delta": 1
+          "current": 34,
+          "delta": 0
         },
         "oversized_modules": {
           "baseline": 5,
@@ -3527,7 +3527,7 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 108421,
+      "logical_lines": 108403,
       "methods": {
         "dunder": 269,
         "private": 659,
@@ -3676,18 +3676,18 @@
           "physical_lines": 981
         },
         {
-          "file": "mtg_commander_sim/rules/capabilities.py",
-          "functions_and_methods": 27,
-          "language": "python",
-          "logical_lines": 870,
-          "physical_lines": 937
-        },
-        {
           "file": "mtg_commander_sim/effect_runtime/objects_stack_and_tokens.py",
           "functions_and_methods": 21,
           "language": "python",
           "logical_lines": 854,
           "physical_lines": 922
+        },
+        {
+          "file": "mtg_commander_sim/rules/capabilities.py",
+          "functions_and_methods": 28,
+          "language": "python",
+          "logical_lines": 852,
+          "physical_lines": 921
         },
         {
           "file": "mtg_commander_sim/semantic_choices/intent_host.py",
@@ -5580,7 +5580,7 @@
           "physical_lines": 1
         }
       ],
-      "oversized_function_and_method_count": 35,
+      "oversized_function_and_method_count": 34,
       "oversized_functions_and_methods": [
         {
           "end_line": 1645,
@@ -5935,17 +5935,6 @@
           "visibility": "public"
         },
         {
-          "end_line": 874,
-          "file": "mtg_commander_sim/rules/capabilities.py",
-          "kind": "function",
-          "line": 709,
-          "logical_lines": 156,
-          "name": "capability_dependencies_for_node",
-          "physical_lines": 166,
-          "symbol": "capability_dependencies_for_node",
-          "visibility": "public"
-        },
-        {
           "end_line": 281,
           "file": "mtg_commander_sim/card_programs/trust.py",
           "kind": "function",
@@ -6006,7 +5995,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 118455,
+      "physical_lines": 118439,
       "python_file_count": 276,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -6024,7 +6013,7 @@
           "web/src"
         ]
       },
-      "top_level_functions": 1423,
+      "top_level_functions": 1424,
       "web_file_count": 16
     },
     "semantic_handlers": {
@@ -8809,7 +8798,7 @@
         {
           "condition": "isinstance(operation, str) and operation",
           "file": "mtg_commander_sim/rules/capabilities.py",
-          "line": 729,
+          "line": 755,
           "string_literals": [],
           "symbol": "nested_operations"
         },
@@ -10515,7 +10504,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "4dac20dc615c283cdd4d1577e9be5404bf749ad7c1b776e89ba0f8283e594d11"
+          "verified": "c7923e916963aee0fbc9810f5acd2351e96f639aedb9ff08444586bea2adbe46"
         },
         "metadata_complete": true,
         "missing_metadata": [],

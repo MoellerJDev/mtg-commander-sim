@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "4dac20dc615c283cdd4d1577e9be5404bf749ad7c1b776e89ba0f8283e594d11"
+verified: "c7923e916963aee0fbc9810f5acd2351e96f639aedb9ff08444586bea2adbe46"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 generated_source: "coverage/platform-readiness.json"
@@ -11,7 +11,7 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_platform_status.p
 
 # Platform implementation status
 
-Source fingerprint: `4dac20dc615c283cdd4d1577e9be5404bf749ad7c1b776e89ba0f8283e594d11`
+Source fingerprint: `c7923e916963aee0fbc9810f5acd2351e96f639aedb9ff08444586bea2adbe46`
 
 ## Current top-level state
 
@@ -28,11 +28,11 @@ Source fingerprint: `4dac20dc615c283cdd4d1577e9be5404bf749ad7c1b776e89ba0f8283e5
 
 ## Top blockers
 
+- mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted
 - ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked
 - ordinary Deathtouch now has separate typed positive-assignment and final-damage-result capabilities with immutable source snapshots, one-check marker consumption even when the permanent ceases to be a creature, phases out, or survives because it is Indestructible, canonical rollback, multiplayer replay, and generic CardProgram lowering; regeneration, unsupported ability-changing/copy/face-down characteristic producers, and broader damage-assignment modifiers remain blocked, so the aggregate mechanic is not trusted
 - ordinary Defender now has one typed current-characteristic attack restriction shared by advertised candidates and accepted declarations plus generic CardProgram lowering; permissions that allow Defender creatures to attack, put-attacking effects, unsupported ability-changing/copy/face-down producers, and the broader CR 508 restrictions-and-requirements solver remain blocked, so the aggregate mechanic is not trusted
 - ordinary Menace now has one typed current-characteristic conditional blocker minimum shared by projected constraints and accepted declarations plus generic CardProgram lowering; additional-block permissions, unsupported ability-changing/copy/face-down producers, and the broader CR 509 restrictions-and-requirements solver remain blocked, so the aggregate mechanic is not trusted
-- ordinary Basic Landwalk, Fear, Horsemanship, Intimidate, Shadow, and Skulk now consume one shared typed current-characteristics block-legality boundary, while nonbasic or qualified landwalk, conditional or rules-text-equivalent evasion, unresolved variable power, additional-block permissions, and unsupported characteristic producers remain explicit blockers
 
 Complete platform, validation, milestone, and provenance data is in the [machine-readable platform report](../coverage/platform-readiness.json).
 
