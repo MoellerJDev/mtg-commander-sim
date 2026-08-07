@@ -4603,6 +4603,14 @@
     {
       "capability_id": "mana.activated.color_set",
       "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_with_only_a_colorless_legendary_adds_no_mana",
+      "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Cover the official Mox Amber ruling that a qualifying colorless legendary still permits activation while producing no mana because colorless is not a color."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
       "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_without_qualifying_legendary_adds_no_mana",
       "official_rule_ids": ["106.1", "106.4", "605.1a", "605.2", "605.3a", "605.3b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],

@@ -393,6 +393,67 @@ class ColorSetManaRuntimeTests(unittest.TestCase):
         self.assertTrue(source.tapped)
         self.assertEqual(before, dict(player.mana_pool))
 
+    def test_mox_amber_with_only_a_colorless_legendary_adds_no_mana(self):
+        session = self.session(10616)
+        source, ability = self._typed_source(session)
+        engine = session.engine
+        legend = next(
+            card
+            for card in engine.state.cards.values()
+            if card.is_card_object
+            and card.owner == source.controller
+            and card.object_id != source.object_id
+        )
+        engine.move_card(
+            legend.object_id,
+            "battlefield",
+            controller=source.controller,
+            tapped=False,
+            log=False,
+        )
+        original = engine._effective_card_data
+
+        def colorless_legendary(card):
+            value = original(card)
+            if getattr(card, "object_id", card) == legend.object_id:
+                value = dict(value)
+                value["type_line"] = "Legendary Artifact Creature — Construct"
+                value["colors"] = ()
+            return value
+
+        player = engine.state.players[source.controller]
+        before = dict(player.mana_pool)
+        with mock.patch.object(
+            engine,
+            "_effective_card_data",
+            side_effect=colorless_legendary,
+        ), mock.patch.object(
+            engine,
+            "_activated_abilities",
+            return_value=(ability,),
+        ):
+            self.assertEqual(
+                [{}],
+                self._nonzero_modes(
+                    engine,
+                    source.controller,
+                    source,
+                    ability,
+                ),
+            )
+            result = session.act(
+                f"pilot:{source.controller}",
+                {
+                    "a": "activate",
+                    "source": source.ref,
+                    "ability": ability.ability_id,
+                },
+            )
+
+        self.assertTrue(result.ok, result.summary)
+        self.assertTrue(source.tapped)
+        self.assertEqual(before, dict(player.mana_pool))
+
     def test_actual_mox_amber_program_offers_no_colored_mode_without_legendary(self):
         session = self.session(10611)
         engine = session.engine

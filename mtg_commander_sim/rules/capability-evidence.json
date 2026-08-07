@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "registry_fingerprint": "bbdf4957929881bf9a1d0b24d6cdcdc8c59e724e2ac3beb67e7c3596107d8884",
-  "declaration_source_fingerprint": "8c18f336f55e57083a9aa8f83f9e81664e0f0ffcf814cf511970b0df71484fae",
+  "declaration_source_fingerprint": "9327c9ebdb45b83cd9ffeb5d9d02111ea030e6c4ebc3dbf4eded516d45342f0d",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -8171,6 +8171,25 @@
     {
       "capability_id": "mana.activated.color_set",
       "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_with_only_a_colorless_legendary_adds_no_mana",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Cover the official Mox Amber ruling that a qualifying colorless legendary still permits activation while producing no mana because colorless is not a color."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
       "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_without_qualifying_legendary_adds_no_mana",
       "official_rule_ids": [
         "106.1",
@@ -11296,5 +11315,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "085e893512d22120d1cd0c91b389cc3e9912dc4f2a02d3c1a4ff48e84e9b61e4"
+  "fingerprint": "620df489b58e4d9e0b9d4ee27f91ae7bc0fba1aa04980826e0ef194497c70714"
 }
