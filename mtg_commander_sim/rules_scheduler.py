@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import re
@@ -7,6 +8,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from .rules.component_resolution import implementation_component_resolves
 from .util import stable_json
 
 
@@ -489,13 +491,161 @@ def _queue_summary(context: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _test_id_resolves(test_id: str, repository_root: Path) -> bool:
+    """Resolve a fully qualified test by syntax only; never execute it."""
+
+    parts = str(test_id).split(".")
+    if len(parts) < 3 or parts[0] != "tests":
+        return False
+    module_path: Path | None = None
+    remaining: list[str] = []
+    for length in range(len(parts) - 1, 0, -1):
+        candidate = repository_root.joinpath(*parts[:length]).with_suffix(".py")
+        if candidate.is_file():
+            module_path = candidate
+            remaining = parts[length:]
+            break
+    if module_path is None or not remaining:
+        return False
+    try:
+        tree = ast.parse(
+            module_path.read_text(encoding="utf-8"),
+            filename=str(module_path),
+        )
+    except (OSError, SyntaxError, UnicodeError):
+        return False
+    if len(remaining) == 1:
+        return any(
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and node.name == remaining[0]
+            for node in tree.body
+        )
+    if len(remaining) != 2:
+        return False
+    class_name, method_name = remaining
+    return any(
+        isinstance(node, ast.ClassDef)
+        and node.name == class_name
+        and any(
+            isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and child.name == method_name
+            for child in node.body
+        )
+        for node in tree.body
+    )
+
+
+def _selected_bounded_batch_is_complete(
+    context: Mapping[str, Any],
+    capability_registry: Mapping[str, Any],
+    *,
+    repository_root: Path,
+) -> bool:
+    selected = context["selected_source"]
+    target_ids = {
+        str(value)
+        for value in selected.get("target_capability_ids", [])
+        if value
+    }
+    if not target_ids:
+        return False
+    capabilities = {
+        str(row.get("id") or ""): row
+        for row in capability_registry.get("capabilities", [])
+    }
+    targets = [capabilities.get(capability_id) for capability_id in target_ids]
+    if any(target is None for target in targets):
+        return False
+    required_test_fields = {
+        "positive": "positive_tests",
+        "negative": "negative_tests",
+        "interaction": "interaction_tests",
+        "multiplayer": "multiplayer_tests",
+        "privacy": "privacy_tests",
+        "replay": "replay_tests",
+    }
+    for capability in targets:
+        assert capability is not None
+        required_evidence = {
+            str(value) for value in capability.get("required_evidence", [])
+        }
+        if (
+            capability.get("status") != "trusted"
+            or capability.get("blockers")
+            or not {"positive", "negative", "replay"} <= required_evidence
+            or capability.get("implementation_mutation_status") != "killed"
+        ):
+            return False
+        if any(
+            evidence not in required_test_fields
+            or not capability.get(required_test_fields[evidence])
+            for evidence in required_evidence
+        ):
+            return False
+        dependencies = tuple(capability.get("dependencies", ()))
+        dependency_status = capability.get("dependency_fail_closed_status")
+        if dependencies and dependency_status != "passed":
+            return False
+        if not dependencies and dependency_status not in {
+            "passed",
+            "not_applicable",
+        }:
+            return False
+    selected_cases = [
+        context["cases_by_id"][rule_id]
+        for rule_id in context["selected_rule_ids"]
+    ]
+    components = {
+        str(value)
+        for capability in targets
+        if capability is not None
+        for value in capability.get("implementation_components", [])
+    }
+    components.update(
+        str(value)
+        for case in selected_cases
+        for value in case.get("implementation_components", [])
+    )
+    tests = {
+        str(value)
+        for case in selected_cases
+        for value in case.get("executable_test_ids", [])
+    }
+    exit_criteria = tuple(selected.get("exit_criteria", ()))
+    return bool(
+        components
+        and tests
+        and exit_criteria
+        and all(type(value) is str and value for value in exit_criteria)
+        and all(implementation_component_resolves(value) for value in components)
+        and all(_test_id_resolves(value, repository_root) for value in tests)
+    )
+
+
 def build_rules_dependency_queue(
     rule_index: Mapping[str, Any],
     conformance: Mapping[str, Any],
     catalog: Mapping[str, Any],
     capability_registry: Mapping[str, Any],
+    *,
+    repository_root: str | Path | None = None,
 ) -> dict[str, Any]:
     context = _scheduler_context(rule_index, conformance, catalog)
+    repository = (
+        Path(repository_root)
+        if repository_root is not None
+        else Path(__file__).resolve().parents[1]
+    )
+    if _selected_bounded_batch_is_complete(
+        context,
+        capability_registry,
+        repository_root=repository,
+    ):
+        batch_id = str(context["selected_source"].get("batch_id") or "")
+        raise RulesSchedulerError(
+            f"Selected batch {batch_id!r} is already complete; "
+            "select an incomplete dependency-ready bounded batch"
+        )
     queue_items = _queue_items(context, capability_registry)
     payload: dict[str, Any] = {
         "schema_version": RULES_SCHEDULER_SCHEMA_VERSION,
@@ -535,6 +685,7 @@ def build_rules_dependency_queue_from_root(
             / "rules"
             / "capability-registry.json"
         ),
+        repository_root=repository,
     )
 
 

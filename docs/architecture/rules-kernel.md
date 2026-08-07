@@ -27,11 +27,12 @@ typed commit owners; `mana_activation.py`, `tap_state.py`, and
 `token_creation.py`, `destruction.py`, `permanent_exile.py`, and
 `return_to_hand.py` own focused transactions behind typed host protocols.
 `stack_counter.py` owns represented counterability checks, stack removal,
-ordinary countered-spell destination, telemetry, and public journaling.
+replacement-aware countered-spell movement, telemetry, and public journaling.
 Destruction delegates shield removal to the counter owner and permanent
 movement to the zone owner; direct exile and return snapshot owner, controller,
-and object identity before delegating their requested moves to that same
-replacement-aware zone owner.
+and object identity through one closed single-object transition substrate before
+delegating their distinct requested destinations to that same replacement-aware
+zone owner.
 Capability lifecycle and replay hydration have narrowly declared compatibility
 ownership. All other rules helpers return values or operate through an
 approved mutation boundary. Typed semantic handlers receive
@@ -96,9 +97,12 @@ zone-destination changes use the same exact selection journal before mutation.
 Triggers consume normalized events; replacements transform represented events
 before final mutation; state-based actions run to a fixed point. Mandatory
 direct counters now use a closed typed stack-target grammar and an exact
-intrinsic counter-prohibition declaration. Conditional-payment counters,
-alternate destinations, broader prohibitions, and universal draw, damage,
-prevention, and entry participation remain blocked. New rules work must
+intrinsic counter-prohibition declaration. A physical spell countered through
+that owner emits one pre-counter normalized occurrence, followed by a
+card-graveyard occurrence only when the committed destination is the
+graveyard. Countered abilities, spell copies, conditional-payment counters,
+intrinsic alternate destinations, broader prohibitions, and universal draw,
+damage, prevention, and entry participation remain blocked. New rules work must
 identify event/replacement participation and use capability IDs from the
 versioned registry.
 

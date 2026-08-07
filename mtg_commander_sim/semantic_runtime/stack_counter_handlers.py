@@ -3,11 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from .context import ReadOnlyHandlerContext, SemanticNodeError
+from .context import ReadOnlyHandlerContext
+from .direct_target_fields import validate_direct_target_effect
 from .intents import CounterStackIntent, IntentPlan
-
-
-_FIELDS = frozenset({"op", "stack", "reason"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,31 +30,22 @@ class CounterStackTargetHandler:
         effect: Mapping[str, Any],
         context: ReadOnlyHandlerContext,
     ) -> IntentPlan:
-        unknown = sorted(set(effect) - _FIELDS)
-        if unknown:
-            raise SemanticNodeError(
-                "Counter effect has unknown fields: " + ", ".join(unknown)
-            )
-        stack_ref = effect.get("stack")
-        if not isinstance(stack_ref, str) or not stack_ref:
-            raise SemanticNodeError(
-                "Counter effects require one nonempty stack reference"
-            )
-        raw_reason = effect.get("reason")
-        if raw_reason is not None and (
-            not isinstance(raw_reason, str) or not raw_reason
-        ):
-            raise SemanticNodeError(
-                "Counter effect reason must be a nonempty string"
-            )
+        fields = validate_direct_target_effect(
+            effect,
+            context,
+            operation=self.operation,
+            reference_field="stack",
+            family_label="Counter",
+            allow_replacement_selections=False,
+        )
         return IntentPlan(
             operation=self.operation,
             handler_id=self.handler_id,
             intents=(
                 CounterStackIntent(
                     actor=context.actor,
-                    stack_ref=stack_ref,
-                    reason=raw_reason or context.default_reason,
+                    stack_ref=fields.object_ref,
+                    reason=fields.reason,
                     countered_by=context.actor,
                 ),
             ),

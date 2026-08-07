@@ -486,7 +486,7 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         for effect in invalid:
             with self.assertRaisesRegex(
                 GameRuleError,
-                "nonempty permanent reference|unknown fields",
+                "one nonempty target reference|unknown fields",
             ):
                 engine.apply_effect(effect, actor="A")
             self.assertEqual(before, authoritative_state_hash(engine.state))
@@ -663,7 +663,7 @@ class TypedSemanticHandlerTests(unittest.TestCase):
         second = session.act("pilot:B", {"action_id": "pass"})
 
         self.assertFalse(second.ok)
-        self.assertIn("nonempty permanent reference", second.summary)
+        self.assertIn("one nonempty target reference", second.summary)
         self.assertEqual(before, authoritative_state_hash(engine.state))
         self.assertFalse(engine.state.cards[card.object_id].tapped)
         self.assertEqual(

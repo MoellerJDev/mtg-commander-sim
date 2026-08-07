@@ -6214,8 +6214,16 @@
     {
       "capability_id": "stack.counter.effect",
       "evidence_class": "interaction",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_destination_replacement_emits_only_pre_counter_event",
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Apply a graveyard-destination replacement to a countered physical spell, retain the pre-counter event, and omit the post-move graveyard event."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "interaction",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_target_that_leaves_stack_invalidates_resolution",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Revalidate the selected stack object on resolution and counter the countering spell by the represented game-rule path after its sole target leaves the stack."
     },
@@ -6223,7 +6231,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "interaction",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_intrinsic_uncounterable_spell_survives_typed_counter",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Resolve a generated typed counter against an intrinsically uncounterable spell and retain the target on the stack until its ordinary resolution."
     },
@@ -6231,15 +6239,23 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Advertise, submit, resolve, and publicly project one generated direct counter instruction in a four-seat game."
     },
     {
       "capability_id": "stack.counter.effect",
       "evidence_class": "mutation",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_event_derivation_mutant_is_killed",
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill omission of normalized counter-event derivation while preserving the same canonical stack removal and zone movement."
+    },
+    {
+      "capability_id": "stack.counter.effect",
+      "evidence_class": "mutation",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_stack_counter_owner_mutants_are_killed",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Kill suppression of the counterability guard and omission of the canonical stack-removal and countered-spell zone movement owner."
     },
@@ -6247,7 +6263,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "negative",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_source_cannot_target_its_own_stack_object",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Exclude the counter spell or ability's own stack object from the legal target set."
     },
@@ -6255,7 +6271,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "negative",
       "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_targeted_counter_shape_mutants_fail_closed",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Reject altered operations, target references, target domains, source-exclusion rules, and missing mechanic ownership before capability promotion."
     },
@@ -6263,7 +6279,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "negative",
       "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_unsupported_counter_variants_remain_material_residuals",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Keep optional, conditional-payment, mass, qualified, linked-result, and alternate-destination counter clauses outside the bounded grammar."
     },
@@ -6271,7 +6287,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "positive",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Offer and commit an exact generated counter spell through the same target and legality path advertised to the acting player."
     },
@@ -6279,7 +6295,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "positive",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_countered_ability_leaves_card_zones_unchanged",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Remove a represented activated ability from the stack without moving any physical card between zones."
     },
@@ -6287,7 +6303,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "positive",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_handler_lowers_one_strict_typed_counter_intent",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Validate one strict JSON-compatible counter operation and lower it through a read-only handler context to one typed stack-counter intent."
     },
@@ -6295,7 +6311,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "positive",
       "test_id": "tests.test_targeted_counter_effect_clauses.TargetedCounterCompilerTests.test_spell_trigger_and_activated_contexts_share_targeted_counter_lowering",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Lower the same mandatory direct counter instruction from spell, triggered, and activated contexts with exact source spans."
     },
@@ -6303,7 +6319,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "privacy",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Project only public stack and graveyard results while withholding unrelated opposing hand identities."
     },
@@ -6311,7 +6327,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "replay",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Replay the advertised target, paid counter spell, canonical stack removal, public zone result, event journal, and final state hash exactly."
     },
@@ -6319,7 +6335,7 @@
       "capability_id": "stack.counter.effect",
       "evidence_class": "rollback",
       "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_missing_stack_target_rolls_back_without_mutation",
-      "official_rule_ids": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "official_rule_ids": ["115.1", "115.5", "603.10e", "608.2b", "701.6", "701.6a", "701.6b"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Reject a missing stack identity before any stack, zone, telemetry, or event mutation."
     },
@@ -6855,15 +6871,23 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "interaction",
       "test_id": "tests.test_oracle_ir.OracleIRTests.test_self_dies_trigger_uses_last_known_controller",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
     {
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "interaction",
+      "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_countered_spell_replaced_to_exile_has_no_graveyard_event",
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Derive the pre-counter occurrence while withholding the card-graveyard occurrence when replacement changes the committed destination to exile."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "interaction",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerIntegrationTests.test_source_that_leaves_still_observes_simultaneous_death",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -6871,7 +6895,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_simultaneous_semantic_triggers_use_apnap_and_owner_order",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -6879,15 +6903,31 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "mutation",
       "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_zone_trigger_detection_mutant_is_killed",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
     {
       "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_event_derivation_mutant_is_killed",
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill omission of the normalized counter-event derivation at the shared committed zone-change boundary."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "negative",
+      "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_counter_transition_kind_is_closed_and_typed",
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject an untyped or unknown transition classification before event derivation."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "negative",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_occurrence_rejects_malformed_and_non_event_moves_are_empty",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -6895,15 +6935,23 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "positive",
       "test_id": "tests.test_preflight_v080.NormalizedZoneEventTests.test_self_dies_trigger_uses_last_known_battlefield_zone",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
     {
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "positive",
+      "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_countered_physical_spell_derives_exact_normalized_events",
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Derive exactly one pre-counter spell event followed by one post-move card-graveyard event for a physical spell countered to its owner's graveyard."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "positive",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_derives_exact_enter_and_death_events",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
     },
@@ -6911,7 +6959,7 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "privacy",
       "test_id": "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_private_library_to_hand_move_produces_no_public_trigger_event",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Do not derive a public normalized trigger event for an ordinary private library-to-hand move; visibility-dependent hidden-zone trigger families remain excluded and fail closed."
     },
@@ -6919,9 +6967,17 @@
       "capability_id": "trigger.event.normalized_zone_change",
       "evidence_class": "replay",
       "test_id": "tests.test_oracle_ir.OracleIRTests.test_fixed_life_self_enter_trigger_replays_exactly",
-      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a"],
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
       "supported_profiles": ["traditional", "commander_duel", "commander_review"],
       "applicability_note": "Derive represented permanent-enter, permanent-leave, and creature-dies trigger occurrences from immutable facts captured around the canonical committed zone change, using pre-event source facts for leaves-the-battlefield detection."
+    },
+    {
+      "capability_id": "trigger.event.normalized_zone_change",
+      "evidence_class": "replay",
+      "test_id": "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
+      "official_rule_ids": ["603.2", "603.6", "603.6a", "603.6c", "603.10", "603.10a", "603.10e"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the countered-spell transition, normalized event ordering, trigger journal inputs, and final state hash exactly."
     },
     {
       "capability_id": "trigger.placement.apnap",

@@ -38757,26 +38757,35 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "countering does not dispatch a generic event carrying the pre-counter spell and ability snapshot",
-        "spell-copy and uncounterable interactions lack a look-back trigger matrix"
+        "countered abilities and spell copies without physical card movement do not yet dispatch the generic counter occurrence",
+        "generic spell-or-ability counter trigger compilation and the full look-back interaction matrix remain incomplete"
       ],
       "case_id": "cr-603.10e",
       "case_version": 1,
       "classification": "behavioral",
-      "covered_scenarios": [],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "603.10"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
-        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule"
+        "tests.test_stack_counter_rules.StackCounterRuleTests.test_compiled_counter_targets_exact_stack_domains_and_replays",
+        "tests.test_stack_counter_rules.StackCounterRuleTests.test_counter_destination_replacement_emits_only_pre_counter_event",
+        "tests.test_triggered_abilities.TriggeredAbilityRuleTests.test_contract_traces_every_cr_603_rule",
+        "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_countered_physical_spell_derives_exact_normalized_events",
+        "tests.test_zone_trigger_events.ZoneTriggerEventModelTests.test_countered_spell_replaced_to_exile_has_no_graveyard_event"
       ],
       "implementation_components": [
-        "CommanderEngine._counter_stack_item",
-        "CommanderEngine._dispatch_semantic_event"
+        "mtg_commander_sim.stack_counter.counter_stack_item",
+        "mtg_commander_sim.zone_trigger_events.normalized_zone_trigger_events",
+        "mtg_commander_sim.zone_trigger_processing.dispatch_zone_change_occurrence"
       ],
       "notes": [
-        "Moving a countered object is implemented, but its trigger exception is not."
+        "The physical countered-spell slice now has a typed pre-counter event and replacement-aware post-move graveyard event; the broader spell-or-ability rule remains blocked."
       ],
       "required_scenarios": [
         "positive",

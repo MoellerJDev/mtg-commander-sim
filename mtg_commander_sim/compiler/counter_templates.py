@@ -5,6 +5,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping
 
+from .direct_target import (
+    compiled_direct_target,
+    direct_target_effect,
+    direct_target_slug,
+    stack_target_schema,
+)
+
 
 class CounterTarget(str, Enum):
     SPELL = "spell"
@@ -70,16 +77,15 @@ class TargetedCounterEffectTemplate:
 
     @property
     def template_id(self) -> str:
-        slug = (
-            self.target.value.replace(",", "")
-            .replace(" or ", "-or-")
-            .replace(" ", "-")
-        )
+        slug = direct_target_slug(self.target.value)
         return f"counter-target-{slug}-v2"
 
     @property
     def effects(self) -> tuple[Mapping[str, Any], ...]:
-        return ({"op": "counter_stack_target", "stack": "$target.0"},)
+        return direct_target_effect(
+            "counter_stack_target",
+            reference_field="stack",
+        )
 
     @property
     def target_schema(self) -> Mapping[str, Any]:
@@ -94,27 +100,22 @@ class TargetedCounterEffectTemplate:
             }
             else ["spell"]
         )
-        schema: dict[str, Any] = {
-            "zones": ["stack"],
-            "categories": categories,
-            "source_exclusion": True,
-            "count": 1,
-        }
+        options: dict[str, Any] = {}
         if self.target in _TYPE_DOMAINS:
-            schema["types_any"] = list(_TYPE_DOMAINS[self.target])
+            options["types_any"] = _TYPE_DOMAINS[self.target]
         elif self.target is CounterTarget.NONCREATURE_SPELL:
-            schema["types_none"] = ["creature"]
+            options["types_none"] = ("creature",)
         elif self.target in _COLOR_DOMAINS:
-            schema["colors_any"] = list(_COLOR_DOMAINS[self.target])
+            options["colors_any"] = _COLOR_DOMAINS[self.target]
         elif self.target is CounterTarget.NONBLUE_SPELL:
-            schema["predicate"] = "nonblue_spell"
+            options["predicate"] = "nonblue_spell"
         elif self.target is CounterTarget.COLORLESS_SPELL:
-            schema["colorless"] = True
+            options["colorless"] = True
         elif self.target is CounterTarget.ACTIVATED_ABILITY:
-            schema["predicate"] = "activated_ability"
+            options["predicate"] = "activated_ability"
         elif self.target is CounterTarget.TRIGGERED_ABILITY:
-            schema["predicate"] = "triggered_ability"
-        return schema
+            options["predicate"] = "triggered_ability"
+        return stack_target_schema(categories=categories, **options)
 
     @property
     def mechanics(self) -> tuple[str, ...]:
@@ -128,11 +129,11 @@ class TargetedCounterEffectTemplate:
         Mapping[str, Any],
         tuple[str, ...],
     ]:
-        return (
-            self.template_id,
-            self.effects,
-            self.target_schema,
-            self.mechanics,
+        return compiled_direct_target(
+            template_id=self.template_id,
+            effects=self.effects,
+            target_schema=self.target_schema,
+            mechanics=self.mechanics,
         )
 
 

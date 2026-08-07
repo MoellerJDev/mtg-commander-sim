@@ -137,10 +137,15 @@ from .trigger_discovery import (
     semantic_event_matches,
     semantic_event_value,
 )
-from .zone_trigger_events import ZoneChangeOccurrence
+from .zone_trigger_events import (
+    validate_zone_transition_request,
+    ZoneChangeOccurrence,
+    ZoneTransitionKind,
+)
 from .zone_trigger_processing import (
     capture_departure_trigger_sources,
     dispatch_zone_change_occurrence,
+    semantic_event_sources,
 )
 from .life_state import (
     pay_life_cost,
@@ -1572,10 +1577,9 @@ class CommanderEngine(
         replacement_source_zones: Mapping[str, str] | None = None,
         replacement_selections: Sequence[str | None | Mapping[str, Any]] = (),
         prepared_replacement: PreparedZoneChange | None = None,
+        transition_kind: ZoneTransitionKind = ZoneTransitionKind.ORDINARY,
     ) -> CardInstance:
-        if destination not in {"library", "hand", "battlefield", "graveyard", "exile", "command", "outside"}:
-            raise GameRuleError(f"Unsupported destination {destination}")
-        card = self.state.cards[object_id]
+        card = validate_zone_transition_request(self.state.cards, object_id, destination, transition_kind)
         requested_destination = destination
         origin = card.zone
         library_position: str | int | None = None
@@ -1894,7 +1898,7 @@ class CommanderEngine(
                 departure_source_characteristics=(
                     departure_snapshot.source_characteristics
                 ),
-                reason=reason,
+                reason=reason, transition_kind=transition_kind,
             )
         return card
 
@@ -1937,27 +1941,9 @@ class CommanderEngine(
         *,
         zones: set[str] | None = None,
     ) -> list[CardInstance]:
-        """Return cards whose visible zone can host a semantic event handler.
-
-        Library cards are deliberately excluded.  Hand handlers are allowed so
-        long as their semantic program explicitly declares ``active_zone=hand``;
-        the resulting trigger remains controlled and visible through the normal
-        projected stack protocol.
-        """
-
-        active_zones = zones or {
-            "battlefield",
-            "graveyard",
-            "exile",
-            "command",
-            "hand",
-        }
-        return [
-            card
-            for card in self.state.cards.values()
-            if card.zone in active_zones
-            and (card.controller in self.active_seats or card.owner in self.active_seats)
-        ]
+        return semantic_event_sources(
+            self.state.cards.values(), active_seats=self.active_seats, zones=zones
+        )
 
     def _dispatch_zone_change_events(
         self,
@@ -1976,6 +1962,7 @@ class CommanderEngine(
             str, Mapping[str, Any]
         ],
         reason: str,
+        transition_kind: ZoneTransitionKind = ZoneTransitionKind.ORDINARY,
         trigger_batch: list[StackItem] | None = None,
     ) -> None:
         """Compatibility adapter from committed moves to immutable facts."""
@@ -1999,6 +1986,7 @@ class CommanderEngine(
             previous_attached_to=origin_attached_to,
             tapped=card.tapped,
             cause=reason,
+            transition_kind=transition_kind,
         )
         owns_trigger_batch = trigger_batch is None
         event_triggers = trigger_batch if trigger_batch is not None else []

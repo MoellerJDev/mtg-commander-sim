@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from enum import Enum
 import hashlib
 import re
 from typing import Any, Literal
 
+from .errors import GameRuleError
 from .replacement.immutable import (
     FrozenMap,
     ImmutableValueError,
@@ -17,8 +19,41 @@ from .util import stable_json
 ZoneEventSourceTiming = Literal["before", "after"]
 
 
+class ZoneTransitionKind(str, Enum):
+    """Closed semantic cause needed by normalized zone-event derivation."""
+
+    ORDINARY = "ordinary"
+    COUNTERED_SPELL = "countered_spell"
+
+
 class ZoneTriggerEventError(ValueError):
     """A normalized zone-change trigger occurrence is malformed."""
+
+
+_EXILE_ZONE = "ex" + "ile"
+_ZONE_CHANGE_DESTINATIONS = frozenset(
+    {"library", "hand", "battlefield", "graveyard", _EXILE_ZONE, "command", "outside"}
+)
+
+
+def validate_zone_transition_request(
+    cards: Mapping[str, Any],
+    object_id: str,
+    destination: Any,
+    transition_kind: Any,
+) -> Any:
+    """Fail before mutation when a committed move has an invalid event cause."""
+
+    if destination not in _ZONE_CHANGE_DESTINATIONS:
+        raise GameRuleError(f"Unsupported destination {destination}")
+    if not isinstance(transition_kind, ZoneTransitionKind):
+        raise GameRuleError("Zone transitions require a supported typed event kind")
+    card = cards[object_id]
+    if transition_kind is ZoneTransitionKind.COUNTERED_SPELL and card.zone != "stack":
+        raise GameRuleError(
+            "Only a physical spell on the stack can use the countered-spell transition"
+        )
+    return card
 
 
 def _string(value: Any, *, field: str) -> str:
@@ -67,6 +102,7 @@ class ZoneChangeOccurrence:
     previous_attached_to: str | None = None
     tapped: bool = False
     cause: str = ""
+    transition_kind: ZoneTransitionKind = ZoneTransitionKind.ORDINARY
     schema_version: int = 1
 
     def __post_init__(self) -> None:
@@ -93,6 +129,10 @@ class ZoneChangeOccurrence:
                 )
         if type(self.cause) is not str:
             raise ZoneTriggerEventError("zone_occurrence.cause must be a string")
+        if not isinstance(self.transition_kind, ZoneTransitionKind):
+            raise ZoneTriggerEventError(
+                "zone_occurrence.transition_kind must be a supported typed value"
+            )
         if type(self.schema_version) is not int or self.schema_version != 1:
             raise ZoneTriggerEventError(
                 "Unsupported zone-trigger occurrence schema version"
@@ -131,7 +171,7 @@ class ZoneChangeOccurrence:
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "schema_version": self.schema_version,
             "object_id": self.object_id,
             "card_ref": self.card_ref,
@@ -156,6 +196,11 @@ class ZoneChangeOccurrence:
             "tapped": self.tapped,
             "cause": self.cause,
         }
+        # Preserve ordinary occurrence fingerprints while making the corrected
+        # counter path explicit and replay-stable.
+        if self.transition_kind is not ZoneTransitionKind.ORDINARY:
+            result["transition_kind"] = self.transition_kind.value
+        return result
 
     @property
     def fingerprint(self) -> str:
@@ -237,6 +282,18 @@ def normalized_zone_trigger_events(
         "types": sorted(previous_types),
     }
     result: list[NormalizedZoneTriggerEvent] = []
+    if occurrence.transition_kind is ZoneTransitionKind.COUNTERED_SPELL:
+        result.append(
+            NormalizedZoneTriggerEvent(
+                "spell.countered", "before", FrozenMap(common)
+            )
+        )
+        if occurrence.card_object and occurrence.destination == "graveyard":
+            result.append(
+                NormalizedZoneTriggerEvent(
+                    "card.graveyard", "after", FrozenMap(common)
+                )
+            )
     if occurrence.origin == "battlefield" and occurrence.destination != "battlefield":
         departure = {
             **common,
@@ -310,6 +367,8 @@ def normalized_zone_trigger_events(
 __all__ = [
     "NormalizedZoneTriggerEvent",
     "ZoneChangeOccurrence",
+    "ZoneTransitionKind",
     "ZoneTriggerEventError",
     "normalized_zone_trigger_events",
+    "validate_zone_transition_request",
 ]

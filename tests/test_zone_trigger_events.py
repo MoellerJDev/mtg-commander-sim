@@ -6,6 +6,7 @@ from common import keep_all, load_assets, make_session
 from mtg_commander_sim.semantics import SemanticProgram
 from mtg_commander_sim.zone_trigger_events import (
     ZoneChangeOccurrence,
+    ZoneTransitionKind,
     ZoneTriggerEventError,
     normalized_zone_trigger_events,
 )
@@ -135,6 +136,48 @@ class ZoneTriggerEventModelTests(unittest.TestCase):
         )
 
         self.assertEqual((), normalized_zone_trigger_events(moved))
+
+    def test_countered_physical_spell_derives_exact_normalized_events(self):
+        countered = occurrence(
+            origin="stack",
+            destination="graveyard",
+            previous_characteristics={"type_line": "Instant"},
+            current_characteristics={"type_line": "Instant"},
+            transition_kind=ZoneTransitionKind.COUNTERED_SPELL,
+        )
+
+        events = normalized_zone_trigger_events(countered)
+
+        self.assertEqual(
+            ["spell.countered", "card.graveyard"],
+            [event.kind for event in events],
+        )
+        self.assertEqual(
+            ["before", "after"],
+            [event.source_timing for event in events],
+        )
+        self.assertEqual(
+            ZoneTransitionKind.COUNTERED_SPELL.value,
+            countered.to_dict()["transition_kind"],
+        )
+
+    def test_countered_spell_replaced_to_exile_has_no_graveyard_event(self):
+        countered = occurrence(
+            origin="stack",
+            destination="exile",
+            previous_characteristics={"type_line": "Sorcery"},
+            current_characteristics={"type_line": "Sorcery"},
+            transition_kind=ZoneTransitionKind.COUNTERED_SPELL,
+        )
+
+        events = normalized_zone_trigger_events(countered)
+
+        self.assertEqual(["spell.countered"], [event.kind for event in events])
+        self.assertEqual("before", events[0].source_timing)
+
+    def test_counter_transition_kind_is_closed_and_typed(self):
+        with self.assertRaisesRegex(ZoneTriggerEventError, "supported typed value"):
+            occurrence(transition_kind="countered_spell")
 
 
 class ZoneTriggerIntegrationTests(unittest.TestCase):

@@ -5,6 +5,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Mapping
 
+from .direct_target import (
+    compiled_direct_target,
+    direct_target_effect,
+    permanent_target_schema,
+)
+
 
 class TapStateAction(str, Enum):
     """Closed action vocabulary for one permanent tap-state instruction."""
@@ -41,23 +47,20 @@ class TargetedTapStateEffectTemplate:
 
     @property
     def effects(self) -> tuple[Mapping[str, Any], ...]:
-        return (
-            {
-                "op": self.action.value,
-                "card": "$target.0",
-            },
+        return direct_target_effect(
+            self.action.value,
+            reference_field="card",
         )
 
     @property
     def target_schema(self) -> Mapping[str, Any]:
-        schema: dict[str, Any] = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "count": 1,
-        }
-        if self.target is not TapStateTarget.PERMANENT:
-            schema["types_any"] = [self.target.value]
-        return schema
+        return permanent_target_schema(
+            types_any=(
+                ()
+                if self.target is TapStateTarget.PERMANENT
+                else (self.target.value,)
+            )
+        )
 
     @property
     def mechanics(self) -> tuple[str, ...]:
@@ -71,11 +74,11 @@ class TargetedTapStateEffectTemplate:
         Mapping[str, Any],
         tuple[str, ...],
     ]:
-        return (
-            self.template_id,
-            self.effects,
-            self.target_schema,
-            self.mechanics,
+        return compiled_direct_target(
+            template_id=self.template_id,
+            effects=self.effects,
+            target_schema=self.target_schema,
+            mechanics=self.mechanics,
         )
 
 

@@ -20,6 +20,7 @@ _DEPARTURE_EVENTS = frozenset(
         "creature.dies",
         "permanent.graveyard",
         "permanent.leave",
+        "spell.countered",
     }
 )
 _ENTER_EVENTS = frozenset(
