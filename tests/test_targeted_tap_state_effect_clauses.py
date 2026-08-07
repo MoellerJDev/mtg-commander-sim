@@ -105,7 +105,7 @@ class TargetedTapStateCompilerTests(unittest.TestCase):
     def setUpClass(cls):
         cls.temporary = tempfile.TemporaryDirectory()
         cls.db = focused_card_database(cls.temporary.name)
-        cls.base = cls.db.lookup("Lightning Bolt")
+        cls.base = cls.db.lookup("Lightning Greaves")
         cls.capabilities = load_default_capability_registry()
 
     @classmethod
