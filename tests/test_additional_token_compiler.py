@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 
 from common import DB_PATH
-from quorune.carddb import CardDatabase
+from quorune.carddb import CardDatabase, CardRecord
 from quorune.compiler.token_templates import (
     static_additional_token_replacement_handler,
 )
@@ -18,6 +18,34 @@ from quorune.semantic_runtime import (
     TokenCreationReplacementContext,
 )
 from quorune.semantics import SemanticRegistry
+
+
+def additional_token_record(
+    name: str,
+    oracle_text: str,
+    suffix: int,
+) -> CardRecord:
+    return CardRecord(
+        oracle_id=f"00000000-0000-4000-8000-{suffix:012d}",
+        name=name,
+        mana_cost="{2}",
+        mana_value=2.0,
+        type_line="Artifact",
+        oracle_text=oracle_text,
+        power=None,
+        toughness=None,
+        loyalty=None,
+        defense=None,
+        colors=(),
+        color_identity=(),
+        keywords=(),
+        produced_mana=(),
+        layout="normal",
+        released_at="2026-01-01",
+        legalities={"commander": "legal"},
+        faces=(),
+        raw={},
+    )
 
 
 class AdditionalTokenCompilerTests(unittest.TestCase):
@@ -105,16 +133,37 @@ class AdditionalTokenCompilerTests(unittest.TestCase):
                 )
 
     def test_pinned_family_emits_exact_source_spanned_runtime_nodes(self):
-        for card_name in (
-            "Xorn",
-            "Peregrin Took",
-            "Tippy-Toe, Terrific Partner",
-            "Jolene, the Plunder Queen",
-            "Stridehangar Automaton",
-            "Worldwalker Helm",
-        ):
-            with self.subTest(card_name=card_name):
-                record = self.db.lookup(card_name)
+        fixtures = (
+            additional_token_record(
+                "Generic Treasure Replacement Fixture",
+                "If you would create one or more Treasure tokens, instead "
+                "create those tokens plus an additional Treasure token.",
+                450001,
+            ),
+            additional_token_record(
+                "Generic Food Replacement Fixture",
+                "If one or more tokens would be created under your control, "
+                "those tokens plus an additional Food token are created "
+                "instead.",
+                450002,
+            ),
+            additional_token_record(
+                "Generic Thopter Replacement Fixture",
+                "If one or more artifact tokens would be created under your "
+                "control, those tokens plus an additional 1/1 colorless "
+                "Thopter artifact creature token with flying are created "
+                "instead.",
+                450003,
+            ),
+            additional_token_record(
+                "Generic Map Replacement Fixture",
+                "If you would create one or more artifact tokens, instead "
+                "create those tokens plus an additional Map token.",
+                450004,
+            ),
+        )
+        for record in fixtures:
+            with self.subTest(card_name=record.name):
                 ir = compile_oracle_card(
                     record,
                     capability_registry=self.capabilities,

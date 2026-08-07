@@ -89,19 +89,21 @@ class TokenCreationReplacementTests(unittest.TestCase):
             if card.owner == "A" and card.printed_name == name
         )
 
-    def install_generated_xorn(self, engine):
-        xorn = self.db.lookup("Xorn")
+    def install_generated_worldwalker(self, engine):
+        record = self.db.lookup("Worldwalker Helm")
+        for program in engine.semantics.programs_for_oracle(record.oracle_id):
+            if program.event == "token.create":
+                engine.semantics.remove(program.key)
         result = register_generated_programs(
             self.db,
             engine.semantics,
-            (xorn,),
+            (record,),
             capability_registry=load_default_capability_registry(),
             capability_profile="commander_review",
             promote_exact_runtime_handlers=True,
         )
         self.assertEqual(1, result["runtime_handlers_promoted"])
-        source = self.card(engine, "Stridehangar Automaton")
-        source.oracle_id = xorn.oracle_id
+        source = self.card(engine, "Worldwalker Helm")
         source.printed_name = "Anonymous replacement source"
         engine.move_card(source.object_id, "battlefield", controller="A")
         return source
@@ -151,7 +153,7 @@ class TokenCreationReplacementTests(unittest.TestCase):
     def test_generic_compiler_program_drives_runtime_without_name_dispatch(self):
         session = self.session(12505011)
         engine = session.engine
-        self.install_generated_xorn(engine)
+        self.install_generated_worldwalker(engine)
 
         created = engine.create_token(
             "A",
@@ -162,7 +164,7 @@ class TokenCreationReplacementTests(unittest.TestCase):
 
         self.assertEqual(2, len(created))
         self.assertEqual(
-            ["Treasure", "Treasure"],
+            ["Map", "Treasure"],
             sorted(
                 engine._resolve_object("A", ref).printed_name
                 for ref in created
@@ -655,7 +657,7 @@ class TokenCreationReplacementTests(unittest.TestCase):
     def test_generic_additional_token_program_replays_exactly(self):
         session = self.session(12505031)
         engine = session.engine
-        self.install_generated_xorn(engine)
+        self.install_generated_worldwalker(engine)
         program = SemanticProgram(
             key="test:generic-treasure-token-effect",
             label="Create a Treasure token",
@@ -696,13 +698,16 @@ class TokenCreationReplacementTests(unittest.TestCase):
             result = session.act(principal, {"action_id": "pass"})
             self.assertTrue(result.ok, result.summary)
         self.assertEqual(
-            2,
-            sum(
-                card.is_token
-                and card.zone == "battlefield"
-                and card.printed_name == "Treasure"
-                for card in engine.state.cards.values()
-            ),
+            {"Map": 1, "Treasure": 1},
+            {
+                name: sum(
+                    card.is_token
+                    and card.zone == "battlefield"
+                    and card.printed_name == name
+                    for card in engine.state.cards.values()
+                )
+                for name in ("Map", "Treasure")
+            },
         )
 
         with tempfile.TemporaryDirectory() as temporary:
