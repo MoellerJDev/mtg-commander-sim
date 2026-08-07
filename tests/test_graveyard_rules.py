@@ -12,6 +12,7 @@ from quorune.engine import StateInvariantError
 from quorune.model import StackItem
 from quorune.replacement_effects import (
     ReplacementChoiceRequired,
+    ReplacementEffectError,
     ReplacementEventBatch,
 )
 from quorune.record import (
@@ -644,6 +645,43 @@ class GraveyardRuleTests(unittest.TestCase):
                 prepared=prepared,
             )
         self.assertEqual(before, authoritative_state_hash(engine.state))
+
+    def test_inapplicable_replacement_does_not_require_an_eliminated_chooser(self):
+        session = self.make_session(40415)
+        engine = session.engine
+        voidwalker = self.card(engine, "B", "Dauthi Voidwalker")
+        engine.move_card(
+            voidwalker.object_id,
+            "battlefield",
+            controller="B",
+            log=False,
+        )
+        departing_commander = self.card(engine, "A", "Mishra, Eminent One")
+        engine.state.players["A"].in_game = False
+
+        snapshot = capture_zone_change_replacement_snapshot(
+            engine,
+            ((departing_commander.object_id, "outside"),),
+        )
+        prepared = prepare_zone_change_replacement_snapshot(snapshot)
+
+        self.assertTrue(snapshot.effects)
+        self.assertEqual(["B"], list(snapshot.apnap_order))
+        self.assertEqual(
+            "outside",
+            prepared[departing_commander.object_id].destination,
+        )
+        self.assertEqual((), prepared[departing_commander.object_id].journal)
+
+        applicable = capture_zone_change_replacement_snapshot(
+            engine,
+            ((departing_commander.object_id, "graveyard"),),
+        )
+        with self.assertRaisesRegex(
+            ReplacementEffectError,
+            "missing from APNAP order",
+        ):
+            prepare_zone_change_replacement_snapshot(applicable)
 
     def test_dauthi_replacement_replays_without_oracle_id_dispatch(self):
         session = self.make_session(40408)

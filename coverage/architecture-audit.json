@@ -3587,7 +3587,7 @@
           "visibility": "private"
         }
       ],
-      "logical_lines": 111276,
+      "logical_lines": 111288,
       "methods": {
         "dunder": 282,
         "private": 664,
@@ -3788,8 +3788,8 @@
           "file": "quorune/semantic_runtime/zone_replacements.py",
           "functions_and_methods": 25,
           "language": "python",
-          "logical_lines": 754,
-          "physical_lines": 812
+          "logical_lines": 770,
+          "physical_lines": 828
         },
         {
           "file": "quorune/replacement/ordering.py",
@@ -4688,13 +4688,6 @@
           "physical_lines": 228
         },
         {
-          "file": "quorune/semantic_runtime/zone_replacement_model.py",
-          "functions_and_methods": 7,
-          "language": "python",
-          "logical_lines": 197,
-          "physical_lines": 225
-        },
-        {
           "file": "quorune/semantic_choices/object_selection.py",
           "functions_and_methods": 2,
           "language": "python",
@@ -4707,6 +4700,13 @@
           "language": "python",
           "logical_lines": 193,
           "physical_lines": 201
+        },
+        {
+          "file": "quorune/semantic_runtime/zone_replacement_model.py",
+          "functions_and_methods": 7,
+          "language": "python",
+          "logical_lines": 193,
+          "physical_lines": 221
         },
         {
           "file": "quorune/affected_permanents.py",
@@ -6132,7 +6132,7 @@
           "physical_lines": 1706
         }
       ],
-      "physical_lines": 121626,
+      "physical_lines": 121638,
       "python_file_count": 287,
       "review_thresholds": {
         "function_logical_lines_review": 150,
@@ -10724,7 +10724,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "a3c148e6937fce00366a56a8d193d4511939563b03797c6c0100702eb4ebe7bd"
+          "verified": "e5fa94b7779f50c720cb1310912a3442da9f5aade894ef19d92f8c3e864f8e3c"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -11149,8 +11149,8 @@
       "named_deterministic_fuzz_cases": 1
     },
     "python": {
-      "conventional_ast_cases": 1905,
-      "discovered_total": 5205,
+      "conventional_ast_cases": 1906,
+      "discovered_total": 5206,
       "generated_rule_conformance_cases": 3300,
       "named_cross_cutting_counts": {
         "compiler_named": 54,

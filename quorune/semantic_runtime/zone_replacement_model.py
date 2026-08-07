@@ -192,10 +192,6 @@ class ZoneChangeReplacementSnapshot:
             raise ZoneReplacementError(
                 "Zone replacement snapshots require unique affected objects"
             )
-        if any(subject.chooser not in order for subject in subjects):
-            raise ZoneReplacementError(
-                "A zone replacement chooser is absent from APNAP order"
-            )
         effects = tuple(self.effects)
         if any(not isinstance(effect, ReplacementEffect) for effect in effects):
             raise ZoneReplacementError(

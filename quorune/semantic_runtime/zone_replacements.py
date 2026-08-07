@@ -15,6 +15,7 @@ from ..replacement_effects import (
     ReplacementSelection,
     ReplacementChoiceRequired,
     advance_replacement_batch,
+    replacement_choice,
 )
 from ..rules.capabilities import load_default_capability_registry
 from .component_registry import RuntimeComponentRegistry, exact_fields
@@ -645,7 +646,12 @@ def prepare_zone_change_replacement_snapshot(
     events = tuple(
         _snapshot_event(snapshot, subject) for subject in snapshot.subjects
     )
-    if not snapshot.effects:
+    applicable = tuple(
+        (subject, event)
+        for subject, event in zip(snapshot.subjects, events, strict=True)
+        if replacement_choice(event, snapshot.effects) is not None
+    )
+    if not applicable:
         if selections:
             raise error_type(
                 "Replacement selections were supplied without an applicable "
@@ -655,18 +661,20 @@ def prepare_zone_change_replacement_snapshot(
             subject.object_id: _prepared_from_event(
                 subject,
                 event,
-                effects=(),
+                effects=snapshot.effects,
                 journal=(),
             )
             for subject, event in zip(snapshot.subjects, events, strict=True)
         }
+    applicable_subjects = tuple(subject for subject, _event in applicable)
+    applicable_events = tuple(event for _subject, event in applicable)
     progress = advance_replacement_batch(
         ReplacementEventBatch(
             batch_id=(
                 f"replacement:zone.batch:{snapshot.revision}:"
                 f"{snapshot.event_sequence + 1}"
             ),
-            events=events,
+            events=applicable_events,
             apnap_order=snapshot.apnap_order,
         ),
         snapshot.effects,
@@ -678,9 +686,17 @@ def prepare_zone_change_replacement_snapshot(
             effects=snapshot.effects,
             pending=progress.pending,
         )
-    prepared: dict[str, PreparedZoneChange] = {}
+    prepared: dict[str, PreparedZoneChange] = {
+        subject.object_id: _prepared_from_event(
+            subject,
+            event,
+            effects=snapshot.effects,
+            journal=(),
+        )
+        for subject, event in zip(snapshot.subjects, events, strict=True)
+    }
     for subject, event in zip(
-        snapshot.subjects,
+        applicable_subjects,
         progress.batch.events,
         strict=True,
     ):
