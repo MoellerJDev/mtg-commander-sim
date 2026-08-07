@@ -10,7 +10,7 @@
     "branch": "compiler/generic-return-target-effect-clauses",
     "branch_ancestry": {
       "focused_branch_base": "322be25dc2bbf838ad89c7eb79c86a431671e2f4",
-      "focused_branch_unique_commits_over_main": 3
+      "focused_branch_unique_commits_over_main": 4
     },
     "pull_requests": [
       {
@@ -880,11 +880,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "9d4278417f57290e8f05ef2fcd949da19fbdfec3",
+    "feature_head_sha": "62dfd0ba6da79e2ed60c3bb713a6725f87e01dd5",
     "feature_head_classification": "active_candidate",
     "certified_head_sha": "7fc841330f8aa2b3cc845502c187183fc91ae35e",
     "certified_head_classification": "current_main_tree_equivalent",
-    "generation_timestamp": "2026-08-07T07:20:10Z"
+    "generation_timestamp": "2026-08-07T07:45:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
