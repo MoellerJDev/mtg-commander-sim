@@ -14,6 +14,7 @@ import re
 from typing import Any, Iterable, Mapping, Sequence
 
 from .replacement.immutable import FrozenMap, thaw_value
+from .color_set_mana_abilities import ColorSetActivatedManaAbilitySpec
 from .fixed_mana_abilities import FixedManaMode
 from .util import mana_cost_to_vector, normalize_mana_bundle, parse_mana_symbols
 
@@ -101,6 +102,7 @@ class ActivatedAbility:
     target_schema: FrozenMap | None = None
     crew_threshold: int | None = None
     fixed_mana_outputs: tuple[FixedManaMode, ...] = ()
+    color_set_mana_output: ColorSetActivatedManaAbilitySpec | None = None
 
     def __post_init__(self) -> None:
         if self.target_schema is not None and not isinstance(
@@ -114,6 +116,12 @@ class ActivatedAbility:
             for mode in self.fixed_mana_outputs
         ):
             raise ValueError("fixed_mana_outputs must contain typed modes")
+        if self.color_set_mana_output is not None and not isinstance(
+            self.color_set_mana_output, ColorSetActivatedManaAbilitySpec
+        ):
+            raise ValueError(
+                "color_set_mana_output must be a typed color-set descriptor"
+            )
 
     @property
     def compiled_cost(self) -> bool:

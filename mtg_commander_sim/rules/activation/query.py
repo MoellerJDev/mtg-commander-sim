@@ -13,6 +13,8 @@ from ...card_overrides.game_record_v3 import (
     historical_granted_activated_ability_descriptors,
 )
 from ...compiled_mana_abilities import (
+    compiled_color_set_mana_abilities,
+    compiled_color_set_mana_family_present,
     compiled_fixed_mana_abilities,
     compiled_fixed_mana_family_present,
 )
@@ -50,11 +52,25 @@ def activated_abilities(
         card,
         executable_oracle_text=executable_oracle_text,
     )
-    stale_compiled_mana = (
-        not compiled_mana
-        and compiled_fixed_mana_family_present(host, card)
+    compiled_color_set_mana = compiled_color_set_mana_abilities(
+        host,
+        card,
+        executable_oracle_text=executable_oracle_text,
     )
-    owned_lines = {spec.line_index for spec in compiled_mana}
+    stale_compiled_mana = (
+        (
+            not compiled_mana
+            and compiled_fixed_mana_family_present(host, card)
+        )
+        or (
+            not compiled_color_set_mana
+            and compiled_color_set_mana_family_present(host, card)
+        )
+    )
+    owned_lines = {
+        spec.line_index
+        for spec in (*compiled_mana, *compiled_color_set_mana)
+    }
     runtime_lines = executable_oracle_text.splitlines()
     for line_index in owned_lines:
         if 0 <= line_index < len(runtime_lines):
@@ -71,6 +87,9 @@ def activated_abilities(
     )
     abilities.extend(
         spec.to_activated_ability() for spec in compiled_mana
+    )
+    abilities.extend(
+        spec.to_activated_ability() for spec in compiled_color_set_mana
     )
     abilities.sort(key=lambda ability: ability.line_index)
     _append_intrinsic_land_abilities(host, data, abilities)

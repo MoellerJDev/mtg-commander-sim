@@ -162,6 +162,7 @@ from .mana_ability_runtime import (
     mana_modes_for_ability,
     mana_output_for_ability,
 )
+from .mana_source_discovery import available_mana_sources
 from .mana_undo import (
     clear_mana_undo_stack,
     ManaUndoError,
@@ -4517,137 +4518,11 @@ class CommanderEngine(
         *,
         spend_context: str | None = None,
     ) -> list[ManaSource]:
-        identity = self._commander_identity(seat)
-        sources: list[ManaSource] = []
-        for object_id in self.state.players[seat].zones["battlefield"]:
-            card = self.state.cards[object_id]
-            if card.controller != seat or card.tapped or card.phased_out:
-                continue
-            data = self._effective_card_data(card)
-            card_types, _, _ = self._type_parts(
-                str(data.get("type_line") or "")
-            )
-            if (
-                "creature" in card_types
-                and haste.summoning_sickness_prohibits_tap_or_untap_cost(
-                    self,
-                    card,
-                    as_though_haste=self._may_activate_creature_as_haste(
-                        seat, card
-                    ),
-                )
-            ):
-                continue
-            granted_token_mana = bool(
-                card.is_token
-                and "creature" in card_types
-                and self._controller_has_oracle_text(
-                    seat,
-                    'creature tokens you control have "{t}: add one '
-                    'mana of any color."',
-                )
-            )
-            if granted_token_mana:
-                modes = tuple(
-                    ManaMode(
-                        {
-                            **normalize_mana_bundle(None),
-                            color: 1,
-                        }
-                    )
-                    for color in "WUBRG"
-                )
-                sources.append(
-                    ManaSource(
-                        object_id,
-                        card.ref,
-                        self.display_name(object_id),
-                        modes,
-                    )
-                )
-                continue
-            record = self.card_record(card)
-            if not record:
-                compiled_modes = self._recordless_mana_modes(seat, card)
-                if compiled_modes:
-                    sources.append(
-                        ManaSource(
-                            object_id,
-                            card.ref,
-                            self.display_name(object_id),
-                            tuple(compiled_modes),
-                        )
-                    )
-                continue
-            mana_abilities = [
-                ability
-                for ability in self._activated_abilities(card)
-                if ability.mana_ability and card.zone in ability.zones
-            ]
-            if (
-                not mana_abilities
-                and not record.is_land
-                and "creature tokens you control have"
-                in record.oracle_text.casefold()
-            ):
-                continue
-            if mana_abilities and not any(
-                activation_condition_status(
-                    self,
-                    seat,
-                    ability,
-                    card,
-                )[0]
-                == "payable"
-                for ability in mana_abilities
-            ):
-                # A source whose only Oracle mana abilities have an unmet or
-                # unresolved activation condition must not make dependent
-                # spells appear payable.
-                continue
-            modes = extract_effective_mana_modes(
-                record,
-                self._effective_card_data(card),
-                identity,
-            )
-            compiled_modes: list[ManaMode] = []
-            for mode in modes:
-                restriction = self._compiled_mana_restriction(
-                    mode.restriction
-                )
-                if restriction is None:
-                    if self._mana_mode_has_compiled_activation_condition(
-                        mode.restriction
-                    ):
-                        compiled_modes.append(
-                            ManaMode(
-                                mode.bundle,
-                                conditional=False,
-                                restriction=mode.restriction,
-                                side_effects=mode.side_effects,
-                                requires_choice=mode.requires_choice,
-                            )
-                        )
-                    else:
-                        compiled_modes.append(mode)
-                    continue
-                if self._mana_restriction_allows(
-                    restriction,
-                    spend_context,
-                ):
-                    compiled_modes.append(
-                        ManaMode(
-                            mode.bundle,
-                            conditional=False,
-                            restriction=mode.restriction,
-                            side_effects=mode.side_effects,
-                            requires_choice=mode.requires_choice,
-                        )
-                    )
-            modes = tuple(compiled_modes)
-            if modes:
-                sources.append(ManaSource(object_id, card.ref, self.display_name(object_id), modes))
-        return sources
+        return available_mana_sources(
+            self,
+            seat,
+            spend_context=spend_context,
+        )
 
     def _activate_mana_plan(
         self,

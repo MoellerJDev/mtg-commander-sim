@@ -16,6 +16,12 @@ ADD_CLAUSE_RE = re.compile(
     r"\{T\}(?P<costs>(?:\s*,\s*[^:\n]+)?)\s*:\s*Add\s+(?P<output>[^\.\n]+)",
     re.IGNORECASE,
 )
+_DYNAMIC_OUTPUT_MARKERS = (
+    "mana of any color among",
+    "for each color among",
+    "mana of each color among",
+    "mana of any color that ",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -101,6 +107,22 @@ def _bundle_from_symbols(text: str) -> dict[str, int]:
 
 def _any_color_modes(quantity: int = 1, allowed: Iterable[str] = ("W", "U", "B", "R", "G")) -> list[ManaMode]:
     return [ManaMode({**normalize_mana_bundle(None), color: quantity}) for color in allowed]
+
+
+def _has_unresolved_dynamic_output(oracle_text: str) -> bool:
+    normalized = oracle_text.casefold()
+    return any(marker in normalized for marker in _DYNAMIC_OUTPUT_MARKERS)
+
+
+def _is_unrestricted_any_output(output_text: str) -> bool:
+    return (
+        "among" not in output_text
+        and "that " not in output_text
+        and (
+            "one mana of any color" in output_text
+            or "one mana of any type" in output_text
+        )
+    )
 
 
 def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = ()) -> tuple[ManaMode, ...]:
@@ -218,7 +240,7 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
                 for mode in _any_color_modes(1, allowed)
             )
             continue
-        if "one mana of any color" in lower or "one mana of any type" in lower:
+        if _is_unrestricted_any_output(lower):
             allowed = ("W", "U", "B", "R", "G", "C") if "any type" in lower else ("W", "U", "B", "R", "G")
             modes.extend(
                 ManaMode(
@@ -263,7 +285,7 @@ def extract_mana_modes(record: CardRecord, commander_identity: Iterable[str] = (
 
     # Scryfall's produced_mana is a useful fallback, but not enough evidence to
     # claim a complex source is unconditional.
-    if not modes and record.produced_mana:
+    if not modes and record.produced_mana and not _has_unresolved_dynamic_output(oracle):
         # produced_mana says what a card can make, not whether the activation is
         # currently legal or what nonmana costs/restrictions apply. A fallback
         # is therefore always conditional and is never silently auto-spent by

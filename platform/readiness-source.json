@@ -7,10 +7,10 @@
   },
   "integration": {
     "active_phase": null,
-    "branch": "main",
+    "branch": "fix/typed-color-among-mana",
     "branch_ancestry": {
-      "focused_branch_base": "0c229ab9543ae2cb631c9b17326fa15a869f6d97",
-      "focused_branch_unique_commits_over_main": 0
+      "focused_branch_base": "e0e80861bfc3f332146cda91597b901521f47779",
+      "focused_branch_unique_commits_over_main": 6
     },
     "pull_requests": [
       {
@@ -747,6 +747,97 @@
         "number": 105,
         "state": "merged",
         "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/105"
+      },
+      {
+        "base": "main",
+        "head": "docs/current-state-documentation-system",
+        "number": 106,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/106"
+      },
+      {
+        "base": "main",
+        "head": "rules/trample-combat-damage-assignment",
+        "number": 107,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/107"
+      },
+      {
+        "base": "main",
+        "head": "rules/combat-damage-snapshot-canonicalization",
+        "number": 108,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/108"
+      },
+      {
+        "base": "main",
+        "head": "rules/activated-draw-ability-harvest",
+        "number": 109,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/109"
+      },
+      {
+        "base": "main",
+        "head": "rules/draw-result-actions-and-ordering",
+        "number": 110,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/110"
+      },
+      {
+        "base": "main",
+        "head": "rules/draw-hidden-casting-and-reveal-choice",
+        "number": 111,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/111"
+      },
+      {
+        "base": "main",
+        "head": "rules/deathtouch-assignment-result",
+        "number": 112,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/112"
+      },
+      {
+        "base": "main",
+        "head": "rules/defender-attack-restriction",
+        "number": 113,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/113"
+      },
+      {
+        "base": "main",
+        "head": "rules/menace-block-restriction",
+        "number": 114,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/114"
+      },
+      {
+        "base": "main",
+        "head": "rules/basic-landwalk-block-restriction",
+        "number": 115,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/115"
+      },
+      {
+        "base": "main",
+        "head": "rules/typed-combat-evasion-restrictions",
+        "number": 116,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/116"
+      },
+      {
+        "base": "main",
+        "head": "rules/typed-block-transition-keyword-triggers",
+        "number": 117,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/117"
+      },
+      {
+        "base": "main",
+        "head": "fix/deathtouch-marker-and-activation-hardening",
+        "number": 118,
+        "state": "merged",
+        "url": "https://github.com/MoellerJDev/mtg-commander-sim/pull/118"
       }
     ],
     "tags": [
@@ -761,11 +852,11 @@
     ]
   },
   "provenance": {
-    "feature_head_sha": "a84a42af7ec40527754fd1410797963b710c88bb",
+    "feature_head_sha": "578c8dec96d9429e9420320f423531099fcba7c8",
     "feature_head_classification": "active_candidate",
-    "certified_head_sha": "bce3266b86e2b4e63cd89340aa3e02632ba9da14",
-    "certified_head_classification": "historical_certified",
-    "generation_timestamp": "2026-08-06T15:30:17Z"
+    "certified_head_sha": "e0e80861bfc3f332146cda91597b901521f47779",
+    "certified_head_classification": "current_main",
+    "generation_timestamp": "2026-08-07T01:40:00Z"
   },
   "snapshots": {
     "comprehensive_rules": {
@@ -1048,8 +1139,14 @@
     {
       "id": "deathtouch_marker_and_activation_type_hardening",
       "name": "Deathtouch marker lifetime and activation type hardening",
+      "status": "integrated_on_certified_main",
+      "evidence": "PR 118 consumes each since-last-check Deathtouch marker at the applicable state-based-action check even if the damaged permanent has ceased to be a creature, is phased out, or survives because it is Indestructible. Later creature or phased-in states cannot reuse old damage. The state action remains simultaneous and stale multi-object consumption still rejects before mutation. Activation-condition counts consume the canonical parsed effective card-type set instead of substring matching, so subtype text cannot satisfy a card-type condition and malformed effective type data fails closed. Exact-head run 31137555278 passed every required gate, squash commit e0e8086 is on main, and post-merge main-smoke run 31138335232 passed. Broader characteristic producers remain outside this bounded correction."
+    },
+    {
+      "id": "color_set_activated_mana_harvest",
+      "name": "Typed current-color-set activated mana abilities",
       "status": "implemented_current_source_tree",
-      "evidence": "The current source tree consumes each since-last-check Deathtouch marker at the applicable state-based-action check even if the damaged permanent has ceased to be a creature, is phased out, or survives because it is Indestructible. Later creature or phased-in states cannot reuse old damage. The state action remains simultaneous and stale multi-object consumption still rejects before mutation. Activation-condition counts consume the canonical parsed effective card-type set instead of substring matching, so subtype text cannot satisfy a card-type condition and malformed effective type data fails closed. Focused red/green, replay, rollback, multiplayer, interaction, capability, and killed-mutation checks pass; regeneration and broader characteristic producers remain outside this bounded correction."
+      "evidence": "The current source tree gives four closed current-color-set activated mana templates one immutable compiler descriptor, seat-bound object query, shared manual-offer and automatic-payment mode owner, immediate stackless result, rollback boundary, and exact replay path. Mox Amber with no qualifying legendary creature or planeswalker remains legally activatable but advertises no colored output, adds no mana, and cannot pay another action automatically. Bloom Tender and Mox Amber become exact, trusted, capability-closed CardPrograms; Faeburrow Elder and The Grey Havens lose only the resolved mana residuals while retaining their unrelated blockers. The Commander census gains two exact cards, removes five material residuals, and keeps zero construction failures. CommanderEngine shrinks by 122 logical lines with no direct-write or card-specificity growth. Closed negative grammar, current-control/color/phasing, Haste, multiplayer, privacy, rollback, replay, offer-command parity, mutation, and explicit pair evidence pass focused checks; monocolored-only, linked-exile, opponent-relative, restricted, triggered, side-effecting, and wider conditional variants remain residual."
     },
     {
       "id": "rules_snapshot",
@@ -1075,8 +1172,8 @@
     "rooms_and_lobbies": "implemented_invite_only_two_or_four_seat_remove_leave_replace_and_watch",
     "replay": "implemented_command_replay_with_additive_card_program_trust_and_exact_runtime_binding_provenance",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
-    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty-four bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger fixed_mana_ability and cast_permission owners",
-    "capability_evidence": "implemented_registry_v40_with_68_records_58_trusted_and_571_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "semantic_handlers": "implemented_registered read-only typed-intent handlers plus twenty-five bounded runtime components and six closed effect-runtime families with strict binding and focused tap token counter damage combat_damage_snapshot combat_damage_assignment combat_damage_sequence damage_result life player_counter continuous_effect attachment aura_entry draw typed_ability_fragment haste_eligibility aerial_block_legality defender_attack_restriction menace_block_restriction landwalk_restriction combat_evasion_restriction block_transition_keyword_trigger fixed_mana_ability color_set_mana_ability and cast_permission owners",
+    "capability_evidence": "implemented_registry_v41_with_69_records_59_trusted_and_590_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "hidden_information": "implemented_projected_protocol",
@@ -1087,14 +1184,14 @@
   "validation": {
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31116075484,
+      "run_id": 31138335232,
       "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31116075484"
+      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31138335232"
     },
     "local": {
       "compile": "pass",
-      "deterministic_tests": "certified_main_through_pr117_exact_head_31114243343_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31116075484_pass",
-      "focused_rules_tests": "deathtouch_noncreature_phased_and_indestructible_one_check_marker_consumption_activation_exact_card_type_matching_malformed_fail_closed_canonical_proposal_identity_rollback_multiplayer_replay_capability_and_mutation_evidence_pass; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
+      "deterministic_tests": "certified_main_through_pr118_exact_head_31137555278_sharded_public_ubuntu_windows_package_generated_replay_privacy_and_headless_browser_pass; post_merge_main_smoke_31138335232_pass",
+      "focused_rules_tests": "color_set_mana_closed_grammar_current_control_effective_colors_phasing_haste_multiplayer_privacy_rollback_replay_offer_command_parity_empty_qualifying_set_and_mutation_evidence_pass; broad_validation_deferred_to_exact_head_public_ci_by_repository_policy",
       "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
       "four_player_protocol_demo": "pass",
@@ -1122,7 +1219,7 @@
     "generic face-pinned First Strike and Double Strike now close the represented strike-step participation capability and harvest its sole-blocker cards, but the aggregate mechanics remain partial while ability-changing, copy, face-down, additional-combat or damage-step, and other unsupported participation producers remain reachable",
     "damage replacement/prevention now includes typed finite and next-instance shields, dynamic/divided and independent per-object creation, explicit face-up CR 609.7a source provenance, incarnation-safe permanent-spell continuity, closed property rechecks, simultaneous allocation and same-chooser event ordering, unpreventable nonconsumption, aggregate prevention dispatch, replacement-capable life/permanent-counter/source-controller-damage aftermath, immediate independent life siblings, resumable mana-payment choices, static full-recipient redirection, and closed CR 615.13 triggered draw/damage/counter results on the ordinary stack; explicit-target or mixed immediate aftermath, arbitrary opaque provenance, face-down source characteristics, wider property predicates, life-gain prevention, non-effect-runtime life producers, partial/attached redirection, non-damage transformations, remaining result-replacement families, and excess selection remain unimplemented",
     "generic Vigilance, Haste, Flying, and Reach consume current represented effective keywords through canonical attack, tap-state, activation, mana-payment, and block-legality owners; unsupported ability-changing and copy producers, conditional haste acquisition, other evasion and declaration requirements or costs, and complete effective-characteristic closure remain explicit blockers",
-    "fixed-output target-free nonloyalty activated mana abilities now compile to one typed offer, command, payment, replay, and immediate-resolution contract; dynamic, conditional, restricted, triggered, side-effecting, arbitrary nested-payment, and parenthesized basic-land reminder variants remain explicit blockers",
+    "fixed-output target-free nonloyalty activated mana abilities and the closed current-color-set family now compile to typed offer, auto-payment, command, replay, and immediate-resolution contracts; Mox Amber-style empty qualifying sets legally add no mana, while monocolored-only, linked-exile, opponent-relative, broader dynamic or conditional, restricted, triggered, side-effecting, arbitrary nested-payment, and parenthesized basic-land reminder variants remain explicit blockers",
     "face-pinned printed Flash now compiles to one typed cast-permission contract shared by offer and proposal legality; conditional, granted, removed, player-wide as-though, land-timing, zone-permission, and broader prohibition interactions remain explicit blockers",
     "traditional and Commander format-wide capabilities are not yet inventoried in the fine-grained registry, so capability-only strict match readiness fails closed",
     "most reviewed semantic-pack abilities remain legacy_reviewed compatibility rather than capability_closed, and many registered capabilities/components remain tested or blocked rather than trusted",

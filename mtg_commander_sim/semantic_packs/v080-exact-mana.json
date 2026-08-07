@@ -91,24 +91,6 @@
         "authored_by": "v0.8-exact-mana-family",
         "review_status": "reviewed"
       }
-    },
-    {
-      "key": "0c23fefe-9891-4dd8-9bb1-eebdb3274e31:ability:ab1",
-      "label": "Bloom Tender mana ability",
-      "oracle_id": "0c23fefe-9891-4dd8-9bb1-eebdb3274e31",
-      "ability_id": "ability:ab1",
-      "active_zone": "battlefield",
-      "event": "activate",
-      "effects": [],
-      "trust_level": "trusted",
-      "coverage": ["mana_ability", "dynamic_mana", "permanent_color_count"],
-      "tests": ["test_bloom_tender_derives_one_mana_for_each_controlled_color"],
-      "provenance": {
-        "source_oracle_hash": "ac7fed346449034d5bb4b7f625c929c48598604f3b46c32833238f6c715450ba",
-        "source_rulings_hash": "119b8db7235339faded4c207b9ebeca145259af6db2ce6f695b659823e519886",
-        "authored_by": "v0.8-exact-mana-family",
-        "review_status": "reviewed"
-      }
     }
   ]
 }

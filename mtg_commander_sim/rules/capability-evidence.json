@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "8551be4d2457e7ee981b5cd3f71efa10db88dab2810e7d5c7b6c6af16dfdf8c1",
-  "declaration_source_fingerprint": "a05202edd5b53ee326382b99ad3c35492a28b24db944eb1a55136fbc1bfe08e5",
+  "registry_fingerprint": "bbdf4957929881bf9a1d0b24d6cdcdc8c59e724e2ac3beb67e7c3596107d8884",
+  "declaration_source_fingerprint": "9327c9ebdb45b83cd9ffeb5d9d02111ea030e6c4ebc3dbf4eded516d45342f0d",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -7846,6 +7846,405 @@
       "applicability_note": "Apply a trusted generically compiled fixed integral multiplier to a canonical positive life-gain event."
     },
     {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_actual_mox_offer_and_command_share_current_color_modes",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Drive the projected color choices and accepted activation from the same source-pinned typed descriptor and current mode query."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_color_set_mana_respects_haste_cost_dependency",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply the shared haste and continuous-control restriction before a creature can pay a tap-symbol dynamic mana cost."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_uses_current_control_and_effective_colors",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Intersect current control, phased status, type, supertype, and continuous effective color characteristics."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_color_set_mana_is_controller_scoped_in_four_player_game",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive colors only from qualifying objects controlled by the activating seat in a four-player game."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaCompilerTests.test_color_set_mana_runtime_mutants_are_killed",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill qualifier removal, query widening, and choose-one versus one-each selection mutants."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaCompilerTests.test_color_set_compiler_leaves_unrepresented_variants_residual",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Leave monocolored, linked-exile, opponent-relative, and additional-condition variants as explicit residuals."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaCompilerTests.test_color_set_handler_rejects_malformed_descriptors",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject unknown descriptor fields and malformed typed query payloads before runtime registration."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaCompilerTests.test_legacy_parser_does_not_widen_color_set_output",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Prevent the legacy record parser and produced-mana fallback from advertising unrestricted WUBRG modes for a color-set-dependent ability."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_changed_color_set_oracle_fails_closed",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a stale source-pinned descriptor without reparsing changed executable Oracle text at runtime."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_invalid_color_set_choice_rolls_back",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject an unavailable selected color and roll back source tap, mana pool, and event journal atomically."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaCompilerTests.test_color_set_compiler_lowers_each_closed_template",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower each represented choose-one and one-each current-color-set template into one exact source-spanned typed CardProgram descriptor."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_actual_mox_amber_auto_mana_uses_only_qualifying_colors",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Feed auto-payment only the current qualifying UBR modes from the same typed Mox Amber descriptor used by manual activation."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_actual_mox_amber_program_offers_no_colored_mode_without_legendary",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Compile the pinned Mox Amber record, expose its real seat action without a colored choice, and resolve the empty color set to no mana."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_bloom_tender_adds_one_of_each_current_permanent_color",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Produce one mana of every represented current permanent color as one deterministic mode."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_graveyard_query_uses_owner_and_ignores_other_graveyards",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Derive the selectable colors from legendary creature cards owned by the activating player in that player's graveyard, independent of current controller fields."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_legendary_permanent_query_includes_noncreature_permanents",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Include a colored legendary noncreature permanent in the represented legendary-permanent color query."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_advertises_only_current_qualifying_colors",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Advertise exactly one selectable mode per current color among the qualifying permanents."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_with_only_a_colorless_legendary_adds_no_mana",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Cover the official Mox Amber ruling that a qualifying colorless legendary still permits activation while producing no mana because colorless is not a color."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_mox_amber_without_qualifying_legendary_adds_no_mana",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Permit activation while adding no mana when the represented qualifying color set is empty."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_color_set_mana_projection_exposes_no_hidden_cards",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project public color-derived modes without exposing an opposing hand object."
+    },
+    {
+      "capability_id": "mana.activated.color_set",
+      "evidence_class": "replay",
+      "test_id": "tests.test_color_set_mana_abilities.ColorSetManaRuntimeTests.test_color_set_mana_activation_replays_exactly",
+      "official_rule_ids": [
+        "106.1",
+        "106.4",
+        "605.1a",
+        "605.2",
+        "605.3a",
+        "605.3b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the same current-color-set activation and stackless mana result from the initial checkpoint."
+    },
+    {
       "capability_id": "mana.activated.fixed_output",
       "evidence_class": "interaction",
       "test_id": "tests.test_fixed_mana_abilities.FixedManaRuntimeTests.test_compiled_fixed_output_creature_respects_haste_cost_dependency",
@@ -10916,5 +11315,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "dd51d9f8a2d0021eea48f7982d8bda371dcb905e12ff13bda70284fc739a9610"
+  "fingerprint": "620df489b58e4d9e0b9d4ee27f91ae7bc0fba1aa04980826e0ef194497c70714"
 }
