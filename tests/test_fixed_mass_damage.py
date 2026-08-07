@@ -209,8 +209,8 @@ class FixedDamageSetModelTests(unittest.TestCase):
         assert_snapshot()
         with patch.object(
             fixed_damage_set_module,
-            "query_objects",
-            lambda candidates, _spec: tuple(candidates),
+            "select_affected_permanents",
+            lambda candidates, _spec, **_kwargs: tuple(candidates),
         ):
             with self.assertRaises(AssertionError):
                 assert_snapshot()

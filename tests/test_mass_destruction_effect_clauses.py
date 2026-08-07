@@ -311,7 +311,7 @@ class MassDestructionCompilerTests(unittest.TestCase):
         self.assertIsInstance(plan.intents[0], DestroyPermanentSetIntent)
         for malformed in (
             {"op": "destroy_all", "source": "$source"},
-            {**template.effects[0], "source": None},
+            {**template.effects[0], "source": True},
             {**template.effects[0], "arbitrary": True},
         ):
             with self.subTest(effect=malformed):
@@ -379,31 +379,31 @@ class MassDestructionRuntimeTests(unittest.TestCase):
     def test_mass_destruction_apnap_shield_indestructible_and_replay(self):
         session = self.session(7013101)
         engine = session.engine
-        blast = self.card(engine, "B", "Vandalblast")
-        ordinary = self.put(engine, self.card(engine, "A", "Lightning Greaves"))
-        shielded = self.put(engine, self.card(engine, "C", "Lightning Greaves"))
+        blast = self.card(engine, "A", "Vandalblast")
+        ordinary = self.put(engine, self.card(engine, "B", "Lightning Greaves"))
+        shielded = self.put(engine, self.card(engine, "D", "Lightning Greaves"))
         shielded.counters["shield"] = 1
-        indestructible = self.put(engine, self.card(engine, "D", "Darksteel Citadel"))
-        own = self.put(engine, self.card(engine, "B", "Sensei's Divining Top"))
+        indestructible = self.put(engine, self.card(engine, "C", "Darksteel Citadel"))
+        own = self.put(engine, self.card(engine, "A", "Sensei's Divining Top"))
         engine.move_card(blast.object_id, "hand", log=False)
-        engine.state.players["B"].mana_pool.update({"C": 4, "R": 1})
-        engine.state.active_player = "B"
+        engine.state.players["A"].mana_pool.update({"C": 4, "R": 1})
+        engine.state.active_player = "A"
         engine.state.phase = "precombat_main"
         engine.state.step = "main"
-        engine.state.priority_player = "B"
-        hints = engine._priority_action_hints("B")
+        engine.state.priority_player = "A"
+        hints = engine._priority_action_hints("A")
         action = next(row for row in hints["actions"] if row.get("card") == blast.ref)
         self.assertIn(
             "overload",
             {option["id"] for option in action["cost_options"]},
         )
-        engine._issue_priority("B", hints)
+        engine._issue_priority("A", hints)
         session.initial_checkpoint = checkpoint_envelope(engine.state)
         session.commands.clear()
         session.decisions.clear()
 
         accepted = session.act(
-            "pilot:B",
+            "pilot:A",
             {
                 "action_id": action["id"],
                 "cost_option": "overload",
@@ -441,8 +441,8 @@ class MassDestructionRuntimeTests(unittest.TestCase):
         session = self.session(7013102)
         engine = session.engine
         source = self.put(engine, self.card(engine, "A", "Lightning Greaves"))
-        opponent = self.put(engine, self.card(engine, "B", "Sensei's Divining Top"))
-        creature = self.put(engine, self.card(engine, "C", "Birds of Paradise"))
+        opponent = self.put(engine, self.card(engine, "B", "Sol Ring"))
+        creature = self.put(engine, self.card(engine, "D", "Birds of Paradise"))
         spec = AffectedPermanentSetSpec(
             query=ObjectQuerySpec(
                 zones=("battlefield",),
