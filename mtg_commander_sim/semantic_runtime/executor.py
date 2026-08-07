@@ -211,23 +211,23 @@ def prepare_draw_resolution(
     )
 
 
-def _execute_destruction_intent(
-    sink: SemanticIntentSink,
-    intent: DestroyPermanentIntent,
-) -> object:
-    return destruction.destroy_permanent_refs(
-        sink,
-        (intent.object_ref,),
-        actor=intent.actor,
-        reason=intent.reason,
-        replacement_selections=intent.replacement_selections,
-    )
+PermanentTransitionIntent = (
+    DestroyPermanentIntent | ReturnPermanentToOwnerHandIntent
+)
 
 
-def _execute_return_to_hand_intent(
+def _execute_permanent_transition_intent(
     sink: SemanticIntentSink,
-    intent: ReturnPermanentToOwnerHandIntent,
+    intent: PermanentTransitionIntent,
 ) -> object:
+    if isinstance(intent, DestroyPermanentIntent):
+        return destruction.destroy_permanent_refs(
+            sink,
+            (intent.object_ref,),
+            actor=intent.actor,
+            reason=intent.reason,
+            replacement_selections=intent.replacement_selections,
+        )
     return return_to_hand.return_permanent_to_owner_hand(
         sink,
         intent.object_ref,
@@ -270,18 +270,12 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
             )
             results.append(("creatures", result))
             continue
-        if isinstance(intent, DestroyPermanentIntent):
-            results.append(
-                (intent.object_ref, _execute_destruction_intent(sink, intent))
-            )
-            continue
-        if isinstance(intent, ReturnPermanentToOwnerHandIntent):
-            results.append(
-                (
-                    intent.object_ref,
-                    _execute_return_to_hand_intent(sink, intent),
-                )
-            )
+        if isinstance(
+            intent,
+            (DestroyPermanentIntent, ReturnPermanentToOwnerHandIntent),
+        ):
+            result = _execute_permanent_transition_intent(sink, intent)
+            results.append((intent.object_ref, result))
             continue
         if isinstance(intent, AddManaIntent):
             result = sink.apply_mana_intent(intent)
