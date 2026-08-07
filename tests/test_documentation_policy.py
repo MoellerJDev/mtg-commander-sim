@@ -75,11 +75,75 @@ class DocumentationPolicyTests(unittest.TestCase):
             path = root / "README.md"
             path.write_text(
                 "---\nstatus: current\n---\n\n"
-                "PR #41 introduced this. PR #42 superseded it.\n",
+                "PR #41 introduced this.\n",
                 encoding="utf-8",
             )
             failures = MODULE.stale_claim_failures(root, [path], policy)
-        self.assertTrue(any("PR history" in item for item in failures))
+        self.assertTrue(any("pull-request history" in item for item in failures))
+
+    def test_current_workflow_run_and_transient_branch_are_rejected(self) -> None:
+        policy = MODULE.load_policy()
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            path = root / "README.md"
+            path.write_text(
+                "---\nstatus: current\n---\n\n"
+                "Workflow run 123456789 passed on branch fix/example.\n",
+                encoding="utf-8",
+            )
+            failures = MODULE.stale_claim_failures(root, [path], policy)
+        self.assertTrue(any("workflow run ID" in item for item in failures))
+        self.assertTrue(any("transient branch" in item for item in failures))
+
+    def test_root_document_allowlist_is_enforced(self) -> None:
+        policy = MODULE.load_policy()
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            allowed = root / "README.md"
+            extra = root / ".." / root.name / "STATUS.md"
+            allowed.write_text("# Readme\n", encoding="utf-8")
+            extra.write_text("# Status\n", encoding="utf-8")
+            failures = MODULE.root_document_failures(root, [allowed, extra], policy)
+        self.assertTrue(any("STATUS.md" in item for item in failures))
+
+    def test_historical_document_outside_allowed_location_is_rejected(self) -> None:
+        policy = MODULE.load_policy()
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            path = root / "docs" / "old-status.md"
+            path.parent.mkdir()
+            path.write_text(
+                "---\nstatus: historical\nmaintenance: hand-maintained\n---\n",
+                encoding="utf-8",
+            )
+            failures = MODULE.historical_placement_failures(root, [path], policy)
+        self.assertTrue(any("outside an allowed location" in item for item in failures))
+
+    def test_generated_dashboard_fingerprint_must_match_source(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            (root / "coverage").mkdir()
+            source = root / "coverage" / "status.json"
+            source.write_text("{}\n", encoding="utf-8", newline="\n")
+            dashboard = root / "coverage" / "status.md"
+            command = "python scripts/update.py --write"
+            dashboard.write_text(
+                "---\nstatus: generated\nmaintenance: generated\n"
+                "generated_source: coverage/status.json\n"
+                f"generation_command: {command}\nverified: {'0' * 64}\n---\n\n"
+                f"{command}\n",
+                encoding="utf-8",
+            )
+            policy = {
+                "generated_dashboards": {
+                    "coverage/status.md": {
+                        "source": "coverage/status.json",
+                        "command": command,
+                    }
+                }
+            }
+            failures = MODULE.generated_source_failures(root, policy)
+        self.assertTrue(any("is stale" in item for item in failures))
 
     def test_adr_requires_alternatives(self) -> None:
         policy = MODULE.load_policy()

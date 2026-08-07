@@ -9,10 +9,13 @@ maintenance: "hand-maintained"
 
 # Mechanic capability extension guide
 
-Capability registry version 13 is the current incremental trust boundary beside the
-legacy broad mechanic contracts. The initial migration covers the generated
-base-damage spell shape and its public target/base-result dependencies. It is
-not a claim that the broad damage family or all compiler nodes have migrated.
+Capability registry version 40 is the current incremental trust boundary beside
+the legacy broad mechanic contracts. Fine-grained closures now cover bounded
+families across damage and replacement results, life and counters, draw,
+continuous characteristics and attachments, casting and activation, and combat
+declaration, assignment, and keyword transitions. The generated registry and
+coverage reports are the inventory authority; this breadth is not a claim that
+any aggregate rules family or every compiler node has migrated.
 
 A capability is the smallest reviewable behavioral contract that a card
 program depends on. Its versioned record will identify inputs, outputs, state

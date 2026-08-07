@@ -89,6 +89,7 @@ class PermanentSnapshot:
     toughness: int | None = None
     marked_damage: int = 0
     deathtouch_damage: bool = False
+    phased_out: bool = False
     indestructible: bool = False
     loyalty: int | None = None
     defense: int | None = None
@@ -161,6 +162,10 @@ def evaluate_permanent_state_based_actions(
     deathtouch_checks: set[str] = set()
 
     for permanent in permanents:
+        if permanent.deathtouch_damage:
+            deathtouch_checks.add(permanent.object_id)
+        if permanent.phased_out:
+            continue
         card_types = {
             str(value).casefold() for value in permanent.card_types
         }
@@ -180,8 +185,6 @@ def evaluate_permanent_state_based_actions(
             world_permanents.append(permanent)
 
         if is_creature and permanent.toughness is not None:
-            if permanent.deathtouch_damage:
-                deathtouch_checks.add(permanent.object_id)
             if permanent.toughness <= 0:
                 put_in_graveyard.add(permanent.object_id)
             elif (

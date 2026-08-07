@@ -12375,7 +12375,16 @@ class CommanderEngine(
                     continue
                 seen.add(object_id)
                 card = self.state.cards[object_id]
-                if card.zone != "battlefield" or card.phased_out:
+                if card.zone != "battlefield":
+                    continue
+                if card.phased_out:
+                    snapshots.append(
+                        PermanentSnapshot(
+                            object_id=card.object_id,
+                            deathtouch_damage=card.deathtouch_damage,
+                            phased_out=True,
+                        )
+                    )
                     continue
                 data = self._effective_card_data(card)
                 card_types, subtypes, supertypes = self._type_parts(

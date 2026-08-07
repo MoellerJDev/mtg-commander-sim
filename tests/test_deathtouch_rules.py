@@ -183,6 +183,29 @@ class DeathtouchStateBasedActionTests(unittest.TestCase):
             batch.deathtouch_checks,
         )
 
+    def test_noncreature_and_phased_markers_are_consumed_by_this_check(self):
+        batch = evaluate_permanent_state_based_actions(
+            (
+                PermanentSnapshot(
+                    object_id="former-creature",
+                    card_types=frozenset({"artifact"}),
+                    deathtouch_damage=True,
+                ),
+                PermanentSnapshot(
+                    object_id="phased-creature",
+                    card_types=frozenset(),
+                    deathtouch_damage=True,
+                    phased_out=True,
+                ),
+            )
+        )
+
+        self.assertEqual((), batch.destroy)
+        self.assertEqual(
+            ("former-creature", "phased-creature"),
+            batch.deathtouch_checks,
+        )
+
     def test_stale_check_batch_rolls_back_without_consuming_any_marker(self):
         current = SimpleNamespace(
             zone="battlefield",
@@ -209,6 +232,20 @@ class DeathtouchStateBasedActionTests(unittest.TestCase):
 
         self.assertTrue(current.deathtouch_damage)
         self.assertTrue(stale.deathtouch_damage)
+
+    def test_phased_battlefield_marker_is_consumed_transactionally(self):
+        phased = SimpleNamespace(
+            zone="battlefield",
+            phased_out=True,
+            deathtouch_damage=True,
+        )
+        host = SimpleNamespace(state=SimpleNamespace(cards={"phased": phased}))
+
+        self.assertEqual(
+            ("phased",),
+            consume_deathtouch_damage_checks(host, ("phased",)),
+        )
+        self.assertFalse(phased.deathtouch_damage)
 
 
 if __name__ == "__main__":

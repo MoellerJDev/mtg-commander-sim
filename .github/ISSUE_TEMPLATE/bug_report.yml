@@ -1,0 +1,71 @@
+name: Bug report
+description: Report a reproducible defect outside the specialized rules and compiler forms.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for a sanitized, minimal report. Use the rules or compiler form when either is the primary defect. Never attach credentials, capabilities, private hands, library order, authoritative checkpoints, or live Game Records.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Give the release version or full commit SHA where the defect occurs.
+      placeholder: Full commit SHA or version
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Authoritative engine or CLI
+        - Replay or persistence
+        - Server or projected protocol
+        - Browser client
+        - Card data or local setup
+        - Packaging or developer tooling
+        - Other or uncertain
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include operating system, CPython version, browser and Node version when relevant, and local configuration without secrets.
+      placeholder: Windows 11, CPython 3.12.x, Node version, browser version, relevant safe settings
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide a sanitized initial state, commands, and the smallest deterministic sequence that reproduces the defect.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Add safe logs, stack traces, screenshots, or replay hashes. Redact local paths, tokens, private state, and provider data.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety confirmation
+      options:
+        - label: I removed credentials, capabilities, invite codes, private hands, library order, checkpoints, live records, and other private state.
+          required: true
+        - label: This is not a security vulnerability; if it is, I will follow SECURITY.md instead of filing a public issue.
+          required: true

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from typing import Any, Protocol
 
 from ...abilities import ActivatedAbility
@@ -31,6 +32,36 @@ _COUNT_WORDS = {
 _COUNT_PATTERN = "|".join(
     (r"\d+", *(re.escape(word) for word in _COUNT_WORDS))
 )
+
+
+def _effective_card_types(
+    host: ActivationConditionHost,
+    card: Any,
+) -> frozenset[str] | None:
+    """Return the canonical effective card types or fail closed."""
+
+    try:
+        data = host._effective_card_data(card)
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return None
+    if not isinstance(data, Mapping):
+        return None
+    type_line = data.get("type_line")
+    if not isinstance(type_line, str) or not type_line.strip():
+        return None
+    try:
+        parts = host._type_parts(type_line)
+    except (AttributeError, TypeError, ValueError):
+        return None
+    if not isinstance(parts, tuple) or len(parts) != 3:
+        return None
+    card_types = parts[0]
+    if not isinstance(card_types, (set, frozenset)) or any(
+        not isinstance(value, str) or not value.strip()
+        for value in card_types
+    ):
+        return None
+    return frozenset(value.casefold() for value in card_types)
 
 
 def activation_condition_status(
@@ -75,18 +106,15 @@ def activation_condition_status(
             else ("payable", None)
         )
     if "activate only if you control an artifact" in effect:
-        controls_artifact = any(
-            host.state.cards[object_id].controller == seat
-            and not host.state.cards[object_id].phased_out
-            and "artifact"
-            in host._type_parts(
-                str(
-                    host._effective_card_data(object_id).get("type_line")
-                    or ""
-                )
-            )[0]
-            for object_id in host.state.players[seat].zones["battlefield"]
-        )
+        controls_artifact = False
+        for object_id in host.state.players[seat].zones["battlefield"]:
+            permanent = host.state.cards[object_id]
+            if permanent.controller != seat or permanent.phased_out:
+                continue
+            card_types = _effective_card_types(host, object_id)
+            if card_types is None:
+                return "unresolved", "malformed_effective_type_line"
+            controls_artifact = controls_artifact or "artifact" in card_types
         return (
             ("payable", None)
             if controls_artifact
@@ -98,14 +126,10 @@ def activation_condition_status(
     ) in effect:
         card_types: set[str] = set()
         for object_id in host.state.players[seat].zones["graveyard"]:
-            card_types.update(
-                host._type_parts(
-                    str(
-                        host._effective_card_data(object_id).get("type_line")
-                        or ""
-                    )
-                )[0]
-            )
+            object_types = _effective_card_types(host, object_id)
+            if object_types is None:
+                return "unresolved", "malformed_effective_type_line"
+            card_types.update(object_types)
         return (
             ("payable", None)
             if len(card_types) >= 4
@@ -129,10 +153,10 @@ def activation_condition_status(
         permanent = host.state.cards[object_id]
         if permanent.controller != seat or permanent.phased_out:
             continue
-        type_line = str(
-            host._effective_card_data(permanent).get("type_line") or ""
-        ).casefold()
-        if kind in type_line:
+        card_types = _effective_card_types(host, permanent)
+        if card_types is None:
+            return "unresolved", "malformed_effective_type_line"
+        if kind in card_types:
             controlled += 1
     if controlled < required:
         return "unavailable", f"requires_{required}_{kind}s"

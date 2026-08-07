@@ -3185,6 +3185,14 @@
     },
     {
       "capability_id": "damage.result.deathtouch",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_old_deathtouch_marker_cannot_apply_after_type_or_phase_returns",
+      "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Consume the since-last-check marker even when the object is no longer a creature or is phased out, so a later creature or phased-in state cannot reuse it."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
       "official_rule_ids": ["120.3e", "120.4", "702.2", "702.2a", "702.2b", "702.2d", "702.2e", "702.2f", "704.5h"],

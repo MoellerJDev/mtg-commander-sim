@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from pathlib import Path
 import sys
 from typing import Any, Mapping
@@ -145,6 +146,55 @@ def _markdown(value: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _compact_markdown(value: Mapping[str, Any]) -> str:
+    summary = value["summary"]
+    selected = value["selected_batch"]
+    command = r".\.venv\Scripts\python.exe scripts\update_rules_scheduler.py --write"
+    fingerprint = hashlib.sha256(_json_text(value).encode("utf-8")).hexdigest()
+    blockers = list(selected["exit_criteria"])
+    if not blockers:
+        blockers = ["No selected-batch blockers were reported."]
+    lines = [
+        "---",
+        'title: "Rules dependency queue"',
+        'status: "generated"',
+        'authoritative_source: "coverage/rules-dependency-queue.json"',
+        f'verified: "{fingerprint}"',
+        'audience: "rules, compiler, and engine contributors"',
+        'maintenance: "generated"',
+        'generated_source: "coverage/rules-dependency-queue.json"',
+        f'generation_command: "{command}"',
+        "---",
+        "",
+        "# Rules dependency queue",
+        "",
+        f"Source fingerprint: `{value['fingerprint']}`",
+        "",
+        "## Current top-level state",
+        "",
+        f"- Pinned rules: `{summary['total_rules']}`",
+        f"- Queued rules: `{summary['queued_rules']}`",
+        f"- Subsystems: `{summary['subsystem_count']}`",
+        f"- Selected subsystem: `{selected['subsystem_id']}`",
+        f"- Selected batch: `{selected['batch_id']}`",
+        "",
+        "## Top blockers",
+        "",
+        *(f"- {item}" for item in blockers[:5]),
+        "",
+        "Complete rule, subsystem, dependency, classification, and selected-batch data "
+        "is in the [machine-readable rules queue](../coverage/rules-dependency-queue.json).",
+        "",
+        "Exact generation command:",
+        "",
+        "```powershell",
+        command,
+        "```",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     mode = parser.add_mutually_exclusive_group(required=True)
@@ -153,7 +203,7 @@ def main() -> int:
     args = parser.parse_args()
     value = build_rules_dependency_queue_from_root(ROOT)
     expected_json = _json_text(value)
-    expected_markdown = _markdown(value)
+    expected_markdown = _compact_markdown(value)
     if args.write:
         JSON_OUTPUT.write_text(
             expected_json, encoding="utf-8", newline="\n"

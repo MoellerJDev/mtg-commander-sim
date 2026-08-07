@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -198,8 +199,21 @@ def stale_claim_failures(
                 body,
             )
         )
-        if len(pr_references) > 1 or has_pr_ledger:
-            failures.append(f"{relative}: current guidance contains PR history")
+        if pr_references or has_pr_ledger:
+            failures.append(f"{relative}: current guidance contains pull-request history")
+        if re.search(
+            r"(?i)\b(?:workflow\s+)?run(?:\s+id)?\s*[:#]?\s*[0-9]{6,}\b"
+            r"|github\.com/[^\s)]+/actions/runs/[0-9]+",
+            body,
+        ):
+            failures.append(f"{relative}: current guidance contains a workflow run ID")
+        if re.search(
+            r"(?i)\brefs/heads/[a-z0-9._/-]+"
+            r"|\b(?:branch|head)\s+(?:named\s+)?[`'\"]?"
+            r"(?:fix|feat|feature|chore|docs|refactor|test|agent)/[a-z0-9._/-]+",
+            body,
+        ):
+            failures.append(f"{relative}: current guidance contains a transient branch")
     return failures
 
 
@@ -207,17 +221,132 @@ def index_failures(root: Path, paths: list[Path]) -> list[str]:
     index = root / "docs" / "index.md"
     if not index.is_file():
         return ["docs/index.md: authoritative documentation map is missing"]
-    linked: set[Path] = set()
-    for raw in LINK.findall(_without_fences(index.read_text(encoding="utf-8"))):
-        resolved = _link_target(index, raw, root)
-        if resolved is not None:
-            linked.add(resolved[0])
+    linked: set[Path] = {index.resolve()}
+    pending = [index.resolve()]
+    while pending:
+        source = pending.pop()
+        if not source.is_file() or source.suffix.lower() != ".md":
+            continue
+        for raw in LINK.findall(_without_fences(source.read_text(encoding="utf-8"))):
+            resolved = _link_target(source, raw, root)
+            if resolved is None:
+                continue
+            target = resolved[0]
+            if target in linked or not target.is_file():
+                continue
+            linked.add(target)
+            if target.suffix.lower() == ".md":
+                pending.append(target)
     missing = [
         path.relative_to(root).as_posix()
         for path in paths
         if path != index and path not in linked
     ]
     return [f"docs/index.md: unindexed document {path}" for path in missing]
+
+
+def root_document_failures(root: Path, paths: list[Path], policy: dict) -> list[str]:
+    allowed = set(policy.get("root_document_allowlist", []))
+    resolved_root = root.resolve()
+    actual = {
+        path.name
+        for path in paths
+        if (
+            path.parent.resolve() == resolved_root
+            and path.suffix.lower() == ".md"
+        )
+    }
+    return [
+        f"{name}: root Markdown document is not in the allowlist"
+        for name in sorted(actual - allowed)
+    ]
+
+
+def ownership_failures(root: Path, paths: list[Path], policy: dict) -> list[str]:
+    failures: list[str] = []
+    claims: dict[str, list[str]] = {}
+    for path in paths:
+        relative = path.relative_to(root).as_posix()
+        metadata = parse_front_matter(path.read_text(encoding="utf-8"))
+        concern = metadata.get("concern")
+        if concern and metadata.get("status") == "current":
+            claims.setdefault(concern, []).append(relative)
+    owners = policy.get("authoritative_concerns", {})
+    if len(set(owners.values())) != len(owners):
+        failures.append("documentation policy: concern owners must be unique")
+    for concern, owner in sorted(owners.items()):
+        path = root / owner
+        if not path.is_file():
+            failures.append(f"{owner}: authoritative concern owner is missing")
+            continue
+        metadata = parse_front_matter(path.read_text(encoding="utf-8"))
+        if metadata.get("status") != "current":
+            failures.append(f"{owner}: authoritative concern owner must be current")
+        if metadata.get("concern") != concern:
+            failures.append(f"{owner}: must declare concern {concern!r}")
+        if claims.get(concern, []) != [owner]:
+            failures.append(
+                f"{concern}: expected one current owner {owner!r}, "
+                f"found {sorted(claims.get(concern, []))}"
+            )
+    for retired in policy.get("retired_documents", []):
+        if (root / retired).exists():
+            failures.append(f"{retired}: retired document still exists")
+    return failures
+
+
+def historical_placement_failures(
+    root: Path, paths: list[Path], policy: dict
+) -> list[str]:
+    allowed_prefixes = tuple(policy.get("historical_allowed_prefixes", []))
+    allowed_documents = set(policy.get("historical_allowed_documents", []))
+    heading = re.compile(
+        r"(?im)^#{2,6}\s+(?:history|milestones?|migration (?:history|chronology)|"
+        r"version history|implementation chronology|pull requests?)\s*$"
+    )
+    failures: list[str] = []
+    for path in paths:
+        relative = path.relative_to(root).as_posix()
+        text = path.read_text(encoding="utf-8")
+        metadata = parse_front_matter(text)
+        allowed = relative in allowed_documents or relative.startswith(allowed_prefixes)
+        if metadata.get("status") == "historical" and not allowed:
+            failures.append(f"{relative}: historical document is outside an allowed location")
+        if (
+            metadata.get("status") == "current"
+            and metadata.get("maintenance") == "hand-maintained"
+            and not allowed
+            and heading.search(_without_fences(FRONT_MATTER.sub("", text, count=1)))
+        ):
+            failures.append(f"{relative}: historical prose belongs in ADRs, CHANGELOG, or docs/history")
+    return failures
+
+
+def generated_source_failures(root: Path, policy: dict) -> list[str]:
+    failures: list[str] = []
+    for relative, rule in sorted(policy.get("generated_dashboards", {}).items()):
+        path = root / relative
+        source = root / rule["source"]
+        if not path.is_file():
+            failures.append(f"{relative}: generated dashboard is missing")
+            continue
+        if not source.is_file():
+            failures.append(f"{relative}: generated source {rule['source']!r} is missing")
+            continue
+        text = path.read_text(encoding="utf-8")
+        metadata = parse_front_matter(text)
+        if metadata.get("status") != "generated" or metadata.get("maintenance") != "generated":
+            failures.append(f"{relative}: generated dashboard metadata is invalid")
+        if metadata.get("generated_source") != rule["source"]:
+            failures.append(f"{relative}: generated_source metadata is stale")
+        if metadata.get("generation_command") != rule["command"]:
+            failures.append(f"{relative}: generation_command metadata is stale")
+        if rule["command"] not in text:
+            failures.append(f"{relative}: exact generation command is not documented")
+        expected = hashlib.sha256(source.read_bytes()).hexdigest()
+        if metadata.get("verified") != expected:
+            failures.append(f"{relative}: generated Markdown is stale for {rule['source']}")
+    return failures
 
 
 def adr_failures(root: Path, policy: dict) -> list[str]:
@@ -259,6 +388,10 @@ def validate(root: Path = ROOT, policy_path: Path = POLICY_PATH) -> list[str]:
         *link_failures(root, paths),
         *stale_claim_failures(root, paths, policy),
         *index_failures(root, paths),
+        *root_document_failures(root, paths, policy),
+        *ownership_failures(root, paths, policy),
+        *historical_placement_failures(root, paths, policy),
+        *generated_source_failures(root, policy),
         *adr_failures(root, policy),
     ]
 

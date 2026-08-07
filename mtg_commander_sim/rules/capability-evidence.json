@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "e4c530ffa1e859fcfb2f088128ae842c3e8030491dfcb337e2506e85ab8d41d5",
-  "declaration_source_fingerprint": "ecbba912ce4047d8259fcfd4c32aa25daa116f0b177c0e86e7c061ad3029d364",
+  "registry_fingerprint": "8551be4d2457e7ee981b5cd3f71efa10db88dab2810e7d5c7b6c6af16dfdf8c1",
+  "declaration_source_fingerprint": "a05202edd5b53ee326382b99ad3c35492a28b24db944eb1a55136fbc1bfe08e5",
   "declarations": [
     {
       "capability_id": "activation.tap_untap_cost.haste",
@@ -6290,6 +6290,28 @@
     },
     {
       "capability_id": "damage.result.deathtouch",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_old_deathtouch_marker_cannot_apply_after_type_or_phase_returns",
+      "official_rule_ids": [
+        "120.3e",
+        "120.4",
+        "702.2",
+        "702.2a",
+        "702.2b",
+        "702.2d",
+        "702.2e",
+        "702.2f",
+        "704.5h"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Consume the since-last-check marker even when the object is no longer a creature or is phased out, so a later creature or phased-in state cannot reuse it."
+    },
+    {
+      "capability_id": "damage.result.deathtouch",
       "evidence_class": "multiplayer",
       "test_id": "tests.test_combat_keyword_rules.CombatKeywordRuleTests.test_four_player_deathtouch_result_is_source_derived_and_replays",
       "official_rule_ids": [
@@ -10894,5 +10916,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "e5c405e6b823876f28318e5f7ed17009a659ba924752c1ef76c005c0940ca850"
+  "fingerprint": "dd51d9f8a2d0021eea48f7982d8bda371dcb905e12ff13bda70284fc739a9610"
 }

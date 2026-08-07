@@ -133,7 +133,28 @@ class CombatDamageSnapshotTests(unittest.TestCase):
             ],
             [value.to_dict() for value in canonical],
         )
-        self.assertEqual(proposal.proposal_id, proposal.proposal_id)
+        reordered = _Query()
+        reordered.participant_ids = tuple(reversed(reordered.participant_ids))
+        reordered.blocker_ids = tuple(reversed(reordered.blocker_ids))
+        equivalent = build_combat_damage_assignment_proposal(
+            seat="A",
+            snapshot=build_combat_damage_snapshot(reordered),
+        )
+        reconstructed = type(proposal)(
+            damage_step_id=proposal.damage_step_id,
+            actor=proposal.actor,
+            sources=proposal.sources,
+            attacking_sources=proposal.attacking_sources,
+            deathtouch_sources=proposal.deathtouch_sources,
+            trample_sources=proposal.trample_sources,
+        )
+        changed = replace(
+            proposal,
+            sources=(replace(proposal.sources[0], power=6),),
+        )
+        self.assertEqual(proposal.proposal_id, equivalent.proposal_id)
+        self.assertEqual(proposal.proposal_id, reconstructed.proposal_id)
+        self.assertNotEqual(proposal.proposal_id, changed.proposal_id)
 
     def test_snapshot_deeply_freezes_query_values(self):
         query = _Query()

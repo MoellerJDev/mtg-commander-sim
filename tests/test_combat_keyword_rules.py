@@ -658,6 +658,44 @@ class CombatKeywordRuleTests(unittest.TestCase):
         self.assertFalse(engine._stabilize())
         self.assertEqual("battlefield", blocker.zone)
 
+    def test_old_deathtouch_marker_cannot_apply_after_type_or_phase_returns(self):
+        session = self.make_session(510453)
+        engine = session.engine
+        former_creature = self.token(
+            engine,
+            "B",
+            "Former creature",
+            power=2,
+            toughness=8,
+        )
+        former_creature.deathtouch_damage = True
+        former_creature.annotations["copy_overrides"]["type_line"] = (
+            "Token Artifact"
+        )
+
+        self.assertFalse(engine._stabilize())
+        self.assertFalse(former_creature.deathtouch_damage)
+        former_creature.annotations["copy_overrides"]["type_line"] = (
+            "Token Artifact Creature — Test"
+        )
+        self.assertFalse(engine._stabilize())
+        self.assertEqual("battlefield", former_creature.zone)
+
+        phased = self.token(
+            engine,
+            "B",
+            "Phased creature",
+            power=2,
+            toughness=8,
+        )
+        phased.deathtouch_damage = True
+        phased.phased_out = True
+        self.assertFalse(engine._stabilize())
+        self.assertFalse(phased.deathtouch_damage)
+        phased.phased_out = False
+        self.assertFalse(engine._stabilize())
+        self.assertEqual("battlefield", phased.zone)
+
     def test_trample_deals_to_defender_after_all_blockers_leave(self):
         session = self.make_session(51047)
         engine = session.engine

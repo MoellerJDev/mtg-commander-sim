@@ -230,6 +230,7 @@ async function advanceToActionReady(
   action: Locator,
   testInfo: TestInfo,
   durabilityTimeout = 45_000,
+  holdWindow?: () => Promise<boolean>,
 ) {
   // Stop advancing as soon as the exact capability exists, even if React still
   // has it disabled behind the previous command's serialization lock. A goal
@@ -241,6 +242,7 @@ async function advanceToActionReady(
     advance: async () => {
       await new Promise((resolve) => setTimeout(resolve, 200));
       if (await action.count()) return true;
+      if (holdWindow && await holdWindow()) return true;
       for (const page of pages) {
         const result = await submitAuthorizedPass(page);
         if (result !== "unavailable") return true;
@@ -1150,8 +1152,14 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
       // Use the exact current capability instead of accepting an unrelated
       // delayed pass revision as evidence that a drag command was submitted.
       const playAction = page.getByTestId(`action-play-land:${landRef}`);
+      const expectedActiveSeat = page === host ? "A" : "B";
+      const table = page.locator(".game-shell");
       await advanceToActionReady(
         [host, opponent], playAction, testInfo, durableTransitionTimeout,
+        async () => (
+          (await table.getAttribute("data-active-player")) === expectedActiveSeat
+          && (await table.getAttribute("data-phase")) === "precombat_main"
+        ),
       );
       await playAction.click();
       const dialog = page.getByTestId("choice-dialog");
@@ -1198,6 +1206,13 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
       "Swamp", "Swamp", "Forest", "Forest", "Swamp", "Forest",
     ];
     for (let turn = 0; turn < requiredMana.length; turn += 1) {
+      if (turn === requiredMana.length - 1) {
+        // Arm the defender's stop before the host's final development can
+        // finish and Auto-pass both seats into the defender's turn. The
+        // projection helper below advances the intervening stack response
+        // while preserving Full Control for the upcoming main phase.
+        await ensureFullControl(opponent);
+      }
       await playLand(host, requiredMana[turn]);
       if (turn === requiredMana.length - 1) {
         const commander = host
@@ -1212,17 +1227,10 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
         await submitOpenChoice(host);
         // The accepted cast still crosses stack priority and durability writes
         // before the permanent appears in the projected battlefield.
-        await expect(host.getByTestId("own-battlefield")).toContainText(
-          "Yargle and Multani",
-          { timeout: durableTransitionTimeout },
-        );
-      }
-      if (turn === requiredMana.length - 1) {
-        // The sixth land creates a meaningful commander offer. Hold the
-        // defender's priority before the land command is acknowledged so
-        // Auto-pass cannot consume that newly strategic main phase before the
-        // exact decision-ID helper observes it.
-        await ensureFullControl(opponent);
+        await passUntilProjection([host, opponent], async () => (
+          (await host.getByTestId("own-battlefield").textContent())
+            ?.includes("Yargle and Multani") ?? false
+        ), testInfo, durableTransitionTimeout);
       }
       await playLand(opponent);
       if (turn === requiredMana.length - 1) {
@@ -1272,8 +1280,20 @@ test("@browser-soak @natural-winner @persistence a trusted browser duel reaches 
         { timeout: durableTransitionTimeout },
       );
     }
-    await submitFormAction(host, "pass");
     await ensureFullControl(opponent);
+    // Arm the defender before this pass can end the host's turn; toggling
+    // afterward races the automatic transition through the next precombat
+    // main phase. Damage can become visible before durability serialization
+    // re-enables this pass, so wait for the exact capability instead of
+    // starting an unbounded click against its disabled projection.
+    const turnEndingPass = host.getByTestId("action-pass");
+    await advanceToActionReady(
+      [host, opponent], turnEndingPass, testInfo, durableTransitionTimeout,
+    );
+    // Auto-pass may win the narrow race after readiness is observed. That is
+    // already the desired transition: the following exact Seat B land offer,
+    // protected by Full Control, proves the turn advanced without skipping B.
+    await submitAuthorizedPass(host);
     await playLand(opponent);
     await declineCommanderDevelopment(opponent);
     await ensureAutoPass(opponent);
