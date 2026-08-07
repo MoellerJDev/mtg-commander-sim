@@ -131,7 +131,11 @@ silently expand or bypass the gate.
 The final `PR / Certification` job receives the stable Windows certification
 result and every other required job through `needs`, and fails unless all
 succeeded. Protect `main` with the exact required status context
-`PR / Certification`.
+`PR / Certification`. After verifying those dependencies, the job publishes an
+untracked `exact-head-certification-<run-id>` artifact. Its strict receipt pins
+the repository, pull request, exact PR-head SHA, workflow run, complete required
+check suite, fingerprint algorithm, and tracked source-tree fingerprint. It
+does not contain or predict the eventual merge SHA.
 
 The pre-sharding public baseline is run `31025126367`: its single Windows
 discovery process executed the complete test allocation in 2,265.245 seconds
@@ -165,13 +169,13 @@ a compact snapshot and exact one-test rerun command. Ordinary command
 acknowledgements still wait for authoritative durability, while review artifacts
 remain derived and are generated only for paused or terminal records.
 
-`scripts/update_platform_status.py` treats current Git and pull-request facts
-as validation inputs rather than prose. Active PR phases must identify a real
-open PR whose head contains the recorded candidate commit; a candidate already
-reachable from `main`, a pending PR already merged, or a stale head lacking an
-explicit historical classification fails closed. Current test counts and
-CardProgram census values are derived from the authoritative test inventory and
-coverage artifacts rather than copied into `platform/readiness-source.json`.
+`platform/readiness-source.json` contains durable product and certification
+policy only. Pull-request numbers, exact heads, workflow runs, merge SHAs,
+runtime branches, and transient integration chronology belong to GitHub and the
+untracked certification receipt. The generated readiness report records the
+evaluated source-tree fingerprint, while current test counts and CardProgram
+census values are derived from the authoritative test inventory and coverage
+artifacts rather than copied into the source.
 
 Deterministic failures that escape the quick gate are recorded in
 `platform/ci-escape-source.json`. The generated
@@ -185,7 +189,13 @@ as pushes.
 `.github/workflows/main-smoke.yml` runs after each push to `main`. It checks a
 compact replay/server suite, generated integration state, pinned rules, wheel
 metadata, and the production browser build. It is an integration alarm, not a
-second complete pre-merge suite.
+second complete pre-merge suite. Before those checks, it resolves the pull
+request associated with the current merge commit, finds a successful PR workflow
+for that exact head, downloads its live certification receipt, and requires the
+current tracked source tree to have the same fingerprint. A squash merge passes
+without a follow-up status commit because commit identity is deliberately not
+the equivalence boundary; a materially different tree, missing/stale receipt,
+failed gate, direct push, or mismatched GitHub coordinate fails closed.
 
 `.github/workflows/nightly.yml` owns expensive breadth:
 

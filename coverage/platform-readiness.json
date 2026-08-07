@@ -31,27 +31,11 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "current_merged_main_git_sha": null,
-    "current_runtime_git_sha": null,
-    "current_runtime_git_sha_persistence": "runtime-only; tracked reports store null because a commit cannot contain its own SHA",
-    "evaluated_source_tree_hash": "b91185fede13339f75ab3026d1914b044fe298b08a56a74ee37a5b2000effe8f",
+    "evaluated_source_tree_hash": "c204af2218b0246ad404c56a8101789e3d49219a85d60a29d77cc6ca4065f7eb",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
     "stale_check": "python scripts/update_platform_status.py --check"
-  },
-  "integration": {
-    "active_phase": null,
-    "tags": [
-      {
-        "commit": "4dc3feb625f824b9062e162808fd74b07e97c404",
-        "name": "v0.6.0"
-      },
-      {
-        "commit": "bed4179e702caccd6e9f3cfb7b313b2dadcb0000",
-        "name": "v0.7.0"
-      }
-    ]
   },
   "milestones": [
     {
@@ -370,7 +354,7 @@
       "evidence": "Feature head 312d837664a0f32ccda454d9fd1dd81e11ae92d3 adds one immutable fixed affected-set model, a narrow read-only effective-characteristic query, global APNAP and logical-identity recipient ordering, overlap deduplication, strict target-controller revalidation, and one canonical simultaneous damage-batch commit. Oracle IR v43 lowers 48 Commander-legal clauses through a closed player, creature, planeswalker, opponent-controlled, flying, color, nonartifact, nontoken, and shadow grammar without runtime Oracle parsing or card identity behavior. The current Commander census promotes 25 exact trusted capability-closed cards, from 2,098 to 2,123, and removes 40 material residuals, from 47,745 to 47,705; representative promotions include Pyroclasm, End the Festivities, Simoon, Sweltering Suns, Flame Rift, Volcanic Fallout, and Storm's Wrath. CommanderEngine, direct GameState writes, Oracle-ID literals, and printed-name literals remain flat. Static architecture, compilation, pinned-rules, capability-evidence, documentation, reusable-piece, generator, and diff checks pass locally; behavioral, replay, privacy, multiplayer, interaction, rollback, and mutation regressions are delegated to public PR CI. Divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, and linked life, draw, scry, or conditional riders remain explicit residuals.",
       "id": "typed_fixed_affected_set_damage_harvest",
       "name": "Typed fixed simultaneous affected-set damage",
-      "status": "implemented_at_feature_head"
+      "status": "integrated_on_certified_main"
     },
     {
       "evidence": "The versioned 2026-06-19 corpus, reviewed CR 400-408 and CR 500-514 families, focused CR 725 and CR 508-509/608 current-turn history slices, and the reviewed partial CR 121 draw contract are represented. Broader rules and Oracle completeness remain explicitly unclaimed.",
@@ -385,7 +369,6 @@
       "status": "partial"
     }
   ],
-  "next_task": "Certify the typed fixed affected-set damage candidate in public PR CI, then select the next dependency-ready reusable rules family from the refreshed card-unlock frontier. Divided, variable, negative-predicate, compound, linked-result, and unpreventable damage variants remain separate explicit work.",
   "package": {
     "name": "mtg-commander-sim",
     "python": ">=3.12,<3.13",
@@ -412,11 +395,9 @@
     "transport_neutral_service": "implemented_strict_protocol_3"
   },
   "provenance": {
-    "certified_head_classification": "current_main",
-    "certified_head_sha": "34a2cc46b94c06187dbaeb9a8fb56402116d5329",
-    "feature_head_classification": "active_candidate",
-    "feature_head_sha": "312d837664a0f32ccda454d9fd1dd81e11ae92d3",
-    "generation_timestamp": "2026-08-07T14:17:27Z"
+    "certification_policy": "exact_head_actions_receipt_and_source_tree_equivalence",
+    "certification_receipt_schema_version": 1,
+    "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3"
   },
   "repository": {
     "default_branch": "main",
@@ -464,7 +445,7 @@
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
-  "schema_version": 2,
+  "schema_version": 3,
   "snapshots": {
     "comprehensive_rules": {
       "effective_date": "2026-06-19",
@@ -525,9 +506,7 @@
     },
     "ci": {
       "matrix": "Python 3.12 on Ubuntu and Windows",
-      "run_id": 31181245846,
-      "status": "pass",
-      "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31181245846"
+      "policy": "pull requests publish an exact-head certification receipt after all required gates pass; main smoke verifies source-tree equivalence"
     },
     "local": {
       "browser_four_isolated_contexts": "pass_seven_journeys_per_tab_seat_isolation_duel_four_player_lifecycle_exact_retry_mobile_reconnect_focus_private_penalized_mulligan_form_saved_full_control_auto_mana_card_drag_drop_tapped_orientation_isolated_spectator_public_log_target_stack_treasure_trigger_combat_concession_and_natural_winner",
@@ -535,9 +514,6 @@
       "browser_typecheck_and_production_build": "pass_typecheck_group_discovery_and_authoritative_four_context_headless_smoke_with_progress_and_persistence_metrics",
       "compile": "pass",
       "deterministic_four_player_full_game": "pass_micro_pool_natural_winner_exact_replay",
-      "deterministic_tests": "certified_main_through_pr130_at_34a2cc46b94c06187dbaeb9a8fb56402116d5329; pr130_exact_head_run_31180670367_and_post_merge_main_smoke_31181245846_pass; fixed_affected_set_feature_behavior_is_delegated_to_public_pr_ci",
-      "focused_ci_policy_tests": "pass_path_and_changed_symbol_impact_classification_deterministic_browser_and_windows_groups_metrics_parsing_fail_closed_windows_certification_status_git_and_github_truth_derivation_workflow_structure_actor_persistence_progress_endpoint_terminal_metrics_concurrent_review_publication_and_architecture_freshness",
-      "focused_rules_tests": "fixed_affected_set_changed_modules_compile_pinned_corpus_census_frontier_reusable_piece_generation_architecture_capability_documentation_rules_and_diff_static_checks_pass; no local behavioral regression suite executed",
       "four_player_protocol_demo": "pass",
       "managed_scryfall_data_and_images": "pass_startup_freshness_atomic_build_archive_cleanup_record_pinned_snapshot_local_cache_preview_confirmation_and_static_serving",
       "repository_history_security_audit": "pass",

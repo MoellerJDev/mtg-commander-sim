@@ -356,10 +356,32 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Require every PR gate
         env:
           CI_NEEDS_JSON: ${{ toJSON(needs) }}
         run: python scripts/verify_ci_needs.py
+      - name: Create exact-head certification receipt
+        env:
+          CI_NEEDS_JSON: ${{ toJSON(needs) }}
+          MTG_EXACT_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MTG_PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: >-
+          python scripts/certification_receipt.py create
+          --repository "${GITHUB_REPOSITORY}"
+          --pull-request "${MTG_PR_NUMBER}"
+          --exact-head-sha "${MTG_EXACT_HEAD_SHA}"
+          --workflow-run-id "${GITHUB_RUN_ID}"
+          --needs-json "${CI_NEEDS_JSON}"
+          --output local/certification-receipt.json
+      - name: Publish exact-head certification receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: exact-head-certification-${{ github.run_id }}
+          path: local/certification-receipt.json
+          if-no-files-found: error
+          retention-days: 30
 
   metrics:
     name: PR / Metrics

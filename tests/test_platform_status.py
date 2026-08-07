@@ -4,8 +4,9 @@ import json
 import subprocess
 import sys
 import unittest
-from unittest import mock
 
+from scripts.certification_receipt import RECEIPT_SCHEMA_VERSION
+from scripts.source_tree_fingerprint import SOURCE_TREE_FINGERPRINT_ALGORITHM
 from scripts.update_platform_status import (
     ROOT,
     _canonical_tracked_blob_oids,
@@ -19,38 +20,33 @@ from scripts.update_platform_status import (
 
 
 class PlatformStatusTests(unittest.TestCase):
-    def test_report_derives_package_test_and_subsystem_state(self):
+    def source(self) -> dict:
+        return json.loads(
+            (ROOT / "platform" / "readiness-source.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+    def test_report_derives_durable_package_test_and_subsystem_state(self):
         report = build_report()
-        self.assertEqual(report["package"]["version"], "0.8.0")
+        self.assertEqual("0.8.0", report["package"]["version"])
         self.assertGreaterEqual(report["tests"]["deterministic_cases_discovered"], 286)
         self.assertGreaterEqual(report["tests"]["server_files"], 4)
         self.assertGreaterEqual(report["tests"]["web_files"], 10)
         self.assertGreaterEqual(report["tests"]["migration_files"], 1)
-        self.assertEqual(report["platform"]["ai_dependency"], "none_for_core_tests_or_runtime")
-        self.assertNotIn("pull_requests", report["integration"])
-        self.assertNotIn("branch", report["integration"])
-        self.assertNotIn("branch_ancestry", report["integration"])
+        self.assertEqual("none_for_core_tests_or_runtime", report["platform"]["ai_dependency"])
+        self.assertNotIn("integration", report)
+        self.assertNotIn("next_task", report)
         self.assertEqual(
-            len(report["generated"]["evaluated_source_tree_hash"]),
-            64,
+            SOURCE_TREE_FINGERPRINT_ALGORITHM,
+            report["generated"]["source_tree_fingerprint_algorithm"],
         )
-        self.assertEqual(
-            report["generated"]["current_runtime_git_sha"],
-            subprocess.check_output(
-                ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-            ).strip(),
-        )
-        self.assertEqual(
-            report["generated"]["current_merged_main_git_sha"],
-            subprocess.check_output(
-                ["git", "rev-parse", "origin/main"], cwd=ROOT, text=True
-            ).strip(),
-        )
+        self.assertEqual(64, len(report["generated"]["evaluated_source_tree_hash"]))
+        self.assertNotIn("current_runtime_git_sha", report["generated"])
+        self.assertNotIn("current_merged_main_git_sha", report["generated"])
         persisted = json.loads(_serialize_json(report))
-        self.assertIsNone(persisted["generated"]["current_runtime_git_sha"])
-        self.assertIsNone(
-            persisted["generated"]["current_merged_main_git_sha"]
-        )
+        self.assertEqual(report["generated"], persisted["generated"])
+
         readiness = render_readiness(report)
         status = render_status(report)
         self.assertTrue(readiness.startswith("---\n"))
@@ -63,10 +59,6 @@ class PlatformStatusTests(unittest.TestCase):
         self.assertIn("## Top blockers", status)
         self.assertIn("coverage/platform-readiness.json", status)
         self.assertIn("scripts\\update_platform_status.py --write", status)
-        self.assertNotIn("Current feature head", status)
-        self.assertNotIn("Certified exact head", status)
-        self.assertNotIn("Active next system", status)
-        self.assertIn("## Current top-level state", readiness)
 
     def test_source_tree_fingerprint_excludes_generated_reports_only(self):
         self.assertTrue(
@@ -80,9 +72,7 @@ class PlatformStatusTests(unittest.TestCase):
                 ROOT / "docs" / "PLATFORM_IMPLEMENTATION_STATUS.md",
             )
         )
-        self.assertFalse(
-            _is_generated_report("README.md", ROOT / "README.md")
-        )
+        self.assertFalse(_is_generated_report("README.md", ROOT / "README.md"))
 
     def test_source_tree_fingerprint_uses_git_clean_blobs(self):
         expected = subprocess.check_output(
@@ -91,252 +81,54 @@ class PlatformStatusTests(unittest.TestCase):
             text=True,
         ).strip()
         self.assertEqual(
-            _canonical_tracked_blob_oids([".gitattributes"]),
             [expected],
+            _canonical_tracked_blob_oids([".gitattributes"]),
         )
 
-    def test_provenance_rejects_old_or_duplicated_commit_coordinates(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["validation"]["baseline_commit"] = source["provenance"][
-            "certified_head_sha"
-        ]
-        with self.assertRaisesRegex(ValueError, "baseline_commit"):
-            _validate_provenance(source)
-
-        source["validation"].pop("baseline_commit")
-        source["integration"]["commit_reference"] = "duplicated current main"
-        with self.assertRaisesRegex(ValueError, "commit_reference"):
-            _validate_provenance(source)
-
-    def test_provenance_rejects_pending_certification_language(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["description"] = "certification pending"
-        with self.assertRaisesRegex(ValueError, "certification pending"):
-            _validate_provenance(source)
-
-    def test_active_candidate_may_have_feature_head_milestone(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["active_phase"] = None
-        source["integration"]["pull_requests"] = []
-        source["provenance"]["feature_head_classification"] = (
-            "active_candidate"
-        )
-        source["milestones"][0]["status"] = "implemented_at_feature_head"
-        with mock.patch(
-            "scripts.update_platform_status._git_is_ancestor",
-            side_effect=(False, True),
-        ):
-            _validate_provenance(source)
-
-    def test_integrated_feature_cannot_retain_feature_head_milestone(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["active_phase"] = None
-        source["integration"]["pull_requests"] = []
-        source["provenance"]["feature_head_classification"] = (
-            "historical_integrated"
-        )
-        source["milestones"][0]["status"] = "implemented_at_feature_head"
-        with mock.patch(
-            "scripts.update_platform_status._git_is_ancestor",
-            side_effect=(True, True),
-        ):
-            with self.assertRaisesRegex(ValueError, "cannot remain at feature head"):
-                _validate_provenance(source)
-
-    def test_active_phase_rejects_a_feature_already_on_main(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["active_phase"] = {
-            "id": "stale_active_phase",
-            "pull_request": 100,
-            "head": "rules/generic-flash-cast-timing",
-        }
-        source["integration"]["pull_requests"] = []
-        source["provenance"]["feature_head_classification"] = (
-            "active_candidate"
-        )
-        with mock.patch(
-            "scripts.update_platform_status._git_is_ancestor",
-            return_value=True,
-        ):
-            with self.assertRaisesRegex(ValueError, "already reachable"):
-                _validate_provenance(source)
-
-    def test_active_phase_requires_a_matching_open_pull_request(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["active_phase"] = {
-            "id": "active_phase",
-            "pull_request": 100,
-            "head": "rules/generic-flash-cast-timing",
-        }
-        source["integration"]["pull_requests"] = []
-        source["provenance"]["feature_head_classification"] = (
-            "active_candidate"
-        )
-        with (
-            mock.patch(
-                "scripts.update_platform_status._git_is_ancestor",
-                side_effect=(False, True),
-            ),
-            mock.patch(
-                "scripts.update_platform_status._github_pull_request",
-                return_value={
-                    "state": "CLOSED",
-                    "headRefName": "rules/generic-flash-cast-timing",
-                    "headRefOid": source["provenance"]["feature_head_sha"],
-                    "baseRefName": "main",
-                },
-            ),
-        ):
-            with self.assertRaisesRegex(ValueError, "no matching open"):
-                _validate_provenance(source)
-
-    def test_merged_pull_request_cannot_remain_pending(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["active_phase"] = None
-        source["integration"]["pull_requests"] = [
-            {
-                "base": "main",
-                "head": "feature/already-merged",
-                "number": 999,
-                "state": "open",
-                "url": "https://example.invalid/pull/999",
-            }
-        ]
-        with (
-            mock.patch(
-                "scripts.update_platform_status._github_pull_request",
-                return_value={
-                    "state": "MERGED",
-                    "headRefName": "feature/already-merged",
-                    "headRefOid": source["provenance"]["feature_head_sha"],
-                    "baseRefName": "main",
-                },
-            ),
-        ):
-            with self.assertRaisesRegex(ValueError, "not the recorded open"):
-                _validate_provenance(source)
-
-    def test_open_pull_request_coordinates_must_match_github(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["active_phase"] = None
-        source["integration"]["pull_requests"] = [
-            {
-                "base": "main",
-                "head": "feature/recorded",
-                "number": 999,
-                "state": "open",
-                "url": "https://example.invalid/pull/999",
-            }
-        ]
-        with mock.patch(
-            "scripts.update_platform_status._github_pull_request",
-            return_value={
-                "state": "OPEN",
-                "headRefName": "feature/different",
-                "headRefOid": source["provenance"]["feature_head_sha"],
-                "baseRefName": "main",
-            },
-        ):
-            with self.assertRaisesRegex(ValueError, "not the recorded open"):
-                _validate_provenance(source)
-
-    def test_stale_heads_require_explicit_historical_classification(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["pull_requests"] = []
-        source["provenance"]["certified_head_sha"] = subprocess.check_output(
-            ["git", "rev-parse", "origin/main^"],
-            cwd=ROOT,
-            text=True,
-        ).strip()
-        source["provenance"]["certified_head_classification"] = (
-            "current_main"
-        )
-        with self.assertRaisesRegex(ValueError, "trails current main"):
-            _validate_provenance(source)
-
-    def test_historical_certified_head_may_trail_current_main(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["pull_requests"] = []
-        source["provenance"]["certified_head_sha"] = subprocess.check_output(
-            ["git", "rev-parse", "origin/main^"],
-            cwd=ROOT,
-            text=True,
-        ).strip()
-        source["provenance"]["certified_head_classification"] = (
-            "historical_certified"
-        )
+    def test_durable_provenance_has_no_execution_coordinates(self):
+        source = self.source()
         _validate_provenance(source)
-
-    def test_squash_merged_exact_head_must_match_current_main_tree(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
+        self.assertEqual(3, source["schema_version"])
+        self.assertEqual(
+            RECEIPT_SCHEMA_VERSION,
+            source["provenance"]["certification_receipt_schema_version"],
         )
-        source["integration"]["pull_requests"] = []
-        source["provenance"]["certified_head_classification"] = (
-            "current_main_tree_equivalent"
-        )
-        with mock.patch(
-            "scripts.update_platform_status._git_tree_sha",
-            side_effect=("same-tree", "same-tree"),
+        serialized = json.dumps(source, sort_keys=True).lower()
+        for value in (
+            "active_phase",
+            "feature_head_sha",
+            "certified_head_sha",
+            "generation_timestamp",
+            "pull_requests",
+            "run_id",
+            "runtime_branch",
         ):
+            self.assertNotIn(value, serialized)
+
+    def test_durable_provenance_rejects_transient_integration_state(self):
+        source = self.source()
+        source["integration"] = {"branch": "feature/transient"}
+        with self.assertRaisesRegex(ValueError, "transient integration"):
             _validate_provenance(source)
 
-        with mock.patch(
-            "scripts.update_platform_status._git_tree_sha",
-            side_effect=("certified-tree", "main-tree"),
-        ):
-            with self.assertRaisesRegex(ValueError, "not tree-equivalent"):
-                _validate_provenance(source)
+        source = self.source()
+        source["next_task"] = "transient scheduler duplicate"
+        with self.assertRaisesRegex(ValueError, "rules scheduler"):
+            _validate_provenance(source)
 
-    def test_current_card_baseline_is_derived_not_hand_copied(self):
-        source = json.loads(
-            (ROOT / "platform" / "readiness-source.json").read_text(
-                encoding="utf-8"
-            )
-        )
-        source["integration"]["pull_requests"] = []
+    def test_durable_provenance_rejects_unknown_policy_or_execution_receipt(self):
+        source = self.source()
+        source["provenance"]["source_tree_fingerprint_algorithm"] = "stale-v1"
+        with self.assertRaisesRegex(ValueError, "algorithm"):
+            _validate_provenance(source)
+
+        source = self.source()
+        source["validation"]["ci"]["run_id"] = 123
+        with self.assertRaisesRegex(ValueError, "durable CI"):
+            _validate_provenance(source)
+
+    def test_card_census_remains_derived(self):
+        source = self.source()
         source["validation"]["card_program_census"] = "stale hand copy"
         with self.assertRaisesRegex(ValueError, "must be derived"):
             _validate_provenance(source)
@@ -354,7 +146,7 @@ class PlatformStatusTests(unittest.TestCase):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(0, result.returncode, result.stderr)
 
 
 if __name__ == "__main__":
