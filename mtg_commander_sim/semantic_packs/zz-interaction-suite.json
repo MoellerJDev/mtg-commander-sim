@@ -557,11 +557,29 @@
             "effects": [
               {
                 "op": "destroy_all",
-                "filter": {
-                  "zones": ["battlefield"],
-                  "categories": ["permanent"],
-                  "artifact": true,
-                  "controller": "opponent"
+                "source": "$source",
+                "set": {
+                  "controller_relation": "opponents",
+                  "target_controller": null,
+                  "exclude_source": false,
+                  "query": {
+                    "zones": ["battlefield"],
+                    "owner": null,
+                    "controller": null,
+                    "types_all": ["artifact"],
+                    "types_any": [],
+                    "excluded_types": [],
+                    "subtypes_all": [],
+                    "supertypes_all": [],
+                    "colors_all": [],
+                    "colors_any": [],
+                    "keywords_all": [],
+                    "token": null,
+                    "tapped": null,
+                    "include_phased_out": false,
+                    "known_to_actor": null,
+                    "exclude_ref": null
+                  }
                 }
               }
             ]

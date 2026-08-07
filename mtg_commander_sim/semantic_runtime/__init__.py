@@ -143,6 +143,7 @@ from .effect_handlers import DOMAIN_EFFECT_HANDLERS, DomainEffectHandler
 from .destruction_handlers import (
     DESTRUCTION_HANDLERS,
     DestroyPermanentHandler,
+    DestroyPermanentSetHandler,
 )
 from .permanent_exile_handlers import (
     ExilePermanentHandler,
@@ -176,6 +177,7 @@ from .intents import (
     DrawCardsIntent,
     DomainEffectIntent,
     DestroyPermanentIntent,
+    DestroyPermanentSetIntent,
     IntentPlan,
     EliminatePlayersIntent,
     ExilePermanentIntent,
@@ -237,6 +239,7 @@ from .zone_replacements import (
     default_zone_change_replacement_registry,
     resolve_zone_change_replacements,
     prepare_zone_change_replacement,
+    prepare_zone_change_replacement_batch,
 )
 
 
@@ -300,6 +303,8 @@ __all__ = [
     "DomainEffectIntent",
     "DestroyPermanentHandler",
     "DestroyPermanentIntent",
+    "DestroyPermanentSetIntent",
+    "DestroyPermanentSetHandler",
     "ExilePermanentHandler",
     "ExilePermanentIntent",
     "FixedDamageSetHandler",
@@ -438,6 +443,7 @@ __all__ = [
     "collect_life_change_replacement_effects",
     "log_applied_zone_replacements",
     "prepare_zone_change_replacement",
+    "prepare_zone_change_replacement_batch",
     "PreparedZoneChange",
     "ZoneReplacementError",
     "describe_runtime_handler",

@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Literal, Mapping, TypeAlias
 
+from ..affected_permanents import AffectedPermanentSetSpec
 from ..drawing.model import (
     DiscardDrawnCardUnlessType,
     DrawnCardAction,
@@ -98,6 +99,43 @@ class DestroyPermanentIntent:
             _freeze_replacement_selections(
                 self.replacement_selections,
                 family="Destruction",
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class DestroyPermanentSetIntent:
+    actor: str
+    spec: AffectedPermanentSetSpec
+    reason: str
+    source_ref: str | None = None
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        if any(type(value) is not str or not value for value in (self.actor, self.reason)):
+            raise ValueError(
+                "Destruction-set intents require actor and reason"
+            )
+        if not isinstance(self.spec, AffectedPermanentSetSpec):
+            raise ValueError(
+                "Destruction-set intents require a typed affected set"
+            )
+        if self.source_ref is not None and (
+            type(self.source_ref) is not str or not self.source_ref
+        ):
+            raise ValueError(
+                "Destruction-set source must be a nonempty reference"
+            )
+        if self.spec.exclude_source and self.source_ref is None:
+            raise ValueError(
+                "Source-excluding destruction sets require a source"
+            )
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                self.replacement_selections,
+                family="Destruction-set",
             ),
         )
 
@@ -523,6 +561,7 @@ SemanticIntent: TypeAlias = (
     | SetPermanentTappedIntent
     | UntapAllCreaturesIntent
     | DestroyPermanentIntent
+    | DestroyPermanentSetIntent
     | ReturnPermanentToOwnerHandIntent
     | ExilePermanentIntent
     | DealFixedDamageSetIntent

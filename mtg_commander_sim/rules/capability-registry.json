@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 49,
+  "registry_version": 50,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -1257,6 +1257,33 @@
       "dependency_fail_closed_rationale": "The exact direct-target compiler shape requires resolution-time target revalidation; blocking that dependency prevents the destruction node and its CardProgram from becoming trusted.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_destruction_disposition_mutants_are_killed changes shield, Indestructible, and state-based disposition boundaries; the focused assertions reject each mutant.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "permanent.destroy.fixed_set",
+      "version": 1,
+      "official_rules": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and execute one mandatory fixed public battlefield-set destruction instruction as a simultaneous typed precommit transaction with immutable APNAP selection, Indestructible prohibition, shield-counter replacement, and canonical zone-change ownership.",
+        "inputs": ["closed typed affected-permanent set", "complete public APNAP battlefield snapshot", "current represented effective types, colors, supertypes, keywords, token state, and tapped state", "physical and logical object identity", "current shield-counter counts"],
+        "outputs": ["one immutable affected-set snapshot", "canonical simultaneous destruction zone events", "shield-counter and Indestructible dispositions", "public typed result journal"],
+        "exclusions": ["regeneration and cannot-be-regenerated riders", "variable, quantified, comparative, chosen, named, or history-dependent predicates", "negative color, subtype, or keyword predicates", "linked destroyed-this-way results, costs, modes, choices, and delayed destruction", "unrepresented continuous-effect, copy, face-down, and replacement interactions; cards representing those interactions remain material residuals and fail match trust closed"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.affected_permanents.AffectedPermanentSetSpec", "mtg_commander_sim.destruction_sets.snapshot_destruction_set", "mtg_commander_sim.destruction_sets.resolve_destruction_set", "mtg_commander_sim.compiler.destruction_templates.MassDestructionEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.mass_destruction_node_capabilities", "mtg_commander_sim.semantic_runtime.destruction_handlers.DestroyPermanentSetHandler", "mtg_commander_sim.destruction.prepare_destructions", "mtg_commander_sim.destruction.commit_destruction_plan"],
+      "positive_tests": ["test_spell_trigger_and_activated_contexts_share_mass_destruction_lowering", "test_mass_destruction_apnap_shield_indestructible_and_replay"],
+      "negative_tests": ["test_unsupported_mass_destruction_variants_remain_residuals", "test_mass_destruction_shape_mutants_fail_closed", "test_mass_destruction_stale_snapshot_rolls_back"],
+      "interaction_tests": ["test_mass_destruction_apnap_shield_indestructible_and_replay", "test_mass_destruction_uses_typed_query_and_source_exclusion"],
+      "multiplayer_tests": ["test_mass_destruction_apnap_shield_indestructible_and_replay"],
+      "privacy_tests": ["test_mass_destruction_apnap_shield_indestructible_and_replay"],
+      "replay_tests": ["test_mass_destruction_apnap_shield_indestructible_and_replay"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The non-target fixed-set owner has no optional capability dependency; targeted-controller nodes separately require the existing target-revalidation capability in their exact node shape.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_mass_destruction_selection_mutant_is_killed changes the affected-set controller boundary and the focused four-player assertions reject the survivor.",
       "blockers": [],
       "status": "trusted"
     },

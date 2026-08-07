@@ -5209,6 +5209,86 @@
       "applicability_note": "Validate the complete prepared destruction batch before moving a permanent or removing a shield counter."
     },
     {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionRuntimeTests.test_mass_destruction_uses_typed_query_and_source_exclusion",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Snapshot current represented effective characteristics, exclude the physical source when required, and route every result through the canonical destruction owner."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionRuntimeTests.test_mass_destruction_apnap_shield_indestructible_and_replay",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Select the complete four-player affected set in APNAP order while preserving distinct shield, Indestructible, and destruction dispositions."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionModelTests.test_mass_destruction_selection_mutant_is_killed",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a controller-relation mutant that would include the acting player's permanents in an opponents-only fixed set."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionCompilerTests.test_mass_destruction_shape_mutants_fail_closed",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject altered operations, sources, affected-set descriptors, target relationships, and unknown fields before capability promotion."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "negative",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionCompilerTests.test_unsupported_mass_destruction_variants_remain_residuals",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep regeneration riders, dynamic quantities, linked results, negative colors and subtypes, selections, delayed effects, and history predicates outside the closed family."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionCompilerTests.test_spell_trigger_and_activated_contexts_share_mass_destruction_lowering",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower the same fixed-set destruction clause in spell, trigger, and activated contexts with exact source spans and typed capability ownership."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "positive",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionRuntimeTests.test_mass_destruction_apnap_shield_indestructible_and_replay",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Execute a four-player simultaneous fixed-set destruction instruction through immutable snapshot, preflight, and canonical commit."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionRuntimeTests.test_mass_destruction_apnap_shield_indestructible_and_replay",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project only public battlefield identities and the public destruction result in every seat view."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "replay",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionRuntimeTests.test_mass_destruction_apnap_shield_indestructible_and_replay",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the fixed affected-set snapshot, dispositions, simultaneous zone events, journal, and final state hash exactly."
+    },
+    {
+      "capability_id": "permanent.destroy.fixed_set",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_mass_destruction_effect_clauses.MassDestructionRuntimeTests.test_mass_destruction_stale_snapshot_rolls_back",
+      "official_rule_ids": ["608.2c", "701.8", "701.8a", "701.8b", "701.8c", "702.12b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject stale logical identity or effective disposition before any object moves or shield counter changes."
+    },
+    {
       "capability_id": "permanent.exile.effect",
       "evidence_class": "interaction",
       "test_id": "tests.test_permanent_exile_rules.PermanentExileRuleTests.test_exile_destination_replacement_preserves_typed_result",

@@ -42,7 +42,6 @@ EFFECT_FAMILY_CONTRACTS = (
                 "bestow_prepare",
                 "bounce",
                 "destroy",
-                "destroy_all",
                 "destroy_selected",
                 "discard",
                 "exchange_artifact_zones",

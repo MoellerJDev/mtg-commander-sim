@@ -22,6 +22,7 @@ from .intents import (
     DealFixedDamageSetIntent,
     DomainEffectIntent,
     DestroyPermanentIntent,
+    DestroyPermanentSetIntent,
     DrawCardsIntent,
     IntentPlan,
     EliminatePlayersIntent,
@@ -151,6 +152,11 @@ class SemanticIntentSink(
     def deal_fixed_damage_set_intent(
         self,
         intent: DealFixedDamageSetIntent,
+    ) -> Any: ...
+
+    def destroy_permanent_set_intent(
+        self,
+        intent: DestroyPermanentSetIntent,
     ) -> Any: ...
 
 
@@ -297,6 +303,10 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
         if isinstance(intent, PERMANENT_TRANSITION_INTENT_TYPES):
             result = _execute_permanent_transition_intent(sink, intent)
             results.append((intent.object_ref, result))
+            continue
+        if isinstance(intent, DestroyPermanentSetIntent):
+            result = sink.destroy_permanent_set_intent(intent)
+            results.append((intent.actor, result))
             continue
         if isinstance(intent, AddManaIntent):
             result = sink.apply_mana_intent(intent)

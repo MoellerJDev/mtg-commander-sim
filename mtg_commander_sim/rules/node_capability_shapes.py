@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence
 
+from ..affected_permanents import (
+    AffectedPermanentSetError,
+    AffectedPermanentSetSpec,
+    PermanentControllerRelation as AffectedControllerRelation,
+)
 from ..fixed_damage_set_model import (
     FixedDamageSetError,
     FixedDamageSetSpec,
@@ -453,6 +458,58 @@ def targeted_destruction_node_capabilities(
     )
 
 
+def mass_destruction_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for the closed fixed-set destruction grammar."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if not {"destroy", "destroy-fixed-set"}.issubset(mechanics) or len(effects) != 1:
+        return ()
+    effect = effects[0]
+    if (
+        set(effect) != {"op", "source", "set"}
+        or effect.get("op") != "destroy_all"
+        or effect.get("source") != "$source"
+    ):
+        return ()
+    try:
+        spec = AffectedPermanentSetSpec.from_dict(effect["set"])
+    except (AffectedPermanentSetError, KeyError, TypeError):
+        return ()
+    targeted = spec.controller_relation is AffectedControllerRelation.TARGET_PLAYER
+    schema = dict(target_schema or {})
+    valid_player_schemas = (
+        {
+            "zones": ["player"],
+            "categories": ["player"],
+            "count": 1,
+            "player_relation": "any",
+        },
+        {
+            "zones": ["player"],
+            "categories": ["player"],
+            "count": 1,
+            "player_relation": "opponent",
+        },
+    )
+    if targeted:
+        if "cr-115-targets" not in mechanics or schema not in valid_player_schemas:
+            return ()
+        if spec.target_controller != "$target.0":
+            return ()
+        return (
+            "permanent.destroy.fixed_set",
+            "target.revalidate_resolution",
+        )
+    if target_schema is not None or "cr-115-targets" in mechanics:
+        return ()
+    return ("permanent.destroy.fixed_set",)
+
+
 def targeted_return_to_hand_node_capabilities(
     *,
     effects: Sequence[Mapping[str, Any]],
@@ -539,6 +596,7 @@ def targeted_counter_node_capabilities(
 
 __all__ = [
     "fixed_damage_node_capabilities",
+    "mass_destruction_node_capabilities",
     "fixed_draw_node_capabilities",
     "targeted_destruction_node_capabilities",
     "targeted_exile_node_capabilities",

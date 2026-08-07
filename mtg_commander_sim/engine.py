@@ -265,6 +265,7 @@ from .semantic_runtime import (
     log_applied_zone_replacements,
     PreparedZoneChange,
     prepare_zone_change_replacement,
+    prepare_zone_change_replacement_batch,
     prepare_draw_resolution,
 )
 from .semantic_choices import (
@@ -2142,6 +2143,9 @@ class CommanderEngine(
         *,
         reason: str,
         log: bool = False,
+        replacement_selections: Sequence[
+            str | None | Mapping[str, Any]
+        ] = (),
     ) -> list[CardInstance]:
         """Move a set of objects before emitting any resulting trigger event."""
 
@@ -2156,17 +2160,14 @@ class CommanderEngine(
             )
             for source in sources
         }
-        prepared_replacements = {
-            object_id: prepare_zone_change_replacement(
-                self,
-                self.state.cards[object_id],
-                destination,
-                sources=sources,
-                source_zones=source_zones,
-                error_type=GameRuleError,
-            )
-            for object_id, destination in changes
-        }
+        prepared_replacements = prepare_zone_change_replacement_batch(
+            self,
+            tuple(changes),
+            sources=sources,
+            source_zones=source_zones,
+            selections=tuple(replacement_selections),
+            error_type=GameRuleError,
+        )
         snapshots: list[
             tuple[
                 CardInstance,

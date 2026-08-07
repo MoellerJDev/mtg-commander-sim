@@ -13,6 +13,7 @@ from ..rules.capabilities import (
 )
 from ..rules.node_capability_shapes import (
     fixed_damage_node_capabilities,
+    mass_destruction_node_capabilities,
     fixed_draw_node_capabilities,
     targeted_counter_node_capabilities,
     targeted_destruction_node_capabilities,
@@ -342,6 +343,27 @@ def _is_closed_targeted_destruction_program(
     )
 
 
+def _is_closed_mass_destruction_program(
+    program: SemanticProgram,
+) -> bool:
+    """Recognize only the reviewed fixed affected-set destruction family."""
+
+    required = set(
+        mass_destruction_node_capabilities(
+            effects=program.effects,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value in {"destroy", "destroy-fixed-set", "cr-115-targets"}
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def _is_closed_targeted_exile_program(
     program: SemanticProgram,
 ) -> bool:
@@ -392,6 +414,7 @@ def _is_closed_effect_program(program: SemanticProgram) -> bool:
         or _is_closed_fixed_draw_program(program)
         or _is_closed_targeted_counter_program(program)
         or _is_closed_targeted_destruction_program(program)
+        or _is_closed_mass_destruction_program(program)
         or _is_closed_targeted_exile_program(program)
         or _is_closed_targeted_return_to_hand_program(program)
         or _is_closed_targeted_tap_state_program(program)
