@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from types import SimpleNamespace
 import unittest
 
 from mtg_commander_sim.ability_fragments import (
@@ -16,6 +17,12 @@ from mtg_commander_sim.attack_transition_model import (
     build_attack_transition,
     derive_attack_keyword_trigger_occurrences,
 )
+from mtg_commander_sim.combat_relationship_state import (
+    AttackDeclarationAssignment,
+    CombatRelationshipStateError,
+    commit_attack_declaration,
+)
+from mtg_commander_sim.model import CombatState
 
 
 def _spec(kind: CombatKeywordTriggerKind) -> CombatKeywordTriggerSpec:
@@ -76,6 +83,41 @@ class _Query:
 
 
 class AttackTransitionModelTests(unittest.TestCase):
+    def test_attack_relationship_batch_rejects_before_mutation(self):
+        combat = CombatState()
+        attacker = SimpleNamespace(
+            zone="battlefield",
+            controller="A",
+            phased_out=False,
+            attacking=None,
+        )
+        assignments = (
+            AttackDeclarationAssignment(
+                attacker_object_id="attacker-a",
+                target="B",
+                target_kind="player",
+                defending_player="B",
+            ),
+            AttackDeclarationAssignment(
+                attacker_object_id="missing-attacker",
+                target="C",
+                target_kind="player",
+                defending_player="C",
+            ),
+        )
+
+        with self.assertRaises(CombatRelationshipStateError):
+            commit_attack_declaration(
+                combat,
+                {"attacker-a": attacker},
+                controller="A",
+                assignments=assignments,
+            )
+
+        self.assertIsNone(attacker.attacking)
+        self.assertEqual({}, combat.attackers)
+        self.assertEqual({}, combat.attack_target_context)
+
     def test_exalted_triggers_once_per_instance_only_for_attack_alone(self):
         query = _Query()
         query.sources = ("attacker-a", "exalted-land")

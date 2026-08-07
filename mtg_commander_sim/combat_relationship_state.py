@@ -134,12 +134,18 @@ def commit_attack_declaration(
             raise CombatRelationshipStateError(
                 "An attacker relationship is already committed"
             )
+        committed.append(assignment)
+
+    # The complete batch is validated before the canonical owner performs its
+    # first write. This keeps the owner transactional even when it is exercised
+    # independently of the engine's command-level rollback boundary.
+    for assignment in committed:
+        attacker = cards[assignment.attacker_object_id]
         attacker.attacking = assignment.target
         combat.attackers[assignment.attacker_object_id] = assignment.target
         combat.attack_target_context[assignment.attacker_object_id] = (
             assignment.target_context
         )
-        committed.append(assignment)
     return tuple(committed)
 
 
