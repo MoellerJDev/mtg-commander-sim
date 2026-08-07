@@ -14,6 +14,7 @@ from ..rules.capabilities import (
 from ..rules.node_capability_shapes import (
     fixed_damage_node_capabilities,
     fixed_draw_node_capabilities,
+    targeted_counter_node_capabilities,
     targeted_destruction_node_capabilities,
     targeted_exile_node_capabilities,
     targeted_return_to_hand_node_capabilities,
@@ -297,6 +298,27 @@ def _is_closed_targeted_tap_state_program(
     )
 
 
+def _is_closed_targeted_counter_program(
+    program: SemanticProgram,
+) -> bool:
+    """Recognize only the reviewed direct stack-counter effect family."""
+
+    required = set(
+        targeted_counter_node_capabilities(
+            effects=program.effects,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value in {"counter", "cr-115-targets"}
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def _is_closed_targeted_destruction_program(
     program: SemanticProgram,
 ) -> bool:
@@ -366,6 +388,7 @@ def _is_closed_effect_program(program: SemanticProgram) -> bool:
     return bool(
         _is_closed_fixed_damage_program(program)
         or _is_closed_fixed_draw_program(program)
+        or _is_closed_targeted_counter_program(program)
         or _is_closed_targeted_destruction_program(program)
         or _is_closed_targeted_exile_program(program)
         or _is_closed_targeted_return_to_hand_program(program)

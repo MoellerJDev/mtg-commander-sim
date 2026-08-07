@@ -45,6 +45,7 @@ VALID_EFFECT_OPERATIONS = {
     "counter_all_subtype",
     "counter_or_destroy_blue",
     "counter_stack",
+    "counter_stack_target",
     "counter_unless_pay",
     "cumulative_upkeep",
     "create_token",

@@ -26,6 +26,8 @@ activation use read-only immutable proposal builders followed by declared
 typed commit owners; `mana_activation.py`, `tap_state.py`, and
 `token_creation.py`, `destruction.py`, `permanent_exile.py`, and
 `return_to_hand.py` own focused transactions behind typed host protocols.
+`stack_counter.py` owns represented counterability checks, stack removal,
+ordinary countered-spell destination, telemetry, and public journaling.
 Destruction delegates shield removal to the counter owner and permanent
 movement to the zone owner; direct exile and return snapshot owner, controller,
 and object identity before delegating their requested moves to that same
@@ -36,10 +38,11 @@ approved mutation boundary. Typed semantic handlers receive
 an immutable rules query and emit intents; they cannot import the engine or
 state model. The intent executor calls existing canonical engine methods or
 the focused tap-state port.
-Typed direct-target destruction, permanent-exile, and return-to-owner-hand
-handlers likewise commit only through their focused transactions; the aggregate
-mechanics remain untrusted where regeneration, mass selection, linked exile,
-recursion, reanimation, costs, or other unsupported grammar and interactions
+Typed direct-target destruction, permanent-exile, return-to-owner-hand, and
+stack-counter handlers likewise commit only through their focused
+transactions. The aggregate mechanics remain untrusted where regeneration,
+mass selection, linked exile, recursion, reanimation, conditional payment,
+alternate counter destinations, or other unsupported grammar and interactions
 are materially reachable.
 
 Continuous characteristics are a shared rules responsibility rather than a
@@ -91,10 +94,13 @@ dispatching enter events. `replacement_decisions.py` persists competing
 affected-seat choices as ordinary Game Record v3 continuations, and represented
 zone-destination changes use the same exact selection journal before mutation.
 Triggers consume normalized events; replacements transform represented events
-before final mutation; state-based actions run to a fixed point. Universal
-counter, draw, damage, prevention, entry, and prohibition participation remains
-blocked. New rules work must identify event/replacement participation and use
-capability IDs from the versioned registry.
+before final mutation; state-based actions run to a fixed point. Mandatory
+direct counters now use a closed typed stack-target grammar and an exact
+intrinsic counter-prohibition declaration. Conditional-payment counters,
+alternate destinations, broader prohibitions, and universal draw, damage,
+prevention, and entry participation remain blocked. New rules work must
+identify event/replacement participation and use capability IDs from the
+versioned registry.
 
 For represented CR 611 object modifications, resolution-created effects lock
 the affected physical/logical object set after successful preparation. Static

@@ -140,6 +140,62 @@ _TARGETED_RETURN_TO_HAND_SCHEMAS: tuple[Mapping[str, Any], ...] = (
 _TARGETED_EXILE_SCHEMAS: tuple[Mapping[str, Any], ...] = tuple(
     dict(schema) for schema in _TARGETED_RETURN_TO_HAND_SCHEMAS
 )
+_COUNTER_STACK_BASE = {
+    "zones": ["stack"],
+    "categories": ["spell"],
+    "source_exclusion": True,
+    "count": 1,
+}
+_TARGETED_COUNTER_SCHEMAS: tuple[Mapping[str, Any], ...] = (
+    _COUNTER_STACK_BASE,
+    {**_COUNTER_STACK_BASE, "types_none": ["creature"]},
+    *tuple(
+        {**_COUNTER_STACK_BASE, "types_any": list(types)}
+        for types in (
+            ("creature",),
+            ("creature", "planeswalker"),
+            ("instant", "sorcery"),
+            ("sorcery",),
+            ("instant",),
+            ("artifact", "enchantment"),
+            ("artifact",),
+            ("creature", "enchantment"),
+            ("artifact", "creature"),
+        )
+    ),
+    *tuple(
+        {**_COUNTER_STACK_BASE, "colors_any": list(colors)}
+        for colors in (("U",), ("R",), ("G",), ("R", "G"))
+    ),
+    {**_COUNTER_STACK_BASE, "predicate": "nonblue_spell"},
+    {**_COUNTER_STACK_BASE, "colorless": True},
+    {
+        "zones": ["stack"],
+        "categories": ["ability"],
+        "source_exclusion": True,
+        "predicate": "activated_ability",
+        "count": 1,
+    },
+    {
+        "zones": ["stack"],
+        "categories": ["ability"],
+        "source_exclusion": True,
+        "predicate": "triggered_ability",
+        "count": 1,
+    },
+    {
+        "zones": ["stack"],
+        "categories": ["ability"],
+        "source_exclusion": True,
+        "count": 1,
+    },
+    {
+        "zones": ["stack"],
+        "categories": ["spell", "ability"],
+        "source_exclusion": True,
+        "count": 1,
+    },
+)
 
 
 def _positive_int(value: Any) -> bool:
@@ -401,6 +457,34 @@ def targeted_exile_node_capabilities(
     )
 
 
+def targeted_counter_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for the closed direct stack-counter grammar."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if (
+        not {"counter", "cr-115-targets"}.issubset(mechanics)
+        or len(effects) != 1
+        or dict(target_schema or {}) not in _TARGETED_COUNTER_SCHEMAS
+    ):
+        return ()
+    effect = effects[0]
+    if (
+        set(effect) != {"op", "stack"}
+        or effect.get("op") != "counter_stack_target"
+        or effect.get("stack") != "$target.0"
+    ):
+        return ()
+    return (
+        "stack.counter.effect",
+        "target.revalidate_resolution",
+    )
+
+
 __all__ = [
     "fixed_damage_node_capabilities",
     "fixed_draw_node_capabilities",
@@ -408,4 +492,5 @@ __all__ = [
     "targeted_exile_node_capabilities",
     "targeted_return_to_hand_node_capabilities",
     "targeted_tap_state_node_capabilities",
+    "targeted_counter_node_capabilities",
 ]

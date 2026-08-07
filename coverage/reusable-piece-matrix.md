@@ -2,7 +2,7 @@
 title: "Reusable rules piece matrix"
 status: "generated"
 authoritative_source: "coverage/reusable-piece-matrix.json.gz"
-verified: "0fa2e4f35bc72fa226a9029157720b460a55d2edafade7b8a48323131d60a036"
+verified: "bbf9a8b363600634e256e592aaf5b9a67aece8ce59e1d01ed7a806c2cac8a3e0"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -17,19 +17,19 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 
 - Profile: `commander_review`
 - Ontology: `reusable-pieces-v1`
-- Pieces: 1,015
+- Pieces: 1,018
 - Cards indexed: 31,623
 - Material abilities classified: 59,968
 - Unclassified material spans: 0
-- Mapped pinned rules: 669 / 3,300
+- Mapped pinned rules: 673 / 3,300
 - Applicable piece pairs: 20,270
-- Covered piece pairs: 113
+- Covered piece pairs: 114
 
 ## Ontology classes
 
 | Class | Pieces |
 |---|---:|
-| `actions_permissions` — Actions, permissions, and prohibitions | 4 |
+| `actions_permissions` — Actions, permissions, and prohibitions | 6 |
 | `card_forms` — Card types and specialized forms | 3 |
 | `choices_continuations` — Modes, targets, choices, and continuations | 6 |
 | `combat` — Combat | 21 |
@@ -40,7 +40,7 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `keyword_mechanics` — Keyword actions and keyword abilities | 556 |
 | `multiplayer_commander` — Multiplayer, Commander, and profile pieces | 1 |
 | `object_identity` — Object identity and lifetime | 27 |
-| `one_shot_effects` — One-shot semantic effects | 92 |
+| `one_shot_effects` — One-shot semantic effects | 93 |
 | `players_format` — Players, relationships, and format state | 1 |
 | `proposals` — Casting and activation proposals | 5 |
 | `quantities` — Quantity and value expressions | 1 |
@@ -52,7 +52,7 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 
 | System | Status | Pieces | Blocking pieces |
 |---|---|---:|---:|
-| `action_legality_casting_activation_costs_mana` | `inventoried` | 16 | 5 |
+| `action_legality_casting_activation_costs_mana` | `inventoried` | 18 | 5 |
 | `combat` | `compositional` | 21 | 0 |
 | `derived_characteristics_static_layers` | `inventoried` | 16 | 5 |
 | `generic_triggers_stack_placement` | `inventoried` | 2 | 2 |
@@ -61,7 +61,7 @@ Counts official ruling presence by Oracle ID. Ruling prose is not yet behavioral
 | `replacement_prevention` | `inventoried` | 13 | 5 |
 | `state_turn_loops_stabilization` | `inventoried` | 0 | 0 |
 | `targets_modes_searches_references_choices` | `inventoried` | 8 | 6 |
-| `typed_transactions_events_mutations` | `inventoried` | 153 | 54 |
+| `typed_transactions_events_mutations` | `inventoried` | 154 | 54 |
 
 ## Highest current blocker leverage
 

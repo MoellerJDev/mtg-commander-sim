@@ -48,14 +48,18 @@ permanent-exile, and return-to-owner-hand intents route to
 `mtg_commander_sim/destruction.py`, `mtg_commander_sim/permanent_exile.py`, and
 `mtg_commander_sim/return_to_hand.py`; those transaction owners validate
 identity and disposition before delegating authoritative counter or zone writes
-to existing canonical owners. These ports depend on narrow
+to existing canonical owners. Direct stack-counter intents route to
+`mtg_commander_sim/stack_counter.py`, which owns counterability, stack removal,
+ordinary spell destination, telemetry, and public journaling behind a narrow
+host protocol. These ports depend on narrow
 structural host protocols rather than the engine class and are authorized by
 [ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md) and
 [ADR 0011](../adr/0011-counter-placement-event-and-mutation-owner.md), plus
 [ADR 0012](../adr/0012-damage-transaction-and-static-prevention.md),
 [ADR 0027](../adr/0027-typed-permanent-destruction.md),
-[ADR 0028](../adr/0028-typed-return-to-owner-hand.md), and
-[ADR 0029](../adr/0029-typed-permanent-exile.md).
+[ADR 0028](../adr/0028-typed-return-to-owner-hand.md),
+[ADR 0029](../adr/0029-typed-permanent-exile.md), and
+[ADR 0030](../adr/0030-typed-stack-counter.md).
 
 Every production Python module has one generated exact classification covering
 layer, owner, allowed dependency layers, GameState access, specificity,

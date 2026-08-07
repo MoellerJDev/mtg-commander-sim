@@ -84,6 +84,7 @@
       "test_semantic_choice_model",
       "test_semantic_handlers",
       "test_semantic_searches",
+      "test_stack_counter_rules",
       "test_targeting_v070",
       "test_trigger_targeting",
       "test_typed_ability_fragments"
@@ -168,6 +169,7 @@
       "test_oracle_ir",
       "test_preflight_v080",
       "test_rule_capabilities",
+      "test_targeted_counter_effect_clauses",
       "test_targeted_destruction_effect_clauses",
       "test_targeted_exile_effect_clauses",
       "test_targeted_return_to_hand_effect_clauses",

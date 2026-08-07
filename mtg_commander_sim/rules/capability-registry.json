@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 47,
+  "registry_version": 48,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -1394,6 +1394,60 @@
       "implementation_mutation_rationale": "The focused semantic tap-state mutation test kills an aggregate sink that omits eligible creatures or bypasses individual untap behavior.",
       "blockers": ["Complete effective-characteristic dependencies and untap replacement ordering are not yet represented in ambient match closure."],
       "status": "tested"
+    },
+    {
+      "id": "stack.counter.effect",
+      "version": 1,
+      "official_rules": ["115.1", "115.5", "608.2b", "701.6", "701.6a", "701.6b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and execute one mandatory direct-target instruction that counters a currently legal spell, activated ability, or triggered ability through a typed stack-counter owner after exact target revalidation.",
+        "inputs": ["closed typed direct-target counter clause", "current public stack object", "canonical spell or ability characteristics", "source-exclusion identity", "trusted counter-prohibition declaration"],
+        "outputs": ["removed stack object", "ordinary countered spell movement toward its owner's graveyard", "counter failure journal for represented prohibitions", "public deterministic event"],
+        "exclusions": ["counter unless a player pays or performs another action", "conditional, optional, modal, mass, multi-target, or linked-result counter clauses", "alternate countered-spell destinations", "countering by a game rule", "conditional, source-qualified, name-qualified, target-qualified, or variable-mana-value stack predicates"]
+      },
+      "dependencies": ["stack.counter.prohibition.intrinsic", "target.revalidate_resolution"],
+      "implementation_components": ["mtg_commander_sim.compiler.counter_templates.TargetedCounterEffectTemplate", "mtg_commander_sim.rules.node_capability_shapes.targeted_counter_node_capabilities", "mtg_commander_sim.semantic_runtime.stack_counter_handlers.CounterStackTargetHandler", "mtg_commander_sim.stack_counter.counter_stack_item"],
+      "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_counter_lowering", "test_handler_lowers_one_strict_typed_counter_intent", "test_compiled_counter_targets_exact_stack_domains_and_replays", "test_countered_ability_leaves_card_zones_unchanged"],
+      "negative_tests": ["test_unsupported_counter_variants_remain_material_residuals", "test_targeted_counter_shape_mutants_fail_closed", "test_counter_source_cannot_target_its_own_stack_object"],
+      "interaction_tests": ["test_intrinsic_uncounterable_spell_survives_typed_counter", "test_counter_target_that_leaves_stack_invalidates_resolution"],
+      "multiplayer_tests": ["test_compiled_counter_targets_exact_stack_domains_and_replays"],
+      "privacy_tests": ["test_compiled_counter_targets_exact_stack_domains_and_replays"],
+      "replay_tests": ["test_compiled_counter_targets_exact_stack_domains_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The exact counter node requires both resolution-time target revalidation and the typed intrinsic counter-prohibition declaration; blocking either dependency prevents the node and CardProgram from becoming trusted.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_stack_counter_owner_mutants_are_killed suppresses stack removal and source exclusion in turn; the focused state and target assertions reject both survivors.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "stack.counter.prohibition.intrinsic",
+      "version": 1,
+      "official_rules": ["101.2", "609.1", "701.6b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile the complete intrinsic sentence 'This spell can't be countered' into a trusted stack-active CardProgram declaration and pin that prohibition onto the spell when it is cast.",
+        "inputs": ["exact source-spanned Oracle sentence", "current trusted CardProgram registry", "physical spell object at cast commit"],
+        "outputs": ["typed stack-active counter-prohibition declaration", "counter-prohibition flag pinned to the created stack object"],
+        "exclusions": ["conditional counter prohibitions", "prohibitions limited by counter source or quality", "dynamically granted prohibitions other than already represented cast context", "Oracle text inspection during a game transition"]
+      },
+      "dependencies": [],
+      "implementation_components": ["mtg_commander_sim.compiler.counter_templates.is_intrinsically_uncounterable_spell", "mtg_commander_sim.oracle_ir._compile_face", "mtg_commander_sim.stack_counter.oracle_has_intrinsic_counter_prohibition", "mtg_commander_sim.rules.casting.commit._create_spell_item"],
+      "positive_tests": ["test_intrinsic_uncounterable_compiles_as_stack_capability", "test_intrinsic_uncounterable_spell_survives_typed_counter"],
+      "negative_tests": ["test_conditional_counter_prohibitions_remain_residuals", "test_untrusted_counter_prohibition_declaration_is_ignored"],
+      "interaction_tests": ["test_intrinsic_uncounterable_spell_survives_typed_counter"],
+      "multiplayer_tests": [],
+      "privacy_tests": [],
+      "replay_tests": ["test_intrinsic_uncounterable_spell_survives_typed_counter"],
+      "required_evidence": ["positive", "negative", "interaction", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The exact intrinsic declaration has no capability dependencies and is consumed only from a current trusted CardProgram.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_intrinsic_counter_prohibition_mutant_is_killed removes the trusted declaration lookup and the focused counter-failure assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
     },
     {
       "id": "trigger.event.normalized_zone_change",

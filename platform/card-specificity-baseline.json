@@ -1711,7 +1711,7 @@
       "column": 44,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 323,
+      "line": 327,
       "matched_printed_name": "Exile",
       "symbol": null,
       "value": "exile"
@@ -1720,7 +1720,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 324,
+      "line": 328,
       "matched_printed_name": "Library",
       "symbol": null,
       "value": "library"
@@ -1729,7 +1729,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 707,
+      "line": 711,
       "matched_printed_name": "Reason",
       "symbol": "become_monarch",
       "value": "reason"
@@ -1738,7 +1738,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 811,
+      "line": 815,
       "matched_printed_name": "Library",
       "symbol": "_assert_invariants",
       "value": "library"
@@ -1747,7 +1747,7 @@
       "column": 52,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 811,
+      "line": 815,
       "matched_printed_name": "Exile",
       "symbol": "_assert_invariants",
       "value": "exile"
@@ -1756,7 +1756,7 @@
       "column": 63,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 920,
+      "line": 924,
       "matched_printed_name": "Life",
       "symbol": "_effective_card_data",
       "value": "life"
@@ -1765,7 +1765,7 @@
       "column": 26,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 1257,
+      "line": 1261,
       "matched_printed_name": "Exile",
       "symbol": "_reset_zone_change",
       "value": "exile"
@@ -1774,7 +1774,7 @@
       "column": 31,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1570,
+      "line": 1574,
       "matched_printed_name": "Library",
       "symbol": "move_card",
       "value": "library"
@@ -1783,7 +1783,7 @@
       "column": 78,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1570,
+      "line": 1574,
       "matched_printed_name": "Exile",
       "symbol": "move_card",
       "value": "exile"
@@ -1792,7 +1792,7 @@
       "column": 26,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1576,
+      "line": 1580,
       "matched_printed_name": "Library",
       "symbol": "move_card",
       "value": "library"
@@ -1801,7 +1801,7 @@
       "column": 31,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1580,
+      "line": 1584,
       "matched_printed_name": "Library",
       "symbol": "move_card",
       "value": "library"
@@ -1810,7 +1810,7 @@
       "column": 42,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1580,
+      "line": 1584,
       "matched_printed_name": "Exile",
       "symbol": "move_card",
       "value": "exile"
@@ -1819,7 +1819,7 @@
       "column": 21,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1654,
+      "line": 1658,
       "matched_printed_name": "Library",
       "symbol": "move_card",
       "value": "library"
@@ -1828,7 +1828,7 @@
       "column": 60,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1654,
+      "line": 1658,
       "matched_printed_name": "Library",
       "symbol": "move_card",
       "value": "library"
@@ -1837,7 +1837,7 @@
       "column": 59,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 1655,
+      "line": 1659,
       "matched_printed_name": "Library",
       "symbol": "move_card",
       "value": "library"
@@ -1846,7 +1846,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 1675,
+      "line": 1679,
       "matched_printed_name": "Reason",
       "symbol": "move_card",
       "value": "reason"
@@ -1855,7 +1855,7 @@
       "column": 30,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 1794,
+      "line": 1798,
       "matched_printed_name": "Library",
       "symbol": "move_card",
       "value": "library"
@@ -1864,7 +1864,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 1831,
+      "line": 1835,
       "matched_printed_name": "Reason",
       "symbol": "move_card",
       "value": "reason"
@@ -1873,7 +1873,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 1852,
+      "line": 1856,
       "matched_printed_name": "Reason",
       "symbol": "move_card",
       "value": "reason"
@@ -1882,7 +1882,7 @@
       "column": 70,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 1864,
+      "line": 1868,
       "matched_printed_name": "Reason",
       "symbol": "move_card",
       "value": "reason"
@@ -1891,7 +1891,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 1945,
+      "line": 1949,
       "matched_printed_name": "Exile",
       "symbol": "_semantic_event_sources",
       "value": "exile"
@@ -1900,7 +1900,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2102,
+      "line": 2106,
       "matched_printed_name": "Reason",
       "symbol": "_add_saga_lore",
       "value": "reason"
@@ -1909,7 +1909,7 @@
       "column": 40,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2250,
+      "line": 2254,
       "matched_printed_name": "Library",
       "symbol": "shuffle_library",
       "value": "library"
@@ -1918,7 +1918,7 @@
       "column": 38,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2251,
+      "line": 2255,
       "matched_printed_name": "Library",
       "symbol": "shuffle_library",
       "value": "library"
@@ -1927,7 +1927,7 @@
       "column": 65,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2255,
+      "line": 2259,
       "matched_printed_name": "Reason",
       "symbol": "shuffle_library",
       "value": "reason"
@@ -1936,7 +1936,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2486,
+      "line": 2490,
       "matched_printed_name": "Lands",
       "symbol": "_opening_hand_signals",
       "value": "lands"
@@ -1945,7 +1945,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2563,
+      "line": 2567,
       "matched_printed_name": "Pilot",
       "symbol": "_issue_mulligan_declaration",
       "value": "pilot"
@@ -1954,7 +1954,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2571,
+      "line": 2575,
       "matched_printed_name": "Index",
       "symbol": "_issue_mulligan_declaration",
       "value": "index"
@@ -1963,7 +1963,7 @@
       "column": 51,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2627,
+      "line": 2631,
       "matched_printed_name": "Index",
       "symbol": "_complete_mulligan_declaration",
       "value": "index"
@@ -1972,7 +1972,7 @@
       "column": 42,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2643,
+      "line": 2647,
       "matched_printed_name": "Library",
       "symbol": "_perform_mulligan_redraws",
       "value": "library"
@@ -1981,7 +1981,7 @@
       "column": 21,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2663,
+      "line": 2667,
       "matched_printed_name": "Pilot",
       "symbol": "_perform_mulligan_redraws",
       "value": "pilot"
@@ -1990,7 +1990,7 @@
       "column": 42,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2704,
+      "line": 2708,
       "matched_printed_name": "Library",
       "symbol": "_complete_mulligan_bottom",
       "value": "library"
@@ -1999,7 +1999,7 @@
       "column": 35,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2730,
+      "line": 2734,
       "matched_printed_name": "X",
       "symbol": "schedule_extra_turn",
       "value": "X"
@@ -2008,7 +2008,7 @@
       "column": 99,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2738,
+      "line": 2742,
       "matched_printed_name": "Turn",
       "symbol": "schedule_extra_turn",
       "value": "turn"
@@ -2017,7 +2017,7 @@
       "column": 14,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2804,
+      "line": 2808,
       "matched_printed_name": "Turn",
       "symbol": "_begin_turn",
       "value": "Turn "
@@ -2026,7 +2026,7 @@
       "column": 93,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2852,
+      "line": 2856,
       "matched_printed_name": "Reason",
       "symbol": "_clear_mana",
       "value": "reason"
@@ -2035,7 +2035,7 @@
       "column": 37,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2863,
+      "line": 2867,
       "matched_printed_name": "Stun",
       "symbol": "_untap_permanent",
       "value": "stun"
@@ -2044,7 +2044,7 @@
       "column": 34,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2866,
+      "line": 2870,
       "matched_printed_name": "Stun",
       "symbol": "_untap_permanent",
       "value": "stun"
@@ -2053,7 +2053,7 @@
       "column": 30,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2868,
+      "line": 2872,
       "matched_printed_name": "Stun",
       "symbol": "_untap_permanent",
       "value": "stun"
@@ -2062,7 +2062,7 @@
       "column": 31,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2875,
+      "line": 2879,
       "matched_printed_name": "Stun",
       "symbol": "_untap_permanent",
       "value": "stun"
@@ -2071,7 +2071,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 2876,
+      "line": 2880,
       "matched_printed_name": "Reason",
       "symbol": "_untap_permanent",
       "value": "reason"
@@ -2080,7 +2080,7 @@
       "column": 39,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 3061,
+      "line": 3065,
       "matched_printed_name": "Seedborn Muse",
       "symbol": "_enter_step",
       "value": "Seedborn Muse"
@@ -2089,7 +2089,7 @@
       "column": 32,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3080,
+      "line": 3084,
       "matched_printed_name": "Reason",
       "symbol": "_enter_step",
       "value": "reason"
@@ -2098,7 +2098,7 @@
       "column": 42,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3080,
+      "line": 3084,
       "matched_printed_name": "Seedborn Muse",
       "symbol": "_enter_step",
       "value": "Seedborn Muse"
@@ -2107,7 +2107,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3094,
+      "line": 3098,
       "matched_printed_name": "Reason",
       "symbol": "_enter_step",
       "value": "reason"
@@ -2116,7 +2116,7 @@
       "column": 25,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3127,
+      "line": 3131,
       "matched_printed_name": "Pilot",
       "symbol": "_enter_step",
       "value": "pilot"
@@ -2125,7 +2125,7 @@
       "column": 32,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3176,
+      "line": 3180,
       "matched_printed_name": "Reason",
       "symbol": "_enter_step",
       "value": "reason"
@@ -2134,7 +2134,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3372,
+      "line": 3376,
       "matched_printed_name": "Reason",
       "symbol": "_remove_object_from_combat",
       "value": "reason"
@@ -2143,7 +2143,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3598,
+      "line": 3602,
       "matched_printed_name": "Exile",
       "symbol": "_end_turn_now",
       "value": "exile"
@@ -2152,7 +2152,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3624,
+      "line": 3628,
       "matched_printed_name": "Reason",
       "symbol": "_end_turn_now",
       "value": "reason"
@@ -2161,7 +2161,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3685,
+      "line": 3689,
       "matched_printed_name": "Pilot",
       "symbol": "_issue_priority",
       "value": "pilot"
@@ -2170,7 +2170,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3788,
+      "line": 3792,
       "matched_printed_name": "X",
       "symbol": "_stack_signature",
       "value": "x"
@@ -2179,7 +2179,7 @@
       "column": 47,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 3972,
+      "line": 3976,
       "matched_printed_name": "Lands",
       "symbol": "_signature_has_actions",
       "value": "lands"
@@ -2188,7 +2188,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 4306,
+      "line": 4310,
       "matched_printed_name": "Pilot",
       "symbol": "_process_trigger_groups",
       "value": "pilot"
@@ -2197,7 +2197,7 @@
       "column": 29,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 4308,
+      "line": 4312,
       "matched_printed_name": "Order",
       "symbol": "_process_trigger_groups",
       "value": "order"
@@ -2206,7 +2206,7 @@
       "column": 107,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 4323,
+      "line": 4327,
       "matched_printed_name": "Order",
       "symbol": "_complete_trigger_order",
       "value": "order"
@@ -2215,7 +2215,7 @@
       "column": 45,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 4746,
+      "line": 4750,
       "matched_printed_name": "Life",
       "symbol": "_land_enters_tapped",
       "value": "life"
@@ -2224,7 +2224,7 @@
       "column": 31,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 4815,
+      "line": 4819,
       "matched_printed_name": "Life",
       "symbol": "_land_entry_life_amount",
       "value": "life"
@@ -2233,7 +2233,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 4975,
+      "line": 4979,
       "matched_printed_name": "Zombie",
       "symbol": "_compiled_zone_cast_permission",
       "value": "zombie"
@@ -2242,7 +2242,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5146,
+      "line": 5150,
       "matched_printed_name": "Return",
       "symbol": "_pay_ability_choice_costs",
       "value": "return"
@@ -2251,7 +2251,7 @@
       "column": 20,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5147,
+      "line": 5151,
       "matched_printed_name": "Exile",
       "symbol": "_pay_ability_choice_costs",
       "value": "exile"
@@ -2260,7 +2260,7 @@
       "column": 29,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5147,
+      "line": 5151,
       "matched_printed_name": "Exile",
       "symbol": "_pay_ability_choice_costs",
       "value": "exile"
@@ -2269,7 +2269,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5244,
+      "line": 5248,
       "matched_printed_name": "Plains",
       "symbol": "_fetch_land_types",
       "value": "plains"
@@ -2278,7 +2278,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5245,
+      "line": 5249,
       "matched_printed_name": "Island",
       "symbol": "_fetch_land_types",
       "value": "island"
@@ -2287,7 +2287,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5246,
+      "line": 5250,
       "matched_printed_name": "Swamp",
       "symbol": "_fetch_land_types",
       "value": "swamp"
@@ -2296,7 +2296,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5247,
+      "line": 5251,
       "matched_printed_name": "Mountain",
       "symbol": "_fetch_land_types",
       "value": "mountain"
@@ -2305,7 +2305,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5248,
+      "line": 5252,
       "matched_printed_name": "Forest",
       "symbol": "_fetch_land_types",
       "value": "forest"
@@ -2314,7 +2314,7 @@
       "column": 56,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5254,
+      "line": 5258,
       "matched_printed_name": "Library",
       "symbol": "_fetch_land_options",
       "value": "library"
@@ -2323,7 +2323,7 @@
       "column": 25,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 5861,
+      "line": 5865,
       "matched_printed_name": "X",
       "symbol": "_compiled_printed_cost_options",
       "value": "X"
@@ -2332,7 +2332,7 @@
       "column": 60,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 5942,
+      "line": 5946,
       "matched_printed_name": "X",
       "symbol": "_compiled_printed_cost_options",
       "value": "X"
@@ -2341,7 +2341,7 @@
       "column": 55,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 5951,
+      "line": 5955,
       "matched_printed_name": "X",
       "symbol": "_compiled_printed_cost_options",
       "value": "X"
@@ -2350,7 +2350,7 @@
       "column": 58,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 6116,
+      "line": 6120,
       "matched_printed_name": "Lands",
       "symbol": "_priority_window_empty",
       "value": "lands"
@@ -2359,7 +2359,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 6313,
+      "line": 6317,
       "matched_printed_name": "Exile",
       "symbol": "_target_candidate_rows",
       "value": "exile"
@@ -2368,7 +2368,7 @@
       "column": 42,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 6557,
+      "line": 6561,
       "matched_printed_name": "Exile",
       "symbol": "_target_row_matches",
       "value": "exile"
@@ -2377,7 +2377,7 @@
       "column": 45,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 6558,
+      "line": 6562,
       "matched_printed_name": "Void",
       "symbol": "_target_row_matches",
       "value": "void"
@@ -2386,7 +2386,7 @@
       "column": 26,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7071,
+      "line": 7085,
       "matched_printed_name": "Pilot",
       "symbol": "_begin_pending_trigger_target_selection",
       "value": "pilot"
@@ -2395,7 +2395,7 @@
       "column": 29,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7072,
+      "line": 7086,
       "matched_printed_name": "Reason",
       "symbol": "_begin_pending_trigger_target_selection",
       "value": "reason"
@@ -2404,7 +2404,7 @@
       "column": 21,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7106,
+      "line": 7120,
       "matched_printed_name": "Pilot",
       "symbol": "_program_can_auto_resolve",
       "value": "pilot"
@@ -2413,7 +2413,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7207,
+      "line": 7221,
       "matched_printed_name": "Pilot",
       "symbol": "_begin_battle_entry_protector_choice",
       "value": "pilot"
@@ -2422,7 +2422,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7362,
+      "line": 7376,
       "matched_printed_name": "Exile",
       "symbol": "_begin_siege_defeated_resolution",
       "value": "exile"
@@ -2431,7 +2431,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 7366,
+      "line": 7380,
       "matched_printed_name": "Exile",
       "symbol": "_begin_siege_defeated_resolution",
       "value": "exile"
@@ -2440,7 +2440,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7428,
+      "line": 7442,
       "matched_printed_name": "Reason",
       "symbol": "_begin_siege_defeated_resolution",
       "value": "reason"
@@ -2449,7 +2449,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7495,
+      "line": 7509,
       "matched_printed_name": "Pilot",
       "symbol": "_begin_siege_defeated_resolution",
       "value": "pilot"
@@ -2458,7 +2458,7 @@
       "column": 28,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 7563,
+      "line": 7577,
       "matched_printed_name": "Exile",
       "symbol": "_complete_siege_defeated_choice",
       "value": "exile"
@@ -2467,7 +2467,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7612,
+      "line": 7626,
       "matched_printed_name": "Exile",
       "symbol": "_complete_siege_defeated_choice",
       "value": "exile"
@@ -2476,7 +2476,7 @@
       "column": 33,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7620,
+      "line": 7634,
       "matched_printed_name": "Exile",
       "symbol": "_complete_siege_defeated_choice",
       "value": "exile"
@@ -2485,7 +2485,7 @@
       "column": 25,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7671,
+      "line": 7685,
       "matched_printed_name": "Pilot",
       "symbol": "_prepare_stack_resolution",
       "value": "pilot"
@@ -2494,7 +2494,7 @@
       "column": 30,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7778,
+      "line": 7792,
       "matched_printed_name": "Return",
       "symbol": "_prepare_stack_resolution",
       "value": "Return "
@@ -2503,7 +2503,7 @@
       "column": 34,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7787,
+      "line": 7801,
       "matched_printed_name": "Return",
       "symbol": "_prepare_stack_resolution",
       "value": "Return "
@@ -2512,7 +2512,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7838,
+      "line": 7852,
       "matched_printed_name": "Reason",
       "symbol": "_prepare_stack_resolution",
       "value": "reason"
@@ -2521,7 +2521,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 7990,
+      "line": 8004,
       "matched_printed_name": "Pilot",
       "symbol": "_prepare_storm_resolution",
       "value": "pilot"
@@ -2530,7 +2530,7 @@
       "column": 62,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8087,
+      "line": 8101,
       "matched_printed_name": "Copy",
       "symbol": "_complete_storm_choice",
       "value": " copy"
@@ -2539,7 +2539,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 8168,
+      "line": 8182,
       "matched_printed_name": "Library",
       "symbol": "_create_copy_object",
       "value": "library"
@@ -2548,7 +2548,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 8172,
+      "line": 8186,
       "matched_printed_name": "Exile",
       "symbol": "_create_copy_object",
       "value": "exile"
@@ -2557,7 +2557,7 @@
       "column": 63,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8182,
+      "line": 8196,
       "matched_printed_name": "Copy",
       "symbol": "_create_copy_object",
       "value": "Copy"
@@ -2566,7 +2566,7 @@
       "column": 34,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8325,
+      "line": 8339,
       "matched_printed_name": "Copy",
       "symbol": "_copy_stack_item",
       "value": " copy"
@@ -2575,7 +2575,7 @@
       "column": 26,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8367,
+      "line": 8381,
       "matched_printed_name": "Copied",
       "symbol": "_copy_stack_item",
       "value": " copied "
@@ -2584,7 +2584,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8372,
+      "line": 8386,
       "matched_printed_name": "Reason",
       "symbol": "_copy_stack_item",
       "value": "reason"
@@ -2593,7 +2593,7 @@
       "column": 27,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8451,
+      "line": 8465,
       "matched_printed_name": "Library",
       "symbol": "_resolve_fetch_land",
       "value": "library"
@@ -2602,7 +2602,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8644,
+      "line": 8658,
       "matched_printed_name": "Reason",
       "symbol": "_revalidate_resolution_targets",
       "value": "reason"
@@ -2611,7 +2611,7 @@
       "column": 46,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8757,
+      "line": 8771,
       "matched_printed_name": "Index",
       "symbol": "_semantic_value",
       "value": "index"
@@ -2620,7 +2620,7 @@
       "column": 43,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8772,
+      "line": 8786,
       "matched_printed_name": "Index",
       "symbol": "_semantic_value",
       "value": "index"
@@ -2629,7 +2629,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8811,
+      "line": 8825,
       "matched_printed_name": "Reason",
       "symbol": "_continue_resolution",
       "value": "reason"
@@ -2638,7 +2638,7 @@
       "column": 43,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 8924,
+      "line": 8938,
       "matched_printed_name": "Copy",
       "symbol": "_continue_resolution",
       "value": " copy"
@@ -2647,7 +2647,7 @@
       "column": 25,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9066,
+      "line": 9080,
       "matched_printed_name": "Plains",
       "symbol": "_search_candidate_matches",
       "value": "plains"
@@ -2656,7 +2656,7 @@
       "column": 35,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9066,
+      "line": 9080,
       "matched_printed_name": "Island",
       "symbol": "_search_candidate_matches",
       "value": "island"
@@ -2665,7 +2665,7 @@
       "column": 45,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9066,
+      "line": 9080,
       "matched_printed_name": "Swamp",
       "symbol": "_search_candidate_matches",
       "value": "swamp"
@@ -2674,7 +2674,7 @@
       "column": 54,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9066,
+      "line": 9080,
       "matched_printed_name": "Mountain",
       "symbol": "_search_candidate_matches",
       "value": "mountain"
@@ -2683,7 +2683,7 @@
       "column": 66,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9066,
+      "line": 9080,
       "matched_printed_name": "Forest",
       "symbol": "_search_candidate_matches",
       "value": "forest"
@@ -2692,7 +2692,7 @@
       "column": 41,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9077,
+      "line": 9091,
       "matched_printed_name": "Library",
       "symbol": "_semantic_search_options",
       "value": "library"
@@ -2701,7 +2701,7 @@
       "column": 25,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 9085,
+      "line": 9099,
       "matched_printed_name": "Library",
       "symbol": "_semantic_search_options",
       "value": "library"
@@ -2710,7 +2710,7 @@
       "column": 57,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 9085,
+      "line": 9099,
       "matched_printed_name": "Exile",
       "symbol": "_semantic_search_options",
       "value": "exile"
@@ -2719,7 +2719,7 @@
       "column": 48,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9136,
+      "line": 9150,
       "matched_printed_name": "Library",
       "symbol": "_begin_semantic_search",
       "value": "library"
@@ -2728,7 +2728,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9144,
+      "line": 9158,
       "matched_printed_name": "Library",
       "symbol": "_begin_semantic_search",
       "value": "library"
@@ -2737,7 +2737,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9200,
+      "line": 9214,
       "matched_printed_name": "Pilot",
       "symbol": "_begin_semantic_search",
       "value": "pilot"
@@ -2746,7 +2746,7 @@
       "column": 48,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9306,
+      "line": 9320,
       "matched_printed_name": "Library",
       "symbol": "_complete_semantic_search",
       "value": "library"
@@ -2755,7 +2755,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9314,
+      "line": 9328,
       "matched_printed_name": "Library",
       "symbol": "_complete_semantic_search",
       "value": "library"
@@ -2764,7 +2764,7 @@
       "column": 36,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9363,
+      "line": 9377,
       "matched_printed_name": "Library",
       "symbol": "_complete_semantic_search",
       "value": "library"
@@ -2773,7 +2773,7 @@
       "column": 36,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9365,
+      "line": 9379,
       "matched_printed_name": "Library",
       "symbol": "_complete_semantic_search",
       "value": "library"
@@ -2782,7 +2782,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 9370,
+      "line": 9384,
       "matched_printed_name": "Exile",
       "symbol": "_complete_semantic_search",
       "value": "exile"
@@ -2791,7 +2791,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 9371,
+      "line": 9385,
       "matched_printed_name": "Library",
       "symbol": "_complete_semantic_search",
       "value": "library"
@@ -2800,7 +2800,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9442,
+      "line": 9456,
       "matched_printed_name": "Exile",
       "symbol": "_complete_semantic_search",
       "value": "exile"
@@ -2809,34 +2809,16 @@
       "column": 50,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9457,
+      "line": 9471,
       "matched_printed_name": "Library",
       "symbol": "_complete_semantic_search",
       "value": "library"
     },
     {
-      "column": 20,
-      "file": "mtg_commander_sim/engine.py",
-      "in_condition": false,
-      "line": 9537,
-      "matched_printed_name": "Reason",
-      "symbol": "_counter_stack_item",
-      "value": "reason"
-    },
-    {
-      "column": 16,
-      "file": "mtg_commander_sim/engine.py",
-      "in_condition": false,
-      "line": 9569,
-      "matched_printed_name": "Reason",
-      "symbol": "_counter_stack_item",
-      "value": "reason"
-    },
-    {
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9651,
+      "line": 9608,
       "matched_printed_name": "Pilot",
       "symbol": "_issue_next_apnap_choice",
       "value": "pilot"
@@ -2845,7 +2827,7 @@
       "column": 41,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9689,
+      "line": 9646,
       "matched_printed_name": "Sacrifice",
       "symbol": "_apply_apnap_choices",
       "value": "sacrifice"
@@ -2854,7 +2836,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9698,
+      "line": 9655,
       "matched_printed_name": "Sacrifice",
       "symbol": "_apply_apnap_choices",
       "value": "sacrifice"
@@ -2863,7 +2845,7 @@
       "column": 12,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9700,
+      "line": 9657,
       "matched_printed_name": "Exile",
       "symbol": "_apply_apnap_choices",
       "value": "exile"
@@ -2872,7 +2854,7 @@
       "column": 21,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9700,
+      "line": 9657,
       "matched_printed_name": "Exile",
       "symbol": "_apply_apnap_choices",
       "value": "exile"
@@ -2881,7 +2863,7 @@
       "column": 27,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 9708,
+      "line": 9665,
       "matched_printed_name": "Exile",
       "symbol": "_apply_apnap_choices",
       "value": "exile"
@@ -2890,7 +2872,7 @@
       "column": 40,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": true,
-      "line": 9846,
+      "line": 9803,
       "matched_printed_name": "Prohibit",
       "symbol": "_can_block",
       "value": "prohibit"
@@ -2899,7 +2881,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 11089,
+      "line": 11046,
       "matched_printed_name": "Pilot",
       "symbol": "_issue_attackers",
       "value": "pilot"
@@ -2908,7 +2890,7 @@
       "column": 17,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 11562,
+      "line": 11519,
       "matched_printed_name": "Pilot",
       "symbol": "_issue_next_blocker",
       "value": "pilot"
@@ -2917,7 +2899,7 @@
       "column": 21,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 11755,
+      "line": 11712,
       "matched_printed_name": "Pilot",
       "symbol": "_continue_combat_damage_assignments",
       "value": "pilot"
@@ -2926,7 +2908,7 @@
       "column": 32,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12389,
+      "line": 12346,
       "matched_printed_name": "Reason",
       "symbol": "_repair_battle_protectors",
       "value": "reason"
@@ -2935,7 +2917,7 @@
       "column": 28,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12437,
+      "line": 12394,
       "matched_printed_name": "Reason",
       "symbol": "_repair_battle_protectors",
       "value": "reason"
@@ -2944,7 +2926,7 @@
       "column": 25,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12445,
+      "line": 12402,
       "matched_printed_name": "Pilot",
       "symbol": "_repair_battle_protectors",
       "value": "pilot"
@@ -2953,7 +2935,7 @@
       "column": 25,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12808,
+      "line": 12765,
       "matched_printed_name": "Pilot",
       "symbol": "_stabilize",
       "value": "pilot"
@@ -2962,7 +2944,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12889,
+      "line": 12846,
       "matched_printed_name": "Reason",
       "symbol": "_complete_battle_protector_choice",
       "value": "reason"
@@ -2971,7 +2953,7 @@
       "column": 55,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12950,
+      "line": 12907,
       "matched_printed_name": "Exile",
       "symbol": "_eliminate_players",
       "value": "exile"
@@ -2980,7 +2962,7 @@
       "column": 86,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12954,
+      "line": 12911,
       "matched_printed_name": "Reason",
       "symbol": "_eliminate_players",
       "value": "reason"
@@ -2989,7 +2971,7 @@
       "column": 24,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 12968,
+      "line": 12925,
       "matched_printed_name": "Reason",
       "symbol": "_eliminate_players",
       "value": "reason"
@@ -2998,7 +2980,7 @@
       "column": 32,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 13023,
+      "line": 12980,
       "matched_printed_name": "Reason",
       "symbol": "apply_effect",
       "value": "reason"
@@ -3007,7 +2989,7 @@
       "column": 16,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 13142,
+      "line": 13099,
       "matched_printed_name": "Reason",
       "symbol": "create_emblem",
       "value": "reason"
@@ -3016,7 +2998,7 @@
       "column": 160,
       "file": "mtg_commander_sim/engine.py",
       "in_condition": false,
-      "line": 13199,
+      "line": 13156,
       "matched_printed_name": "Reason",
       "symbol": "change_control",
       "value": "reason"
@@ -3097,28 +3079,10 @@
       "column": 26,
       "file": "mtg_commander_sim/oracle_ir.py",
       "in_condition": false,
-      "line": 176,
+      "line": 181,
       "matched_printed_name": "Life",
       "symbol": "_effect_template",
       "value": "life"
-    },
-    {
-      "column": 20,
-      "file": "mtg_commander_sim/oracle_ir.py",
-      "in_condition": false,
-      "line": 231,
-      "matched_printed_name": "Exile",
-      "symbol": "_effect_template",
-      "value": "exile"
-    },
-    {
-      "column": 13,
-      "file": "mtg_commander_sim/oracle_ir.py",
-      "in_condition": false,
-      "line": 233,
-      "matched_printed_name": "Exile",
-      "symbol": "_effect_template",
-      "value": "exile"
     },
     {
       "column": 23,
@@ -4933,7 +4897,7 @@
       "column": 4,
       "file": "mtg_commander_sim/rules/capabilities.py",
       "in_condition": false,
-      "line": 170,
+      "line": 179,
       "matched_printed_name": "Status",
       "symbol": null,
       "value": "status"
@@ -4942,7 +4906,7 @@
       "column": 29,
       "file": "mtg_commander_sim/rules/capabilities.py",
       "in_condition": false,
-      "line": 407,
+      "line": 416,
       "matched_printed_name": "Status",
       "symbol": "_validate_capability",
       "value": "status"
@@ -4951,7 +4915,7 @@
       "column": 19,
       "file": "mtg_commander_sim/rules/capabilities.py",
       "in_condition": true,
-      "line": 633,
+      "line": 642,
       "matched_printed_name": "Status",
       "symbol": "visit",
       "value": "status"
@@ -4960,7 +4924,7 @@
       "column": 59,
       "file": "mtg_commander_sim/rules/capabilities.py",
       "in_condition": false,
-      "line": 634,
+      "line": 643,
       "matched_printed_name": "Status",
       "symbol": "visit",
       "value": "status"
@@ -4969,7 +4933,7 @@
       "column": 20,
       "file": "mtg_commander_sim/rules/capabilities.py",
       "in_condition": false,
-      "line": 652,
+      "line": 661,
       "matched_printed_name": "Status",
       "symbol": "closure",
       "value": "status"
@@ -4978,7 +4942,7 @@
       "column": 64,
       "file": "mtg_commander_sim/rules/capabilities.py",
       "in_condition": false,
-      "line": 652,
+      "line": 661,
       "matched_printed_name": "Status",
       "symbol": "closure",
       "value": "status"
@@ -4987,7 +4951,7 @@
       "column": 30,
       "file": "mtg_commander_sim/rules/casting/commit.py",
       "in_condition": false,
-      "line": 155,
+      "line": 158,
       "matched_printed_name": "X",
       "symbol": "_pay_life_additional_cost",
       "value": "x"
@@ -4996,7 +4960,7 @@
       "column": 12,
       "file": "mtg_commander_sim/rules/casting/commit.py",
       "in_condition": false,
-      "line": 196,
+      "line": 199,
       "matched_printed_name": "Exile",
       "symbol": "_commit_additional_costs",
       "value": "exile"
@@ -5005,7 +4969,7 @@
       "column": 12,
       "file": "mtg_commander_sim/rules/casting/commit.py",
       "in_condition": false,
-      "line": 450,
+      "line": 460,
       "matched_printed_name": "X",
       "symbol": "_record_cast",
       "value": "x"
@@ -5014,7 +4978,7 @@
       "column": 32,
       "file": "mtg_commander_sim/rules/casting/commit.py",
       "in_condition": false,
-      "line": 546,
+      "line": 556,
       "matched_printed_name": "X",
       "symbol": "commit_cast",
       "value": "x"
@@ -5689,7 +5653,7 @@
       "column": 8,
       "file": "mtg_commander_sim/semantic_runtime/executor.py",
       "in_condition": false,
-      "line": 185,
+      "line": 188,
       "matched_printed_name": "Reason",
       "symbol": "draw_intent_effect",
       "value": "reason"
@@ -5698,7 +5662,7 @@
       "column": 28,
       "file": "mtg_commander_sim/semantic_runtime/executor.py",
       "in_condition": false,
-      "line": 342,
+      "line": 357,
       "matched_printed_name": "Counters",
       "symbol": "execute_intent_plan",
       "value": "counters"
@@ -5740,10 +5704,28 @@
       "value": "reason"
     },
     {
+      "column": 36,
+      "file": "mtg_commander_sim/semantic_runtime/stack_counter_handlers.py",
+      "in_condition": false,
+      "line": 10,
+      "matched_printed_name": "Reason",
+      "symbol": null,
+      "value": "reason"
+    },
+    {
+      "column": 32,
+      "file": "mtg_commander_sim/semantic_runtime/stack_counter_handlers.py",
+      "in_condition": false,
+      "line": 45,
+      "matched_printed_name": "Reason",
+      "symbol": "lower",
+      "value": "reason"
+    },
+    {
       "column": 4,
       "file": "mtg_commander_sim/semantics.py",
       "in_condition": false,
-      "line": 76,
+      "line": 77,
       "matched_printed_name": "Explore",
       "symbol": null,
       "value": "explore"
@@ -5752,7 +5734,7 @@
       "column": 4,
       "file": "mtg_commander_sim/semantics.py",
       "in_condition": false,
-      "line": 77,
+      "line": 78,
       "matched_printed_name": "Fabricate",
       "symbol": null,
       "value": "fabricate"
@@ -5761,7 +5743,7 @@
       "column": 4,
       "file": "mtg_commander_sim/semantics.py",
       "in_condition": false,
-      "line": 79,
+      "line": 80,
       "matched_printed_name": "Exile",
       "symbol": null,
       "value": "exile"
@@ -5770,7 +5752,7 @@
       "column": 4,
       "file": "mtg_commander_sim/semantics.py",
       "in_condition": false,
-      "line": 86,
+      "line": 88,
       "matched_printed_name": "Life",
       "symbol": null,
       "value": "life"
@@ -5779,7 +5761,7 @@
       "column": 4,
       "file": "mtg_commander_sim/semantics.py",
       "in_condition": false,
-      "line": 110,
+      "line": 112,
       "matched_printed_name": "Sacrifice",
       "symbol": null,
       "value": "sacrifice"
@@ -5788,7 +5770,7 @@
       "column": 4,
       "file": "mtg_commander_sim/semantics.py",
       "in_condition": false,
-      "line": 124,
+      "line": 126,
       "matched_printed_name": "Reanimate",
       "symbol": null,
       "value": "reanimate"
@@ -5963,6 +5945,24 @@
       "matched_printed_name": "Exile",
       "symbol": "execute_shortcut",
       "value": "exile"
+    },
+    {
+      "column": 16,
+      "file": "mtg_commander_sim/stack_counter.py",
+      "in_condition": false,
+      "line": 98,
+      "matched_printed_name": "Reason",
+      "symbol": "counter_stack_item",
+      "value": "reason"
+    },
+    {
+      "column": 12,
+      "file": "mtg_commander_sim/stack_counter.py",
+      "in_condition": false,
+      "line": 135,
+      "matched_printed_name": "Reason",
+      "symbol": "counter_stack_item",
+      "value": "reason"
     },
     {
       "column": 4,
@@ -6354,7 +6354,7 @@
   ],
   "generator": "scripts/update_architecture_audit.py --write --card-db <path>",
   "limitations": "Exact full printed-name literals only. Card-named helpers and semantic operations are separately reviewed in architecture-audit-source.json.",
-  "review_adr": "docs/adr/0028-typed-return-to-owner-hand.md",
+  "review_adr": "docs/adr/0030-typed-stack-counter.md",
   "schema_version": 1,
   "scope": [
     "mtg_commander_sim/__init__.py",
@@ -6419,12 +6419,14 @@
     "mtg_commander_sim/compiler/activated_mana_nodes.py",
     "mtg_commander_sim/compiler/continuous_templates.py",
     "mtg_commander_sim/compiler/corpus_reporting.py",
+    "mtg_commander_sim/compiler/counter_templates.py",
     "mtg_commander_sim/compiler/creature_subtypes.py",
     "mtg_commander_sim/compiler/cycling_nodes.py",
     "mtg_commander_sim/compiler/damage_templates.py",
     "mtg_commander_sim/compiler/dependency_gate.py",
     "mtg_commander_sim/compiler/destruction_templates.py",
     "mtg_commander_sim/compiler/draw_templates.py",
+    "mtg_commander_sim/compiler/exile_templates.py",
     "mtg_commander_sim/compiler/fixed_numbers.py",
     "mtg_commander_sim/compiler/ir_model.py",
     "mtg_commander_sim/compiler/keyword_nodes.py",
@@ -6495,6 +6497,7 @@
     "mtg_commander_sim/object_predicate.py",
     "mtg_commander_sim/object_query.py",
     "mtg_commander_sim/oracle_ir.py",
+    "mtg_commander_sim/permanent_exile.py",
     "mtg_commander_sim/permissions.py",
     "mtg_commander_sim/persistence.py",
     "mtg_commander_sim/pilot.py",
@@ -6595,8 +6598,10 @@
     "mtg_commander_sim/semantic_runtime/life_replacements.py",
     "mtg_commander_sim/semantic_runtime/mana_abilities.py",
     "mtg_commander_sim/semantic_runtime/nodes.py",
+    "mtg_commander_sim/semantic_runtime/permanent_exile_handlers.py",
     "mtg_commander_sim/semantic_runtime/registry.py",
     "mtg_commander_sim/semantic_runtime/return_to_hand_handlers.py",
+    "mtg_commander_sim/semantic_runtime/stack_counter_handlers.py",
     "mtg_commander_sim/semantic_runtime/tap_state_handlers.py",
     "mtg_commander_sim/semantic_runtime/token_replacements.py",
     "mtg_commander_sim/semantic_runtime/zone_replacements.py",
@@ -6604,6 +6609,7 @@
     "mtg_commander_sim/service.py",
     "mtg_commander_sim/session.py",
     "mtg_commander_sim/shortcuts.py",
+    "mtg_commander_sim/stack_counter.py",
     "mtg_commander_sim/state_based_actions.py",
     "mtg_commander_sim/state_based_execution.py",
     "mtg_commander_sim/state_planner.py",

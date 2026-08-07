@@ -11,6 +11,7 @@ from .component_resolution import implementation_component_resolves
 from .node_capability_shapes import (
     fixed_damage_node_capabilities,
     fixed_draw_node_capabilities,
+    targeted_counter_node_capabilities,
     targeted_destruction_node_capabilities,
     targeted_exile_node_capabilities,
     targeted_return_to_hand_node_capabilities,
@@ -137,6 +138,7 @@ MECHANIC_CAPABILITY_DEPENDENCIES: dict[str, tuple[str, ...]] = {
 _SHAPE_GATED_MECHANICS = frozenset(
     {
         "cr-121-drawing-a-card",
+        "counter",
         "destroy",
         _EXILE_MECHANIC,
         "return-to-owner-hand",
@@ -704,6 +706,32 @@ def load_default_capability_registry() -> CapabilityRegistry:
     return registry
 
 
+def _targeted_effect_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanics: set[str],
+) -> set[str]:
+    dependencies: set[str] = set()
+    for resolver in (
+        fixed_damage_node_capabilities,
+        fixed_draw_node_capabilities,
+        targeted_counter_node_capabilities,
+        targeted_destruction_node_capabilities,
+        targeted_exile_node_capabilities,
+        targeted_return_to_hand_node_capabilities,
+        targeted_tap_state_node_capabilities,
+    ):
+        dependencies.update(
+            resolver(
+                effects=effects,
+                target_schema=target_schema,
+                mechanic_ids=mechanics,
+            )
+        )
+    return dependencies
+
+
 def capability_dependencies_for_node(
     *,
     effects: Sequence[Mapping[str, Any]],
@@ -786,45 +814,10 @@ def capability_dependencies_for_node(
         )
     schema = dict(target_schema or {})
     dependencies.update(
-        fixed_damage_node_capabilities(
+        _targeted_effect_capabilities(
             effects=effects,
             target_schema=target_schema,
-            mechanic_ids=mechanics,
-        )
-    )
-    dependencies.update(
-        fixed_draw_node_capabilities(
-            effects=effects,
-            target_schema=target_schema,
-            mechanic_ids=mechanics,
-        )
-    )
-    dependencies.update(
-        targeted_destruction_node_capabilities(
-            effects=effects,
-            target_schema=target_schema,
-            mechanic_ids=mechanics,
-        )
-    )
-    dependencies.update(
-        targeted_exile_node_capabilities(
-            effects=effects,
-            target_schema=target_schema,
-            mechanic_ids=mechanics,
-        )
-    )
-    dependencies.update(
-        targeted_return_to_hand_node_capabilities(
-            effects=effects,
-            target_schema=target_schema,
-            mechanic_ids=mechanics,
-        )
-    )
-    dependencies.update(
-        targeted_tap_state_node_capabilities(
-            effects=effects,
-            target_schema=target_schema,
-            mechanic_ids=mechanics,
+            mechanics=mechanics,
         )
     )
     if (
@@ -888,6 +881,8 @@ def capability_covered_mechanics(
         covered.add(_EXILE_MECHANIC)
     if "permanent.return.owner_hand" in supplied:
         covered.add("return-to-owner-hand")
+    if "stack.counter.effect" in supplied:
+        covered.add("counter")
     if supplied.intersection(
         {
             "zone.draw.result_generated_ordering",

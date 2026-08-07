@@ -170,6 +170,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "mtg_commander_sim/rules_corpus.py",
         "mtg_commander_sim/rules_scheduler.py",
         "mtg_commander_sim/shortcuts.py",
+        "mtg_commander_sim/stack_counter.py",
         "mtg_commander_sim/state_based_actions.py",
         "mtg_commander_sim/state_based_execution.py",
         "mtg_commander_sim/state_planner.py",
@@ -317,6 +318,8 @@ def _owner(relative: str, layer: str) -> str:
         return "return_to_hand"
     if relative == "mtg_commander_sim/permanent_exile.py":
         return "permanent_exile"
+    if relative == "mtg_commander_sim/stack_counter.py":
+        return "stack_counter"
     if relative == "mtg_commander_sim/replacement_decisions.py":
         return "replacement_effects"
     if relative == "mtg_commander_sim/rules_scheduler.py":
@@ -428,6 +431,7 @@ def build_classifications() -> dict[str, Any]:
                             "permanent_exile.py",
                             "replacement/",
                             "return_to_hand.py",
+                            "stack_counter.py",
                             "state_planner.py",
                             "tap_state.py",
                             "token_creation.py",

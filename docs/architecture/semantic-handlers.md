@@ -48,6 +48,15 @@ the underlying counter or zone mutation. Broad legacy exile operations remain
 separate because they also represent stack and hidden-zone movement outside the
 direct battlefield-target grammar.
 
+Mandatory direct stack counters lower through a separate strict handler to one
+typed intent. The focused stack owner performs counterability, stack removal,
+ordinary spell movement, and journaling; target legality and source exclusion
+come from the same closed schema used by action offers. The exact intrinsic
+sentence “This spell can't be countered” is compiled once as a trusted
+stack-active declaration and pinned during cast commit. Conditional counter
+clauses and prohibitions remain residual rather than falling back to runtime
+Oracle parsing.
+
 To migrate an instruction, characterize existing output and replay, define the
 smallest typed node/query/intent surface, register one stable handler, add
 success and malformed-input rollback tests, and remove every parallel dispatch
@@ -57,5 +66,6 @@ See [ADR 0006](../adr/0006-typed-semantic-handler-boundary.md),
 [ADR 0009](../adr/0009-typed-tap-state-mutation-owner.md), and
 [ADR 0014](../adr/0014-typed-semantic-choice-and-effect-ownership.md),
 [ADR 0027](../adr/0027-typed-permanent-destruction.md),
-[ADR 0028](../adr/0028-typed-return-to-owner-hand.md), and
-[ADR 0029](../adr/0029-typed-permanent-exile.md).
+[ADR 0028](../adr/0028-typed-return-to-owner-hand.md),
+[ADR 0029](../adr/0029-typed-permanent-exile.md), and
+[ADR 0030](../adr/0030-typed-stack-counter.md).

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "98cc889801a361921bb10a7f4c7051fa6a8585ad",
+    "baseline_main_commit": "8d9b1b170c4a9d2ade0cdcdf52505a0974febce2",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-07",
-    "phase": "typed_permanent_exile_and_direct_target_harvest",
-    "scope_note": "Certified main through PR 126 includes typed return-to-owner-hand ownership and direct-target harvest. The current focused branch adds an immutable identity-pinned permanent-exile transaction, one closed direct-target compiler family shared by spell, trigger, and activated contexts, replacement-aware result ownership, public multiplayer projection, Oracle IR v41 harvest, and current generated status."
+    "phase": "typed_direct_stack_counter_and_intrinsic_prohibition_harvest",
+    "scope_note": "Certified main through PR 127 includes typed permanent-exile ownership and direct-target harvest. The current focused branch adds a closed mandatory direct stack-counter compiler family shared by spell, trigger, and activated contexts, one typed stack-removal owner, current trusted intrinsic counter-prohibition declarations, exact target revalidation, Oracle IR v42 harvest, and current generated status."
   },
   "ci": {
     "workflow": "PR",
-    "run_id": 31164340735,
-    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31164340735",
+    "run_id": 31168367380,
+    "url": "https://github.com/MoellerJDev/mtg-commander-sim/actions/runs/31168367380",
     "status": "pass",
     "python_versions": [
       "3.12"
@@ -43,6 +43,7 @@
       "mtg_commander_sim/life_state.py",
       "mtg_commander_sim/continuous_effect_state.py",
       "mtg_commander_sim/tap_state.py",
+      "mtg_commander_sim/stack_counter.py",
       "mtg_commander_sim/token_creation.py"
       ,"mtg_commander_sim/mana_activation.py"
       ,"mtg_commander_sim/semantic_choices/intent_host.py"
@@ -163,6 +164,7 @@
         "mtg_commander_sim/destruction.py",
         "mtg_commander_sim/permanent_exile.py",
         "mtg_commander_sim/return_to_hand.py",
+        "mtg_commander_sim/stack_counter.py",
         "mtg_commander_sim/tap_state.py",
         "mtg_commander_sim/engine.py"
       ],

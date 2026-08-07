@@ -1,0 +1,46 @@
+{
+  "cards": [
+    {
+      "cmc": 2.0,
+      "color_identity": ["U"],
+      "colors": ["U"],
+      "defense": null,
+      "keywords": [],
+      "layout": "normal",
+      "legalities": {"commander": "legal"},
+      "loyalty": null,
+      "mana_cost": "{U}{U}",
+      "name": "Counterspell",
+      "oracle_id": "cc187110-1148-4090-bbb8-e205694a39f5",
+      "oracle_text": "Counter target spell.",
+      "power": null,
+      "produced_mana": [],
+      "released_at": "1993-08-05",
+      "toughness": null,
+      "type_line": "Instant"
+    },
+    {
+      "cmc": 1.0,
+      "color_identity": ["U"],
+      "colors": ["U"],
+      "defense": null,
+      "keywords": [],
+      "layout": "normal",
+      "legalities": {"commander": "legal"},
+      "loyalty": null,
+      "mana_cost": "{U}",
+      "name": "Unanswerable Test Spell",
+      "oracle_id": "00000000-0000-4000-8000-000000000128",
+      "oracle_text": "This spell can't be countered.",
+      "power": null,
+      "produced_mana": [],
+      "released_at": "2026-08-07",
+      "toughness": null,
+      "type_line": "Instant"
+    }
+  ],
+  "fixture_kind": "focused_targeted_counter_cards",
+  "rulings": [],
+  "schema_version": 1,
+  "source": "Pinned synthetic witnesses for focused compiler/runtime tests"
+}
