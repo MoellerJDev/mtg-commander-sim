@@ -13,6 +13,7 @@ from ..semantic_runtime import (
     IntentPlan,
     PlaceCountersIntent,
     PlaceCountersOnSetIntent,
+    PlaceCountersOnTargetsIntent,
     PlacePlayerCountersIntent,
     ProliferateIntent,
     ZoneMoveIntent,
@@ -118,6 +119,7 @@ def _issue_semantic_intent_replacement_choice(
     response: Mapping[str, Any],
     intent: (
         PlaceCountersOnSetIntent
+        | PlaceCountersOnTargetsIntent
         | PlacePlayerCountersIntent
         | ProliferateIntent
         | ZoneMoveIntent
@@ -238,6 +240,7 @@ def continue_semantic_completion(
                 intent,
                 (
                     PlaceCountersOnSetIntent,
+                    PlaceCountersOnTargetsIntent,
                     PlacePlayerCountersIntent,
                     ProliferateIntent,
                     ZoneMoveIntent,

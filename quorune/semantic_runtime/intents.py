@@ -552,6 +552,63 @@ class PlaceCountersOnSetIntent:
 
 
 @dataclass(frozen=True, slots=True)
+class PlaceCountersOnTargetsIntent:
+    actor: str
+    object_refs: tuple[str, ...]
+    maximum_targets: int
+    counter_name: str
+    amount: int
+    reason: str
+    source_ref: str | None = None
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        refs = tuple(self.object_refs)
+        normalized = (
+            " ".join(self.counter_name.casefold().split())
+            if type(self.counter_name) is str
+            else ""
+        )
+        if any(
+            type(value) is not str or not value
+            for value in (self.actor, normalized, self.reason)
+        ):
+            raise ValueError(
+                "Counter-target intents require actor, counter, and reason"
+            )
+        if (
+            type(self.maximum_targets) is not int
+            or self.maximum_targets <= 0
+            or len(refs) > self.maximum_targets
+            or any(type(ref) is not str or not ref for ref in refs)
+            or len(refs) != len(set(refs))
+        ):
+            raise ValueError(
+                "Counter-target intents require unique refs within a positive maximum"
+            )
+        if type(self.amount) is not int or self.amount <= 0:
+            raise ValueError(
+                "Counter-target intent amount must be a positive exact integer"
+            )
+        if self.source_ref is not None and (
+            type(self.source_ref) is not str or not self.source_ref
+        ):
+            raise ValueError(
+                "Counter-target intent source must be a nonempty reference"
+            )
+        object.__setattr__(self, "object_refs", refs)
+        object.__setattr__(self, "counter_name", normalized)
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                tuple(self.replacement_selections),
+                family="Counter-target placement",
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class PlacePlayerCountersIntent:
     actor: str
     player_ids: tuple[str, ...]
@@ -850,6 +907,7 @@ SemanticIntent: TypeAlias = (
     | PayManaCostIntent
     | PlaceCountersIntent
     | PlaceCountersOnSetIntent
+    | PlaceCountersOnTargetsIntent
     | PlacePlayerCountersIntent
     | CounterStackIntent
     | EliminatePlayersIntent

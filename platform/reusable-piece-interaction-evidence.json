@@ -578,6 +578,22 @@
       "capability_ids": ["stack.counter.effect", "stack.counter.prohibition.intrinsic"],
       "interaction_order": 3,
       "assertion": "The direct counter owner consumes the exact trusted intrinsic counter-prohibition declaration pinned at cast commit and leaves the protected spell on the stack."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_partial_target_revalidation_places_only_on_still_legal_targets",
+      "piece_ids": ["capability.counter.producer.fixed_permanent_target_set_effect", "capability.target.revalidate_resolution"],
+      "capability_ids": ["counter.producer.fixed_permanent_target_set_effect", "target.revalidate_resolution"],
+      "interaction_order": 2,
+      "assertion": "The bounded fixed target-set producer revalidates every selected public permanent and commits counters only to the still-legal subset."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_target_set_suspends_for_quantity_replacement_and_replays",
+      "piece_ids": ["capability.counter.placement.quantity_replacement", "capability.counter.producer.fixed_permanent_target_set_effect"],
+      "capability_ids": ["counter.placement.quantity_replacement", "counter.producer.fixed_permanent_target_set_effect"],
+      "interaction_order": 2,
+      "assertion": "One immutable APNAP-canonical target set suspends for permanent-counter quantity replacement and resumes the same batch with exact replay."
     }
   ]
 }

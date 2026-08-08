@@ -2527,6 +2527,94 @@
       "applicability_note": "Replay the selected player target, priority sequence, affected-set snapshot, replacement journal, and final state hash exactly."
     },
     {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_partial_target_revalidation_places_only_on_still_legal_targets",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Revalidate every selected public permanent and commit one canonical counter batch only for the still-legal target subset."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_target_set_suspends_for_quantity_replacement_and_replays",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Suspend one APNAP-canonical still-legal target set for an affected-controller quantity-replacement choice and resume the same typed intent."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_target_set_suspends_for_quantity_replacement_and_replays",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Resolve a bounded target set in a four-player game with canonical controller order and an affected-controller replacement choice."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetCompilerTests.test_target_set_compiler_mutant_is_killed",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a compiler mutant that removes the closed bounded target-set template and would otherwise preserve a false exact promotion."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetCompilerTests.test_unsupported_target_set_variants_remain_material_residuals",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep Support, variable, distributed, counter-qualified, combat-qualified, subtype-qualified, modal, conditional, and compound target sets outside the closed grammar."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_all_original_targets_illegal_is_countered_before_counter_mutation",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Counter an originally targeted instruction when every selected target is illegal at resolution, without entering the counter-placement transaction."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_handler_and_snapshot_reject_malformed_inputs_without_mutation",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject duplicate or excessive targets, booleans, unknown fields, invalid public identities, and incomplete APNAP views before authoritative mutation."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetCompilerTests.test_spell_trigger_and_activated_contexts_share_target_set_lowering",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower one source-spanned bounded fixed target-set placement family across spell, trigger, and activated contexts."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_runtime_canonicalizes_still_legal_targets_in_apnap_order",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Materialize an immutable still-legal target set in canonical APNAP and logical-identity order before the shared counter transaction."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_target_set_suspends_for_quantity_replacement_and_replays",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project only public target and replacement labels to the affected seat without exposing continuation payloads, hands, or libraries."
+    },
+    {
+      "capability_id": "counter.producer.fixed_permanent_target_set_effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_fixed_counter_placement_target_sets.FixedCounterPlacementTargetSetRuntimeTests.test_target_set_suspends_for_quantity_replacement_and_replays",
+      "official_rule_ids": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay selected target identities, resolution revalidation, replacement choice, continuation restoration, and final state hash exactly."
+    },
+    {
       "capability_id": "counter.producer.fixed_player_effect",
       "evidence_class": "interaction",
       "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_player_counter_placement_triggers_poison_sba_and_replay",

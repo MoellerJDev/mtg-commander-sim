@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "70f5f4d296709ed018e2b5fcc5ab12b2c5841db2",
+  "baseline_commit": "8eed999792cb2d6f4e4f8ef64cc800af164f2639",
   "card_named_helpers": [
     {
       "file": "quorune/engine.py",
@@ -2259,9 +2259,9 @@
     "physical_lines": 12927
   },
   "exception_binding": {
-    "adr": "docs/adr/0036-typed-fixed-affected-set-counter-placement.md",
-    "allowance_fingerprint": "2fb8205cc4ac75dac5b26c56fc96a676d67da77868106d02b27055de8b0a71e4",
-    "exception_id": "ARCH-EXC-0016"
+    "adr": "docs/adr/0037-typed-fixed-target-set-counter-placement.md",
+    "allowance_fingerprint": "37c6168c71e92be9c3fb21df0b32297d39a9fa6f2524f442bb7d66b65e3ebe42",
+    "exception_id": "ARCH-EXC-0017"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2610,6 +2610,7 @@
     "pay_or_lose",
     "place_counters",
     "place_counters_on_set",
+    "place_counters_on_targets",
     "place_player_counters",
     "populate_with_haste",
     "prepare_graveyard_creature_aura",
@@ -2641,6 +2642,6 @@
   ],
   "schema_version": 2,
   "source_fingerprints": {
-    "printed_name_allowances_sha256": "5afee672e7e3647645b5bdcda450d025c452e3288b813330c0580925b4f75399"
+    "printed_name_allowances_sha256": "1de675762c676052794cdfe62a457e9fd1fc15545696b9d5d189e50a2ff068bc"
   }
 }

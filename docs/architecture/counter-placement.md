@@ -1,7 +1,7 @@
 ---
 title: "Counter-placement transaction"
 status: "current"
-authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, quorune/entry_counter_model.py, quorune/entry_counters.py, semantic_runtime/counter_replacements.py, ADR 0011, and ADR 0034"
+authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, quorune/counter_placement_sets.py, quorune/counter_placement_targets.py, quorune/entry_counter_model.py, quorune/entry_counters.py, semantic_runtime/counter_replacements.py, ADR 0011, ADR 0034, ADR 0036, and ADR 0037"
 verified: "2026-08-08"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -62,6 +62,11 @@ remain residual rather than being inferred at runtime.
 protocols. It delegates the one atomic write plan to `counter_state.py`, which
 owns poison, energy, arbitrary normalized player counters, and permanent
 counter maps.
+`counter_placement_sets.py` and `counter_placement_targets.py` are read-only
+coordinators: they snapshot a represented public battlefield set or the
+still-legal members of a submitted bounded target set, canonicalize it by
+APNAP controller and logical object identity, and delegate the complete batch
+to `counter_placement.py`. Neither module owns authoritative state mutation.
 `semantic_runtime/counter_replacements.py` validates source descriptors and
 returns immutable effects; architecture policy prohibits it from importing the
 engine, `GameState`, transport, persistence, or projection code.
@@ -92,13 +97,25 @@ permanent can suspend through `resolving_entry` and resume without replaying
 earlier spell effects. Simultaneous entries prepare in APNAP order without
 mutation.
 
-Oracle IR v50 lowers the closed reusable fixed-placement grammars through the
+Oracle IR v52 lowers the closed reusable fixed-placement grammars through the
 typed operation in spell, triggered, and activated contexts. It accepts one
 positive exact quantity of one named counter on the source, the exact named
 source, or one direct battlefield permanent target. Direct targets may use one
 permanent card type or one pinned creature subtype, a fixed controller
 relation, and source exclusion. The strict runtime handler lowers only to
 `PlaceCountersIntent`; it neither parses Oracle text nor mutates state.
+
+The affected-set family lowers one mandatory fixed quantity onto every member
+of one closed public battlefield set. Its predicates are serialized in an
+immutable `AffectedPermanentSetSpec`; resolution snapshots the entire set
+before the canonical simultaneous counter transaction begins. The bounded
+target-set family separately lowers “each of up to N target” instructions for
+direct permanent types, optional controller relations, and the represented
+noncreature-artifact predicate. The selected refs remain distinct and bounded,
+zero is legal for “up to,” and resolution follows CR 608.2b: still-legal
+targets receive counters, while an originally nonempty selection with no legal
+targets does not resolve. Both families use typed semantic intents and exact
+replacement continuations rather than runtime Oracle interpretation.
 
 The same compiler boundary now lowers one mandatory fixed player-counter
 instruction in spell, triggered, and activated contexts. Its closed relations
@@ -138,8 +155,10 @@ The following producers and wordings remain deliberately outside this slice:
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
 - cumulative upkeep;
-- optional, variable, distributed, set-based, and multiple-counter placement
-  clauses, plus fixed player-counter variants outside the closed relations;
+- Support shorthand and optional, variable, distributed, dynamic,
+  subtype-qualified, combat-qualified, modal, conditional, compound, and
+  multiple-counter target-set clauses, plus fixed player-counter variants
+  outside the closed relations;
 - conditional targets and non-creature subtype predicates;
 - Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
 - Planeswalker or Battle token entry with an applicable quantity replacement
@@ -163,9 +182,11 @@ until those families and producers are integrated.
 
 Primary assurance is in `test_counter_placement_replacements.py`,
 `test_proliferate_rules.py`, `test_proliferate_compiler.py`, and
-`test_fixed_counter_placement_effects.py`, plus intrinsic entry coverage in
-`test_intrinsic_entry_counters.py`, with shared event-order coverage in
-`test_replacement_event_tree.py` and focused mutation evidence in
+`test_fixed_counter_placement_effects.py`, with affected- and target-set
+coverage in `test_fixed_counter_placement_sets.py` and
+`test_fixed_counter_placement_target_sets.py`, plus intrinsic entry coverage
+in `test_intrinsic_entry_counters.py`, shared event-order coverage in
+`test_replacement_event_tree.py`, and focused mutation evidence in
 `test_capability_implementation_mutations.py`.
 
 Current aggregate corpus counts and remaining blockers are generated in

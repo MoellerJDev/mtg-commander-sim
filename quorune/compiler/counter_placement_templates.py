@@ -159,6 +159,98 @@ class FixedCounterPlacementTemplate:
 
 
 @dataclass(frozen=True, slots=True)
+class FixedCounterPlacementTargetSetTemplate:
+    """One fixed placement on each member of an optional target set."""
+
+    count: int
+    counter_name: str
+    maximum_targets: int
+    permanent_type: str
+    controller_relation: str = "any"
+    exclude_creature: bool = False
+
+    def __post_init__(self) -> None:
+        if type(self.count) is not int or self.count <= 0:
+            raise ValueError("Counter-target placement count must be positive")
+        if type(self.counter_name) is not str:
+            raise ValueError("Counter-target placement name must be nonempty")
+        normalized = " ".join(self.counter_name.casefold().split())
+        if not normalized:
+            raise ValueError("Counter-target placement name must be nonempty")
+        object.__setattr__(self, "counter_name", normalized)
+        if type(self.maximum_targets) is not int or self.maximum_targets <= 0:
+            raise ValueError("Counter-target maximum must be positive")
+        if self.permanent_type not in _PERMANENT_TYPES:
+            raise ValueError("Counter-target permanent type is unsupported")
+        if self.controller_relation not in {"any", "you", "opponent"}:
+            raise ValueError("Counter-target controller relation is unsupported")
+        if type(self.exclude_creature) is not bool or (
+            self.exclude_creature and self.permanent_type != "artifact"
+        ):
+            raise ValueError("Counter-target negative type predicate is unsupported")
+
+    @property
+    def template_id(self) -> str:
+        negative = "noncreature-" if self.exclude_creature else ""
+        relation = (
+            f"-{self.controller_relation}"
+            if self.controller_relation != "any"
+            else ""
+        )
+        return (
+            f"place-fixed-counter-target-set-{self.maximum_targets}-"
+            f"{negative}{self.permanent_type}{relation}-v1"
+        )
+
+    @property
+    def effects(self) -> tuple[Mapping[str, Any], ...]:
+        return (
+            {
+                "op": "place_counters_on_targets",
+                "cards": "$targets",
+                "maximum_targets": self.maximum_targets,
+                "counter": self.counter_name,
+                "amount": self.count,
+                "source": "$source",
+            },
+        )
+
+    @property
+    def target_schema(self) -> Mapping[str, Any]:
+        schema: dict[str, Any] = {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "up_to": self.maximum_targets,
+        }
+        if self.permanent_type != "permanent":
+            schema["types_any"] = [self.permanent_type]
+        if self.exclude_creature:
+            schema["types_none"] = ["creature"]
+        if self.controller_relation != "any":
+            schema["controller_relation"] = self.controller_relation
+        return schema
+
+    @property
+    def mechanics(self) -> tuple[str, ...]:
+        return ("cr-122-counters", "cr-115-targets")
+
+    def compiled(
+        self,
+    ) -> tuple[
+        str,
+        tuple[Mapping[str, Any], ...],
+        Mapping[str, Any],
+        tuple[str, ...],
+    ]:
+        return (
+            self.template_id,
+            self.effects,
+            self.target_schema,
+            self.mechanics,
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class FixedPlayerCounterPlacementTemplate:
     """One mandatory fixed placement on a closed player relation."""
 
@@ -435,6 +527,76 @@ def fixed_counter_placement_effect_template(
         creature_subtype=creature_subtype,
         controller_relation=relation,
         exclude_source=exclude_source,
+    )
+
+
+_TARGET_SET_PERMANENT_TYPES = {
+    "artifact": "artifact",
+    "artifacts": "artifact",
+    "battle": "battle",
+    "battles": "battle",
+    "creature": "creature",
+    "creatures": "creature",
+    "enchantment": "enchantment",
+    "enchantments": "enchantment",
+    "land": "land",
+    "lands": "land",
+    "permanent": "permanent",
+    "permanents": "permanent",
+    "planeswalker": "planeswalker",
+    "planeswalkers": "planeswalker",
+}
+
+
+def fixed_counter_placement_target_set_effect_template(
+    text: str,
+) -> FixedCounterPlacementTargetSetTemplate | None:
+    """Parse one fixed placement on each of up to N direct targets."""
+
+    match = _PLACEMENT.fullmatch(text.strip())
+    if match is None:
+        return None
+    count = fixed_number(match.group("count"))
+    if count <= 0 or (match.group("plural").casefold() == "counter") != (
+        count == 1
+    ):
+        return None
+    subject = " ".join(match.group("subject").casefold().split())
+    target = re.fullmatch(
+        rf"each of up to (?P<maximum>{_COUNT}) target "
+        r"(?P<noncreature>noncreature )?"
+        r"(?P<kind>artifact|artifacts|battle|battles|creature|creatures|"
+        r"enchantment|enchantments|land|lands|permanent|permanents|"
+        r"planeswalker|planeswalkers)"
+        r"(?P<relation> you control| an opponent controls| you don't control)?",
+        subject,
+        re.IGNORECASE,
+    )
+    if target is None:
+        return None
+    maximum = fixed_number(target.group("maximum"))
+    kind_word = target.group("kind").casefold()
+    singular = not kind_word.endswith("s")
+    if maximum <= 0 or singular is not (maximum == 1):
+        return None
+    permanent_type = _TARGET_SET_PERMANENT_TYPES[kind_word]
+    exclude_creature = bool(target.group("noncreature"))
+    if exclude_creature and permanent_type != "artifact":
+        return None
+    relation = (target.group("relation") or "").casefold()
+    return FixedCounterPlacementTargetSetTemplate(
+        count=count,
+        counter_name=match.group("counter"),
+        maximum_targets=maximum,
+        permanent_type=permanent_type,
+        controller_relation=(
+            "you"
+            if relation == " you control"
+            else "opponent"
+            if relation
+            else "any"
+        ),
+        exclude_creature=exclude_creature,
     )
 
 
@@ -842,10 +1004,12 @@ __all__ = [
     "FIXED_COUNTER_SET_KEYWORDS",
     "FixedCounterPlacementTemplate",
     "FixedCounterPlacementSetTemplate",
+    "FixedCounterPlacementTargetSetTemplate",
     "FixedPlayerCounterPlacementTemplate",
     "PlayerCounterPlacementSubject",
     "fixed_counter_placement_effect_template",
     "fixed_counter_placement_set_effect_template",
+    "fixed_counter_placement_target_set_effect_template",
     "fixed_counter_set_spec_is_closed",
     "fixed_player_counter_placement_effect_template",
 ]

@@ -14,6 +14,10 @@ from ..counter_placement_sets import (
     CounterPlacementSetError,
     resolve_counter_placement_set,
 )
+from ..counter_placement_targets import (
+    CounterPlacementTargetSetError,
+    resolve_counter_placement_targets,
+)
 from ..counter_state import player_counter_snapshot
 from ..errors import GameRuleError
 from ..fixed_damage_set import (
@@ -53,6 +57,7 @@ from ..semantic_runtime import (
     PayManaCostIntent,
     PlaceCountersIntent,
     PlaceCountersOnSetIntent,
+    PlaceCountersOnTargetsIntent,
     PlacePlayerCountersIntent,
     ProliferateIntent,
     RecordChoiceIntent,
@@ -77,6 +82,24 @@ class SemanticChoiceIntentHostMixin:
 
     def affected_permanent_object_rows(self, actor: str):
         return tuple(self._semantic_choice_object_rows(actor))
+
+    def counter_target_active_seats(self) -> tuple[str, ...]:
+        return tuple(self.active_seats)
+
+    def counter_target_apnap_order(self) -> tuple[str, ...]:
+        return tuple(self.apnap_order())
+
+    def counter_target_object_rows(
+        self,
+        actor: str,
+        refs: tuple[str, ...],
+    ):
+        by_ref = {
+            row.ref: row
+            for row in self._semantic_choice_object_rows(actor)
+            if row.zone == "battlefield" and not row.phased_out
+        }
+        return tuple(by_ref[ref] for ref in refs if ref in by_ref)
 
     def fixed_damage_active_seats(self) -> tuple[str, ...]:
         return tuple(self.active_seats)
@@ -670,6 +693,31 @@ class SemanticChoiceIntentHostMixin:
                 ),
             )
         except CounterPlacementSetError as exc:
+            raise GameRuleError(str(exc)) from exc
+        return tuple(
+            self.state.cards[result.object_id].ref for result in results
+        )
+
+    def place_counters_on_targets_intent(
+        self,
+        intent: PlaceCountersOnTargetsIntent,
+    ) -> tuple[str, ...]:
+        try:
+            results = resolve_counter_placement_targets(
+                self,
+                actor=intent.actor,
+                refs=intent.object_refs,
+                maximum_targets=intent.maximum_targets,
+                counter_name=intent.counter_name,
+                amount=intent.amount,
+                reason=intent.reason,
+                source_ref=intent.source_ref,
+                replacement_selections=tuple(
+                    thaw_value(value)
+                    for value in intent.replacement_selections
+                ),
+            )
+        except CounterPlacementTargetSetError as exc:
             raise GameRuleError(str(exc)) from exc
         return tuple(
             self.state.cards[result.object_id].ref for result in results

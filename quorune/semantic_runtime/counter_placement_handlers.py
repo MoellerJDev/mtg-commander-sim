@@ -16,6 +16,7 @@ from .intents import (
     IntentPlan,
     PlaceCountersIntent,
     PlaceCountersOnSetIntent,
+    PlaceCountersOnTargetsIntent,
     PlacePlayerCountersIntent,
 )
 
@@ -191,6 +192,132 @@ class FixedCounterPlacementSetHandler:
 
 
 @dataclass(frozen=True, slots=True)
+class FixedCounterPlacementTargetSetHandler:
+    handler_id: str = "generic.fixed-counter-placement-target-set.v1"
+    schema_version: int = 1
+    family: str = "effect.counter-placement-target-set"
+    operation: str = "place_counters_on_targets"
+    rule_references: tuple[str, ...] = (
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "counter.producer.fixed_permanent_target_set_effect",
+    )
+
+    def lower(
+        self,
+        effect: Mapping[str, Any],
+        context: ReadOnlyHandlerContext,
+    ) -> IntentPlan:
+        allowed = {
+            "op",
+            "cards",
+            "maximum_targets",
+            "counter",
+            "amount",
+            "source",
+            _REASON_FIELD,
+            "_replacement_selections",
+        }
+        unknown = sorted(set(effect) - allowed)
+        if unknown:
+            raise SemanticNodeError(
+                "Counter-target effect has unknown fields: "
+                + ", ".join(unknown)
+            )
+        missing = sorted(
+            {
+                "op",
+                "cards",
+                "maximum_targets",
+                "counter",
+                "amount",
+                "source",
+            }
+            - set(effect)
+        )
+        if missing:
+            raise SemanticNodeError(
+                "Counter-target effect is missing fields: "
+                + ", ".join(missing)
+            )
+        if effect.get("op") != self.operation:
+            raise SemanticNodeError("Counter-target operation is unsupported")
+        raw_cards = effect.get("cards")
+        if not isinstance(raw_cards, (list, tuple)):
+            raise SemanticNodeError(
+                "Counter-target placement requires an array of targets"
+            )
+        cards = tuple(raw_cards)
+        maximum = effect.get("maximum_targets")
+        if (
+            type(maximum) is not int
+            or maximum <= 0
+            or len(cards) > maximum
+            or any(type(card) is not str or not card for card in cards)
+            or len(cards) != len(set(cards))
+        ):
+            raise SemanticNodeError(
+                "Counter-target placement requires unique targets within a positive maximum"
+            )
+        counter_name = effect.get("counter")
+        if type(counter_name) is not str or not counter_name.strip():
+            raise SemanticNodeError(
+                "Counter-target placement requires one nonempty counter name"
+            )
+        amount = effect.get("amount")
+        if type(amount) is not int or amount <= 0:
+            raise SemanticNodeError(
+                "Counter-target amount must be a positive exact integer"
+            )
+        source_ref = effect.get("source")
+        if type(source_ref) is not str or not source_ref:
+            raise SemanticNodeError(
+                "Counter-target placement requires one nonempty source reference"
+            )
+        raw_reason = effect.get(_REASON_FIELD)
+        if raw_reason is not None and (
+            type(raw_reason) is not str or not raw_reason
+        ):
+            raise SemanticNodeError(
+                "Counter-target reason must be a nonempty string"
+            )
+        raw_selections = effect.get("_replacement_selections")
+        if raw_selections is None:
+            raw_selections = ()
+        if not isinstance(raw_selections, (list, tuple)):
+            raise SemanticNodeError(
+                "Counter-target replacement selections must be an array"
+            )
+        try:
+            intent = PlaceCountersOnTargetsIntent(
+                actor=context.actor,
+                object_refs=cards,
+                maximum_targets=maximum,
+                counter_name=counter_name,
+                amount=amount,
+                reason=raw_reason or context.default_reason,
+                source_ref=source_ref,
+                replacement_selections=tuple(raw_selections),
+            )
+        except ValueError as exc:
+            raise SemanticNodeError(str(exc)) from exc
+        return IntentPlan(
+            operation=self.operation,
+            handler_id=self.handler_id,
+            intents=(intent,),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class FixedPlayerCounterPlacementHandler:
     handler_id: str = "generic.fixed-player-counter-placement.v1"
     schema_version: int = 1
@@ -306,6 +433,7 @@ class FixedPlayerCounterPlacementHandler:
 COUNTER_PLACEMENT_HANDLERS = (
     FixedCounterPlacementHandler(),
     FixedCounterPlacementSetHandler(),
+    FixedCounterPlacementTargetSetHandler(),
     FixedPlayerCounterPlacementHandler(),
 )
 
@@ -314,5 +442,6 @@ __all__ = [
     "COUNTER_PLACEMENT_HANDLERS",
     "FixedCounterPlacementHandler",
     "FixedCounterPlacementSetHandler",
+    "FixedCounterPlacementTargetSetHandler",
     "FixedPlayerCounterPlacementHandler",
 ]

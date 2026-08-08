@@ -1424,6 +1424,20 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "quorune/counter_placement_targets.py",
+      "layer": "rules",
+      "owning_subsystem": "legacy_rules",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "none"
+    },
+    {
       "file": "quorune/counter_removal.py",
       "layer": "rules",
       "owning_subsystem": "counter_state",
@@ -4427,5 +4441,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "39fae49f751c3b8aee5b7f9ae726ab79b92547704c355ab638ef8fcaa8272f06"
+  "fingerprint": "f266db52602842ea126c205db63f1263d2da2565b09adf56987f411b5d018630"
 }

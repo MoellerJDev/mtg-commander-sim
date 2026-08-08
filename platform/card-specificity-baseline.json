@@ -938,10 +938,30 @@
     },
     {
       "card_specificity_exempt": false,
+      "column": 4,
+      "file": "quorune/compiler/counter_placement_templates.py",
+      "in_condition": false,
+      "line": 535,
+      "matched_printed_name": "Artifacts",
+      "symbol": null,
+      "value": "artifacts"
+    },
+    {
+      "card_specificity_exempt": false,
+      "column": 4,
+      "file": "quorune/compiler/counter_placement_templates.py",
+      "in_condition": false,
+      "line": 543,
+      "matched_printed_name": "Lands",
+      "symbol": null,
+      "value": "lands"
+    },
+    {
+      "card_specificity_exempt": false,
       "column": 15,
       "file": "quorune/compiler/counter_placement_templates.py",
       "in_condition": false,
-      "line": 449,
+      "line": 611,
       "matched_printed_name": "Lifelink",
       "symbol": null,
       "value": "lifelink"
@@ -951,7 +971,7 @@
       "column": 48,
       "file": "quorune/compiler/counter_placement_templates.py",
       "in_condition": false,
-      "line": 449,
+      "line": 611,
       "matched_printed_name": "Vigilance",
       "symbol": null,
       "value": "vigilance"
@@ -971,7 +991,7 @@
       "column": 18,
       "file": "quorune/compiler/program_generation.py",
       "in_condition": false,
-      "line": 33,
+      "line": 34,
       "matched_printed_name": "Exile",
       "symbol": null,
       "value": "exile"
@@ -5411,7 +5431,7 @@
       "column": 4,
       "file": "quorune/rules/capabilities.py",
       "in_condition": false,
-      "line": 185,
+      "line": 186,
       "matched_printed_name": "Status",
       "symbol": null,
       "value": "status"
@@ -5421,7 +5441,7 @@
       "column": 29,
       "file": "quorune/rules/capabilities.py",
       "in_condition": false,
-      "line": 422,
+      "line": 423,
       "matched_printed_name": "Status",
       "symbol": "_validate_capability",
       "value": "status"
@@ -5431,7 +5451,7 @@
       "column": 19,
       "file": "quorune/rules/capabilities.py",
       "in_condition": true,
-      "line": 648,
+      "line": 649,
       "matched_printed_name": "Status",
       "symbol": "visit",
       "value": "status"
@@ -5441,7 +5461,7 @@
       "column": 59,
       "file": "quorune/rules/capabilities.py",
       "in_condition": false,
-      "line": 649,
+      "line": 650,
       "matched_printed_name": "Status",
       "symbol": "visit",
       "value": "status"
@@ -5451,7 +5471,7 @@
       "column": 20,
       "file": "quorune/rules/capabilities.py",
       "in_condition": false,
-      "line": 667,
+      "line": 668,
       "matched_printed_name": "Status",
       "symbol": "closure",
       "value": "status"
@@ -5461,7 +5481,7 @@
       "column": 64,
       "file": "quorune/rules/capabilities.py",
       "in_condition": false,
-      "line": 667,
+      "line": 668,
       "matched_printed_name": "Status",
       "symbol": "closure",
       "value": "status"
@@ -5621,7 +5641,7 @@
       "column": 18,
       "file": "quorune/rules/node_capability_shapes.py",
       "in_condition": false,
-      "line": 23,
+      "line": 24,
       "matched_printed_name": "Exile",
       "symbol": null,
       "value": "exile"
@@ -5831,7 +5851,7 @@
       "column": 16,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 194,
+      "line": 217,
       "matched_printed_name": "Reason",
       "symbol": "set_card_designation_intent",
       "value": "reason"
@@ -5841,7 +5861,7 @@
       "column": 58,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 343,
+      "line": 366,
       "matched_printed_name": "Library",
       "symbol": "choose_one_rest_bottom_random_intent",
       "value": "library"
@@ -5851,7 +5871,7 @@
       "column": 23,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 348,
+      "line": 371,
       "matched_printed_name": "Library",
       "symbol": "choose_one_rest_bottom_random_intent",
       "value": "library"
@@ -5861,7 +5881,7 @@
       "column": 16,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 417,
+      "line": 440,
       "matched_printed_name": "Library",
       "symbol": "return_cards_to_library_top_intent",
       "value": "library"
@@ -5871,7 +5891,7 @@
       "column": 16,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 459,
+      "line": 482,
       "matched_printed_name": "Reason",
       "symbol": "apply_life_change_intent",
       "value": "reason"
@@ -5881,7 +5901,7 @@
       "column": 16,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 480,
+      "line": 503,
       "matched_printed_name": "Reason",
       "symbol": "pay_life_intent",
       "value": "reason"
@@ -5891,7 +5911,7 @@
       "column": 58,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 493,
+      "line": 516,
       "matched_printed_name": "Library",
       "symbol": "reveal_library_cards_intent",
       "value": "library"
@@ -5901,7 +5921,7 @@
       "column": 23,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 506,
+      "line": 529,
       "matched_printed_name": "Library",
       "symbol": "reveal_library_cards_intent",
       "value": "library"
@@ -5911,7 +5931,7 @@
       "column": 58,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 538,
+      "line": 561,
       "matched_printed_name": "Library",
       "symbol": "move_library_cards_to_bottom_intent",
       "value": "library"
@@ -5921,7 +5941,7 @@
       "column": 23,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 544,
+      "line": 567,
       "matched_printed_name": "Library",
       "symbol": "move_library_cards_to_bottom_intent",
       "value": "library"
@@ -5931,7 +5951,7 @@
       "column": 23,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 577,
+      "line": 600,
       "matched_printed_name": "Library",
       "symbol": "reorder_library_top_intent",
       "value": "library"
@@ -5941,7 +5961,7 @@
       "column": 58,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 581,
+      "line": 604,
       "matched_printed_name": "Library",
       "symbol": "reorder_library_top_intent",
       "value": "library"
@@ -5951,7 +5971,7 @@
       "column": 24,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 811,
+      "line": 859,
       "matched_printed_name": "Sacrifice",
       "symbol": "create_token_intent",
       "value": "Sacrifice "
@@ -5961,7 +5981,7 @@
       "column": 31,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 815,
+      "line": 863,
       "matched_printed_name": "Sacrifice",
       "symbol": "create_token_intent",
       "value": "Sacrifice "
@@ -5971,7 +5991,7 @@
       "column": 16,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 927,
+      "line": 975,
       "matched_printed_name": "Reason",
       "symbol": "add_subtype_intent",
       "value": "reason"
@@ -5981,7 +6001,7 @@
       "column": 16,
       "file": "quorune/semantic_choices/intent_host.py",
       "in_condition": false,
-      "line": 1070,
+      "line": 1118,
       "matched_printed_name": "Reason",
       "symbol": "_apply_amass",
       "value": "reason"
@@ -6261,7 +6281,7 @@
       "column": 8,
       "file": "quorune/semantic_runtime/executor.py",
       "in_condition": false,
-      "line": 218,
+      "line": 224,
       "matched_printed_name": "Reason",
       "symbol": "draw_intent_effect",
       "value": "reason"
@@ -6291,7 +6311,7 @@
       "column": 4,
       "file": "quorune/semantics.py",
       "in_condition": false,
-      "line": 81,
+      "line": 82,
       "matched_printed_name": "Explore",
       "symbol": null,
       "value": "explore"
@@ -6301,7 +6321,7 @@
       "column": 4,
       "file": "quorune/semantics.py",
       "in_condition": false,
-      "line": 82,
+      "line": 83,
       "matched_printed_name": "Fabricate",
       "symbol": null,
       "value": "fabricate"
@@ -6311,7 +6331,7 @@
       "column": 4,
       "file": "quorune/semantics.py",
       "in_condition": false,
-      "line": 84,
+      "line": 85,
       "matched_printed_name": "Exile",
       "symbol": null,
       "value": "exile"
@@ -6321,7 +6341,7 @@
       "column": 4,
       "file": "quorune/semantics.py",
       "in_condition": false,
-      "line": 92,
+      "line": 93,
       "matched_printed_name": "Life",
       "symbol": null,
       "value": "life"
@@ -6331,7 +6351,7 @@
       "column": 4,
       "file": "quorune/semantics.py",
       "in_condition": false,
-      "line": 116,
+      "line": 117,
       "matched_printed_name": "Sacrifice",
       "symbol": null,
       "value": "sacrifice"
@@ -6341,7 +6361,7 @@
       "column": 4,
       "file": "quorune/semantics.py",
       "in_condition": false,
-      "line": 130,
+      "line": 131,
       "matched_printed_name": "Reanimate",
       "symbol": null,
       "value": "reanimate"
@@ -6999,7 +7019,7 @@
   ],
   "generator": "scripts/update_architecture_audit.py --write --card-db <path>",
   "limitations": "Exact full printed-name literals only. Card-named helpers and semantic operations are separately reviewed in architecture-audit-source.json.",
-  "review_adr": "docs/adr/0036-typed-fixed-affected-set-counter-placement.md",
+  "review_adr": "docs/adr/0037-typed-fixed-target-set-counter-placement.md",
   "schema_version": 1,
   "scope": [
     "quorune/__init__.py",
@@ -7097,6 +7117,7 @@
     "quorune/continuous_effects.py",
     "quorune/counter_placement.py",
     "quorune/counter_placement_sets.py",
+    "quorune/counter_placement_targets.py",
     "quorune/counter_removal.py",
     "quorune/counter_state.py",
     "quorune/cycling_abilities.py",

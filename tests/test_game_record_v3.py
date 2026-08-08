@@ -148,7 +148,7 @@ class GameRecordV3Tests(unittest.TestCase):
             semantic_inventory = manifest["runtime_trust"][
                 "semantic_handler_inventory"
             ]
-            self.assertEqual(91, len(semantic_inventory))
+            self.assertEqual(92, len(semantic_inventory))
             self.assertTrue(
                 {
                     "effect.zone-attachment.reanimate_attached_creature_aura.v1",

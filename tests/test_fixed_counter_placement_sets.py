@@ -327,7 +327,6 @@ class FixedCounterPlacementSetCompilerTests(unittest.TestCase):
         texts = (
             "You may put a +1/+1 counter on each creature you control.",
             "Put X +1/+1 counters on each creature you control.",
-            "Put a +1/+1 counter on each of up to two target creatures.",
             "Put a +1/+1 counter on each creature you control with a +1/+1 counter on it.",
             "Put a +1/+1 counter on each modified creature you control.",
             "Put a +1/+1 counter on each attacking creature.",
