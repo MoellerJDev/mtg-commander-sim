@@ -117,6 +117,9 @@ class SupportCounterPlacementCompilerTests(unittest.TestCase):
                         "counter": "+1/+1",
                         "amount": 1,
                         "source": "$source",
+                        "support_source_context": (
+                            "permanent" if excludes_source else "spell"
+                        ),
                     },
                     node.effects[0],
                 )
@@ -147,7 +150,15 @@ class SupportCounterPlacementCompilerTests(unittest.TestCase):
         self.assertTrue(permanent.target_schema["source_exclusion"])
         self.assertNotIn("source_exclusion", spell.target_schema)
         self.assertNotEqual(permanent.template_id, spell.template_id)
-        self.assertEqual(permanent.effects, spell.effects)
+        self.assertEqual(
+            "permanent",
+            permanent.effects[0]["support_source_context"],
+        )
+        self.assertEqual(
+            "spell",
+            spell.effects[0]["support_source_context"],
+        )
+        self.assertNotEqual(permanent.effects, spell.effects)
 
     def test_support_shape_mutations_fail_closed(self):
         template = support_counter_placement_effect_template(
@@ -167,6 +178,12 @@ class SupportCounterPlacementCompilerTests(unittest.TestCase):
             {**template.effects[0], "amount": 2},
             {**template.effects[0], "counter": "charge"},
             {**template.effects[0], "maximum_targets": True},
+            {**template.effects[0], "support_source_context": "spell"},
+            {
+                key: value
+                for key, value in template.effects[0].items()
+                if key != "support_source_context"
+            },
             {**template.effects[0], "unknown": True},
         ):
             with self.subTest(effect=effect):
@@ -178,6 +195,11 @@ class SupportCounterPlacementCompilerTests(unittest.TestCase):
                     )
                 )
         for schema in (
+            {
+                key: value
+                for key, value in template.target_schema.items()
+                if key != "source_exclusion"
+            },
             {**template.target_schema, "source_exclusion": False},
             {**template.target_schema, "types_any": ["artifact"]},
             {**template.target_schema, "controller_relation": "you"},
