@@ -281,7 +281,7 @@
       "exception_id": "ARCH-EXC-0014",
       "adr": "docs/adr/0033-typed-fixed-counter-placement.md",
       "artifact": "platform/architecture-guard-baseline.json",
-      "allowance_fingerprint": "PENDING_REVIEWED_BASELINE_REFRESH",
+      "allowance_fingerprint": "1da65937fe113ca058a05628f462e143f6959eee16e5ccefa465987bbcb13ef4",
       "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after typed fixed counter-placement extraction.",
       "rationale": "The fixed counter-placement family adds one closed universal semantic operation while keeping CommanderEngine, direct GameState writes, oversized symbols, Oracle-ID literals, and printed-name specificity flat. Its strict read-only handler emits PlaceCountersIntent and leaves replacement ordering, suspension, rollback, replay, and mutation with the existing canonical counter transaction.",
       "owner": "rules architecture maintainers",
