@@ -16,8 +16,8 @@
     {
       "mechanic_id": "cr-122-counters",
       "path": "mechanics/contracts/basic-counters.json",
-      "sha256": "14a3582a371ba2d7f1ca575590844ff8270c5302a9b7aa55859af64f67eb0386",
-      "version": 2
+      "sha256": "b86bfec80bed34972b4ac248a98aad58ff3b1797c929be2875045a23c4647c50",
+      "version": 3
     },
     {
       "mechanic_id": "cr-111-tokens",
@@ -6224,16 +6224,16 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/basic-counters.json",
-      "contract_sha256": "14a3582a371ba2d7f1ca575590844ff8270c5302a9b7aa55859af64f67eb0386",
-      "contract_version": 2,
+      "contract_sha256": "b86bfec80bed34972b4ac248a98aad58ff3b1797c929be2875045a23c4647c50",
+      "contract_version": 3,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "counter_placement mutation owner plus semantic_runtime.counter_replacements and represented semantic producers",
-      "implementation_version": "counter-placement-transaction-v2",
+      "implementation_component": "closed fixed-counter and Proliferate compilers, strict semantic and choice handlers, counter_placement mutation owner, semantic_runtime.counter_replacements, and represented semantic producers",
+      "implementation_version": "counter-placement-transaction-v3",
       "kind": "rules_section",
       "known_blockers": [
-        "variable and distributed counter instructions remain residual",
-        "explore, cumulative upkeep, fabricate, proliferate, intrinsic entry counters, loyalty costs, rule actions, and player counters are not yet migrated to the shared transaction",
+        "optional, variable, distributed, multi-counter, fixed player-counter, and set-based counter instructions remain residual",
+        "cumulative upkeep, intrinsic entry counters, loyalty costs, and rule actions are not yet migrated to the shared transaction",
         "fractional, halving, dynamic-quantity, movement, removal, prevention, and full enters-with-counter replacement families remain unsupported",
         "counter type rules beyond existing power/toughness and loyalty consumers are incomplete"
       ],
@@ -6253,7 +6253,18 @@
         "test_counter_replacement_choice_is_seat_scoped",
         "test_counter_replacement_choice_replays_exactly",
         "test_counter_replacement_property_1000_deterministic_transitions",
-        "test_counter_quantity_replacement_mutant_is_killed"
+        "test_counter_quantity_replacement_mutant_is_killed",
+        "test_spell_trigger_and_activated_contexts_share_fixed_counter_lowering",
+        "test_closed_subject_grammar_uses_typed_types_subtypes_and_relations",
+        "test_fixed_counter_template_property_is_deterministic_for_exact_counts",
+        "test_unsupported_fixed_counter_variants_remain_material_residuals",
+        "test_fixed_counter_shape_and_dependency_mutants_fail_closed",
+        "test_typed_fixed_counter_handler_places_counters_without_domain_dispatch",
+        "test_typed_fixed_counter_handler_rejects_malformed_effects",
+        "test_stale_fixed_counter_target_fails_before_mutation",
+        "test_fixed_counter_result_does_not_require_source_to_remain",
+        "test_fixed_counter_effect_suspends_for_quantity_replacement",
+        "test_four_player_fixed_counter_replacement_choice_is_seat_scoped"
       ],
       "trust_level": "untrusted"
     },

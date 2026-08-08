@@ -10,7 +10,7 @@ import unittest
 from quorune.errors import GameRuleError
 from quorune.carddb import CardRecord
 from quorune.model import CardInstance, StackItem
-from quorune.oracle_ir import generated_programs
+from quorune.oracle_ir import ORACLE_COMPILER_VERSION, generated_programs
 from quorune.projection import StateProjector
 from quorune.record import (
     authoritative_state_hash,
@@ -301,7 +301,10 @@ class ProliferateEngineTests(unittest.TestCase):
 
         self.assertTrue(result.ok, result.summary)
         self.assertEqual(2, target.counters["charge"])
-        self.assertEqual("oracle-ir-v48", generated.provenance["authored_by"])
+        self.assertEqual(
+            ORACLE_COMPILER_VERSION,
+            generated.provenance["authored_by"],
+        )
 
     def test_proliferate_empty_choice_resolves_without_counter_mutation(self):
         session = self.session(7013406)
