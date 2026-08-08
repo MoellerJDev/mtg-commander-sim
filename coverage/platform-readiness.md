@@ -2,7 +2,7 @@
 title: "Platform readiness"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "c90b925e5aedbd0555deb94b8f1279730b0b03f85952588c05c79983e12f15ce"
+verified: "d0c3cb450235a38fb0ef4d0a681488ea82f1d75b3ece9269bde5678cf6927b76"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 generated_source: "coverage/platform-readiness.json"
@@ -11,7 +11,7 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_platform_status.p
 
 # Platform readiness
 
-Source fingerprint: `c90b925e5aedbd0555deb94b8f1279730b0b03f85952588c05c79983e12f15ce`
+Source fingerprint: `d0c3cb450235a38fb0ef4d0a681488ea82f1d75b3ece9269bde5678cf6927b76`
 
 ## Current top-level state
 
@@ -28,7 +28,7 @@ Source fingerprint: `c90b925e5aedbd0555deb94b8f1279730b0b03f85952588c05c79983e12
 
 ## Top blockers
 
-- mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain residual, while explore, fabricate, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration through the resumable counter-placement owner, so aggregate CR 614.16 is not trusted
+- mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate now lowers to a capability-closed enters trigger whose counter result suspends and resumes through the replacement-aware counter owner; optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain residual, while explore, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration, so aggregate CR 614.16 and CR 702.123 remain blocked
 - fixed simultaneous affected-set damage now snapshots represented public player and permanent groups through the canonical effective-characteristic query and commits one APNAP-ordered, logical-identity-deduplicated damage batch; divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, linked life/draw/scry/conditional riders, and broader source-LKI producers remain explicit blockers, so aggregate mass-damage coverage is not trusted
 - mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted
 - ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked
