@@ -135,6 +135,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "quorune/cast_timing.py",
         "quorune/continuous_effects.py",
         "quorune/counter_placement.py",
+        "quorune/counter_placement_sets.py",
         "quorune/counter_removal.py",
         "quorune/counter_state.py",
         "quorune/damage.py",
@@ -303,6 +304,7 @@ def _owner(relative: str, layer: str) -> str:
         return "state_change_planning"
     if relative in {
         "quorune/counter_placement.py",
+        "quorune/counter_placement_sets.py",
         "quorune/entry_counter_coordination.py",
         "quorune/entry_counters.py",
         "quorune/entry_counter_model.py",
@@ -429,6 +431,7 @@ def build_classifications() -> dict[str, Any]:
                             "card_overrides/",
                             "effect_contracts.py",
                             "counter_placement.py",
+                            "counter_placement_sets.py",
                             "counter_removal.py",
                             "counter_state.py",
                             "entry_counter",

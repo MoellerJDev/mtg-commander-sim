@@ -70,7 +70,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v50"
+ORACLE_COMPILER_VERSION = "oracle-ir-v51"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(

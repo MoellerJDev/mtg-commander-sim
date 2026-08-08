@@ -12,6 +12,7 @@ from ..replacement_effects import (
 from ..semantic_runtime import (
     IntentPlan,
     PlaceCountersIntent,
+    PlaceCountersOnSetIntent,
     PlacePlayerCountersIntent,
     ProliferateIntent,
     ZoneMoveIntent,
@@ -115,7 +116,12 @@ def _issue_semantic_intent_replacement_choice(
     continuation: SemanticChoiceContinuation,
     actor: str,
     response: Mapping[str, Any],
-    intent: PlacePlayerCountersIntent | ProliferateIntent | ZoneMoveIntent,
+    intent: (
+        PlaceCountersOnSetIntent
+        | PlacePlayerCountersIntent
+        | ProliferateIntent
+        | ZoneMoveIntent
+    ),
     intent_index: int,
     required: ReplacementChoiceRequired,
 ) -> None:
@@ -230,7 +236,12 @@ def continue_semantic_completion(
                 )
             elif isinstance(
                 intent,
-                (PlacePlayerCountersIntent, ProliferateIntent, ZoneMoveIntent),
+                (
+                    PlaceCountersOnSetIntent,
+                    PlacePlayerCountersIntent,
+                    ProliferateIntent,
+                    ZoneMoveIntent,
+                ),
             ):
                 _issue_semantic_intent_replacement_choice(
                     host,

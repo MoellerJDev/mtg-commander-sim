@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence
 
+from ..compiler.counter_placement_templates import (
+    fixed_counter_set_spec_is_closed,
+)
 from ..compiler.creature_subtypes import canonical_creature_subtype
 from ..affected_permanents import (
     AffectedPermanentSetError,
@@ -744,6 +747,63 @@ def fixed_counter_placement_node_capabilities(
     return ()
 
 
+def fixed_counter_placement_set_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for one closed affected-set placement."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if "cr-122-counters" not in mechanics or len(effects) != 1:
+        return ()
+    effect = effects[0]
+    if (
+        set(effect) != {"op", "source", "set", "counter", "amount"}
+        or effect.get("op") != "place_counters_on_set"
+        or effect.get("source") != "$source"
+        or type(effect.get("counter")) is not str
+        or not str(effect.get("counter") or "").strip()
+        or type(effect.get("amount")) is not int
+        or effect.get("amount", 0) <= 0
+    ):
+        return ()
+    try:
+        spec = AffectedPermanentSetSpec.from_dict(effect.get("set"))
+    except (AffectedPermanentSetError, TypeError):
+        return ()
+    if not fixed_counter_set_spec_is_closed(spec):
+        return ()
+    if spec.controller_relation is AffectedControllerRelation.TARGET_PLAYER:
+        if (
+            "cr-115-targets" not in mechanics
+            or dict(target_schema or {})
+            not in {
+                "any": {
+                    "zones": ["player"],
+                    "categories": ["player"],
+                    "count": 1,
+                    "player_relation": "any",
+                },
+                "opponent": {
+                    "zones": ["player"],
+                    "categories": ["player"],
+                    "count": 1,
+                    "player_relation": "opponent",
+                },
+            }.values()
+        ):
+            return ()
+        return (
+            "counter.producer.fixed_permanent_set_effect",
+            "target.revalidate_resolution",
+        )
+    if target_schema is not None:
+        return ()
+    return ("counter.producer.fixed_permanent_set_effect",)
+
+
 def fixed_player_counter_placement_node_capabilities(
     *,
     effects: Sequence[Mapping[str, Any]],
@@ -809,6 +869,7 @@ __all__ = [
     "mass_destruction_node_capabilities",
     "fixed_draw_node_capabilities",
     "fixed_counter_placement_node_capabilities",
+    "fixed_counter_placement_set_node_capabilities",
     "fixed_player_counter_placement_node_capabilities",
     "single_explore_node_capabilities",
     "single_proliferate_node_capabilities",

@@ -7,6 +7,11 @@ from enum import Enum
 import re
 from typing import Any, Mapping
 
+from ..affected_permanents import (
+    AffectedPermanentSetSpec,
+    PermanentControllerRelation,
+)
+from ..object_predicate import ObjectQuerySpec
 from .creature_subtypes import canonical_creature_subtype
 from .fixed_numbers import fixed_number
 
@@ -247,6 +252,93 @@ class FixedPlayerCounterPlacementTemplate:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class FixedCounterPlacementSetTemplate:
+    """One mandatory fixed placement on one closed battlefield set."""
+
+    count: int
+    counter_name: str
+    spec: AffectedPermanentSetSpec
+    target_relation: str | None = None
+
+    def __post_init__(self) -> None:
+        if type(self.count) is not int or self.count <= 0:
+            raise ValueError("Counter-set placement count must be positive")
+        if type(self.counter_name) is not str:
+            raise ValueError("Counter-set placement name must be nonempty")
+        normalized = " ".join(self.counter_name.casefold().split())
+        if not normalized:
+            raise ValueError("Counter-set placement name must be nonempty")
+        object.__setattr__(self, "counter_name", normalized)
+        if not isinstance(self.spec, AffectedPermanentSetSpec):
+            raise ValueError("Counter-set placement requires a typed set")
+        if not fixed_counter_set_spec_is_closed(self.spec):
+            raise ValueError("Counter-set placement predicate is unsupported")
+        if self.target_relation not in {None, "any", "opponent"}:
+            raise ValueError("Counter-set player target relation is unsupported")
+        needs_target = (
+            self.spec.controller_relation
+            is PermanentControllerRelation.TARGET_PLAYER
+        )
+        if needs_target is not (self.target_relation is not None):
+            raise ValueError(
+                "Counter-set target relation contradicts its affected set"
+            )
+
+    @property
+    def template_id(self) -> str:
+        return (
+            f"place-fixed-counter-set-{self.spec.fingerprint[:16]}-"
+            f"{self.target_relation or 'untargeted'}-v1"
+        )
+
+    @property
+    def effects(self) -> tuple[Mapping[str, Any], ...]:
+        return (
+            {
+                "op": "place_counters_on_set",
+                "source": "$source",
+                "set": self.spec.to_dict(),
+                "counter": self.counter_name,
+                "amount": self.count,
+            },
+        )
+
+    @property
+    def target_schema(self) -> Mapping[str, Any] | None:
+        if self.target_relation is None:
+            return None
+        return {
+            "zones": ["player"],
+            "categories": ["player"],
+            "count": 1,
+            "player_relation": self.target_relation,
+        }
+
+    @property
+    def mechanics(self) -> tuple[str, ...]:
+        return (
+            ("cr-122-counters", "cr-115-targets")
+            if self.target_relation is not None
+            else ("cr-122-counters",)
+        )
+
+    def compiled(
+        self,
+    ) -> tuple[
+        str,
+        tuple[Mapping[str, Any], ...],
+        Mapping[str, Any] | None,
+        tuple[str, ...],
+    ]:
+        return (
+            self.template_id,
+            self.effects,
+            self.target_schema,
+            self.mechanics,
+        )
+
+
 def _target_subject(subject: str) -> tuple[str | None, str | None, str, bool] | None:
     match = re.fullmatch(
         r"(?P<another>another )?target (?P<kind>artifact|battle|creature|"
@@ -343,6 +435,273 @@ def fixed_counter_placement_effect_template(
         creature_subtype=creature_subtype,
         controller_relation=relation,
         exclude_source=exclude_source,
+    )
+
+
+_SET_COLOR_WORDS = {
+    "white": "W",
+    "blue": "U",
+    "black": "B",
+    "red": "R",
+    "green": "G",
+}
+FIXED_COUNTER_SET_KEYWORDS = frozenset(
+    {"flying", "lifelink", "menace", "trample", "vigilance"}
+)
+_FIXED_COUNTER_SET_TYPE_SHAPES = frozenset(
+    {
+        (),
+        ("artifact",),
+        ("battle",),
+        ("creature",),
+        ("enchantment",),
+        ("land",),
+        ("planeswalker",),
+        ("artifact", "creature"),
+        ("creature", "land"),
+    }
+)
+_SET_NONCREATURE_SUBTYPES = {
+    "equipment": "equipment",
+    "saga": "saga",
+}
+
+
+def fixed_counter_set_spec_is_closed(
+    spec: AffectedPermanentSetSpec,
+) -> bool:
+    """Return whether a set uses only the reviewed compiler grammar."""
+
+    if not isinstance(spec, AffectedPermanentSetSpec):
+        return False
+    query = spec.query
+    type_shape = tuple(query.types_all)
+    if type_shape not in _FIXED_COUNTER_SET_TYPE_SHAPES:
+        return False
+    if query.types_any or query.excluded_types or query.colors_all:
+        return False
+    subtypes = tuple(query.subtypes_all)
+    if len(subtypes) > 1:
+        return False
+    if subtypes:
+        subtype = subtypes[0]
+        creature_subtype = canonical_creature_subtype(subtype)
+        if creature_subtype is not None:
+            if type_shape not in {(), ("creature",)}:
+                return False
+        elif subtype not in {"equipment", "saga"} or type_shape:
+            return False
+    if tuple(query.supertypes_all) not in {(), ("legendary",)}:
+        return False
+    if query.supertypes_all and type_shape not in {
+        ("creature",),
+        ("planeswalker",),
+    }:
+        return False
+    if len(query.colors_any) > 1 or not set(query.colors_any).issubset(
+        {"W", "U", "B", "R", "G"}
+    ):
+        return False
+    if query.colors_any and type_shape not in {
+        ("creature",),
+        ("planeswalker",),
+    }:
+        return False
+    if len(query.keywords_all) > 1 or not set(query.keywords_all).issubset(
+        FIXED_COUNTER_SET_KEYWORDS
+    ):
+        return False
+    if query.keywords_all and type_shape != ("creature",):
+        return False
+    if (query.token is not None or query.tapped is not None) and (
+        type_shape != ("creature",)
+    ):
+        return False
+    qualifier_count = sum(
+        (
+            bool(query.supertypes_all),
+            bool(query.colors_any),
+            bool(query.keywords_all),
+            query.token is not None,
+            query.tapped is not None,
+        )
+    )
+    return qualifier_count <= 1
+
+
+def _fixed_counter_set_query(
+    subject: str,
+) -> tuple[AffectedPermanentSetSpec, str | None] | None:
+    phrase = " ".join(subject.casefold().split())
+    if not phrase.startswith("each "):
+        return None
+    phrase = phrase[5:]
+
+    keyword: str | None = None
+    keyword_match = re.fullmatch(
+        r"(?P<body>.+) with (?P<keyword>"
+        + "|".join(sorted(FIXED_COUNTER_SET_KEYWORDS))
+        + r")",
+        phrase,
+    )
+    if keyword_match is not None:
+        phrase = keyword_match.group("body")
+        keyword = keyword_match.group("keyword")
+
+    relation = PermanentControllerRelation.ANY
+    target_controller: str | None = None
+    target_relation: str | None = None
+    controller_suffixes = (
+        (
+            " target opponent controls",
+            PermanentControllerRelation.TARGET_PLAYER,
+            "$target.0",
+            "opponent",
+        ),
+        (
+            " target player controls",
+            PermanentControllerRelation.TARGET_PLAYER,
+            "$target.0",
+            "any",
+        ),
+        (
+            " each opponent controls",
+            PermanentControllerRelation.OPPONENTS,
+            None,
+            None,
+        ),
+        (
+            " your opponents control",
+            PermanentControllerRelation.OPPONENTS,
+            None,
+            None,
+        ),
+        (
+            " opponents control",
+            PermanentControllerRelation.OPPONENTS,
+            None,
+            None,
+        ),
+        (
+            " you don't control",
+            PermanentControllerRelation.OPPONENTS,
+            None,
+            None,
+        ),
+        (
+            " you control",
+            PermanentControllerRelation.ACTOR,
+            None,
+            None,
+        ),
+    )
+    for suffix, candidate, target, target_kind in controller_suffixes:
+        if phrase.endswith(suffix):
+            phrase = phrase[: -len(suffix)]
+            relation = candidate
+            target_controller = target
+            target_relation = target_kind
+            break
+
+    exclude_source = phrase.startswith("other ")
+    if exclude_source:
+        phrase = phrase[6:]
+    kwargs: dict[str, Any] = {"zones": ("battlefield",)}
+
+    exact_types: dict[str, tuple[str, ...]] = {
+        "permanent": (),
+        "artifact": ("artifact",),
+        "battle": ("battle",),
+        "creature": ("creature",),
+        "enchantment": ("enchantment",),
+        "land": ("land",),
+        "planeswalker": ("planeswalker",),
+        "artifact creature": ("artifact", "creature"),
+        "land creature": ("creature", "land"),
+    }
+    if phrase in exact_types:
+        kwargs["types_all"] = exact_types[phrase]
+    elif phrase in {"token creature", "creature token"}:
+        kwargs["types_all"] = ("creature",)
+        kwargs["token"] = True
+    elif phrase == "nontoken creature":
+        kwargs["types_all"] = ("creature",)
+        kwargs["token"] = False
+    else:
+        quality = re.fullmatch(
+            r"(?P<quality>legendary|tapped|untapped|white|blue|black|red|green) "
+            r"(?P<kind>creature|planeswalker)",
+            phrase,
+        )
+        if quality is not None:
+            kwargs["types_all"] = (quality.group("kind"),)
+            value = quality.group("quality")
+            if value == "legendary":
+                kwargs["supertypes_all"] = ("legendary",)
+            elif value in {"tapped", "untapped"}:
+                kwargs["tapped"] = value == "tapped"
+            else:
+                kwargs["colors_any"] = (_SET_COLOR_WORDS[value],)
+        elif phrase in _SET_NONCREATURE_SUBTYPES:
+            kwargs["subtypes_all"] = (_SET_NONCREATURE_SUBTYPES[phrase],)
+        else:
+            creature_match = re.fullmatch(
+                r"(?P<subtype>[a-z][a-z' -]*?)(?P<creature> creature)?",
+                phrase,
+            )
+            if creature_match is None:
+                return None
+            subtype = canonical_creature_subtype(
+                creature_match.group("subtype")
+            )
+            if subtype is None:
+                return None
+            kwargs["subtypes_all"] = (subtype,)
+            if creature_match.group("creature"):
+                kwargs["types_all"] = ("creature",)
+
+    if keyword is not None:
+        if keyword not in FIXED_COUNTER_SET_KEYWORDS or kwargs.get("types_all") != (
+            "creature",
+        ):
+            return None
+        kwargs["keywords_all"] = (keyword,)
+    try:
+        return (
+            AffectedPermanentSetSpec(
+                query=ObjectQuerySpec(**kwargs),
+                controller_relation=relation,
+                target_controller=target_controller,
+                exclude_source=exclude_source,
+            ),
+            target_relation,
+        )
+    except ValueError:
+        return None
+
+
+def fixed_counter_placement_set_effect_template(
+    text: str,
+) -> FixedCounterPlacementSetTemplate | None:
+    """Parse one mandatory fixed placement on a closed permanent set."""
+
+    match = _PLACEMENT.fullmatch(text.strip())
+    if match is None:
+        return None
+    count = fixed_number(match.group("count"))
+    if count <= 0 or (match.group("plural").casefold() == "counter") != (
+        count == 1
+    ):
+        return None
+    parsed = _fixed_counter_set_query(match.group("subject"))
+    if parsed is None:
+        return None
+    spec, target_relation = parsed
+    return FixedCounterPlacementSetTemplate(
+        count=count,
+        counter_name=match.group("counter"),
+        spec=spec,
+        target_relation=target_relation,
     )
 
 
@@ -480,9 +839,13 @@ def fixed_player_counter_placement_effect_template(
 
 __all__ = [
     "CounterPlacementSubject",
+    "FIXED_COUNTER_SET_KEYWORDS",
     "FixedCounterPlacementTemplate",
+    "FixedCounterPlacementSetTemplate",
     "FixedPlayerCounterPlacementTemplate",
     "PlayerCounterPlacementSubject",
     "fixed_counter_placement_effect_template",
+    "fixed_counter_placement_set_effect_template",
+    "fixed_counter_set_spec_is_closed",
     "fixed_player_counter_placement_effect_template",
 ]

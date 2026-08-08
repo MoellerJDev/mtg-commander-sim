@@ -246,7 +246,6 @@ class FixedCounterPlacementCompilerTests(unittest.TestCase):
     def test_unsupported_fixed_counter_variants_remain_material_residuals(self):
         texts = (
             "Put up to one +1/+1 counter on target creature.",
-            "Put a +1/+1 counter on each creature you control.",
             "Put X charge counters on target artifact.",
             "Put a +1/+1 counter and a flying counter on target creature.",
             "Put a poison counter on target player.",

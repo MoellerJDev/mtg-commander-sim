@@ -3,9 +3,14 @@ from __future__ import annotations
 from dataclasses import replace
 from typing import Any, Mapping, Sequence
 
+from ..affected_permanents import (
+    AffectedPermanentSetError,
+    AffectedPermanentSetSpec,
+)
 from ..replacement.immutable import FrozenMap, thaw_value
 from ..semantic_runtime import (
     PlaceCountersIntent,
+    PlaceCountersOnSetIntent,
     PlacePlayerCountersIntent,
     ProliferateIntent,
     ProliferateSubject,
@@ -18,6 +23,14 @@ _REASON_FIELD = "rea" + "son"
 _COUNTER_INTENT_FIELDS = {
     "actor",
     "object_refs",
+    "counter_name",
+    "amount",
+    _REASON_FIELD,
+    "source_ref",
+}
+_COUNTER_SET_INTENT_FIELDS = {
+    "actor",
+    "spec",
     "counter_name",
     "amount",
     _REASON_FIELD,
@@ -125,6 +138,18 @@ def semantic_intent_identity(intent: Any) -> tuple[str, dict[str, Any]]:
 
     if isinstance(intent, PlaceCountersIntent):
         return "place_counters", counter_intent_identity(intent)
+    if isinstance(intent, PlaceCountersOnSetIntent):
+        return (
+            "place_counters_on_set",
+            {
+                "actor": intent.actor,
+                "spec": intent.spec.to_dict(),
+                "counter_name": intent.counter_name,
+                "amount": intent.amount,
+                _REASON_FIELD: intent.reason,
+                "source_ref": intent.source_ref,
+            },
+        )
     if isinstance(intent, PlacePlayerCountersIntent):
         return (
             "place_player_counters",
@@ -241,12 +266,66 @@ def _validate_player_counter_intent_identity(
     }
 
 
+def _validate_counter_set_intent_identity(
+    value: Mapping[str, Any],
+) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise SemanticChoiceError(
+            "Counter-set intent identity must be an object"
+        )
+    actual = set(value)
+    if actual != _COUNTER_SET_INTENT_FIELDS:
+        missing = sorted(_COUNTER_SET_INTENT_FIELDS - actual)
+        unknown = sorted(actual - _COUNTER_SET_INTENT_FIELDS)
+        details = [
+            *(f"missing {name}" for name in missing),
+            *(f"unknown {name}" for name in unknown),
+        ]
+        raise SemanticChoiceError(
+            "Counter-set intent identity fields: " + "; ".join(details)
+        )
+    try:
+        spec = AffectedPermanentSetSpec.from_dict(value["spec"])
+    except (AffectedPermanentSetError, TypeError) as exc:
+        raise SemanticChoiceError(
+            "Counter-set intent specification is malformed"
+        ) from exc
+    actor = value["actor"]
+    counter_name = value["counter_name"]
+    amount = value["amount"]
+    reason = value[_REASON_FIELD]
+    source = value["source_ref"]
+    if (
+        type(actor) is not str
+        or not actor
+        or type(counter_name) is not str
+        or not counter_name
+        or type(amount) is not int
+        or amount <= 0
+        or type(reason) is not str
+        or not reason
+        or (source is not None and (type(source) is not str or not source))
+        or (spec.exclude_source and source is None)
+    ):
+        raise SemanticChoiceError("Counter-set intent identity is malformed")
+    return {
+        "actor": actor,
+        "spec": spec.to_dict(),
+        "counter_name": counter_name,
+        "amount": amount,
+        _REASON_FIELD: reason,
+        "source_ref": source,
+    }
+
+
 def validate_semantic_intent_identity(
     kind: str,
     value: Mapping[str, Any],
 ) -> dict[str, Any]:
     if kind == "place_counters":
         return validate_counter_intent_identity(value)
+    if kind == "place_counters_on_set":
+        return _validate_counter_set_intent_identity(value)
     if kind == "place_player_counters":
         return _validate_player_counter_intent_identity(value)
     if kind == "proliferate":
@@ -396,6 +475,7 @@ def with_replacement_selections(
     selections: Sequence[str | FrozenMap | Mapping[str, Any]],
 ) -> (
     PlaceCountersIntent
+    | PlaceCountersOnSetIntent
     | PlacePlayerCountersIntent
     | ProliferateIntent
     | ZoneMoveIntent
@@ -404,6 +484,7 @@ def with_replacement_selections(
         intent,
         (
             PlaceCountersIntent,
+            PlaceCountersOnSetIntent,
             PlacePlayerCountersIntent,
             ProliferateIntent,
             ZoneMoveIntent,

@@ -10,6 +10,7 @@ from typing import Any, Iterable, Mapping, Sequence
 from .component_resolution import implementation_component_resolves
 from .node_capability_shapes import (
     fixed_counter_placement_node_capabilities,
+    fixed_counter_placement_set_node_capabilities,
     fixed_player_counter_placement_node_capabilities,
     fixed_damage_node_capabilities,
     mass_destruction_node_capabilities,
@@ -720,6 +721,7 @@ def _targeted_effect_capabilities(
     dependencies: set[str] = set()
     for resolver in (
         fixed_counter_placement_node_capabilities,
+        fixed_counter_placement_set_node_capabilities,
         fixed_player_counter_placement_node_capabilities,
         fixed_damage_node_capabilities,
         mass_destruction_node_capabilities,
@@ -929,6 +931,8 @@ def capability_covered_mechanics(
     if "counter.placement.quantity_replacement" in supplied:
         covered.add("cr-122-counters")
     if "counter.producer.fixed_effect" in supplied:
+        covered.add("cr-122-counters")
+    if "counter.producer.fixed_permanent_set_effect" in supplied:
         covered.add("cr-122-counters")
     if "counter.producer.fixed_player_effect" in supplied:
         covered.add("cr-122-counters")
