@@ -41,6 +41,17 @@ _MANA_FIELDS = {
     "replacement_batch",
     "replacement_effects",
 }
+_SEMANTIC_COUNTER_COMPLETION_FIELDS = {
+    "replacement_resume_kind",
+    "semantic_choice_continuation",
+    "semantic_choice_actor",
+    "semantic_choice_response",
+    "intent_index",
+    "counter_intent",
+    "replacement_selections",
+    "replacement_batch",
+    "replacement_effects",
+}
 _MANA_FRAME_FIELDS = {
     "active_player",
     "phase",
@@ -72,6 +83,11 @@ class ReplacementContinuation:
     priority_action: str = ""
     priority_response: FrozenMap | None = None
     priority_frame: FrozenMap | None = None
+    semantic_choice_continuation: FrozenMap | None = None
+    semantic_choice_actor: str = ""
+    semantic_choice_response: FrozenMap | None = None
+    intent_index: int = 0
+    counter_intent: FrozenMap | None = None
 
     @classmethod
     def from_dict(
@@ -87,6 +103,10 @@ class ReplacementContinuation:
             return _decode_combat_continuation(cls, value, batch, effects)
         if resume_kind == "mana_payment":
             return _decode_mana_continuation(cls, value, batch, effects)
+        if resume_kind == "semantic_counter_completion":
+            return _decode_semantic_counter_completion(
+                cls, value, batch, effects
+            )
         return _decode_semantic_continuation(cls, value, batch, effects)
 
     def thaw_combat_assignments(self) -> list[dict[str, Any]]:
@@ -123,6 +143,27 @@ class ReplacementContinuation:
             )
         return thaw_value(self.priority_frame)
 
+    def thaw_semantic_choice_continuation(self) -> dict[str, Any]:
+        if self.semantic_choice_continuation is None:
+            raise ReplacementEffectError(
+                "This continuation has no semantic-choice continuation"
+            )
+        return thaw_value(self.semantic_choice_continuation)
+
+    def thaw_semantic_choice_response(self) -> dict[str, Any]:
+        if self.semantic_choice_response is None:
+            raise ReplacementEffectError(
+                "This continuation has no semantic-choice response"
+            )
+        return thaw_value(self.semantic_choice_response)
+
+    def thaw_counter_intent(self) -> dict[str, Any]:
+        if self.counter_intent is None:
+            raise ReplacementEffectError(
+                "This continuation has no counter intent"
+            )
+        return thaw_value(self.counter_intent)
+
 
 def _validate_continuation_shape(value: Mapping[str, Any]) -> str:
     resume_kind = str(value.get("replacement_resume_kind") or "semantic")
@@ -130,6 +171,10 @@ def _validate_continuation_shape(value: Mapping[str, Any]) -> str:
         "combat_damage": (_COMBAT_FIELDS, "combat continuation"),
         "semantic": (_SEMANTIC_FIELDS, "semantic continuation"),
         "mana_payment": (_MANA_FIELDS, "mana-payment continuation"),
+        "semantic_counter_completion": (
+            _SEMANTIC_COUNTER_COMPLETION_FIELDS,
+            "semantic counter-completion continuation",
+        ),
     }
     shape = shapes.get(resume_kind)
     if shape is None:
@@ -326,6 +371,42 @@ def _decode_mana_continuation(
         priority_action=action,
         priority_response=FrozenMap(response),
         priority_frame=FrozenMap(frame),
+    )
+
+
+def _decode_semantic_counter_completion(
+    continuation_type: type[ReplacementContinuation],
+    value: Mapping[str, Any],
+    batch: ReplacementEventBatch,
+    effects: tuple[ReplacementEffect, ...],
+) -> ReplacementContinuation:
+    semantic = value["semantic_choice_continuation"]
+    actor = value["semantic_choice_actor"]
+    response = value["semantic_choice_response"]
+    counter_intent = value["counter_intent"]
+    intent_index = value["intent_index"]
+    if (
+        not isinstance(semantic, Mapping)
+        or not isinstance(actor, str)
+        or not actor
+        or not isinstance(response, Mapping)
+        or not isinstance(counter_intent, Mapping)
+        or type(intent_index) is not int
+        or intent_index < 0
+    ):
+        raise ReplacementEffectError(
+            "Semantic counter-completion continuation fields are malformed"
+        )
+    return continuation_type(
+        batch=batch,
+        effects=effects,
+        resume_kind="semantic_counter_completion",
+        semantic_choice_continuation=FrozenMap(semantic),
+        semantic_choice_actor=actor,
+        semantic_choice_response=FrozenMap(response),
+        intent_index=intent_index,
+        counter_intent=FrozenMap(counter_intent),
+        replacement_selections=_decode_combat_selections(value),
     )
 
 

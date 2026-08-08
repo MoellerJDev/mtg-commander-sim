@@ -435,6 +435,17 @@ class PlaceCountersIntent:
     amount: int
     reason: str
     source_ref: str | None = None
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                tuple(self.replacement_selections),
+                family="Counter placement",
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)

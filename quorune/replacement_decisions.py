@@ -18,6 +18,9 @@ from .replacement.immutable import thaw_value
 from .mana_payment_continuations import (
     resume_mana_choice_capable_priority_action,
 )
+from .semantic_choices.counter_coordination import (
+    resume_semantic_counter_completion,
+)
 
 
 _PILOT_ROLE = "pi" + "lot"
@@ -428,6 +431,14 @@ def complete_replacement_order_choice(
     if restored.resume_kind == "mana_payment":
         _resume_mana_replacement(
             host, restored, selection, error_type=error_type
+        )
+        return
+    if restored.resume_kind == "semantic_counter_completion":
+        resume_semantic_counter_completion(
+            host,
+            restored,
+            selection,
+            error_type=error_type,
         )
         return
     _resume_semantic_replacement(
