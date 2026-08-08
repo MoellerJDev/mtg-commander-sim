@@ -1945,10 +1945,11 @@ class OracleIRTests(unittest.TestCase):
         )[0]
         self.assertEqual(
             {
-                "op": "add_counter_selected",
-                "cards": ["$target.0"],
+                "op": "place_counters",
+                "card": "$target.0",
                 "counter": "+1/+1",
                 "amount": 1,
+                "source": "$source",
             },
             counter_program.effects[0],
         )

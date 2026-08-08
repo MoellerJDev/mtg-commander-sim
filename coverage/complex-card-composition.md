@@ -2,7 +2,7 @@
 title: "Complex card composition benchmark"
 status: "generated"
 authoritative_source: "coverage/complex-card-composition.json"
-verified: "874083be14629ace7aaf74091a5ba39b619a86e223726060864fce7079f903ed"
+verified: "12c1528c0652ffb88df2355fc20c932013608ff575f5a819797c3cd016fa0740"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -31,10 +31,10 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Invasion of Fiora // Marchesa, Resolute Monarch | 175 | 17 | 5 | 7 | 6 | 17 | `blocked` |
 | Ojer Axonil, Deepest Might // Temple of Power | 172 | 20 | 7 | 6 | 8 | 6 | `blocked` |
 | Conqueror's Galleon // Conqueror's Foothold | 171 | 20 | 5 | 7 | 7 | 14 | `blocked` |
-| Flamewar, Brash Veteran // Flamewar, Streetwise Operative | 171 | 20 | 5 | 6 | 8 | 15 | `blocked` |
 | Sorin of House Markov // Sorin, Ravenous Neonate | 170 | 18 | 3 | 7 | 10 | 19 | `blocked` |
 | Invasion of Kaldheim // Pyre of the World Tree | 168 | 16 | 5 | 4 | 5 | 22 | `blocked` |
 | Stay Hidden, Stay Silent | 168 | 15 | 6 | 4 | 5 | 17 | `blocked` |
+| Flamewar, Brash Veteran // Flamewar, Streetwise Operative | 166 | 19 | 5 | 6 | 7 | 15 | `blocked` |
 | Starscream, Power Hungry // Starscream, Seeker Leader | 165 | 17 | 4 | 8 | 4 | 19 | `blocked` |
 | Ojer Taq, Deepest Foundation // Temple of Civilization | 164 | 20 | 7 | 6 | 8 | 2 | `blocked` |
 | Gwen Stacy // Ghost-Spider | 163 | 21 | 5 | 5 | 7 | 13 | `blocked` |

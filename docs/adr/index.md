@@ -47,3 +47,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0030 — typed direct stack-counter ownership](0030-typed-stack-counter.md)
 - [ADR 0031 — typed fixed affected-set damage](0031-typed-fixed-damage-sets.md)
 - [ADR 0032 — durable certification receipts](0032-durable-certification-receipts.md)
+- [ADR 0033 — typed fixed counter-placement effects](0033-typed-fixed-counter-placement.md)

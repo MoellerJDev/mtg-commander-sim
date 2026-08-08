@@ -27,8 +27,21 @@ def validate_direct_target_effect(
     reference_field: str,
     family_label: str,
     allow_replacement_selections: bool,
+    additional_allowed_fields: tuple[str, ...] = (),
 ) -> DirectTargetFields:
-    allowed = {"op", reference_field, _REASON_FIELD}
+    if any(
+        type(field) is not str or not field
+        for field in additional_allowed_fields
+    ):
+        raise SemanticNodeError(
+            f"{family_label} additional fields must be nonempty strings"
+        )
+    allowed = {
+        "op",
+        reference_field,
+        _REASON_FIELD,
+        *additional_allowed_fields,
+    }
     if allow_replacement_selections:
         allowed.add("_replacement_selections")
     unknown = sorted(set(effect) - allowed)

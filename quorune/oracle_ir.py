@@ -70,7 +70,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v48"
+ORACLE_COMPILER_VERSION = "oracle-ir-v49"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
@@ -331,58 +331,6 @@ def _effect_template(
             ),
             None,
             ("cr-611-continuous-effects", keyword),
-        )
-    counter_pattern = (
-        r"(?P<counter>[+-]\d+/[+-]\d+|[A-Za-z][A-Za-z-]*)"
-    )
-    match = re.fullmatch(
-        rf"put (?:a|an|one) {counter_pattern} counter on this "
-        r"(?P<kind>artifact|creature|enchantment|permanent)\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        counter = match.group("counter")
-        return (
-            f"counter-self-{match.group('kind').casefold()}-v1",
-            (
-                {
-                    "op": "add_counter_selected",
-                    "cards": ["$source"],
-                    "counter": counter,
-                    "amount": 1,
-                },
-            ),
-            None,
-            ("cr-122-counters",),
-        )
-    match = re.fullmatch(
-        rf"put (?:a|an|one) {counter_pattern} counter on target "
-        r"(?P<kind>artifact|creature|enchantment|land|permanent)\.?",
-        normalized,
-        re.IGNORECASE,
-    )
-    if match:
-        kind = match.group("kind").casefold()
-        schema: dict[str, Any] = {
-            "zones": ["battlefield"],
-            "categories": ["permanent"],
-            "count": 1,
-        }
-        if kind != "permanent":
-            schema["types_any"] = [kind]
-        return (
-            f"counter-target-{kind}-v1",
-            (
-                {
-                    "op": "add_counter_selected",
-                    "cards": ["$target.0"],
-                    "counter": match.group("counter"),
-                    "amount": 1,
-                },
-            ),
-            schema,
-            ("cr-122-counters", "cr-115-targets"),
         )
     match = re.fullmatch(
         r"return this (?P<kind>artifact|creature|enchantment|permanent) "

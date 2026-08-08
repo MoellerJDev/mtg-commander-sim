@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "34a2cc46b94c06187dbaeb9a8fb56402116d5329",
+  "baseline_commit": "d8e0d2bcd5a6aff5950654c5e61046c5ca250293",
   "card_named_helpers": [
     {
       "file": "quorune/engine.py",
@@ -729,7 +729,7 @@
     "quorune/record.py": 11
   },
   "engine": {
-    "logical_lines": 12449,
+    "logical_lines": 12389,
     "methods": [
       {
         "kind": "method",
@@ -2272,12 +2272,12 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 13183
+    "physical_lines": 13111
   },
   "exception_binding": {
-    "adr": "docs/adr/0031-typed-fixed-damage-sets.md",
-    "allowance_fingerprint": "21be8087788fd140fa8f95d61debf397944f181a648ab5b509980cd2af3c7a41",
-    "exception_id": "ARCH-EXC-0013"
+    "adr": "docs/adr/0033-typed-fixed-counter-placement.md",
+    "allowance_fingerprint": "1da65937fe113ca058a05628f462e143f6959eee16e5ccefa465987bbcb13ef4",
+    "exception_id": "ARCH-EXC-0014"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2288,6 +2288,7 @@
   ],
   "oracle_id_literals": [
     {
+      "card_specificity_exempt": false,
       "column": 13,
       "file": "quorune/shortcuts.py",
       "in_condition": false,
@@ -2297,6 +2298,7 @@
       "value": "ace86e56-efde-4eb7-8815-71456a4c3abe"
     },
     {
+      "card_specificity_exempt": false,
       "column": 15,
       "file": "quorune/shortcuts.py",
       "in_condition": false,
@@ -2306,6 +2308,7 @@
       "value": "09ff28b1-b6c9-48e6-b12e-2f0e644f709f"
     },
     {
+      "card_specificity_exempt": false,
       "column": 11,
       "file": "quorune/shortcuts.py",
       "in_condition": false,
@@ -2315,6 +2318,7 @@
       "value": "76b003e0-15af-4f22-bdf2-1ade5430964a"
     },
     {
+      "card_specificity_exempt": false,
       "column": 9,
       "file": "quorune/shortcuts.py",
       "in_condition": false,
@@ -2324,6 +2328,7 @@
       "value": "d3438037-3efd-4ce0-88ec-6d48ab521992"
     },
     {
+      "card_specificity_exempt": false,
       "column": 14,
       "file": "quorune/shortcuts.py",
       "in_condition": false,
@@ -2431,7 +2436,7 @@
     },
     {
       "file": "quorune/engine.py",
-      "logical_lines": 341,
+      "logical_lines": 339,
       "symbol": "CommanderEngine.move_card"
     },
     {
@@ -2451,7 +2456,7 @@
     },
     {
       "file": "quorune/oracle_ir.py",
-      "logical_lines": 338,
+      "logical_lines": 276,
       "symbol": "_effect_template"
     },
     {
@@ -2512,7 +2517,7 @@
     },
     {
       "file": "quorune/engine.py",
-      "logical_lines": 12449
+      "logical_lines": 12389
     },
     {
       "file": "quorune/record.py",
@@ -2624,6 +2629,7 @@
     "note",
     "offer_draw",
     "pay_or_lose",
+    "place_counters",
     "populate_with_haste",
     "prepare_graveyard_creature_aura",
     "proliferate",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence
 
+from ..compiler.creature_subtypes import canonical_creature_subtype
 from ..affected_permanents import (
     AffectedPermanentSetError,
     AffectedPermanentSetSpec,
@@ -656,10 +657,98 @@ def targeted_counter_node_capabilities(
     )
 
 
+def _fixed_counter_target_schema_is_closed(
+    target_schema: Mapping[str, Any] | None,
+) -> bool:
+    if target_schema is None:
+        return False
+    schema = dict(target_schema)
+    allowed = {
+        "zones",
+        "categories",
+        "count",
+        "types_any",
+        "subtypes_any",
+        "controller_relation",
+        "source_exclusion",
+    }
+    if set(schema) - allowed or (
+        schema.get("zones") != ["battlefield"]
+        or schema.get("categories") != ["permanent"]
+        or type(schema.get("count")) is not int
+        or schema.get("count") != 1
+    ):
+        return False
+    types = schema.get("types_any", ())
+    subtypes = schema.get("subtypes_any", ())
+    if types and subtypes:
+        return False
+    if types:
+        if not isinstance(types, (list, tuple)) or tuple(types) not in {
+            ("artifact",),
+            ("battle",),
+            ("creature",),
+            ("enchantment",),
+            ("land",),
+            ("planeswalker",),
+        }:
+            return False
+    if subtypes:
+        if (
+            not isinstance(subtypes, (list, tuple))
+            or len(subtypes) != 1
+            or canonical_creature_subtype(subtypes[0]) != subtypes[0]
+        ):
+            return False
+    relation = schema.get("controller_relation", "any")
+    if relation not in {"any", "you", "opponent"}:
+        return False
+    if "source_exclusion" in schema and schema["source_exclusion"] is not True:
+        return False
+    return True
+
+
+def fixed_counter_placement_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for one closed fixed counter placement."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if "cr-122-counters" not in mechanics or len(effects) != 1:
+        return ()
+    effect = effects[0]
+    if (
+        set(effect) != {"op", "card", "counter", "amount", "source"}
+        or effect.get("op") != "place_counters"
+        or type(effect.get("counter")) is not str
+        or not effect.get("counter")
+        or type(effect.get("amount")) is not int
+        or effect.get("amount", 0) <= 0
+        or effect.get("source") != "$source"
+    ):
+        return ()
+    if target_schema is None and effect.get("card") == "$source":
+        return ("counter.producer.fixed_effect",)
+    if (
+        "cr-115-targets" in mechanics
+        and effect.get("card") == "$target.0"
+        and _fixed_counter_target_schema_is_closed(target_schema)
+    ):
+        return (
+            "counter.producer.fixed_effect",
+            "target.revalidate_resolution",
+        )
+    return ()
+
+
 __all__ = [
     "fixed_damage_node_capabilities",
     "mass_destruction_node_capabilities",
     "fixed_draw_node_capabilities",
+    "fixed_counter_placement_node_capabilities",
     "single_explore_node_capabilities",
     "single_proliferate_node_capabilities",
     "targeted_destruction_node_capabilities",
