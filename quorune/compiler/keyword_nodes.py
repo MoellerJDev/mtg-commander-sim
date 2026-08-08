@@ -2,12 +2,48 @@ from __future__ import annotations
 
 import re
 
+from .cumulative_upkeep_nodes import fixed_mana_cumulative_upkeep_node
+from .cycling_nodes import ordinary_cycling_keyword_node
 from .dependency_gate import DependencyGate
-from .ir_model import OracleNode, SourceSpan
+from .ir_model import OracleNode, OracleResidual, SourceSpan
+from ..rules.capabilities import CapabilityRegistry
 
 
 _DREDGE_MECHANIC = "dred" + "ge"
 _FABRICATE_MECHANIC = "fabri" + "cate"
+
+
+def closed_special_keyword_node(
+    *,
+    node_id: str,
+    line: str,
+    material_line: str,
+    span: SourceSpan,
+    mechanics: tuple[str, ...],
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    residuals: list[OracleResidual],
+) -> OracleNode | None:
+    """Lower closed keyword families that own their complete node shape."""
+
+    values = {
+        "node_id": node_id,
+        "line": line,
+        "material_line": material_line,
+        "span": span,
+        "mechanics": mechanics,
+        "capability_registry": capability_registry,
+        "capability_profile": capability_profile,
+        "residuals": residuals,
+    }
+    for lower in (
+        ordinary_cycling_keyword_node,
+        fixed_mana_cumulative_upkeep_node,
+    ):
+        node = lower(**values)
+        if node is not None:
+            return node
+    return None
 
 
 def fabricate_keyword_node(
@@ -115,4 +151,8 @@ def dredge_keyword_node(
     )
 
 
-__all__ = ["dredge_keyword_node", "fabricate_keyword_node"]
+__all__ = [
+    "closed_special_keyword_node",
+    "dredge_keyword_node",
+    "fabricate_keyword_node",
+]

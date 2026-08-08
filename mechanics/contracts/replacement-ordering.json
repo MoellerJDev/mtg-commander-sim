@@ -73,7 +73,7 @@
     "version": "replacement-ordering-v4"
   },
   "known_blockers": [
-    "generic replacement choice packets are wired only into represented token-creation, semantic zone-change, and effect-generated permanent-counter producers",
+    "generic replacement choice packets are wired only into represented token-creation, semantic zone-change, effect-generated permanent-counter, and fixed-mana Cumulative Upkeep age-counter producers",
     "multiple simultaneous events for the same affected chooser do not expose an explicit event-order choice when order could matter",
     "entry reservation scopes are not yet consumed by general as-enters choice transactions",
     "draw, damage, remaining counter-placement producers, commander movement, and other replacement producers remain outside the universal event boundary"

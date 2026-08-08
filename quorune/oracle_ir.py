@@ -24,7 +24,6 @@ from .compiler.continuous_templates import (
     controlled_creature_until_end_of_turn_effect,
 )
 from .compiler.counter_templates import is_intrinsically_uncounterable_spell
-from .compiler.cycling_nodes import ordinary_cycling_keyword_node
 from .cycling_abilities import CYCLING_MECHANIC_ID
 from .compiler.activated_mana_nodes import (
     activated_oracle_node,
@@ -45,6 +44,7 @@ from .compiler.explore_templates import single_explore_effect_template
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.keyword_nodes import (
+    closed_special_keyword_node,
     dredge_keyword_node,
     fabricate_keyword_node,
 )
@@ -74,7 +74,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v55"
+ORACLE_COMPILER_VERSION = "oracle-ir-v56"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
@@ -509,7 +509,7 @@ def _keyword_node_for_mechanics(
     capability_profile: str,
     residuals: list[OracleResidual],
 ) -> OracleNode:
-    cycling = ordinary_cycling_keyword_node(
+    closed_special = closed_special_keyword_node(
         node_id=node_id,
         line=line,
         material_line=material_line,
@@ -519,8 +519,8 @@ def _keyword_node_for_mechanics(
         capability_profile=capability_profile,
         residuals=residuals,
     )
-    if cycling is not None:
-        return cycling
+    if closed_special is not None:
+        return closed_special
     gate = keyword_dependency_gate(
         material_line=material_line,
         mechanics=mechanics,

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702.24 — Fixed ordinary mana cumulative upkeep",
+  "cases": [
+    {
+      "rule_id": "702.24",
+      "rule_text_sha256": "4b526095767c6f870b1b1c08b0864d5eae84c585c4470756da47761bfdbaac3a",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["quorune.rules.capabilities.CapabilityRegistry"],
+      "executable_test_ids": ["tests.test_cumulative_upkeep_counter_placement.CumulativeUpkeepCompilerTests.test_fixed_mana_cumulative_upkeep_is_source_spanned_and_capability_closed"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; counter.producer.cumulative_upkeep_fixed_mana owns only the bounded fixed positive ordinary mana family."]
+    },
+    {
+      "rule_id": "702.24a",
+      "rule_text_sha256": "b8d43ab5860836272bb10a3f81d517070bc7f5ef2db4aff9a2361b3960d751c9",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["quorune.cumulative_upkeep.FixedManaCumulativeUpkeepSpec", "quorune.compiler.cumulative_upkeep_nodes.fixed_mana_cumulative_upkeep_node", "quorune.semantic_choices.payments.OptionalPaymentHandler", "quorune.semantic_choices.preparation_coordination.continue_semantic_preparation"],
+      "executable_test_ids": ["tests.test_cumulative_upkeep_counter_placement.CumulativeUpkeepRuntimeTests.test_intervening_source_identity_and_control_change_are_respected", "tests.test_cumulative_upkeep_counter_placement.CumulativeUpkeepRuntimeTests.test_quantity_replacement_changes_age_counter_and_payment_together", "tests.test_cumulative_upkeep_counter_placement.CumulativeUpkeepRuntimeTests.test_quantity_replacement_resume_replays_exactly", "tests.test_cumulative_upkeep_counter_placement.CumulativeUpkeepCompilerTests.test_unsupported_cumulative_upkeep_costs_remain_material_residuals"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": ["alternative, snow, hybrid, Phyrexian, zero, variable, and nonmana cumulative-upkeep costs remain outside the compiler grammar", "cost modification and restricted-mana interactions are limited to the separately represented canonical mana-payment owner", "gained or copied cumulative-upkeep abilities are not propagated by this family"],
+      "notes": ["The source's pinned logical identity is rechecked for the intervening battlefield condition; a departed or returned new object makes the ability do nothing.", "The age counter is committed through the replacement-aware counter transaction before the payment is calculated from the actual resulting count.", "The trigger controller remains the payment chooser after a source control change, and an unpaid source is sacrificed only if that player still controls it.", "Aggregate CR 702.24 remains blocked by the explicit variants."]
+    },
+    {
+      "rule_id": "702.24b",
+      "rule_text_sha256": "0d3debbb45fc00aa1e3d4fe4682755313b2881db7f0d028d8f846ada32ec268f",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["quorune.compiler.cumulative_upkeep_nodes.fixed_mana_cumulative_upkeep_node"],
+      "executable_test_ids": ["tests.test_cumulative_upkeep_counter_placement.CumulativeUpkeepCompilerTests.test_unsupported_cumulative_upkeep_costs_remain_material_residuals"],
+      "required_scenarios": ["negative"],
+      "covered_scenarios": ["negative"],
+      "blockers": ["multiple cumulative-upkeep instances on one object remain a material residual until independent trigger creation and the shared total-age payment are explicitly certified"],
+      "notes": ["The compiler fails closed instead of collapsing multiple printed instances or charging one combined pre-replacement estimate."]
+    }
+  ]
+}

@@ -305,7 +305,10 @@ class SemanticChoiceCoordinationMixin:
             cost_value = {
                 "GENERIC": max(0, int(effect.get("difference", 0)))
             }
-        elif str(effect.get("op") or "") == "cumulative_upkeep":
+        elif (
+            str(effect.get("op") or "") == "cumulative_upkeep"
+            and str(effect.get("stage") or "") == "pay"
+        ):
             per_counter = self._mana_vector(
                 effect.get("cost_per_counter") or {"GENERIC": 1}
             )
@@ -318,7 +321,7 @@ class SemanticChoiceCoordinationMixin:
                 None,
             )
             if source is not None:
-                age = int(source.counters.get("age", 0)) + 1
+                age = int(source.counters.get("age", 0))
                 cost_value = {
                     key: int(value) * age
                     for key, value in per_counter.items()

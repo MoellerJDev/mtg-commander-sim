@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "counter.producer.cumulative_upkeep_fixed_mana": (
+        "tests.test_cumulative_upkeep_counter_placement."
+        "CumulativeUpkeepCompilerTests."
+        "test_dependency_and_compiler_mutations_fail_closed"
+    ),
     "counter.producer.intrinsic_entry": (
         "tests.test_intrinsic_entry_counters."
         "IntrinsicEntryCounterTests."

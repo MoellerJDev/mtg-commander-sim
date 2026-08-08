@@ -169,11 +169,25 @@ when the source leaves the battlefield. Simultaneous multi-permanent Explore,
 repeated Explore, Explore replacement effects, and broader granted/copy
 propagation remain explicit residuals.
 
+One printed fixed positive ordinary mana cumulative-upkeep instance now uses a
+two-stage semantic continuation. The first stage places its age counter through
+the same replacement-aware transaction and can suspend for affected-object
+ordering. Only after that commit does the second stage read the permanent's
+actual age-counter count, calculate the payment, and issue the controller's
+payment-or-sacrifice choice. This prevents quantity replacement from changing
+the counter result without changing the cost. Resolution rechecks the pinned
+source incarnation for the keyword's intervening battlefield condition. A
+departed or returned new object makes the ability do nothing; a control change
+leaves the original trigger controller responsible for the payment and permits
+sacrifice only while that player still controls the permanent. Alternative,
+snow, hybrid, Phyrexian, zero, variable, nonmana, copied, granted, and
+multiple-instance forms remain precise residuals.
+
 The following producers and wordings remain deliberately outside this slice:
 
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
-- cumulative upkeep;
+- cumulative-upkeep forms outside the fixed positive ordinary mana family;
 - Support X or zero and conditional, optional, repeated, copied, granted,
   modal, or compound Support instructions, plus variable, distributed, dynamic,
   subtype-qualified, combat-qualified, modal, conditional, compound, and
