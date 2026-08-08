@@ -17,7 +17,7 @@ request numbers, CI run IDs, test totals or transient task notes here.
 
 1. Inspect Git, worktree, pull-request and CI state instead of trusting a prior
    handoff.
-2. Read [`docs/index.md`](docs/index.md) and use its task routing table.
+2. Read `docs/index.md` and use its task routing table.
 3. Read the relevant generated status report before choosing rules or
    architecture work.
 4. Read only the architecture, reference, operations and ADR documents required
@@ -28,13 +28,13 @@ request numbers, CI run IDs, test totals or transient task notes here.
 
 Useful status entry points:
 
-- [`docs/PLATFORM_IMPLEMENTATION_STATUS.md`](docs/PLATFORM_IMPLEMENTATION_STATUS.md)
-- [`docs/RULES_COMPLETENESS_STATUS.md`](docs/RULES_COMPLETENESS_STATUS.md)
-- [`docs/COMPILER_COVERAGE_STATUS.md`](docs/COMPILER_COVERAGE_STATUS.md)
-- [`docs/ARCHITECTURE_DEBT_STATUS.md`](docs/ARCHITECTURE_DEBT_STATUS.md)
-- [`docs/REBRAND_STATUS.md`](docs/REBRAND_STATUS.md)
-- [`coverage/card-unlock-frontier.md`](coverage/card-unlock-frontier.md)
-- [`coverage/reusable-piece-matrix.md`](coverage/reusable-piece-matrix.md)
+- `docs/PLATFORM_IMPLEMENTATION_STATUS.md`
+- `docs/RULES_COMPLETENESS_STATUS.md`
+- `docs/COMPILER_COVERAGE_STATUS.md`
+- `docs/ARCHITECTURE_DEBT_STATUS.md`
+- `docs/REBRAND_STATUS.md`
+- `coverage/card-unlock-frontier.md`
+- `coverage/reusable-piece-matrix.md`
 
 ## Authority and safety boundaries
 
@@ -42,29 +42,39 @@ Useful status entry points:
   Gathering, Commander, Oracle, Comprehensive Rules, Scryfall, and Moxfield are
   third-party rules, format, or data compatibility references; do not replace
   those terms when they are technically accurate.
+
 - Before renaming a distribution, module, environment variable, schema ID,
   protocol key, record field, replay prefix, command, or optional-client path,
-  read [`docs/REBRAND_STATUS.md`](docs/REBRAND_STATUS.md). Compatibility
+  read `docs/REBRAND_STATUS.md`. Compatibility
   identifiers require an explicit migration rather than a global replacement.
 
 - `CommanderEngine` and its typed rules subsystems are authoritative. A client
   never mutates zones, life, mana, stack, counters, choices or effects.
+
 - Every player command uses an unconsumed capability issued to the authenticated
   principal. `principal` is transport identity, never client-selected data.
+
 - Only a scoped arbiter capability can submit generic effects. Product gameplay,
   rules enforcement, CI and releases cannot depend on an LLM or live AI ruling.
+
 - Project hidden information by principal. Never solve a UI or test problem by
   exposing an authoritative checkpoint, library order or another seat's data.
+
 - Use the pinned local Scryfall snapshot during games. Network access belongs to
   managed data refresh outside game transitions.
+
 - Material unknown Oracle semantics, unsupported grammar and untrusted
   capability dependencies fail closed before mutation.
+
 - A yield is an optimization, never authority to suppress a changed meaningful
   action. `suppressed_meaningful_windows` must remain zero.
+
 - Advertised actions and accepted commands consume the same typed legality,
   cost and target authority.
+
 - Preserve protocol versioning, deterministic hashes, transactional rollback,
   principal projection and exact Game Record v3 replay.
+
 - Do not infer provider/model identity, completion, rules fidelity or matchup
   evidence from partial or duplicated fixtures.
 
@@ -95,7 +105,7 @@ component registry. Do not add runtime Oracle parsing or arbitrary executable
 callbacks. Repeated source-pinned descriptors must become a generic compiler
 production and component family.
 
-Follow [`docs/architecture/dependency-rules.md`](docs/architecture/dependency-rules.md)
+Follow `docs/architecture/dependency-rules.md`
 and the accepted [ADRs](docs/adr/index.md). A production module or function over
 the policy threshold is measured debt; growth requires the documented review
 path. The generated architecture audit is the measurement authority.
@@ -134,6 +144,33 @@ deterministic impact plan without executing the broad gate:
 .\.venv\Scripts\python.exe scripts\quick_gate.py --dry-run
 ```
 
+The dry-run output is a required change-impact inventory, not proof that the
+identified work ran. Before pushing, execute every applicable non-behavioral
+command identified by the plan or by the owning repository documentation,
+including:
+
+- changed-module compilation;
+- JSON and schema parsing;
+- deterministic generators;
+- generated-output freshness checks;
+- applicable documentation fitness functions;
+- repository and diff hygiene.
+
+Resolve every omitted command, stale tracked output, or inconsistent generated
+artifact before pushing the coherent head.
+
+This does not authorize routine local behavioral tests, broad gates, historical
+regression journeys, package or operating-system matrices, or browser
+certification. Those remain public exact-head CI responsibilities except under
+the diagnostic and release-critical exceptions below.
+
+When adding or changing a fixture, manifest entry, registry record, generated
+source, schema, workflow input, or package input, identify every consumer before
+pushing. Do not assume that Linux, Windows, package, browser, or generated jobs
+consume the same source unless the repository proves that they do. Prefer one
+canonical manifest or machine-readable source. When duplicated consumer lists
+must remain, add or preserve a deterministic completeness check.
+
 Push the coherent exact head and let public pull-request CI run the broad
 Python, generated, package, platform and headless-browser checks. Use that CI
 window for independent Slot B work instead of repeating the same suite
@@ -147,11 +184,62 @@ when the user asks or when diagnosing a specific CI-only or release-critical
 failure that cannot be isolated from the Actions evidence. Run only the
 directly relevant test in that case. Browser automation remains headless. The
 complete workflow and recovery commands are in
-[`docs/development/ci-pipeline.md`](docs/development/ci-pipeline.md).
+`docs/development/ci-pipeline.md`.
 
 Never stage `run/`, `local/`, SQLite databases, Scryfall archives, image or deck
 caches, raw capabilities, private packets, provider memory or live Game Records.
 Use temporary directories and sanitized recipes for regression records.
+
+## CI failure triage and recurrence prevention
+
+When public pull-request CI fails, inspect every failed job for the same exact
+head before changing the branch. For each failed job, identify:
+
+- the failed step;
+- the exact command;
+- the first actionable error;
+- the source or tracked artifact involved.
+
+Group failed jobs by shared root cause. Do not assume that every red job is an
+independent defect. One omitted generator, stale artifact, missing fixture or
+registry consumer, schema change, package input, or documentation update may
+surface in several jobs.
+
+Classify each root cause as one of:
+
+- implementation or rules correctness;
+- omitted deterministic repository command;
+- stale generated or status artifact;
+- missing documentation update;
+- missing fixture, manifest, registry, or consumer update;
+- package, platform, server, protocol, or browser integration;
+- demonstrated transient infrastructure failure.
+
+For a deterministic omission:
+
+1. Use the Actions evidence to identify the authoritative source and every
+   affected consumer.
+2. Fix every manifestation of the shared cause in one coherent branch
+   correction. Do not patch only the first failed job.
+3. Run only the directly relevant local diagnostic permitted by the development
+   policy above.
+4. Rerun the applicable compilation, parsing, generator, freshness,
+   documentation, and diff-hygiene commands.
+5. When the dry-run impact map or an existing validator reasonably should have
+   identified the obligation, update that map or validator in the same branch.
+6. When duplicated lists, copied workflow arguments, or independently maintained
+   registrations caused the omission, replace them with one canonical source or
+   add a deterministic completeness validator.
+7. Push one corrected exact head, then return to independent next-batch work
+   while public CI reruns.
+
+Do not blindly rerun a deterministic failure against an unchanged head. A rerun
+without a source change is appropriate only for a demonstrated transient
+infrastructure failure.
+
+Do not add a prose-only checklist item when the repository can mechanically
+derive, validate, or centralize the obligation. Do not weaken or bypass a real
+check merely because the immediate implementation appears correct.
 
 ## Documentation contract
 
@@ -169,6 +257,28 @@ For every implementation change, update the smallest existing document that
 owns the affected behavior. Do not create a progress diary, branch handoff,
 duplicate overview or one-page-per-feature note.
 
+A code-only diff is not evidence that documentation is unaffected. Before
+pushing, use the `docs/index.md` task routing table to identify the smallest
+existing document that owns any changed:
+
+- responsibility or mutation owner;
+- public contract or schema;
+- command or contributor workflow;
+- supported behavior or limitation;
+- compiler, capability, or runtime-component boundary;
+- replay, privacy, protocol, or browser behavior;
+- extension path.
+
+Update that document when its owned behavior changed. When no documentation
+change is required, that conclusion must come from reviewing the owning
+document, not from the absence of an edited Markdown file.
+
+Documentation fitness functions validate the documentation and generated
+artifacts that exist. They do not by themselves prove that a required
+documentation update was not omitted. Run the applicable platform-status and
+architecture-audit freshness checks whenever their code or machine-readable
+inputs may have changed, even when no hand-maintained Markdown was edited.
+
 Living documentation must:
 
 - describe the immediate current state in present tense;
@@ -179,12 +289,12 @@ Living documentation must:
 - use sentence-case headings, literal language and repository-relative links;
 - identify commands that are safe to copy;
 - delete or rewrite superseded guidance in the same PR;
-- update [`docs/index.md`](docs/index.md) when files move, appear or disappear.
+- update `docs/index.md` when files move, appear or disappear.
 
 Use an ADR only for a durable architecture decision whose alternatives and
 consequences future contributors need. Supersede accepted ADRs; do not rewrite
 their historical decision. Keep historical narrative only in ADRs and
-[`CHANGELOG.md`](CHANGELOG.md).
+`CHANGELOG.md`.
 
 Run the documentation fitness functions after any Markdown change:
 
@@ -196,3 +306,4 @@ Run the documentation fitness functions after any Markdown change:
 
 If a document disagrees with code or generated evidence, fix or remove the
 document. Never preserve a stale statement for continuity.
+
