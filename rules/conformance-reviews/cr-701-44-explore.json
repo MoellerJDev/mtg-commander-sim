@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 701.44 — Single-permanent Explore",
+  "cases": [
+    {
+      "rule_id": "701.44",
+      "rule_text_sha256": "3b73900b8d29f963dece78edd4bd9529d855e50f2a3fcc39b3d66cd657630905",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["quorune.rules.capabilities.CapabilityRegistry"],
+      "executable_test_ids": ["tests.test_explore_compiler.ExploreCompilerTests.test_single_source_and_controlled_target_shapes_are_typed"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword-action heading; keyword_action.explore.single owns the bounded one-permanent process."]
+    },
+    {
+      "rule_id": "701.44a",
+      "rule_text_sha256": "7ccf2b0054a5f24deca848be6c9d982aa65f0771900caf449e44e8705abea2d2",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "runtime_behavior",
+      "reviewed": true,
+      "implementation_components": ["quorune.semantic_choices.library_and_hand.ExploreChoiceHandler", "quorune.semantic_choices.counter_coordination.continue_semantic_preparation"],
+      "executable_test_ids": ["tests.test_explore_rules.ExploreRuleTests.test_nonland_reveal_places_counter_before_request", "tests.test_explore_rules.ExploreRuleTests.test_land_reveal_moves_to_hand_then_marks_explored", "tests.test_explore_rules.ExploreReplacementContinuationTests.test_counter_and_zone_replacements_suspend_before_explore_mutation"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "replay", "hidden_information"],
+      "blockers": [],
+      "notes": ["Each reveal, counter placement, optional library-to-graveyard move, and completion event is ordered through typed intents; counter and zone replacements suspend before mutation."]
+    },
+    {
+      "rule_id": "701.44b",
+      "rule_text_sha256": "dc81fefc2f9e88a2bc2b934912f0fb16d2242b7b3aa107abd7204a31f13d4a0b",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "runtime_behavior",
+      "reviewed": true,
+      "implementation_components": ["quorune.semantic_runtime.intents.ExploreCompletedIntent", "quorune.semantic_choices.intent_host.SemanticChoiceIntentHostMixin.complete_explore_intent"],
+      "executable_test_ids": ["tests.test_explore_rules.ExploreRuleTests.test_empty_library_still_completes_explore", "tests.test_explore_rules.ExploreEngineTests.test_nonland_explore_uses_current_controller_and_completes"],
+      "required_scenarios": ["positive", "negative", "replay"],
+      "covered_scenarios": ["positive", "negative", "replay"],
+      "blockers": [],
+      "notes": ["A typed completion event is emitted even when an empty library or missing current incarnation prevents all preceding physical actions."]
+    },
+    {
+      "rule_id": "701.44c",
+      "rule_text_sha256": "c3dd53b832282d7718b353fe45a5106bbedf8359315ee3d4f682099a9437669d",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "runtime_behavior",
+      "reviewed": true,
+      "implementation_components": ["quorune.semantic_runtime.explore.capture_explore_source_departure", "quorune.semantic_runtime.explore.explore_source_controller", "quorune.semantic_choices.library_and_hand.ExploreChoiceHandler"],
+      "executable_test_ids": ["tests.test_explore_rules.ExploreRuleTests.test_old_or_phased_incarnation_cannot_receive_explore_counter", "tests.test_explore_rules.ExploreRuleTests.test_source_controller_uses_current_then_departure_lki", "tests.test_explore_rules.ExploreEngineTests.test_departed_explorer_uses_lki_controller_without_countering_return"],
+      "required_scenarios": ["positive", "negative", "interaction", "replay"],
+      "covered_scenarios": ["positive", "negative", "interaction", "replay"],
+      "blockers": [],
+      "notes": ["The process uses the current represented permanent when its logical incarnation remains on the battlefield and otherwise uses its pinned departure controller without affecting a later incarnation."]
+    },
+    {
+      "rule_id": "701.44d",
+      "rule_text_sha256": "d39ae8df72f5ad0f66a350c242841f38789d61f51a045d2d42454eebaf8f6a4e",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["quorune.compiler.explore_templates.single_explore_effect_template"],
+      "executable_test_ids": ["tests.test_explore_compiler.ExploreCompilerTests.test_unsupported_explore_variants_remain_outside_closed_grammar"],
+      "required_scenarios": ["negative", "multiplayer"],
+      "covered_scenarios": ["negative"],
+      "blockers": ["one instruction making multiple permanents explore simultaneously is not lowered", "the CR 701.44d APNAP process-order decision has no typed coordinator"],
+      "notes": ["Multiple simultaneous explorers remain a precise residual; this capability does not claim aggregate Explore completion."]
+    }
+  ]
+}
