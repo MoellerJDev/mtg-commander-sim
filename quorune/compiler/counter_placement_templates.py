@@ -278,9 +278,6 @@ class SupportCounterPlacementTemplate:
                 "counter": "+1/+1",
                 "amount": 1,
                 "source": "$source",
-                "support_source_context": (
-                    "permanent" if self.source_is_permanent else "spell"
-                ),
             },
         )
 
@@ -291,6 +288,9 @@ class SupportCounterPlacementTemplate:
             "categories": ["permanent"],
             "types_any": ["creature"],
             "up_to": self.maximum_targets,
+            "support_source_context": (
+                "permanent" if self.source_is_permanent else "spell"
+            ),
         }
         if self.source_is_permanent:
             schema["source_exclusion"] = True

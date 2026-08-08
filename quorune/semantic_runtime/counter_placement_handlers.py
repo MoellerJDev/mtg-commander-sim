@@ -224,7 +224,6 @@ class FixedCounterPlacementTargetSetHandler:
             "counter",
             "amount",
             "source",
-            "support_source_context",
             _REASON_FIELD,
             "_replacement_selections",
         }
@@ -252,14 +251,6 @@ class FixedCounterPlacementTargetSetHandler:
             )
         if effect.get("op") != self.operation:
             raise SemanticNodeError("Counter-target operation is unsupported")
-        support_source_context = effect.get("support_source_context")
-        if support_source_context is not None and support_source_context not in {
-            "permanent",
-            "spell",
-        }:
-            raise SemanticNodeError(
-                "Counter-target Support source context is unsupported"
-            )
         raw_cards = effect.get("cards")
         if not isinstance(raw_cards, (list, tuple)):
             raise SemanticNodeError(

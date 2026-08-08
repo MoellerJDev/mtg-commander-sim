@@ -827,8 +827,6 @@ def fixed_counter_placement_target_set_node_capabilities(
         "amount",
         "source",
     }
-    if support:
-        expected_effect_fields.add("support_source_context")
     maximum = effect.get("maximum_targets")
     if (
         set(effect) != expected_effect_fields
@@ -851,6 +849,7 @@ def fixed_counter_placement_target_set_node_capabilities(
         "types_none",
         "controller_relation",
         "source_exclusion",
+        "support_source_context",
         "up_to",
     }
     if (
@@ -885,7 +884,7 @@ def fixed_counter_placement_target_set_node_capabilities(
     if "source_exclusion" in schema and schema["source_exclusion"] is not True:
         return ()
     if support:
-        source_context = effect.get("support_source_context")
+        source_context = schema.get("support_source_context")
         if (
             str(effect.get("counter")).casefold() != "+1/+1"
             or effect.get("amount") != 1
@@ -907,6 +906,8 @@ def fixed_counter_placement_target_set_node_capabilities(
             "counter.producer.support",
         )
     if "source_exclusion" in schema:
+        return ()
+    if "support_source_context" in schema:
         return ()
     return (
         "counter.producer.fixed_permanent_target_set_effect",
