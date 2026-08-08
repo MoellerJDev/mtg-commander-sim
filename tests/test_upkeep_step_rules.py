@@ -108,7 +108,16 @@ class UpkeepStepRuleTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            {"503", "503.1", "503.1a", "503.2"},
+            {
+                "118.12",
+                "503",
+                "503.1",
+                "503.1a",
+                "503.2",
+                "702.24",
+                "702.24a",
+                "702.24b",
+            },
             set(contract["rule_references"]),
         )
 
