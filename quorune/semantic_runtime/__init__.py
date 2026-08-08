@@ -68,6 +68,7 @@ from .counter_replacements import (
 from .counter_placement_handlers import (
     COUNTER_PLACEMENT_HANDLERS,
     FixedCounterPlacementHandler,
+    FixedCounterPlacementSetHandler,
     FixedPlayerCounterPlacementHandler,
 )
 from .damage_replacements import (
@@ -193,6 +194,7 @@ from .intents import (
     PayManaCostIntent,
     PayLifeIntent,
     PlaceCountersIntent,
+    PlaceCountersOnSetIntent,
     PlacePlayerCountersIntent,
     RecordChoiceIntent,
     RecordZoneMoveIntent,
@@ -341,6 +343,7 @@ __all__ = [
     "CounterQuantityReplacementNode",
     "CounterReplacementSourceContext",
     "FixedCounterPlacementHandler",
+    "FixedCounterPlacementSetHandler",
     "FixedPlayerCounterPlacementHandler",
     "DamageQuantityReplacementHandler",
     "DamageQuantityReplacementNode",
@@ -399,6 +402,7 @@ __all__ = [
     "PayManaCostIntent",
     "PayLifeIntent",
     "PlaceCountersIntent",
+    "PlaceCountersOnSetIntent",
     "PlacePlayerCountersIntent",
     "ReadOnlyHandlerContext",
     "RecordChoiceIntent",

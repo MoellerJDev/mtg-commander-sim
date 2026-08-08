@@ -148,10 +148,11 @@ class GameRecordV3Tests(unittest.TestCase):
             semantic_inventory = manifest["runtime_trust"][
                 "semantic_handler_inventory"
             ]
-            self.assertEqual(90, len(semantic_inventory))
+            self.assertEqual(91, len(semantic_inventory))
             self.assertTrue(
                 {
                     "effect.zone-attachment.reanimate_attached_creature_aura.v1",
+                    "generic.fixed-counter-placement-set.v1",
                     "generic.fixed-player-counter-placement.v1",
                 }.issubset(
                     {item["handler_id"] for item in semantic_inventory}

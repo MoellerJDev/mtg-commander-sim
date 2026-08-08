@@ -5,11 +5,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from ..affected_permanents import (
+    AffectedPermanentSetError,
+    AffectedPermanentSetSpec,
+    PermanentControllerRelation,
+)
 from .context import ReadOnlyHandlerContext, SemanticNodeError
 from .direct_target_fields import validate_direct_target_effect
 from .intents import (
     IntentPlan,
     PlaceCountersIntent,
+    PlaceCountersOnSetIntent,
     PlacePlayerCountersIntent,
 )
 
@@ -76,6 +82,111 @@ class FixedCounterPlacementHandler:
                     replacement_selections=fields.replacement_selections,
                 ),
             ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class FixedCounterPlacementSetHandler:
+    handler_id: str = "generic.fixed-counter-placement-set.v1"
+    schema_version: int = 1
+    family: str = "effect.counter-placement-set"
+    operation: str = "place_counters_on_set"
+    rule_references: tuple[str, ...] = (
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2c",
+        "608.2h",
+        "614.16",
+        "616.1",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "counter.producer.fixed_permanent_set_effect",
+    )
+
+    def lower(
+        self,
+        effect: Mapping[str, Any],
+        context: ReadOnlyHandlerContext,
+    ) -> IntentPlan:
+        allowed = {
+            "op",
+            "source",
+            "set",
+            "counter",
+            "amount",
+            _REASON_FIELD,
+            "_replacement_selections",
+        }
+        unknown = sorted(set(effect) - allowed)
+        if unknown:
+            raise SemanticNodeError(
+                "Counter-set effect has unknown fields: "
+                + ", ".join(unknown)
+            )
+        missing = sorted(
+            {"op", "source", "set", "counter", "amount"} - set(effect)
+        )
+        if missing:
+            raise SemanticNodeError(
+                "Counter-set effect is missing fields: "
+                + ", ".join(missing)
+            )
+        if effect.get("op") != self.operation:
+            raise SemanticNodeError("Counter-set operation is unsupported")
+        try:
+            spec = AffectedPermanentSetSpec.from_dict(effect.get("set"))
+        except (AffectedPermanentSetError, TypeError) as exc:
+            raise SemanticNodeError(str(exc)) from exc
+        if spec.controller_relation is PermanentControllerRelation.TARGET_PLAYER:
+            context.query.require_active_seat(
+                str(spec.target_controller or "")
+            )
+        counter_name = effect.get("counter")
+        if type(counter_name) is not str or not counter_name.strip():
+            raise SemanticNodeError(
+                "Counter-set placement requires one nonempty counter name"
+            )
+        amount = effect.get("amount")
+        if type(amount) is not int or amount <= 0:
+            raise SemanticNodeError(
+                "Counter-set amount must be a positive exact integer"
+            )
+        source_ref = effect.get("source")
+        if type(source_ref) is not str or not source_ref:
+            raise SemanticNodeError(
+                "Counter-set placement requires one nonempty source reference"
+            )
+        raw_reason = effect.get(_REASON_FIELD)
+        if raw_reason is not None and (
+            type(raw_reason) is not str or not raw_reason
+        ):
+            raise SemanticNodeError(
+                "Counter-set reason must be a nonempty string"
+            )
+        raw_selections = effect.get("_replacement_selections")
+        if raw_selections is None:
+            raw_selections = ()
+        if not isinstance(raw_selections, (list, tuple)):
+            raise SemanticNodeError(
+                "Counter-set replacement selections must be an array"
+            )
+        try:
+            intent = PlaceCountersOnSetIntent(
+                actor=context.actor,
+                spec=spec,
+                counter_name=counter_name,
+                amount=amount,
+                reason=raw_reason or context.default_reason,
+                source_ref=source_ref,
+                replacement_selections=tuple(raw_selections),
+            )
+        except ValueError as exc:
+            raise SemanticNodeError(str(exc)) from exc
+        return IntentPlan(
+            operation=self.operation,
+            handler_id=self.handler_id,
+            intents=(intent,),
         )
 
 
@@ -194,6 +305,7 @@ class FixedPlayerCounterPlacementHandler:
 
 COUNTER_PLACEMENT_HANDLERS = (
     FixedCounterPlacementHandler(),
+    FixedCounterPlacementSetHandler(),
     FixedPlayerCounterPlacementHandler(),
 )
 
@@ -201,5 +313,6 @@ COUNTER_PLACEMENT_HANDLERS = (
 __all__ = [
     "COUNTER_PLACEMENT_HANDLERS",
     "FixedCounterPlacementHandler",
+    "FixedCounterPlacementSetHandler",
     "FixedPlayerCounterPlacementHandler",
 ]

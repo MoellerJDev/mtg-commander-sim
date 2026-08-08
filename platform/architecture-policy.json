@@ -21,6 +21,7 @@
     "quorune/continuous_effects.py",
     "quorune/continuous_effect_model.py",
     "quorune/counter_placement.py",
+    "quorune/counter_placement_sets.py",
     "quorune/counter_state.py",
     "quorune/cycling_abilities.py",
     "quorune/damage.py",

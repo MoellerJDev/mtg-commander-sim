@@ -34,6 +34,7 @@ from .intents import (
     PayManaCostIntent,
     PayLifeIntent,
     PlaceCountersIntent,
+    PlaceCountersOnSetIntent,
     PlacePlayerCountersIntent,
     RecordChoiceIntent,
     RecordZoneMoveIntent,
@@ -130,6 +131,11 @@ class SemanticIntentSink(
     def place_counters_intent(
         self,
         intent: PlaceCountersIntent,
+    ) -> tuple[str, ...]: ...
+
+    def place_counters_on_set_intent(
+        self,
+        intent: PlaceCountersOnSetIntent,
     ) -> tuple[str, ...]: ...
 
     def place_player_counters_intent(
@@ -307,8 +313,16 @@ def _execute_recording_intent(
     return intent.explorer_ref, None
 
 
-CounterPlacementIntent = PlaceCountersIntent | PlacePlayerCountersIntent
-COUNTER_PLACEMENT_INTENT_TYPES = (PlaceCountersIntent, PlacePlayerCountersIntent)
+CounterPlacementIntent = (
+    PlaceCountersIntent
+    | PlaceCountersOnSetIntent
+    | PlacePlayerCountersIntent
+)
+COUNTER_PLACEMENT_INTENT_TYPES = (
+    PlaceCountersIntent,
+    PlaceCountersOnSetIntent,
+    PlacePlayerCountersIntent,
+)
 _COUNTER_RESULT_KEY = "counter" + "s"
 
 
@@ -318,6 +332,8 @@ def _execute_counter_placement_intent(
 ) -> tuple[str, object]:
     if isinstance(intent, PlaceCountersIntent):
         return _COUNTER_RESULT_KEY, sink.place_counters_intent(intent)
+    if isinstance(intent, PlaceCountersOnSetIntent):
+        return _COUNTER_RESULT_KEY, sink.place_counters_on_set_intent(intent)
     return "player_counters", sink.place_player_counters_intent(intent)
 
 

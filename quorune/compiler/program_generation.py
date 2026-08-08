@@ -13,6 +13,7 @@ from ..rules.capabilities import (
 )
 from ..rules.node_capability_shapes import (
     fixed_counter_placement_node_capabilities,
+    fixed_counter_placement_set_node_capabilities,
     fixed_player_counter_placement_node_capabilities,
     fixed_damage_node_capabilities,
     mass_destruction_node_capabilities,
@@ -408,6 +409,27 @@ def _is_closed_fixed_player_counter_placement_program(
     )
 
 
+def _is_closed_fixed_counter_placement_set_program(
+    program: SemanticProgram,
+) -> bool:
+    """Recognize only the reviewed fixed affected-set counter family."""
+
+    required = set(
+        fixed_counter_placement_set_node_capabilities(
+            effects=program.effects,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value in {"cr-122-counters", "cr-115-targets"}
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def _is_closed_targeted_destruction_program(
     program: SemanticProgram,
 ) -> bool:
@@ -501,6 +523,7 @@ def _is_closed_effect_program(program: SemanticProgram) -> bool:
         _is_closed_single_explore_program,
         _is_closed_single_proliferate_program,
         _is_closed_fixed_counter_placement_program,
+        _is_closed_fixed_counter_placement_set_program,
         _is_closed_fixed_player_counter_placement_program,
         _is_closed_targeted_counter_program,
         _is_closed_targeted_destruction_program,

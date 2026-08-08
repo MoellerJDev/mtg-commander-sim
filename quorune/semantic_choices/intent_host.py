@@ -10,6 +10,10 @@ from ..counter_placement import (
     place_counters,
     place_counters_on_refs,
 )
+from ..counter_placement_sets import (
+    CounterPlacementSetError,
+    resolve_counter_placement_set,
+)
 from ..counter_state import player_counter_snapshot
 from ..errors import GameRuleError
 from ..fixed_damage_set import (
@@ -48,6 +52,7 @@ from ..semantic_runtime import (
     PayLifeIntent,
     PayManaCostIntent,
     PlaceCountersIntent,
+    PlaceCountersOnSetIntent,
     PlacePlayerCountersIntent,
     ProliferateIntent,
     RecordChoiceIntent,
@@ -641,6 +646,30 @@ class SemanticChoiceIntentHostMixin:
                 source_ref=intent.source_ref,
             )
         except CounterPlacementError as exc:
+            raise GameRuleError(str(exc)) from exc
+        return tuple(
+            self.state.cards[result.object_id].ref for result in results
+        )
+
+    def place_counters_on_set_intent(
+        self,
+        intent: PlaceCountersOnSetIntent,
+    ) -> tuple[str, ...]:
+        try:
+            results = resolve_counter_placement_set(
+                self,
+                actor=intent.actor,
+                spec=intent.spec,
+                counter_name=intent.counter_name,
+                amount=intent.amount,
+                reason=intent.reason,
+                source_ref=intent.source_ref,
+                replacement_selections=tuple(
+                    thaw_value(value)
+                    for value in intent.replacement_selections
+                ),
+            )
+        except CounterPlacementSetError as exc:
             raise GameRuleError(str(exc)) from exc
         return tuple(
             self.state.cards[result.object_id].ref for result in results

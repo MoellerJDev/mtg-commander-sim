@@ -320,6 +320,28 @@
         "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_typed_player_counter_handler_uses_apnap_subject_order_and_counter_owner",
         "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_target_player_counter_choice_is_seat_scoped_and_replays_exactly"
       ]
+    },
+    {
+      "exception_id": "ARCH-EXC-0016",
+      "adr": "docs/adr/0036-typed-fixed-affected-set-counter-placement.md",
+      "artifact": "platform/architecture-guard-baseline.json",
+      "allowance_fingerprint": "2fb8205cc4ac75dac5b26c56fc96a676d67da77868106d02b27055de8b0a71e4",
+      "exact_allowance": "Only the reduced structural write identities, engine methods, size ceilings, specificity literals, Oracle-ID literals, effect operations, and legacy helpers serialized after typed fixed affected-set counter placement extraction.",
+      "rationale": "The fixed affected-set counter family adds one closed universal semantic operation and one read-only rules module while keeping CommanderEngine, direct GameState writes, oversized symbols, Oracle-ID literals, and card-specificity flat apart from reviewed generic keyword-predicate literals that happen to match printed card names. Its strict handler emits PlaceCountersOnSetIntent and leaves replacement ordering, suspension, rollback, replay, and mutation with the existing canonical counter transaction.",
+      "owner": "rules architecture maintainers",
+      "maximum_scope": "Existing serialized residual allowances plus the reviewed place_counters_on_set operation, read-only counter_placement_sets module, and generic predicate literals described by ADR 0036; removals are allowed and additions or growth are forbidden.",
+      "removal_condition": "Remove the exception when every serialized grandfathered allowance has migrated to a reviewed owner; remove place_counters_on_set only if a successor typed effect model preserves its closed grammar, immutable public set snapshot, APNAP ordering, target revalidation, canonical transaction ownership, privacy, replay, and fail-closed residuals.",
+      "target_milestone": "typed fixed affected-set permanent-counter effects and shared spell, triggered, and activated effect-clause closure",
+      "replay_implications": "Game Record v3 remains compatible; source-spanned descriptors, stable logical-identity ordering, target revalidation, replacement continuations, and canonical counter journals preserve exact command replay.",
+      "privacy_implications": "The represented sets use public battlefield characteristics and seat-relative controller relations only; direct player targets remain seat-scoped and hidden zones are neither queried nor projected.",
+      "security_implications": "The strict handler accepts only a closed typed affected-set descriptor, emits an immutable intent, and grants no callback, arbitrary mutation, runtime Oracle parsing, transport access, or card-identity dispatch.",
+      "tests": [
+        "tests.test_architecture_guards.ArchitectureGuardTests.test_current_repository_passes_every_architecture_guard",
+        "tests.test_architecture_governance.ArchitectureGovernanceTests.test_exception_is_bound_to_exact_allowance_fingerprint",
+        "tests.test_fixed_counter_placement_sets.FixedCounterPlacementSetCompilerTests.test_spell_trigger_and_activated_contexts_share_fixed_counter_set_lowering",
+        "tests.test_fixed_counter_placement_sets.FixedCounterPlacementSetRuntimeTests.test_fixed_counter_set_resolves_canonical_apnap_batch",
+        "tests.test_fixed_counter_placement_sets.FixedCounterPlacementSetRuntimeTests.test_target_player_counter_set_is_seat_scoped_and_replays_exactly"
+      ]
     }
   ]
 }

@@ -500,6 +500,58 @@ class PlaceCountersIntent:
 
 
 @dataclass(frozen=True, slots=True)
+class PlaceCountersOnSetIntent:
+    actor: str
+    spec: AffectedPermanentSetSpec
+    counter_name: str
+    amount: int
+    reason: str
+    source_ref: str | None = None
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        normalized = (
+            " ".join(self.counter_name.casefold().split())
+            if type(self.counter_name) is str
+            else ""
+        )
+        if any(
+            type(value) is not str or not value
+            for value in (self.actor, normalized, self.reason)
+        ):
+            raise ValueError(
+                "Counter-set intents require actor, counter, and reason"
+            )
+        if not isinstance(self.spec, AffectedPermanentSetSpec):
+            raise ValueError(
+                "Counter-set intents require a typed affected set"
+            )
+        if type(self.amount) is not int or self.amount <= 0:
+            raise ValueError(
+                "Counter-set intent amount must be a positive exact integer"
+            )
+        if self.source_ref is not None and (
+            type(self.source_ref) is not str or not self.source_ref
+        ):
+            raise ValueError(
+                "Counter-set intent source must be a nonempty reference"
+            )
+        if self.spec.exclude_source and self.source_ref is None:
+            raise ValueError(
+                "Source-excluding counter sets require a source"
+            )
+        object.__setattr__(self, "counter_name", normalized)
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                tuple(self.replacement_selections),
+                family="Counter-set placement",
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class PlacePlayerCountersIntent:
     actor: str
     player_ids: tuple[str, ...]
@@ -797,6 +849,7 @@ SemanticIntent: TypeAlias = (
     | ReorderLibraryTopIntent
     | PayManaCostIntent
     | PlaceCountersIntent
+    | PlaceCountersOnSetIntent
     | PlacePlayerCountersIntent
     | CounterStackIntent
     | EliminatePlayersIntent
