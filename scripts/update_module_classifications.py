@@ -139,6 +139,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "quorune/counter_placement_sets.py",
         "quorune/counter_removal.py",
         "quorune/counter_state.py",
+        "quorune/cumulative_upkeep.py",
         "quorune/damage.py",
         "quorune/damage_prevention.py",
         "quorune/damage_transaction.py",
@@ -316,6 +317,8 @@ def _owner(relative: str, layer: str) -> str:
         "quorune/entry_counter_model.py",
     }:
         return "counter_placement"
+    if relative == "quorune/cumulative_upkeep.py":
+        return "cumulative_upkeep"
     if relative in {
         "quorune/destruction.py",
         "quorune/destruction_sets.py",
@@ -441,6 +444,7 @@ def build_classifications() -> dict[str, Any]:
                             "counter_placement_sets.py",
                             "counter_removal.py",
                             "counter_state.py",
+                            "cumulative_upkeep.py",
                             "entry_counter",
                             "commander.py",
                             "combat_damage_",

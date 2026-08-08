@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 60,
+  "registry_version": 61,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -489,7 +489,7 @@
         "summary": "Resolve represented effect-generated permanent counter placements, including prevention aftermath, through affected-object ordering and a typed precommit plan before committing counters.",
         "inputs": ["placing player", "affected card or permanent", "resolved positive integral counter amount", "fixed multiply/add runtime components"],
         "outputs": ["resolved counter amount", "exact replacement journal", "principal-scoped competing choice", "validated typed counter commit plan", "authoritative counter mutation"],
-        "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "counter costs", "rule-generated placements other than the separately declared intrinsic-entry family"]
+        "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "counter costs", "rule-generated placements other than the separately declared intrinsic-entry and fixed-mana cumulative-upkeep families"]
       },
       "dependencies": [],
       "implementation_components": ["quorune.semantic_runtime.counter_replacements.CounterQuantityReplacementHandler", "quorune.counter_placement.prepare_counter_placements", "quorune.counter_placement.plan_prepared_counter_placement_commit", "quorune.counter_placement.commit_counter_placement_plan", "quorune.damage_prevention_aftermath.prepare_prevention_aftermath"],
@@ -504,6 +504,33 @@
       "dependency_fail_closed_rationale": "This bounded counter producer has no capability dependencies beyond the shared replacement event substrate.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "counter.producer.cumulative_upkeep_fixed_mana",
+      "version": 1,
+      "official_rules": ["101.4", "118.12", "122.1", "122.6", "603.3", "614.16", "702.24", "702.24a", "702.24b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve one ordinary fixed-mana cumulative-upkeep instance by placing its age counter through the canonical replacement-aware transaction before calculating the optional payment from the actual committed age-counter count.",
+        "inputs": ["one printed cumulative-upkeep instance", "fixed positive ordinary mana cost per age counter", "current source identity and controller", "actual post-replacement age-counter count"],
+        "outputs": ["source-spanned upkeep trigger", "identity-pinned intervening-condition recheck", "replacement-aware age-counter placement", "payment-or-sacrifice choice priced from committed state", "typed mana-payment or zone-move intent", "exact continuation replay"],
+        "exclusions": ["alternative, snow, hybrid, Phyrexian, variable, or nonmana costs", "multiple instances on one object", "gained or copied cumulative-upkeep abilities", "cost modification or restricted-mana families beyond the canonical represented mana-payment owner", "counter movement, removal, or unrepresented quantity replacements"]
+      },
+      "dependencies": ["counter.placement.quantity_replacement"],
+      "implementation_components": ["quorune.cumulative_upkeep.FixedManaCumulativeUpkeepSpec", "quorune.compiler.cumulative_upkeep_nodes.fixed_mana_cumulative_upkeep_node", "quorune.rules.node_capability_shapes.fixed_mana_cumulative_upkeep_node_capabilities", "quorune.semantic_choices.payments.OptionalPaymentHandler", "quorune.semantic_choices.preparation_coordination.continue_semantic_preparation", "quorune.semantic_runtime.intents.PlaceCountersIntent", "quorune.semantic_runtime.intents.PayManaCostIntent", "quorune.semantic_runtime.intents.ZoneMoveIntent"],
+      "positive_tests": ["test_fixed_mana_cumulative_upkeep_is_source_spanned_and_capability_closed", "test_intervening_source_identity_and_control_change_are_respected", "test_quantity_replacement_changes_age_counter_and_payment_together"],
+      "negative_tests": ["test_unsupported_cumulative_upkeep_costs_remain_material_residuals", "test_malformed_stage_fails_and_stale_source_is_noop_before_mutation"],
+      "interaction_tests": ["test_intervening_source_identity_and_control_change_are_respected", "test_quantity_replacement_changes_age_counter_and_payment_together"],
+      "multiplayer_tests": ["test_four_player_replacement_choice_and_payment_are_seat_scoped"],
+      "privacy_tests": ["test_four_player_replacement_choice_and_payment_are_seat_scoped"],
+      "replay_tests": ["test_quantity_replacement_resume_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The explicit compiler gate retains a material dependency residual whenever canonical counter quantity replacement is not trusted for the active profile.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_dependency_and_compiler_mutations_fail_closed removes the fixed-mana cumulative-upkeep node and proves the previously exact source-spanned trigger becomes a material residual.",
       "blockers": [],
       "status": "trusted"
     },

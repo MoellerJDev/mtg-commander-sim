@@ -16,6 +16,7 @@ from ..rules.node_capability_shapes import (
     fixed_counter_placement_set_node_capabilities,
     fixed_counter_placement_target_set_node_capabilities,
     fixed_player_counter_placement_node_capabilities,
+    fixed_mana_cumulative_upkeep_node_capabilities,
     fixed_damage_node_capabilities,
     mass_destruction_node_capabilities,
     fixed_draw_node_capabilities,
@@ -410,6 +411,28 @@ def _is_closed_fixed_player_counter_placement_program(
     )
 
 
+def _is_closed_fixed_mana_cumulative_upkeep_program(
+    program: SemanticProgram,
+) -> bool:
+    """Recognize exactly one ordinary fixed-mana upkeep trigger."""
+
+    required = set(
+        fixed_mana_cumulative_upkeep_node_capabilities(
+            effects=program.effects,
+            event_condition=program.event_condition,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value == "cumulative upkeep"
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def _is_closed_fixed_counter_placement_set_program(
     program: SemanticProgram,
 ) -> bool:
@@ -548,6 +571,7 @@ def _is_closed_effect_program(program: SemanticProgram) -> bool:
         _is_closed_fixed_counter_placement_set_program,
         _is_closed_fixed_counter_placement_target_set_program,
         _is_closed_fixed_player_counter_placement_program,
+        _is_closed_fixed_mana_cumulative_upkeep_program,
         _is_closed_targeted_counter_program,
         _is_closed_targeted_destruction_program,
         _is_closed_mass_destruction_program,

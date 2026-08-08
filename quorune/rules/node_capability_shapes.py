@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence
 
+from ..fixed_mana_abilities import MANA_COST_KEYS
+
 from ..attachment_references import (
     AttachmentReferenceError,
     AttachmentReferenceSpec,
@@ -985,6 +987,46 @@ def fixed_player_counter_placement_node_capabilities(
     )
 
 
+def fixed_mana_cumulative_upkeep_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    event_condition: Mapping[str, Any] | None,
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return ownership only for one fixed-mana cumulative-upkeep trigger."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if "cumulative upkeep" not in mechanics or len(effects) != 1:
+        return ()
+    effect = effects[0]
+    cost = effect.get("cost_per_counter")
+    if (
+        target_schema is not None
+        or set(effect) != {"op", "player", "source", "cost_per_counter"}
+        or effect.get("op") != "cumulative_upkeep"
+        or effect.get("player") != "$controller"
+        or effect.get("source") != "$source"
+        or not isinstance(cost, Mapping)
+        or set(cost) != set(MANA_COST_KEYS)
+        or any(type(amount) is not int or amount < 0 for amount in cost.values())
+        or not any(cost.values())
+    ):
+        return ()
+    if dict(event_condition or {}) != {
+        "all": [
+            {
+                "field": "player",
+                "op": "eq",
+                "value": "$source.controller",
+            },
+            {"field": "step", "op": "eq", "value": "upkeep"},
+        ]
+    }:
+        return ()
+    return ("counter.producer.cumulative_upkeep_fixed_mana",)
+
+
 __all__ = [
     "fixed_damage_node_capabilities",
     "mass_destruction_node_capabilities",
@@ -993,6 +1035,7 @@ __all__ = [
     "fixed_counter_placement_set_node_capabilities",
     "fixed_counter_placement_target_set_node_capabilities",
     "fixed_player_counter_placement_node_capabilities",
+    "fixed_mana_cumulative_upkeep_node_capabilities",
     "single_explore_node_capabilities",
     "single_proliferate_node_capabilities",
     "targeted_destruction_node_capabilities",
