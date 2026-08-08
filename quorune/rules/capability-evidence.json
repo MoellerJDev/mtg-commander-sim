@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "dcdb9bd6f84beaa2852ba3a89795340bc457dfac9b4158b8227e68ac0b332e56",
-  "declaration_source_fingerprint": "7fb927bf87d0d21289e236dbf534f7d2f0022cdb459a7c9e5e61693a1c89d3ae",
+  "registry_fingerprint": "e7c8c759562fd300ea143b740c66fe2df13bf8de40e0c0585295441f64f0e17e",
+  "declaration_source_fingerprint": "a0b467cc2065faf05e62c88982f46d1a464f2971b04e5c50ec7e10a0f81e6495",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -8531,6 +8531,139 @@
       "applicability_note": "Attribute combat damage to the designated physical commander card across zone and control changes and apply the separate 21-damage state-based action ledger."
     },
     {
+      "capability_id": "keyword_action.explore.single",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_explore_rules.ExploreEngineTests.test_counter_and_zone_replacements_suspend_before_explore_mutation",
+      "official_rule_ids": [
+        "122.1",
+        "400.6",
+        "701.44",
+        "701.44a",
+        "701.44b",
+        "701.44c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Suspend one Explore instruction before either counter placement or a zone move when competing replacement effects require an affected-player choice."
+    },
+    {
+      "capability_id": "keyword_action.explore.single",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_explore_rules.ExploreEngineTests.test_four_player_explore_choice_is_controller_scoped_and_public",
+      "official_rule_ids": [
+        "122.1",
+        "400.6",
+        "701.44",
+        "701.44a",
+        "701.44b",
+        "701.44c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Issue the nonland Explore choice only to the exploring permanent's current controller in a four-player game while keeping the reveal public."
+    },
+    {
+      "capability_id": "keyword_action.explore.single",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_explore_compiler.ExploreCompilerTests.test_explore_compiler_template_mutant_is_killed",
+      "official_rule_ids": [
+        "122.1",
+        "400.6",
+        "701.44",
+        "701.44a",
+        "701.44b",
+        "701.44c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a compiler mutant that removes the closed single-permanent Explore template and would otherwise preserve a false exact promotion."
+    },
+    {
+      "capability_id": "keyword_action.explore.single",
+      "evidence_class": "negative",
+      "test_id": "tests.test_explore_compiler.ExploreCompilerTests.test_unsupported_explore_variants_remain_outside_closed_grammar",
+      "official_rule_ids": [
+        "122.1",
+        "400.6",
+        "701.44",
+        "701.44a",
+        "701.44b",
+        "701.44c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep repeated, simultaneous, unqualified-target, replacement, and multi-target Explore variants outside the bounded grammar."
+    },
+    {
+      "capability_id": "keyword_action.explore.single",
+      "evidence_class": "positive",
+      "test_id": "tests.test_explore_compiler.ExploreCompilerTests.test_explore_program_is_capability_closed_and_dependencies_fail_closed",
+      "official_rule_ids": [
+        "122.1",
+        "400.6",
+        "701.44",
+        "701.44a",
+        "701.44b",
+        "701.44c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Compile a source-bound single Explore trigger to a trusted CardProgram only while both counter and zone replacement dependencies remain trusted."
+    },
+    {
+      "capability_id": "keyword_action.explore.single",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_explore_rules.ExploreEngineTests.test_four_player_explore_choice_is_controller_scoped_and_public",
+      "official_rule_ids": [
+        "122.1",
+        "400.6",
+        "701.44",
+        "701.44a",
+        "701.44b",
+        "701.44c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the current Explore decision only to its controller and expose no decision packet or continuation internals to other seats."
+    },
+    {
+      "capability_id": "keyword_action.explore.single",
+      "evidence_class": "replay",
+      "test_id": "tests.test_explore_rules.ExploreEngineTests.test_explore_preparation_replacement_resume_replays_exactly",
+      "official_rule_ids": [
+        "122.1",
+        "400.6",
+        "701.44",
+        "701.44a",
+        "701.44b",
+        "701.44c"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the suspended counter replacement and following Explore choice to the identical authoritative state hash."
+    },
+    {
       "capability_id": "life.change.effect",
       "evidence_class": "interaction",
       "test_id": "tests.test_life_effect_runtime.LifeEffectRuntimeTests.test_drain_log_reports_final_replacement_adjusted_values",
@@ -14333,5 +14466,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "e54cda6cffa366573d74de61ab90062d543083382797778181d42243f656b234"
+  "fingerprint": "6b9c791efd201afcf267243c8d36b36d29ed4017980607d8989ea7173cfeb3c4"
 }

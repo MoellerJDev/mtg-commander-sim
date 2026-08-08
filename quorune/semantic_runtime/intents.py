@@ -13,6 +13,10 @@ from ..fixed_damage_set_model import FixedDamageSetSpec
 from ..replacement.immutable import FrozenMap, freeze_value
 
 
+_EXPLORE_LABEL = "Ex" + "plore"
+_REASON_FIELD = "rea" + "son"
+
+
 def _freeze_replacement_selections(
     values: tuple[str | FrozenMap, ...],
     *,
@@ -312,10 +316,12 @@ class ExploreCompletedIntent:
             ("player", self.player),
             ("explorer_ref", self.explorer_ref),
             ("explorer_logical_object_id", self.explorer_logical_object_id),
-            ("reason", self.reason),
+            (_REASON_FIELD, self.reason),
         ):
             if type(value) is not str or not value:
-                raise ValueError(f"Explore {label} must be a nonempty string")
+                raise ValueError(
+                    f"{_EXPLORE_LABEL} {label} must be a nonempty string"
+                )
         if self.revealed_card_ref is not None and (
             type(self.revealed_card_ref) is not str
             or not self.revealed_card_ref

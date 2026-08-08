@@ -290,8 +290,8 @@ from .semantic_choices.engine_coordination import (
 from .semantic_choices.intent_host import SemanticChoiceIntentHostMixin
 from .semantic_runtime.explore import (
     capture_explore_source_departure,
-    explore_source_controller,
 )
+from .semantic_runtime.values import resolve_semantic_value
 from .state_based_actions import (
     ObjectSnapshot,
     PermanentSnapshot,
@@ -8715,69 +8715,7 @@ class CommanderEngine(
             raise GameRuleError("Semantic continuation program version changed")
 
     def _semantic_value(self, value: Any, item: StackItem) -> Any:
-        """Resolve transport-safe runtime placeholders in cached semantics.
-
-        Programs can be reused across games because they refer to `$controller`,
-        `$active`, `$source`, `$card`, `$stack`, `$x`, or `$target.N` rather than
-        physical object ids. Dict/list structures are resolved recursively.
-        """
-        if isinstance(value, list):
-            return [self._semantic_value(child, item) for child in value]
-        if isinstance(value, dict):
-            return {key: self._semantic_value(child, item) for key, child in value.items()}
-        if not isinstance(value, str) or not value.startswith("$"):
-            return value
-        if value == "$controller":
-            return item.controller
-        if value == "$active":
-            return self.state.active_player
-        if value == "$source":
-            return self._stack_source_ref(item)
-        if value == "$source.controller":
-            return explore_source_controller(item, self.state.cards)
-        if value == "$card":
-            card = self.state.cards.get(item.card_object_id or "")
-            return card.ref if card else None
-        if value == "$stack":
-            return item.ref
-        if value == "$x":
-            return item.x_value or 0
-        if value == "$turn_sequence":
-            return self.state.turn_sequence
-        if value.startswith("$context."):
-            return item.context.get(value.removeprefix("$context."))
-        if value == "$targets":
-            return [
-                target
-                for target in item.targets
-                if target is not None
-            ]
-        attribute_match = re.fullmatch(
-            r"\$target\.(?P<attribute>controller|owner|mana_value|colors|type_line)"
-            r"[.\[](?P<index>\d+)\]?",
-            value,
-        )
-        if attribute_match:
-            index = int(attribute_match.group("index"))
-            if index >= len(item.targets):
-                return None
-            target_ref = item.targets[index]
-            if target_ref is None:
-                return None
-            snapshot = dict(
-                item.context.get("target_snapshots", {}).get(
-                    str(target_ref),
-                    self._target_snapshot(str(target_ref)),
-                )
-            )
-            return snapshot.get(attribute_match.group("attribute"))
-        target_match = re.fullmatch(r"\$target[.\[](?P<index>\d+)\]?", value)
-        if target_match:
-            index = int(target_match.group("index"))
-            if index >= len(item.targets):
-                return None
-            return item.targets[index]
-        return value
+        return resolve_semantic_value(self, value, item)
 
     @staticmethod
     def _effect_has_missing_target(effect: Mapping[str, Any]) -> bool:

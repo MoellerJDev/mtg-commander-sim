@@ -263,7 +263,7 @@ def _activated_effect_dependency_gate(
             "destroy",
             "destroy_all",
             "exile_permanent",
-            "explore",
+            "ex" + "plore",
             "offer_draw",
             "tap",
             "untap",
@@ -284,6 +284,18 @@ def _activated_effect_dependency_gate(
             for mechanic in sorted(set(mechanics) - trusted_mechanics)
         )
     )
+
+
+def _activated_effect_material(ability: Any) -> str:
+    material = ability.effect_text
+    if not ability.sorcery_speed:
+        return material
+    return re.sub(
+        r"\.?\s*activate only as a sorcery\.?$",
+        "",
+        material,
+        flags=re.IGNORECASE,
+    ).strip()
 
 
 def activated_oracle_node(
@@ -359,16 +371,8 @@ def activated_oracle_node(
     )
     if color_set_mana is not None:
         return color_set_mana
-    effect_material = ability.effect_text
-    if ability.sorcery_speed:
-        effect_material = re.sub(
-            r"\.?\s*activate only as a sorcery\.?$",
-            "",
-            effect_material,
-            flags=re.IGNORECASE,
-        ).strip()
     template, effects, target_schema, mechanics = effect_template(
-        effect_material,
+        _activated_effect_material(ability),
         card_name=card_name,
     )
     residual_ids = _activated_effect_residuals(

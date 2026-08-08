@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import replace
 from typing import Any, Mapping, Protocol, Sequence
 
 from ..replacement.immutable import FrozenMap, thaw_value
@@ -10,8 +9,21 @@ from ..replacement_effects import (
     ReplacementEffectError,
     replacement_choice_payload,
 )
-from ..semantic_runtime import IntentPlan, PlaceCountersIntent, execute_intent_plan
+from ..semantic_runtime import (
+    IntentPlan,
+    PlaceCountersIntent,
+    ZoneMoveIntent,
+    execute_intent_plan,
+)
 from .defaults import default_semantic_choice_registry
+from .intent_replacement import (
+    counter_intent_identity,
+    semantic_intent_identity,
+    serialized_replacement_selections,
+    validate_counter_intent_identity,
+    validate_semantic_intent_identity,
+    with_replacement_selections,
+)
 from .model import (
     SemanticChoiceCompletion,
     SemanticChoiceContinuation,
@@ -20,15 +32,6 @@ from .model import (
 
 
 _PILOT_ROLE = "pi" + "lot"
-_REASON_FIELD = "rea" + "son"
-_COUNTER_INTENT_FIELDS = {
-    "actor",
-    "object_refs",
-    "counter_name",
-    "amount",
-    _REASON_FIELD,
-    "source_ref",
-}
 
 
 class SemanticCounterCoordinationHost(Protocol):
@@ -57,68 +60,6 @@ class SemanticCounterCoordinationHost(Protocol):
         note: str,
         instruction_pointer: int = 0,
     ) -> None: ...
-
-
-def counter_intent_identity(intent: PlaceCountersIntent) -> dict[str, Any]:
-    """Serialize the stable, choice-independent identity of one placement."""
-
-    if not isinstance(intent, PlaceCountersIntent):
-        raise SemanticChoiceError(
-            "Counter continuation requires a typed placement intent"
-        )
-    return {
-        "actor": intent.actor,
-        "object_refs": list(intent.object_refs),
-        "counter_name": intent.counter_name,
-        "amount": intent.amount,
-        _REASON_FIELD: intent.reason,
-        "source_ref": intent.source_ref,
-    }
-
-
-def validate_counter_intent_identity(value: Mapping[str, Any]) -> dict[str, Any]:
-    if not isinstance(value, Mapping):
-        raise SemanticChoiceError("Counter intent identity must be an object")
-    actual = set(value)
-    if actual != _COUNTER_INTENT_FIELDS:
-        missing = sorted(_COUNTER_INTENT_FIELDS - actual)
-        unknown = sorted(actual - _COUNTER_INTENT_FIELDS)
-        details = [
-            *(f"missing {name}" for name in missing),
-            *(f"unknown {name}" for name in unknown),
-        ]
-        raise SemanticChoiceError(
-            "Counter intent identity fields: " + "; ".join(details)
-        )
-    actor = value["actor"]
-    refs = value["object_refs"]
-    name = value["counter_name"]
-    amount = value["amount"]
-    reason = value[_REASON_FIELD]
-    source = value["source_ref"]
-    if (
-        not isinstance(actor, str)
-        or not actor
-        or not isinstance(refs, (list, tuple))
-        or not refs
-        or any(not isinstance(ref, str) or not ref for ref in refs)
-        or len(refs) != len(set(refs))
-        or not isinstance(name, str)
-        or not name
-        or type(amount) is not int
-        or amount < 0
-        or not isinstance(reason, str)
-        or (source is not None and (not isinstance(source, str) or not source))
-    ):
-        raise SemanticChoiceError("Counter intent identity is malformed")
-    return {
-        "actor": actor,
-        "object_refs": list(refs),
-        "counter_name": name,
-        "amount": amount,
-        _REASON_FIELD: reason,
-        "source_ref": source,
-    }
 
 
 def _serialized_selections(
@@ -166,6 +107,46 @@ def _issue_counter_replacement_choice(
     )
 
 
+def _issue_semantic_intent_replacement_choice(
+    host: SemanticCounterCoordinationHost,
+    *,
+    continuation: SemanticChoiceContinuation,
+    actor: str,
+    response: Mapping[str, Any],
+    intent: ZoneMoveIntent,
+    intent_index: int,
+    required: ReplacementChoiceRequired,
+) -> None:
+    intent_kind, identity = semantic_intent_identity(intent)
+    pending = required.pending
+    chooser = pending.choice.chooser
+    host.permissions.issue(
+        kind="replacement.order",
+        role=_PILOT_ROLE,
+        actors=[chooser],
+        allowed_actions=["choose"],
+        payload_by_actor={
+            chooser: replacement_choice_payload(pending, required.effects)
+        },
+        continuation={
+            "replacement_resume_kind": "semantic_intent_completion",
+            "semantic_choice_continuation": continuation.to_dict(),
+            "semantic_choice_actor": actor,
+            "semantic_choice_response": dict(response),
+            "intent_index": intent_index,
+            "semantic_intent_kind": intent_kind,
+            "semantic_intent": identity,
+            "replacement_selections": serialized_replacement_selections(
+                intent.replacement_selections
+            ),
+            "replacement_batch": required.batch.to_dict(),
+            "replacement_effects": [
+                effect.to_dict() for effect in required.effects
+            ],
+        },
+    )
+
+
 def _source_ref(host: SemanticCounterCoordinationHost, item: Any) -> str | None:
     object_id = item.source_object_id or item.card_object_id or ""
     source = host.state.cards.get(object_id)
@@ -185,34 +166,45 @@ def continue_semantic_completion(
         str | FrozenMap | Mapping[str, Any]
     ] = (),
     expected_counter_intent: Mapping[str, Any] | None = None,
+    expected_intent_kind: str | None = None,
+    expected_intent: Mapping[str, Any] | None = None,
 ) -> bool:
-    """Execute a completion, suspending counter placement before mutation."""
+    """Execute a completion, suspending supported intents before mutation."""
 
     intents = tuple(completion.intents)
     if type(start_index) is not int or start_index < 0 or start_index > len(intents):
-        raise SemanticChoiceError("Semantic counter intent index is invalid")
-    expected = (
-        validate_counter_intent_identity(expected_counter_intent)
-        if expected_counter_intent is not None
-        else None
-    )
+        raise SemanticChoiceError("Semantic completion intent index is invalid")
+    if expected_counter_intent is not None and (
+        expected_intent_kind is not None or expected_intent is not None
+    ):
+        raise SemanticChoiceError("Semantic completion has competing identities")
+    if expected_counter_intent is not None:
+        expected_kind = "place_counters"
+        expected = validate_counter_intent_identity(expected_counter_intent)
+    elif expected_intent_kind is not None or expected_intent is not None:
+        if expected_intent_kind is None or expected_intent is None:
+            raise SemanticChoiceError(
+                "Semantic completion intent identity is incomplete"
+            )
+        expected_kind = expected_intent_kind
+        expected = validate_semantic_intent_identity(
+            expected_intent_kind, expected_intent
+        )
+    else:
+        expected_kind = None
+        expected = None
     for index in range(start_index, len(intents)):
         intent = intents[index]
         selections = replacement_selections if index == start_index else ()
         if selections or expected is not None:
-            if not isinstance(intent, PlaceCountersIntent):
+            actual_kind, identity = semantic_intent_identity(intent)
+            if expected is not None and (
+                actual_kind != expected_kind or identity != expected
+            ):
                 raise SemanticChoiceError(
-                    "Semantic counter continuation no longer names a counter intent"
+                    "Semantic completion intent changed before replacement resume"
                 )
-            identity = counter_intent_identity(intent)
-            if expected is not None and identity != expected:
-                raise SemanticChoiceError(
-                    "Semantic counter intent changed before replacement resume"
-                )
-            intent = replace(
-                intent,
-                replacement_selections=tuple(selections),
-            )
+            intent = with_replacement_selections(intent, selections)
         try:
             execute_intent_plan(
                 host,
@@ -223,18 +215,29 @@ def continue_semantic_completion(
                 ),
             )
         except ReplacementChoiceRequired as required:
-            if not isinstance(intent, PlaceCountersIntent):
+            if isinstance(intent, PlaceCountersIntent):
+                _issue_counter_replacement_choice(
+                    host,
+                    continuation=continuation,
+                    actor=actor,
+                    response=response,
+                    intent=intent,
+                    intent_index=index,
+                    selections=intent.replacement_selections,
+                    required=required,
+                )
+            elif isinstance(intent, ZoneMoveIntent):
+                _issue_semantic_intent_replacement_choice(
+                    host,
+                    continuation=continuation,
+                    actor=actor,
+                    response=response,
+                    intent=intent,
+                    intent_index=index,
+                    required=required,
+                )
+            else:
                 raise
-            _issue_counter_replacement_choice(
-                host,
-                continuation=continuation,
-                actor=actor,
-                response=response,
-                intent=intent,
-                intent_index=index,
-                selections=intent.replacement_selections,
-                required=required,
-            )
             return False
         expected = None
         replacement_selections = ()
@@ -312,6 +315,64 @@ def resume_semantic_counter_completion(
                 selection,
             ),
             expected_counter_intent=expected_intent,
+        )
+    except (SemanticChoiceError, ReplacementEffectError) as exc:
+        raise error_type(str(exc)) from exc
+
+
+def resume_semantic_intent_completion(
+    host: SemanticCounterCoordinationHost,
+    restored: ReplacementContinuation,
+    selection: str | Mapping[str, Any],
+    *,
+    error_type: type[Exception],
+) -> None:
+    try:
+        raw_continuation = restored.thaw_semantic_choice_continuation()
+        response = restored.thaw_semantic_choice_response()
+        expected_intent = restored.thaw_semantic_intent()
+        registry = default_semantic_choice_registry()
+        handler, continuation = registry.decode_continuation(raw_continuation)
+        item = next(
+            (
+                candidate
+                for candidate in host.state.stack
+                if candidate.ref == continuation.stack_ref
+            ),
+            None,
+        )
+        if item is None:
+            raise SemanticChoiceError(
+                "Semantic intent continuation stack object no longer exists"
+            )
+        host._validate_semantic_frame(
+            continuation.semantic_frame.to_dict(), item
+        )
+        actor = restored.semantic_choice_actor
+        completion = handler.complete(
+            continuation,
+            response,
+            host._semantic_choice_query(
+                actor,
+                response=response,
+                effect=continuation.effect,
+                source_ref=_source_ref(host, item),
+            ),
+        )
+        continue_semantic_completion(
+            host,
+            item=item,
+            continuation=continuation,
+            actor=actor,
+            response=response,
+            completion=completion,
+            start_index=restored.intent_index,
+            replacement_selections=(
+                *restored.replacement_selections,
+                selection,
+            ),
+            expected_intent_kind=restored.semantic_intent_kind,
+            expected_intent=expected_intent,
         )
     except (SemanticChoiceError, ReplacementEffectError) as exc:
         raise error_type(str(exc)) from exc

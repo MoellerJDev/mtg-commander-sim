@@ -286,6 +286,21 @@ def _execute_permanent_transition_intent(
     )
 
 
+RecordingIntent = RecordChoiceIntent | ExploreCompletedIntent
+RECORDING_INTENT_TYPES = (RecordChoiceIntent, ExploreCompletedIntent)
+
+
+def _execute_recording_intent(
+    sink: SemanticIntentSink,
+    intent: RecordingIntent,
+) -> tuple[str, None]:
+    if isinstance(intent, RecordChoiceIntent):
+        sink.record_choice_intent(intent)
+        return intent.actor, None
+    sink.complete_explore_intent(intent)
+    return intent.explorer_ref, None
+
+
 def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
     if any(isinstance(intent, DrawCardsIntent) for intent in plan.intents):
         raise SemanticNodeError(
@@ -330,13 +345,8 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
             result = sink.set_card_designation_intent(intent)
             results.append((intent.object_ref, result))
             continue
-        if isinstance(intent, RecordChoiceIntent):
-            sink.record_choice_intent(intent)
-            results.append((intent.actor, None))
-            continue
-        if isinstance(intent, ExploreCompletedIntent):
-            sink.complete_explore_intent(intent)
-            results.append((intent.explorer_ref, None))
+        if isinstance(intent, RECORDING_INTENT_TYPES):
+            results.append(_execute_recording_intent(sink, intent))
             continue
         if isinstance(intent, ZoneMoveIntent):
             result = sink.move_object_intent(intent)

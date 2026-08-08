@@ -20,10 +20,7 @@ from .compiler.corpus_reporting import (
 from .compiler.continuous_templates import (
     controlled_creature_until_end_of_turn_effect,
 )
-from .compiler.counter_templates import (
-    is_intrinsically_uncounterable_spell,
-    targeted_counter_effect_template,
-)
+from .compiler.counter_templates import is_intrinsically_uncounterable_spell
 from .compiler.cycling_nodes import ordinary_cycling_keyword_node
 from .cycling_abilities import CYCLING_MECHANIC_ID
 from .compiler.activated_mana_nodes import (
@@ -41,15 +38,7 @@ from .compiler.draw_templates import (
     draw_reveal_or_trigger_nodes,
     fixed_draw_effect_template,
 )
-from .compiler.damage_templates import fixed_damage_effect_template
-from .compiler.destruction_templates import (
-    destruction_effect_template,
-)
-from .compiler.exile_templates import targeted_exile_effect_template
 from .compiler.explore_templates import single_explore_effect_template
-from .compiler.return_to_hand_templates import (
-    targeted_return_to_hand_effect_template,
-)
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
 from .compiler.keyword_nodes import (
@@ -68,6 +57,9 @@ from .compiler.prevention_templates import (
     fixed_prevention_effect_template,
     prevention_trigger_effect_template,
 )
+from .compiler.resolution_effect_templates import (
+    typed_resolution_effect_template,
+)
 from .compiler.runtime_templates import StaticRuntimeTemplate, static_runtime_template
 from .compiler.tap_state_templates import targeted_tap_state_effect_template
 from .declaration_costs import parse_declaration_cost_line
@@ -78,7 +70,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v46"
+ORACLE_COMPILER_VERSION = "oracle-ir-v47"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
@@ -211,24 +203,11 @@ def _effect_template(
                 "cr-101-the-magic-golden-rules",
             ),
         )
-    fixed_damage = fixed_damage_effect_template(
-        normalized,
-        card_name=card_name,
+    typed = typed_resolution_effect_template(
+        normalized, card_name=card_name
     )
-    if fixed_damage is not None:
-        return fixed_damage.compiled()
-    destruction = destruction_effect_template(normalized)
-    if destruction is not None:
-        return destruction.compiled()
-    exiled = targeted_exile_effect_template(normalized)
-    if exiled is not None:
-        return exiled.compiled()
-    returned = targeted_return_to_hand_effect_template(normalized)
-    if returned is not None:
-        return returned.compiled()
-    countered = targeted_counter_effect_template(normalized)
-    if countered is not None:
-        return countered.compiled()
+    if typed is not None:
+        return typed
     match = re.fullmatch(
         r"target player mills (?P<count>\d+) cards?\.?",
         normalized,

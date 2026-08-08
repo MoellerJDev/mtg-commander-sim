@@ -52,6 +52,21 @@ _SEMANTIC_COUNTER_COMPLETION_FIELDS = {
     "replacement_batch",
     "replacement_effects",
 }
+_SEMANTIC_INTENT_COMPLETION_FIELDS = {
+    "replacement_resume_kind",
+    "semantic_choice_continuation",
+    "semantic_choice_actor",
+    "semantic_choice_response",
+    "intent_index",
+    "semantic_intent_kind",
+    "semantic_intent",
+    "replacement_selections",
+    "replacement_batch",
+    "replacement_effects",
+}
+_SEMANTIC_PREPARATION_FIELDS = (
+    _SEMANTIC_INTENT_COMPLETION_FIELDS - {"semantic_choice_response"}
+)
 _MANA_FRAME_FIELDS = {
     "active_player",
     "phase",
@@ -88,6 +103,8 @@ class ReplacementContinuation:
     semantic_choice_response: FrozenMap | None = None
     intent_index: int = 0
     counter_intent: FrozenMap | None = None
+    semantic_intent_kind: str = ""
+    semantic_intent: FrozenMap | None = None
 
     @classmethod
     def from_dict(
@@ -106,6 +123,13 @@ class ReplacementContinuation:
         if resume_kind == "semantic_counter_completion":
             return _decode_semantic_counter_completion(
                 cls, value, batch, effects
+            )
+        if resume_kind in {
+            "semantic_intent_completion",
+            "semantic_preparation",
+        }:
+            return _decode_semantic_intent_continuation(
+                cls, value, batch, effects, resume_kind=resume_kind
             )
         return _decode_semantic_continuation(cls, value, batch, effects)
 
@@ -164,6 +188,13 @@ class ReplacementContinuation:
             )
         return thaw_value(self.counter_intent)
 
+    def thaw_semantic_intent(self) -> dict[str, Any]:
+        if self.semantic_intent is None:
+            raise ReplacementEffectError(
+                "This continuation has no semantic intent"
+            )
+        return thaw_value(self.semantic_intent)
+
 
 def _validate_continuation_shape(value: Mapping[str, Any]) -> str:
     resume_kind = str(value.get("replacement_resume_kind") or "semantic")
@@ -174,6 +205,14 @@ def _validate_continuation_shape(value: Mapping[str, Any]) -> str:
         "semantic_counter_completion": (
             _SEMANTIC_COUNTER_COMPLETION_FIELDS,
             "semantic counter-completion continuation",
+        ),
+        "semantic_intent_completion": (
+            _SEMANTIC_INTENT_COMPLETION_FIELDS,
+            "semantic intent-completion continuation",
+        ),
+        "semantic_preparation": (
+            _SEMANTIC_PREPARATION_FIELDS,
+            "semantic preparation continuation",
         ),
     }
     shape = shapes.get(resume_kind)
@@ -406,6 +445,50 @@ def _decode_semantic_counter_completion(
         semantic_choice_response=FrozenMap(response),
         intent_index=intent_index,
         counter_intent=FrozenMap(counter_intent),
+        replacement_selections=_decode_combat_selections(value),
+    )
+
+
+def _decode_semantic_intent_continuation(
+    continuation_type: type[ReplacementContinuation],
+    value: Mapping[str, Any],
+    batch: ReplacementEventBatch,
+    effects: tuple[ReplacementEffect, ...],
+    *,
+    resume_kind: str,
+) -> ReplacementContinuation:
+    semantic = value["semantic_choice_continuation"]
+    actor = value["semantic_choice_actor"]
+    response = value.get("semantic_choice_response")
+    semantic_intent = value["semantic_intent"]
+    intent_kind = value["semantic_intent_kind"]
+    intent_index = value["intent_index"]
+    if (
+        not isinstance(semantic, Mapping)
+        or type(actor) is not str
+        or not actor
+        or actor not in batch.apnap_order
+        or (resume_kind == "semantic_intent_completion" and not isinstance(response, Mapping))
+        or not isinstance(semantic_intent, Mapping)
+        or intent_kind not in {"place_counters", "zone_move"}
+        or type(intent_index) is not int
+        or intent_index < 0
+    ):
+        raise ReplacementEffectError(
+            "Semantic intent continuation fields are malformed"
+        )
+    return continuation_type(
+        batch=batch,
+        effects=effects,
+        resume_kind=resume_kind,
+        semantic_choice_continuation=FrozenMap(semantic),
+        semantic_choice_actor=actor,
+        semantic_choice_response=(
+            FrozenMap(response) if isinstance(response, Mapping) else None
+        ),
+        intent_index=intent_index,
+        semantic_intent_kind=intent_kind,
+        semantic_intent=FrozenMap(semantic_intent),
         replacement_selections=_decode_combat_selections(value),
     )
 

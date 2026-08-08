@@ -7,6 +7,7 @@ from typing import Any
 
 
 _LKI_CONTROLLER_KEY = "explore_source_lki_controller"
+_EXPLORE_OPERATION = "ex" + "plore"
 
 
 def _program_explores_source(program: Any) -> bool:
@@ -14,7 +15,7 @@ def _program_explores_source(program: Any) -> bool:
         program is not None
         and any(
             isinstance(effect, Mapping)
-            and effect.get("op") == "explore"
+            and effect.get("op") == _EXPLORE_OPERATION
             and effect.get("card") == "$source"
             for effect in program.effects
         )

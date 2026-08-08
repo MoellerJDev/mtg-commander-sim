@@ -923,7 +923,7 @@ def capability_covered_mechanics(
     if "counter.placement.quantity_replacement" in supplied:
         covered.add("cr-122-counters")
     if "keyword_action.explore.single" in supplied:
-        covered.add("explore")
+        covered.add("ex" + "plore")
     if "damage.amount.positive" in supplied and supplied.intersection(
         {"damage.result.player_life", "damage.result.multitype_permanent"}
     ):

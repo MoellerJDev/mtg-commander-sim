@@ -10,7 +10,6 @@ from ..replacement.immutable import thaw_value
 from ..semantic_runtime.draw_restrictions import current_draw_permission
 from ..semantic_runtime import (
     IntentPlan,
-    execute_intent_plan,
     prepare_draw_resolution,
 )
 from ..targets import TargetGroup, available_modes, target_plan
@@ -23,6 +22,7 @@ from .context import (
 )
 from .counter_coordination import continue_semantic_completion
 from .defaults import default_semantic_choice_registry
+from .preparation_coordination import continue_semantic_preparation
 from .model import (
     SemanticChoiceContinuation,
     SemanticChoiceError,
@@ -475,6 +475,26 @@ class SemanticChoiceCoordinationMixin:
             )
         except SemanticChoiceError as exc:
             raise GameRuleError(str(exc)) from exc
+        continuation = SemanticChoiceContinuation(
+            handler_id=handler.handler_id,
+            handler_version=handler.schema_version,
+            stack_ref=item.ref,
+            effect=preparation.continuation_effect,
+            remaining=tuple(dict(value) for value in remaining),
+            destination=destination,
+            note=note,
+            semantic_frame=SemanticChoiceFrame(
+                semantic_program_id=str(item.semantic_key or ""),
+                semantic_program_version=(
+                    self.semantics.get(item.semantic_key).version
+                    if self.semantics.get(item.semantic_key)
+                    else None
+                ),
+                stack_object=item.ref,
+                instruction_pointer=instruction_pointer,
+                controller=item.controller,
+            ),
+        )
         preparation_intents = tuple(preparation.preparation_intents)
         # Only a single typed draw intent needs to leave this immediate
         # preparation path for the replacement-aware draw coordinator.  Other
@@ -523,62 +543,15 @@ class SemanticChoiceCoordinationMixin:
                 },
             )
             return
-        for intent in preparation_intents:
-            execute_intent_plan(
+        try:
+            continue_semantic_preparation(
                 self,
-                IntentPlan(
-                    operation=handler.operation,
-                    handler_id=handler.handler_id,
-                    intents=(intent,),
-                ),
+                continuation=continuation,
+                actor=seat,
+                preparation=preparation,
             )
-        if preparation.auto_continue is not None:
-            self._continue_resolution(
-                stack_ref=item.ref,
-                effects=[
-                    *(
-                        thaw_value(value)
-                        for value in preparation.auto_continue.prepend_effects
-                    ),
-                    *(thaw_value(value) for value in remaining),
-                ],
-                destination=destination,
-                note=note,
-                instruction_pointer=instruction_pointer + 1,
-            )
-            return
-        assert preparation.request is not None
-        continuation = SemanticChoiceContinuation(
-            handler_id=handler.handler_id,
-            handler_version=handler.schema_version,
-            stack_ref=item.ref,
-            effect=preparation.continuation_effect,
-            remaining=tuple(dict(value) for value in remaining),
-            destination=destination,
-            note=note,
-            semantic_frame=SemanticChoiceFrame(
-                semantic_program_id=str(item.semantic_key or ""),
-                semantic_program_version=(
-                    self.semantics.get(item.semantic_key).version
-                    if self.semantics.get(item.semantic_key)
-                    else None
-                ),
-                stack_object=item.ref,
-                instruction_pointer=instruction_pointer,
-                controller=item.controller,
-            ),
-        )
-        decision = self.permissions.issue(
-            kind="semantic.choice",
-            role="pilot",
-            actors=[seat],
-            allowed_actions=["choose"],
-            payload_by_actor={seat: preparation.request.payload()},
-            continuation=continuation.to_dict(),
-        )
-        decision.continuation = continuation.with_pending_choice(
-            decision.decision_id
-        ).to_dict()
+        except SemanticChoiceError as exc:
+            raise GameRuleError(str(exc)) from exc
 
     def _complete_registered_semantic_choice(self, decision: Any) -> None:
         seat = decision.actors[0]

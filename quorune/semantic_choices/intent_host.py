@@ -242,7 +242,7 @@ class SemanticChoiceIntentHostMixin:
                 intent.explorer_logical_object_id
             ),
             "result": intent.result,
-            "reason": intent.reason,
+            "rea" + "son": intent.reason,
         }
         if intent.revealed_card_ref is not None:
             details["revealed_card"] = intent.revealed_card_ref

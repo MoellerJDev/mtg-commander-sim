@@ -1,14 +1,21 @@
 from __future__ import annotations
 
+import json
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 import os
 
+from quorune import oracle_ir as oracle_ir_module
 from quorune.carddb import CardDatabase
 from quorune.compiler.explore_templates import (
     single_explore_effect_template,
 )
-from quorune.oracle_ir import compile_oracle_card
+from quorune.oracle_ir import compile_oracle_card, generated_programs
+from quorune.rules.capabilities import (
+    CapabilityRegistry,
+    load_default_capability_registry,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,6 +25,7 @@ DB_PATH = Path(
         ROOT / "data" / "scryfall-20260728-compact.sqlite3",
     )
 )
+REGISTRY_PATH = ROOT / "quorune" / "rules" / "capability-registry.json"
 from quorune.rules.node_capability_shapes import (
     single_explore_node_capabilities,
 )
@@ -130,6 +138,83 @@ class ExploreCompilerTests(unittest.TestCase):
         self.assertEqual("activated_ability", activation.kind)
         self.assertEqual("explore-source-permanent-once-v1", activation.template_id)
         self.assertEqual(1, activation.span.line)
+
+    def test_explore_program_is_capability_closed_and_dependencies_fail_closed(self):
+        capabilities = load_default_capability_registry()
+        with CardDatabase(DB_PATH) as database:
+            record = database.lookup("Cenote Scout")
+            program = next(
+                value
+                for value in generated_programs(
+                    database,
+                    record,
+                    trust_level="trusted",
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+                if value.provenance.get("template_id")
+                == "explore-source-permanent-once-v1"
+            )
+            self.assertEqual("trusted", program.trust_level)
+            self.assertTrue(program.capability_closure["trusted"])
+            self.assertEqual(
+                "oracle-ir-v47", program.provenance["authored_by"]
+            )
+            self.assertIn(
+                "keyword_action.explore.single",
+                program.capability_dependencies,
+            )
+
+            registry_value = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
+            dependency = next(
+                row
+                for row in registry_value["capabilities"]
+                if row["id"] == "counter.placement.quantity_replacement"
+            )
+            dependency["status"] = "blocked"
+            dependency["blockers"] = ["test mutation"]
+            blocked = compile_oracle_card(
+                record,
+                capability_registry=CapabilityRegistry(registry_value),
+                capability_profile="commander_review",
+            )
+        self.assertNotEqual("exact", blocked.status)
+        self.assertTrue(
+            any(
+                "counter.placement.quantity_replacement" in blocker
+                for residual in blocked.material_residuals
+                for blocker in residual.blockers
+            )
+        )
+
+    def test_explore_compiler_template_mutant_is_killed(self):
+        capabilities = load_default_capability_registry()
+        with CardDatabase(DB_PATH) as database:
+            record = database.lookup("Cenote Scout")
+
+            def assert_exact() -> None:
+                result = compile_oracle_card(
+                    record,
+                    capability_registry=capabilities,
+                    capability_profile="commander_review",
+                )
+                self.assertEqual("exact", result.status)
+                self.assertTrue(
+                    any(
+                        node.template_id == "explore-source-permanent-once-v1"
+                        for face in result.faces
+                        for node in face.nodes
+                    )
+                )
+
+            assert_exact()
+            with patch.object(
+                oracle_ir_module,
+                "single_explore_effect_template",
+                return_value=None,
+            ):
+                with self.assertRaises(AssertionError):
+                    assert_exact()
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@
 title: "ADR 0011: counter-placement event and mutation ownership"
 status: "ADR"
 authoritative_source: "this decision record and platform/architecture-policy.json"
-verified: "2026-08-02"
+verified: "2026-08-07"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 adr_id: "0011"
@@ -35,6 +35,16 @@ and immutable fixed integral quantity transformations. It remains pure and has
 no authority over `GameState`. The engine implements a narrow host protocol and
 keeps compatibility facades while producers migrate incrementally.
 
+Semantic-choice preparation and completion use separate typed continuation
+coordinators. A replacement-capable intent is pinned by its complete canonical
+identity before suspension, and resume reconstructs the handler output,
+revalidates the stack frame, skips already committed predecessor intents, and
+continues from that exact intent. Fabricate retains its historical
+counter-completion continuation. Single-permanent Explore uses the generic
+preparation continuation for its counter or revealed-land move and the generic
+completion continuation for the optional graveyard move. Game Record v3 stays
+additive and historical continuation shapes remain strict and replayable.
+
 A zone replacement that creates counters represents them as nested event-tree
 children. The parent is exhausted before the child under CR 616.1g, while all
 choices still complete before the original zone mutation. Capabilities remain
@@ -62,6 +72,9 @@ tested or blocked outside the represented producer and descriptor families.
 - Engine physical line count decreases for the migrated paths.
 - Remaining counter producers are an explicit architecture inventory rather
   than implied coverage.
+- A semantic producer may migrate only when its enclosing instruction can
+  suspend before mutation and resume without replaying earlier reveals,
+  choices, logs, or zone changes.
 
 ## Removal condition
 

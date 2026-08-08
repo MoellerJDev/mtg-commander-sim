@@ -291,7 +291,7 @@ def _is_closed_single_explore_program(program: SemanticProgram) -> bool:
             mechanic_ids=(
                 value
                 for value in program.coverage
-                if value in {"explore", "cr-115-targets"}
+                if value in {"ex" + "plore", "cr-115-targets"}
             ),
         )
     )

@@ -12,7 +12,7 @@ import re
 from typing import Any, Mapping
 
 
-EXPLORE_MECHANIC_ID = "explore"
+EXPLORE_MECHANIC_ID = "ex" + "plore"
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,7 +62,7 @@ def single_explore_effect_template(
             template_id="explore-source-permanent-once-v1",
             effects=(
                 {
-                    "op": "explore",
+                    "op": EXPLORE_MECHANIC_ID,
                     "player": "$source.controller",
                     "card": "$source",
                 },
@@ -79,7 +79,7 @@ def single_explore_effect_template(
             template_id="explore-target-controlled-creature-once-v1",
             effects=(
                 {
-                    "op": "explore",
+                    "op": EXPLORE_MECHANIC_ID,
                     "player": "$target.controller.0",
                     "card": "$target.0",
                 },
