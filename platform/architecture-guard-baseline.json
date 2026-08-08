@@ -1,5 +1,5 @@
 {
-  "baseline_commit": "d8e0d2bcd5a6aff5950654c5e61046c5ca250293",
+  "baseline_commit": "71deb497f4c88fb4e07f71e5ec745aff1d6be106",
   "card_named_helpers": [
     {
       "file": "quorune/engine.py",
@@ -157,12 +157,6 @@
       "kind": "mutating_call:remove",
       "state_path": "stack",
       "symbol": "_complete_storm_choice"
-    },
-    {
-      "file": "quorune/engine.py",
-      "kind": "mutating_call:remove",
-      "state_path": "stack",
-      "symbol": "_continue_resolution"
     },
     {
       "file": "quorune/engine.py",
@@ -724,12 +718,12 @@
     }
   ],
   "direct_game_state_writes_by_file": {
-    "quorune/engine.py": 110,
+    "quorune/engine.py": 109,
     "quorune/permissions.py": 8,
     "quorune/record.py": 11
   },
   "engine": {
-    "logical_lines": 12389,
+    "logical_lines": 12211,
     "methods": [
       {
         "kind": "method",
@@ -1418,11 +1412,6 @@
       },
       {
         "kind": "method",
-        "name": "_initialize_intrinsic_entry_counters",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
         "name": "_is_main_phase",
         "visibility": "private"
       },
@@ -2088,11 +2077,6 @@
       },
       {
         "kind": "method",
-        "name": "_untap_permanent",
-        "visibility": "private"
-      },
-      {
-        "kind": "method",
         "name": "_update_yield_change_epochs",
         "visibility": "private"
       },
@@ -2272,12 +2256,12 @@
         "visibility": "public"
       }
     ],
-    "physical_lines": 13111
+    "physical_lines": 12927
   },
   "exception_binding": {
-    "adr": "docs/adr/0033-typed-fixed-counter-placement.md",
-    "allowance_fingerprint": "1da65937fe113ca058a05628f462e143f6959eee16e5ccefa465987bbcb13ef4",
-    "exception_id": "ARCH-EXC-0014"
+    "adr": "docs/adr/0035-typed-fixed-player-counter-placement.md",
+    "allowance_fingerprint": "65f96c7fb4de8e41f46af601f1a6fa8a5456f769ae89561d06d380dc08abc7af",
+    "exception_id": "ARCH-EXC-0015"
   },
   "legacy_card_specific_operations": [
     "daretti_exchange",
@@ -2401,11 +2385,6 @@
     },
     {
       "file": "quorune/engine.py",
-      "logical_lines": 168,
-      "symbol": "CommanderEngine._continue_resolution"
-    },
-    {
-      "file": "quorune/engine.py",
       "logical_lines": 232,
       "symbol": "CommanderEngine._declaration_restrictions"
     },
@@ -2426,7 +2405,7 @@
     },
     {
       "file": "quorune/engine.py",
-      "logical_lines": 328,
+      "logical_lines": 255,
       "symbol": "CommanderEngine._stabilize"
     },
     {
@@ -2517,7 +2496,7 @@
     },
     {
       "file": "quorune/engine.py",
-      "logical_lines": 12389
+      "logical_lines": 12211
     },
     {
       "file": "quorune/record.py",
@@ -2630,6 +2609,7 @@
     "offer_draw",
     "pay_or_lose",
     "place_counters",
+    "place_player_counters",
     "populate_with_haste",
     "prepare_graveyard_creature_aura",
     "proliferate",

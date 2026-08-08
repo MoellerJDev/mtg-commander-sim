@@ -8,7 +8,7 @@
       }
     ],
     "debt_trend": {
-      "baseline_commit": "d8e0d2bcd5a6aff5950654c5e61046c5ca250293",
+      "baseline_commit": "71deb497f4c88fb4e07f71e5ec745aff1d6be106",
       "dimensions": {
         "card_named_helpers": {
           "baseline": 1,
@@ -16,14 +16,14 @@
           "delta": 0
         },
         "direct_game_state_writes": {
-          "baseline": 129,
+          "baseline": 128,
           "current": 128,
-          "delta": -1
+          "delta": 0
         },
         "engine_logical_lines": {
-          "baseline": 12389,
+          "baseline": 12211,
           "current": 12211,
-          "delta": -178
+          "delta": 0
         },
         "legacy_card_specific_operations": {
           "baseline": 5,
@@ -36,9 +36,9 @@
           "delta": 0
         },
         "oversized_functions_and_methods": {
-          "baseline": 34,
+          "baseline": 33,
           "current": 33,
-          "delta": -1
+          "delta": 0
         },
         "oversized_modules": {
           "baseline": 5,
@@ -11074,7 +11074,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "bf15ae489c7894ff976d856f197bb83d71ad51dadc1c8ffe64783155b4456127"
+          "verified": "40ba02e0b6cc89782d29a61130844c123cf4560fc40cfb6de196965c9ac126e0"
         },
         "metadata_complete": true,
         "missing_metadata": [],

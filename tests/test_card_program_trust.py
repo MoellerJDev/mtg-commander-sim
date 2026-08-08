@@ -138,7 +138,14 @@ class CardProgramTrustTests(unittest.TestCase):
 
     def test_global_handler_and_component_inventory_is_capability_bound(self):
         status = runtime_component_status("commander_review")
-        self.assertEqual(89, len(status["semantic_handlers"]))
+        self.assertEqual(90, len(status["semantic_handlers"]))
+        self.assertIn(
+            "generic.fixed-player-counter-placement.v1",
+            {
+                row["handler_id"]
+                for row in status["semantic_handlers"]
+            },
+        )
         self.assertEqual(30, len(status["runtime_components"]))
         self.assertEqual(
             {
