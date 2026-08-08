@@ -1,7 +1,7 @@
 ---
 title: "Counter-placement transaction"
 status: "current"
-authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, quorune/counter_placement_sets.py, quorune/counter_placement_targets.py, quorune/entry_counter_model.py, quorune/entry_counters.py, semantic_runtime/counter_replacements.py, ADR 0011, ADR 0034, ADR 0036, and ADR 0037"
+authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, quorune/counter_placement_sets.py, quorune/counter_placement_targets.py, quorune/entry_counter_model.py, quorune/entry_counters.py, semantic_runtime/counter_replacements.py, ADR 0011, ADR 0034, ADR 0036, ADR 0037, and ADR 0038"
 verified: "2026-08-08"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -97,7 +97,7 @@ permanent can suspend through `resolving_entry` and resume without replaying
 earlier spell effects. Simultaneous entries prepare in APNAP order without
 mutation.
 
-Oracle IR v52 lowers the closed reusable fixed-placement grammars through the
+Oracle IR v53 lowers the closed reusable fixed-placement grammars through the
 typed operation in spell, triggered, and activated contexts. It accepts one
 positive exact quantity of one named counter on the source, the exact named
 source, or one direct battlefield permanent target. Direct targets may use one
@@ -116,6 +116,14 @@ zero is legal for “up to,” and resolution follows CR 608.2b: still-legal
 targets receive counters, while an originally nonempty selection with no legal
 targets does not resolve. Both families use typed semantic intents and exact
 replacement continuations rather than runtime Oracle interpretation.
+
+The fixed positive Support N family reuses that target-set path. The compiler
+derives source context from the exact parsed card-type set: a permanent source
+adds the CR 701.41a “other” source exclusion, while an instant or sorcery
+source does not. Unrelated or ambiguous source types remain residual. Support
+then resolves as one +1/+1 counter on each surviving creature target through
+the existing APNAP-canonical, quantity-replacement-aware transaction; it adds
+no runtime Oracle parser, Support-specific mutation, or card identity branch.
 
 The same compiler boundary now lowers one mandatory fixed player-counter
 instruction in spell, triggered, and activated contexts. Its closed relations
@@ -155,7 +163,8 @@ The following producers and wordings remain deliberately outside this slice:
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
 - cumulative upkeep;
-- Support shorthand and optional, variable, distributed, dynamic,
+- Support X or zero and conditional, optional, repeated, copied, granted,
+  modal, or compound Support instructions, plus variable, distributed, dynamic,
   subtype-qualified, combat-qualified, modal, conditional, compound, and
   multiple-counter target-set clauses, plus fixed player-counter variants
   outside the closed relations;
@@ -185,7 +194,8 @@ Primary assurance is in `test_counter_placement_replacements.py`,
 `test_fixed_counter_placement_effects.py`, with affected- and target-set
 coverage in `test_fixed_counter_placement_sets.py` and
 `test_fixed_counter_placement_target_sets.py`, plus intrinsic entry coverage
-in `test_intrinsic_entry_counters.py`, shared event-order coverage in
+in `test_intrinsic_entry_counters.py`, Support coverage in
+`test_support_counter_placement.py`, shared event-order coverage in
 `test_replacement_event_tree.py`, and focused mutation evidence in
 `test_capability_implementation_mutations.py`.
 

@@ -43,6 +43,7 @@
       "test_fixed_counter_placement_target_sets",
       "test_fixed_player_counter_placement_effects",
       "test_intrinsic_entry_counters",
+      "test_support_counter_placement",
       "test_life_change",
       "test_life_effect_runtime",
       "test_mass_destruction_effect_clauses",

@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
-  "contract_version": 5,
+  "contract_version": 6,
   "mechanic_id": "cr-122-counters",
   "official_name": "Counters",
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
-  "rule_references": ["115.1", "115.3", "115.6", "122", "122.1", "122.2", "122.6", "122.6a", "608.2b", "608.2h", "614.1", "614.16", "616.1", "616.1f", "616.1g"],
+  "rule_references": ["115.1", "115.3", "115.6", "122", "122.1", "122.2", "122.6", "122.6a", "608.2b", "608.2h", "614.1", "614.16", "616.1", "616.1f", "616.1g", "701.41", "701.41a"],
   "glossary_references": [],
   "dependencies": ["cr-110-permanents", "cr-611-continuous-effects"],
   "coverage_status": "partial",
@@ -13,7 +13,7 @@
   "behavior": {
     "zones": ["battlefield"],
     "objects": ["source or direct-target permanent", "bounded sets of direct-target permanents", "closed public battlefield sets", "players and phased-in permanents selected for ordinary Proliferate", "entering Planeswalker or Battle card and its prospective permanent"],
-    "events": ["put a positive fixed quantity of named counters on one source or direct-target battlefield permanent", "put the same fixed quantity of one named counter on each member of a bounded direct-target set", "put the same fixed quantity of one named counter on every member of one represented public battlefield set", "put one additional counter of every existing kind on each subject selected for one ordinary Proliferate instruction", "nested counter placement created by a represented replacement", "mandatory intrinsic Planeswalker loyalty or Battle defense self-replacement during battlefield entry"],
+    "events": ["put a positive fixed quantity of named counters on one source or direct-target battlefield permanent", "put the same fixed quantity of one named counter on each member of a bounded direct-target set", "perform one fixed positive Support N instruction with source-context target exclusion", "put the same fixed quantity of one named counter on every member of one represented public battlefield set", "put one additional counter of every existing kind on each subject selected for one ordinary Proliferate instruction", "nested counter placement created by a represented replacement", "mandatory intrinsic Planeswalker loyalty or Battle defense self-replacement during battlefield entry"],
     "state_reads": ["current object identity and target legality", "placing player", "affected permanent controller", "active players in APNAP order", "represented target and affected-set predicates", "active reviewed runtime counter-replacement sources", "canonical prospective type set and printed nonnegative integral loyalty or defense"],
     "state_writes": ["permanent or player counter quantity after every applicable replacement choice has resolved"],
     "costs": [],
@@ -29,7 +29,7 @@
     "zone_change": ["zone changes clear counters from the new object"],
     "source_leaves": ["targeted effects can resolve if their source leaves"]
   },
-  "variants": ["fixed positive counters on this permanent or exact card-name source", "fixed positive counters on one direct permanent-type or validated creature-subtype target", "bounded up-to sets of direct permanent-type targets with closed controller predicates", "closed mandatory public battlefield sets with represented type, controller, token, and counter predicates", "fixed controller relation and source exclusion predicates", "one ordinary Proliferate instruction over players and permanents", "printed Planeswalker loyalty and Battle defense on entry", "fixed additional counters", "fixed integral counter multiplication", "replacement-created nested counter placement"],
+  "variants": ["fixed positive counters on this permanent or exact card-name source", "fixed positive counters on one direct permanent-type or validated creature-subtype target", "bounded up-to sets of direct permanent-type targets with closed controller predicates", "fixed positive Support N from a permanent or instant/sorcery source", "closed mandatory public battlefield sets with represented type, controller, token, and counter predicates", "fixed controller relation and source exclusion predicates", "one ordinary Proliferate instruction over players and permanents", "printed Planeswalker loyalty and Battle defense on entry", "fixed additional counters", "fixed integral counter multiplication", "replacement-created nested counter placement"],
   "witness_cards": [
     {
       "name": "Doubling Season",
@@ -78,6 +78,15 @@
     "test_target_set_suspends_for_quantity_replacement_and_replays",
     "test_unsupported_target_set_variants_remain_material_residuals",
     "test_target_set_compiler_mutant_is_killed",
+    "test_support_compiles_in_spell_trigger_and_activated_contexts",
+    "test_permanent_support_excludes_source_while_spell_support_does_not",
+    "test_support_shape_mutations_fail_closed",
+    "test_unsupported_support_variants_remain_material_residuals",
+    "test_support_source_context_uses_exact_card_types",
+    "test_support_compiler_mutant_is_killed",
+    "test_permanent_support_excludes_source_from_legal_targets",
+    "test_support_all_original_targets_illegal_rolls_back",
+    "test_support_partial_target_revalidation_and_quantity_replacement_replay",
     "test_intrinsic_card_form_compiler_declares_exact_typed_capability",
     "test_intrinsic_card_form_dependency_fails_closed",
     "test_unsupported_intrinsic_card_forms_are_material_residuals",
@@ -92,13 +101,13 @@
     "test_battle_protector_validation_is_closed"
   ],
   "implementation": {
-    "component": "closed fixed-counter single-target, bounded target-set, affected-set, Proliferate, and card-form entry compilers; strict semantic and replacement continuations; typed target and set coordinators; counter_placement mutation owner; semantic_runtime counter and zone replacements; and represented producers",
-    "version": "counter-placement-transaction-v5",
-    "capability_ids": ["counter.producer.fixed_effect", "counter.producer.fixed_permanent_set_effect", "counter.producer.fixed_permanent_target_set_effect", "counter.producer.intrinsic_entry", "counter.producer.proliferate", "counter.placement.quantity_replacement"],
-    "supported_slice": "Mandatory fixed positive named counters on one source, one direct battlefield permanent target, one bounded up-to set of direct permanent targets, or one closed mandatory public battlefield set through spell, trigger, and activated contexts; one ordinary Proliferate instruction over eligible players and permanents; and printed nonnegative integral Planeswalker loyalty or Battle defense on entry."
+    "component": "closed fixed-counter single-target, bounded target-set, Support, affected-set, Proliferate, and card-form entry compilers; strict semantic and replacement continuations; typed target and set coordinators; counter_placement mutation owner; semantic_runtime counter and zone replacements; and represented producers",
+    "version": "counter-placement-transaction-v6",
+    "capability_ids": ["counter.producer.fixed_effect", "counter.producer.fixed_permanent_set_effect", "counter.producer.fixed_permanent_target_set_effect", "counter.producer.support", "counter.producer.intrinsic_entry", "counter.producer.proliferate", "counter.placement.quantity_replacement"],
+    "supported_slice": "Mandatory fixed positive named counters on one source, one direct battlefield permanent target, one bounded up-to set of direct permanent targets, one fixed positive Support N instruction, or one closed mandatory public battlefield set through spell, trigger, and activated contexts; one ordinary Proliferate instruction over eligible players and permanents; and printed nonnegative integral Planeswalker loyalty or Battle defense on entry."
   },
   "known_blockers": [
-    "Support shorthand and optional, variable, distributed, multi-counter, dynamic, subtype-qualified, combat-qualified, modal, conditional, and compound target-set instructions remain residual",
+    "Support X, zero, copied, granted, optional, repeated, conditional, modal, and compound Support instructions remain residual, along with optional, variable, distributed, multi-counter, dynamic, subtype-qualified, combat-qualified, modal, conditional, and compound general target-set instructions",
     "cumulative upkeep, loyalty costs, and other rule-action counter producers are not yet migrated to the shared transaction",
     "token Planeswalker or Battle entry with an applicable quantity replacement remains fail closed until token creation can suspend atomically",
     "fractional, halving, dynamic-quantity, movement, removal, prevention, and other enters-with-counter replacement families remain unsupported",

@@ -52,3 +52,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0035 — typed fixed player-counter placement](0035-typed-fixed-player-counter-placement.md)
 - [ADR 0036 — typed fixed affected-set counter placement](0036-typed-fixed-affected-set-counter-placement.md)
 - [ADR 0037 — typed fixed target-set counter placement](0037-typed-fixed-target-set-counter-placement.md)
+- [ADR 0038 — source-context-aware Support lowering](0038-source-context-aware-support.md)

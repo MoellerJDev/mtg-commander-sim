@@ -7,6 +7,7 @@ from .counter_placement_templates import (
     fixed_counter_placement_set_effect_template,
     fixed_counter_placement_target_set_effect_template,
     fixed_player_counter_placement_effect_template,
+    support_counter_placement_effect_template,
 )
 from .counter_templates import targeted_counter_effect_template
 from .damage_templates import fixed_damage_effect_template
@@ -28,6 +29,7 @@ def typed_resolution_effect_template(
     text: str,
     *,
     card_name: str,
+    source_is_permanent: bool | None = None,
 ) -> CompiledEffectTemplate | None:
     """Lower the closed direct-damage and permanent-transition families."""
 
@@ -37,6 +39,13 @@ def typed_resolution_effect_template(
     proliferate = single_proliferate_effect_template(text)
     if proliferate is not None:
         return proliferate.compiled()
+    if source_is_permanent is not None:
+        support = support_counter_placement_effect_template(
+            text,
+            source_is_permanent=source_is_permanent,
+        )
+        if support is not None:
+            return support.compiled()
     fixed_player_counter_placement = (
         fixed_player_counter_placement_effect_template(text)
     )

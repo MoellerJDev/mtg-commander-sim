@@ -251,6 +251,69 @@ class FixedCounterPlacementTargetSetTemplate:
 
 
 @dataclass(frozen=True, slots=True)
+class SupportCounterPlacementTemplate:
+    """One fixed Support N instruction with source-context target semantics."""
+
+    maximum_targets: int
+    source_is_permanent: bool
+
+    def __post_init__(self) -> None:
+        if type(self.maximum_targets) is not int or self.maximum_targets <= 0:
+            raise ValueError("Support maximum must be a positive exact integer")
+        if type(self.source_is_permanent) is not bool:
+            raise ValueError("Support source context must be explicit")
+
+    @property
+    def template_id(self) -> str:
+        context = "permanent" if self.source_is_permanent else "spell"
+        return f"support-fixed-{context}-{self.maximum_targets}-v1"
+
+    @property
+    def effects(self) -> tuple[Mapping[str, Any], ...]:
+        return (
+            {
+                "op": "place_counters_on_targets",
+                "cards": "$targets",
+                "maximum_targets": self.maximum_targets,
+                "counter": "+1/+1",
+                "amount": 1,
+                "source": "$source",
+            },
+        )
+
+    @property
+    def target_schema(self) -> Mapping[str, Any]:
+        schema: dict[str, Any] = {
+            "zones": ["battlefield"],
+            "categories": ["permanent"],
+            "types_any": ["creature"],
+            "up_to": self.maximum_targets,
+        }
+        if self.source_is_permanent:
+            schema["source_exclusion"] = True
+        return schema
+
+    @property
+    def mechanics(self) -> tuple[str, ...]:
+        return ("support", "cr-122-counters", "cr-115-targets")
+
+    def compiled(
+        self,
+    ) -> tuple[
+        str,
+        tuple[Mapping[str, Any], ...],
+        Mapping[str, Any],
+        tuple[str, ...],
+    ]:
+        return (
+            self.template_id,
+            self.effects,
+            self.target_schema,
+            self.mechanics,
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class FixedPlayerCounterPlacementTemplate:
     """One mandatory fixed placement on a closed player relation."""
 
@@ -597,6 +660,31 @@ def fixed_counter_placement_target_set_effect_template(
             else "any"
         ),
         exclude_creature=exclude_creature,
+    )
+
+
+def support_counter_placement_effect_template(
+    text: str,
+    *,
+    source_is_permanent: bool,
+) -> SupportCounterPlacementTemplate | None:
+    """Parse one ordinary fixed positive Support N keyword action."""
+
+    if type(source_is_permanent) is not bool:
+        raise ValueError("Support source context must be explicit")
+    match = re.fullmatch(
+        rf"support (?P<maximum>{_COUNT})\.?",
+        text.strip(),
+        re.IGNORECASE,
+    )
+    if match is None:
+        return None
+    maximum = fixed_number(match.group("maximum"))
+    if maximum <= 0:
+        return None
+    return SupportCounterPlacementTemplate(
+        maximum_targets=maximum,
+        source_is_permanent=source_is_permanent,
     )
 
 
@@ -1005,11 +1093,13 @@ __all__ = [
     "FixedCounterPlacementTemplate",
     "FixedCounterPlacementSetTemplate",
     "FixedCounterPlacementTargetSetTemplate",
+    "SupportCounterPlacementTemplate",
     "FixedPlayerCounterPlacementTemplate",
     "PlayerCounterPlacementSubject",
     "fixed_counter_placement_effect_template",
     "fixed_counter_placement_set_effect_template",
     "fixed_counter_placement_target_set_effect_template",
+    "support_counter_placement_effect_template",
     "fixed_counter_set_spec_is_closed",
     "fixed_player_counter_placement_effect_template",
 ]
