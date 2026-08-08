@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from ..entry_counters import IntrinsicEntryCounter
 from ..replacement_effects import (
     ReplaceableEvent,
     ReplacementBatchChoice,
@@ -116,6 +117,7 @@ class ZoneChangeSubjectSnapshot:
     destination_controller: str | None
     object_types: tuple[str, ...]
     is_card_object: bool
+    intrinsic_entry_counters: tuple[IntrinsicEntryCounter, ...] = ()
 
     def __post_init__(self) -> None:
         required = (
@@ -144,6 +146,17 @@ class ZoneChangeSubjectSnapshot:
                 "Zone replacement subject types must be canonical strings"
             )
         object.__setattr__(self, "object_types", object_types)
+        entry_counters = tuple(self.intrinsic_entry_counters)
+        if any(
+            not isinstance(value, IntrinsicEntryCounter)
+            for value in entry_counters
+        ):
+            raise ZoneReplacementError(
+                "Zone replacement entry counters must be typed instructions"
+            )
+        object.__setattr__(
+            self, "intrinsic_entry_counters", entry_counters
+        )
         if type(self.is_card_object) is not bool:
             raise ZoneReplacementError(
                 "Zone replacement card-object state must be boolean"

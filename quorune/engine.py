@@ -13,7 +13,6 @@ from .abilities import (
     ActivatedAbility,
 )
 from .aura import (
-    aura_resolution_move_kwargs,
     commit_aura_zone_move,
     complete_aura_entry_choice,
     EnchantSpec,
@@ -153,6 +152,14 @@ from .life_state import (
 from . import haste
 from .combat_evasion_engine_adapter import engine_combat_evasion_verdict
 from .errors import GameRuleError, StateInvariantError
+from .entry_counters import (
+    capture_prospective_entry_characteristics,
+    mark_intrinsic_entry_counters_initialized,
+    prospective_battle_entry_protector,
+)
+from .entry_counter_coordination import (
+    prepare_resolving_entry_replacement,
+)
 from .deck import DeckDefinition
 from .mana import (
     extract_effective_mana_modes,
@@ -180,7 +187,10 @@ from .stack_counter import (
     counter_stack_item,
     stack_item_can_be_countered,
 )
-from .stack_resolution import trusted_generic_empty_resolution
+from .stack_resolution import (
+    complete_stack_resolution,
+    trusted_generic_empty_resolution,
+)
 from .mana_payment_continuations import (
     execute_mana_choice_capable_priority_action,
 )
@@ -1377,65 +1387,6 @@ class CommanderEngine(
             if line.strip()
         )
 
-    def _initialize_intrinsic_entry_counters(
-        self,
-        card: CardInstance,
-    ) -> None:
-        """Apply counter entry abilities intrinsic to represented card types."""
-
-        if card.zone != "battlefield":
-            return
-        data = self._effective_card_data(
-            card,
-            printed_entry_characteristics=True,
-        )
-        card_types, subtypes, _ = self._type_parts(
-            str(data.get("type_line") or "")
-        )
-        if "planeswalker" in card_types:
-            try:
-                loyalty = int(str(data.get("loyalty")))
-            except (TypeError, ValueError):
-                raise GameRuleError(
-                    f"{self.display_name(card.object_id)} is a "
-                    "planeswalker without represented starting loyalty"
-                )
-            if loyalty < 0:
-                raise GameRuleError(
-                    "Starting loyalty cannot be negative"
-                )
-            card.counters["loyalty"] = loyalty
-            card.annotations["loyalty_initialized"] = True
-        if "battle" not in card_types:
-            card.battle_protector = None
-            return
-        if "siege" in subtypes:
-            if (
-                card.battle_protector not in self.active_seats
-                or card.battle_protector == card.controller
-            ):
-                raise GameRuleError(
-                    f"{self.display_name(card.object_id)} must enter with "
-                    "one of its controller's opponents as protector"
-                )
-        elif subtypes:
-            raise GameRuleError(
-                "The protector predicate for Battle type(s) "
-                f"{sorted(subtypes)} is not compiled"
-            )
-        else:
-            card.battle_protector = card.controller
-        try:
-            defense = int(str(data.get("defense")))
-        except (TypeError, ValueError):
-            raise GameRuleError(
-                f"{self.display_name(card.object_id)} is a Battle without "
-                "a represented printed defense number"
-            )
-        if defense < 0:
-            raise GameRuleError("Battle defense cannot be negative")
-        card.counters["defense"] = defense
-
     @staticmethod
     def _trigger_item_matches_incarnation(
         card: CardInstance,
@@ -1620,23 +1571,11 @@ class CommanderEngine(
                     changed_players=[card.owner],
                 )
             return card
-        destination_type_line = str(
-            self._effective_card_data(card).get("type_line") or ""
-        )
-        if enter_face is not None:
-            record = self.card_record(card)
-            selected_face = next(
-                (
-                    face
-                    for face in (record.faces if record else ())
-                    if str(face.get("name") or "") == enter_face
-                ),
-                None,
+        entry_characteristics, destination_type_line = (
+            capture_prospective_entry_characteristics(
+                self, card=card, enter_face=enter_face
             )
-            if selected_face is not None:
-                destination_type_line = str(
-                    selected_face.get("type_line") or ""
-                )
+        )
         if (
             destination == "battlefield"
             and card.is_card_object
@@ -1697,11 +1636,24 @@ class CommanderEngine(
             card,
             destination,
             destination_controller=controller,
+            entry_characteristics=entry_characteristics,
             selections=tuple(replacement_selections),
             prepared=prepared_replacement,
             error_type=GameRuleError,
         )
         destination = prepared_replacement.destination
+        prospective_battle_protector = prospective_battle_entry_protector(
+            destination=destination,
+            entry_characteristics=entry_characteristics,
+            controller=controller or card.owner,
+            supplied_protector=(
+                str(battle_protector)
+                if battle_protector is not None
+                else card.battle_protector
+            ),
+            active_seats=self.active_seats,
+            error_type=GameRuleError,
+        )
         if (aura_move := preflight_aura_zone_move(
             self, card, destination=destination, requested_destination=requested_destination, destination_type_line=destination_type_line, enter_face=enter_face, enchant_spec=aura_enchant_spec, controller=controller, target_ref=aura_target_ref, resolving_as_spell=resolving_as_aura_spell, origin=origin, log=log, error_type=GameRuleError,
         )).remain_in_origin: return card
@@ -1763,12 +1715,10 @@ class CommanderEngine(
             )
             card.acquired_control_turn_count = self.state.players[card.controller].turns_begun
             card.entered_battlefield_turn_sequence = self.state.turn_sequence
-            if battle_protector is not None:
-                card.battle_protector = str(battle_protector)
+            card.battle_protector = prospective_battle_protector
             self.state.players[card.controller].zones["battlefield"].append(
                 object_id
             )
-            self._initialize_intrinsic_entry_counters(card)
             commit_aura_zone_move(self, card, aura_entry_plan, error_type=GameRuleError)
             pending_attachment = take_pending_attachment(card)
             if pending_attachment is not None:
@@ -1886,6 +1836,7 @@ class CommanderEngine(
             error_type=StateInvariantError,
         )
         commit_counter_events_from_resolution(self, prepared_replacement, reason=reason, log=log, error_type=StateInvariantError)
+        mark_intrinsic_entry_counters_initialized(card, destination=card.zone, destination_type_line=destination_type_line)
         if semantic_events:
             self._dispatch_zone_change_events(
                 card,
@@ -8732,6 +8683,9 @@ class CommanderEngine(
         destination: str | None,
         note: str,
         instruction_pointer: int = 0,
+        entry_replacement_selections: Sequence[
+            str | Mapping[str, Any]
+        ] = (),
     ) -> None:
         item = next((candidate for candidate in self.state.stack if candidate.ref == stack_ref), None)
         if item is None:
@@ -8838,60 +8792,30 @@ class CommanderEngine(
             if not apply_effect_with_replacement_choice(self, item, effect, replacement_frame):
                 return
             index += 1
-        # Remove the resolving object from stack only when all player choices
-        # and effects have completed.
-        item.context.pop("currently_resolving", None)
-        self.state.stack.remove(item)
-        self._maybe_sacrifice_completed_saga(item)
-        entered: CardInstance | None = None
-        if item.context.get("copy_permanent_spell"):
-            if not item.card_object_id:
-                raise StateInvariantError(
-                    "A permanent spell copy requires a copy object"
-                )
-            card = self.state.cards[item.card_object_id]
-            if not card.is_spell_copy or card.zone != "stack":
-                raise StateInvariantError(
-                    "Permanent spell-copy object left the stack early"
-                )
-            characteristics = copy.deepcopy(
-                dict(
-                    item.context.get(
-                        "copy_permanent_characteristics", {}
-                    )
-                )
-            )
-            name = str(
-                item.context.get("copy_permanent_name")
-                or item.label.removesuffix(" copy")
-            )
-            card.printed_name = name
-            card.annotations["copy_overrides"] = characteristics
-            # CR 608.3f/707.10f: this same spell-copy object becomes a token
-            # permanent. It is not a newly created token.
-            card.object_kind = "token"
-            card.is_token = True
-            entered = self.move_card(
-                card.object_id,
-                "battlefield",
-                controller=item.controller, **aura_resolution_move_kwargs(item),
-                reason="permanent spell copy resolved",
-                log=False,
-                semantic_events=True,
-            )
-        elif item.card_object_id:
-            card = self.state.cards[item.card_object_id]
-            if card.zone == "stack":
-                if item.context.get("cost_option") == "evoke":
-                    card.annotations["evoked"] = True
-                entered = self.move_card(
-                    card.object_id,
-                    destination or item.default_destination or "graveyard",
-                    controller=item.controller, **aura_resolution_move_kwargs(item),
-                    reason="spell resolved",
-                    log=False,
-                    semantic_events=True,
-                )
+        # Prepare the final physical zone move before removing the resolving
+        # stack object. Intrinsic as-enters counters are self-replacements in
+        # this same immutable event tree, so a counter-replacement ordering
+        # choice can suspend without replaying prior instructions.
+        entry_preparation = prepare_resolving_entry_replacement(
+            self,
+            item=item,
+            destination=destination,
+            note=note,
+            instruction_pointer=instruction_pointer + len(effects),
+            selections=entry_replacement_selections,
+            error_type=GameRuleError,
+        )
+        if entry_preparation.suspended:
+            return
+        entry_destination = entry_preparation.destination
+        prepared_entry = entry_preparation.replacement
+
+        complete_stack_resolution(
+            self,
+            item=item,
+            destination=entry_destination,
+            prepared_replacement=prepared_entry,
+        )
         self._log(item.controller, "stack.resolve", f"Resolved {item.ref} {item.label}.", {"stack": item.ref, "effects": effects, "destination": destination, "note": note}, importance=2, changed_players=[item.controller])
         if self._stabilize():
             return

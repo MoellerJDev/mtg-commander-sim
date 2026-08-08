@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import replace
+from dataclasses import asdict, replace
 import hashlib
 from typing import Any, Iterable, Mapping
 
@@ -10,6 +10,10 @@ from ..compiler.program_generation import (
     generated_programs,
     rulings_source_hash,
     runtime_handler_footprint,
+)
+from ..compiler.card_form_rules import (
+    CardFormRuleNode,
+    compile_intrinsic_entry_counter_forms,
 )
 from ..oracle_ir import ORACLE_COMPILER_VERSION, compile_oracle_card
 from ..rules.capabilities import CapabilityRegistry
@@ -109,6 +113,85 @@ def _bind_program_faces(
     return tuple(result)
 
 
+def _card_form_rule_programs(
+    record: CardRecord,
+    *,
+    nodes: Iterable[CardFormRuleNode],
+    oracle_source_hash: str,
+    rulings_hash: str,
+    capability_registry: CapabilityRegistry | None,
+    capability_profile: str,
+    trust_level: str,
+) -> tuple[SemanticProgram, ...]:
+    """Lower rules-derived card forms without treating them as Oracle text."""
+
+    if capability_registry is None:
+        return ()
+    programs: list[SemanticProgram] = []
+    for node in nodes:
+        closure = capability_registry.closure(
+            node.capability_dependencies,
+            profile=capability_profile,
+        )
+        if trust_level == "trusted" and not closure.trusted:
+            raise ValueError(
+                f"{record.name} cannot be promoted to trusted generated "
+                "semantics: intrinsic entry-counter capability is blocked"
+            )
+        descriptor = node.descriptor()
+        ability_id = (
+            f"static:{node.face_id}:intrinsic-entry-"
+            f"{descriptor['counter_name']}"
+        )
+        programs.append(
+            SemanticProgram(
+                key=f"{record.oracle_id}:{ability_id}",
+                label=(
+                    f"{record.name} — intrinsic "
+                    f"{descriptor['counter_name']} entry counters"
+                ),
+                effects=[],
+                requires_arbiter=trust_level != "trusted",
+                oracle_id=record.oracle_id,
+                ability_id=ability_id,
+                active_zone="all",
+                event="intrinsic_entry",
+                trust_level=trust_level,
+                provenance={
+                    "source_oracle_hash": oracle_source_hash,
+                    "source_rulings_hash": rulings_hash,
+                    "authored_by": "card-form-rule-compiler-v1",
+                    "review_status": (
+                        "capability_closure_verified"
+                        if trust_level == "trusted"
+                        else "generated_review_required"
+                    ),
+                    "template_id": "intrinsic_entry_counter",
+                    "face_id": node.face_id,
+                    "source_kind": "type_line",
+                    "source_span": asdict(node.span),
+                    "card_form_descriptor": descriptor,
+                    "capability_registry_fingerprint": (
+                        closure.registry_fingerprint
+                    ),
+                    "capability_closure_fingerprint": closure.fingerprint,
+                    "capability_profile": closure.profile,
+                },
+                tests=["card_form_rule:intrinsic_entry_counter"],
+                event_condition={"card_form_rule": descriptor},
+                coverage=[
+                    "generated_card_form_rule",
+                    "intrinsic_entry_counter",
+                ],
+                capability_dependencies=list(
+                    node.capability_dependencies
+                ),
+                capability_closure=closure.to_dict(),
+            )
+        )
+    return tuple(programs)
+
+
 def compile_card_program(
     db: CardDatabase,
     record: CardRecord,
@@ -152,19 +235,36 @@ def compile_card_program(
         record,
         compiled_face_ids=(face.face_id for face in ir.faces),
     )
-    abilities = _bind_program_faces(programs.values(), faces)
+    ruling_hash = rulings_source_hash(db, record)
+    card_form_compilation = compile_intrinsic_entry_counter_forms(
+        record,
+        compiled_face_ids=tuple(face.face_id for face in faces),
+    )
+    card_form_programs = _card_form_rule_programs(
+        record,
+        nodes=card_form_compilation.nodes,
+        oracle_source_hash=ir.oracle_hash,
+        rulings_hash=ruling_hash,
+        capability_registry=capability_registry,
+        capability_profile=capability_profile,
+        trust_level=trust_level,
+    )
+    abilities = _bind_program_faces(
+        (*programs.values(), *card_form_programs), faces
+    )
     residuals = [
         {"face_id": face.face_id, **residual.to_dict()}
         for face in ir.faces
         for residual in face.residuals
     ]
+    residuals.extend(card_form_compilation.residuals)
     return CardProgram.create(
         compiler_version=ORACLE_COMPILER_VERSION,
         oracle_id=record.oracle_id,
         card_name=record.name,
         faces=faces,
         oracle_source_hash=ir.oracle_hash,
-        rulings_source_hash=rulings_source_hash(db, record),
+        rulings_source_hash=ruling_hash,
         abilities=abilities,
         residuals=residuals,
         provenance={

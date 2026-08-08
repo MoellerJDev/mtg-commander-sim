@@ -16,8 +16,8 @@
     {
       "mechanic_id": "cr-122-counters",
       "path": "mechanics/contracts/basic-counters.json",
-      "sha256": "b86bfec80bed34972b4ac248a98aad58ff3b1797c929be2875045a23c4647c50",
-      "version": 3
+      "sha256": "2022ad1ebb6e869f620bcfd2acf9cb1edf3601d4bc30999789240b9c325d53c0",
+      "version": 4
     },
     {
       "mechanic_id": "cr-111-tokens",
@@ -40,8 +40,8 @@
     {
       "mechanic_id": "cr-310-battles",
       "path": "mechanics/contracts/battles.json",
-      "sha256": "3973811786f826f28220d96dd2e5e1a57373299875d7c5ddac22b218d4400171",
-      "version": 3
+      "sha256": "91045fed2aae908bfb02560b7526676a8be70e7c55091f807c54edf523e1b1a7",
+      "version": 4
     },
     {
       "mechanic_id": "cr-507-beginning-of-combat-step",
@@ -6224,17 +6224,18 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/basic-counters.json",
-      "contract_sha256": "b86bfec80bed34972b4ac248a98aad58ff3b1797c929be2875045a23c4647c50",
-      "contract_version": 3,
+      "contract_sha256": "2022ad1ebb6e869f620bcfd2acf9cb1edf3601d4bc30999789240b9c325d53c0",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "closed fixed-counter and Proliferate compilers, strict semantic and choice handlers, counter_placement mutation owner, semantic_runtime.counter_replacements, and represented semantic producers",
-      "implementation_version": "counter-placement-transaction-v3",
+      "implementation_component": "closed fixed-counter, Proliferate, and card-form entry compilers; strict semantic and replacement continuations; counter_placement mutation owner; semantic_runtime counter and zone replacements; and represented producers",
+      "implementation_version": "counter-placement-transaction-v4",
       "kind": "rules_section",
       "known_blockers": [
         "optional, variable, distributed, multi-counter, fixed player-counter, and set-based counter instructions remain residual",
-        "cumulative upkeep, intrinsic entry counters, loyalty costs, and rule actions are not yet migrated to the shared transaction",
-        "fractional, halving, dynamic-quantity, movement, removal, prevention, and full enters-with-counter replacement families remain unsupported",
+        "cumulative upkeep, loyalty costs, and other rule-action counter producers are not yet migrated to the shared transaction",
+        "token Planeswalker or Battle entry with an applicable quantity replacement remains fail closed until token creation can suspend atomically",
+        "fractional, halving, dynamic-quantity, movement, removal, prevention, and other enters-with-counter replacement families remain unsupported",
         "counter type rules beyond existing power/toughness and loyalty consumers are incomplete"
       ],
       "mechanic_id": "cr-122-counters",
@@ -6264,7 +6265,19 @@
         "test_stale_fixed_counter_target_fails_before_mutation",
         "test_fixed_counter_result_does_not_require_source_to_remain",
         "test_fixed_counter_effect_suspends_for_quantity_replacement",
-        "test_four_player_fixed_counter_replacement_choice_is_seat_scoped"
+        "test_four_player_fixed_counter_replacement_choice_is_seat_scoped",
+        "test_intrinsic_card_form_compiler_declares_exact_typed_capability",
+        "test_intrinsic_card_form_dependency_fails_closed",
+        "test_unsupported_intrinsic_card_forms_are_material_residuals",
+        "test_intrinsic_counter_model_rejects_malformed_values",
+        "test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+        "test_intrinsic_entry_counter_generation_mutant_is_killed",
+        "test_competing_entry_counter_replacements_order_to_nine_or_ten",
+        "test_simultaneous_entry_choices_follow_four_player_apnap",
+        "test_resolving_entry_choice_is_private_and_replays_exactly",
+        "test_counter_child_tracks_a_later_destination_replacement",
+        "test_token_compatibility_path_fails_before_unsupported_replacement",
+        "test_battle_protector_validation_is_closed"
       ],
       "trust_level": "untrusted"
     },
@@ -6661,15 +6674,16 @@
     {
       "category": "card_types",
       "contract_path": "mechanics/contracts/battles.json",
-      "contract_sha256": "3973811786f826f28220d96dd2e5e1a57373299875d7c5ddac22b218d4400171",
-      "contract_version": 3,
+      "contract_sha256": "91045fed2aae908bfb02560b7526676a8be70e7c55091f807c54edf523e1b1a7",
+      "contract_version": 4,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "CommanderEngine Battle entry, combat, trigger, damage, and protector state paths",
-      "implementation_version": "battles-v3",
+      "implementation_component": "typed card-form entry and counter-replacement transactions plus CommanderEngine Battle combat, trigger, damage, and protector facades",
+      "implementation_version": "battles-v4",
       "kind": "rules_section",
       "known_blockers": [
-        "nonspell and token Battle entry paths do not yet suspend for an as-enters protector choice unless a trusted caller supplies the selected protector",
+        "nonspell Battle entry still requires a trusted caller to supply any required Siege protector choice",
+        "token Battle entry with an applicable counter-quantity replacement fails closed until token creation can suspend atomically",
         "attacking or blocking creatures becoming Battles and Battles changing controller during combat are not yet removed from combat by every continuous-effect path",
         "future Battle subtypes are rejected until their protector predicates are present in a pinned Comprehensive Rules snapshot",
         "complete simultaneous/APNAP protector choices and all Battle-targeting interactions are not implemented",
@@ -6708,7 +6722,14 @@
         "test_siege_trigger_does_not_follow_a_changed_object",
         "test_transform_back_face_cannot_be_cast_without_permission",
         "test_siege_transformed_cast_choice_replays_exactly",
-        "test_battle_damage_and_state_action_replay_exactly"
+        "test_battle_damage_and_state_action_replay_exactly",
+        "test_intrinsic_card_form_compiler_declares_exact_typed_capability",
+        "test_unsupported_intrinsic_card_forms_are_material_residuals",
+        "test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+        "test_competing_entry_counter_replacements_order_to_nine_or_ten",
+        "test_simultaneous_entry_choices_follow_four_player_apnap",
+        "test_resolving_entry_choice_is_private_and_replays_exactly",
+        "test_battle_protector_validation_is_closed"
       ],
       "trust_level": "untrusted"
     },

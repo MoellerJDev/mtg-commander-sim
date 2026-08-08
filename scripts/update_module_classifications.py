@@ -54,6 +54,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "quorune/damage_modifier_state.py",
         "quorune/continuous_effect_model.py",
         "quorune/enchant_spec.py",
+        "quorune/entry_counter_model.py",
         "quorune/model.py",
         "quorune/object_predicate.py",
         "quorune/prevention_triggers.py",
@@ -148,6 +149,8 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "quorune/destruction.py",
         "quorune/destruction_sets.py",
         "quorune/engine.py",
+        "quorune/entry_counter_coordination.py",
+        "quorune/entry_counters.py",
         "quorune/errors.py",
         "quorune/enchant_spec.py",
         "quorune/life_change.py",
@@ -294,7 +297,12 @@ def _owner(relative: str, layer: str) -> str:
         return "object_query"
     if relative == "quorune/state_planner.py":
         return "state_change_planning"
-    if relative == "quorune/counter_placement.py":
+    if relative in {
+        "quorune/counter_placement.py",
+        "quorune/entry_counter_coordination.py",
+        "quorune/entry_counters.py",
+        "quorune/entry_counter_model.py",
+    }:
         return "counter_placement"
     if relative in {
         "quorune/destruction.py",
@@ -418,6 +426,7 @@ def build_classifications() -> dict[str, Any]:
                             "effect_contracts.py",
                             "counter_placement.py",
                             "counter_state.py",
+                            "entry_counter",
                             "commander.py",
                             "combat_damage_",
                             "combat_relationship_state.py",

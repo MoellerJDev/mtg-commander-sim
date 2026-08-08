@@ -691,31 +691,22 @@ class StateBasedActionEngineTests(unittest.TestCase):
         for index, defense in enumerate((None, "not-a-number", "-1")):
             with self.subTest(defense=defense):
                 engine = self.make_engine(7080 + index)
-                permanent_ref = engine.create_token(
-                    "A",
-                    name="Future Battle",
-                    characteristics={
-                        "type_line": "Token Artifact",
-                    },
-                )[0]
-                permanent = self.card(engine, permanent_ref)
-                permanent.annotations["copy_overrides"] = {
-                    "name": "Malformed Battle",
-                    "type_line": "Battle",
-                    "defense": defense,
-                }
-                permanent.battle_protector = "A"
-
                 with self.assertRaisesRegex(
                     GameRuleError,
                     (
-                        "without a represented printed defense number"
+                        "Battle defense must be a represented "
+                        "nonnegative integer"
                         if defense != "-1"
-                        else "defense cannot be negative"
+                        else "Battle defense cannot be negative"
                     ),
                 ):
-                    engine._initialize_intrinsic_entry_counters(
-                        permanent
+                    engine.create_token(
+                        "A",
+                        name="Malformed Battle",
+                        characteristics={
+                            "type_line": "Token Battle",
+                            "defense": defense,
+                        },
                     )
 
     def test_typeless_battle_controller_is_its_protector(self):
@@ -2639,8 +2630,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
         effective_card_data = engine._effective_card_data
         captured: dict[str, dict] = {}
 
-        def derived_data(card):
-            data = effective_card_data(card)
+        def derived_data(card, **kwargs):
+            data = effective_card_data(card, **kwargs)
             if (
                 card.object_id == recipient.object_id
                 and source.zone == "battlefield"

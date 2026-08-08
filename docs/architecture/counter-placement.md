@@ -1,7 +1,7 @@
 ---
 title: "Counter-placement transaction"
 status: "current"
-authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, semantic_runtime/counter_replacements.py, and ADR 0011"
+authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, quorune/entry_counter_model.py, quorune/entry_counters.py, semantic_runtime/counter_replacements.py, ADR 0011, and ADR 0034"
 verified: "2026-08-08"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -81,6 +81,17 @@ counter from one permanent exploring once, and ordinary single-instruction
 Proliferate over players and permanents. These paths prepare before mutation
 and can safely suspend.
 
+Intrinsic Planeswalker loyalty and Battle defense now use the same boundary.
+The card-form compiler reads the canonical parsed type set and printed integral
+characteristic once, emits a type-line-spanned CardProgram declaration, and
+requires `counter.producer.intrinsic_entry`. Entry preparation lowers that
+declaration to a mandatory self-replacement on the containing zone event; its
+typed nested counter event follows any later destination replacement before
+the ordinary affected-controller quantity-replacement ordering. A resolving
+permanent can suspend through `resolving_entry` and resume without replaying
+earlier spell effects. Simultaneous entries prepare in APNAP order without
+mutation.
+
 Oracle IR v49 lowers one closed reusable fixed-placement grammar through the
 typed operation in spell, triggered, and activated contexts. It accepts one
 positive exact quantity of one named counter on the source, the exact named
@@ -113,7 +124,6 @@ propagation remain explicit residuals.
 
 The following producers and wordings remain deliberately outside this slice:
 
-- intrinsic planeswalker and battle entry counters;
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
 - cumulative upkeep;
@@ -121,6 +131,11 @@ The following producers and wordings remain deliberately outside this slice:
   multiple-counter placement clauses;
 - conditional targets and non-creature subtype predicates;
 - Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
+- Planeswalker or Battle token entry with an applicable quantity replacement
+  remains fail closed until token creation has an identity-pinned resumable
+  continuation; replacement-free token entry uses the canonical counter owner;
+- unsupported Battle subtype protector procedures and unrepresented
+  copy-layer, face-down, or dynamic entry-characteristic interactions;
 - counter removal and movement, state-based removals, and card-specific
   continuation paths such as Demonic Junker.
 
@@ -131,13 +146,14 @@ instruction first gains a typed resumable frame. They are recorded blockers,
 not silently approximated migrations.
 
 The component also excludes fractional or halving replacements, dynamic
-quantities, counter movement, prevention, complete enters-with-counter
-ordering, and universal placing-player derivation. Broad CR 122/614/616 stays
-blocked until those families and producers are integrated.
+quantities, counter movement, prevention, other enters-with-counter wordings,
+and universal placing-player derivation. Broad CR 122/614/616 stays blocked
+until those families and producers are integrated.
 
 Primary assurance is in `test_counter_placement_replacements.py`,
 `test_proliferate_rules.py`, `test_proliferate_compiler.py`, and
-`test_fixed_counter_placement_effects.py`, with shared event-order coverage in
+`test_fixed_counter_placement_effects.py`, plus intrinsic entry coverage in
+`test_intrinsic_entry_counters.py`, with shared event-order coverage in
 `test_replacement_event_tree.py` and focused mutation evidence in
 `test_capability_implementation_mutations.py`.
 

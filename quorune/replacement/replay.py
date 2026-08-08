@@ -67,6 +67,17 @@ _SEMANTIC_INTENT_COMPLETION_FIELDS = {
 _SEMANTIC_PREPARATION_FIELDS = (
     _SEMANTIC_INTENT_COMPLETION_FIELDS - {"semantic_choice_response"}
 )
+_RESOLVING_ENTRY_FIELDS = {
+    "replacement_resume_kind",
+    "stack_ref",
+    "destination",
+    "note",
+    "instruction_pointer",
+    "semantic_frame",
+    "replacement_selections",
+    "replacement_batch",
+    "replacement_effects",
+}
 _MANA_FRAME_FIELDS = {
     "active_player",
     "phase",
@@ -130,6 +141,10 @@ class ReplacementContinuation:
         }:
             return _decode_semantic_intent_continuation(
                 cls, value, batch, effects, resume_kind=resume_kind
+            )
+        if resume_kind == "resolving_entry":
+            return _decode_resolving_entry_continuation(
+                cls, value, batch, effects
             )
         return _decode_semantic_continuation(cls, value, batch, effects)
 
@@ -213,6 +228,10 @@ def _validate_continuation_shape(value: Mapping[str, Any]) -> str:
         "semantic_preparation": (
             _SEMANTIC_PREPARATION_FIELDS,
             "semantic preparation continuation",
+        ),
+        "resolving_entry": (
+            _RESOLVING_ENTRY_FIELDS,
+            "resolving entry continuation",
         ),
     }
     shape = shapes.get(resume_kind)
@@ -544,6 +563,45 @@ def _decode_semantic_continuation(
         ),
         destination=destination,
         note=value["note"],
+        instruction_pointer=instruction_pointer,
+        semantic_frame=FrozenMap(semantic_frame),
+    )
+
+
+def _decode_resolving_entry_continuation(
+    continuation_type: type[ReplacementContinuation],
+    value: Mapping[str, Any],
+    batch: ReplacementEventBatch,
+    effects: tuple[ReplacementEffect, ...],
+) -> ReplacementContinuation:
+    stack_ref = value["stack_ref"]
+    destination = value["destination"]
+    note = value["note"]
+    instruction_pointer = value["instruction_pointer"]
+    semantic_frame = value["semantic_frame"]
+    if (
+        not isinstance(stack_ref, str)
+        or not stack_ref
+        or (
+            destination is not None
+            and not isinstance(destination, str)
+        )
+        or not isinstance(note, str)
+        or type(instruction_pointer) is not int
+        or instruction_pointer < 0
+        or not isinstance(semantic_frame, Mapping)
+    ):
+        raise ReplacementEffectError(
+            "Resolving entry continuation fields are malformed"
+        )
+    return continuation_type(
+        batch=batch,
+        effects=effects,
+        resume_kind="resolving_entry",
+        replacement_selections=_decode_combat_selections(value),
+        stack_ref=stack_ref,
+        destination=destination,
+        note=note,
         instruction_pointer=instruction_pointer,
         semantic_frame=FrozenMap(semantic_frame),
     )

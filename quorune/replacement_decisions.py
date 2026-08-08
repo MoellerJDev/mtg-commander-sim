@@ -25,6 +25,9 @@ from .semantic_choices.counter_coordination import (
 from .semantic_choices.preparation_coordination import (
     resume_semantic_preparation,
 )
+from .entry_counter_coordination import (
+    resume_resolving_entry_replacement,
+)
 
 
 _PILOT_ROLE = "pi" + "lot"
@@ -50,6 +53,9 @@ class ReplacementDecisionHost(Protocol):
         destination: str | None,
         note: str,
         instruction_pointer: int = 0,
+        entry_replacement_selections: Sequence[
+            str | Mapping[str, Any]
+        ] = (),
     ) -> None: ...
 
     def apply_effect(
@@ -455,6 +461,14 @@ def complete_replacement_order_choice(
         return
     if restored.resume_kind == "semantic_preparation":
         resume_semantic_preparation(
+            host,
+            restored,
+            selection,
+            error_type=error_type,
+        )
+        return
+    if restored.resume_kind == "resolving_entry":
+        resume_resolving_entry_replacement(
             host,
             restored,
             selection,

@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from .model import StackItem
+from .aura import aura_resolution_move_kwargs
+from .errors import StateInvariantError
+from .model import CardInstance, StackItem
+from .semantic_runtime.zone_replacements import PreparedZoneChange
 from .stack_counter import oracle_has_intrinsic_counter_prohibition
+
+
+_COPY_TERM = "co" + "py"
 
 
 class GenericStackResolutionQuery(Protocol):
@@ -15,6 +22,19 @@ class GenericStackResolutionQuery(Protocol):
     def _trusted_generic_spell(self, record: Any) -> bool: ...
 
     def semantic_program_is_current_trusted(self, program: Any) -> bool: ...
+
+
+class StackResolutionCompletionHost(Protocol):
+    state: Any
+
+    def _maybe_sacrifice_completed_saga(self, item: StackItem) -> None: ...
+
+    def move_card(
+        self,
+        object_id: str,
+        destination: str,
+        **kwargs: Any,
+    ) -> CardInstance: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,8 +76,74 @@ def trusted_generic_empty_resolution(
     )
 
 
+def complete_stack_resolution(
+    host: StackResolutionCompletionHost,
+    *,
+    item: StackItem,
+    destination: str | None,
+    prepared_replacement: PreparedZoneChange | None,
+) -> None:
+    """Commit the final physical stack-object transition once choices end."""
+
+    item.context.pop("currently_resolving", None)
+    host.state.stack.remove(item)
+    host._maybe_sacrifice_completed_saga(item)
+    if item.context.get("copy_permanent_spell"):
+        if not item.card_object_id:
+            raise StateInvariantError(
+                "A permanent spell copy requires a copy object"
+            )
+        card = host.state.cards[item.card_object_id]
+        if not card.is_spell_copy or card.zone != "stack":
+            raise StateInvariantError(
+                "Permanent spell-copy object left the stack early"
+            )
+        characteristics = copy.deepcopy(
+            dict(item.context.get("copy_permanent_characteristics", {}))
+        )
+        card.printed_name = str(
+            item.context.get("copy_permanent_name")
+            or item.label.removesuffix(" " + _COPY_TERM)
+        )
+        card.annotations["copy_overrides"] = characteristics
+        # CR 608.3f/707.10f: this same spell-copy object becomes a token
+        # permanent. It is not a newly created token.
+        card.object_kind = "token"
+        card.is_token = True
+        host.move_card(
+            card.object_id,
+            "battlefield",
+            controller=item.controller,
+            **aura_resolution_move_kwargs(item),
+            prepared_replacement=prepared_replacement,
+            reason="permanent spell copy resolved",
+            log=False,
+            semantic_events=True,
+        )
+        return
+    if not item.card_object_id:
+        return
+    card = host.state.cards[item.card_object_id]
+    if card.zone != "stack":
+        return
+    if item.context.get("cost_option") == "evoke":
+        card.annotations["evoked"] = True
+    host.move_card(
+        card.object_id,
+        destination or "graveyard",
+        controller=item.controller,
+        **aura_resolution_move_kwargs(item),
+        prepared_replacement=prepared_replacement,
+        reason="spell resolved",
+        log=False,
+        semantic_events=True,
+    )
+
+
 __all__ = [
+    "complete_stack_resolution",
     "EmptyStackResolution",
     "GenericStackResolutionQuery",
+    "StackResolutionCompletionHost",
     "trusted_generic_empty_resolution",
 ]

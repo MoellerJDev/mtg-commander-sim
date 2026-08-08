@@ -164,12 +164,22 @@
       "assertion_kind": "unsupported_fail_closed",
       "reviewed": true,
       "implementation_components": [
-        "CommanderEngine._initialize_intrinsic_entry_counters",
-        "CommanderEngine.move_card"
+        "quorune.entry_counter_model.intrinsic_entry_counters",
+        "quorune.compiler.card_form_rules.compile_intrinsic_entry_counter_forms",
+        "quorune.entry_counters.intrinsic_entry_counter_effects",
+        "quorune.semantic_runtime.zone_replacements.capture_zone_change_replacement_snapshot",
+        "quorune.entry_counter_coordination.issue_resolving_entry_replacement_choice",
+        "quorune.counter_placement.commit_counter_placement_plan"
       ],
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_enters_with_printed_defense_and_copies_reset_it",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_protector_is_chosen_as_the_spell_resolves"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_protector_is_chosen_as_the_spell_resolves",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_card_form_compiler_declares_exact_typed_capability",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_unsupported_intrinsic_card_forms_are_material_residuals",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_competing_entry_counter_replacements_order_to_nine_or_ten",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_simultaneous_entry_choices_follow_four_player_apnap",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_resolving_entry_choice_is_private_and_replays_exactly"
       ],
       "required_scenarios": [
         "positive",
@@ -177,13 +187,17 @@
         "replay"
       ],
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "interaction",
+        "replay"
       ],
       "blockers": [
-        "the complete affected-player replacement-effect choice and ordering system for as-enters effects is not implemented"
+        "token Battle entry with an applicable counter-quantity replacement remains fail closed until token creation can suspend atomically",
+        "complete face-down, copy-layer, and dynamic continuous-characteristic entry interactions are not implemented"
       ],
       "notes": [
-        "The intrinsic entry initialization reads printed entry characteristics, so reduced battlefield defense is not copied as the next object's entry count."
+        "The card-form compiler and entry transaction read printed entry characteristics, so reduced battlefield defense is not copied as the next object's entry count.",
+        "Intrinsic defense is a mandatory self-replacement whose nested counter event participates in affected-controller quantity-replacement ordering and exact replay."
       ]
     },
     {

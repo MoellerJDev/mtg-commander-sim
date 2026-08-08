@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "counter.producer.intrinsic_entry": (
+        "tests.test_intrinsic_entry_counters."
+        "IntrinsicEntryCounterTests."
+        "test_intrinsic_entry_counter_generation_mutant_is_killed"
+    ),
     "counter.producer.proliferate": (
         "tests.test_proliferate_compiler."
         "ProliferateCompilerTests."

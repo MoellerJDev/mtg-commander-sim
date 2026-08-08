@@ -32,7 +32,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "e100ef4d180915c2cc6298f7bce42ca0e970255a28247d0aa8982b32f3f985d0",
+    "evaluated_source_tree_hash": "124d4aeb7ba154a4f3c1dd3ef2b99a422187d0e7ad7fa08751e8c1b502fb2f70",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -468,11 +468,11 @@
       "total": 38623
     },
     "rules": {
-      "blocked": 379,
+      "blocked": 380,
       "definition_only": 124,
       "passing": 211,
       "total": 3300,
-      "unreviewed": 2586
+      "unreviewed": 2585
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -497,7 +497,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5279,
+    "deterministic_cases_discovered": 5291,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,

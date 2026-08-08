@@ -48,3 +48,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0031 — typed fixed affected-set damage](0031-typed-fixed-damage-sets.md)
 - [ADR 0032 — durable certification receipts](0032-durable-certification-receipts.md)
 - [ADR 0033 — typed fixed counter-placement effects](0033-typed-fixed-counter-placement.md)
+- [ADR 0034 — intrinsic entry counters use the replacement tree](0034-intrinsic-entry-counter-transactions.md)

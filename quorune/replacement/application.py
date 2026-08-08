@@ -351,9 +351,64 @@ def _create_affected_object_counter_event(
                 "requested_amount": operation.amount,
                 "source": operation.source_ref,
                 "effect_generated": True,
+                "follows_zone_destination": True,
             },
         )
     )
+
+
+def _retarget_zone_counter_children(
+    event: ReplaceableEvent,
+    payload: Mapping[str, Any],
+    children: list[ReplaceableEvent],
+) -> None:
+    """Keep typed "with counters" results attached to the final zone event."""
+
+    if event.kind != "zone.change" or event.affected_object is None:
+        return
+    destination = payload.get("destination")
+    if type(destination) is not str or not destination:
+        raise ReplacementEffectError(
+            "Zone counter results require a resolved destination"
+        )
+    target_controller = (
+        payload.get("destination_controller")
+        if destination == "battlefield"
+        else None
+    )
+    for index, child in enumerate(children):
+        if (
+            child.kind != "counter.place"
+            or child.affected_object is None
+            or child.affected_object.object_id
+            != event.affected_object.object_id
+            or child.payload.get("follows_zone_destination") is not True
+        ):
+            continue
+        child_payload = thaw_value(child.payload)
+        child_payload["target_zone"] = destination
+        child_payload["target_kind"] = (
+            "permanent" if destination == "battlefield" else "card"
+        )
+        child_payload["target_controller"] = target_controller
+        children[index] = ReplaceableEvent(
+            event_id=child.event_id,
+            kind=child.kind,
+            affected_player=child.affected_player,
+            affected_object=AffectedObject(
+                object_id=child.affected_object.object_id,
+                owner=child.affected_object.owner,
+                controller=(
+                    str(target_controller)
+                    if target_controller is not None
+                    else None
+                ),
+            ),
+            payload=child_payload,
+            applied_effects=child.applied_effects,
+            children=child.children,
+            entry_scope=child.entry_scope,
+        )
 
 
 def _apply_additional_token(
@@ -412,6 +467,8 @@ def _apply_operation(
     if isinstance(operation, SetField):
         _require_field(event, operation.field, _SET_FIELDS, operation="set")
         payload[operation.field] = thaw_value(operation.value)
+        if operation.field == "destination":
+            _retarget_zone_counter_children(event, payload, children)
         return entry_scope
     if isinstance(operation, AddAmount):
         _require_field(event, operation.field, _NUMERIC_FIELDS, operation="add")
