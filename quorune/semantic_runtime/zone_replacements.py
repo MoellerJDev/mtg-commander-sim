@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Mapping, Protocol, Sequence
 
+from ..entry_counters import (
+    EntryCounterError,
+    intrinsic_entry_counter_effects,
+    intrinsic_entry_counters,
+)
 from ..replacement_effects import (
     AffectedObject,
     CreateAffectedObjectCounter,
@@ -385,6 +390,7 @@ def capture_zone_change_replacement_snapshot(
     changes: Sequence[tuple[str, str]],
     *,
     destination_controllers: Mapping[str, str | None] | None = None,
+    entry_characteristics: Mapping[str, Mapping[str, Any]] | None = None,
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
     error_type: type[Exception] = ZoneReplacementError,
@@ -411,6 +417,18 @@ def capture_zone_change_replacement_snapshot(
         raise error_type(
             "Zone replacement destination controllers reference unknown objects"
         )
+    entry_characteristics = entry_characteristics or {}
+    if set(entry_characteristics) - set(object_ids):
+        raise error_type(
+            "Zone replacement entry characteristics reference unknown objects"
+        )
+    if any(
+        not isinstance(value, Mapping)
+        for value in entry_characteristics.values()
+    ):
+        raise error_type(
+            "Zone replacement entry characteristics must be mappings"
+        )
 
     subjects: list[ZoneChangeSubjectSnapshot] = []
     for object_id, destination in supplied:
@@ -420,16 +438,24 @@ def capture_zone_change_replacement_snapshot(
                 "Zone replacement snapshot references an unknown object"
             )
         try:
+            characteristics = dict(
+                entry_characteristics.get(
+                    object_id, host._effective_card_data(card)
+                )
+            )
+            card_types, subtypes, supertypes = host._type_parts(
+                str(characteristics.get("type_line") or "")
+            )
             types = tuple(
-                sorted(
-                    set().union(
-                        *host._type_parts(
-                            str(
-                                host._effective_card_data(card).get("type_line")
-                                or ""
-                            )
-                        )
-                    )
+                sorted({*card_types, *subtypes, *supertypes})
+            )
+            destination_controller = (
+                destination_controllers[object_id]
+                if object_id in destination_controllers
+                else (
+                    card.controller
+                    if card.zone == "stack"
+                    else card.owner
                 )
             )
             subjects.append(
@@ -445,24 +471,20 @@ def capture_zone_change_replacement_snapshot(
                     ),
                     origin=card.zone,
                     destination=destination,
-                    destination_controller=(
-                        destination_controllers[object_id]
-                        if object_id in destination_controllers
-                        else (
-                            card.owner
-                            if destination == "battlefield"
-                            else (
-                                card.controller
-                                if card.zone in {"battlefield", "stack"}
-                                else None
-                            )
-                        )
+                    destination_controller=destination_controller,
+                    intrinsic_entry_counters=intrinsic_entry_counters(
+                        characteristics,
+                        card_types=tuple(sorted(card_types)),
                     ),
                     object_types=types,
                     is_card_object=card.is_card_object,
                 )
             )
-        except (SemanticNodeError, ZoneReplacementError) as exc:
+        except (
+            EntryCounterError,
+            SemanticNodeError,
+            ZoneReplacementError,
+        ) as exc:
             raise error_type(str(exc)) from exc
 
     candidates = (
@@ -485,10 +507,20 @@ def capture_zone_change_replacement_snapshot(
         )
     )
     try:
-        effects = collect_zone_change_replacement_effects(
+        ambient_effects = collect_zone_change_replacement_effects(
             host,
             sources=active_sources,
             source_zones={source.object_id: "battlefield" for source in active_sources},
+        )
+        intrinsic_effects = tuple(
+            effect
+            for subject in subjects
+            if subject.destination_controller is not None
+            for effect in intrinsic_entry_counter_effects(
+                object_ref=subject.object_ref,
+                destination_controller=subject.destination_controller,
+                counters=subject.intrinsic_entry_counters,
+            )
         )
         return ZoneChangeReplacementSnapshot(
             revision=host.state.revision,
@@ -496,7 +528,12 @@ def capture_zone_change_replacement_snapshot(
             apnap_order=tuple(host.apnap_order()),
             source_refs=tuple(source.ref for source in active_sources),
             subjects=tuple(subjects),
-            effects=tuple(sorted(effects, key=lambda effect: effect.effect_id)),
+            effects=tuple(
+                sorted(
+                    (*ambient_effects, *intrinsic_effects),
+                    key=lambda effect: effect.effect_id,
+                )
+            ),
         )
     except (SemanticNodeError, ZoneReplacementError) as exc:
         raise error_type(str(exc)) from exc
@@ -568,6 +605,7 @@ def prepare_zone_change_replacement(
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
     destination_controller: str | None = None,
+    entry_characteristics: Mapping[str, Any] | None = None,
     selections: Sequence[str | None | Mapping[str, Any]] = (),
     prepared: PreparedZoneChange | None = None,
     error_type: type[Exception] = ZoneReplacementError,
@@ -597,6 +635,11 @@ def prepare_zone_change_replacement(
             if destination_controller is not None
             else None
         ),
+        entry_characteristics=(
+            {card.object_id: entry_characteristics}
+            if entry_characteristics is not None
+            else None
+        ),
         sources=sources,
         source_zones=source_zones,
         selections=selections,
@@ -611,6 +654,9 @@ def prepare_zone_change_replacement_batch(
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
     destination_controllers: Mapping[str, str | None] | None = None,
+    entry_characteristics: Mapping[
+        str, Mapping[str, Any]
+    ] | None = None,
     selections: Sequence[str | None | Mapping[str, Any]] = (),
     error_type: type[Exception] = ZoneReplacementError,
 ) -> dict[str, PreparedZoneChange]:
@@ -620,6 +666,7 @@ def prepare_zone_change_replacement_batch(
         host,
         changes,
         destination_controllers=destination_controllers,
+        entry_characteristics=entry_characteristics,
         sources=sources,
         source_zones=source_zones,
         error_type=error_type,

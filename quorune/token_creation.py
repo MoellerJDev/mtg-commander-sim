@@ -12,8 +12,19 @@ from .aura import (
     prepare_aura_entry,
 )
 from .model import CardInstance
-from .replacement_effects import ReplacementChoiceRequired
+from .entry_counters import (
+    commit_unreplaced_intrinsic_entry_counters,
+    EntryCounterError,
+    intrinsic_entry_counters,
+    validate_battle_entry_protector,
+)
+from .replacement_effects import (
+    ReplacementChoiceRequired,
+    replacement_choice,
+)
 from .semantic_runtime import (
+    collect_counter_placement_replacement_effects,
+    CounterPlacementEventSpec,
     TokenCreationReplacementContext,
     default_token_creation_replacement_registry,
     resolve_token_creation_replacements,
@@ -35,6 +46,13 @@ class TokenCreationHost(Protocol):
     @property
     def seats(self) -> list[str]: ...
 
+    @property
+    def active_seats(self) -> list[str]: ...
+
+    def _semantic_event_sources(
+        self, *, zones: set[str] | None = None
+    ) -> list[Any]: ...
+
     def _require_seat(self, seat: str, *, in_game: bool = False) -> Any: ...
 
     def _resolve_object(
@@ -45,7 +63,12 @@ class TokenCreationHost(Protocol):
         self, type_line: str
     ) -> tuple[set[str], set[str], set[str]]: ...
 
-    def _effective_card_data(self, card: Any) -> Mapping[str, Any]: ...
+    def _effective_card_data(
+        self,
+        card: Any,
+        *,
+        printed_entry_characteristics: bool = False,
+    ) -> Mapping[str, Any]: ...
 
     def _compiled_enchant_spec(
         self,
@@ -65,8 +88,6 @@ class TokenCreationHost(Protocol):
     def _next_ref(self, prefix: str) -> str: ...
 
     def _stable_runtime_id(self, namespace: str, value: str) -> str: ...
-
-    def _initialize_intrinsic_entry_counters(self, card: CardInstance) -> None: ...
 
     def _refresh_world_supertype_timestamp(
         self, card: CardInstance, *, gained_at: int
@@ -355,6 +376,58 @@ def _preflight_aura_token_specs(
             continue
         preview = _preview_token_object(host, controller, spec)
         data = host._effective_card_data(preview)
+        card_types, subtypes, supertypes = host._type_parts(
+            str(data.get("type_line") or "")
+        )
+        try:
+            counters = intrinsic_entry_counters(
+                data,
+                card_types=tuple(sorted(card_types)),
+            )
+            spec["battle_protector"] = validate_battle_entry_protector(
+                card_types=tuple(sorted(card_types)),
+                subtypes=tuple(sorted(subtypes)),
+                controller=controller,
+                supplied_protector=(
+                    str(spec["battle_protector"])
+                    if spec.get("battle_protector") is not None
+                    else None
+                ),
+                active_seats=host.active_seats,
+            )
+            counter_effects = (
+                collect_counter_placement_replacement_effects(host)
+                if any(counter.amount for counter in counters)
+                else ()
+            )
+            for index, counter in enumerate(counters):
+                if counter.amount == 0:
+                    continue
+                event = CounterPlacementEventSpec(
+                    event_id=f"token.entry-counter:{index}",
+                    subject_kind="permanent",
+                    subject_id=preview.object_id,
+                    owner=controller,
+                    controller=controller,
+                    target_zone="battlefield",
+                    target_types=tuple(
+                        sorted({*card_types, *subtypes, *supertypes})
+                    ),
+                    placing_player=controller,
+                    counter_name=counter.counter_name,
+                    amount=counter.amount,
+                    source_ref=f"rule:{counter.rule_id}:{preview.ref}",
+                    effect_generated=True,
+                    logical_object_id=preview.logical_object_id,
+                ).event()
+                if replacement_choice(event, counter_effects) is not None:
+                    raise TokenCreationError(
+                        "Token copies entering with intrinsic counters and "
+                        "an applicable counter replacement are not yet "
+                        "supported"
+                    )
+        except EntryCounterError as exc:
+            raise TokenCreationError(str(exc)) from exc
         if not is_aura_type_line(str(data.get("type_line") or "")):
             prepared.append(spec)
             continue
@@ -436,7 +509,25 @@ def _commit_token_object(
     )
     host.state.cards[object_id] = card
     host.state.players[controller].zones["battlefield"].append(object_id)
-    host._initialize_intrinsic_entry_counters(card)
+    try:
+        data = host._effective_card_data(
+            card,
+            printed_entry_characteristics=True,
+        )
+        card_types, _, _ = host._type_parts(
+            str(data.get("type_line") or "")
+        )
+        commit_unreplaced_intrinsic_entry_counters(
+            host,
+            object_id=card.object_id,
+            logical_object_id=card.logical_object_id,
+            counters=intrinsic_entry_counters(
+                data,
+                card_types=tuple(sorted(card_types)),
+            ),
+        )
+    except EntryCounterError as exc:
+        raise TokenCreationError(str(exc)) from exc
     host._refresh_world_supertype_timestamp(
         card,
         gained_at=card.zone_timestamp,
