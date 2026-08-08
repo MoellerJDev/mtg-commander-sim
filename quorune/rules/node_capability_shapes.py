@@ -813,6 +813,7 @@ def fixed_counter_placement_target_set_node_capabilities(
     """Return capabilities only for one closed optional permanent target set."""
 
     mechanics = {str(value).casefold() for value in mechanic_ids}
+    support = "support" in mechanics
     if not {"cr-122-counters", "cr-115-targets"}.issubset(mechanics):
         return ()
     if len(effects) != 1:
@@ -847,6 +848,8 @@ def fixed_counter_placement_target_set_node_capabilities(
         "types_any",
         "types_none",
         "controller_relation",
+        "source_exclusion",
+        "support_source_context",
         "up_to",
     }
     if (
@@ -878,6 +881,34 @@ def fixed_counter_placement_target_set_node_capabilities(
             or tuple(types_any) != ("artifact",)
         ):
             return ()
+    if "source_exclusion" in schema and schema["source_exclusion"] is not True:
+        return ()
+    if support:
+        source_context = schema.get("support_source_context")
+        if (
+            str(effect.get("counter")).casefold() != "+1/+1"
+            or effect.get("amount") != 1
+            or tuple(types_any) != ("creature",)
+            or "types_none" in schema
+            or "controller_relation" in schema
+            or source_context not in {"permanent", "spell"}
+            or (
+                source_context == "permanent"
+                and schema.get("source_exclusion") is not True
+            )
+            or (
+                source_context == "spell"
+                and "source_exclusion" in schema
+            )
+        ):
+            return ()
+        return (
+            "counter.producer.support",
+        )
+    if "source_exclusion" in schema:
+        return ()
+    if "support_source_context" in schema:
+        return ()
     return (
         "counter.producer.fixed_permanent_target_set_effect",
         "target.revalidate_resolution",

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from functools import partial
 from typing import Any, Iterable, Mapping, Sequence
 
 from .aura import keyword_target_schema
@@ -12,6 +13,7 @@ from .cast_timing import (
     CAST_PERMISSION_EVENT,
     PRINTED_FLASH_MECHANIC,
 )
+from .characteristic_evaluation import type_parts
 from .compiler.corpus_reporting import (
     execute_oracle_operation,
     explain_oracle_ir,
@@ -70,7 +72,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v52"
+ORACLE_COMPILER_VERSION = "oracle-ir-v53"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
@@ -84,6 +86,17 @@ _REPLACEMENT_MARKERS = re.compile(
 _ABILITY_WORD = re.compile(
     r"^(?P<word>[A-Za-z][A-Za-z ']+)\s+[—-]\s+(?P<body>.+)$"
 )
+_PERMANENT_CARD_TYPES = frozenset(
+    {
+        "artifact",
+        "battle",
+        "creature",
+        "enchantment",
+        "land",
+        "planeswalker",
+    }
+)
+_SPELL_CARD_TYPES = frozenset({"instant", "sorcery"})
 
 
 def _source_lines(text: str) -> Iterable[tuple[str, SourceSpan]]:
@@ -120,23 +133,41 @@ def _without_parenthetical_reminder(text: str) -> str:
 
 def _static_runtime_for_face(
     text: str,
-    type_line: str,
-    permanent: bool,
+    card_types: frozenset[str],
 ) -> StaticRuntimeTemplate | None:
     return static_runtime_template(
         text,
-        source_damageable=any(
-            card_type in type_line.casefold()
-            for card_type in ("battle", "creature", "planeswalker")
+        source_damageable=bool(
+            card_types.intersection({"battle", "creature", "planeswalker"})
         ),
-        source_permanent=permanent,
+        source_permanent=bool(card_types.intersection(_PERMANENT_CARD_TYPES)),
     )
+
+
+def _face_type_context(
+    type_line: str,
+) -> tuple[frozenset[str], bool, bool, bool | None]:
+    """Return exact card types and the closed Support source context."""
+
+    parsed_card_types, _subtypes, _supertypes = type_parts(type_line)
+    card_types = frozenset(parsed_card_types)
+    permanent = bool(card_types.intersection(_PERMANENT_CARD_TYPES))
+    spell = bool(card_types.intersection(_SPELL_CARD_TYPES))
+    support_source = (
+        True
+        if permanent and not spell
+        else False
+        if spell and not permanent
+        else None
+    )
+    return card_types, permanent, spell, support_source
 
 
 def _effect_template(
     text: str,
     *,
     card_name: str,
+    source_is_permanent: bool | None = None,
 ) -> tuple[
     str | None,
     tuple[Mapping[str, Any], ...],
@@ -203,9 +234,7 @@ def _effect_template(
                 "cr-101-the-magic-golden-rules",
             ),
         )
-    typed = typed_resolution_effect_template(
-        normalized, card_name=card_name
-    )
+    typed = typed_resolution_effect_template(normalized, card_name=card_name, source_is_permanent=source_is_permanent)
     if typed is not None:
         return typed
     match = re.fullmatch(
@@ -416,6 +445,7 @@ def _reviewed_effect_template(
     text: str,
     *,
     card_name: str,
+    source_is_permanent: bool | None = None,
 ) -> tuple[
     str | None,
     tuple[Mapping[str, Any], ...],
@@ -432,7 +462,11 @@ def _reviewed_effect_template(
         text.strip(),
         card_name=card_name,
     )
-    return prevention or _effect_template(text, card_name=card_name)
+    return prevention or _effect_template(
+        text,
+        card_name=card_name,
+        source_is_permanent=source_is_permanent,
+    )
 
 
 def _keyword_node_for_mechanics(
@@ -740,6 +774,7 @@ def _trigger_node(
     capability_registry: CapabilityRegistry | None,
     capability_profile: str,
     residuals: list[OracleResidual],
+    effect_template: Any = _reviewed_effect_template,
 ) -> OracleNode | None:
     """Compile one closed ordinary or CR 615.13 triggered ability."""
 
@@ -785,7 +820,7 @@ def _trigger_node(
         template, effects, target_schema, mechanics = (
             explored.compiled()
             if explored is not None
-            else _reviewed_effect_template(
+            else effect_template(
                 trigger.group("body"),
                 card_name=card_name,
             )
@@ -887,20 +922,19 @@ def _compile_face(
 ) -> OracleFaceIR:
     nodes: list[OracleNode] = []
     residuals: list[OracleResidual] = []
-    permanent = any(
-        card_type in type_line.casefold()
-        for card_type in (
-            "artifact",
-            "battle",
-            "creature",
-            "enchantment",
-            "land",
-            "planeswalker",
-        )
+    (
+        card_types,
+        permanent,
+        spell,
+        support_source_is_permanent,
+    ) = _face_type_context(type_line)
+    contextual_effect_template = partial(
+        _reviewed_effect_template,
+        source_is_permanent=support_source_is_permanent,
     )
-    spell = any(
-        card_type in type_line.casefold()
-        for card_type in ("instant", "sorcery")
+    contextual_trigger_node = partial(
+        _trigger_node,
+        effect_template=contextual_effect_template,
     )
     for index, (line, span) in enumerate(_source_lines(oracle_text), 1):
         node_id = f"{face_id}:n{index}"
@@ -926,7 +960,7 @@ def _compile_face(
             trusted_mechanics=trusted_mechanics,
             capability_registry=capability_registry,
             capability_profile=capability_profile, residuals=residuals,
-            effect_template=_reviewed_effect_template,
+            effect_template=contextual_effect_template,
         )
         if activated_node is not None:
             nodes.append(activated_node)
@@ -939,7 +973,8 @@ def _compile_face(
             trusted_mechanics=trusted_mechanics,
             capability_registry=capability_registry, capability_profile=capability_profile,
             residuals=residuals,
-            runtime_handler_node=_runtime_handler_node, trigger_node=_trigger_node,
+            runtime_handler_node=_runtime_handler_node,
+            trigger_node=contextual_trigger_node,
             append_residual=_residual,
         )
         if event_nodes is not None:
@@ -1182,9 +1217,7 @@ def _compile_face(
             )
             continue
 
-        runtime_template = _static_runtime_for_face(
-            material_line, type_line, permanent
-        )
+        runtime_template = _static_runtime_for_face(material_line, card_types)
         if runtime_template is not None:
             nodes.append(
                 _runtime_handler_node(
@@ -1232,7 +1265,7 @@ def _compile_face(
 
         ability_word = _ABILITY_WORD.match(material_line)
         body = ability_word.group("body") if ability_word else material_line
-        template, effects, target_schema, mechanics = _reviewed_effect_template(
+        template, effects, target_schema, mechanics = contextual_effect_template(
             body,
             card_name=face_name or record.name,
         )

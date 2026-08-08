@@ -35,6 +35,11 @@ def keyword_mechanics(
             # executes during resolution, not a keyword ability carried by
             # the source. Let the closed resolution grammar own it.
             return None
+        if re.fullmatch(r"support\s+.+", lower):
+            # Support is a keyword action whose target set depends on whether
+            # the instruction's source is a permanent or an instant/sorcery.
+            # Let the source-context-aware resolution grammar own it.
+            return None
         if lower in _KNOWN_BARE_KEYWORDS or lower in known:
             mechanics.append(lower)
             continue

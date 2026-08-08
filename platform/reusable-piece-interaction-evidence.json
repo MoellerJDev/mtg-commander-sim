@@ -589,6 +589,22 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_support_partial_target_revalidation_and_quantity_replacement_replay",
+      "piece_ids": ["capability.counter.placement.quantity_replacement", "capability.counter.producer.support"],
+      "capability_ids": ["counter.placement.quantity_replacement", "counter.producer.support"],
+      "interaction_order": 2,
+      "assertion": "Support delegates its surviving target set to the canonical counter owner, suspends for the affected permanent's quantity-replacement order, and resumes exactly once."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_support_partial_target_revalidation_and_quantity_replacement_replay",
+      "piece_ids": ["capability.counter.producer.support", "capability.target.revalidate_resolution"],
+      "capability_ids": ["counter.producer.support", "target.revalidate_resolution"],
+      "interaction_order": 2,
+      "assertion": "Support revalidates every originally selected creature and applies +1/+1 counters only to the still-legal subset."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_target_set_suspends_for_quantity_replacement_and_replays",
       "piece_ids": ["capability.counter.placement.quantity_replacement", "capability.counter.producer.fixed_permanent_target_set_effect"],
       "capability_ids": ["counter.placement.quantity_replacement", "counter.producer.fixed_permanent_target_set_effect"],

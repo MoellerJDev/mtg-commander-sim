@@ -443,7 +443,7 @@ def _is_closed_fixed_counter_placement_target_set_program(
             mechanic_ids=(
                 value
                 for value in program.coverage
-                if value in {"cr-122-counters", "cr-115-targets"}
+                if value in {"cr-122-counters", "cr-115-targets", "support"}
             ),
         )
     )

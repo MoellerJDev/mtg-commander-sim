@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "819fd479e09c86ad64426169f39005f087ab9d0bec637265a437d55517abfe8d",
-  "declaration_source_fingerprint": "ecba4ba09894443e479bbd6cf524323b5a142ca224869639e0a08af8409bbcfa",
+  "registry_fingerprint": "eccc1acafc464d04b53858d5ab4fad7a1606d2249fe3edc76012150bc9475ec3",
+  "declaration_source_fingerprint": "1199d4bc0e60928e6913c386c3d19e77ffb913a5c8eee64b098bd12aed5f0367",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -6696,6 +6696,231 @@
         "commander_review"
       ],
       "applicability_note": "Replay the Proliferate selection and permanent counter-replacement ordering to the identical final authoritative state hash."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementRuntimeTests.test_support_partial_target_revalidation_and_quantity_replacement_replay",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate a partly illegal Support target set, then apply the affected permanent's ordered counter quantity replacement only to the surviving target."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementRuntimeTests.test_support_partial_target_revalidation_and_quantity_replacement_replay",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve the surviving Support target and replacement chooser in a four-player APNAP context."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementCompilerTests.test_support_compiler_mutant_is_killed",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill removal of the source-context-aware Support compiler production."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "negative",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementCompilerTests.test_support_source_context_uses_exact_card_types",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Fail closed when Support appears on an unrelated, malformed, or mixed permanent-and-spell card-type source."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "negative",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementCompilerTests.test_unsupported_support_variants_remain_material_residuals",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep variable, zero, optional, repeated, and conditional Support outside the bounded compiler grammar."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "positive",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementCompilerTests.test_support_compiles_in_spell_trigger_and_activated_contexts",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower fixed positive Support in spell, enters-trigger, and activated contexts through one source-spanned typed target-set descriptor."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "positive",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementRuntimeTests.test_permanent_support_excludes_source_from_legal_targets",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Exclude a permanent Support source from its own target candidates while leaving other legal creatures available."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementRuntimeTests.test_support_partial_target_revalidation_and_quantity_replacement_replay",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the Support replacement choice only to its affected seat without exposing object identity or opposing hands."
+    },
+    {
+      "capability_id": "counter.producer.support",
+      "evidence_class": "replay",
+      "test_id": "tests.test_support_counter_placement.SupportCounterPlacementRuntimeTests.test_support_partial_target_revalidation_and_quantity_replacement_replay",
+      "official_rule_ids": [
+        "101.4",
+        "115.1",
+        "115.3",
+        "115.6",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "608.2b",
+        "614.16",
+        "616.1",
+        "701.41",
+        "701.41a"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the same partial Support target set, replacement selection, and final authoritative hash."
     },
     {
       "capability_id": "counter.removal.rule_generated",
@@ -15959,5 +16184,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "0bc93ac4e14cce0d8b17c649bc31e8ec04d78c7ab2e96c1bf476e40fe9815884"
+  "fingerprint": "4be296f5df69a8320da35d3a22bad7a6d4414ecc6ec1e5fa5d7a498b67c037ab"
 }

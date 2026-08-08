@@ -55,6 +55,7 @@
       "test_replacement_model_hardening",
       "test_return_to_hand_rules",
       "test_single_object_zone_transition",
+      "test_support_counter_placement",
       "test_token_creation_replacements",
       "test_zone_replacement_compiler"
     ],
