@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 55,
+  "registry_version": 56,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -450,7 +450,7 @@
         "summary": "Resolve represented effect-generated permanent counter placements, including prevention aftermath, through affected-object ordering and a typed precommit plan before committing counters.",
         "inputs": ["placing player", "affected card or permanent", "resolved positive integral counter amount", "fixed multiply/add runtime components"],
         "outputs": ["resolved counter amount", "exact replacement journal", "principal-scoped competing choice", "validated typed counter commit plan", "authoritative counter mutation"],
-        "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "cost and rule-generated placements", "complete enters-with-counter ordering"]
+        "exclusions": ["player counters", "fractional or halving replacements", "counter movement", "counter removal", "counter costs", "rule-generated placements other than the separately declared intrinsic-entry family"]
       },
       "dependencies": [],
       "implementation_components": ["quorune.semantic_runtime.counter_replacements.CounterQuantityReplacementHandler", "quorune.counter_placement.prepare_counter_placements", "quorune.counter_placement.plan_prepared_counter_placement_commit", "quorune.counter_placement.commit_counter_placement_plan", "quorune.damage_prevention_aftermath.prepare_prevention_aftermath"],
@@ -492,6 +492,33 @@
       "dependency_fail_closed_rationale": "The compiler dependency mutation blocks exact fixed counter-placement CardPrograms whenever the canonical counter-placement replacement owner is unavailable.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "The focused compiler mutation removes the fixed counter template and proves that the previously exact source-spanned node becomes a material residual.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "counter.producer.intrinsic_entry",
+      "version": 1,
+      "official_rules": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve printed nonnegative integral Planeswalker loyalty and Battle defense as mandatory self-replacement entry counters inside the canonical zone-change replacement tree.",
+        "inputs": ["canonical card-form type set", "printed starting loyalty or defense", "prospective battlefield controller", "physical and logical object identity", "complete represented zone and counter replacement set"],
+        "outputs": ["source-spanned CardProgram card-form declaration", "mandatory self-replacement zone event", "nested replacement-aware counter placement", "affected-controller ordering", "exact resolving-entry continuation and replay"],
+        "exclusions": ["variable, missing, negative, or nonintegral printed values", "loyalty activation costs or counter removal", "unsupported Battle subtypes and protector procedures", "token entry when an applicable counter replacement would require suspension", "unrepresented copy, face, or continuous-characteristic interactions"]
+      },
+      "dependencies": ["counter.placement.quantity_replacement"],
+      "implementation_components": ["quorune.entry_counter_model.intrinsic_entry_counters", "quorune.compiler.card_form_rules.intrinsic_entry_counter_nodes", "quorune.entry_counters.intrinsic_entry_counter_effects", "quorune.semantic_runtime.zone_replacements.capture_zone_change_replacement_snapshot", "quorune.entry_counter_coordination.issue_resolving_entry_replacement_choice", "quorune.semantic_runtime.zone_replacements.commit_counter_events_from_resolution"],
+      "positive_tests": ["test_intrinsic_card_form_compiler_declares_exact_typed_capability", "test_ordinary_planeswalker_and_battle_entry_use_counter_owner"],
+      "negative_tests": ["test_intrinsic_counter_model_rejects_malformed_values", "test_battle_protector_validation_is_closed", "test_token_compatibility_path_fails_before_unsupported_replacement"],
+      "interaction_tests": ["test_competing_entry_counter_replacements_order_to_nine_or_ten", "test_counter_child_tracks_a_later_destination_replacement"],
+      "multiplayer_tests": ["test_simultaneous_entry_choices_follow_four_player_apnap"],
+      "privacy_tests": ["test_resolving_entry_choice_is_private_and_replays_exactly"],
+      "replay_tests": ["test_resolving_entry_choice_is_private_and_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The card-form compiler refuses trusted promotion when the canonical counter-placement quantity replacement dependency is blocked.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused mutation removes intrinsic entry-counter effect generation and the ordinary Planeswalker entry assertion rejects the surviving zero-counter result.",
       "blockers": [],
       "status": "trusted"
     },

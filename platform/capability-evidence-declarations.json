@@ -2447,6 +2447,94 @@
       "applicability_note": "Replay four priority passes and the affected-seat replacement choice to the identical authoritative state hash."
     },
     {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_competing_entry_counter_replacements_order_to_nine_or_ten",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Apply two represented counter-quantity replacements to one intrinsic Planeswalker entry event in either legal affected-controller order."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_counter_child_tracks_a_later_destination_replacement",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Retarget the nested entry-counter event when a later replacement changes the containing zone-change destination."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_simultaneous_entry_choices_follow_four_player_apnap",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Collect simultaneous affected-object entry-counter replacement choices in four-player APNAP order without preparing-state mutation."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_entry_counter_generation_mutant_is_killed",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill removal of intrinsic self-replacement generation by requiring ordinary Planeswalker entry to produce its printed loyalty counters."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "negative",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_battle_protector_validation_is_closed",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Fail closed for invalid Siege protectors and Battle subtypes whose protector procedure is not represented."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "negative",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_counter_model_rejects_malformed_values",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject missing, boolean, fractional, negative, and nonnumeric printed entry values before a replacement event exists."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "negative",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_token_compatibility_path_fails_before_unsupported_replacement",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject token entry before creation when an applicable counter replacement would require unsupported suspension."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "positive",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_card_form_compiler_declares_exact_typed_capability",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower canonical Planeswalker and Battle card types to exact source-spanned CardProgram declarations while rejecting subtype-only matches."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "positive",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Enter ordinary Planeswalker and Siege cards with printed counters through the canonical counter mutation owner and preserve the chosen protector."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_resolving_entry_choice_is_private_and_replays_exactly",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project a resolving-entry replacement choice only to the affected controller without exposing continuation or physical object identity."
+    },
+    {
+      "capability_id": "counter.producer.intrinsic_entry",
+      "evidence_class": "replay",
+      "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_resolving_entry_choice_is_private_and_replays_exactly",
+      "official_rule_ids": ["122.1", "122.6", "306.5b", "310.4b", "614.1c", "614.16", "616.1", "616.1f"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the affected-seat replacement order and resolving permanent entry to the same authoritative state hash."
+    },
+    {
       "capability_id": "counter.producer.proliferate",
       "evidence_class": "interaction",
       "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_counter_replacements_suspend_whole_batch_before_mutation",

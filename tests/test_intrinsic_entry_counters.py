@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from common import ROOT, keep_all, make_session
 from scripts.build_test_database import build_fixture_database
-from quorune.carddb import CardDatabase
+from quorune.card_programs import CardProgram
+from quorune.card_programs.adapters import compile_card_program
+from quorune.carddb import CardDatabase, CardRecord
 from quorune.deck import DeckLoader
 from quorune.engine import GameRuleError
 from quorune.entry_counters import (
@@ -33,6 +37,10 @@ from quorune.replacement import (
     replacement_choice,
 )
 from quorune.replacement_effects import ReplacementChoiceRequired
+from quorune.rules.capabilities import (
+    CapabilityRegistry,
+    load_default_capability_registry,
+)
 from quorune.semantic_runtime import prepare_zone_change_replacement_batch
 
 
@@ -54,6 +62,7 @@ class IntrinsicEntryCounterTests(unittest.TestCase):
             database,
         )
         cls.db = CardDatabase(database)
+        cls.capabilities = load_default_capability_registry()
         loader = DeckLoader(cls.db)
         cls.mishra = loader.load(
             ROOT / "examples" / "mishra-eminent-one.txt",
@@ -172,6 +181,129 @@ class IntrinsicEntryCounterTests(unittest.TestCase):
             ),
         )
 
+    @staticmethod
+    def card_form_record(
+        *,
+        type_line: str,
+        loyalty: str | None = None,
+        defense: str | None = None,
+    ) -> CardRecord:
+        suffix = (
+            306_500_000_001
+            if loyalty is not None
+            else 310_400_000_001 if defense is not None else 110_000_000_001
+        )
+        return CardRecord(
+            oracle_id=(
+                "00000000-0000-4000-8000-" f"{suffix:012d}"
+            ),
+            name="Intrinsic Entry Fixture",
+            mana_cost="{2}",
+            mana_value=2.0,
+            type_line=type_line,
+            oracle_text="Lifelink",
+            power=None,
+            toughness=None,
+            loyalty=loyalty,
+            defense=defense,
+            colors=(),
+            color_identity=(),
+            keywords=("Lifelink",),
+            produced_mana=(),
+            layout="normal",
+            released_at="2026-01-01",
+            legalities={"commander": "legal"},
+            faces=(),
+            raw={},
+        )
+
+    def test_intrinsic_card_form_compiler_declares_exact_typed_capability(self):
+        for type_line, loyalty, defense, expected_counter in (
+            ("Legendary Planeswalker — Test", "4", None, "loyalty"),
+            ("Battle — Siege", None, "3", "defense"),
+        ):
+            with self.subTest(type_line=type_line):
+                program = compile_card_program(
+                    self.db,
+                    self.card_form_record(
+                        type_line=type_line,
+                        loyalty=loyalty,
+                        defense=defense,
+                    ),
+                    capability_registry=self.capabilities,
+                    capability_profile="commander_review",
+                    trust_level="trusted",
+                )
+                self.assertIn(
+                    "counter.producer.intrinsic_entry",
+                    program.capability_dependencies,
+                )
+                self.assertTrue(program.trust_closure["trusted"])
+                ability = next(
+                    value
+                    for value in program.to_dict()["abilities"]
+                    if value["runtime"]["provenance"].get("source_kind")
+                    == "type_line"
+                )
+                self.assertEqual("static", ability["kind"])
+                self.assertEqual(
+                    {"line": 1, "start": 0, "end": len(type_line)},
+                    ability["source_span"],
+                )
+                self.assertEqual(
+                    "type_line",
+                    ability["runtime"]["provenance"]["source_kind"],
+                )
+                self.assertEqual(
+                    expected_counter,
+                    ability["runtime"]["provenance"]
+                    ["card_form_descriptor"]["counter_name"],
+                )
+                self.assertEqual(
+                    program.to_dict(),
+                    CardProgram.from_dict(program.to_dict()).to_dict(),
+                )
+
+        subtype_only = compile_card_program(
+            self.db,
+            self.card_form_record(type_line="Creature — Planeswalker"),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+        self.assertNotIn(
+            "counter.producer.intrinsic_entry",
+            subtype_only.capability_dependencies,
+        )
+
+    def test_intrinsic_card_form_dependency_fails_closed(self):
+        registry_value = json.loads(
+            (ROOT / "quorune" / "rules" / "capability-registry.json")
+            .read_text(encoding="utf-8")
+        )
+        dependency = next(
+            row
+            for row in registry_value["capabilities"]
+            if row["id"] == "counter.placement.quantity_replacement"
+        )
+        dependency["status"] = "blocked"
+        dependency["blockers"] = ["test mutation"]
+        registry = CapabilityRegistry(copy.deepcopy(registry_value))
+        registry.mark_evidence_verified("0" * 64)
+        with self.assertRaisesRegex(
+            ValueError, "intrinsic entry-counter capability is blocked"
+        ):
+            compile_card_program(
+                self.db,
+                self.card_form_record(
+                    type_line="Planeswalker — Test",
+                    loyalty="4",
+                ),
+                capability_registry=registry,
+                capability_profile="commander_review",
+                trust_level="trusted",
+            )
+
     def test_intrinsic_counter_model_rejects_malformed_values(self):
         expected = intrinsic_entry_counters(
             {"loyalty": "04"},
@@ -233,6 +365,34 @@ class IntrinsicEntryCounterTests(unittest.TestCase):
         self.assertEqual(4, walker.counters["loyalty"])
         self.assertEqual(3, battle.counters["defense"])
         self.assertEqual("B", battle.battle_protector)
+
+    def test_intrinsic_entry_counter_generation_mutant_is_killed(self):
+        def assert_entry_counter_created(seed: int) -> None:
+            session = self.session(seed)
+            engine = session.engine
+            walker = self.add_entry_card(
+                engine,
+                seat="A",
+                ref=f"walker-mutation-{seed}",
+                type_line="Planeswalker — Test",
+                loyalty="4",
+            )
+            engine.move_card(
+                walker.object_id,
+                "battlefield",
+                controller="A",
+                semantic_events=False,
+            )
+            self.assertEqual(4, walker.counters.get("loyalty", 0))
+
+        assert_entry_counter_created(3065007)
+        with patch(
+            "quorune.semantic_runtime.zone_replacements."
+            "intrinsic_entry_counter_effects",
+            return_value=(),
+        ):
+            with self.assertRaises(AssertionError):
+                assert_entry_counter_created(3065008)
 
     def test_competing_entry_counter_replacements_order_to_nine_or_ten(self):
         results: set[int] = set()
