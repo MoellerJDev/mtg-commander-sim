@@ -125,6 +125,7 @@
       "test_deathtouch_rules",
       "test_exact_combat_keywords",
       "test_fixed_mass_damage",
+      "test_rule_generated_counter_removals",
       "test_state_based_actions",
       "test_trample_assignment_integration"
     ],

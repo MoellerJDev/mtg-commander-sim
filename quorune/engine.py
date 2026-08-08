@@ -182,7 +182,7 @@ from .mana_undo import (
     priority_actions_with_mana_undo,
     undo_mana_activation,
 )
-from .tap_state import tap_declared_attackers
+from .tap_state import tap_declared_attackers, untap_permanent
 from .stack_counter import (
     counter_stack_item,
     stack_item_can_be_countered,
@@ -310,6 +310,7 @@ from .state_based_actions import (
     player_loss_seats,
 )
 from .state_based_execution import (
+    commit_state_based_counter_removals,
     commit_state_based_zone_changes,
     prepare_state_based_execution,
 )
@@ -2795,38 +2796,6 @@ class CommanderEngine(
                 player.stats.pop("restricted_mana", None)
                 self._log(seat, "mana.empty", f"{seat}'s mana pool emptied.", {"lost": lost, "reason": reason}, importance=0, changed_players=[seat])
 
-    def _untap_permanent(
-        self,
-        card: CardInstance,
-        *,
-        actor: str | None,
-        reason: str,
-    ) -> bool:
-        if not card.tapped:
-            return False
-        stun = int(card.counters.get("stun", 0))
-        if stun > 0:
-            if stun == 1:
-                card.counters.pop("stun", None)
-            else:
-                card.counters["stun"] = stun - 1
-            self._log(
-                actor,
-                "permanent.untap.replaced",
-                f"A stun counter was removed from {card.ref} instead of untapping it.",
-                {
-                    "object": card.ref,
-                    "counter": "stun",
-                    "reason": reason,
-                },
-                importance=1,
-                changed_objects=[card.object_id],
-                changed_players=[card.controller],
-            )
-            return False
-        card.tapped = False
-        return True
-
     def _unsupported_phasing_source_at_untap(
         self,
         active: str,
@@ -2975,8 +2944,8 @@ class CommanderEngine(
                         )[0]
                     ):
                         continue
-                    if self._untap_permanent(
-                        card,
+                    if untap_permanent(
+                        self, card,
                         actor=active,
                         reason="untap step",
                     ):
@@ -2999,8 +2968,8 @@ class CommanderEngine(
                         if (
                             card.controller == seat
                             and not card.phased_out
-                            and self._untap_permanent(
-                                card,
+                            and untap_permanent(
+                                self, card,
                                 actor=seat,
                                 reason="Seedborn Muse",
                             )
@@ -12343,104 +12312,27 @@ class CommanderEngine(
                     ):
                         self._detach_permanent(card)
                         detached.append(object_id)
-                counter_changes: list[dict[str, Any]] = []
-                maximum_counter_changes: list[dict[str, Any]] = []
-                counter_removals: dict[
-                    tuple[str, str], int
-                ] = {}
-                for object_id, count in (
-                    sba_batch.counter_pairs_to_remove
-                ):
-                    for kind in ("+1/+1", "-1/-1"):
-                        key = (object_id, kind)
-                        counter_removals[key] = max(
-                            counter_removals.get(key, 0),
-                            count,
-                        )
-                for object_id, kind, count in (
-                    sba_batch.counter_maximums_to_remove
-                ):
-                    key = (object_id, kind)
-                    # Counter-removal actions discovered from the same
-                    # snapshot can name the same indistinguishable counters.
-                    # Satisfy the greatest required removal for that kind
-                    # rather than adding overlapping requirements.
-                    counter_removals[key] = max(
-                        counter_removals.get(key, 0),
-                        count,
-                    )
-                counter_values_before: dict[
-                    str, dict[str, int]
-                ] = {}
-                for object_id, _ in (
-                    sba_batch.counter_pairs_to_remove
-                ):
-                    card = self.state.cards[object_id]
-                    if card.zone != "battlefield":
-                        continue
-                    counter_values_before.setdefault(
-                        object_id,
-                        dict(card.counters),
-                    )
-                for object_id, _, _ in (
-                    sba_batch.counter_maximums_to_remove
-                ):
-                    card = self.state.cards[object_id]
-                    if card.zone != "battlefield":
-                        continue
-                    counter_values_before.setdefault(
-                        object_id,
-                        dict(card.counters),
-                    )
-                for (object_id, kind), count in sorted(
-                    counter_removals.items()
-                ):
-                    card = self.state.cards[object_id]
-                    if card.zone != "battlefield":
-                        continue
-                    remaining = max(
-                        0,
-                        int(card.counters.get(kind, 0)) - count,
-                    )
-                    if remaining:
-                        card.counters[kind] = remaining
-                    else:
-                        card.counters.pop(kind, None)
-                for object_id, count in (
-                    sba_batch.counter_pairs_to_remove
-                ):
-                    card = self.state.cards[object_id]
-                    if card.zone != "battlefield":
-                        continue
-                    counter_changes.append(
-                        {
-                            "object": card.ref,
-                            "pairs_removed": count,
-                        }
-                    )
-                for object_id, kind, count in (
-                    sba_batch.counter_maximums_to_remove
-                ):
-                    card = self.state.cards[object_id]
-                    if card.zone != "battlefield":
-                        continue
-                    before = int(
-                        counter_values_before[object_id].get(
-                            kind, 0
-                        )
-                    )
-                    maximum_counter_changes.append(
-                        {
-                            "object": card.ref,
-                            "counter": kind,
-                            "before": before,
-                            "maximum": before - count,
-                            "required_removal": count,
-                            "after": int(
-                                card.counters.get(kind, 0)
-                            ),
-                        }
-                    )
+                counter_result = commit_state_based_counter_removals(
+                    self, execution.counter_removals
+                )
+                counter_changes = [
+                    {
+                        "object": self.state.cards[value.object_id].ref,
+                        "pairs_removed": value.pairs_removed,
+                    }
+                    for value in counter_result.pairs
+                ]
+                maximum_counter_changes = [
+                    {
+                        "object": self.state.cards[value.object_id].ref,
+                        "counter": value.counter_name,
+                        "before": value.before,
+                        "maximum": value.maximum,
+                        "required_removal": value.required_removal,
+                        "after": value.after,
+                    }
+                    for value in counter_result.maximums
+                ]
                 ceased: list[dict[str, Any]] = []
                 ceased_object_ids: list[str] = []
                 for object_id in sba_batch.cease:

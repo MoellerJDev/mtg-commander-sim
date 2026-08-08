@@ -76,6 +76,12 @@
       ]
     },
     {
+      "mechanic_id": "cr-704-state-based-actions",
+      "capabilities": [
+        "counter.removal.rule_generated"
+      ]
+    },
+    {
       "mechanic_id": "cr-614-replacement-effects",
       "capabilities": [
         "zone.change.destination_replacement"
@@ -465,6 +471,33 @@
       "dependency_fail_closed_rationale": "This bounded counter producer has no capability dependencies beyond the shared replacement event substrate.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "counter.removal.rule_generated",
+      "version": 1,
+      "official_rules": ["122.1d", "502.3", "701.26b", "704.3", "704.5q", "704.5r"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Prepare and commit exact permanent-counter removals through one canonical typed transaction for the represented stun untap replacement and simultaneous state-based opposing-pair and maximum-counter actions.",
+        "inputs": ["stable physical and logical permanent identity", "battlefield zone", "canonical counter kind", "exact positive integral removal amount", "one simultaneous state-based snapshot"],
+        "outputs": ["canonical immutable removal plan", "rollback-safe exact counter transition", "typed state-based result data", "deterministic public journal state"],
+        "exclusions": ["effect or cost counter-removal grammar", "player counters", "choices among counter kinds", "counter movement", "arbitrary maximum-counter ability grammar", "replacement discovery and ordering beyond the represented mandatory stun replacement"]
+      },
+      "dependencies": [],
+      "implementation_components": ["quorune.counter_removal.plan_counter_removals", "quorune.counter_removal.commit_counter_removals", "quorune.tap_state.untap_permanent", "quorune.state_based_execution.prepare_state_based_execution", "quorune.state_based_execution.commit_state_based_counter_removals"],
+      "positive_tests": ["test_removals_are_canonical_and_commit_exactly", "test_stun_replacement_uses_the_counter_removal_owner", "test_overlapping_sba_removals_share_one_atomic_plan"],
+      "negative_tests": ["test_malformed_or_unpayable_removal_fails_before_mutation", "test_stale_identity_rolls_back_the_whole_removal_batch", "test_stun_replacement_rejects_malformed_public_state", "test_malformed_sba_removal_fails_before_mutation"],
+      "interaction_tests": ["test_overlapping_sba_removals_share_one_atomic_plan", "test_moving_permanent_skips_redundant_counter_removal"],
+      "multiplayer_tests": ["test_opposing_counter_removal_replays_in_four_player_game"],
+      "privacy_tests": [],
+      "replay_tests": ["test_opposing_counter_removal_replays_in_four_player_game", "test_compiled_untap_activation_consumes_stun_and_replays", "test_rasputin_counter_maximum_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This bounded mutation owner has no capability dependencies beyond the shared typed counter-state substrate.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "test_stun_replacement_uses_the_counter_removal_owner replaces the canonical counter commit with a no-op and proves the untap replacement cannot report success while leaving the counter state unchanged.",
       "blockers": [],
       "status": "trusted"
     },
@@ -1533,7 +1566,7 @@
         "exclusions": ["optional, modal, aggregate, quantified, relational, qualified, or compound untap clauses", "untap-symbol costs", "untap-step selection", "replacement ordering beyond stun counters", "continuous prohibitions against untapping; cards representing those interactions remain material residuals and fail match trust closed"]
       },
       "dependencies": [],
-      "implementation_components": ["quorune.compiler.tap_state_templates.TargetedTapStateEffectTemplate", "quorune.rules.node_capability_shapes.targeted_tap_state_node_capabilities", "quorune.semantic_runtime.tap_state_handlers.UntapPermanentHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "quorune.tap_state.set_permanent_tapped", "CommanderEngine._untap_permanent"],
+      "implementation_components": ["quorune.compiler.tap_state_templates.TargetedTapStateEffectTemplate", "quorune.rules.node_capability_shapes.targeted_tap_state_node_capabilities", "quorune.semantic_runtime.tap_state_handlers.UntapPermanentHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "quorune.tap_state.set_permanent_tapped", "quorune.tap_state.untap_permanent", "quorune.counter_removal.commit_counter_removals"],
       "positive_tests": ["test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering", "test_compiled_untap_activation_consumes_stun_and_replays", "test_tap_state_handlers_lower_typed_intents_through_read_only_context", "test_tap_state_effects_change_only_eligible_state"],
       "negative_tests": ["test_unsupported_tap_state_variants_remain_material_residuals", "test_targeted_tap_state_shape_mutants_fail_closed", "test_tap_state_validation_fails_before_mutation"],
       "interaction_tests": ["test_compiled_untap_activation_consumes_stun_and_replays", "test_stun_counter_replaces_typed_untap_without_false_event"],
@@ -1560,7 +1593,7 @@
         "exclusions": ["arbitrary selectors", "complete layer dependencies", "other untap replacements", "player choices", "noncreature permanent sets"]
       },
       "dependencies": ["permanent.untap.effect"],
-      "implementation_components": ["quorune.semantic_runtime.tap_state_handlers.UntapAllCreaturesHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "quorune.tap_state.untap_all_creatures", "CommanderEngine._untap_permanent"],
+      "implementation_components": ["quorune.semantic_runtime.tap_state_handlers.UntapAllCreaturesHandler", "quorune.semantic_runtime.executor.execute_intent_plan", "quorune.tap_state.untap_all_creatures", "quorune.tap_state.untap_permanent", "quorune.counter_removal.commit_counter_removals"],
       "positive_tests": ["test_untap_all_creatures_uses_effective_types_and_canonical_state_path"],
       "negative_tests": ["test_tap_state_validation_fails_before_mutation", "test_untap_all_dependency_fails_closed"],
       "interaction_tests": ["test_stun_counter_replaces_typed_untap_without_false_event"],

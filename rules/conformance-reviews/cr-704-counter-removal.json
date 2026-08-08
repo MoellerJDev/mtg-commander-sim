@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 704.5q-r — Rule-Generated Counter Removal",
+  "cases": [
+    {
+      "rule_id": "704.5q",
+      "rule_text_sha256": "329f337f314d590ceb0034f97fe8abc16fd8a8cfacfc74abb14ea2e525443c47",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": [
+        "quorune.state_based_actions.evaluate_permanent_state_based_actions",
+        "quorune.state_based_execution.prepare_state_based_execution",
+        "quorune.state_based_execution.commit_state_based_counter_removals",
+        "quorune.counter_removal.commit_counter_removals"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_opposing_power_toughness_counters_cancel_in_pairs",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_removals_are_canonical_and_commit_exactly",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_malformed_or_unpayable_removal_fails_before_mutation",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stale_identity_rolls_back_the_whole_removal_batch",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_overlapping_sba_removals_share_one_atomic_plan",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_sba_removal_order_is_canonical_across_permutations",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_opposing_counter_removal_replays_in_four_player_game"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "blockers": [],
+      "notes": [
+        "Every phased-in permanent with both represented opposing power/toughness counter kinds contributes one canonical exact removal from the same immutable state-based snapshot. The shared transaction rejects malformed or stale identities before mutation and replays exactly in multiplayer."
+      ]
+    },
+    {
+      "rule_id": "704.5r",
+      "rule_text_sha256": "532591e6b56b28e1ba0dde6a6a8ee44459bd2b04929279022e1726872f1125cc",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": [
+        "quorune.state_based_actions.counter_maximums_from_oracle",
+        "quorune.state_based_actions.evaluate_permanent_state_based_actions",
+        "quorune.state_based_execution.prepare_state_based_execution",
+        "quorune.state_based_execution.commit_state_based_counter_removals",
+        "quorune.counter_removal.commit_counter_removals"
+      ],
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_counter_maximum_sentence_and_snapshot_action",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_counter_maximum_overlaps_opposing_pair_removal",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_rasputin_counter_maximum_replays_exactly",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_overlapping_sba_removals_share_one_atomic_plan",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_malformed_sba_removal_fails_before_mutation"
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
+      "blockers": [
+        "complete_precompiled_maximum_counter_ability_grammar_not_implemented",
+        "four_player_maximum_counter_interaction_evidence_not_complete"
+      ],
+      "notes": [
+        "The reviewed numeric self-restriction sentence family now commits through the canonical exact removal owner, including overlap and replay. Runtime Oracle interpretation and incomplete maximum-ability grammar prevent promotion of the complete rule."
+      ]
+    }
+  ]
+}

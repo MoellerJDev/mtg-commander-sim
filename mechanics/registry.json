@@ -436,14 +436,14 @@
     {
       "mechanic_id": "cr-704-state-based-actions",
       "path": "mechanics/contracts/state-based-actions.json",
-      "sha256": "2ebd4a0dd11e2bf308a4251d2534ac5d2c6179dad0ef67b3052797e700fef20c",
-      "version": 6
+      "sha256": "d89181e085d367ee4b261256bcb9b88c379d364cb0fc8be217d10ad6b5ae25a2",
+      "version": 7
     },
     {
       "mechanic_id": "tap-and-untap",
       "path": "mechanics/contracts/tap-and-untap.json",
-      "sha256": "f1f65131892b81922990de59d91e8820b85f886dc9d9091d3d7b467e9ea49451",
-      "version": 2
+      "sha256": "f478576f19936540d2e87425d5126c42c32838c52a03ba44119f92cab87d32e4",
+      "version": 3
     },
     {
       "mechanic_id": "toxic",
@@ -5581,14 +5581,14 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/tap-and-untap.json",
-      "contract_sha256": "f1f65131892b81922990de59d91e8820b85f886dc9d9091d3d7b467e9ea49451",
-      "contract_version": 2,
+      "contract_sha256": "f478576f19936540d2e87425d5126c42c32838c52a03ba44119f92cab87d32e4",
+      "contract_version": 3,
       "coverage_status": "tested",
       "dependencies": [
         "701"
       ],
-      "implementation_component": "typed direct-target compiler, tap and untap semantic handlers, canonical tap_state mutation port, and stun-aware engine primitive",
-      "implementation_version": "tap-state-effects-v2",
+      "implementation_component": "typed direct-target compiler, tap and untap semantic handlers, tap_state.untap_permanent, and the canonical exact counter-removal transaction",
+      "implementation_version": "tap-state-effects-v3",
       "kind": "keyword_action",
       "known_blockers": [
         "optional, modal, aggregate, quantified, relational, qualified, and compound tap-state clauses remain precise compiler residuals",
@@ -5611,6 +5611,9 @@
         "test_tap_state_validation_fails_before_mutation",
         "test_tap_state_resolution_rolls_back_atomically",
         "test_tap_state_effects_replay_exactly",
+        "test_stun_replacement_uses_the_counter_removal_owner",
+        "test_stun_replacement_rejects_malformed_public_state",
+        "test_stale_identity_rolls_back_the_whole_removal_batch",
         "test_semantic_tap_state_mutants_are_killed",
         "test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering",
         "test_unsupported_tap_state_variants_remain_material_residuals",
@@ -8464,12 +8467,12 @@
     {
       "category": "additional_rules",
       "contract_path": "mechanics/contracts/state-based-actions.json",
-      "contract_sha256": "2ebd4a0dd11e2bf308a4251d2534ac5d2c6179dad0ef67b3052797e700fef20c",
-      "contract_version": 6,
+      "contract_sha256": "d89181e085d367ee4b261256bcb9b88c379d364cb0fc8be217d10ad6b5ae25a2",
+      "contract_version": 7,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-      "implementation_version": "state-based-actions-v7",
+      "implementation_component": "state_based_actions.evaluate_permanent_state_based_actions, state_based_execution.prepare_state_based_execution, state_based_execution.commit_state_based_counter_removals, and counter_removal.commit_counter_removals",
+      "implementation_version": "state-based-actions-v8",
       "kind": "rules_section",
       "known_blockers": [
         "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
@@ -8493,6 +8496,14 @@
         "test_counter_maximum_sentence_and_snapshot_action",
         "test_counter_maximum_overlaps_opposing_pair_removal",
         "test_rasputin_counter_maximum_replays_exactly",
+        "test_removals_are_canonical_and_commit_exactly",
+        "test_malformed_or_unpayable_removal_fails_before_mutation",
+        "test_stale_identity_rolls_back_the_whole_removal_batch",
+        "test_overlapping_sba_removals_share_one_atomic_plan",
+        "test_sba_removal_order_is_canonical_across_permutations",
+        "test_moving_permanent_skips_redundant_counter_removal",
+        "test_malformed_sba_removal_fails_before_mutation",
+        "test_opposing_counter_removal_replays_in_four_player_game",
         "test_zero_defense_battle_waits_for_its_pending_trigger",
         "test_battle_trigger_from_same_incarnation_defers_state_action",
         "test_old_incarnation_trigger_does_not_defer_battle_state_action",

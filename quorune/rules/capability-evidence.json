@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "d47a62786111bc20efb55077ff1180114e3380d441f5203c19cccb6b2a300039",
-  "declaration_source_fingerprint": "a139f36997cd0268e78034d365ac8ad5a27b5c1180063ce2f7b328ccd74c4c63",
+  "registry_fingerprint": "2c7429fd74f133622753e201fc410367b2be8b5b46f3a469fef8800e6ebf04e5",
+  "declaration_source_fingerprint": "f9024be4b365f45ac654d83639c550e547f8aa3cf3ad713b91e7fc805b72135a",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -5994,6 +5994,139 @@
         "commander_review"
       ],
       "applicability_note": "Replay the Proliferate selection and permanent counter-replacement ordering to the identical final authoritative state hash."
+    },
+    {
+      "capability_id": "counter.removal.rule_generated",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_overlapping_sba_removals_share_one_atomic_plan",
+      "official_rule_ids": [
+        "122.1d",
+        "502.3",
+        "701.26b",
+        "704.3",
+        "704.5q",
+        "704.5r"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Coalesce overlapping same-snapshot opposing-pair and maximum requirements without double-removing indistinguishable counters."
+    },
+    {
+      "capability_id": "counter.removal.rule_generated",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_opposing_counter_removal_replays_in_four_player_game",
+      "official_rule_ids": [
+        "122.1d",
+        "502.3",
+        "701.26b",
+        "704.3",
+        "704.5q",
+        "704.5r"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve an opposing-counter state action after a four-player priority round without seat-order-dependent state."
+    },
+    {
+      "capability_id": "counter.removal.rule_generated",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stun_replacement_uses_the_counter_removal_owner",
+      "official_rule_ids": [
+        "122.1d",
+        "502.3",
+        "701.26b",
+        "704.3",
+        "704.5q",
+        "704.5r"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill a mutation that bypasses the exact counter-state commit while attempting to report the stun replacement as completed."
+    },
+    {
+      "capability_id": "counter.removal.rule_generated",
+      "evidence_class": "negative",
+      "test_id": "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_malformed_or_unpayable_removal_fails_before_mutation",
+      "official_rule_ids": [
+        "122.1d",
+        "502.3",
+        "701.26b",
+        "704.3",
+        "704.5q",
+        "704.5r"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject malformed, duplicate, boolean, nonintegral, and insufficient exact removals before any counter changes."
+    },
+    {
+      "capability_id": "counter.removal.rule_generated",
+      "evidence_class": "negative",
+      "test_id": "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stale_identity_rolls_back_the_whole_removal_batch",
+      "official_rule_ids": [
+        "122.1d",
+        "502.3",
+        "701.26b",
+        "704.3",
+        "704.5q",
+        "704.5r"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject a stale logical incarnation and preserve every counter in the prepared batch."
+    },
+    {
+      "capability_id": "counter.removal.rule_generated",
+      "evidence_class": "positive",
+      "test_id": "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_removals_are_canonical_and_commit_exactly",
+      "official_rule_ids": [
+        "122.1d",
+        "502.3",
+        "701.26b",
+        "704.3",
+        "704.5q",
+        "704.5r"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Canonicalize exact permanent-counter removals and commit their typed transitions atomically."
+    },
+    {
+      "capability_id": "counter.removal.rule_generated",
+      "evidence_class": "replay",
+      "test_id": "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_opposing_counter_removal_replays_in_four_player_game",
+      "official_rule_ids": [
+        "122.1d",
+        "502.3",
+        "701.26b",
+        "704.3",
+        "704.5q",
+        "704.5r"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay a four-player opposing-counter state action to the same authoritative state hash."
     },
     {
       "capability_id": "damage.amount.positive",
@@ -15109,5 +15242,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "2390a01823151fc25c12cf7565b222e4ec42621b0d27779d37d95a18c925186b"
+  "fingerprint": "e855b42e35639ba4015def07ae3e864e5a062d01f06eb5eeff1cecfe71a718c9"
 }

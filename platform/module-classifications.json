@@ -1410,6 +1410,20 @@
       "replay_participation": "authoritative"
     },
     {
+      "file": "quorune/counter_removal.py",
+      "layer": "rules",
+      "owning_subsystem": "counter_state",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "quorune/counter_state.py",
       "layer": "rules",
       "owning_subsystem": "counter_state",
@@ -4399,5 +4413,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "4be8e3b9296f74490d8c0df499fc59bd7c0914c1bebc4da52f12fbb23a955941"
+  "fingerprint": "d5d0f49e2c2f5542e56190262d5362d7466753a807fafe5df62d0a747141bee4"
 }
