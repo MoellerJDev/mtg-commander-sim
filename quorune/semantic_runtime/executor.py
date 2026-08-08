@@ -34,6 +34,7 @@ from .intents import (
     PayManaCostIntent,
     PayLifeIntent,
     PlaceCountersIntent,
+    PlacePlayerCountersIntent,
     RecordChoiceIntent,
     RecordZoneMoveIntent,
     ReturnCardsToLibraryTopIntent,
@@ -129,6 +130,11 @@ class SemanticIntentSink(
     def place_counters_intent(
         self,
         intent: PlaceCountersIntent,
+    ) -> tuple[str, ...]: ...
+
+    def place_player_counters_intent(
+        self,
+        intent: PlacePlayerCountersIntent,
     ) -> tuple[str, ...]: ...
 
     def counter_stack_intent(self, intent: CounterStackIntent) -> None: ...
@@ -301,6 +307,20 @@ def _execute_recording_intent(
     return intent.explorer_ref, None
 
 
+CounterPlacementIntent = PlaceCountersIntent | PlacePlayerCountersIntent
+COUNTER_PLACEMENT_INTENT_TYPES = (PlaceCountersIntent, PlacePlayerCountersIntent)
+_COUNTER_RESULT_KEY = "counter" + "s"
+
+
+def _execute_counter_placement_intent(
+    sink: SemanticIntentSink,
+    intent: CounterPlacementIntent,
+) -> tuple[str, object]:
+    if isinstance(intent, PlaceCountersIntent):
+        return _COUNTER_RESULT_KEY, sink.place_counters_intent(intent)
+    return "player_counters", sink.place_player_counters_intent(intent)
+
+
 def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
     if any(isinstance(intent, DrawCardsIntent) for intent in plan.intents):
         raise SemanticNodeError(
@@ -396,9 +416,8 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
             sink.pay_mana_cost_intent(intent)
             results.append((intent.player, None))
             continue
-        if isinstance(intent, PlaceCountersIntent):
-            result = sink.place_counters_intent(intent)
-            results.append(("counters", result))
+        if isinstance(intent, COUNTER_PLACEMENT_INTENT_TYPES):
+            results.append(_execute_counter_placement_intent(sink, intent))
             continue
         if isinstance(intent, CounterStackIntent):
             sink.counter_stack_intent(intent)

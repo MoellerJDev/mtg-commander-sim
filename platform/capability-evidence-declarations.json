@@ -2447,6 +2447,102 @@
       "applicability_note": "Replay four priority passes and the affected-seat replacement choice to the identical authoritative state hash."
     },
     {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_player_counter_placement_triggers_poison_sba_and_replay",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Commit one typed simultaneous player-counter batch before the poison state-based action eliminates every affected opponent."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_target_player_counter_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Choose one legal player target in a four-player game and resolve the fixed player-counter instruction without exposing unrelated seat state."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementCompilerTests.test_fixed_player_counter_compiler_mutant_is_killed",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a compiler mutant that removes the closed fixed player-counter template and would otherwise preserve a false exact promotion."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementCompilerTests.test_unsupported_fixed_player_counter_variants_remain_material_residuals",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep variable, optional, linked, conditional, compound, and malformed symbol wording outside the closed player-counter grammar."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_inactive_player_counter_target_rolls_back_without_mutation",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject a player target that left the game before the fixed placement commits and preserve the authoritative state hash."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_typed_player_counter_handler_rejects_malformed_effects",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject boolean, zero, empty, unknown, mismatched-target, and malformed replacement-selection fields before mutation."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementCompilerTests.test_spell_trigger_and_activated_contexts_share_fixed_player_counter_lowering",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower one source-spanned fixed player-counter family across spell, trigger, and activated contexts."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_fixed_player_counter_source_may_leave_before_result",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Commit the typed fixed player-counter result after its source has left while preserving source provenance in the event journal."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_typed_player_counter_handler_uses_apnap_subject_order_and_counter_owner",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower an each-player instruction to one APNAP-canonical typed intent and commit every player counter through the shared counter owner."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_target_player_counter_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project the public target decision only to its controller without exposing any opponent's hidden hand."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_player_counter_placement_triggers_poison_sba_and_replay",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the simultaneous poison placement and resulting multiplayer state-based losses to the identical authoritative hash."
+    },
+    {
+      "capability_id": "counter.producer.fixed_player_effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_target_player_counter_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the selected player target, four priority passes, and typed rad-counter result to the identical authoritative state hash."
+    },
+    {
       "capability_id": "counter.producer.intrinsic_entry",
       "evidence_class": "interaction",
       "test_id": "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_competing_entry_counter_replacements_order_to_nine_or_ten",
@@ -6977,6 +7073,21 @@
         "commander_review"
       ],
       "applicability_note": "Revalidate the selected player immediately before committing the targeted activated ability's private draw transaction."
+    },
+    {
+      "capability_id": "target.revalidate_resolution",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_fixed_player_counter_placement_effects.FixedPlayerCounterPlacementRuntimeTests.test_target_player_counter_choice_is_seat_scoped_and_replays_exactly",
+      "official_rule_ids": [
+        "115.1",
+        "608.2b"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Revalidate the selected active player before committing the targeted fixed player-counter transaction."
     },
     {
       "capability_id": "target.revalidate_resolution",

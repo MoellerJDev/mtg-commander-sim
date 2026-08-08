@@ -744,11 +744,72 @@ def fixed_counter_placement_node_capabilities(
     return ()
 
 
+def fixed_player_counter_placement_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for one closed player-counter placement."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if "cr-122-counters" not in mechanics or len(effects) != 1:
+        return ()
+    effect = effects[0]
+    subject = effect.get("subjects")
+    base_fields = {"op", "subjects", "counter", "amount", "source"}
+    expected_fields = (
+        base_fields | {"target"} if subject == "target" else base_fields
+    )
+    if (
+        set(effect) != expected_fields
+        or effect.get("op") != "place_player_counters"
+        or subject
+        not in {"controller", "target", "each-player", "each-opponent"}
+        or type(effect.get("counter")) is not str
+        or not str(effect.get("counter") or "").strip()
+        or type(effect.get("amount")) is not int
+        or effect.get("amount", 0) <= 0
+        or effect.get("source") != "$source"
+    ):
+        return ()
+    if subject != "target":
+        return (
+            ("counter.producer.fixed_player_effect",)
+            if target_schema is None
+            else ()
+        )
+    valid_schemas = (
+        {
+            "zones": ["player"],
+            "categories": ["player"],
+            "count": 1,
+        },
+        {
+            "zones": ["player"],
+            "categories": ["player"],
+            "count": 1,
+            "player_relation": "opponent",
+        },
+    )
+    if (
+        effect.get("target") != "$target.0"
+        or "cr-115-targets" not in mechanics
+        or dict(target_schema or {}) not in valid_schemas
+    ):
+        return ()
+    return (
+        "counter.producer.fixed_player_effect",
+        "target.revalidate_resolution",
+    )
+
+
 __all__ = [
     "fixed_damage_node_capabilities",
     "mass_destruction_node_capabilities",
     "fixed_draw_node_capabilities",
     "fixed_counter_placement_node_capabilities",
+    "fixed_player_counter_placement_node_capabilities",
     "single_explore_node_capabilities",
     "single_proliferate_node_capabilities",
     "targeted_destruction_node_capabilities",

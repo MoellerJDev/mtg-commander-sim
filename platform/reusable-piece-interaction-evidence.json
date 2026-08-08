@@ -365,6 +365,14 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_target_player_counter_choice_is_seat_scoped_and_replays_exactly",
+      "piece_ids": ["capability.counter.producer.fixed_player_effect", "capability.target.revalidate_resolution"],
+      "capability_ids": ["counter.producer.fixed_player_effect", "target.revalidate_resolution"],
+      "interaction_order": 2,
+      "assertion": "A targeted fixed player-counter instruction revalidates the selected active player before the canonical counter transaction commits and replays the result."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_self_pump_and_basic_token_creation_lower_generically",
       "piece_ids": ["mechanic.cr-111-tokens", "mechanic.cr-122-counters", "mechanic.cr-611-continuous-effects"],
       "capability_ids": [],

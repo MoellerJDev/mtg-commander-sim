@@ -105,7 +105,7 @@ class TypedSemanticHandlerTests(unittest.TestCase):
             len({row["operation"] for row in inventory}),
         )
         self.assertEqual(
-            82,
+            83,
             len(
                 [
                     row
