@@ -16,8 +16,8 @@
     {
       "mechanic_id": "cr-122-counters",
       "path": "mechanics/contracts/basic-counters.json",
-      "sha256": "3f2f6af361fa87c8ac7d1740d26549a7ca893f2f69623319646067dd856b8fec",
-      "version": 5
+      "sha256": "557a6b656effb2ead9f73f295a85c45c9c4c1d50504111a163c67b53c279222f",
+      "version": 6
     },
     {
       "mechanic_id": "cr-111-tokens",
@@ -6227,15 +6227,15 @@
     {
       "category": "game_concepts",
       "contract_path": "mechanics/contracts/basic-counters.json",
-      "contract_sha256": "3f2f6af361fa87c8ac7d1740d26549a7ca893f2f69623319646067dd856b8fec",
-      "contract_version": 5,
+      "contract_sha256": "557a6b656effb2ead9f73f295a85c45c9c4c1d50504111a163c67b53c279222f",
+      "contract_version": 6,
       "coverage_status": "partial",
       "dependencies": [],
-      "implementation_component": "closed fixed-counter single-target, bounded target-set, affected-set, Proliferate, and card-form entry compilers; strict semantic and replacement continuations; typed target and set coordinators; counter_placement mutation owner; semantic_runtime counter and zone replacements; and represented producers",
-      "implementation_version": "counter-placement-transaction-v5",
+      "implementation_component": "closed fixed-counter single-target, bounded target-set, Support, affected-set, Proliferate, and card-form entry compilers; strict semantic and replacement continuations; typed target and set coordinators; counter_placement mutation owner; semantic_runtime counter and zone replacements; and represented producers",
+      "implementation_version": "counter-placement-transaction-v6",
       "kind": "rules_section",
       "known_blockers": [
-        "Support shorthand and optional, variable, distributed, multi-counter, dynamic, subtype-qualified, combat-qualified, modal, conditional, and compound target-set instructions remain residual",
+        "Support X, zero, copied, granted, optional, repeated, conditional, modal, and compound Support instructions remain residual, along with optional, variable, distributed, multi-counter, dynamic, subtype-qualified, combat-qualified, modal, conditional, and compound general target-set instructions",
         "cumulative upkeep, loyalty costs, and other rule-action counter producers are not yet migrated to the shared transaction",
         "token Planeswalker or Battle entry with an applicable quantity replacement remains fail closed until token creation can suspend atomically",
         "fractional, halving, dynamic-quantity, movement, removal, prevention, and other enters-with-counter replacement families remain unsupported",
@@ -6283,6 +6283,15 @@
         "test_target_set_suspends_for_quantity_replacement_and_replays",
         "test_unsupported_target_set_variants_remain_material_residuals",
         "test_target_set_compiler_mutant_is_killed",
+        "test_support_compiles_in_spell_trigger_and_activated_contexts",
+        "test_permanent_support_excludes_source_while_spell_support_does_not",
+        "test_support_shape_mutations_fail_closed",
+        "test_unsupported_support_variants_remain_material_residuals",
+        "test_support_source_context_uses_exact_card_types",
+        "test_support_compiler_mutant_is_killed",
+        "test_permanent_support_excludes_source_from_legal_targets",
+        "test_support_all_original_targets_illegal_rolls_back",
+        "test_support_partial_target_revalidation_and_quantity_replacement_replay",
         "test_intrinsic_card_form_compiler_declares_exact_typed_capability",
         "test_intrinsic_card_form_dependency_fails_closed",
         "test_unsupported_intrinsic_card_forms_are_material_residuals",

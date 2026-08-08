@@ -43,7 +43,6 @@
       "test_fixed_counter_placement_target_sets",
       "test_fixed_player_counter_placement_effects",
       "test_intrinsic_entry_counters",
-      "test_support_counter_placement",
       "test_life_change",
       "test_life_effect_runtime",
       "test_mass_destruction_effect_clauses",
@@ -56,6 +55,7 @@
       "test_replacement_model_hardening",
       "test_return_to_hand_rules",
       "test_single_object_zone_transition",
+      "test_support_counter_placement",
       "test_token_creation_replacements",
       "test_zone_replacement_compiler"
     ],

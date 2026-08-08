@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "8eed999792cb2d6f4e4f8ef64cc800af164f2639",
+    "baseline_main_commit": "300bb5ad57014fdc6c98cfbb350ac87f18bbee7e",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-08",
-    "phase": "fixed_target_set_counter_closure",
-    "scope_note": "Certified main through PR 145 includes typed fixed player- and affected-set counter placement, exact-head certification, and green post-merge smoke. The focused branch adds one bounded direct target-set counter family, immutable still-legal target snapshots, APNAP/logical-identity ordering, generic spell/trigger/activated lowering, Oracle IR v52, explicit capability evidence, and a measured five-card Commander harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior."
+    "phase": "support_counter_placement_closure",
+    "scope_note": "The evaluated source tree includes typed fixed player-, affected-set-, and bounded target-set counter placement. This focused branch adds fixed positive Support N with exact permanent-versus-instant/sorcery source context, source exclusion for permanent Support, generic spell/trigger/activated lowering, Oracle IR v53, explicit capability and interaction evidence, and a measured seven-card Commander harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior."
   },
   "ci": {
     "workflow": "PR",
-    "run_id": 31256881611,
-    "url": "https://github.com/MoellerJDev/quorune/actions/runs/31256881611",
+    "run_id": 31261062941,
+    "url": "https://github.com/MoellerJDev/quorune/actions/runs/31261062941",
     "status": "pass",
     "python_versions": [
       "3.12"

@@ -234,11 +234,7 @@ def _effect_template(
                 "cr-101-the-magic-golden-rules",
             ),
         )
-    typed = typed_resolution_effect_template(
-        normalized,
-        card_name=card_name,
-        source_is_permanent=source_is_permanent,
-    )
+    typed = typed_resolution_effect_template(normalized, card_name=card_name, source_is_permanent=source_is_permanent)
     if typed is not None:
         return typed
     match = re.fullmatch(
