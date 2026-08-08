@@ -20,6 +20,10 @@ from .mana_payment_continuations import (
 )
 from .semantic_choices.counter_coordination import (
     resume_semantic_counter_completion,
+    resume_semantic_intent_completion,
+)
+from .semantic_choices.preparation_coordination import (
+    resume_semantic_preparation,
 )
 
 
@@ -435,6 +439,22 @@ def complete_replacement_order_choice(
         return
     if restored.resume_kind == "semantic_counter_completion":
         resume_semantic_counter_completion(
+            host,
+            restored,
+            selection,
+            error_type=error_type,
+        )
+        return
+    if restored.resume_kind == "semantic_intent_completion":
+        resume_semantic_intent_completion(
+            host,
+            restored,
+            selection,
+            error_type=error_type,
+        )
+        return
+    if restored.resume_kind == "semantic_preparation":
+        resume_semantic_preparation(
             host,
             restored,
             selection,

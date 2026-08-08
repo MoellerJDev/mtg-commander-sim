@@ -2,7 +2,7 @@
 title: "Complex card composition benchmark"
 status: "generated"
 authoritative_source: "coverage/complex-card-composition.json"
-verified: "f51314eaabf881b92c6da518ff711098cd11d956429ce220f81b1a5c8a02d977"
+verified: "abeb44e8be2b7a7bb0c619efc074429c025d2b79c5b0f7312e2a4674d6001cd5"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -16,6 +16,7 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Valki, God of Lies // Tibalt, Cosmic Impostor | 208 | 17 | 6 | 6 | 13 | 22 | `blocked` |
 | Invasion of Innistrad // Deluge of the Dead | 191 | 22 | 6 | 5 | 9 | 16 | `blocked` |
 | Invasion of New Phyrexia // Teferi Akosa of Zhalfir | 191 | 17 | 5 | 5 | 13 | 18 | `blocked` |
+| Twists and Turns // Mycoid Maze | 189 | 24 | 6 | 6 | 8 | 7 | `blocked` |
 | Vorinclex // The Grand Evolution | 188 | 22 | 7 | 7 | 9 | 4 | `blocked` |
 | Sheoldred // The True Scriptures | 187 | 21 | 7 | 7 | 10 | 4 | `blocked` |
 | Terra, Magical Adept // Esper Terra | 187 | 18 | 6 | 6 | 9 | 14 | `blocked` |
@@ -31,7 +32,6 @@ Contains public card names, Oracle IDs, generated piece IDs, and aggregate count
 | Ojer Axonil, Deepest Might // Temple of Power | 172 | 20 | 7 | 6 | 8 | 6 | `blocked` |
 | Conqueror's Galleon // Conqueror's Foothold | 171 | 20 | 5 | 7 | 7 | 14 | `blocked` |
 | Flamewar, Brash Veteran // Flamewar, Streetwise Operative | 171 | 20 | 5 | 6 | 8 | 15 | `blocked` |
-| Twists and Turns // Mycoid Maze | 171 | 18 | 6 | 6 | 8 | 7 | `blocked` |
 | Sorin of House Markov // Sorin, Ravenous Neonate | 170 | 18 | 3 | 7 | 10 | 19 | `blocked` |
 | Invasion of Kaldheim // Pyre of the World Tree | 168 | 16 | 5 | 4 | 5 | 22 | `blocked` |
 | Stay Hidden, Stay Silent | 168 | 15 | 6 | 4 | 5 | 17 | `blocked` |

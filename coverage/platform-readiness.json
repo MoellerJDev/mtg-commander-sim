@@ -1,6 +1,6 @@
 {
   "blockers": [
-    "mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate now lowers to a capability-closed enters trigger whose counter result suspends and resumes through the replacement-aware counter owner; optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain residual, while explore, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration, so aggregate CR 614.16 and CR 702.123 remain blocked",
+    "mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate and single-permanent Explore now lower to capability-closed typed programs whose counter and zone results suspend and resume through replacement-aware intent owners without repeating earlier instructions; simultaneous or repeated Explore, Explore replacement effects, optional or state-derived token variants, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration, so aggregate CR 122, CR 614/616, CR 701.44, and CR 702.123 remain blocked",
     "fixed simultaneous affected-set damage now snapshots represented public player and permanent groups through the canonical effective-characteristic query and commits one APNAP-ordered, logical-identity-deduplicated damage batch; divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, linked life/draw/scry/conditional riders, and broader source-LKI producers remain explicit blockers, so aggregate mass-damage coverage is not trusted",
     "mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted",
     "ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
@@ -32,7 +32,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "c3f8e94fb31d95cbd67686659474c205cc8a5fa9aa6602c5f9285f267f6ac163",
+    "evaluated_source_tree_hash": "742eb01961172dfa3eb8ea940e61e01375557921c83d24e724bf1a9c289e721b",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -358,9 +358,21 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "Oracle IR v45 lowers the closed mandatory fixed Treasure-, artifact-, and unqualified additional-token wording family to a source-spanned CardProgram V2 runtime descriptor. One immutable CreateAdditionalToken operation transforms the original token event without mutating GameState; added card types and subtypes participate in same-event replacement rediscovery, each source applies at most once, and the existing token owner commits one timestamped batch only after ordering completes. The legacy v1 descriptor remains registered for historical compatibility while current generated and reviewed descriptors deduplicate on v2. The pinned Commander census makes all six affected abilities exact, promotes two complete cards to exact trusted CardPrograms, reduces unresolved cards by five, and removes six material residuals with no new construction failures. Focused compiler, model, four-player APNAP/privacy, rollback, replay, compatibility, and killed-mutation tests pass locally; exact-head CI remains the broad certification authority. Optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain explicit residuals, and aggregate CR 614.16 stays blocked by remaining counter producers.",
+      "evidence": "PR 137 and merge commit 354acaaa70a4c7903ce884dddef3a7f388a54d2f integrate Oracle IR v45 lowering for the closed mandatory fixed Treasure-, artifact-, and unqualified additional-token wording family. One immutable CreateAdditionalToken operation transforms the original token event without mutating GameState; added card types and subtypes participate in same-event replacement rediscovery, each source applies at most once, and the existing token owner commits one timestamped batch only after ordering completes. The legacy v1 descriptor remains registered for historical compatibility while current generated and reviewed descriptors deduplicate on v2. The certified Commander census made all six affected abilities exact, promoted two complete cards to exact trusted CardPrograms, reduced unresolved cards by five, and removed six material residuals with no new construction failures. Optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain explicit residuals, and aggregate CR 614.16 stays blocked by remaining producers.",
       "id": "additional_token_replacement_closure",
       "name": "Typed mandatory fixed additional-token replacements",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "PR 138 and merge commit e743a24f84e2622318e606c3eba155970646eda8 integrate Oracle IR v46 lowering for ordinary positive-integral Fabricate as a source-spanned enters trigger. The chosen counter result suspends before mutation through the replacement-aware semantic-completion continuation, resumes at the exact pinned PlaceCountersIntent, and preserves seat projection, rollback, later-intent ordering, exact replay, and the canonical Servo token owner. Exact-head run 31232537938 passed every required Python, generated, package, Windows, browser, and certification job. Zero, variable, copied, granted, and non-Servo variants remain explicit residuals.",
+      "id": "fabricate_counter_producer_closure",
+      "name": "Ordinary Fabricate counter-producer closure",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "Oracle IR v47 lowers one source permanent or one target creature you control exploring once to a capability-closed CardProgram V2 node. A typed semantic preparation coordinator publicly reveals the current controller's top card, suspends a counter or revealed-land move before replacement-sensitive mutation, resumes without repeating predecessor intents, and issues the nonland choice only to that controller. The optional graveyard move uses the same strict typed intent identity after choice completion. Source-controller last-known information, phased or changed logical identity, four-player projection, rollback, replacement ordering, and exact replay have focused evidence. CR 701.44d simultaneous Explore, repeated Explore, Explore replacement effects, and broader granted/copy propagation remain blocked.",
+      "id": "single_permanent_explore_closure",
+      "name": "Typed single-permanent Explore action",
       "status": "implemented_on_current_source_tree"
     },
     {
@@ -413,11 +425,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 47627,
+      "material_residuals": 47580,
       "status_counts": {
-        "exact": 2167,
-        "partial": 13233,
-        "unresolved": 16223
+        "exact": 2187,
+        "partial": 13251,
+        "unresolved": 16185
       },
       "total": 31623
     },
@@ -435,20 +447,20 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 55295,
+      "material_residuals": 55247,
       "status_counts": {
-        "exact": 5124,
-        "partial": 14387,
-        "unresolved": 19112
+        "exact": 5145,
+        "partial": 14406,
+        "unresolved": 19072
       },
       "total": 38623
     },
     "rules": {
-      "blocked": 377,
-      "definition_only": 122,
-      "passing": 207,
+      "blocked": 378,
+      "definition_only": 123,
+      "passing": 210,
       "total": 3300,
-      "unreviewed": 2594
+      "unreviewed": 2589
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -473,7 +485,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5231,
+    "deterministic_cases_discovered": 5251,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -483,31 +495,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 47627,
+        "material_residuals": 47580,
         "status_counts": {
-          "residual": 29456,
-          "trusted": 2167
+          "residual": 29436,
+          "trusted": 2187
         },
         "trust_basis_counts": {
-          "capability_closed": 2162,
+          "capability_closed": 2182,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 29456
+          "unresolved": 29436
         }
       },
       "full": {
         "cards_considered": 38623,
-        "material_residuals": 55291,
+        "material_residuals": 55243,
         "status_counts": {
           "failed": 2248,
-          "residual": 33496,
-          "trusted": 2879
+          "residual": 33475,
+          "trusted": 2900
         },
         "trust_basis_counts": {
-          "capability_closed": 2874,
+          "capability_closed": 2895,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 33496
+          "unresolved": 33475
         }
       }
     },

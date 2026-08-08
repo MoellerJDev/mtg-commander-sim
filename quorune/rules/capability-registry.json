@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 52,
+  "registry_version": 53,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -61,6 +61,12 @@
       "mechanic_id": "fabricate",
       "capabilities": [
         "counter.producer.fabricate"
+      ]
+    },
+    {
+      "mechanic_id": "explore",
+      "capabilities": [
+        "keyword_action.explore.single"
       ]
     },
     {
@@ -480,6 +486,33 @@
       "dependency_fail_closed_rationale": "The compiler dependency mutation test blocks Fabricate CardProgram trust when any required trigger, token, or counter-placement capability is unavailable.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "The continuation-identity mutation test changes the pinned counter intent after suspension and proves resume rejects the altered placement before mutation.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "keyword_action.explore.single",
+      "version": 1,
+      "official_rules": ["122.1", "400.6", "701.44", "701.44a", "701.44b", "701.44c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve one permanent exploring once, revealing the current controller's top library card, moving a revealed land to hand or offering the nonland top-or-graveyard choice, and placing the conditional +1/+1 counter through canonical replacement-aware owners.",
+        "inputs": ["one source permanent or target creature you control", "one current source logical identity", "current controller and private library", "one ordinary Explore instruction"],
+        "outputs": ["public top-card reveal", "replacement-aware land or graveyard zone move", "replacement-aware +1/+1 counter on the current phased-in incarnation", "seat-scoped nonland choice", "normalized Explore completion event", "exact continuation replay"],
+        "exclusions": ["simultaneous multi-permanent Explore under CR 701.44d", "explores twice or repeated Explore", "Explore replacement effects", "granted or copied Explore outside represented typed ability propagation", "listeners beyond the normalized completion event", "arbitrary target or multi-target Explore wording"]
+      },
+      "dependencies": ["counter.placement.quantity_replacement", "zone.change.destination_replacement"],
+      "implementation_components": ["quorune.compiler.explore_templates.single_explore_effect_template", "quorune.rules.node_capability_shapes.single_explore_node_capabilities", "quorune.semantic_choices.library_and_hand.ExploreChoiceHandler", "quorune.semantic_choices.preparation_coordination.continue_semantic_preparation", "quorune.semantic_choices.preparation_coordination.resume_semantic_preparation", "quorune.semantic_choices.counter_coordination.resume_semantic_intent_completion", "quorune.semantic_runtime.intents.ExploreCompletedIntent", "quorune.semantic_runtime.explore.explore_source_controller"],
+      "positive_tests": ["test_single_source_and_controlled_target_shapes_are_typed", "test_oracle_nodes_preserve_trigger_and_activation_source_spans", "test_explore_program_is_capability_closed_and_dependencies_fail_closed", "test_nonland_explore_uses_current_controller_and_completes"],
+      "negative_tests": ["test_unsupported_explore_variants_remain_outside_closed_grammar", "test_capability_shape_rejects_malformed_effects", "test_zone_move_intent_identity_is_strict_and_material", "test_tampered_explore_preparation_identity_rolls_back"],
+      "interaction_tests": ["test_counter_and_zone_replacements_suspend_before_explore_mutation", "test_explore_graveyard_zone_replacement_suspends_and_replays", "test_departed_explorer_uses_lki_controller_without_countering_return"],
+      "multiplayer_tests": ["test_four_player_explore_choice_is_controller_scoped_and_public"],
+      "privacy_tests": ["test_four_player_explore_choice_is_controller_scoped_and_public", "test_counter_and_zone_replacements_suspend_before_explore_mutation"],
+      "replay_tests": ["test_explore_preparation_replacement_resume_replays_exactly", "test_explore_graveyard_zone_replacement_suspends_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The compiler dependency mutation blocks exact Explore CardProgram trust when the counter-placement or zone-destination replacement capability is unavailable.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The compiler mutation test removes the closed Explore template and proves the previously exact generated program becomes a material residual.",
       "blockers": [],
       "status": "trusted"
     },

@@ -280,6 +280,7 @@ def _activation_stack_item(
         notes=str(response.get("note") or ""),
         visibility=list(host.seats),
         context={
+            "source_logical_object_id": source.logical_object_id,
             **dict(details.get("builtin_context") or {}),
             "target_groups": thaw_json(proposal.target_groups),
             "target_snapshots": thaw_json(proposal.target_snapshots),

@@ -236,7 +236,7 @@ class GeneratedFabricateRuntimeTests(unittest.TestCase):
 
         self.assertTrue(result.ok, result.summary)
         self.assertEqual(1, apprentice.counters["+1/+1"])
-        self.assertEqual("oracle-ir-v46", program.provenance["authored_by"])
+        self.assertEqual("oracle-ir-v47", program.provenance["authored_by"])
 
     def test_four_player_fabricate_choice_uses_one_persistent_affected_seat(self):
         session, apprentice, _program = self.session(players=4, seed=70212302)

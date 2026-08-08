@@ -2,7 +2,7 @@
 title: "Counter-placement transaction"
 status: "current"
 authoritative_source: "quorune/counter_placement.py, semantic_runtime/counter_replacements.py, and ADR 0011"
-verified: "2026-08-05"
+verified: "2026-08-07"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -70,16 +70,28 @@ until their ordering and continuation semantics are modeled.
 ## Current producer inventory
 
 The shared transaction currently owns positive `add_counter_selected`, positive
-generic `counter`, `counter_all_subtype`, direct transaction calls, and typed
-nested zone-replacement counters. These paths prepare before mutation and can
-safely suspend.
+generic `counter`, `counter_all_subtype`, direct transaction calls, typed
+nested zone-replacement counters, ordinary positive-integral Fabricate choices,
+and the conditional +1/+1 counter from one permanent exploring once. These
+paths prepare before mutation and can safely suspend.
+
+The bounded Explore family compiles source/self and “target creature you
+control” instructions to CardProgram V2. It publicly reveals the current
+controller's top card, uses a replacement-aware zone move for a revealed land
+or chosen nonland, places the counter only on the same current phased-in
+logical incarnation, and emits one typed completion event. Its preparation
+continuation pins the exact counter or zone intent, so a replacement choice
+cannot repeat the prior reveal. Controller last-known information is captured
+when the source leaves the battlefield. Simultaneous multi-permanent Explore,
+repeated Explore, Explore replacement effects, and broader granted/copy
+propagation remain explicit residuals.
 
 The following producers remain deliberately outside this slice:
 
 - intrinsic planeswalker and battle entry counters;
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
-- explore, cumulative upkeep, and proliferate;
+- cumulative upkeep and proliferate;
 - Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
 - player counters, state-based removals, and card-specific continuation paths
   such as Demonic Junker.
