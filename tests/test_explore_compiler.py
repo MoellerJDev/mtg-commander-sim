@@ -158,7 +158,7 @@ class ExploreCompilerTests(unittest.TestCase):
             self.assertEqual("trusted", program.trust_level)
             self.assertTrue(program.capability_closure["trusted"])
             self.assertEqual(
-                "oracle-ir-v48", program.provenance["authored_by"]
+                "oracle-ir-v49", program.provenance["authored_by"]
             )
             self.assertIn(
                 "keyword_action.explore.single",
