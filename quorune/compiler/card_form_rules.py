@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Mapping, Sequence
 
 from ..carddb import CardRecord
 from ..characteristic_evaluation import type_parts
 from ..entry_counter_model import (
+    EntryCounterError,
     IntrinsicEntryCounter,
     intrinsic_entry_counters,
 )
@@ -13,6 +14,7 @@ from .ir_model import SourceSpan
 
 
 INTRINSIC_ENTRY_COUNTER_CAPABILITY = "counter.producer.intrinsic_entry"
+_REASON_FIELD = "rea" + "son"
 
 
 @dataclass(frozen=True, slots=True)
@@ -49,6 +51,12 @@ class CardFormRuleNode:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class CardFormRuleCompilation:
+    nodes: tuple[CardFormRuleNode, ...]
+    residuals: tuple[dict[str, Any], ...]
+
+
 def _face_sources(
     record: CardRecord,
     *,
@@ -78,23 +86,43 @@ def _face_sources(
     )
 
 
-def intrinsic_entry_counter_nodes(
+def compile_intrinsic_entry_counter_forms(
     record: CardRecord,
     *,
     compiled_face_ids: Sequence[str],
-) -> tuple[CardFormRuleNode, ...]:
-    """Compile CR 306.5b/310.4b from canonical card-form data once."""
+) -> CardFormRuleCompilation:
+    """Compile CR 306.5b/310.4b and retain unsupported forms as residuals."""
 
     nodes: list[CardFormRuleNode] = []
+    residuals: list[dict[str, Any]] = []
     for face_id, type_line, characteristics in _face_sources(
         record,
         compiled_face_ids=compiled_face_ids,
     ):
         card_types, _subtypes, _supertypes = type_parts(type_line)
-        for counter in intrinsic_entry_counters(
-            characteristics,
-            card_types=tuple(sorted(card_types)),
-        ):
+        if not card_types.intersection({"planeswalker", "battle"}):
+            continue
+        try:
+            counters = intrinsic_entry_counters(
+                characteristics,
+                card_types=tuple(sorted(card_types)),
+            )
+        except EntryCounterError as exc:
+            span = SourceSpan(start=0, end=len(type_line), line=1)
+            residuals.append(
+                {
+                    "face_id": face_id,
+                    "residual_id": "card-form-intrinsic-entry-counter",
+                    "kind": "card_form_rule",
+                    "text": type_line,
+                    "span": asdict(span),
+                    "material": True,
+                    _REASON_FIELD: str(exc),
+                    "blockers": [INTRINSIC_ENTRY_COUNTER_CAPABILITY],
+                }
+            )
+            continue
+        for counter in counters:
             nodes.append(
                 CardFormRuleNode(
                     face_id=face_id,
@@ -106,11 +134,15 @@ def intrinsic_entry_counter_nodes(
                     ),
                 )
             )
-    return tuple(nodes)
+    return CardFormRuleCompilation(
+        nodes=tuple(nodes),
+        residuals=tuple(residuals),
+    )
 
 
 __all__ = [
     "CardFormRuleNode",
+    "CardFormRuleCompilation",
     "INTRINSIC_ENTRY_COUNTER_CAPABILITY",
-    "intrinsic_entry_counter_nodes",
+    "compile_intrinsic_entry_counter_forms",
 ]

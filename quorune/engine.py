@@ -13,7 +13,6 @@ from .abilities import (
     ActivatedAbility,
 )
 from .aura import (
-    aura_resolution_move_kwargs,
     commit_aura_zone_move,
     complete_aura_entry_choice,
     EnchantSpec,
@@ -154,11 +153,11 @@ from . import haste
 from .combat_evasion_engine_adapter import engine_combat_evasion_verdict
 from .errors import GameRuleError, StateInvariantError
 from .entry_counters import (
-    EntryCounterError,
-    validate_battle_entry_protector,
+    capture_prospective_entry_characteristics,
+    prospective_battle_entry_protector,
 )
 from .entry_counter_coordination import (
-    issue_resolving_entry_replacement_choice,
+    prepare_resolving_entry_replacement,
 )
 from .deck import DeckDefinition
 from .mana import (
@@ -187,7 +186,10 @@ from .stack_counter import (
     counter_stack_item,
     stack_item_can_be_countered,
 )
-from .stack_resolution import trusted_generic_empty_resolution
+from .stack_resolution import (
+    complete_stack_resolution,
+    trusted_generic_empty_resolution,
+)
 from .mana_payment_continuations import (
     execute_mana_choice_capable_priority_action,
 )
@@ -1568,15 +1570,10 @@ class CommanderEngine(
                     changed_players=[card.owner],
                 )
             return card
-        entry_card = copy.deepcopy(card)
-        if enter_face is not None:
-            entry_card.active_face = enter_face
-        entry_characteristics = self._effective_card_data(
-            entry_card,
-            printed_entry_characteristics=True,
-        )
-        destination_type_line = str(
-            entry_characteristics.get("type_line") or ""
+        entry_characteristics, destination_type_line = (
+            capture_prospective_entry_characteristics(
+                self, card=card, enter_face=enter_face
+            )
         )
         if (
             destination == "battlefield"
@@ -1644,27 +1641,18 @@ class CommanderEngine(
             error_type=GameRuleError,
         )
         destination = prepared_replacement.destination
-        prospective_battle_protector: str | None = None
-        if destination == "battlefield":
-            entry_types, entry_subtypes, _ = self._type_parts(
-                destination_type_line
-            )
-            try:
-                prospective_battle_protector = (
-                    validate_battle_entry_protector(
-                        card_types=tuple(sorted(entry_types)),
-                        subtypes=tuple(sorted(entry_subtypes)),
-                        controller=controller or card.owner,
-                        supplied_protector=(
-                            str(battle_protector)
-                            if battle_protector is not None
-                            else card.battle_protector
-                        ),
-                        active_seats=self.active_seats,
-                    )
-                )
-            except EntryCounterError as exc:
-                raise GameRuleError(str(exc)) from exc
+        prospective_battle_protector = prospective_battle_entry_protector(
+            destination=destination,
+            entry_characteristics=entry_characteristics,
+            controller=controller or card.owner,
+            supplied_protector=(
+                str(battle_protector)
+                if battle_protector is not None
+                else card.battle_protector
+            ),
+            active_seats=self.active_seats,
+            error_type=GameRuleError,
+        )
         if (aura_move := preflight_aura_zone_move(
             self, card, destination=destination, requested_destination=requested_destination, destination_type_line=destination_type_line, enter_face=enter_face, enchant_spec=aura_enchant_spec, controller=controller, target_ref=aura_target_ref, resolving_as_spell=resolving_as_aura_spell, origin=origin, log=log, error_type=GameRuleError,
         )).remain_in_origin: return card
@@ -8806,114 +8794,26 @@ class CommanderEngine(
         # stack object. Intrinsic as-enters counters are self-replacements in
         # this same immutable event tree, so a counter-replacement ordering
         # choice can suspend without replaying prior instructions.
-        entry_card: CardInstance | None = None
-        entry_destination: str | None = None
-        entry_characteristics: Mapping[str, Any] | None = None
-        if item.context.get("copy_permanent_spell"):
-            if not item.card_object_id:
-                raise StateInvariantError(
-                    "A permanent spell copy requires a copy object"
-                )
-            entry_card = self.state.cards[item.card_object_id]
-            entry_destination = "battlefield"
-            entry_characteristics = copy.deepcopy(
-                dict(
-                    item.context.get(
-                        "copy_permanent_characteristics", {}
-                    )
-                )
-            )
-        elif item.card_object_id:
-            candidate = self.state.cards[item.card_object_id]
-            if candidate.zone == "stack":
-                entry_card = candidate
-                entry_destination = (
-                    destination
-                    or item.default_destination
-                    or "graveyard"
-                )
-        prepared_entry: PreparedZoneChange | None = None
-        if entry_card is not None and entry_destination is not None:
-            try:
-                prepared_entry = prepare_zone_change_replacement(
-                    self,
-                    entry_card,
-                    entry_destination,
-                    destination_controller=item.controller,
-                    entry_characteristics=entry_characteristics,
-                    selections=tuple(entry_replacement_selections),
-                    error_type=GameRuleError,
-                )
-            except ReplacementChoiceRequired as required:
-                issue_resolving_entry_replacement_choice(
-                    self,
-                    item=item,
-                    destination=destination,
-                    note=note,
-                    instruction_pointer=(
-                        instruction_pointer + len(effects)
-                    ),
-                    selections=entry_replacement_selections,
-                    required=required,
-                )
-                return
+        entry_preparation = prepare_resolving_entry_replacement(
+            self,
+            item=item,
+            destination=destination,
+            note=note,
+            instruction_pointer=instruction_pointer + len(effects),
+            selections=entry_replacement_selections,
+            error_type=GameRuleError,
+        )
+        if entry_preparation.suspended:
+            return
+        entry_destination = entry_preparation.destination
+        prepared_entry = entry_preparation.replacement
 
-        # Remove the resolving object from stack only when all player choices
-        # and effects have completed.
-        item.context.pop("currently_resolving", None)
-        self.state.stack.remove(item)
-        self._maybe_sacrifice_completed_saga(item)
-        entered: CardInstance | None = None
-        if item.context.get("copy_permanent_spell"):
-            if not item.card_object_id:
-                raise StateInvariantError(
-                    "A permanent spell copy requires a copy object"
-                )
-            card = self.state.cards[item.card_object_id]
-            if not card.is_spell_copy or card.zone != "stack":
-                raise StateInvariantError(
-                    "Permanent spell-copy object left the stack early"
-                )
-            characteristics = copy.deepcopy(
-                dict(
-                    item.context.get(
-                        "copy_permanent_characteristics", {}
-                    )
-                )
-            )
-            name = str(
-                item.context.get("copy_permanent_name")
-                or item.label.removesuffix(" copy")
-            )
-            card.printed_name = name
-            card.annotations["copy_overrides"] = characteristics
-            # CR 608.3f/707.10f: this same spell-copy object becomes a token
-            # permanent. It is not a newly created token.
-            card.object_kind = "token"
-            card.is_token = True
-            entered = self.move_card(
-                card.object_id,
-                "battlefield",
-                controller=item.controller, **aura_resolution_move_kwargs(item),
-                prepared_replacement=prepared_entry,
-                reason="permanent spell copy resolved",
-                log=False,
-                semantic_events=True,
-            )
-        elif item.card_object_id:
-            card = self.state.cards[item.card_object_id]
-            if card.zone == "stack":
-                if item.context.get("cost_option") == "evoke":
-                    card.annotations["evoked"] = True
-                entered = self.move_card(
-                    card.object_id,
-                    entry_destination or "graveyard",
-                    controller=item.controller, **aura_resolution_move_kwargs(item),
-                    prepared_replacement=prepared_entry,
-                    reason="spell resolved",
-                    log=False,
-                    semantic_events=True,
-                )
+        complete_stack_resolution(
+            self,
+            item=item,
+            destination=entry_destination,
+            prepared_replacement=prepared_entry,
+        )
         self._log(item.controller, "stack.resolve", f"Resolved {item.ref} {item.label}.", {"stack": item.ref, "effects": effects, "destination": destination, "note": note}, importance=2, changed_players=[item.controller])
         if self._stabilize():
             return

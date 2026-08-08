@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, Protocol, Sequence
+import copy
+from typing import Any, Mapping, Protocol, Sequence
 
+from .characteristic_evaluation import type_parts
 from .counter_state import (
     CounterChange,
     CounterStateError,
@@ -22,6 +24,33 @@ from .entry_counter_model import (
 
 class EntryCounterCommitHost(Protocol):
     state: Any
+
+
+class EntryCharacteristicsQuery(Protocol):
+    def _effective_card_data(
+        self,
+        card: Any,
+        *,
+        printed_entry_characteristics: bool = False,
+    ) -> Mapping[str, Any]: ...
+
+
+def capture_prospective_entry_characteristics(
+    host: EntryCharacteristicsQuery,
+    *,
+    card: Any,
+    enter_face: str | None,
+) -> tuple[Mapping[str, Any], str]:
+    """Snapshot printed entry characteristics before replacement ordering."""
+
+    prospective_card = copy.deepcopy(card)
+    if enter_face is not None:
+        prospective_card.active_face = enter_face
+    characteristics = host._effective_card_data(
+        prospective_card,
+        printed_entry_characteristics=True,
+    )
+    return characteristics, str(characteristics.get("type_line") or "")
 
 
 def intrinsic_entry_counter_effects(
@@ -110,6 +139,34 @@ def validate_battle_entry_protector(
     return controller
 
 
+def prospective_battle_entry_protector(
+    *,
+    destination: str,
+    entry_characteristics: Mapping[str, Any],
+    controller: str,
+    supplied_protector: str | None,
+    active_seats: Sequence[str],
+    error_type: type[Exception],
+) -> str | None:
+    """Validate the Battle protector against prospective entry data."""
+
+    if destination != "battlefield":
+        return None
+    card_types, subtypes, _ = type_parts(
+        str(entry_characteristics.get("type_line") or "")
+    )
+    try:
+        return validate_battle_entry_protector(
+            card_types=tuple(sorted(card_types)),
+            subtypes=tuple(sorted(subtypes)),
+            controller=controller,
+            supplied_protector=supplied_protector,
+            active_seats=active_seats,
+        )
+    except EntryCounterError as exc:
+        raise error_type(str(exc)) from exc
+
+
 def commit_unreplaced_intrinsic_entry_counters(
     host: EntryCounterCommitHost,
     *,
@@ -140,10 +197,13 @@ def commit_unreplaced_intrinsic_entry_counters(
 
 
 __all__ = [
+    "capture_prospective_entry_characteristics",
     "EntryCounterError",
+    "EntryCharacteristicsQuery",
     "IntrinsicEntryCounter",
     "commit_unreplaced_intrinsic_entry_counters",
     "intrinsic_entry_counter_effects",
     "intrinsic_entry_counters",
+    "prospective_battle_entry_protector",
     "validate_battle_entry_protector",
 ]

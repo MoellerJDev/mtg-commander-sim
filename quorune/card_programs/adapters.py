@@ -11,7 +11,10 @@ from ..compiler.program_generation import (
     rulings_source_hash,
     runtime_handler_footprint,
 )
-from ..compiler.card_form_rules import intrinsic_entry_counter_nodes
+from ..compiler.card_form_rules import (
+    CardFormRuleNode,
+    compile_intrinsic_entry_counter_forms,
+)
 from ..oracle_ir import ORACLE_COMPILER_VERSION, compile_oracle_card
 from ..rules.capabilities import CapabilityRegistry
 from ..rules.capabilities import load_default_capability_registry
@@ -113,7 +116,7 @@ def _bind_program_faces(
 def _card_form_rule_programs(
     record: CardRecord,
     *,
-    faces: tuple[CardProgramFace, ...],
+    nodes: Iterable[CardFormRuleNode],
     oracle_source_hash: str,
     rulings_hash: str,
     capability_registry: CapabilityRegistry | None,
@@ -125,10 +128,7 @@ def _card_form_rule_programs(
     if capability_registry is None:
         return ()
     programs: list[SemanticProgram] = []
-    for node in intrinsic_entry_counter_nodes(
-        record,
-        compiled_face_ids=tuple(face.face_id for face in faces),
-    ):
+    for node in nodes:
         closure = capability_registry.closure(
             node.capability_dependencies,
             profile=capability_profile,
@@ -236,9 +236,13 @@ def compile_card_program(
         compiled_face_ids=(face.face_id for face in ir.faces),
     )
     ruling_hash = rulings_source_hash(db, record)
+    card_form_compilation = compile_intrinsic_entry_counter_forms(
+        record,
+        compiled_face_ids=tuple(face.face_id for face in faces),
+    )
     card_form_programs = _card_form_rule_programs(
         record,
-        faces=faces,
+        nodes=card_form_compilation.nodes,
         oracle_source_hash=ir.oracle_hash,
         rulings_hash=ruling_hash,
         capability_registry=capability_registry,
@@ -253,6 +257,7 @@ def compile_card_program(
         for face in ir.faces
         for residual in face.residuals
     ]
+    residuals.extend(card_form_compilation.residuals)
     return CardProgram.create(
         compiler_version=ORACLE_COMPILER_VERSION,
         oracle_id=record.oracle_id,

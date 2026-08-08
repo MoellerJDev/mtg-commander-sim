@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 3,
+  "contract_version": 4,
   "mechanic_id": "cr-310-battles",
   "official_name": "Battles",
   "effective_date": "2026-06-19",
@@ -122,13 +122,15 @@
     ],
     "apnap": [
       "each Battle's controller makes its own protector choice",
+      "simultaneous intrinsic defense-counter replacement choices are prepared in APNAP order",
       "complete simultaneous protector-choice ordering remains blocked"
     ],
     "layers": [
       "derived card types, subtypes, and copied defense are consulted at every relevant event"
     ],
     "replacement_effects": [
-      "intrinsic defense counters are initialized on battlefield entry",
+      "intrinsic defense counters are a mandatory self-replacement inside the battlefield-entry zone event",
+      "represented quantity replacements apply to the nested defense-counter event in the affected controller's chosen order",
       "complete replacement ordering for the Siege exile and transformed cast remains blocked"
     ],
     "copy": [
@@ -197,14 +199,23 @@
     "test_siege_trigger_does_not_follow_a_changed_object",
     "test_transform_back_face_cannot_be_cast_without_permission",
     "test_siege_transformed_cast_choice_replays_exactly",
-    "test_battle_damage_and_state_action_replay_exactly"
+    "test_battle_damage_and_state_action_replay_exactly",
+    "test_intrinsic_card_form_compiler_declares_exact_typed_capability",
+    "test_unsupported_intrinsic_card_forms_are_material_residuals",
+    "test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+    "test_competing_entry_counter_replacements_order_to_nine_or_ten",
+    "test_simultaneous_entry_choices_follow_four_player_apnap",
+    "test_resolving_entry_choice_is_private_and_replays_exactly",
+    "test_battle_protector_validation_is_closed"
   ],
   "implementation": {
-    "component": "CommanderEngine Battle entry, combat, trigger, damage, and protector state paths",
-    "version": "battles-v3"
+    "component": "typed card-form entry and counter-replacement transactions plus CommanderEngine Battle combat, trigger, damage, and protector facades",
+    "version": "battles-v4",
+    "capability_ids": ["counter.producer.intrinsic_entry"]
   },
   "known_blockers": [
-    "nonspell and token Battle entry paths do not yet suspend for an as-enters protector choice unless a trusted caller supplies the selected protector",
+    "nonspell Battle entry still requires a trusted caller to supply any required Siege protector choice",
+    "token Battle entry with an applicable counter-quantity replacement fails closed until token creation can suspend atomically",
     "attacking or blocking creatures becoming Battles and Battles changing controller during combat are not yet removed from combat by every continuous-effect path",
     "future Battle subtypes are rejected until their protector predicates are present in a pinned Comprehensive Rules snapshot",
     "complete simultaneous/APNAP protector choices and all Battle-targeting interactions are not implemented",

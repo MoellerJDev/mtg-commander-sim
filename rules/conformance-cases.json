@@ -18879,7 +18879,6 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "the complete affected-player replacement-effect choice and ordering system for the intrinsic enters-with-defense effect is not implemented",
         "complete face-down, copy-layer, characteristic-defining, and last-known-information interactions for printed defense remain incomplete"
       ],
       "case_id": "cr-210.1",
@@ -18887,7 +18886,9 @@
       "classification": "behavioral",
       "covered_scenarios": [
         "positive",
-        "negative"
+        "negative",
+        "interaction",
+        "replay"
       ],
       "dependency_rule_ids": [
         "210"
@@ -18896,22 +18897,31 @@
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_enters_with_printed_defense_and_copies_reset_it",
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_without_valid_printed_defense_fails_closed",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_protector_is_chosen_as_the_spell_resolves"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_protector_is_chosen_as_the_spell_resolves",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_counter_model_rejects_malformed_values",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_unsupported_intrinsic_card_forms_are_material_residuals",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_competing_entry_counter_replacements_order_to_nine_or_ten",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_resolving_entry_choice_is_private_and_replays_exactly"
       ],
       "implementation_components": [
         "CardRecord.defense",
         "CommanderEngine._effective_card_data",
-        "CommanderEngine._initialize_intrinsic_entry_counters"
+        "quorune.entry_counter_model.intrinsic_entry_counters",
+        "quorune.entry_counters.intrinsic_entry_counter_effects",
+        "quorune.counter_placement.commit_counter_placement_plan"
       ],
       "notes": [
-        "Represented Battle cards expose their printed defense outside the battlefield and initialize that many defense counters on ordinary entry.",
+        "Represented Battle cards expose their printed defense outside the battlefield and enter with that many defense counters through the replacement-aware counter transaction.",
         "Copied Battles initialize from copied printed defense rather than the source permanent's current counters.",
-        "Missing, malformed, and negative printed defense fail closed instead of silently creating a Battle with guessed counters."
+        "Missing, malformed, and negative printed defense fail closed instead of silently creating a Battle with guessed counters.",
+        "Represented competing counter-quantity replacements use affected-controller ordering and exact replay."
       ],
       "required_scenarios": [
         "positive",
         "negative",
-        "interaction"
+        "interaction",
+        "replay"
       ],
       "reviewed": true,
       "rule_id": "210.1",
@@ -21546,23 +21556,57 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "token Planeswalker entry with an applicable counter-quantity replacement remains fail closed until token creation can suspend atomically",
+        "complete face-down, copy-layer, and dynamic continuous-characteristic entry interactions are not implemented"
       ],
       "case_id": "cr-306.5b",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "306.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_card_form_compiler_declares_exact_typed_capability",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_counter_model_rejects_malformed_values",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_unsupported_intrinsic_card_forms_are_material_residuals",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_competing_entry_counter_replacements_order_to_nine_or_ten",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_simultaneous_entry_choices_follow_four_player_apnap",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_resolving_entry_choice_is_private_and_replays_exactly",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_entry_counter_generation_mutant_is_killed"
+      ],
+      "implementation_components": [
+        "quorune.entry_counter_model.intrinsic_entry_counters",
+        "quorune.compiler.card_form_rules.compile_intrinsic_entry_counter_forms",
+        "quorune.entry_counters.intrinsic_entry_counter_effects",
+        "quorune.semantic_runtime.zone_replacements.capture_zone_change_replacement_snapshot",
+        "quorune.entry_counter_coordination.issue_resolving_entry_replacement_choice",
+        "quorune.counter_placement.commit_counter_placement_plan"
+      ],
+      "notes": [
+        "Ordinary printed nonnegative integral loyalty is compiled from the canonical Planeswalker card type and enters through a mandatory self-replacement and nested counter event.",
+        "Represented competing quantity replacements use affected-controller ordering; simultaneous entries prepare in APNAP order and a resolving permanent can suspend and replay exactly."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "hidden_information",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "306.5b",
       "rule_text_sha256": "3e4371cc70acccf0950639a1f9b07dcd9de560ce3c307a38f50bdf11921df222",
       "schema_version": 1,
@@ -21571,7 +21615,7 @@
         "end_line": 1728,
         "start_line": 1727
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "inventory_only",
@@ -22744,13 +22788,16 @@
     {
       "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "the complete affected-player replacement-effect choice and ordering system for as-enters effects is not implemented"
+        "token Battle entry with an applicable counter-quantity replacement remains fail closed until token creation can suspend atomically",
+        "complete face-down, copy-layer, and dynamic continuous-characteristic entry interactions are not implemented"
       ],
       "case_id": "cr-310.4b",
       "case_version": 1,
       "classification": "behavioral",
       "covered_scenarios": [
-        "positive"
+        "positive",
+        "interaction",
+        "replay"
       ],
       "dependency_rule_ids": [
         "310.4"
@@ -22758,14 +22805,25 @@
       "effective_date": "2026-06-19",
       "executable_test_ids": [
         "tests.test_state_based_actions.StateBasedActionEngineTests.test_battle_enters_with_printed_defense_and_copies_reset_it",
-        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_protector_is_chosen_as_the_spell_resolves"
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_siege_protector_is_chosen_as_the_spell_resolves",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_intrinsic_card_form_compiler_declares_exact_typed_capability",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_unsupported_intrinsic_card_forms_are_material_residuals",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_ordinary_planeswalker_and_battle_entry_use_counter_owner",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_competing_entry_counter_replacements_order_to_nine_or_ten",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_simultaneous_entry_choices_follow_four_player_apnap",
+        "tests.test_intrinsic_entry_counters.IntrinsicEntryCounterTests.test_resolving_entry_choice_is_private_and_replays_exactly"
       ],
       "implementation_components": [
-        "CommanderEngine._initialize_intrinsic_entry_counters",
-        "CommanderEngine.move_card"
+        "quorune.entry_counter_model.intrinsic_entry_counters",
+        "quorune.compiler.card_form_rules.compile_intrinsic_entry_counter_forms",
+        "quorune.entry_counters.intrinsic_entry_counter_effects",
+        "quorune.semantic_runtime.zone_replacements.capture_zone_change_replacement_snapshot",
+        "quorune.entry_counter_coordination.issue_resolving_entry_replacement_choice",
+        "quorune.counter_placement.commit_counter_placement_plan"
       ],
       "notes": [
-        "The intrinsic entry initialization reads printed entry characteristics, so reduced battlefield defense is not copied as the next object's entry count."
+        "The card-form compiler and entry transaction read printed entry characteristics, so reduced battlefield defense is not copied as the next object's entry count.",
+        "Intrinsic defense is a mandatory self-replacement whose nested counter event participates in affected-controller quantity-replacement ordering and exact replay."
       ],
       "required_scenarios": [
         "positive",

@@ -304,6 +304,29 @@ class IntrinsicEntryCounterTests(unittest.TestCase):
                 trust_level="trusted",
             )
 
+    def test_unsupported_intrinsic_card_forms_are_material_residuals(self):
+        program = compile_card_program(
+            self.db,
+            self.card_form_record(
+                type_line="Planeswalker — Test",
+                loyalty="X",
+            ),
+            capability_registry=self.capabilities,
+            capability_profile="commander_review",
+            trust_level="trusted",
+        )
+        self.assertFalse(program.trust_closure["trusted"])
+        residual = next(
+            value
+            for value in program.residuals
+            if value["kind"] == "card_form_rule"
+        )
+        self.assertTrue(residual["material"])
+        self.assertIn(
+            "counter.producer.intrinsic_entry", residual["blockers"]
+        )
+        self.assertIn("nonnegative integer", residual["reason"])
+
     def test_intrinsic_counter_model_rejects_malformed_values(self):
         expected = intrinsic_entry_counters(
             {"loyalty": "04"},
