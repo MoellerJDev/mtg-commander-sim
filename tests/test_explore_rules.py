@@ -234,12 +234,12 @@ class ExploreEngineTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.database.close()
 
-    def _session(self, seed: int):
+    def _session(self, seed: int, *, players: int = 2):
         session = make_session(
             self.database,
             self.mishra,
             self.zimone,
-            players=2,
+            players=players,
             seed=seed,
         )
         keep_all(session)
@@ -355,6 +355,25 @@ class ExploreEngineTests(unittest.TestCase):
             },
         )
         self.assertTrue(result.ok, result.summary)
+
+    def test_four_player_explore_choice_is_controller_scoped_and_public(self):
+        session = self._session(7014403, players=4)
+        engine = session.engine
+        explorer = self._card(engine, "A", "Goblin Engineer")
+        top = self._card(engine, "C", "Sol Ring")
+        engine.move_card(explorer.object_id, "battlefield", controller="C")
+        self._put_on_top(engine, top)
+        self._stack_explore(engine, explorer, "C")
+
+        engine._prepare_stack_resolution()
+        decision = engine.state.pending_decision
+        self.assertEqual(["C"], decision.actors)
+        self.assertEqual({"C"}, set(decision.payload_by_actor))
+        self.assertIsNone(session.packet("pilot:B").get("decision"))
+        self.assertEqual(
+            top.ref,
+            decision.payload_by_actor["C"]["card"]["id"],
+        )
 
 
 if __name__ == "__main__":
