@@ -71,6 +71,8 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --fixture tests/fixtures/draw-rules-cards.json
+          --fixture tests/fixtures/counter-replacement-cards.json
+          --fixture tests/fixtures/explore-cards.json
           --output data/test-ci.sqlite3
       - name: Run functional shard
         run: python scripts/test_shards.py run "${{ matrix.shard }}"
@@ -99,6 +101,8 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --fixture tests/fixtures/draw-rules-cards.json
+          --fixture tests/fixtures/counter-replacement-cards.json
+          --fixture tests/fixtures/explore-cards.json
           --output data/test-ci.sqlite3
       - name: Validate Python runtime and compile
         run: |
@@ -168,6 +172,8 @@ jobs:
             --fixture tests/fixtures/browser-lifecycle-cards.json `
             --fixture tests/fixtures/damage-result-cards.json `
             --fixture tests/fixtures/draw-rules-cards.json `
+            --fixture tests/fixtures/counter-replacement-cards.json `
+            --fixture tests/fixtures/explore-cards.json `
             --output data/test-ci-windows-compat.sqlite3
       - name: Run focused Windows compatibility suite
         run: >-
@@ -216,6 +222,8 @@ jobs:
             --fixture tests/fixtures/browser-lifecycle-cards.json `
             --fixture tests/fixtures/damage-result-cards.json `
             --fixture tests/fixtures/draw-rules-cards.json `
+            --fixture tests/fixtures/counter-replacement-cards.json `
+            --fixture tests/fixtures/explore-cards.json `
             --output "data/test-ci-windows-${{ matrix.shard }}.sqlite3"
       - name: Run full Windows shard
         run: >-
@@ -311,6 +319,8 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --fixture tests/fixtures/draw-rules-cards.json
+          --fixture tests/fixtures/counter-replacement-cards.json
+          --fixture tests/fixtures/explore-cards.json
           --output data/test-ci-${{ matrix.group }}.sqlite3
       - name: Verify generated protocol types and production build
         run: |

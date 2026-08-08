@@ -41,6 +41,8 @@ jobs:
           --fixture tests/fixtures/browser-lifecycle-cards.json
           --fixture tests/fixtures/damage-result-cards.json
           --fixture tests/fixtures/draw-rules-cards.json
+          --fixture tests/fixtures/counter-replacement-cards.json
+          --fixture tests/fixtures/explore-cards.json
           --output data/test-ci.sqlite3
       - name: Run complete deterministic suite
         run: python -m unittest discover -s tests -p "test_*.py" -v
@@ -97,6 +99,8 @@ jobs:
             --fixture tests/fixtures/browser-lifecycle-cards.json \
             --fixture tests/fixtures/damage-result-cards.json \
             --fixture tests/fixtures/draw-rules-cards.json \
+            --fixture tests/fixtures/counter-replacement-cards.json \
+            --fixture tests/fixtures/explore-cards.json \
             --output data/test-ci-${{ matrix.group }}.sqlite3
       - name: Install headless Chromium
         working-directory: web
@@ -143,6 +147,8 @@ jobs:
             --fixture tests/fixtures/browser-lifecycle-cards.json \
             --fixture tests/fixtures/damage-result-cards.json \
             --fixture tests/fixtures/draw-rules-cards.json \
+            --fixture tests/fixtures/counter-replacement-cards.json \
+            --fixture tests/fixtures/explore-cards.json \
             --output data/test-ci.sqlite3
       - name: Run deterministic property budget
         run: python scripts/test_shards.py run-modules "${{ matrix.module }}"
@@ -170,6 +176,8 @@ jobs:
             --fixture tests/fixtures/browser-lifecycle-cards.json \
             --fixture tests/fixtures/damage-result-cards.json \
             --fixture tests/fixtures/draw-rules-cards.json \
+            --fixture tests/fixtures/counter-replacement-cards.json \
+            --fixture tests/fixtures/explore-cards.json \
             --output data/test-ci.sqlite3
       - name: Run focused mutations, full game, persistence, and performance
         run: |
