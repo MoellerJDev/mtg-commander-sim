@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 import copy
+from dataclasses import replace
 import json
 from pathlib import Path
 import tempfile
 import unittest
 
 from quorune.errors import GameRuleError
+from quorune.carddb import CardRecord
 from quorune.model import CardInstance, StackItem
 from quorune.oracle_ir import generated_programs
 from quorune.projection import StateProjector
@@ -27,6 +29,34 @@ from quorune.semantic_runtime.intents import (
 from quorune.semantics import SemanticProgram
 from quorune.rules.capabilities import load_default_capability_registry
 from tests.common import keep_all, load_assets, make_session
+
+
+def generated_proliferate_trigger_record() -> CardRecord:
+    return CardRecord(
+        oracle_id="00000000-0000-4000-9000-000000701340",
+        name="Generic Proliferate Trigger Fixture",
+        mana_cost="{5}{U}",
+        mana_value=6.0,
+        type_line="Creature — Leviathan",
+        oracle_text=(
+            "When this creature enters, proliferate. (Choose any number of "
+            "permanents and/or players, then give each another counter of "
+            "each kind already there.)"
+        ),
+        power="5",
+        toughness="6",
+        loyalty=None,
+        defense=None,
+        colors=("U",),
+        color_identity=("U",),
+        keywords=("Proliferate",),
+        produced_mana=(),
+        layout="normal",
+        released_at="2026-01-01",
+        legalities={"commander": "legal"},
+        faces=(),
+        raw={},
+    )
 
 
 class ProliferateEngineTests(unittest.TestCase):
@@ -221,7 +251,10 @@ class ProliferateEngineTests(unittest.TestCase):
             engine, owner="B", name="Sol Ring", ref="generated-target"
         )
         target.counters["charge"] = 1
-        record = self.database.lookup("Kiora's Dambreaker")
+        record = replace(
+            generated_proliferate_trigger_record(),
+            oracle_id=self.database.lookup("Sol Ring").oracle_id,
+        )
         generated = next(
             program
             for program in generated_programs(
@@ -234,6 +267,10 @@ class ProliferateEngineTests(unittest.TestCase):
             if program.provenance.get("template_id")
             == "proliferate-once-v1"
         )
+        for existing in engine.semantics.programs_for_oracle(
+            record.oracle_id
+        ):
+            engine.semantics.remove(existing.key)
         engine.semantics.put(generated)
         source = CardInstance(
             object_id="fixture:generated-proliferate-source",

@@ -29,12 +29,16 @@ def proliferate_record(
     *,
     suffix: int,
     type_line: str = "Sorcery",
+    name: str | None = None,
+    mana_cost: str = "{2}",
+    mana_value: float = 2.0,
+    keywords: tuple[str, ...] = (),
 ) -> CardRecord:
     return CardRecord(
         oracle_id=f"00000000-0000-4000-9000-{suffix:012d}",
-        name=f"Generic Proliferate Fixture {suffix}",
-        mana_cost="{2}",
-        mana_value=2.0,
+        name=name or f"Generic Proliferate Fixture {suffix}",
+        mana_cost=mana_cost,
+        mana_value=mana_value,
         type_line=type_line,
         oracle_text=text,
         power="2" if "Creature" in type_line else None,
@@ -43,7 +47,7 @@ def proliferate_record(
         defense=None,
         colors=(),
         color_identity=(),
-        keywords=(),
+        keywords=keywords,
         produced_mana=(),
         layout="normal",
         released_at="2026-01-01",
@@ -162,15 +166,54 @@ class ProliferateCompilerTests(unittest.TestCase):
                 self.assertTrue(ir.material_residuals)
 
     def test_representative_commander_cards_use_the_generic_family(self):
-        expected = {
-            "Contentious Plan": "spell_ability",
-            "Kiora's Dambreaker": "triggered_ability",
-            "Viral Drake": "activated_ability",
-        }
-        for name, kind in expected.items():
-            with self.subTest(name=name):
+        expected = (
+            (
+                proliferate_record(
+                    "Proliferate. (Choose any number of permanents and/or "
+                    "players, then give each another counter of each kind "
+                    "already there.)\nDraw a card.",
+                    suffix=40,
+                    name="Contentious Plan",
+                    mana_cost="{1}{U}",
+                    keywords=("Proliferate",),
+                ),
+                "spell_ability",
+            ),
+            (
+                proliferate_record(
+                    "When this creature enters, proliferate. (Choose any "
+                    "number of permanents and/or players, then give each "
+                    "another counter of each kind already there.)",
+                    suffix=41,
+                    name="Kiora's Dambreaker",
+                    mana_cost="{5}{U}",
+                    mana_value=6.0,
+                    type_line="Creature — Leviathan",
+                    keywords=("Proliferate",),
+                ),
+                "triggered_ability",
+            ),
+            (
+                proliferate_record(
+                    "Flying\nInfect (This creature deals damage to creatures "
+                    "in the form of -1/-1 counters and to players in the "
+                    "form of poison counters.)\n{3}{U}: Proliferate. "
+                    "(Choose any number of permanents and/or players, then "
+                    "give each another counter of each kind already there.)",
+                    suffix=42,
+                    name="Viral Drake",
+                    mana_cost="{3}{U}",
+                    mana_value=4.0,
+                    type_line="Creature — Phyrexian Drake",
+                    keywords=("Flying", "Proliferate", "Infect"),
+                ),
+                "activated_ability",
+            ),
+        )
+        for record, kind in expected:
+            with self.subTest(name=record.name):
                 ir = compile_oracle_card(
-                    self.database.lookup(name),
+                    record,
                     capability_registry=self.capabilities,
                     capability_profile="commander_review",
                 )
