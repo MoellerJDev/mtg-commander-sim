@@ -804,6 +804,86 @@ def fixed_counter_placement_set_node_capabilities(
     return ("counter.producer.fixed_permanent_set_effect",)
 
 
+def fixed_counter_placement_target_set_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for one closed optional permanent target set."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if not {"cr-122-counters", "cr-115-targets"}.issubset(mechanics):
+        return ()
+    if len(effects) != 1:
+        return ()
+    effect = effects[0]
+    expected_effect_fields = {
+        "op",
+        "cards",
+        "maximum_targets",
+        "counter",
+        "amount",
+        "source",
+    }
+    maximum = effect.get("maximum_targets")
+    if (
+        set(effect) != expected_effect_fields
+        or effect.get("op") != "place_counters_on_targets"
+        or effect.get("cards") != "$targets"
+        or effect.get("source") != "$source"
+        or type(maximum) is not int
+        or maximum <= 0
+        or type(effect.get("counter")) is not str
+        or not str(effect.get("counter") or "").strip()
+        or type(effect.get("amount")) is not int
+        or effect.get("amount", 0) <= 0
+    ):
+        return ()
+    schema = dict(target_schema or {})
+    allowed_schema_fields = {
+        "zones",
+        "categories",
+        "types_any",
+        "types_none",
+        "controller_relation",
+        "up_to",
+    }
+    if (
+        set(schema) - allowed_schema_fields
+        or schema.get("zones") != ["battlefield"]
+        or schema.get("categories") != ["permanent"]
+        or type(schema.get("up_to")) is not int
+        or schema.get("up_to") != maximum
+        or schema.get("controller_relation", "any")
+        not in {"any", "you", "opponent"}
+    ):
+        return ()
+    types_any = schema.get("types_any", ())
+    if "types_any" in schema:
+        if not isinstance(types_any, (list, tuple)) or tuple(types_any) not in {
+            ("artifact",),
+            ("battle",),
+            ("creature",),
+            ("enchantment",),
+            ("land",),
+            ("planeswalker",),
+        }:
+            return ()
+    types_none = schema.get("types_none", ())
+    if "types_none" in schema:
+        if (
+            not isinstance(types_none, (list, tuple))
+            or tuple(types_none) != ("creature",)
+            or tuple(types_any) != ("artifact",)
+        ):
+            return ()
+    return (
+        "counter.producer.fixed_permanent_target_set_effect",
+        "target.revalidate_resolution",
+    )
+
+
 def fixed_player_counter_placement_node_capabilities(
     *,
     effects: Sequence[Mapping[str, Any]],
@@ -870,6 +950,7 @@ __all__ = [
     "fixed_draw_node_capabilities",
     "fixed_counter_placement_node_capabilities",
     "fixed_counter_placement_set_node_capabilities",
+    "fixed_counter_placement_target_set_node_capabilities",
     "fixed_player_counter_placement_node_capabilities",
     "single_explore_node_capabilities",
     "single_proliferate_node_capabilities",

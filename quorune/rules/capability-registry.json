@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 57,
+  "registry_version": 58,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -552,6 +552,33 @@
       "dependency_fail_closed_rationale": "The compiler dependency mutation blocks exact affected-set counter CardPrograms whenever the canonical counter quantity-replacement owner is unavailable.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "The focused compiler mutation removes the fixed affected-set template and proves that the previously exact source-spanned node becomes a material residual.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "counter.producer.fixed_permanent_target_set_effect",
+      "version": 1,
+      "official_rules": ["115.1", "115.3", "115.6", "122.1", "122.1a", "122.6", "608.2b", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve one positive fixed-count counter placement on each member of one optional bounded set of direct permanent targets through the canonical simultaneous counter-placement transaction.",
+        "inputs": ["one closed fixed-count Oracle instruction", "zero through one fixed maximum of distinct legal public permanent targets", "closed permanent-type and controller predicates", "positive exact integral amount", "one canonical counter name", "stable source provenance reference"],
+        "outputs": ["source-spanned CardProgram node", "strict bounded target schema", "resolution-time target revalidation", "immutable APNAP-canonical still-legal target snapshot", "replacement-aware simultaneous permanent-counter placement", "exact replay"],
+        "exclusions": ["Support keyword shorthand", "variable, distributed, repeated, linked, modal, conditional, or compound placements", "multiple counter kinds or differing amounts in one instruction", "counter costs, movement, or removal", "target predicates based on counters, combat participation, modification, entry history, arbitrary names, creature subtypes, or unsupported qualities", "disjunctive target types other than the represented noncreature-artifact predicate", "counter quantity replacement wording remains a separate capability"]
+      },
+      "dependencies": ["counter.placement.quantity_replacement", "target.revalidate_resolution"],
+      "implementation_components": ["quorune.compiler.counter_placement_templates.FixedCounterPlacementTargetSetTemplate", "quorune.counter_placement_targets.snapshot_counter_placement_targets", "quorune.counter_placement_targets.resolve_counter_placement_targets", "quorune.rules.node_capability_shapes.fixed_counter_placement_target_set_node_capabilities", "quorune.semantic_runtime.counter_placement_handlers.FixedCounterPlacementTargetSetHandler", "quorune.semantic_runtime.intents.PlaceCountersOnTargetsIntent", "quorune.counter_placement.place_counters"],
+      "positive_tests": ["test_spell_trigger_and_activated_contexts_share_target_set_lowering", "test_runtime_canonicalizes_still_legal_targets_in_apnap_order"],
+      "negative_tests": ["test_unsupported_target_set_variants_remain_material_residuals", "test_handler_and_snapshot_reject_malformed_inputs_without_mutation", "test_all_original_targets_illegal_is_countered_before_counter_mutation"],
+      "interaction_tests": ["test_partial_target_revalidation_places_only_on_still_legal_targets", "test_target_set_suspends_for_quantity_replacement_and_replays"],
+      "multiplayer_tests": ["test_target_set_suspends_for_quantity_replacement_and_replays"],
+      "privacy_tests": ["test_target_set_suspends_for_quantity_replacement_and_replays"],
+      "replay_tests": ["test_target_set_suspends_for_quantity_replacement_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "Compiler dependency mutations block exact target-set counter CardPrograms whenever canonical counter quantity replacement or resolution-time target revalidation is unavailable.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused compiler mutation removes the fixed target-set template and proves that the previously exact source-spanned node becomes a material residual.",
       "blockers": [],
       "status": "trusted"
     },

@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "64dac9190ae293001280075cedf5d092634ecc8a",
+    "baseline_main_commit": "8eed999792cb2d6f4e4f8ef64cc800af164f2639",
     "baseline_worktree_clean": true,
-    "verified_at": "2026-08-07",
-    "phase": "additional_token_replacement_closure",
-    "scope_note": "Certified main through PR 136 includes the immutable universal zone-destination replacement snapshot and current post-merge provenance. The focused branch adds one closed mandatory fixed additional-token compiler family, immutable typed event transformation, same-event type/subtype rediscovery, generic runtime lowering, Oracle IR v45, capability evidence, and corpus harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior."
+    "verified_at": "2026-08-08",
+    "phase": "fixed_target_set_counter_closure",
+    "scope_note": "Certified main through PR 145 includes typed fixed player- and affected-set counter placement, exact-head certification, and green post-merge smoke. The focused branch adds one bounded direct target-set counter family, immutable still-legal target snapshots, APNAP/logical-identity ordering, generic spell/trigger/activated lowering, Oracle IR v52, explicit capability evidence, and a measured five-card Commander harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior."
   },
   "ci": {
     "workflow": "PR",
-    "run_id": 31223745301,
-    "url": "https://github.com/MoellerJDev/quorune/actions/runs/31223745301",
+    "run_id": 31256881611,
+    "url": "https://github.com/MoellerJDev/quorune/actions/runs/31256881611",
     "status": "pass",
     "python_versions": [
       "3.12"

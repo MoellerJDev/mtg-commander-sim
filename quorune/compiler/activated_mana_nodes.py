@@ -268,6 +268,7 @@ def _activated_effect_dependency_gate(
             "pro" + "liferate",
             "place_counters",
             "place_counters_on_set",
+            "place_counters_on_targets",
             "place_player_counters",
             "tap",
             "untap",

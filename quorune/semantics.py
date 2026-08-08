@@ -22,6 +22,7 @@ VALID_EFFECT_OPERATIONS = {
     "add_counter_selected",
     "place_counters",
     "place_counters_on_set",
+    "place_counters_on_targets",
     "place_player_counters",
     "add_type",
     "add_subtype",

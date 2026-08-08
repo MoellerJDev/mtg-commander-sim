@@ -492,6 +492,7 @@ def _decode_semantic_intent_continuation(
         or intent_kind not in {
             "place_counters",
             "place_counters_on_set",
+            "place_counters_on_targets",
             "place_player_counters",
             "proliferate",
             "zone_move",

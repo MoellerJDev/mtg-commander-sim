@@ -2,7 +2,7 @@
 title: "Commander card-unlock frontier"
 status: "generated"
 authoritative_source: "coverage/card-unlock-frontier.json.gz"
-verified: "95bc4ad994c9727a14462cef8afdbd83f0434667911785d5272fa7b2923ce18b"
+verified: "00c811be7bbb689581a6c94eeffbe5ae9aa3756339421852a355e6fa02b0b25a"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -14,16 +14,16 @@ This generated report ranks minimum known compiler and rules blockers for the pi
 ## Snapshot
 
 - Cards considered: 31,623
-- Oracle states: `{"exact":2310,"partial":13258,"unresolved":16055}`
-- CardProgram states: `{"residual":29313,"trusted":2310}`
+- Oracle states: `{"exact":2315,"partial":13261,"unresolved":16047}`
+- CardProgram states: `{"residual":29308,"trusted":2315}`
 - Hard construction failures: 0
-- Frontier fingerprint: `95bc4ad994c9727a14462cef8afdbd83f0434667911785d5272fa7b2923ce18b`
+- Frontier fingerprint: `00c811be7bbb689581a6c94eeffbe5ae9aa3756339421852a355e6fa02b0b25a`
 
 ## Highest-leverage single families
 
 | Family | Occurrences | Cards | Sole-blocker cards | Exact abilities | Readiness | Risk |
 |---|---:|---:|---:|---:|---|---|
-| `continuous_layer:continuous-effect-layers-and-dependencies` | 9,578 | 7,720 | 3,341 | 9,578 | missing_lowering | very_high |
+| `continuous_layer:continuous-effect-layers-and-dependencies` | 9,578 | 7,720 | 3,342 | 9,578 | missing_lowering | very_high |
 | `mechanic_dependency:cr-611-continuous-effects` | 567 | 520 | 187 | 346 | partial | high |
 | `mechanic_dependency:cr-614-replacement-effects` | 531 | 531 | 166 | 531 | partial | high |
 | `mechanic_dependency:cr-509-declare-blockers-step` | 421 | 416 | 140 | 385 | partial | high |
@@ -31,7 +31,7 @@ This generated report ranks minimum known compiler and rules blockers for the pi
 | `mechanic_dependency:cr-111-tokens` | 325 | 320 | 112 | 325 | partial | high |
 | `effect_clause:return` | 740 | 713 | 111 | 250 | missing_lowering | high |
 | `effect_clause:destroy-target` | 588 | 555 | 96 | 253 | missing_lowering | high |
-| `effect_clause:exile` | 1,038 | 989 | 90 | 451 | missing_lowering | high |
+| `effect_clause:exile` | 1,038 | 989 | 91 | 451 | missing_lowering | high |
 | `activated_effect:deal-damage` | 514 | 485 | 86 | 169 | missing_lowering | high |
 | `mechanic_dependency:cr-115-targets` | 297 | 281 | 86 | 162 | missing_contract | high |
 | `activated_effect:return` | 450 | 449 | 80 | 167 | missing_lowering | high |
@@ -43,36 +43,36 @@ This generated report ranks minimum known compiler and rules blockers for the pi
 | `effect_clause:look-reveal` | 574 | 569 | 60 | 113 | missing_lowering | high |
 | `activated_effect:create-token` | 475 | 464 | 54 | 194 | missing_lowering | high |
 | `activated_effect:unparsed-target-creature-gains` | 98 | 94 | 50 | 81 | missing_lowering | high |
-| `activated_effect:put-counter` | 382 | 370 | 47 | 133 | missing_lowering | high |
+| `activated_effect:put-counter` | 379 | 367 | 46 | 130 | missing_lowering | high |
 | `effect_clause:create-token` | 723 | 706 | 43 | 158 | missing_lowering | high |
 | `effect_clause:draw` | 599 | 591 | 43 | 128 | missing_lowering | high |
-| `effect_clause:put-counter` | 344 | 341 | 42 | 102 | missing_lowering | high |
 | `effect_clause:sacrifice` | 387 | 383 | 41 | 131 | missing_lowering | high |
+| `activated_effect:destroy-target` | 151 | 150 | 41 | 60 | missing_lowering | high |
 
 ## Highest-leverage bounded bundles
 
 | Families | Exact cards | Exact abilities | Residuals |
 |---|---:|---:|---:|
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-509-declare-blockers-step` | 3,756 | 10,309 | 10,309 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-614-replacement-effects` | 3,747 | 10,455 | 10,455 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, mechanic_dependency:cr-509-declare-blockers-step` | 3,722 | 10,494 | 10,494 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-111-tokens` | 3,709 | 10,249 | 10,249 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-115-targets` | 3,696 | 10,173 | 10,173 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-509-declare-blockers-step, mechanic_dependency:cr-111-tokens` | 3,682 | 10,288 | 10,288 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, mechanic_dependency:cr-111-tokens` | 3,679 | 10,434 | 10,434 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:deal-damage` | 3,674 | 10,177 | 10,177 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:return` | 3,671 | 10,174 | 10,174 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:destroy-target` | 3,655 | 10,177 | 10,177 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:tap-state` | 3,652 | 10,088 | 10,126 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:return` | 3,651 | 10,091 | 10,133 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:exile` | 3,650 | 10,375 | 10,375 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:unparsed-regenerate-this-creature` | 3,650 | 10,053 | 10,069 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-509-declare-blockers-step, effect_clause:deal-damage` | 3,649 | 10,216 | 10,216 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:deal-damage` | 3,647 | 10,093 | 10,142 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-509-declare-blockers-step, effect_clause:return` | 3,646 | 10,213 | 10,213 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, effect_clause:deal-damage` | 3,644 | 10,362 | 10,362 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, effect_clause:return` | 3,642 | 10,359 | 10,359 |
-| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:create-token` | 3,631 | 10,118 | 10,191 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-509-declare-blockers-step` | 3,757 | 10,309 | 10,309 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-614-replacement-effects` | 3,748 | 10,455 | 10,455 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, mechanic_dependency:cr-509-declare-blockers-step` | 3,723 | 10,494 | 10,494 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-111-tokens` | 3,710 | 10,249 | 10,249 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, mechanic_dependency:cr-115-targets` | 3,697 | 10,173 | 10,173 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-509-declare-blockers-step, mechanic_dependency:cr-111-tokens` | 3,683 | 10,288 | 10,288 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, mechanic_dependency:cr-111-tokens` | 3,680 | 10,434 | 10,434 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:deal-damage` | 3,675 | 10,177 | 10,177 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:return` | 3,672 | 10,174 | 10,174 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:destroy-target` | 3,656 | 10,177 | 10,177 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:tap-state` | 3,653 | 10,088 | 10,126 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, effect_clause:exile` | 3,652 | 10,375 | 10,375 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:return` | 3,652 | 10,091 | 10,133 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:unparsed-regenerate-this-creature` | 3,651 | 10,053 | 10,069 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-509-declare-blockers-step, effect_clause:deal-damage` | 3,650 | 10,216 | 10,216 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:deal-damage` | 3,648 | 10,093 | 10,142 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-509-declare-blockers-step, effect_clause:return` | 3,647 | 10,213 | 10,213 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, effect_clause:deal-damage` | 3,645 | 10,362 | 10,362 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-614-replacement-effects, effect_clause:return` | 3,643 | 10,359 | 10,359 |
+| `continuous_layer:continuous-effect-layers-and-dependencies, mechanic_dependency:cr-611-continuous-effects, activated_effect:create-token` | 3,632 | 10,118 | 10,191 |
 
 ## Hard construction failures
 

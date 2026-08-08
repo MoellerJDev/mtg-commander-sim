@@ -2,7 +2,7 @@
 title: "Platform readiness"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "61746dfe71764d283dbd63c5271bdb97bc2d792e8fc7c66e657e502fb822fa7e"
+verified: "72ca3784c00db68e81cd2411d3ba1dd9de5fa634d0fee48848151a2baa2a6b94"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 generated_source: "coverage/platform-readiness.json"
@@ -11,7 +11,7 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_platform_status.p
 
 # Platform readiness
 
-Source fingerprint: `61746dfe71764d283dbd63c5271bdb97bc2d792e8fc7c66e657e502fb822fa7e`
+Source fingerprint: `72ca3784c00db68e81cd2411d3ba1dd9de5fa634d0fee48848151a2baa2a6b94`
 
 ## Current top-level state
 
@@ -28,7 +28,7 @@ Source fingerprint: `61746dfe71764d283dbd63c5271bdb97bc2d792e8fc7c66e657e502fb82
 
 ## Top blockers
 
-- mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate, single-permanent Explore, ordinary single-instruction Proliferate, mandatory fixed source/direct-permanent and fixed player-counter clauses, and represented intrinsic entry counters now use typed transactions; exact permanent-counter removal owns the represented stun untap replacement and CR 704.5q/limited CR 704.5r state actions; optional, variable, distributed, set-based, multiple-counter, conditional-target, noncreature-subtype, repeated or variable Proliferate, cumulative-upkeep-style, cost, general effect removal, movement, player removal, player-counter replacement or prevention, arbitrary maximum-counter grammar, and other rule-generated counter producers still require migration, so aggregate CR 122, CR 614/616, CR 701.34, CR 701.44, CR 702.123, and CR 704.5r remain blocked
+- mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate, single-permanent Explore, ordinary single-instruction Proliferate, mandatory fixed source/direct-permanent, fixed player-counter, closed affected-set, bounded direct target-set, and represented intrinsic entry-counter clauses now use typed transactions; exact permanent-counter removal owns the represented stun untap replacement and CR 704.5q/limited CR 704.5r state actions; Support shorthand, optional, variable, distributed, dynamic, multiple-counter, combat-qualified, subtype-qualified, conditional, modal, compound, repeated or variable Proliferate, cumulative-upkeep-style, cost, general effect removal, movement, player removal, player-counter replacement or prevention, arbitrary maximum-counter grammar, and other rule-generated counter producers still require migration, so aggregate CR 115, CR 122, CR 614/616, CR 701.34, CR 701.41, CR 701.44, CR 702.123, and CR 704.5r remain blocked
 - fixed simultaneous affected-set damage now snapshots represented public player and permanent groups through the canonical effective-characteristic query and commits one APNAP-ordered, logical-identity-deduplicated damage batch; divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, linked life/draw/scry/conditional riders, and broader source-LKI producers remain explicit blockers, so aggregate mass-damage coverage is not trusted
 - mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted
 - ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked
