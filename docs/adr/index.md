@@ -2,7 +2,7 @@
 title: "Architecture decision records"
 status: "current"
 authoritative_source: "docs/adr decision records"
-verified: "2026-08-05"
+verified: "2026-08-08"
 audience: "maintainers and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -54,3 +54,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0037 — typed fixed target-set counter placement](0037-typed-fixed-target-set-counter-placement.md)
 - [ADR 0038 — source-context-aware Support lowering](0038-source-context-aware-support.md)
 - [ADR 0039 — typed attachment-relative result references](0039-typed-attachment-relative-results.md)
+- [ADR 0040 — closed source-self references](0040-closed-source-self-references.md)

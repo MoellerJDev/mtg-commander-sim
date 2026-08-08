@@ -2,7 +2,7 @@
 title: "Oracle compiler architecture"
 status: "current"
 authoritative_source: "quorune/oracle_ir.py, quorune/compiler, and quorune/card_programs"
-verified: "2026-08-07"
+verified: "2026-08-08"
 audience: "compiler and rules contributors"
 maintenance: "hand-maintained"
 ---
@@ -66,6 +66,15 @@ closed positive predicates represented by the object-query vocabulary are
 accepted. Negative keyword or subtype predicates, divided or variable damage,
 multiple damage clauses, and linked result riders remain source-spanned
 residuals until their own typed families exist.
+
+Source-self wording uses one immutable `SourceReferenceSpec` across represented
+counter, damage, prevention, trigger, entry, activation-cost, and declaration
+grammar. It accepts the full Oracle name and bounded complete leading forms
+before a comma, the title delimiters “the” or “of,” or a bounded ordinary
+two-word name. It never guesses an arbitrary prefix, suffix, or nickname.
+Lowered instructions use `$source`; runtime handlers do not receive names or
+reinterpret Oracle text. See
+[ADR 0040](../adr/0040-closed-source-self-references.md).
 
 ## Extending the compiler
 

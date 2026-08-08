@@ -213,6 +213,8 @@ def _owner(relative: str, layer: str) -> str:
         return "reusable_piece_inventory"
     if relative.startswith("quorune/compiler/"):
         return "oracle_compiler"
+    if relative == "quorune/rules/source_references.py":
+        return "oracle_compiler"
     if relative.startswith("quorune/rules/"):
         return "rules_capabilities"
     if relative.startswith("quorune/aura/"):

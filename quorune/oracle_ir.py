@@ -68,12 +68,13 @@ from .compiler.tap_state_templates import targeted_tap_state_effect_template
 from .declaration_costs import parse_declaration_cost_line
 from .declaration_restrictions import parse_declaration_restriction_line
 from .rules.capabilities import CapabilityRegistry
+from .rules.source_references import SourceReferenceSpec
 from .semantics import SemanticProgram, SemanticRegistry
 from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v54"
+ORACLE_COMPILER_VERSION = "oracle-ir-v55"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
@@ -808,7 +809,7 @@ def _trigger_node(
     material_line = _without_parenthetical_reminder(line)
     if not _TRIGGER_PREFIX.match(material_line):
         return None
-    source_name = re.escape(card_name)
+    source_name = SourceReferenceSpec(card_name).regex_pattern
     trigger = re.fullmatch(
         rf"(?:when|whenever) "
         rf"(?P<subject>this (?:artifact|aura|card|creature|"
@@ -935,6 +936,19 @@ def _trigger_node(
     )
 
 
+def _is_unconditional_enters_tapped(line: str, source_name: str) -> bool:
+    source_pattern = SourceReferenceSpec(source_name).regex_pattern
+    return (
+        re.fullmatch(
+            rf"(?:this (?:artifact|creature|enchantment|land|permanent)"
+            rf"|{source_pattern}) enters tapped\.?",
+            line,
+            re.IGNORECASE,
+        )
+        is not None
+    )
+
+
 def _compile_face(
     record: CardRecord,
     *,
@@ -1023,11 +1037,8 @@ def _compile_face(
             nodes.append(counter_prohibition)
             continue
 
-        enters_tapped = re.fullmatch(
-            rf"(?:this (?:artifact|creature|enchantment|land|permanent)"
-            rf"|{re.escape(face_name or record.name)}) enters tapped\.?",
-            line,
-            re.IGNORECASE,
+        enters_tapped = _is_unconditional_enters_tapped(
+            line, face_name or record.name
         )
         if enters_tapped:
             dependencies = ("cr-614-replacement-effects",)

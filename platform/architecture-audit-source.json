@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
   "audit": {
-    "baseline_main_commit": "300bb5ad57014fdc6c98cfbb350ac87f18bbee7e",
+    "baseline_main_commit": "8fda2112510ef5bb8ee7211a8b7ef01d8d56b77b",
     "baseline_worktree_clean": true,
     "verified_at": "2026-08-08",
-    "phase": "support_counter_placement_closure",
-    "scope_note": "The evaluated source tree includes typed fixed player-, affected-set-, and bounded target-set counter placement. This focused branch adds fixed positive Support N with exact permanent-versus-instant/sorcery source context, source exclusion for permanent Support, generic spell/trigger/activated lowering, Oracle IR v53, explicit capability and interaction evidence, and a generated Commander corpus harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior."
+    "phase": "closed_source_self_reference_compilation",
+    "scope_note": "The evaluated source tree includes the certified counter-placement foundation through attachment-relative placement. This branch adds one immutable CR 201.5c source-reference grammar shared by represented counter, damage, prevention, trigger, entry, activation-cost, and declaration producers. Accepted complete names and bounded leading forms lower to the ordinary physical source identity; arbitrary prefixes, suffixes, nicknames, and unsupported alternate-name behavior remain residual. The harvest uses CardProgram V2 and Oracle IR v55 without runtime Oracle parsing, direct GameState writes, or card-identity branches."
   },
   "ci": {
     "workflow": "PR",
-    "run_id": 31261062941,
-    "url": "https://github.com/MoellerJDev/quorune/actions/runs/31261062941",
+    "run_id": 31267011141,
+    "url": "https://github.com/MoellerJDev/quorune/actions/runs/31267011141",
     "status": "pass",
     "python_versions": [
       "3.12"
