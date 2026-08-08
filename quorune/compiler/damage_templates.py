@@ -13,6 +13,7 @@ from ..fixed_damage_set_model import (
     PlayerDamageRelation,
 )
 from ..object_predicate import ObjectQuerySpec
+from ..rules.source_references import SourceReferenceSpec
 
 
 _ABILITY_WORD = re.compile(
@@ -431,13 +432,21 @@ def fixed_damage_effect_template(
     """Recognize one whole fixed-damage clause without interpreting riders."""
 
     source = re.fullmatch(
-        rf"(?P<source>{re.escape(card_name)}|this "
-        rf"(?P<kind>{'|'.join(_FIXED_DAMAGE_SOURCE_KINDS)})) deals "
+        r"(?P<source>.+?) deals "
         r"(?P<amount>[1-9][0-9]*) damage to (?P<recipient>.+?)\.?",
         text.strip(),
         re.IGNORECASE,
     )
     if source is None:
+        return None
+    source_kind = re.fullmatch(
+        rf"this (?P<kind>{'|'.join(_FIXED_DAMAGE_SOURCE_KINDS)})",
+        source.group("source"),
+        re.IGNORECASE,
+    )
+    if source_kind is None and not SourceReferenceSpec(card_name).matches(
+        source.group("source")
+    ):
         return None
     recipient_text = source.group("recipient").casefold()
     fixed_set = _fixed_mass_damage_spec(recipient_text)
@@ -446,7 +455,11 @@ def fixed_damage_effect_template(
         return FixedMassDamageEffectTemplate(
             amount=int(source.group("amount")),
             spec=spec,
-            source_kind=(source.group("kind") or "named").casefold(),
+            source_kind=(
+                source_kind.group("kind").casefold()
+                if source_kind is not None
+                else "named"
+            ),
             target_opponent=target_opponent,
         )
     recipient = next(
@@ -462,7 +475,11 @@ def fixed_damage_effect_template(
     return FixedDamageEffectTemplate(
         amount=int(source.group("amount")),
         recipient=recipient,
-        source_kind=(source.group("kind") or "named").casefold(),
+        source_kind=(
+            source_kind.group("kind").casefold()
+            if source_kind is not None
+            else "named"
+        ),
     )
 
 

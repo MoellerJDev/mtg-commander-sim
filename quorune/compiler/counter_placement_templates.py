@@ -16,6 +16,7 @@ from ..affected_permanents import (
     PermanentControllerRelation,
 )
 from ..object_predicate import ObjectQuerySpec
+from ..rules.source_references import SourceReferenceSpec
 from .creature_subtypes import canonical_creature_subtype
 from .fixed_numbers import fixed_number
 
@@ -616,7 +617,7 @@ def fixed_counter_placement_effect_template(
             subject=CounterPlacementSubject.SOURCE,
             permanent_type=source.group(1).casefold(),
         )
-    if subject.casefold() == " ".join(card_name.casefold().split()):
+    if SourceReferenceSpec(card_name).matches(subject):
         return FixedCounterPlacementTemplate(
             count=count,
             counter_name=counter_name,

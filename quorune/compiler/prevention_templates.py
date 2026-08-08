@@ -8,6 +8,7 @@ from ..object_query import (
     ObjectQuerySpec,
     validate_chosen_damage_source_predicate,
 )
+from ..rules.source_references import SourceReferenceSpec
 
 
 PreventionTemplate = tuple[
@@ -250,9 +251,8 @@ def _chosen_source_triggered_damage_and_draw(
     )
     if not match:
         return None
-    if card_name is not None and (
-        " ".join(match.group("source").casefold().split())
-        != " ".join(card_name.casefold().split())
+    if card_name is not None and not SourceReferenceSpec(card_name).matches(
+        match.group("source")
     ):
         return None
     shield = {
@@ -662,7 +662,7 @@ def prevention_trigger_effect_template(
     normalized = " ".join(text.strip().split())
     source_reference = (
         rf"(?:this (?:artifact|creature|enchantment|permanent)|"
-        rf"{re.escape(card_name)})"
+        rf"{SourceReferenceSpec(card_name).regex_pattern})"
         if card_name
         else r"this (?:artifact|creature|enchantment|permanent)"
     )
