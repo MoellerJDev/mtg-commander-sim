@@ -59,12 +59,12 @@ class SemanticCounterReplacementContinuationTests(unittest.TestCase):
         cls.db.close()
         cls.temporary.cleanup()
 
-    def session(self, seed: int):
+    def session(self, seed: int, *, players: int = 2):
         session = make_session(
             self.db,
             self.mishra,
             self.zimone,
-            players=2,
+            players=players,
             seed=seed,
             auto_pass_empty=False,
         )
@@ -319,6 +319,28 @@ class SemanticCounterReplacementContinuationTests(unittest.TestCase):
         )
         self.assertFalse(rejected.ok)
         self.assertIn("changed before replacement resume", rejected.summary)
+        self.assertEqual(before, authoritative_state_hash(session.engine.state))
+        self.assertNotIn("+1/+1", target.counters)
+
+    def test_semantic_counter_completion_identity_mutant_is_killed(self):
+        session = self.session(12261425)
+        target, _item = self.begin_fabricate(session)
+        self.choose_counter(session)
+        decision = session.engine.state.pending_decision
+        decision.continuation["counter_intent_hash"] = "0" * 64
+        projected = StateProjector(
+            self.db, session.engine.state
+        )._decision("pilot:A")
+        selected = projected["ctx"]["options"][0]["id"]
+        before = authoritative_state_hash(session.engine.state)
+        capability = session.engine.permissions.capability_for("pilot:A")
+        rejected = session.engine.try_submit(
+            token=capability.token,
+            principal="pilot:A",
+            action="choose",
+            payload={"replacement": selected},
+        )
+        self.assertFalse(rejected.ok)
         self.assertEqual(before, authoritative_state_hash(session.engine.state))
         self.assertNotIn("+1/+1", target.counters)
 

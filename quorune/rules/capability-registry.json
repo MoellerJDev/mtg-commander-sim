@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 51,
+  "registry_version": 52,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -55,6 +55,12 @@
       "mechanic_id": "cr-111-tokens",
       "capabilities": [
         "token.creation.additional_replacement"
+      ]
+    },
+    {
+      "mechanic_id": "fabricate",
+      "capabilities": [
+        "counter.producer.fabricate"
       ]
     },
     {
@@ -447,6 +453,33 @@
       "dependency_fail_closed_rationale": "This bounded counter producer has no capability dependencies beyond the shared replacement event substrate.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_counter_quantity_replacement_mutant_is_killed replaces the quantity transform with an identity operation and the behavioral assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "counter.producer.fabricate",
+      "version": 1,
+      "official_rules": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve each ordinary positive integral Fabricate instance as its own enters trigger, then execute the chosen permanent-counter or Servo-token result through canonical resumable owners.",
+        "inputs": ["one printed Fabricate N keyword instance", "positive integral N", "entering source physical identity", "source controller's choice"],
+        "outputs": ["ordinary enters trigger", "seat-scoped counter-or-token choice", "replacement-aware counter placement", "canonical Servo token creation", "exact continuation replay"],
+        "exclusions": ["Fabricate 0 or variable values", "granted or copied Fabricate outside represented typed ability propagation", "counter-placement preparation inside unrelated semantic choices", "player counters", "non-Servo alternative token wording"]
+      },
+      "dependencies": ["counter.placement.quantity_replacement", "token.creation.additional_replacement", "trigger.event.normalized_zone_change", "trigger.placement.apnap"],
+      "implementation_components": ["quorune.compiler.keyword_nodes.fabricate_keyword_node", "quorune.semantic_choices.token_and_copy.FabricateChoiceHandler", "quorune.semantic_choices.counter_coordination.continue_semantic_completion", "quorune.semantic_choices.counter_coordination.resume_semantic_counter_completion", "quorune.semantic_runtime.intents.PlaceCountersIntent", "quorune.semantic_runtime.intents.CreateTokenIntent"],
+      "positive_tests": ["test_fabricate_keyword_lowers_to_source_spanned_capability_closed_trigger", "test_generated_fabricate_program_drives_counter_choice_without_name_dispatch"],
+      "negative_tests": ["test_unsupported_fabricate_values_remain_material_residuals", "test_counter_intent_identity_rejects_unknown_boolean_and_duplicate_data", "test_tampered_counter_intent_fails_closed_without_mutation"],
+      "interaction_tests": ["test_fabricate_suspends_before_mutation_and_projection_is_seat_scoped", "test_counter_resume_executes_later_typed_completion_intents_once"],
+      "multiplayer_tests": ["test_four_player_fabricate_choice_uses_one_persistent_affected_seat"],
+      "privacy_tests": ["test_fabricate_suspends_before_mutation_and_projection_is_seat_scoped"],
+      "replay_tests": ["test_fabricate_counter_replacement_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The compiler dependency mutation test blocks Fabricate CardProgram trust when any required trigger, token, or counter-placement capability is unavailable.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The continuation-identity mutation test changes the pinned counter intent after suspension and proves resume rejects the altered placement before mutation.",
       "blockers": [],
       "status": "trusted"
     },

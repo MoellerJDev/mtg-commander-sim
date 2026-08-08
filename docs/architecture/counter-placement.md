@@ -79,7 +79,8 @@ The following producers remain deliberately outside this slice:
 - intrinsic planeswalker and battle entry counters;
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
-- explore, cumulative upkeep, fabricate, and proliferate;
+- explore, cumulative upkeep, and proliferate;
+- Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
 - player counters, state-based removals, and card-specific continuation paths
   such as Demonic Junker.
 

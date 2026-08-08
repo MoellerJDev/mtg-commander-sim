@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 702.123 — Ordinary Fabricate triggers",
+  "cases": [
+    {
+      "rule_id": "702.123",
+      "rule_text_sha256": "ad579f3461c0a74ed240260d403618f824cb8267b3789f09d66b90497c42ecd8",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["quorune.rules.capabilities.CapabilityRegistry"],
+      "executable_test_ids": ["tests.test_fabricate_compiler.FabricateCompilerTests.test_fabricate_keyword_lowers_to_source_spanned_capability_closed_trigger"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword heading; the bounded ordinary positive-integer family is owned by counter.producer.fabricate."]
+    },
+    {
+      "rule_id": "702.123a",
+      "rule_text_sha256": "9bc164aff7b6102b3f4d9a599289d8910f4984a72deeb775b3f8987acd096413",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["quorune.compiler.keyword_nodes.fabricate_keyword_node", "quorune.semantic_choices.token_and_copy.FabricateChoiceHandler", "quorune.semantic_choices.counter_coordination.continue_semantic_completion"],
+      "executable_test_ids": ["tests.test_fabricate_compiler.GeneratedFabricateRuntimeTests.test_generated_fabricate_program_drives_counter_choice_without_name_dispatch", "tests.test_semantic_counter_replacement_continuations.SemanticCounterReplacementContinuationTests.test_fabricate_counter_replacement_replays_exactly", "tests.test_fabricate_compiler.FabricateCompilerTests.test_unsupported_fabricate_values_remain_material_residuals"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": ["zero and variable Fabricate values are outside the closed compiler grammar", "granted or copied Fabricate is not yet propagated through the typed granted-ability boundary"],
+      "notes": ["Ordinary printed positive-integer Fabricate becomes an enters trigger whose source controller chooses the counter or Servo result.", "The counter result suspends before mutation for affected-player replacement ordering and resumes from a replay-pinned typed continuation; aggregate rule support remains blocked by the explicit variants."]
+    },
+    {
+      "rule_id": "702.123b",
+      "rule_text_sha256": "b37e8d5937a40abaf04ab606599335342c8f56539e6d1dc4c6039d915c579715",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["quorune.compiler.keyword_nodes.fabricate_keyword_node"],
+      "executable_test_ids": ["tests.test_fabricate_compiler.FabricateCompilerTests.test_unsupported_fabricate_values_remain_material_residuals"],
+      "required_scenarios": ["negative"],
+      "covered_scenarios": ["negative"],
+      "blockers": ["multiple Fabricate instances in one printed keyword clause remain a material compiler residual rather than becoming separately ordered triggers"],
+      "notes": ["The compiler fails closed instead of collapsing multiple keyword instances into one trigger."]
+    }
+  ]
+}
