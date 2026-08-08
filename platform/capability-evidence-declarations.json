@@ -2359,6 +2359,94 @@
       "applicability_note": "Replay the Fabricate option and counter-replacement ordering command sequence to the identical authoritative state hash."
     },
     {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_fixed_counter_effect_suspends_for_quantity_replacement",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Suspend the typed fixed-placement intent before mutation when two quantity replacements require affected-controller ordering."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_four_player_fixed_counter_replacement_choice_is_seat_scoped",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Resolve a four-player fixed-placement replacement choice through one affected seat while preserving exact APNAP state and command replay."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementCompilerTests.test_fixed_counter_compiler_template_mutant_is_killed",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a compiler mutant that removes the closed fixed-placement template and would otherwise preserve a false exact promotion."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementCompilerTests.test_unsupported_fixed_counter_variants_remain_material_residuals",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep optional, variable, set, player, compound, move, and unsupported-predicate counter wording outside the closed grammar."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_stale_fixed_counter_target_fails_before_mutation",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject a fixed-placement intent whose selected battlefield permanent has left the legal target zone, preserving the exact authoritative state hash."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_typed_fixed_counter_handler_rejects_malformed_effects",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject boolean, zero, missing, empty, and unknown typed operation fields before authoritative mutation."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementCompilerTests.test_spell_trigger_and_activated_contexts_share_fixed_counter_lowering",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower one reusable source-spanned fixed placement family across spell, trigger, and activated contexts."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_fixed_counter_result_does_not_require_source_to_remain",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Commit the typed fixed counter result after its source has left while preserving replay-pinned source provenance."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_typed_fixed_counter_handler_places_counters_without_domain_dispatch",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower the strict operation to PlaceCountersIntent and commit through the canonical quantity-replacement owner without generic domain dispatch."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_four_player_fixed_counter_replacement_choice_is_seat_scoped",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project the replacement decision only to the affected controller without exposing physical object identity or continuation internals."
+    },
+    {
+      "capability_id": "counter.producer.fixed_effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_fixed_counter_placement_effects.FixedCounterPlacementRuntimeTests.test_four_player_fixed_counter_replacement_choice_is_seat_scoped",
+      "official_rule_ids": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay four priority passes and the affected-seat replacement choice to the identical authoritative state hash."
+    },
+    {
       "capability_id": "counter.producer.proliferate",
       "evidence_class": "interaction",
       "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_counter_replacements_suspend_whole_batch_before_mutation",

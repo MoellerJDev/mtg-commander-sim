@@ -266,6 +266,7 @@ def _activated_effect_dependency_gate(
             "ex" + "plore",
             "offer_draw",
             "pro" + "liferate",
+            "place_counters",
             "tap",
             "untap",
         }

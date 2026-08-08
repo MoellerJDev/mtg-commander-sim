@@ -73,12 +73,21 @@ until their ordering and continuation semantics are modeled.
 
 ## Current producer inventory
 
-The shared transaction currently owns positive `add_counter_selected`, positive
-generic `counter`, `counter_all_subtype`, direct transaction calls, typed
-nested zone-replacement counters, ordinary positive-integral Fabricate choices,
-the conditional +1/+1 counter from one permanent exploring once, and ordinary
-single-instruction Proliferate over players and permanents. These paths prepare
-before mutation and can safely suspend.
+The shared transaction currently owns the typed `place_counters` operation,
+legacy-compatible positive `add_counter_selected`, positive generic `counter`,
+`counter_all_subtype`, direct transaction calls, typed nested zone-replacement
+counters, ordinary positive-integral Fabricate choices, the conditional +1/+1
+counter from one permanent exploring once, and ordinary single-instruction
+Proliferate over players and permanents. These paths prepare before mutation
+and can safely suspend.
+
+Oracle IR v49 lowers one closed reusable fixed-placement grammar through the
+typed operation in spell, triggered, and activated contexts. It accepts one
+positive exact quantity of one named counter on the source, the exact named
+source, or one direct battlefield permanent target. Direct targets may use one
+permanent card type or one pinned creature subtype, a fixed controller
+relation, and source exclusion. The strict runtime handler lowers only to
+`PlaceCountersIntent`; it neither parses Oracle text nor mutates state.
 
 The bounded Proliferate family compiles an unmodified `Proliferate.` clause in
 spell, triggered, and activated contexts to CardProgram V2. The resolving
@@ -102,12 +111,15 @@ when the source leaves the battlefield. Simultaneous multi-permanent Explore,
 repeated Explore, Explore replacement effects, and broader granted/copy
 propagation remain explicit residuals.
 
-The following producers remain deliberately outside this slice:
+The following producers and wordings remain deliberately outside this slice:
 
 - intrinsic planeswalker and battle entry counters;
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
 - cumulative upkeep;
+- optional, variable, distributed, set-based, fixed player-counter, and
+  multiple-counter placement clauses;
+- conditional targets and non-creature subtype predicates;
 - Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
 - counter removal and movement, state-based removals, and card-specific
   continuation paths such as Demonic Junker.
@@ -124,9 +136,10 @@ ordering, and universal placing-player derivation. Broad CR 122/614/616 stays
 blocked until those families and producers are integrated.
 
 Primary assurance is in `test_counter_placement_replacements.py`,
-`test_proliferate_rules.py`, and `test_proliferate_compiler.py`, with shared
-event-order coverage in `test_replacement_event_tree.py` and focused mutation
-evidence in `test_capability_implementation_mutations.py`.
+`test_proliferate_rules.py`, `test_proliferate_compiler.py`, and
+`test_fixed_counter_placement_effects.py`, with shared event-order coverage in
+`test_replacement_event_tree.py` and focused mutation evidence in
+`test_capability_implementation_mutations.py`.
 
 Current aggregate corpus counts and remaining blockers are generated in
 [`docs/COMPILER_COVERAGE_STATUS.md`](../COMPILER_COVERAGE_STATUS.md). They

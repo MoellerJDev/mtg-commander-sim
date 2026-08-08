@@ -20,6 +20,7 @@ BUILTIN_PACK_DIRECTORY = Path(__file__).resolve().parent / "semantic_packs"
 VALID_EFFECT_OPERATIONS = {
     "amass",
     "add_counter_selected",
+    "place_counters",
     "add_type",
     "add_subtype",
     "add_type_until_end_of_turn",

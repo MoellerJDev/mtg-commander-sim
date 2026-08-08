@@ -22,6 +22,7 @@
       "test_continuous_effect_duration",
       "test_counter_placement_replacements",
       "test_counter_state",
+      "test_fixed_counter_placement_effects",
       "test_damage_prevention_aftermath",
       "test_damage_prevention_creation",
       "test_damage_prevention_shields",

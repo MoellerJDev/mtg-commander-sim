@@ -65,6 +65,10 @@ from .counter_replacements import (
     default_counter_placement_replacement_registry,
     resolve_counter_placement_replacements,
 )
+from .counter_placement_handlers import (
+    COUNTER_PLACEMENT_HANDLERS,
+    FixedCounterPlacementHandler,
+)
 from .damage_replacements import (
     collect_damage_replacement_effects,
     DamageQuantityReplacementHandler,
@@ -263,6 +267,7 @@ def default_semantic_handler_registry() -> SemanticHandlerRegistry:
             *FIXED_DAMAGE_SET_HANDLERS,
             *RETURN_TO_HAND_HANDLERS,
             *STACK_COUNTER_HANDLERS,
+            *COUNTER_PLACEMENT_HANDLERS,
             *DOMAIN_EFFECT_HANDLERS,
         )
     )
@@ -333,6 +338,7 @@ __all__ = [
     "CounterQuantityReplacementHandler",
     "CounterQuantityReplacementNode",
     "CounterReplacementSourceContext",
+    "FixedCounterPlacementHandler",
     "DamageQuantityReplacementHandler",
     "DamageQuantityReplacementNode",
     "DamageReplacementCondition",

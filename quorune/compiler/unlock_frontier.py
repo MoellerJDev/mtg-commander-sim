@@ -139,7 +139,7 @@ _CLAUSE_SIGNATURES: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("life-change", ("gain life", "lose life", "life total")),
     ("look-reveal", ("look at", "reveal ")),
     ("mill", ("mill ",)),
-    ("put-counter", ("put a ", "put one or more")),
+    ("put-onto-battlefield", ("put onto the battlefield",)),
     (_RETURN_MARKER, (_RETURN_MARKER + " ",)),
     (_SACRIFICE_MARKER, (_SACRIFICE_MARKER + " ",)),
     ("search", ("search ",)),
@@ -191,6 +191,11 @@ def _capability_id(blocker: str) -> str:
 
 def _clause_signature(text: str, *, kind: str, reason: str) -> str:
     material = " ".join(text.casefold().split())
+    put_signatures = _put_clause_signatures(material)
+    if "put-counter" in put_signatures:
+        return "put-counter"
+    if "put-onto-battlefield" in put_signatures:
+        return "put-onto-battlefield"
     for signature, markers in _CLAUSE_SIGNATURES:
         if any(material.startswith(marker) for marker in markers):
             return signature
@@ -217,6 +222,7 @@ def _clause_families(text: str, *, kind: str, reason: str) -> set[str]:
         for signature, markers in _CLAUSE_SIGNATURES
         if any(marker in material for marker in markers)
     }
+    signatures.update(_put_clause_signatures(material))
     if "destroy " in material:
         signatures.discard("destroy")
         if re.search(r"\bdestroy (?:all|each)\b", material):
@@ -248,6 +254,20 @@ def _clause_families(text: str, *, kind: str, reason: str) -> set[str]:
     ):
         result.add(_family("reference_binding", "linked-result-reference"))
     return result
+
+
+def _put_clause_signatures(material: str) -> set[str]:
+    """Classify counter placement separately from zone placement."""
+
+    signatures: set[str] = set()
+    if re.search(r"\bput\b[^.!?]{0,160}\bcounters?\s+on\b", material):
+        signatures.add("put-counter")
+    if re.search(
+        r"\bput\b[^.!?]{0,160}\bonto the battlefield\b",
+        material,
+    ):
+        signatures.add("put-onto-battlefield")
+    return signatures
 
 
 def canonical_residual_families(

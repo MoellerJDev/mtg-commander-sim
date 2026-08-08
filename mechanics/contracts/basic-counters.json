@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-122-counters",
   "official_name": "Counters",
   "effective_date": "2026-06-19",
@@ -12,10 +12,10 @@
   "trust_level": "untrusted",
   "behavior": {
     "zones": ["battlefield"],
-    "objects": ["source or targeted permanent"],
-    "events": ["put a positive fixed quantity of named counters on one or more battlefield permanents", "nested counter placement created by a represented replacement"],
+    "objects": ["source or targeted permanent", "players and phased-in permanents selected for ordinary Proliferate"],
+    "events": ["put a positive fixed quantity of named counters on one source or direct-target battlefield permanent", "put one additional counter of every existing kind on each subject selected for one ordinary Proliferate instruction", "nested counter placement created by a represented replacement"],
     "state_reads": ["current object identity and target legality", "placing player", "affected permanent controller", "active reviewed runtime counter-replacement sources"],
-    "state_writes": ["counter quantity after every applicable replacement choice has resolved"],
+    "state_writes": ["permanent or player counter quantity after every applicable replacement choice has resolved"],
     "costs": [],
     "timing": ["during semantic effect resolution"],
     "targets": ["target is revalidated on resolution"],
@@ -29,7 +29,7 @@
     "zone_change": ["zone changes clear counters from the new object"],
     "source_leaves": ["targeted effects can resolve if their source leaves"]
   },
-  "variants": ["one counter on this permanent", "one counter on target permanent", "fixed additional counters", "fixed integral counter multiplication", "replacement-created nested counter placement"],
+  "variants": ["fixed positive counters on this permanent or exact card-name source", "fixed positive counters on one direct permanent-type or validated creature-subtype target", "fixed controller relation and source exclusion predicates", "one ordinary Proliferate instruction over players and permanents", "fixed additional counters", "fixed integral counter multiplication", "replacement-created nested counter placement"],
   "witness_cards": [
     {
       "name": "Doubling Season",
@@ -52,15 +52,28 @@
     "test_counter_replacement_choice_is_seat_scoped",
     "test_counter_replacement_choice_replays_exactly",
     "test_counter_replacement_property_1000_deterministic_transitions",
-    "test_counter_quantity_replacement_mutant_is_killed"
+    "test_counter_quantity_replacement_mutant_is_killed",
+    "test_spell_trigger_and_activated_contexts_share_fixed_counter_lowering",
+    "test_closed_subject_grammar_uses_typed_types_subtypes_and_relations",
+    "test_fixed_counter_template_property_is_deterministic_for_exact_counts",
+    "test_unsupported_fixed_counter_variants_remain_material_residuals",
+    "test_fixed_counter_shape_and_dependency_mutants_fail_closed",
+    "test_typed_fixed_counter_handler_places_counters_without_domain_dispatch",
+    "test_typed_fixed_counter_handler_rejects_malformed_effects",
+    "test_stale_fixed_counter_target_fails_before_mutation",
+    "test_fixed_counter_result_does_not_require_source_to_remain",
+    "test_fixed_counter_effect_suspends_for_quantity_replacement",
+    "test_four_player_fixed_counter_replacement_choice_is_seat_scoped"
   ],
   "implementation": {
-    "component": "counter_placement mutation owner plus semantic_runtime.counter_replacements and represented semantic producers",
-    "version": "counter-placement-transaction-v2"
+    "component": "closed fixed-counter and Proliferate compilers, strict semantic and choice handlers, counter_placement mutation owner, semantic_runtime.counter_replacements, and represented semantic producers",
+    "version": "counter-placement-transaction-v3",
+    "capability_ids": ["counter.producer.fixed_effect", "counter.producer.proliferate", "counter.placement.quantity_replacement"],
+    "supported_slice": "Mandatory fixed positive named counters on one source or one direct battlefield permanent target through spell, trigger, and activated contexts, plus one ordinary Proliferate instruction over eligible players and permanents."
   },
   "known_blockers": [
-    "variable and distributed counter instructions remain residual",
-    "explore, cumulative upkeep, fabricate, proliferate, intrinsic entry counters, loyalty costs, rule actions, and player counters are not yet migrated to the shared transaction",
+    "optional, variable, distributed, multi-counter, fixed player-counter, and set-based counter instructions remain residual",
+    "cumulative upkeep, intrinsic entry counters, loyalty costs, and rule actions are not yet migrated to the shared transaction",
     "fractional, halving, dynamic-quantity, movement, removal, prevention, and full enters-with-counter replacement families remain unsupported",
     "counter type rules beyond existing power/toughness and loyalty consumers are incomplete"
   ],
