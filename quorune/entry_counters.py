@@ -167,6 +167,21 @@ def prospective_battle_entry_protector(
         raise error_type(str(exc)) from exc
 
 
+def mark_intrinsic_entry_counters_initialized(
+    card: Any,
+    *,
+    destination: str,
+    destination_type_line: str,
+) -> None:
+    """Retain zero-loyalty SBA eligibility after entry counters leave."""
+
+    if destination != "battlefield":
+        return
+    card_types, _subtypes, _supertypes = type_parts(destination_type_line)
+    if "planeswalker" in card_types:
+        card.annotations["loyalty_initialized"] = True
+
+
 def commit_unreplaced_intrinsic_entry_counters(
     host: EntryCounterCommitHost,
     *,
@@ -204,6 +219,7 @@ __all__ = [
     "commit_unreplaced_intrinsic_entry_counters",
     "intrinsic_entry_counter_effects",
     "intrinsic_entry_counters",
+    "mark_intrinsic_entry_counters_initialized",
     "prospective_battle_entry_protector",
     "validate_battle_entry_protector",
 ]

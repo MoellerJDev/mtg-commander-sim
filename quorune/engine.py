@@ -154,6 +154,7 @@ from .combat_evasion_engine_adapter import engine_combat_evasion_verdict
 from .errors import GameRuleError, StateInvariantError
 from .entry_counters import (
     capture_prospective_entry_characteristics,
+    mark_intrinsic_entry_counters_initialized,
     prospective_battle_entry_protector,
 )
 from .entry_counter_coordination import (
@@ -1835,6 +1836,7 @@ class CommanderEngine(
             error_type=StateInvariantError,
         )
         commit_counter_events_from_resolution(self, prepared_replacement, reason=reason, log=log, error_type=StateInvariantError)
+        mark_intrinsic_entry_counters_initialized(card, destination=card.zone, destination_type_line=destination_type_line)
         if semantic_events:
             self._dispatch_zone_change_events(
                 card,

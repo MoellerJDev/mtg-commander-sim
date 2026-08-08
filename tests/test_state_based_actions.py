@@ -2630,8 +2630,8 @@ class StateBasedActionEngineTests(unittest.TestCase):
         effective_card_data = engine._effective_card_data
         captured: dict[str, dict] = {}
 
-        def derived_data(card):
-            data = effective_card_data(card)
+        def derived_data(card, **kwargs):
+            data = effective_card_data(card, **kwargs)
             if (
                 card.object_id == recipient.object_id
                 and source.zone == "battlefield"

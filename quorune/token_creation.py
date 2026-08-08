@@ -16,6 +16,7 @@ from .entry_counters import (
     commit_unreplaced_intrinsic_entry_counters,
     EntryCounterError,
     intrinsic_entry_counters,
+    mark_intrinsic_entry_counters_initialized,
     validate_battle_entry_protector,
 )
 from .replacement_effects import (
@@ -525,6 +526,11 @@ def _commit_token_object(
                 data,
                 card_types=tuple(sorted(card_types)),
             ),
+        )
+        mark_intrinsic_entry_counters_initialized(
+            card,
+            destination="battlefield",
+            destination_type_line=str(data.get("type_line") or ""),
         )
     except EntryCounterError as exc:
         raise TokenCreationError(str(exc)) from exc

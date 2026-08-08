@@ -386,6 +386,7 @@ class IntrinsicEntryCounterTests(unittest.TestCase):
         )
 
         self.assertEqual(4, walker.counters["loyalty"])
+        self.assertTrue(walker.annotations["loyalty_initialized"])
         self.assertEqual(3, battle.counters["defense"])
         self.assertEqual("B", battle.battle_protector)
 
