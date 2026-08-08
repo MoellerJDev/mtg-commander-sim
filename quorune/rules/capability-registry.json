@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 59,
+  "registry_version": 60,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -207,6 +207,33 @@
       "dependency_fail_closed_rationale": "This bounded intrinsic keyword ability owns its cost, timing, target, stack, and attachment commit without another optional capability.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "test_generic_equip_resolution_mutant_is_killed removes recognition of the typed built-in Equip resolution and the exact attach operation assertion rejects the survivor.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "attachment.reference.current_or_lki",
+      "version": 1,
+      "official_rules": ["113.7a", "301.5a", "301.5f", "301.6", "303.4b", "303.4m", "608.2b", "608.2c", "608.2h", "701.3"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Resolve one compiled enchanted-, equipped-, or fortified-object reference from the live reciprocal relation of the same source incarnation or its immutable last-known relation after that source leaves.",
+        "inputs": ["typed attachment relation and required permanent type", "source physical and logical identity", "immutable stack-creation attachment snapshot", "current public attachment state and effective target card types"],
+        "outputs": ["one current attached-object reference", "one last-known attached-object reference after source departure", "null for absent, phased, wrong-type, or stale target incarnations", "strict deterministic serialization and replay"],
+        "exclusions": ["attachments to players or cards outside the battlefield", "untyped Oracle-text attachment interpretation", "dynamic or compound attached-object qualities", "references to every object formerly attached during an interval", "attachment creation, legality, movement, or state-based detachment"]
+      },
+      "dependencies": [],
+      "implementation_components": ["quorune.attachment_references.AttachmentReferenceSpec", "quorune.attachment_references.SourceAttachmentSnapshot", "quorune.attachment_references.capture_source_attachment_snapshot", "quorune.attachment_references.resolve_source_attachment", "quorune.semantic_runtime.values.resolve_semantic_value", "quorune.rules.activation.commit.commit_activation", "quorune.trigger_discovery.dispatch_semantic_event"],
+      "positive_tests": ["test_live_relation_and_source_departure_use_current_or_last_known_identity", "test_compiled_activation_places_counter_on_enchanted_creature", "test_source_departure_uses_pinned_attachment_during_resolution"],
+      "negative_tests": ["test_attachment_reference_model_rejects_malformed_and_stale_identity", "test_unsupported_attachment_subjects_remain_material_residuals"],
+      "interaction_tests": ["test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "multiplayer_tests": ["test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "privacy_tests": ["test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "replay_tests": ["test_compiled_activation_places_counter_on_enchanted_creature", "test_source_departure_uses_pinned_attachment_during_resolution", "test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "This read-only identity resolver has no optional capability dependency; callers fail closed on malformed descriptors, context, or stale object incarnations.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused identity mutation removes the reciprocal live relation and is killed by the exact selected-object assertion; stale-incarnation negatives separately reject a new object incarnation.",
       "blockers": [],
       "status": "trusted"
     },
@@ -612,6 +639,33 @@
       "dependency_fail_closed_rationale": "The compiler dependency mutation blocks exact fixed counter-placement CardPrograms whenever the canonical counter-placement replacement owner is unavailable.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "The focused compiler mutation removes the fixed counter template and proves that the previously exact source-spanned node becomes a material residual.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "counter.producer.fixed_attached_effect",
+      "version": 1,
+      "official_rules": ["113.7a", "301.5f", "301.6", "303.4b", "608.2b", "608.2c", "608.2h", "122.1", "122.1a", "122.6", "614.16", "616.1"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve one mandatory positive fixed-count counter placement on the creature, land, or other permanent a typed Aura, Equipment, or Fortification source is attached to.",
+        "inputs": ["one whole fixed-count Oracle instruction", "exact source attachment subtype context", "typed attached-object relation and required permanent type", "positive exact integral amount", "canonical counter name", "stable source and attached-object identities"],
+        "outputs": ["source-spanned CardProgram node", "pre-cost or pre-enqueue immutable relation snapshot", "live-or-last-known attached-object resolution", "replacement-aware permanent-counter placement", "exact replay"],
+        "exclusions": ["optional, variable, distributed, repeated, linked, modal, conditional, or compound placements", "multiple counter kinds or differing amounts", "attached players or nonbattlefield cards", "modified, attacking, blocking, tapped, counter-qualified, or other dynamic attached-object predicates", "attachment creation, movement, costs, and legality"]
+      },
+      "dependencies": ["attachment.reference.current_or_lki", "counter.producer.fixed_effect"],
+      "implementation_components": ["quorune.compiler.counter_placement_templates.FixedCounterPlacementTemplate", "quorune.attachment_references.AttachmentReferenceSpec", "quorune.attachment_references.SourceAttachmentSnapshot", "quorune.rules.node_capability_shapes.fixed_counter_placement_node_capabilities", "quorune.semantic_runtime.values.resolve_semantic_value", "quorune.semantic_runtime.counter_placement_handlers.FixedCounterPlacementHandler", "quorune.counter_placement.place_counters_on_refs"],
+      "positive_tests": ["test_compiler_lowers_closed_enchanted_equipped_and_fortified_subjects", "test_compiled_activation_places_counter_on_enchanted_creature", "test_source_departure_uses_pinned_attachment_during_resolution"],
+      "negative_tests": ["test_unsupported_attachment_subjects_remain_material_residuals", "test_attachment_reference_model_rejects_malformed_and_stale_identity"],
+      "interaction_tests": ["test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "multiplayer_tests": ["test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "privacy_tests": ["test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "replay_tests": ["test_compiled_activation_places_counter_on_enchanted_creature", "test_source_departure_uses_pinned_attachment_during_resolution", "test_attachment_counter_replacement_is_seat_scoped_and_replays"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The CardProgram fails closed if either live-or-LKI attachment identity or the canonical fixed counter-placement transaction is unavailable.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "Focused compiler and runtime mutations remove the typed attached-object descriptor or alter current-versus-last-known selection and prevent exact promotion or change the asserted recipient.",
       "blockers": [],
       "status": "trusted"
     },

@@ -2,7 +2,7 @@
 title: "Reusable rules piece delta"
 status: "generated"
 authoritative_source: "coverage/reusable-piece-delta.json"
-verified: "aef293793d8b8a860fffeed68252ae18680641985d8e95225e98a35141a38f3f"
+verified: "315a24dd8be58648590c6e6ac95b6b3fe60f7b53a72793f4ea0b0c0a3fd3e641"
 audience: "compiler and rules contributors"
 maintenance: "generated"
 ---
@@ -13,14 +13,14 @@ Compared with durable baseline `accelerator-41d849cdc8eb-b3c487cd6ba0`.
 
 | Metric | Current | Delta |
 |---|---:|---:|
-| `capability_closed_commander_card_programs` | 2,317 | +970 |
-| `generic_exact_commander_cards` | 2,322 | +971 |
+| `capability_closed_commander_card_programs` | 2,319 | +972 |
+| `generic_exact_commander_cards` | 2,324 | +973 |
 | `hard_construction_failures` | 0 | +0 |
-| `material_residuals` | 47,132 | -4,388 |
+| `material_residuals` | 47,124 | -4,396 |
 
 ## Piece status movement
 
-- Added: 214
+- Added: 217
 - Removed: 60
 - Promoted axes: 258
 - Demoted axes: 1

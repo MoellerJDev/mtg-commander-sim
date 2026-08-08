@@ -53,3 +53,4 @@ deployment modes, or architecture review thresholds.
 - [ADR 0036 — typed fixed affected-set counter placement](0036-typed-fixed-affected-set-counter-placement.md)
 - [ADR 0037 — typed fixed target-set counter placement](0037-typed-fixed-target-set-counter-placement.md)
 - [ADR 0038 — source-context-aware Support lowering](0038-source-context-aware-support.md)
+- [ADR 0039 — typed attachment-relative result references](0039-typed-attachment-relative-results.md)

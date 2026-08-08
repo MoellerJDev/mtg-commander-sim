@@ -934,6 +934,8 @@ def capability_covered_mechanics(
         covered.add("cr-122-counters")
     if "counter.producer.fixed_effect" in supplied:
         covered.add("cr-122-counters")
+    if "counter.producer.fixed_attached_effect" in supplied:
+        covered.add("cr-122-counters")
     if "counter.producer.fixed_permanent_set_effect" in supplied:
         covered.add("cr-122-counters")
     if "counter.producer.fixed_permanent_target_set_effect" in supplied:

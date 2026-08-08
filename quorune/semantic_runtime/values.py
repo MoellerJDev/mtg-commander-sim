@@ -1,7 +1,13 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Protocol
+from typing import Any, Mapping, Protocol
+
+from ..attachment_references import (
+    AttachmentReferenceError,
+    AttachmentReferenceSpec,
+    resolve_source_attachment,
+)
 
 from .explore import explore_source_controller
 
@@ -16,6 +22,54 @@ class SemanticValueHost(Protocol):
 
     def _target_snapshot(self, target_ref: str) -> dict[str, Any]: ...
 
+    def _type_parts(
+        self, type_line: str
+    ) -> tuple[set[str], set[str], set[str]]: ...
+
+
+def _resolve_attachment_reference(
+    host: SemanticValueHost,
+    value: Mapping[str, Any],
+    item: Any,
+) -> str | None:
+    spec = AttachmentReferenceSpec.from_dict(value)
+    snapshot = item.context.get("source_attachment_snapshot")
+    if not isinstance(snapshot, Mapping):
+        raise AttachmentReferenceError(
+            "Attachment-reference stack context is missing or malformed"
+        )
+    source_object_id = item.source_object_id or item.card_object_id
+    source_logical_object_id = item.context.get("source_logical_object_id")
+    if type(source_object_id) is not str or not source_object_id:
+        raise AttachmentReferenceError(
+            "Attachment-reference stack source identity is missing"
+        )
+    if (
+        type(source_logical_object_id) is not str
+        or not source_logical_object_id
+    ):
+        raise AttachmentReferenceError(
+            "Attachment-reference stack source incarnation is missing"
+        )
+    target = resolve_source_attachment(
+        host.state.cards,
+        snapshot,
+        spec,
+        source_object_id=source_object_id,
+        source_logical_object_id=source_logical_object_id,
+    )
+    if target is None:
+        return None
+    card_types = host._type_parts(
+        str(host._target_snapshot(target.ref).get("type_line") or "")
+    )[0]
+    if (
+        spec.required_card_type != "permanent"
+        and spec.required_card_type not in card_types
+    ):
+        return None
+    return target.ref
+
 
 def resolve_semantic_value(
     host: SemanticValueHost,
@@ -26,6 +80,8 @@ def resolve_semantic_value(
 
     if isinstance(value, list):
         return [resolve_semantic_value(host, child, item) for child in value]
+    if isinstance(value, Mapping) and value.get("kind") == "source_attachment":
+        return _resolve_attachment_reference(host, value, item)
     if isinstance(value, dict):
         return {
             key: resolve_semantic_value(host, child, item)

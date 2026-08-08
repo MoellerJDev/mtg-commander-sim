@@ -111,6 +111,7 @@ def _layer(relative: str, protected_rules_modules: set[str]) -> str:
         "quorune/abilities.py",
         "quorune/affected_permanents.py",
         "quorune/ability_fragments.py",
+        "quorune/attachment_references.py",
         "quorune/attachments.py",
         "quorune/attack_transition_engine_adapter.py",
         "quorune/attack_transition_model.py",
@@ -263,7 +264,10 @@ def _owner(relative: str, layer: str) -> str:
         "quorune/counter_state.py",
     }:
         return "counter_state"
-    if relative == "quorune/attachments.py":
+    if relative in {
+        "quorune/attachment_references.py",
+        "quorune/attachments.py",
+    }:
         return "attachments"
     if relative in {
         "quorune/life_change.py",
@@ -414,6 +418,7 @@ def build_classifications() -> dict[str, Any]:
                     if any(
                         marker in relative
                         for marker in (
+                            "attachment_references.py",
                             "attachments.py",
                             "attack_transition",
                             "block_transition",

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
+from ..attachment_references import AttachmentReferenceKind
 from .counter_placement_templates import (
     fixed_counter_placement_effect_template,
     fixed_counter_placement_set_effect_template,
@@ -30,6 +31,7 @@ def typed_resolution_effect_template(
     *,
     card_name: str,
     source_is_permanent: bool | None = None,
+    source_attachment_relation: AttachmentReferenceKind | None = None,
 ) -> CompiledEffectTemplate | None:
     """Lower the closed direct-damage and permanent-transition families."""
 
@@ -64,6 +66,7 @@ def typed_resolution_effect_template(
     fixed_counter_placement = fixed_counter_placement_effect_template(
         text,
         card_name=card_name,
+        source_attachment_relation=source_attachment_relation,
     )
     if fixed_counter_placement is not None:
         return fixed_counter_placement.compiled()

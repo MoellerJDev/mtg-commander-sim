@@ -8,6 +8,12 @@ from .ability_fragments import (
     canonical_ability_fragments,
     granted_triggered_specs,
 )
+from .attachment_references import (
+    SourceAttachmentSnapshot,
+    capture_last_known_attachment_snapshot,
+    capture_source_attachment_snapshot,
+    required_attachment_relation,
+)
 from .errors import GameRuleError
 from .model import CardInstance, StackItem
 from .semantics import SemanticProgram
@@ -37,6 +43,45 @@ _CHOSEN_TYPE_TRIGGER_MULTIPLIER = (
     "if a triggered ability of another creature you control of the chosen "
     "type triggers, it triggers an additional time"
 )
+
+
+def _trigger_attachment_snapshot(
+    host: "TriggerDiscoveryHost",
+    source: CardInstance,
+    program: SemanticProgram,
+) -> SourceAttachmentSnapshot | None:
+    relation = required_attachment_relation(program.effects)
+    if relation is None:
+        return None
+    authoritative = host.state.cards.get(source.object_id)
+    if authoritative is source:
+        return capture_source_attachment_snapshot(
+            host.state.cards,
+            source,
+            relation,
+        )
+    attached = host.state.cards.get(source.attached_to or "")
+    return capture_last_known_attachment_snapshot(
+        host.state.cards,
+        source,
+        relation,
+        source_logical_object_id=source.logical_object_id,
+        attached_to_ref=attached.ref if attached is not None else None,
+    )
+
+
+def _trigger_attachment_context(
+    host: "TriggerDiscoveryHost",
+    source: CardInstance,
+    program: SemanticProgram,
+) -> dict[str, Any]:
+    snapshot = _trigger_attachment_snapshot(host, source, program)
+    if snapshot is None:
+        return {"source_logical_object_id": source.logical_object_id}
+    return {
+        "source_logical_object_id": snapshot.source.logical_object_id,
+        "source_attachment_snapshot": snapshot.to_dict(),
+    }
 
 
 class TriggerDiscoveryHost(Protocol):
@@ -520,7 +565,7 @@ def dispatch_semantic_event(
                 context={
                     "event": event,
                     **copy.deepcopy(dict(context)),
-                    "source_logical_object_id": source.logical_object_id,
+                    **_trigger_attachment_context(host, source, program),
                     **(
                         {"trigger_target_selection_pending": True}
                         if program.target_schema
