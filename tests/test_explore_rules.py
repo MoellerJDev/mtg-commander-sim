@@ -22,6 +22,7 @@ from quorune.semantic_runtime.explore import (
 )
 from quorune.semantics import SemanticProgram, SemanticRegistry
 from quorune.model import StackItem
+from tests.common import keep_all, load_assets, make_session
 
 
 def _row(
@@ -222,6 +223,138 @@ class ExploreRuleTests(unittest.TestCase):
         card.controller = "A"
         card.logical_object_id = "logical:two"
         self.assertEqual("B", explore_source_controller(item, cards))
+
+
+class ExploreEngineTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.database, cls.mishra, cls.zimone = load_assets()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.database.close()
+
+    def _session(self, seed: int):
+        session = make_session(
+            self.database,
+            self.mishra,
+            self.zimone,
+            players=2,
+            seed=seed,
+        )
+        keep_all(session)
+        engine = session.engine
+        engine.permissions.invalidate_current()
+        engine.state.pending_decision = None
+        engine.state.priority_player = None
+        engine.state.stack.clear()
+        engine.semantics.put(
+            SemanticProgram(
+                key="fixture:explore",
+                label="Explore fixture",
+                effects=[
+                    {
+                        "op": "explore",
+                        "player": "$source.controller",
+                        "card": "$source",
+                    }
+                ],
+            )
+        )
+        return session
+
+    @staticmethod
+    def _card(engine, owner: str, name: str):
+        return next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == owner and card.printed_name == name
+        )
+
+    @staticmethod
+    def _put_on_top(engine, card) -> None:
+        engine.move_card(card.object_id, "library", log=False)
+        library = engine.state.players[card.owner].zones["library"]
+        library.remove(card.object_id)
+        library.append(card.object_id)
+
+    @staticmethod
+    def _stack_explore(engine, source, controller: str) -> None:
+        ref = engine._next_ref("S")
+        engine.state.stack.append(
+            StackItem(
+                stack_id=engine._stable_runtime_id("stack", ref),
+                ref=ref,
+                kind="triggered_ability",
+                controller=controller,
+                label="Explore fixture",
+                source_object_id=source.object_id,
+                semantic_key="fixture:explore",
+                visibility=list(engine.seats),
+                context={
+                    "source_logical_object_id": source.logical_object_id,
+                },
+            )
+        )
+
+    def test_nonland_explore_uses_current_controller_and_completes(self):
+        session = self._session(7014401)
+        engine = session.engine
+        explorer = self._card(engine, "A", "Goblin Engineer")
+        top = self._card(engine, "A", "Sol Ring")
+        engine.move_card(explorer.object_id, "battlefield", controller="A")
+        self._put_on_top(engine, top)
+        self._stack_explore(engine, explorer, "A")
+
+        engine._prepare_stack_resolution()
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        self.assertEqual(1, explorer.counters.get("+1/+1"))
+        result = session.act(
+            "pilot:A",
+            {
+                "action_id": "choose",
+                "choice": "top",
+                "plan": "KEEP_TOP",
+                "reason": "Keep the nonland card on top.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
+        self.assertEqual("library", top.zone)
+        self.assertTrue(
+            any(event.code == "explore.complete" for event in engine.state.events)
+        )
+
+    def test_departed_explorer_uses_lki_controller_without_countering_return(self):
+        session = self._session(7014402)
+        engine = session.engine
+        explorer = self._card(engine, "A", "Goblin Engineer")
+        top = next(
+            card
+            for card in engine.state.cards.values()
+            if card.owner == "B"
+            and not self.database.lookup(card.printed_name).is_land
+            and card.object_id != explorer.object_id
+        )
+        engine.move_card(explorer.object_id, "battlefield", controller="A")
+        self._stack_explore(engine, explorer, "A")
+        engine.change_control(explorer.object_id, "B", reason="Explore LKI")
+        engine.move_card(explorer.object_id, "graveyard", reason="Explore LKI")
+        self._put_on_top(engine, top)
+
+        engine._prepare_stack_resolution()
+        self.assertEqual("semantic.choice", engine.state.pending_decision.kind)
+        self.assertEqual(["B"], engine.state.pending_decision.actors)
+        self.assertNotIn("+1/+1", explorer.counters)
+        result = session.act(
+            "pilot:B",
+            {
+                "action_id": "choose",
+                "choice": "top",
+                "plan": "KEEP_TOP",
+                "reason": "Complete the LKI Explore instruction.",
+            },
+        )
+        self.assertTrue(result.ok, result.summary)
 
 
 if __name__ == "__main__":
