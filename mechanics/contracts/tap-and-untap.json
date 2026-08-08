@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "tap-and-untap",
   "official_name": "Tap and Untap",
   "effective_date": "2026-06-19",
@@ -104,6 +104,8 @@
     "use represented effective creature types",
     "transaction rollback",
     "exact command replay",
+    "malformed stun-counter state rejection before mutation",
+    "stale exact counter-removal rollback",
     "closed direct-target tap and untap clauses shared by spell, trigger, and activated contexts"
   ],
   "witness_cards": [
@@ -138,6 +140,9 @@
     "test_tap_state_validation_fails_before_mutation",
     "test_tap_state_resolution_rolls_back_atomically",
     "test_tap_state_effects_replay_exactly",
+    "test_stun_replacement_uses_the_counter_removal_owner",
+    "test_stun_replacement_rejects_malformed_public_state",
+    "test_stale_identity_rolls_back_the_whole_removal_batch",
     "test_semantic_tap_state_mutants_are_killed",
     "test_spell_trigger_and_activated_contexts_share_targeted_tap_state_lowering",
     "test_unsupported_tap_state_variants_remain_material_residuals",
@@ -146,8 +151,8 @@
     "test_compiled_untap_activation_consumes_stun_and_replays"
   ],
   "implementation": {
-    "component": "typed direct-target compiler, tap and untap semantic handlers, canonical tap_state mutation port, and stun-aware engine primitive",
-    "version": "tap-state-effects-v2"
+    "component": "typed direct-target compiler, tap and untap semantic handlers, tap_state.untap_permanent, and the canonical exact counter-removal transaction",
+    "version": "tap-state-effects-v3"
   },
   "known_blockers": [
     "optional, modal, aggregate, quantified, relational, qualified, and compound tap-state clauses remain precise compiler residuals",

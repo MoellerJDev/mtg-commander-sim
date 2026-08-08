@@ -30,10 +30,6 @@ class ManaUndoHost(Protocol):
         self, actor: str, ref: str, *, zones: set[str]
     ) -> Any: ...
 
-    def _untap_permanent(
-        self, card: Any, *, actor: str | None, reason: str
-    ) -> bool: ...
-
     def _log(self, *args: Any, **kwargs: Any) -> Any: ...
 
 

@@ -1258,7 +1258,7 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         assert_stun_replaces_untap()
 
         def ignore_stun_mutant(
-            _engine: CommanderEngine,
+            _host,
             card,
             *,
             actor,
@@ -1268,9 +1268,7 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
             return True
 
         with patch.object(
-            CommanderEngine,
-            "_untap_permanent",
-            ignore_stun_mutant,
+            tap_state, "untap_permanent", ignore_stun_mutant
         ):
             with self.assertRaises(AssertionError):
                 assert_stun_replaces_untap()

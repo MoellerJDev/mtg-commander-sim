@@ -14314,24 +14314,30 @@
         "positive",
         "negative",
         "interaction",
-        "multiplayer"
+        "multiplayer",
+        "replay"
       ],
       "dependency_rule_ids": [
         "122.1"
       ],
       "effective_date": "2026-06-19",
       "executable_test_ids": [
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stun_replacement_uses_the_counter_removal_owner",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stun_replacement_rejects_malformed_public_state",
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_stun_counter_replaces_typed_untap_without_false_event",
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_untap_all_creatures_uses_effective_types_and_canonical_state_path",
-        "tests.test_untap_step_rules.UntapStepRuleTests.test_stun_and_next_untap_restrictions_precede_the_untap_batch"
+        "tests.test_untap_step_rules.UntapStepRuleTests.test_stun_and_next_untap_restrictions_precede_the_untap_batch",
+        "tests.test_targeted_tap_state_effect_clauses.TargetedTapStateRuntimeTests.test_compiled_untap_activation_consumes_stun_and_replays"
       ],
       "implementation_components": [
-        "CommanderEngine._untap_permanent",
+        "quorune.tap_state.untap_permanent",
+        "quorune.counter_removal.plan_counter_removals",
+        "quorune.counter_removal.commit_counter_removals",
         "UntapPermanentHandler",
         "UntapAllCreaturesHandler"
       ],
       "notes": [
-        "The represented mandatory stun replacement removes exactly one counter and leaves the permanent tapped without emitting a false untap event in one-shot, aggregate, and untap-step paths. Universal replacement discovery and ordering remain blocked."
+        "The represented mandatory stun replacement removes exactly one counter through the typed exact counter-removal transaction, leaves the permanent tapped without emitting a false untap event in one-shot, aggregate, and untap-step paths, rejects malformed state before mutation, and replays exactly. Universal replacement discovery and ordering remain blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -52762,7 +52768,9 @@
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_stun_counter_replaces_typed_untap_without_false_event",
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_untap_all_creatures_uses_effective_types_and_canonical_state_path",
         "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_resolution_rolls_back_atomically",
-        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_replay_exactly"
+        "tests.test_semantic_handlers.TypedSemanticHandlerTests.test_tap_state_effects_replay_exactly",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stun_replacement_uses_the_counter_removal_owner",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stun_replacement_rejects_malformed_public_state"
       ],
       "implementation_components": [
         "UntapPermanentHandler",
@@ -52770,10 +52778,12 @@
         "SetPermanentTappedIntent",
         "UntapAllCreaturesIntent",
         "quorune.tap_state.set_permanent_tapped",
-        "quorune.tap_state.untap_all_creatures"
+        "quorune.tap_state.untap_permanent",
+        "quorune.tap_state.untap_all_creatures",
+        "quorune.counter_removal.commit_counter_removals"
       ],
       "notes": [
-        "Typed one-shot and all-creature instructions untap only tapped phased-in permanents, use represented effective creature types, handle the bounded stun replacement, roll back atomically, and replay exactly. Broader replacement ordering, prohibitions, and characteristic closure remain blocked."
+        "Typed one-shot and all-creature instructions untap only tapped phased-in permanents, use represented effective creature types, handle the bounded stun replacement through the typed exact counter-removal owner, reject malformed public state, roll back atomically, and replay exactly. Broader replacement ordering, prohibitions, and characteristic closure remain blocked."
       ],
       "required_scenarios": [
         "positive",
@@ -81525,23 +81535,48 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
-      "blockers": [
-        "semantic_review_not_completed"
-      ],
+      "assertion_kind": "executable_engine",
+      "blockers": [],
       "case_id": "cr-704.5q",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "704.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_opposing_power_toughness_counters_cancel_in_pairs",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_removals_are_canonical_and_commit_exactly",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_malformed_or_unpayable_removal_fails_before_mutation",
+        "tests.test_rule_generated_counter_removals.CounterRemovalTransactionTests.test_stale_identity_rolls_back_the_whole_removal_batch",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_overlapping_sba_removals_share_one_atomic_plan",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_sba_removal_order_is_canonical_across_permutations",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_opposing_counter_removal_replays_in_four_player_game"
+      ],
+      "implementation_components": [
+        "quorune.state_based_actions.evaluate_permanent_state_based_actions",
+        "quorune.state_based_execution.prepare_state_based_execution",
+        "quorune.state_based_execution.commit_state_based_counter_removals",
+        "quorune.counter_removal.commit_counter_removals"
+      ],
+      "notes": [
+        "Every phased-in permanent with both represented opposing power/toughness counter kinds contributes one canonical exact removal from the same immutable state-based snapshot. The shared transaction rejects malformed or stale identities before mutation and replays exactly in multiplayer."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "704.5q",
       "rule_text_sha256": "329f337f314d590ceb0034f97fe8abc16fd8a8cfacfc74abb14ea2e525443c47",
       "schema_version": 1,
@@ -81550,26 +81585,52 @@
         "end_line": 5521,
         "start_line": 5520
       },
-      "status": "unreviewed"
+      "status": "passing"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "complete_precompiled_maximum_counter_ability_grammar_not_implemented",
+        "four_player_maximum_counter_interaction_evidence_not_complete"
       ],
       "case_id": "cr-704.5r",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "replay"
+      ],
       "dependency_rule_ids": [
         "704.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_state_based_actions.StateBasedActionPrimitiveTests.test_counter_maximum_sentence_and_snapshot_action",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_counter_maximum_overlaps_opposing_pair_removal",
+        "tests.test_state_based_actions.StateBasedActionEngineTests.test_rasputin_counter_maximum_replays_exactly",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_overlapping_sba_removals_share_one_atomic_plan",
+        "tests.test_rule_generated_counter_removals.StateBasedCounterRemovalTests.test_malformed_sba_removal_fails_before_mutation"
+      ],
+      "implementation_components": [
+        "quorune.state_based_actions.counter_maximums_from_oracle",
+        "quorune.state_based_actions.evaluate_permanent_state_based_actions",
+        "quorune.state_based_execution.prepare_state_based_execution",
+        "quorune.state_based_execution.commit_state_based_counter_removals",
+        "quorune.counter_removal.commit_counter_removals"
+      ],
+      "notes": [
+        "The reviewed numeric self-restriction sentence family now commits through the canonical exact removal owner, including overlap and replay. Runtime Oracle interpretation and incomplete maximum-ability grammar prevent promotion of the complete rule."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction",
+        "multiplayer",
+        "replay"
+      ],
+      "reviewed": true,
       "rule_id": "704.5r",
       "rule_text_sha256": "532591e6b56b28e1ba0dde6a6a8ee44459bd2b04929279022e1726872f1125cc",
       "schema_version": 1,
@@ -81578,7 +81639,7 @@
         "end_line": 5523,
         "start_line": 5522
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "inventory_only",

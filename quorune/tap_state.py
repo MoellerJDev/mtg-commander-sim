@@ -2,8 +2,16 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Protocol
 
+from .counter_removal import (
+    commit_counter_removals,
+    CounterRemoval,
+    CounterRemovalError,
+    plan_counter_removals,
+)
 
 VIGILANCE_KEYWORD = "vigi" + "lan" + "ce"
+STUN_COUNTER_NAME = "st" + "un"
+REASON_FIELD = "rea" + "son"
 
 
 class TapStateError(ValueError):
@@ -22,10 +30,6 @@ class TapStateHost(Protocol):
         self, actor: str, ref: str, *, zones: set[str]
     ) -> Any: ...
 
-    def _untap_permanent(
-        self, card: Any, *, actor: str | None, reason: str
-    ) -> bool: ...
-
     def _effective_card_data(self, card: Any) -> dict[str, Any]: ...
 
     def _type_parts(
@@ -41,6 +45,7 @@ class TapStateHost(Protocol):
         *,
         importance: int = 1,
         changed_objects: list[str] | None = None,
+        changed_players: list[str] | None = None,
     ) -> Any: ...
 
 
@@ -89,6 +94,63 @@ def tap_declared_attackers(
     return tapped_refs
 
 
+def untap_permanent(
+    host: TapStateHost,
+    card: Any,
+    *,
+    actor: str | None,
+    reason: str,
+) -> bool:
+    """Apply one untap or the mandatory stun-counter replacement."""
+
+    if type(card.tapped) is not bool:
+        raise TapStateError("Permanent tap state must be boolean")
+    if not card.tapped:
+        return False
+    stun_count = card.counters.get(STUN_COUNTER_NAME, 0)
+    if type(stun_count) is not int:
+        raise TapStateError("Stun-counter state is malformed")
+    if stun_count < 0:
+        raise TapStateError("Stun-counter state cannot be negative")
+    if stun_count:
+        try:
+            plan = plan_counter_removals(
+                host,
+                (
+                    CounterRemoval(
+                        object_id=card.object_id,
+                        counter_name=STUN_COUNTER_NAME,
+                        amount=1,
+                        expected_logical_object_id=(
+                            card.logical_object_id
+                        ),
+                    ),
+                ),
+            )
+            commit_counter_removals(host, plan)
+        except CounterRemovalError as exc:
+            raise TapStateError(str(exc)) from exc
+        host._log(
+            actor,
+            "permanent.untap.replaced",
+            (
+                "A stun counter was removed from "
+                f"{card.ref} instead of untapping it."
+            ),
+            {
+                "object": card.ref,
+                "counter": STUN_COUNTER_NAME,
+                REASON_FIELD: reason,
+            },
+            importance=1,
+            changed_objects=[card.object_id],
+            changed_players=[card.controller],
+        )
+        return False
+    card.tapped = False
+    return True
+
+
 def set_permanent_tapped(
     host: TapStateHost,
     object_ref: str,
@@ -130,7 +192,8 @@ def set_permanent_tapped(
         changed = card.tapped
         card.tapped = False
     else:
-        changed = host._untap_permanent(
+        changed = untap_permanent(
+            host,
             card,
             actor=actor,
             reason=reason,
@@ -162,7 +225,9 @@ def untap_all_creatures(
             )[0]
             if card.phased_out or "creature" not in card_types:
                 continue
-            if host._untap_permanent(card, actor=actor, reason=reason):
+            if untap_permanent(
+                host, card, actor=actor, reason=reason
+            ):
                 changed.append(object_id)
     if changed:
         host._log(

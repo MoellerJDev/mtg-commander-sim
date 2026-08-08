@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 6,
+  "contract_version": 7,
   "mechanic_id": "cr-704-state-based-actions",
   "official_name": "State-Based Actions",
   "effective_date": "2026-06-19",
@@ -84,8 +84,8 @@
       "Battle protector, current attackers, and exact-incarnation pending triggers",
       "the timestamp from which each permanent has continuously had the World supertype",
       "attachment restriction and protected qualities",
-      "+1/+1 and -1/-1 counter counts",
-      "reviewed maximum-counter ability text and the named counter count"
+      "+1/+1 and -1/-1 counter counts from one immutable state-based snapshot",
+      "reviewed maximum-counter ability text, the named counter count, and each permanent's stable logical identity"
     ],
     "state_writes": [
       "player elimination",
@@ -95,8 +95,8 @@
       "simultaneous World-rule graveyard moves",
       "legend choice",
       "unattachment",
-      "opposing counter-pair removal",
-      "counters above a permanent's stated maximum removed",
+      "opposing counter-pair removal through the typed exact counter-removal transaction",
+      "counters above a permanent's stated maximum removed through the same typed transaction",
       "zero-defense Battle graveyard moves",
       "Battle protector repair or no-protector graveyard moves"
     ],
@@ -148,7 +148,10 @@
     "Aura, Equipment, and Fortification cleanup",
     "opposing +1/+1 and -1/-1 counters",
     "Rasputin Dreamweaver dream-counter maximum",
-    "overlapping opposing-counter and maximum-counter removal"
+    "overlapping opposing-counter and maximum-counter removal",
+    "canonical counter-removal planning across equivalent snapshot orderings",
+    "malformed or stale counter-removal rollback before mutation",
+    "four-player exact replay of opposing-counter removal"
   ],
   "witness_cards": [
     {
@@ -188,6 +191,14 @@
     "test_counter_maximum_sentence_and_snapshot_action",
     "test_counter_maximum_overlaps_opposing_pair_removal",
     "test_rasputin_counter_maximum_replays_exactly",
+    "test_removals_are_canonical_and_commit_exactly",
+    "test_malformed_or_unpayable_removal_fails_before_mutation",
+    "test_stale_identity_rolls_back_the_whole_removal_batch",
+    "test_overlapping_sba_removals_share_one_atomic_plan",
+    "test_sba_removal_order_is_canonical_across_permutations",
+    "test_moving_permanent_skips_redundant_counter_removal",
+    "test_malformed_sba_removal_fails_before_mutation",
+    "test_opposing_counter_removal_replays_in_four_player_game",
     "test_zero_defense_battle_waits_for_its_pending_trigger",
     "test_battle_trigger_from_same_incarnation_defers_state_action",
     "test_old_incarnation_trigger_does_not_defer_battle_state_action",
@@ -214,8 +225,8 @@
     "test_losing_and_regaining_world_gets_a_new_since_time"
   ],
   "implementation": {
-    "component": "state_based_actions.evaluate_permanent_state_based_actions and CommanderEngine._stabilize",
-    "version": "state-based-actions-v7"
+    "component": "state_based_actions.evaluate_permanent_state_based_actions, state_based_execution.prepare_state_based_execution, state_based_execution.commit_state_based_counter_removals, and counter_removal.commit_counter_removals",
+    "version": "state-based-actions-v8"
   },
   "known_blockers": [
     "specialized copy-object exceptions such as Prepare copies in exile are not implemented",
