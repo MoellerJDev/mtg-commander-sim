@@ -667,6 +667,32 @@ class ReplacementContinuationTests(unittest.TestCase):
         )
         return value
 
+    @classmethod
+    def semantic_counter_continuation(cls) -> dict:
+        value = cls.continuation()
+        value.pop("combat_assignments")
+        value.update(
+            {
+                "replacement_resume_kind": "semantic_counter_completion",
+                "semantic_choice_continuation": {
+                    "schema_version": 2,
+                    "handler_id": "choice.token.fabricate.v1",
+                },
+                "semantic_choice_actor": "A",
+                "semantic_choice_response": {"choice": "counter"},
+                "intent_index": 0,
+                "counter_intent": {
+                    "actor": "A",
+                    "object_refs": ["A01"],
+                    "counter_name": "+1/+1",
+                    "amount": 1,
+                    "reason": "fabricate",
+                    "source_ref": "A01",
+                },
+            }
+        )
+        return value
+
     def test_continuation_rejects_malformed_entries_and_unknown_fields(self):
         value = self.continuation()
         restored = ReplacementContinuation.from_dict(value)
@@ -741,6 +767,46 @@ class ReplacementContinuationTests(unittest.TestCase):
         ):
             with self.subTest(label=label):
                 malformed = self.mana_continuation()
+                mutate(malformed)
+                with self.assertRaisesRegex(
+                    ReplacementEffectError, message
+                ):
+                    ReplacementContinuation.from_dict(malformed)
+
+    def test_semantic_counter_continuation_is_strict_and_deep_frozen(self):
+        value = self.semantic_counter_continuation()
+        restored = ReplacementContinuation.from_dict(value)
+        value["semantic_choice_response"]["choice"] = "token"
+        value["counter_intent"]["amount"] = 9
+        self.assertEqual(
+            "counter", restored.thaw_semantic_choice_response()["choice"]
+        )
+        self.assertEqual(1, restored.thaw_counter_intent()["amount"])
+
+        for label, mutate, message in (
+            (
+                "boolean index",
+                lambda row: row.update({"intent_index": True}),
+                "fields are malformed",
+            ),
+            (
+                "empty actor",
+                lambda row: row.update({"semantic_choice_actor": ""}),
+                "fields are malformed",
+            ),
+            (
+                "nonmapping intent",
+                lambda row: row.update({"counter_intent": []}),
+                "fields are malformed",
+            ),
+            (
+                "unknown field",
+                lambda row: row.update({"future": True}),
+                "unknown future",
+            ),
+        ):
+            with self.subTest(label=label):
+                malformed = self.semantic_counter_continuation()
                 mutate(malformed)
                 with self.assertRaisesRegex(
                     ReplacementEffectError, message

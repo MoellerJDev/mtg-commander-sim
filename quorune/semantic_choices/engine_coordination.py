@@ -21,6 +21,7 @@ from .context import (
     SemanticChoiceContext,
     SnapshotSemanticChoiceQuery,
 )
+from .counter_coordination import continue_semantic_completion
 from .defaults import default_semantic_choice_registry
 from .model import (
     SemanticChoiceContinuation,
@@ -627,32 +628,17 @@ class SemanticChoiceCoordinationMixin:
             )
         except SemanticChoiceError as exc:
             raise GameRuleError(str(exc)) from exc
-        for intent in completion.intents:
-            execute_intent_plan(
+        try:
+            continue_semantic_completion(
                 self,
-                IntentPlan(
-                    operation=handler.operation,
-                    handler_id=handler.handler_id,
-                    intents=(intent,),
-                ),
+                item=item,
+                continuation=continuation,
+                actor=seat,
+                response=response,
+                completion=completion,
             )
-        if item not in self.state.stack:
-            return
-        remaining = [
-            *(thaw_value(value) for value in completion.prepend_effects),
-            *(thaw_value(value) for value in continuation.remaining),
-        ]
-        if completion.repeat_effect is not None:
-            remaining.insert(0, thaw_value(completion.repeat_effect))
-        self._continue_resolution(
-            stack_ref=continuation.stack_ref,
-            effects=remaining,
-            destination=continuation.destination,
-            note=continuation.note,
-            instruction_pointer=(
-                continuation.semantic_frame.instruction_pointer + 1
-            ),
-        )
+        except SemanticChoiceError as exc:
+            raise GameRuleError(str(exc)) from exc
 
     def _begin_semantic_choice(
         self,

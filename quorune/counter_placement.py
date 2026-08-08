@@ -165,7 +165,7 @@ def prepare_counter_placements(
     host: CounterPlacementHost,
     requests: Sequence[CounterPlacementRequest],
     *,
-    selections: Sequence[str | None] = (),
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
     sources: Sequence[Any] | None = None,
     source_zones: Mapping[str, str] | None = None,
 ) -> PreparedCounterPlacements:
@@ -422,7 +422,7 @@ def place_counters(
     host: CounterPlacementHost,
     requests: Sequence[CounterPlacementRequest],
     *,
-    selections: Sequence[str | None] = (),
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
     reason: str,
     log: bool = True,
 ) -> tuple[CounterPlacementResult, ...]:
@@ -446,7 +446,7 @@ def place_counters_on_refs(
     object_refs: Sequence[str],
     counter_name: str,
     amount: int,
-    selections: Sequence[str | None] = (),
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
     reason: str,
     source_ref: str | None = None,
 ) -> tuple[CounterPlacementResult, ...]:
@@ -481,7 +481,7 @@ def place_counters_on_controlled_subtype(
     subtype: str,
     counter_name: str,
     amount: int,
-    selections: Sequence[str | None] = (),
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
     reason: str,
     source_ref: str | None = None,
 ) -> tuple[CounterPlacementResult, ...]:

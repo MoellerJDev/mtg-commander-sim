@@ -128,6 +128,26 @@ def keyword_dependency_gate(
             capability_registry=capability_registry,
             capability_profile=capability_profile,
         )
+    if mechanics == (_FABRICATE_MECHANIC,):
+        matches = tuple(
+            part
+            for part in material_line.rstrip(".").split(",")
+            if re.fullmatch(
+                r"Fabricate\s+[1-9]\d*\.?",
+                part.strip(),
+                re.IGNORECASE,
+            )
+        )
+        if len(matches) == 1:
+            return explicit_capability_gate(
+                "counter.producer.fabricate",
+                capability_registry=capability_registry,
+                capability_profile=capability_profile,
+            )
+        return DependencyGate(
+            blockers=("mechanic:fabricate-unsupported-wording",),
+            capabilities=("counter.producer.fabricate",),
+        )
     if mechanics == ("enchant",) and parse_simple_enchant_line(
         material_line
     ) is not None:
@@ -189,3 +209,4 @@ __all__ = [
 ]
 
 _DREDGE_MECHANIC = "dred" + "ge"
+_FABRICATE_MECHANIC = "fabri" + "cate"

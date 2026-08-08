@@ -429,7 +429,7 @@ def resolve_counter_placement_replacements(
     events: Sequence[ReplaceableEvent],
     effects: Sequence[ReplacementEffect],
     apnap_order: Sequence[str],
-    selections: Sequence[str | None] = (),
+    selections: Sequence[str | None | Mapping[str, Any]] = (),
 ) -> CounterPlacementReplacementResolution:
     progress = advance_replacement_batch(
         ReplacementEventBatch(

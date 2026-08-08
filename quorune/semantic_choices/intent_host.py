@@ -589,6 +589,7 @@ class SemanticChoiceIntentHostMixin:
                 object_refs=intent.object_refs,
                 counter_name=intent.counter_name,
                 amount=intent.amount,
+                selections=intent.replacement_selections,
                 reason=intent.reason,
                 source_ref=intent.source_ref,
             )

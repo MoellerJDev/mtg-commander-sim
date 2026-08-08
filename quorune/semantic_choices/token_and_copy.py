@@ -30,7 +30,7 @@ class FabricateChoiceHandler:
     operation: str = _FABRICATE_OPERATION
     handler_id: str = "choice.token.fabricate.v1"
     schema_version: int = 1
-    rule_references: tuple[str, ...] = ("CR 701.35", "CR 608.2d")
+    rule_references: tuple[str, ...] = ("CR 702.123a", "CR 603.6a")
     capability_dependencies: tuple[str, ...] = ()
     continuation_fields: tuple[str, ...] = (
         "amount",

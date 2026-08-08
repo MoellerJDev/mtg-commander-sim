@@ -1,35 +1,35 @@
 {
   "assertion_kind_counts": {
     "executable_engine": 208,
-    "inventory_only": 2597,
-    "static_traceability": 121,
-    "unsupported_fail_closed": 374
+    "inventory_only": 2594,
+    "static_traceability": 122,
+    "unsupported_fail_closed": 376
   },
-  "behavioral_cases": 561,
+  "behavioral_cases": 563,
   "behavioral_passing_cases": 186,
-  "behavioral_passing_fraction": 0.331551,
-  "blocked_cases": 375,
+  "behavioral_passing_fraction": 0.330373,
+  "blocked_cases": 377,
   "classification_counts": {
-    "behavioral": 561,
-    "definition_only": 121,
+    "behavioral": 563,
+    "definition_only": 122,
     "structural": 21,
-    "unclassified": 2597
+    "unclassified": 2594
   },
   "current_snapshot_complete": false,
-  "definition_only_cases": 121,
+  "definition_only_cases": 122,
   "effective_date": "2026-06-19",
-  "inventory_only_cases": 2597,
+  "inventory_only_cases": 2594,
   "schema_version": 1,
   "semantic_failing_cases": 0,
   "semantic_passing_cases": 207,
   "skipped_cases": 0,
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "status_counts": {
-    "blocked": 375,
-    "definition_only": 121,
+    "blocked": 377,
+    "definition_only": 122,
     "passing": 207,
-    "unreviewed": 2597
+    "unreviewed": 2594
   },
   "total_cases": 3300,
-  "unreviewed_cases": 2597
+  "unreviewed_cases": 2594
 }

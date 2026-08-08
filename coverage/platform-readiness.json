@@ -1,6 +1,6 @@
 {
   "blockers": [
-    "mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain residual, while explore, fabricate, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration through the resumable counter-placement owner, so aggregate CR 614.16 is not trusted",
+    "mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate now lowers to a capability-closed enters trigger whose counter result suspends and resumes through the replacement-aware counter owner; optional, multiplying, state-derived, modified-entry, copy-token, and wider predefined-token variants remain residual, while explore, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration, so aggregate CR 614.16 and CR 702.123 remain blocked",
     "fixed simultaneous affected-set damage now snapshots represented public player and permanent groups through the canonical effective-characteristic query and commits one APNAP-ordered, logical-identity-deduplicated damage batch; divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, linked life/draw/scry/conditional riders, and broader source-LKI producers remain explicit blockers, so aggregate mass-damage coverage is not trusted",
     "mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted",
     "ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
@@ -32,7 +32,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "29adc1d210be45f0950b70d0dd6f3d90bc1f8e0c734582d4d121509619f08dc7",
+    "evaluated_source_tree_hash": "c3f8e94fb31d95cbd67686659474c205cc8a5fa9aa6602c5f9285f267f6ac163",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -413,11 +413,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 47643,
+      "material_residuals": 47627,
       "status_counts": {
-        "exact": 2156,
-        "partial": 13235,
-        "unresolved": 16232
+        "exact": 2167,
+        "partial": 13233,
+        "unresolved": 16223
       },
       "total": 31623
     },
@@ -435,20 +435,20 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 55311,
+      "material_residuals": 55295,
       "status_counts": {
-        "exact": 5113,
-        "partial": 14389,
-        "unresolved": 19121
+        "exact": 5124,
+        "partial": 14387,
+        "unresolved": 19112
       },
       "total": 38623
     },
     "rules": {
-      "blocked": 375,
-      "definition_only": 121,
+      "blocked": 377,
+      "definition_only": 122,
       "passing": 207,
       "total": 3300,
-      "unreviewed": 2597
+      "unreviewed": 2594
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -473,7 +473,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5219,
+    "deterministic_cases_discovered": 5231,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -483,31 +483,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 47643,
+        "material_residuals": 47627,
         "status_counts": {
-          "residual": 29467,
-          "trusted": 2156
+          "residual": 29456,
+          "trusted": 2167
         },
         "trust_basis_counts": {
-          "capability_closed": 2151,
+          "capability_closed": 2162,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 29467
+          "unresolved": 29456
         }
       },
       "full": {
         "cards_considered": 38623,
-        "material_residuals": 55307,
+        "material_residuals": 55291,
         "status_counts": {
           "failed": 2248,
-          "residual": 33507,
-          "trusted": 2868
+          "residual": 33496,
+          "trusted": 2879
         },
         "trust_basis_counts": {
-          "capability_closed": 2863,
+          "capability_closed": 2874,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 33507
+          "unresolved": 33496
         }
       }
     },

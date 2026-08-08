@@ -2279,6 +2279,86 @@
       "applicability_note": "Resolve represented effect-generated counter placements through affected-object ordering before committing the counters."
     },
     {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_semantic_counter_replacement_continuations.SemanticCounterReplacementContinuationTests.test_counter_resume_executes_later_typed_completion_intents_once",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Resume the pinned semantic completion at its suspended counter intent and execute later typed completion intents exactly once."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_semantic_counter_replacement_continuations.SemanticCounterReplacementContinuationTests.test_fabricate_suspends_before_mutation_and_projection_is_seat_scoped",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Suspend an ordinary Fabricate counter result before mutation when multiple applicable quantity replacements require the affected controller's ordering choice."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_fabricate_compiler.GeneratedFabricateRuntimeTests.test_four_player_fabricate_choice_uses_one_persistent_affected_seat",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Issue the four-player Fabricate choice only to the trigger's controller and expose no decision packet to the other three seats."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_semantic_counter_replacement_continuations.SemanticCounterReplacementContinuationTests.test_semantic_counter_completion_identity_mutant_is_killed",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill a continuation mutant that changes the replay-pinned counter-intent fingerprint before replacement resume."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "negative",
+      "test_id": "tests.test_fabricate_compiler.FabricateCompilerTests.test_unsupported_fabricate_values_remain_material_residuals",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep zero, variable, negative, word-valued, and multiple-in-one-clause Fabricate variants outside the bounded compiler grammar."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "negative",
+      "test_id": "tests.test_semantic_counter_replacement_continuations.SemanticCounterReplacementContinuationTests.test_counter_intent_identity_rejects_unknown_boolean_and_duplicate_data",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject malformed, boolean-valued, duplicate-object, and unknown-field counter continuation identities before mutation."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fabricate_compiler.FabricateCompilerTests.test_fabricate_keyword_lowers_to_source_spanned_capability_closed_trigger",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower each ordinary positive integral Fabricate keyword instance to an independently source-spanned enters trigger with exact capability closure."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "positive",
+      "test_id": "tests.test_fabricate_compiler.GeneratedFabricateRuntimeTests.test_generated_fabricate_program_drives_counter_choice_without_name_dispatch",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Drive an ordinary Fabricate trigger and chosen counter result from the generated CardProgram without printed-name runtime dispatch."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_semantic_counter_replacement_continuations.SemanticCounterReplacementContinuationTests.test_fabricate_suspends_before_mutation_and_projection_is_seat_scoped",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project only public replacement options to the affected seat and keep the pinned semantic response and physical object identity authoritative."
+    },
+    {
+      "capability_id": "counter.producer.fabricate",
+      "evidence_class": "replay",
+      "test_id": "tests.test_semantic_counter_replacement_continuations.SemanticCounterReplacementContinuationTests.test_fabricate_counter_replacement_replays_exactly",
+      "official_rule_ids": ["122.1", "122.6", "603.3", "603.6a", "702.123", "702.123a", "702.123b"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the Fabricate option and counter-replacement ordering command sequence to the identical authoritative state hash."
+    },
+    {
       "capability_id": "damage.amount.positive",
       "evidence_class": "interaction",
       "test_id": "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",

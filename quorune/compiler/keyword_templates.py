@@ -6,7 +6,7 @@ from typing import Sequence
 
 _KEYWORD_WITH_VALUE = re.compile(
     r"^(?P<name>ward|equip|enchant|bushido|cycling|crew|dredge|kicker|toxic|"
-    r"cumulative upkeep|echo|morph|bestow|evoke|unearth)"
+    r"cumulative upkeep|echo|fabricate|morph|bestow|evoke|unearth)"
     r"(?:\s+(?P<value>.+))?$",
     re.IGNORECASE,
 )

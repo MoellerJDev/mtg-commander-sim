@@ -51,7 +51,10 @@ from .compiler.return_to_hand_templates import (
 )
 from .compiler.fixed_numbers import fixed_number as _number
 from .compiler.keyword_templates import keyword_mechanics
-from .compiler.keyword_nodes import dredge_keyword_node
+from .compiler.keyword_nodes import (
+    dredge_keyword_node,
+    fabricate_keyword_node,
+)
 from .compiler.ir_model import (
     append_residual as _residual,
     OracleCardIR,
@@ -74,8 +77,9 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v45"
+ORACLE_COMPILER_VERSION = "oracle-ir-v46"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
+_FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
     re.IGNORECASE,
@@ -560,6 +564,16 @@ def _keyword_node_for_mechanics(
             )
         )
     residual_ids = tuple(residual_id_values)
+    if fabricate := fabricate_keyword_node(
+        node_id=node_id,
+        line=line,
+        material_line=material_line,
+        span=span,
+        mechanics=mechanics,
+        gate=gate,
+        residual_ids=residual_ids,
+    ):
+        return fabricate
     if dredge := dredge_keyword_node(
         node_id=node_id,
         line=line,
@@ -643,17 +657,25 @@ def _keyword_nodes(
             residuals=residuals,
         )
 
-    if PRINTED_FLASH_MECHANIC not in mechanics:
+    split_mechanics = tuple(
+        mechanic
+        for mechanic in (PRINTED_FLASH_MECHANIC, _FABRICATE_MECHANIC)
+        if mechanic in mechanics
+    )
+    if not split_mechanics:
         return (build(mechanics, selected_node_id=node_id),)
 
     result = [
         build(
-            (PRINTED_FLASH_MECHANIC,),
-            selected_node_id=f"{node_id}:{PRINTED_FLASH_MECHANIC}",
+            (mechanic,),
+            selected_node_id=f"{node_id}:{mechanic}",
         )
+        for mechanic in split_mechanics
     ]
     remaining = tuple(
-        mechanic for mechanic in mechanics if mechanic != PRINTED_FLASH_MECHANIC
+        mechanic
+        for mechanic in mechanics
+        if mechanic not in split_mechanics
     )
     if remaining:
         result.append(build(remaining, selected_node_id=node_id))
