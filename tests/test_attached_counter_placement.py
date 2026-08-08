@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from common import keep_all, load_assets, make_session
+from common import ROOT, keep_all, load_assets, make_session
 from quorune.attachment_references import (
     AttachmentReferenceError,
     AttachmentReferenceKind,
@@ -25,11 +25,13 @@ from quorune.attachments import (
     clear_object_attachment_relations,
 )
 from quorune.characteristic_evaluation import type_parts
+from quorune.carddb import CardDatabase
 from quorune.compiler.counter_placement_templates import (
     CounterPlacementSubject,
     FixedCounterPlacementTemplate,
     fixed_counter_placement_effect_template,
 )
+from quorune.deck import DeckLoader
 from quorune.model import CardInstance, StackItem
 from quorune.oracle_ir import compile_oracle_card
 from quorune.projection import StateProjector
@@ -45,6 +47,7 @@ from quorune.rules.capabilities import (
 )
 from quorune.rules import node_capability_shapes
 from quorune.semantic_runtime.values import resolve_semantic_value
+from scripts.build_test_database import build_fixture_database
 
 
 REGISTRY_PATH = (
@@ -53,6 +56,31 @@ REGISTRY_PATH = (
     / "rules"
     / "capability-registry.json"
 )
+
+
+def focused_runtime_assets(directory: str):
+    database = Path(directory) / "attached-counter-placement.sqlite3"
+    build_fixture_database(
+        [
+            ROOT / "tests" / "fixtures" / "scryfall-exact-lists.json",
+            ROOT / "tests" / "fixtures" / "counter-replacement-cards.json",
+            ROOT / "tests" / "fixtures" / "attachment-counter-cards.json",
+        ],
+        database,
+    )
+    card_db = CardDatabase(database)
+    loader = DeckLoader(card_db)
+    mishra = loader.load(
+        ROOT / "examples" / "mishra-eminent-one.txt",
+        commander="Mishra, Eminent One",
+        deck_name="Mishra",
+    )
+    zimone = loader.load(
+        ROOT / "examples" / "zimone-and-dina.txt",
+        commander="Zimone and Dina",
+        deck_name="Zimone",
+    )
+    return card_db, mishra, zimone
 
 
 def permanent(
@@ -529,11 +557,15 @@ class AttachedCounterCompilerTests(unittest.TestCase):
 class AttachedCounterRuntimeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db, cls.mishra, cls.zimone = load_assets()
+        cls.temporary = tempfile.TemporaryDirectory()
+        cls.db, cls.mishra, cls.zimone = focused_runtime_assets(
+            cls.temporary.name
+        )
 
     @classmethod
     def tearDownClass(cls):
         cls.db.close()
+        cls.temporary.cleanup()
 
     def session_with_card(
         self,
