@@ -160,6 +160,7 @@
       "test_seed_20260730_regression"
     ],
     "compiler-cardprogram": [
+      "test_additional_token_compiler",
       "test_attack_keyword_compiler",
       "test_block_keyword_compiler",
       "test_capability_evidence",

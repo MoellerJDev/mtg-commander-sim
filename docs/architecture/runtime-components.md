@@ -54,6 +54,17 @@ mode set, and treats an empty qualifying set as a legal activation that adds no
 mana. Runtime code does not parse Oracle prose. Wider dynamic or conditional
 mana wording remains residual.
 
+`replacement.token.additional.v2` represents the closed mandatory fixed
+additional-token family. Its descriptor carries an optional card-type and
+subtype filter plus one immutable token definition. The replacement operation
+updates the existing `token.create` event atomically, so newly added token
+characteristics participate in the normal replacement rediscovery loop while
+the same source cannot apply twice. The token owner commits every resulting
+specification with one creation timestamp only after APNAP ordering completes.
+The v1 handler remains registered solely for pinned reviewed semantic-pack
+compatibility. Optional choices, quantity multipliers, state-derived token
+definitions, and modified entry instructions remain unsupported.
+
 ## Ownership boundaries
 
 Components receive immutable source-authorized facts, never
@@ -65,6 +76,7 @@ commit:
 - [damage](damage.md) and [prevention](prevention.md)
 - [drawing](drawing.md)
 - [counter placement](counter-placement.md)
+- token creation through `quorune/token_creation.py`
 - [continuous-effect decisions](../adr/0020-continuous-effect-duration-and-applicability.md)
 
 The [extension guide](../extension/runtime-component.md) defines the contributor

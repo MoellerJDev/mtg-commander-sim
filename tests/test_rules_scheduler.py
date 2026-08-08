@@ -125,7 +125,7 @@ class RulesSchedulerTests(unittest.TestCase):
     def test_selected_batch_is_dependency_ready_and_cli_next_uses_it(self):
         selected = self.queue["selected_batch"]
         self.assertEqual(
-            "additional-token-replacement-closure",
+            "counter-producer-replacement-closure",
             selected["batch_id"],
         )
         self.assertEqual(

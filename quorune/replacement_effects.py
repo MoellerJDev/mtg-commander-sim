@@ -10,6 +10,7 @@ from .replacement import (
     AppendValues,
     CapResultLifeLoss,
     CreateAffectedObjectCounter,
+    CreateAdditionalToken,
     CreateNestedEvent,
     EntryReplacementScope,
     FrozenMap,

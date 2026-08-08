@@ -21,6 +21,7 @@ from quorune import landwalk as landwalk_module
 from quorune import damage_results as damage_results_module
 from quorune import destruction as destruction_module
 from quorune import replacement_effects
+from quorune.replacement import application as replacement_application
 from quorune import tap_state
 from quorune import haste as haste_module
 from quorune import trigger_batches as trigger_batches_module
@@ -2212,6 +2213,59 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         ):
             with self.assertRaises(AssertionError):
                 assert_containing_event_first()
+
+    def test_additional_token_replacement_mutant_is_killed(self):
+        event = replacement_effects.ReplaceableEvent(
+            event_id="token:mutation",
+            kind="token.create",
+            affected_player="A",
+            payload={
+                "event_controller": "A",
+                "tokens": [{"name": "Cat", "quantity": 1}],
+                "created_types": ["creature"],
+                "created_subtypes": ["cat"],
+            },
+        )
+        replacement = replacement_effects.ReplacementEffect(
+            effect_id="token:add-food",
+            source_id="A-source",
+            event_kind="token.create",
+            replacement_class=replacement_effects.ReplacementClass.OTHER,
+            operations=(
+                replacement_effects.CreateAdditionalToken(
+                    name="Food",
+                    quantity=1,
+                    characteristics={
+                        "type_line": "Token Artifact — Food"
+                    },
+                    card_types=("artifact",),
+                    subtypes=("food",),
+                    handler_id="replacement.token.additional.v2",
+                    source_ref="A-source",
+                ),
+            ),
+        )
+
+        def assert_additional_token_applied() -> None:
+            resolved = replacement_effects.apply_replacement(
+                replacement_effects.replacement_choice(
+                    event, (replacement,)
+                ),
+                (replacement,),
+                replacement.effect_id,
+            )
+            self.assertEqual(2, len(resolved.payload["tokens"]))
+            self.assertIn("artifact", resolved.payload["created_types"])
+            self.assertIn("food", resolved.payload["created_subtypes"])
+
+        assert_additional_token_applied()
+        with patch.object(
+            replacement_application,
+            "_apply_additional_token",
+            return_value=None,
+        ):
+            with self.assertRaises(AssertionError):
+                assert_additional_token_applied()
 
     def test_counter_quantity_replacement_mutant_is_killed(self):
         descriptor = {

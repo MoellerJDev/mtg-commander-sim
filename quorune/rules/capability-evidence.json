@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "602c6aa5e9ec2aa3f85aac5abac26bc6c828f809eb4f3e4cd8119d97dfe1e8ee",
-  "declaration_source_fingerprint": "021e2738a9a91f8f6d9892be8302ac247fe7817ca24ed2e4c0f78b7626c06ed3",
+  "registry_fingerprint": "0a61cb0e15ab94a76452494df0736aaf583c85f99b660c4d48bd6cc72ce95f72",
+  "declaration_source_fingerprint": "d78125e4eba407ea10fe0c9d915247cc6c90ac17153262da6bb693ae221cc537",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -11860,6 +11860,46 @@
     {
       "capability_id": "token.creation.additional_replacement",
       "evidence_class": "interaction",
+      "test_id": "tests.test_additional_token_compiler.AdditionalTokenCompilerTests.test_generated_and_reviewed_equivalent_handler_is_not_registered_twice",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_replacement_model_hardening.ReplacementImmutabilityTests.test_additional_token_operation_is_immutable_roundtrippable_and_atomic",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "interaction",
       "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_does_not_inherit_original_entry_modifiers",
       "official_rule_ids": [
         "111.2",
@@ -11881,6 +11921,26 @@
       "capability_id": "token.creation.additional_replacement",
       "evidence_class": "interaction",
       "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_multiple_additional_token_components_share_one_creation_timestamp",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_replacement_created_token_rediscovery_uses_same_event",
       "official_rule_ids": [
         "111.2",
         "614.1",
@@ -11939,8 +11999,128 @@
     },
     {
       "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_four_player_replacement_choice_is_affected_seat_scoped",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_capability_implementation_mutations.CapabilityImplementationMutationTests.test_additional_token_replacement_mutant_is_killed",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_additional_token_compiler.AdditionalTokenCompilerTests.test_nearby_unsupported_wording_remains_residual",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "negative",
+      "test_id": "tests.test_replacement_model_hardening.ReplacementImmutabilityTests.test_additional_token_operation_rejects_wrong_event_without_mutation",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
       "evidence_class": "negative",
       "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_component_rejects_malformed_or_nonmatching_events",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "positive",
+      "test_id": "tests.test_additional_token_compiler.AdditionalTokenCompilerTests.test_pinned_family_emits_exact_source_spanned_runtime_nodes",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "positive",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_generic_compiler_program_drives_runtime_without_name_dispatch",
       "official_rule_ids": [
         "111.2",
         "614.1",
@@ -12001,6 +12181,46 @@
       "capability_id": "token.creation.additional_replacement",
       "evidence_class": "replay",
       "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_additional_token_component_replays_exactly",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "replay",
+      "test_id": "tests.test_token_creation_replacements.TokenCreationReplacementTests.test_generic_additional_token_program_replays_exactly",
+      "official_rule_ids": [
+        "111.2",
+        "614.1",
+        "614.1a",
+        "614.4",
+        "614.5",
+        "614.6",
+        "614.16"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Apply a reviewed mandatory replacement that adds a fixed token definition to one nonempty token-creation event controlled by the replacement source's controller."
+    },
+    {
+      "capability_id": "token.creation.additional_replacement",
+      "evidence_class": "rollback",
+      "test_id": "tests.test_replacement_model_hardening.ReplacementImmutabilityTests.test_additional_token_operation_rejects_wrong_event_without_mutation",
       "official_rule_ids": [
         "111.2",
         "614.1",
@@ -13913,5 +14133,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "28b868f317dde7b1b37998438739967a2c29a2e4fb7bb501a54e9defba31b9d5"
+  "fingerprint": "52514009929459ef507cc6b7b8c22b9cc35a89dc93ad472d06ea2057e5bea7ec"
 }

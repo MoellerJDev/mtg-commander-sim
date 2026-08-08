@@ -312,7 +312,7 @@ class CardProgramV2Tests(unittest.TestCase):
             trust_level="trusted",
         )
 
-        self.assertEqual("oracle-ir-v44", current.compiler_version)
+        self.assertEqual("oracle-ir-v45", current.compiler_version)
         self.assertEqual(
             "capability_closed", current.trust_closure["trust_basis"]
         )
@@ -367,7 +367,7 @@ class CardProgramV2Tests(unittest.TestCase):
             capability_profile="commander_review",
             trust_level="trusted",
         )
-        self.assertEqual("oracle-ir-v44", current.compiler_version)
+        self.assertEqual("oracle-ir-v45", current.compiler_version)
         self.assertEqual("capability_closed", current.trust_closure["trust_basis"])
         self.assertEqual(
             ["choose_damage_source", "life"],
@@ -908,7 +908,7 @@ class CardProgramV2Tests(unittest.TestCase):
                 "replacement.life.gain.multiplier.v1": [
                     "life.gain.replacement.static_multiplier"
                 ],
-                "replacement.token.additional.v1": [
+                "replacement.token.additional.v2": [
                     "token.creation.additional_replacement"
                 ],
                 "replacement.zone.destination.v1": [

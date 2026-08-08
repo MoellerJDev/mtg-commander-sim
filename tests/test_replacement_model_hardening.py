@@ -8,6 +8,7 @@ from quorune.replacement_effects import (
     AffectedObject,
     AddAmount,
     CreateAffectedObjectCounter,
+    CreateAdditionalToken,
     MultiplyAmount,
     ReplaceableEvent,
     ReplacementClass,
@@ -253,6 +254,108 @@ class ReplacementImmutabilityTests(unittest.TestCase):
                 "string",
             ):
                 operation_from_dict(malformed)
+
+    def test_additional_token_operation_is_immutable_roundtrippable_and_atomic(self):
+        supplied = {
+            "type_line": "Token Artifact — Food",
+            "oracle_text": "{2}, {T}, Sacrifice this token: You gain 3 life.",
+        }
+        operation = CreateAdditionalToken(
+            name="Food",
+            quantity=1,
+            characteristics=supplied,
+            card_types=("artifact",),
+            subtypes=("food",),
+            handler_id="replacement.token.additional.v2",
+            source_ref="A-source",
+        )
+        before = operation.to_dict()
+        supplied["oracle_text"] = "mutated"
+        self.assertEqual(before, operation.to_dict())
+        self.assertEqual(operation, operation_from_dict(operation.to_dict()))
+
+        event = ReplaceableEvent(
+            event_id="token:additional",
+            kind="token.create",
+            affected_player="A",
+            payload={
+                "event_controller": "A",
+                "tokens": [{"name": "Cat", "quantity": 1}],
+                "created_types": ["creature"],
+                "created_subtypes": ["cat"],
+            },
+        )
+        replacement = ReplacementEffect(
+            effect_id="token:add-food",
+            source_id="A-source",
+            event_kind="token.create",
+            replacement_class=ReplacementClass.OTHER,
+            operations=(operation,),
+        )
+        original_fingerprint = immutable_fingerprint(event.to_dict())
+        resolved = apply_replacement(
+            replacement_choice(event, (replacement,)),
+            (replacement,),
+            replacement.effect_id,
+        )
+        self.assertEqual(
+            ("artifact", "creature"),
+            resolved.payload["created_types"],
+        )
+        self.assertEqual(
+            ("cat", "food"),
+            resolved.payload["created_subtypes"],
+        )
+        self.assertEqual(2, len(resolved.payload["tokens"]))
+        self.assertEqual(
+            "replacement.token.additional.v2",
+            resolved.payload["tokens"][1]["replacement_component"]["handler_id"],
+        )
+        self.assertEqual(
+            original_fingerprint,
+            immutable_fingerprint(event.to_dict()),
+        )
+
+    def test_additional_token_operation_rejects_wrong_event_without_mutation(self):
+        event = ReplaceableEvent(
+            event_id="damage:not-token",
+            kind="damage",
+            affected_player="A",
+            payload={"amount": 1},
+        )
+        operation = CreateAdditionalToken(
+            name="Food",
+            quantity=1,
+            characteristics={"type_line": "Token Artifact — Food"},
+            card_types=("artifact",),
+            subtypes=("food",),
+            handler_id="replacement.token.additional.v2",
+            source_ref="A-source",
+        )
+        replacement = ReplacementEffect(
+            effect_id="damage:add-food",
+            source_id="A-source",
+            event_kind="damage",
+            replacement_class=ReplacementClass.OTHER,
+            operations=(operation,),
+        )
+        before = immutable_fingerprint(event.to_dict())
+        with self.assertRaisesRegex(
+            ReplacementEffectError, "token.create"
+        ):
+            apply_replacement(
+                replacement_choice(event, (replacement,)),
+                (replacement,),
+                replacement.effect_id,
+            )
+        self.assertEqual(before, immutable_fingerprint(event.to_dict()))
+
+        malformed = operation.to_dict()
+        malformed["quantity"] = True
+        with self.assertRaisesRegex(
+            ReplacementOperationError, "must be an integer"
+        ):
+            operation_from_dict(malformed)
 
 
 class ReplacementTreeValidationTests(unittest.TestCase):

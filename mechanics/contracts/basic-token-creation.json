@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "contract_version": 2,
+  "contract_version": 3,
   "mechanic_id": "cr-111-tokens",
   "official_name": "Tokens",
   "effective_date": "2026-06-19",
@@ -12,6 +12,9 @@
     "111.6",
     "111.7",
     "111.8",
+    "614.16",
+    "616.1",
+    "616.1f",
     "704.5d"
   ],
   "glossary_references": [],
@@ -27,6 +30,7 @@
     "objects": ["basic creature tokens with fixed printed characteristics"],
     "events": [
       "token creation and permanent entry",
+      "mandatory fixed additional-token replacement through the immutable token event",
       "token zone change",
       "token cessation as a state-based action"
     ],
@@ -49,7 +53,7 @@
     "hidden_information": [],
     "apnap": [],
     "layers": ["token base characteristics become copiable values"],
-    "replacement_effects": ["token-doubling and token-replacement effects may modify creation"],
+    "replacement_effects": ["the closed mandatory fixed additional-token family may append a known token specification before the authoritative creation commit"],
     "copy": ["copy tokens require a separate characteristic snapshot path"],
     "control_change": ["created token enters under the instructed controller"],
     "zone_change": [
@@ -73,15 +77,19 @@
     "test_token_that_left_battlefield_cannot_move_again",
     "test_nonbattlefield_token_is_not_a_card_target",
     "test_nonbattlefield_tokens_cease_from_the_shared_snapshot",
-    "test_token_cost_cessation_replays_exactly"
+    "test_token_cost_cessation_replays_exactly",
+    "test_generic_compiler_program_drives_runtime_without_name_dispatch",
+    "test_four_player_replacement_choice_is_affected_seat_scoped",
+    "test_additional_token_component_replays_exactly",
+    "test_generic_additional_token_program_replays_exactly"
   ],
   "implementation": {
-    "component": "oracle_ir._effect_template, CommanderEngine.create_token/move_card/_stabilize, and state_based_actions.evaluate_state_based_actions",
-    "version": "token-lifecycle-v2"
+    "component": "oracle_ir._effect_template, compiler.token_templates, token_creation.create_tokens, CommanderEngine.move_card/_stabilize, and state_based_actions.evaluate_state_based_actions",
+    "version": "token-lifecycle-v3"
   },
   "known_blockers": [
-    "tokens with abilities, dynamic values, predefined named characteristics, or linked choices remain residual",
-    "generic replacement ordering for token multipliers is incomplete",
+    "tokens with unrecognized abilities, dynamic values, predefined named characteristics outside the closed vocabulary, or linked choices remain residual",
+    "optional, multiplying, and mutable-state token replacements are not compiled",
     "copy-token characteristic and entry replacement coverage is incomplete"
   ],
   "review_status": "reviewed"

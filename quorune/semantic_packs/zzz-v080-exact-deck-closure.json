@@ -2023,12 +2023,13 @@
       "effects": [],
       "handlers": [
         {
-          "handler_id": "replacement.token.additional.v1",
+          "handler_id": "replacement.token.additional.v2",
           "schema_version": 1,
           "event": "token.create",
           "condition": {
             "event_controller": "source_controller",
-            "created_types_all": ["artifact"]
+            "created_types_all": ["artifact"],
+            "created_subtypes_all": []
           },
           "quantity": 1,
           "token": {
@@ -2080,12 +2081,13 @@
       "effects": [],
       "handlers": [
         {
-          "handler_id": "replacement.token.additional.v1",
+          "handler_id": "replacement.token.additional.v2",
           "schema_version": 1,
           "event": "token.create",
           "condition": {
             "event_controller": "source_controller",
-            "created_types_all": ["artifact"]
+            "created_types_all": ["artifact"],
+            "created_subtypes_all": []
           },
           "quantity": 1,
           "token": {

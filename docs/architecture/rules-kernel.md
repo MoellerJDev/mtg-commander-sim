@@ -89,9 +89,12 @@ Reusable mechanics belong in focused rules modules and typed semantic
 operations. The current tap-state owner commits only the represented single
 permanent and all-effective-creature operations; it preserves stun replacement
 and phased-out behavior without claiming the complete replacement or layer
-systems. The token owner runs represented token events through immutable
-nested replacement trees before committing one timestamped batch and
-dispatching enter events. `replacement_decisions.py` persists competing
+systems. The token owner runs represented token events through an immutable
+replacement batch before committing one timestamped batch and dispatching
+enter events. The closed mandatory fixed additional-token family transforms
+that same event with a typed operation, extends its type/subtype subject for
+replacement rediscovery, and cannot apply one source twice.
+`replacement_decisions.py` persists competing
 affected-seat choices as ordinary Game Record v3 continuations, and represented
 zone-destination changes use the same exact selection journal before mutation.
 Triggers consume normalized events; replacements transform represented events

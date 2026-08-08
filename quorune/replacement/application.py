@@ -19,6 +19,7 @@ from .operations import (
     AppendValues,
     CapResultLifeLoss,
     CreateAffectedObjectCounter,
+    CreateAdditionalToken,
     CreateResultDraws,
     CreateNestedEvent,
     DredgeDraw,
@@ -355,6 +356,50 @@ def _create_affected_object_counter_event(
     )
 
 
+def _apply_additional_token(
+    event: ReplaceableEvent,
+    payload: dict[str, Any],
+    operation: CreateAdditionalToken,
+) -> None:
+    if event.kind != "token.create":
+        raise ReplacementEffectError(
+            "Additional-token creation requires a token.create event"
+        )
+    for field_name in ("tokens", "created_types", "created_subtypes"):
+        current = payload.get(field_name, ())
+        if not isinstance(current, Sequence) or isinstance(
+            current, (str, bytes)
+        ):
+            raise ReplacementEffectError(
+                f"Token creation {field_name} must be an array"
+            )
+    payload["tokens"] = [
+        *list(payload.get("tokens", ())),
+        {
+            "name": operation.name,
+            "quantity": operation.quantity,
+            "characteristics": thaw_value(operation.characteristics),
+            "replacement_component": {
+                "handler_id": operation.handler_id,
+                "source": operation.source_ref,
+                "quantity": operation.quantity,
+            },
+        },
+    ]
+    payload["created_types"] = sorted(
+        {
+            *payload.get("created_types", ()),
+            *operation.card_types,
+        }
+    )
+    payload["created_subtypes"] = sorted(
+        {
+            *payload.get("created_subtypes", ()),
+            *operation.subtypes,
+        }
+    )
+
+
 def _apply_operation(
     event: ReplaceableEvent,
     payload: dict[str, Any],
@@ -430,6 +475,9 @@ def _apply_operation(
             operation,
             effect_id=effect_id,
         )
+        return entry_scope
+    if isinstance(operation, CreateAdditionalToken):
+        _apply_additional_token(event, payload, operation)
         return entry_scope
     if isinstance(operation, ReserveZoneChange):
         if event.kind != "zone.change" or entry_scope is None:

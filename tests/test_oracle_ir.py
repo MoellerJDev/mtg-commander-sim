@@ -556,7 +556,7 @@ class OracleIRTests(unittest.TestCase):
             stateful_ir.faces[0].nodes[0].template_id,
         )
 
-    def test_exact_generated_node_can_be_trusted_with_separate_reviewed_residual(self):
+    def test_newly_exact_nodes_deduplicate_against_reviewed_programs(self):
         record = self.db.lookup("Stridehangar Automaton")
         capabilities = load_default_capability_registry()
         ir = compile_oracle_card(
@@ -564,7 +564,7 @@ class OracleIRTests(unittest.TestCase):
             capability_registry=capabilities,
             capability_profile="commander_review",
         )
-        self.assertEqual("partial", ir.status)
+        self.assertEqual("exact", ir.status)
         generated_node = ir.faces[0].nodes[0]
         self.assertTrue(generated_node.exact)
         self.assertEqual(
@@ -579,9 +579,13 @@ class OracleIRTests(unittest.TestCase):
             capability_registry=capabilities,
             capability_profile="commander_review",
         )
-        self.assertEqual(1, len(programs))
-        self.assertEqual("trusted", programs[0].trust_level)
-        self.assertFalse(programs[0].requires_arbiter)
+        self.assertEqual(2, len(programs))
+        self.assertTrue(
+            all(program.trust_level == "trusted" for program in programs)
+        )
+        self.assertTrue(
+            all(not program.requires_arbiter for program in programs)
+        )
 
         reviewed_registry = SemanticRegistry()
         generation = register_generated_programs(
@@ -593,10 +597,15 @@ class OracleIRTests(unittest.TestCase):
             promote_exact_runtime_handlers=True,
         )
         self.assertEqual(0, generation["programs_generated"])
-        self.assertEqual(1, generation["programs_skipped_existing"])
+        self.assertEqual(2, generation["programs_skipped_existing"])
         self.assertIsNone(
             reviewed_registry.get(
                 f"{record.oracle_id}:static:front:n1"
+            )
+        )
+        self.assertIsNone(
+            reviewed_registry.get(
+                f"{record.oracle_id}:static:front:n2"
             )
         )
 
