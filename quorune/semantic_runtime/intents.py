@@ -500,6 +500,64 @@ class PlaceCountersIntent:
 
 
 @dataclass(frozen=True, slots=True)
+class PlacePlayerCountersIntent:
+    actor: str
+    player_ids: tuple[str, ...]
+    counter_name: str
+    amount: int
+    reason: str
+    source_ref: str | None = None
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.player_ids, (list, tuple)):
+            raise ValueError(
+                "Player counter intent subjects must be an ordered sequence"
+            )
+        players = tuple(self.player_ids)
+        if type(self.counter_name) is not str:
+            raise ValueError(
+                "Player counter intents require actor, counter, and reason"
+            )
+        normalized = " ".join(self.counter_name.casefold().split())
+        if any(
+            type(value) is not str or not value
+            for value in (self.actor, normalized, self.reason)
+        ):
+            raise ValueError(
+                "Player counter intents require actor, counter, and reason"
+            )
+        if (
+            not players
+            or any(type(player) is not str or not player for player in players)
+            or len(players) != len(set(players))
+        ):
+            raise ValueError(
+                "Player counter intent subjects must be unique nonempty seats"
+            )
+        if type(self.amount) is not int or self.amount <= 0:
+            raise ValueError(
+                "Player counter intent amount must be a positive integer"
+            )
+        if self.source_ref is not None and (
+            type(self.source_ref) is not str or not self.source_ref
+        ):
+            raise ValueError(
+                "Player counter intent source must be a nonempty reference"
+            )
+        object.__setattr__(self, "player_ids", players)
+        object.__setattr__(self, "counter_name", normalized)
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                tuple(self.replacement_selections),
+                family="Player counter placement",
+            ),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class CounterStackIntent:
     actor: str
     stack_ref: str
@@ -739,6 +797,7 @@ SemanticIntent: TypeAlias = (
     | ReorderLibraryTopIntent
     | PayManaCostIntent
     | PlaceCountersIntent
+    | PlacePlayerCountersIntent
     | CounterStackIntent
     | EliminatePlayersIntent
     | CopyStackItemIntent

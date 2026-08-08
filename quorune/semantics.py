@@ -21,6 +21,7 @@ VALID_EFFECT_OPERATIONS = {
     "amass",
     "add_counter_selected",
     "place_counters",
+    "place_player_counters",
     "add_type",
     "add_subtype",
     "add_type_until_end_of_turn",

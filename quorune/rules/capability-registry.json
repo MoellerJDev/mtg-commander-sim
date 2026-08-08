@@ -502,6 +502,33 @@
       "status": "trusted"
     },
     {
+      "id": "counter.producer.fixed_player_effect",
+      "version": 1,
+      "official_rules": ["101.4", "107.14", "107.17", "115.1", "122.1", "608.2b", "608.2c"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve one mandatory positive fixed-count counter placement on the controller, one direct player target, each active player, or each active opponent through one canonical player-counter transaction.",
+        "inputs": ["one closed fixed-count Oracle instruction", "controller, direct player target, each-player, or each-opponent relation", "positive exact integral amount", "canonical counter name or energy/ticket symbol", "stable source provenance reference"],
+        "outputs": ["source-spanned CardProgram node", "strict typed player-counter intent", "APNAP-canonical simultaneous subjects", "resolution-time target revalidation where targeted", "authoritative player-counter mutation", "exact replay"],
+        "exclusions": ["variable, optional, distributed, repeated, linked, modal, conditional, or compound placements", "multiple counter kinds in one instruction", "counter costs, movement, or removal", "player-counter quantity replacement wording and prevention", "effects referring to that player, defending player, an object's controller, or another linked subject", "unsupported player-counter replacement cards remain material residuals and fail match trust closed"]
+      },
+      "dependencies": [],
+      "implementation_components": ["quorune.compiler.counter_placement_templates.FixedPlayerCounterPlacementTemplate", "quorune.rules.node_capability_shapes.fixed_player_counter_placement_node_capabilities", "quorune.semantic_runtime.counter_placement_handlers.FixedPlayerCounterPlacementHandler", "quorune.semantic_runtime.intents.PlacePlayerCountersIntent", "quorune.counter_placement.place_counters"],
+      "positive_tests": ["test_spell_trigger_and_activated_contexts_share_fixed_player_counter_lowering", "test_typed_player_counter_handler_uses_apnap_subject_order_and_counter_owner", "test_fixed_player_counter_source_may_leave_before_result"],
+      "negative_tests": ["test_unsupported_fixed_player_counter_variants_remain_material_residuals", "test_typed_player_counter_handler_rejects_malformed_effects", "test_inactive_player_counter_target_rolls_back_without_mutation"],
+      "interaction_tests": ["test_player_counter_placement_triggers_poison_sba_and_replay"],
+      "multiplayer_tests": ["test_target_player_counter_choice_is_seat_scoped_and_replays_exactly"],
+      "privacy_tests": ["test_target_player_counter_choice_is_seat_scoped_and_replays_exactly"],
+      "replay_tests": ["test_player_counter_placement_triggers_poison_sba_and_replay", "test_target_player_counter_choice_is_seat_scoped_and_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "not_applicable",
+      "dependency_fail_closed_rationale": "The bounded non-target relations use the shared typed counter transaction directly; targeted nodes independently require the existing resolution-time target revalidation capability.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused compiler mutation removes the fixed player-counter template and proves that the previously exact source-spanned node becomes a material residual.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
       "id": "counter.producer.fixed_effect",
       "version": 1,
       "official_rules": ["115.1", "608.2b", "608.2c", "122.1", "122.1a", "122.6", "614.16", "616.1"],

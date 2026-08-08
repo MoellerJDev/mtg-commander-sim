@@ -48,6 +48,7 @@ from ..semantic_runtime import (
     PayLifeIntent,
     PayManaCostIntent,
     PlaceCountersIntent,
+    PlacePlayerCountersIntent,
     ProliferateIntent,
     RecordChoiceIntent,
     RecordZoneMoveIntent,
@@ -644,6 +645,36 @@ class SemanticChoiceIntentHostMixin:
         return tuple(
             self.state.cards[result.object_id].ref for result in results
         )
+
+    def place_player_counters_intent(
+        self,
+        intent: PlacePlayerCountersIntent,
+    ) -> tuple[str, ...]:
+        for player in intent.player_ids:
+            if player not in self.active_seats:
+                raise GameRuleError(
+                    "A player counter subject is no longer in the game"
+                )
+        try:
+            results = place_counters(
+                self,
+                tuple(
+                    CounterPlacementRequest(
+                        subject_kind="player",
+                        subject_id=player,
+                        counter_name=intent.counter_name,
+                        amount=intent.amount,
+                        placing_player=intent.actor,
+                        source_ref=intent.source_ref,
+                    )
+                    for player in intent.player_ids
+                ),
+                selections=intent.replacement_selections,
+                reason=intent.reason,
+            )
+        except CounterPlacementError as exc:
+            raise GameRuleError(str(exc)) from exc
+        return tuple(result.subject_id for result in results)
 
     def counter_stack_intent(self, intent: CounterStackIntent) -> None:
         if any(item.ref == intent.stack_ref for item in self.state.stack):

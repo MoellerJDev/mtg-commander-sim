@@ -48,7 +48,7 @@ class ArchitectureAuditTests(unittest.TestCase):
             len(architecture["direct_game_state_write_heuristic"]["locations"]),
         )
         handlers = architecture["semantic_handlers"]
-        self.assertEqual(89, handlers["registered_handler_count"])
+        self.assertEqual(90, handlers["registered_handler_count"])
         self.assertEqual(
             handlers["registered_handler_count"],
             len(handlers["registered_operations"]),
@@ -59,6 +59,7 @@ class ArchitectureAuditTests(unittest.TestCase):
                 "draw",
                 "draw_each_player",
                 "place_counters",
+                "place_player_counters",
                 "reanimate_attached_creature_aura",
                 "tap",
                 "untap",

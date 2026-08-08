@@ -92,13 +92,24 @@ permanent can suspend through `resolving_entry` and resume without replaying
 earlier spell effects. Simultaneous entries prepare in APNAP order without
 mutation.
 
-Oracle IR v49 lowers one closed reusable fixed-placement grammar through the
+Oracle IR v50 lowers the closed reusable fixed-placement grammars through the
 typed operation in spell, triggered, and activated contexts. It accepts one
 positive exact quantity of one named counter on the source, the exact named
 source, or one direct battlefield permanent target. Direct targets may use one
 permanent card type or one pinned creature subtype, a fixed controller
 relation, and source exclusion. The strict runtime handler lowers only to
 `PlaceCountersIntent`; it neither parses Oracle text nor mutates state.
+
+The same compiler boundary now lowers one mandatory fixed player-counter
+instruction in spell, triggered, and activated contexts. Its closed relations
+are the controller, one direct active-player target, each active player, and
+each active opponent. Energy and ticket symbols lower to their canonical
+counter names; ordinary named poison, rad, energy, ticket, and experience
+counters use the same typed `PlacePlayerCountersIntent`. Simultaneous subjects
+are APNAP-canonical, direct targets are revalidated immediately before commit,
+and every write remains owned by `counter_state.py`. Variable quantities,
+linked subjects, multiple counter kinds, and player-counter quantity
+replacement or prevention wording remain residual and fail closed.
 
 The bounded Proliferate family compiles an unmodified `Proliferate.` clause in
 spell, triggered, and activated contexts to CardProgram V2. The resolving
@@ -127,8 +138,8 @@ The following producers and wordings remain deliberately outside this slice:
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
 - cumulative upkeep;
-- optional, variable, distributed, set-based, fixed player-counter, and
-  multiple-counter placement clauses;
+- optional, variable, distributed, set-based, and multiple-counter placement
+  clauses, plus fixed player-counter variants outside the closed relations;
 - conditional targets and non-creature subtype predicates;
 - Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
 - Planeswalker or Battle token entry with an applicable quantity replacement

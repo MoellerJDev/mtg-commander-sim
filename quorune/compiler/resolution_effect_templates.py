@@ -4,6 +4,7 @@ from typing import Any, Mapping
 
 from .counter_placement_templates import (
     fixed_counter_placement_effect_template,
+    fixed_player_counter_placement_effect_template,
 )
 from .counter_templates import targeted_counter_effect_template
 from .damage_templates import fixed_damage_effect_template
@@ -34,6 +35,11 @@ def typed_resolution_effect_template(
     proliferate = single_proliferate_effect_template(text)
     if proliferate is not None:
         return proliferate.compiled()
+    fixed_player_counter_placement = (
+        fixed_player_counter_placement_effect_template(text)
+    )
+    if fixed_player_counter_placement is not None:
+        return fixed_player_counter_placement.compiled()
     fixed_counter_placement = fixed_counter_placement_effect_template(
         text,
         card_name=card_name,

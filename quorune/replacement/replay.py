@@ -491,6 +491,7 @@ def _decode_semantic_intent_continuation(
         or not isinstance(semantic_intent, Mapping)
         or intent_kind not in {
             "place_counters",
+            "place_player_counters",
             "proliferate",
             "zone_move",
         }
