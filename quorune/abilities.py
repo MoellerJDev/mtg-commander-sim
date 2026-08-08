@@ -16,6 +16,7 @@ from typing import Any, Iterable, Mapping, Sequence
 from .replacement.immutable import FrozenMap, thaw_value
 from .color_set_mana_abilities import ColorSetActivatedManaAbilitySpec
 from .fixed_mana_abilities import FixedManaMode
+from .rules.source_references import SourceReferenceSpec
 from .util import mana_cost_to_vector, normalize_mana_bundle, parse_mana_symbols
 
 _ACTIVATE_ONLY_SORCERY = re.compile(
@@ -409,17 +410,16 @@ def _parse_cost(actual_cost: str, card_name: str) -> _ParsedCost:
     loyalty_clauses = 0
     choices: list[CostChoice] = []
     uncompiled: list[str] = []
+    source_reference = SourceReferenceSpec(card_name)
     source_costs = {
-        "discard": {"discard this card", f"discard {card_name.casefold()}"},
+        "discard": {"discard this card"},
         "sacrifice": {
             "sacrifice this permanent", "sacrifice this artifact",
             "sacrifice this creature", "sacrifice this land",
             "sacrifice this token", "sacrifice this card",
-            f"sacrifice {card_name.casefold()}",
         },
         "exile": {
             "exile this card from your graveyard", "exile this card",
-            f"exile {card_name.casefold()}",
         },
     }
     for clause in _split_cost_clauses(actual_cost):
@@ -445,6 +445,16 @@ def _parse_cost(actual_cost: str, card_name: str) -> _ParsedCost:
         matched_source = next(
             (kind for kind, values in source_costs.items() if lower in values), None
         )
+        if matched_source is None:
+            named_source = re.fullmatch(
+                r"(?P<kind>discard|sacrifice|exile) (?P<name>.+)",
+                residue,
+                re.IGNORECASE,
+            )
+            if named_source is not None and source_reference.matches(
+                named_source.group("name").strip(" .")
+            ):
+                matched_source = named_source.group("kind").casefold()
         if matched_source is not None:
             flags[matched_source] = True
             continue

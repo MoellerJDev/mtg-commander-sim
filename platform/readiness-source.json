@@ -19,14 +19,14 @@
     "oracle": {
       "scope": "full_and_commander_legal_oracle_snapshots_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-04T09:02:45.219+00:00",
-      "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3"
+      "updated_at": "2026-08-06T09:02:54.394+00:00",
+      "sha256": "9d44ab29ff15a239d48f190ec59adb8046049d9a18e8010b793a96361749295d"
     },
     "rulings": {
       "scope": "full_rulings_snapshot_plus_exact_list_fixture",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-04T09:00:38.847+00:00",
-      "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098"
+      "updated_at": "2026-08-06T09:00:37.813+00:00",
+      "sha256": "8e4f6b41785ce7ca1fd881372598e48410e2643e95aa893668a784827deeb3ea"
     }
   },
   "milestones": [
@@ -411,8 +411,14 @@
     {
       "id": "support_counter_placement_closure",
       "name": "Typed fixed Support counter placement",
-      "status": "implemented_on_current_source_tree",
+      "status": "integrated_on_certified_main",
       "evidence": "Oracle IR lowers fixed positive Support N through one source-spanned CardProgram V2 target-set node. Exact parsed card types pin permanent versus instant/sorcery source context; permanent Support excludes its source while spell Support does not invent a source permanent. Resolution reuses the bounded target-set coordinator, still-legal target revalidation, simultaneous quantity-replacement transaction, rollback, multiplayer ordering, seat-scoped projection, and exact replay. Current corpus measurements live in the generated compiler coverage and card-unlock frontier. Support X or zero, copied or granted Support, malformed or mixed source types, and conditional, modal, compound, or otherwise qualified variants remain explicit residuals."
+    },
+    {
+      "id": "closed_source_self_reference_compilation",
+      "name": "Closed source-self reference compilation",
+      "status": "implemented_on_current_source_tree",
+      "evidence": "One immutable versioned source-reference vocabulary now serves represented counter, damage, prevention, trigger, entry, activation-cost, and declaration grammar. Full names and bounded complete leading forms lower to the ordinary physical $source reference, while arbitrary prefixes, suffixes, and nicknames remain residuals. Runtime handlers receive no card names and do not reinterpret Oracle text. Gained-ability rewriting, name-changing effects, alternate or interchangeable names, and shortened-name conventions outside the closed vocabulary remain separate blocked families."
     },
     {
       "id": "rules_snapshot",

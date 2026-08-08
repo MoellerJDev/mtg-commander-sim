@@ -32,7 +32,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "69f29c01b041b0b02e9ad8dbe07cf99a2d45e983e884342027707cfb261a5d47",
+    "evaluated_source_tree_hash": "460611db36e460e1bd144ef998178200d84017cefd14ea5ae969db2b572262a6",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -421,6 +421,12 @@
       "evidence": "Oracle IR lowers fixed positive Support N through one source-spanned CardProgram V2 target-set node. Exact parsed card types pin permanent versus instant/sorcery source context; permanent Support excludes its source while spell Support does not invent a source permanent. Resolution reuses the bounded target-set coordinator, still-legal target revalidation, simultaneous quantity-replacement transaction, rollback, multiplayer ordering, seat-scoped projection, and exact replay. Current corpus measurements live in the generated compiler coverage and card-unlock frontier. Support X or zero, copied or granted Support, malformed or mixed source types, and conditional, modal, compound, or otherwise qualified variants remain explicit residuals.",
       "id": "support_counter_placement_closure",
       "name": "Typed fixed Support counter placement",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "One immutable versioned source-reference vocabulary now serves represented counter, damage, prevention, trigger, entry, activation-cost, and declaration grammar. Full names and bounded complete leading forms lower to the ordinary physical $source reference, while arbitrary prefixes, suffixes, and nicknames remain residuals. Runtime handlers receive no card names and do not reinterpret Oracle text. Gained-ability rewriting, name-changing effects, alternate or interchangeable names, and shortened-name conventions outside the closed vocabulary remain separate blocked families.",
+      "id": "closed_source_self_reference_compilation",
+      "name": "Closed source-self reference compilation",
       "status": "implemented_on_current_source_tree"
     },
     {
@@ -473,11 +479,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 47121,
+      "material_residuals": 47024,
       "status_counts": {
-        "exact": 2324,
-        "partial": 13263,
-        "unresolved": 16036
+        "exact": 2331,
+        "partial": 13313,
+        "unresolved": 15979
       },
       "total": 31623
     },
@@ -495,20 +501,20 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 54770,
+      "material_residuals": 54666,
       "status_counts": {
-        "exact": 5288,
-        "partial": 14416,
-        "unresolved": 18919
+        "exact": 5296,
+        "partial": 14467,
+        "unresolved": 18860
       },
       "total": 38623
     },
     "rules": {
-      "blocked": 381,
+      "blocked": 383,
       "definition_only": 124,
       "passing": 212,
       "total": 3300,
-      "unreviewed": 2583
+      "unreviewed": 2581
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -521,19 +527,19 @@
     },
     "oracle": {
       "scope": "full_and_commander_legal_oracle_snapshots_plus_exact_list_fixture",
-      "sha256": "41d849cdc8eb8d6dffef53c26cf9bfee2d0e1c02a98c4951580439a55b0486b3",
+      "sha256": "9d44ab29ff15a239d48f190ec59adb8046049d9a18e8010b793a96361749295d",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-04T09:02:45.219+00:00"
+      "updated_at": "2026-08-06T09:02:54.394+00:00"
     },
     "rulings": {
       "scope": "full_rulings_snapshot_plus_exact_list_fixture",
-      "sha256": "312dd0636e821125560f332f5a5dbb7467ca4d07006097fc9cb425a4110bc098",
+      "sha256": "8e4f6b41785ce7ca1fd881372598e48410e2643e95aa893668a784827deeb3ea",
       "status": "pinned_partial_corpus_coverage",
-      "updated_at": "2026-08-04T09:00:38.847+00:00"
+      "updated_at": "2026-08-06T09:00:37.813+00:00"
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5358,
+    "deterministic_cases_discovered": 5369,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -543,31 +549,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 47124,
+        "material_residuals": 47027,
         "status_counts": {
-          "residual": 29299,
-          "trusted": 2324
+          "residual": 29292,
+          "trusted": 2331
         },
         "trust_basis_counts": {
-          "capability_closed": 2319,
+          "capability_closed": 2326,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 29299
+          "unresolved": 29292
         }
       },
       "full": {
         "cards_considered": 38623,
-        "material_residuals": 54772,
+        "material_residuals": 54668,
         "status_counts": {
           "failed": 2248,
-          "residual": 33332,
-          "trusted": 3043
+          "residual": 33324,
+          "trusted": 3051
         },
         "trust_basis_counts": {
-          "capability_closed": 3038,
+          "capability_closed": 3046,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 33332
+          "unresolved": 33324
         }
       }
     },

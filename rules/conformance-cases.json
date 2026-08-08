@@ -16153,23 +16153,48 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "gained-ability name rewriting, copied abilities, and text-changing effects are not represented by this compiler-only source-reference family",
+        "name changes after compilation and name references to objects other than the source require separate typed identity and effect contracts"
       ],
       "case_id": "cr-201.5",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
       "dependency_rule_ids": [
         "201"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_source_references.SourceReferenceModelTests.test_full_and_complete_precomma_names_form_closed_vocabulary",
+        "tests.test_source_references.SourceReferenceCompilerTests.test_counter_damage_and_prevention_share_shortened_source_identity",
+        "tests.test_source_references.SourceReferenceCompilerTests.test_unrelated_or_partial_names_remain_residual",
+        "tests.test_source_references.SourceReferenceCompilerTests.test_oracle_ir_uses_same_reference_for_trigger_body_and_entry"
+      ],
+      "implementation_components": [
+        "rules.source_references.SourceReferenceSpec",
+        "oracle_ir._trigger_node",
+        "compiler.counter_placement_templates.fixed_counter_placement_effect_template",
+        "compiler.damage_templates.fixed_damage_effect_template",
+        "compiler.prevention_templates.prevention_trigger_effect_template",
+        "abilities.parse_activated_abilities",
+        "declaration_costs.normalized_oracle_line"
+      ],
+      "notes": [
+        "A recognized source name lowers to the existing physical $source reference; runtime handlers never compare a printed card name.",
+        "The family is bounded to represented Oracle clauses and does not claim aggregate Name rules coverage."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative",
+        "interaction"
+      ],
+      "reviewed": true,
       "rule_id": "201.5",
       "rule_text_sha256": "29f94060448497bbf11671737631739abd1f8617de4d6cb244bcb4b6d22710ec",
       "schema_version": 1,
@@ -16178,7 +16203,7 @@
         "end_line": 1323,
         "start_line": 1322
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "inventory_only",
@@ -16237,23 +16262,42 @@
       "status": "unreviewed"
     },
     {
-      "assertion_kind": "inventory_only",
+      "assertion_kind": "unsupported_fail_closed",
       "blockers": [
-        "semantic_review_not_completed"
+        "shortened Oracle forms outside the represented comma, title-delimiter, and two-word vocabularies remain material residuals",
+        "alternate names, interchangeable names, and every future shortened-name convention require their own pinned typed grammar"
       ],
       "case_id": "cr-201.5c",
       "case_version": 1,
-      "classification": "unclassified",
-      "covered_scenarios": [],
+      "classification": "behavioral",
+      "covered_scenarios": [
+        "positive",
+        "negative"
+      ],
       "dependency_rule_ids": [
         "201.5"
       ],
       "effective_date": "2026-06-19",
-      "executable_test_ids": [],
-      "implementation_components": [],
-      "notes": [],
-      "required_scenarios": [],
-      "reviewed": false,
+      "executable_test_ids": [
+        "tests.test_source_references.SourceReferenceModelTests.test_title_delimiter_preserves_complete_name_without_first_word_guess",
+        "tests.test_source_references.SourceReferenceModelTests.test_bounded_two_word_and_of_title_forms_preserve_existing_oracle_names",
+        "tests.test_source_references.SourceReferenceModelTests.test_regex_pattern_is_escaped_and_closed",
+        "tests.test_source_references.SourceReferenceModelTests.test_malformed_names_fail_closed",
+        "tests.test_source_references.SourceReferenceCompilerTests.test_declaration_normalization_accepts_only_complete_precomma_name",
+        "tests.test_source_references.SourceReferenceCompilerTests.test_activated_source_cost_uses_shortened_name_without_guessing"
+      ],
+      "implementation_components": [
+        "rules.source_references.SourceReferenceSpec"
+      ],
+      "notes": [
+        "The compiler accepts only bounded complete leading forms and never adds a printed-name exception.",
+        "Unsupported aliases remain residual rather than falling back to substring or arbitrary-prefix matching."
+      ],
+      "required_scenarios": [
+        "positive",
+        "negative"
+      ],
+      "reviewed": true,
       "rule_id": "201.5c",
       "rule_text_sha256": "b7cc64129986fb58af815558e02c6859eefbdb81bbbb14fb811ea3698cf7cfb4",
       "schema_version": 1,
@@ -16262,7 +16306,7 @@
         "end_line": 1333,
         "start_line": 1332
       },
-      "status": "unreviewed"
+      "status": "blocked"
     },
     {
       "assertion_kind": "inventory_only",

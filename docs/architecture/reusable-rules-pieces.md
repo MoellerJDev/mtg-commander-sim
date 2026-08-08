@@ -104,7 +104,13 @@ never promoted by editing the matrix.
 The durable baseline changes only through an explicit snapshot transition.
 Ordinary rules and compiler work changes the current matrix and delta while the
 baseline remains fixed. Historical baselines are archived rather than silently
-reinterpreted after a rules, Oracle, or rulings snapshot change.
+reinterpreted after a rules, Oracle, or rulings snapshot change. The baseline
+for the active pinned snapshot lives at `coverage/program-baseline.json`.
+Before replacing it, preserve the canonical prior file unchanged under
+`coverage/program-baseline-history/<baseline_id>.json`, then build the new
+baseline from certified `main` against the new snapshot. Feature work on that
+snapshot compares with this clean-main baseline rather than resetting its own
+delta or comparing different corpora.
 
 ## Replay, privacy, and performance
 

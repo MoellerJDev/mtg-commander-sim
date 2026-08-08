@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import re
 from typing import Literal
 
+from .rules.source_references import SourceReferenceSpec
 from .util import mana_cost_to_vector
 
 
@@ -85,15 +86,19 @@ def normalized_oracle_line(text: str, *, card_name: str = "") -> str:
     """Normalize one Oracle line without erasing sentence boundaries."""
 
     line = " ".join(str(text).casefold().split())
-    name = " ".join(str(card_name).casefold().split())
-    if not name:
+    if not str(card_name).strip():
         return line
-    line = line.replace(name, "this creature")
+    source = SourceReferenceSpec(card_name)
+    line = line.replace(source.normalized_names[0], "this creature")
     # Oracle commonly shortens a legendary permanent's self-reference to its
     # leading proper name (for example, a title is omitted). Restrict this
     # normalization to the beginning of the ability sentence so an unrelated
     # named object elsewhere in the text cannot be mistaken for the source.
-    leading_name = name.split(",", 1)[0].split()[0]
+    leading_name = (
+        source.normalized_names[1]
+        if len(source.normalized_names) == 2
+        else ""
+    )
     shortened_suffix = (
         line[len(leading_name) + 1 :]
         if line.startswith(f"{leading_name} ")

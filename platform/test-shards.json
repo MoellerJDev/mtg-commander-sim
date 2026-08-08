@@ -188,6 +188,7 @@
       "test_preflight_v080",
       "test_proliferate_compiler",
       "test_rule_capabilities",
+      "test_source_references",
       "test_targeted_counter_effect_clauses",
       "test_targeted_destruction_effect_clauses",
       "test_targeted_exile_effect_clauses",
