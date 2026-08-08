@@ -10299,7 +10299,7 @@
     "baseline_main_commit": "300bb5ad57014fdc6c98cfbb350ac87f18bbee7e",
     "baseline_worktree_clean": true,
     "phase": "support_counter_placement_closure",
-    "scope_note": "The evaluated source tree includes typed fixed player-, affected-set-, and bounded target-set counter placement. This focused branch adds fixed positive Support N with exact permanent-versus-instant/sorcery source context, source exclusion for permanent Support, generic spell/trigger/activated lowering, Oracle IR v53, explicit capability and interaction evidence, and a measured seven-card Commander harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior.",
+    "scope_note": "The evaluated source tree includes typed fixed player-, affected-set-, and bounded target-set counter placement. This focused branch adds fixed positive Support N with exact permanent-versus-instant/sorcery source context, source exclusion for permanent Support, generic spell/trigger/activated lowering, Oracle IR v53, explicit capability and interaction evidence, and a generated Commander corpus harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior.",
     "verified_at": "2026-08-08"
   },
   "compiler": {
@@ -11198,7 +11198,7 @@
           "maintenance": "generated",
           "status": "generated",
           "title": "Platform implementation status",
-          "verified": "ca115c4427886fc6783de2e8bce518b3b5c668e8c9f9117d05d5ec23f056b071"
+          "verified": "6d4a98beb742b74c4dbf3631781d07b1a8c883d951d47d80a6c910ae7735ca4c"
         },
         "metadata_complete": true,
         "missing_metadata": [],
@@ -11265,7 +11265,7 @@
   "generated": {
     "card_specificity_source": "platform/card-specificity-baseline.json",
     "generator": "scripts/update_architecture_audit.py",
-    "scope_note": "The evaluated source tree includes typed fixed player-, affected-set-, and bounded target-set counter placement. This focused branch adds fixed positive Support N with exact permanent-versus-instant/sorcery source context, source exclusion for permanent Support, generic spell/trigger/activated lowering, Oracle IR v53, explicit capability and interaction evidence, and a measured seven-card Commander harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior.",
+    "scope_note": "The evaluated source tree includes typed fixed player-, affected-set-, and bounded target-set counter placement. This focused branch adds fixed positive Support N with exact permanent-versus-instant/sorcery source context, source exclusion for permanent Support, generic spell/trigger/activated lowering, Oracle IR v53, explicit capability and interaction evidence, and a generated Commander corpus harvest without runtime Oracle parsing, direct GameState writes, or card-identity behavior.",
     "source": "platform/architecture-audit-source.json",
     "stale_check": "python scripts/update_architecture_audit.py --check"
   },
