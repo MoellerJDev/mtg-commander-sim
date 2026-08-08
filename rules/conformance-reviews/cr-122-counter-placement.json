@@ -13,16 +13,19 @@
       "reviewed": true,
       "implementation_components": [
         "model.CardInstance.counters",
+        "model.PlayerState.counters",
+        "counter_state.player_counter_snapshot",
         "counter_placement.commit_prepared_counter_placements"
       ],
       "executable_test_ids": [
-        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_changes_effect_generated_placement"
+        "tests.test_counter_placement_replacements.CounterPlacementReplacementTests.test_counter_quantity_component_changes_effect_generated_placement",
+        "tests.test_counter_state.CounterStateTests.test_generic_player_counter_round_trips_and_zero_is_omitted"
       ],
       "required_scenarios": [],
       "covered_scenarios": [],
       "blockers": [],
       "notes": [
-        "A permanent carries named integer counter quantities; individual counter-kind rules and player counters are reviewed separately."
+        "Permanents and players carry normalized nonnegative named counter quantities. Poison and energy retain replay-compatible first-class player fields while other player counter kinds share one generic state owner."
       ]
     },
     {
@@ -56,10 +59,10 @@
       ],
       "blockers": [
         "all as-enters counter instructions are not yet represented by the shared counter-placement transaction",
-        "player-counter placement and remaining legacy counter producers are not yet integrated"
+        "remaining cost, loyalty, rule-generated, movement, removal, and legacy counter producers are not yet integrated"
       ],
       "notes": [
-        "Represented effect-generated permanent counters and typed counter children created by a zone replacement are proposed, replaced, chosen, and journaled before authoritative mutation. Complete entry-counter and producer coverage remains blocked."
+        "Represented effect-generated player and permanent counters, including ordinary Proliferate and typed counter children created by a zone replacement, are proposed, replaced, chosen, and journaled before authoritative mutation. Complete entry-counter and producer coverage remains blocked."
       ]
     },
     {

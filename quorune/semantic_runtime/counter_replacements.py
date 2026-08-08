@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any, Mapping, Protocol, Sequence
+from typing import Any, Literal, Mapping, Protocol, Sequence
 
 from ..replacement_effects import (
     AffectedObject,
@@ -64,54 +64,87 @@ class CounterReplacementSourceContext:
 @dataclass(frozen=True, slots=True)
 class CounterPlacementEventSpec:
     event_id: str
-    object_id: str
-    owner: str
-    controller: str | None
-    target_zone: str
-    target_types: tuple[str, ...]
+    subject_kind: Literal["player", "permanent"]
+    subject_id: str
     placing_player: str
     counter_name: str
     amount: int
     source_ref: str | None
     effect_generated: bool
+    owner: str | None = None
+    controller: str | None = None
+    target_zone: str | None = None
+    target_types: tuple[str, ...] = ()
     logical_object_id: str | None = None
 
     def __post_init__(self) -> None:
         if (
             not self.event_id
-            or not self.object_id
-            or not self.owner
-            or not self.target_zone
+            or self.subject_kind not in {"player", "permanent"}
+            or not self.subject_id
         ):
             raise SemanticNodeError(
-                "Counter placement events require stable object identity"
+                "Counter placement events require stable subject identity"
             )
         if not self.placing_player:
             raise SemanticNodeError(
                 "Counter placement events require the placing player"
             )
-        if not self.counter_name or self.amount < 1:
+        if (
+            not self.counter_name
+            or type(self.amount) is not int
+            or self.amount < 1
+        ):
             raise SemanticNodeError(
                 "Counter placement events require a positive named amount"
+            )
+        if self.subject_kind == "player":
+            if any(
+                value is not None
+                for value in (
+                    self.owner,
+                    self.controller,
+                    self.target_zone,
+                    self.logical_object_id,
+                )
+            ) or self.target_types:
+                raise SemanticNodeError(
+                    "Player counter events cannot carry permanent identity"
+                )
+        elif not self.owner or not self.target_zone:
+            raise SemanticNodeError(
+                "Permanent counter events require owner and zone identity"
             )
 
     @property
     def target_kind(self) -> str:
+        if self.subject_kind == "player":
+            return "player"
         return "permanent" if self.target_zone == "battlefield" else "card"
 
     def event(self) -> ReplaceableEvent:
         return ReplaceableEvent(
             event_id=self.event_id,
             kind="counter.place",
-            affected_player=None,
-            affected_object=AffectedObject(
-                object_id=self.object_id,
-                owner=self.owner,
-                controller=self.controller,
+            affected_player=(
+                self.subject_id if self.subject_kind == "player" else None
+            ),
+            affected_object=(
+                AffectedObject(
+                    object_id=self.subject_id,
+                    owner=str(self.owner),
+                    controller=self.controller,
+                )
+                if self.subject_kind == "permanent"
+                else None
             ),
             payload={
                 "placing_player": self.placing_player,
-                "target_controller": self.controller,
+                "target_controller": (
+                    self.controller
+                    if self.subject_kind == "permanent"
+                    else self.subject_id
+                ),
                 "target_zone": self.target_zone,
                 "target_logical_object_id": self.logical_object_id,
                 "target_kind": self.target_kind,

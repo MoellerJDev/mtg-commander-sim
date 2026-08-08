@@ -2359,6 +2359,86 @@
       "applicability_note": "Replay the Fabricate option and counter-replacement ordering command sequence to the identical authoritative state hash."
     },
     {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_counter_replacements_suspend_whole_batch_before_mutation",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Suspend a multi-subject, multi-counter-kind Proliferate result before any player or permanent counter changes when permanent quantity replacements require an ordering choice."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_four_player_proliferate_choice_is_public_and_actor_scoped",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Expose public eligible players and permanents to the resolving controller in a four-player game while issuing no choice to the other seats."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_proliferate_compiler.ProliferateCompilerTests.test_proliferate_compiler_mutant_is_killed",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Kill removal of the closed single-Proliferate compiler lowering by requiring the synthetic program to remain exact."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "negative",
+      "test_id": "tests.test_proliferate_compiler.ProliferateCompilerTests.test_unsupported_proliferate_variants_remain_material_residuals",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Keep repeated, variable, target-specific, and replacement-style Proliferate wording outside the bounded single-instruction grammar."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "negative",
+      "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_rejects_stale_subject_snapshot_without_mutation",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Reject a changed selected subject or counter-kind snapshot before adding any Proliferate counters."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "positive",
+      "test_id": "tests.test_proliferate_compiler.ProliferateCompilerTests.test_generic_proliferate_program_is_source_spanned_and_capability_closed",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Lower ordinary spell, trigger, and activated-ability Proliferate instructions to one source-spanned capability-closed CardProgram node."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "positive",
+      "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_generated_proliferate_trigger_runs_without_name_dispatch",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Execute a representative generated Proliferate trigger through the generic CardProgram and typed counter transaction without printed-name dispatch."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "positive",
+      "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_choice_increases_each_existing_counter_kind_once",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Give each selected player and permanent one additional counter of every positive counter kind already on that subject."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_four_player_proliferate_choice_is_public_and_actor_scoped",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Project the public Proliferate candidate set only to the resolving controller without exposing any player's hand."
+    },
+    {
+      "capability_id": "counter.producer.proliferate",
+      "evidence_class": "replay",
+      "test_id": "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_replacement_resume_replays_exactly",
+      "official_rule_ids": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability_note": "Replay the Proliferate selection and permanent counter-replacement ordering to the identical final authoritative state hash."
+    },
+    {
       "capability_id": "damage.amount.positive",
       "evidence_class": "interaction",
       "test_id": "tests.test_turn_history_rules.CurrentTurnHistoryRuleTests.test_only_damage_not_life_loss_or_prevented_damage_unlocks_attack",

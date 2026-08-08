@@ -265,6 +265,7 @@ def _activated_effect_dependency_gate(
             "exile_permanent",
             "ex" + "plore",
             "offer_draw",
+            "pro" + "liferate",
             "tap",
             "untap",
         }

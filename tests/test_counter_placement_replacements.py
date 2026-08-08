@@ -183,7 +183,8 @@ class CounterPlacementReplacementTests(unittest.TestCase):
 
         with self.assertRaisesRegex(CounterPlacementError, "amount"):
             CounterPlacementRequest(
-                object_id="fixture",
+                subject_kind="permanent",
+                subject_id="fixture",
                 counter_name="charge",
                 amount=True,
                 placing_player="A",
@@ -199,7 +200,8 @@ class CounterPlacementReplacementTests(unittest.TestCase):
         for event in (
             CounterPlacementEventSpec(
                 event_id="opponent-permanent",
-                object_id="target-b",
+                subject_kind="permanent",
+                subject_id="target-b",
                 owner="B",
                 controller="B",
                 target_zone="battlefield",
@@ -212,7 +214,8 @@ class CounterPlacementReplacementTests(unittest.TestCase):
             ).event(),
             CounterPlacementEventSpec(
                 event_id="cost-placement",
-                object_id="target-a",
+                subject_kind="permanent",
+                subject_id="target-a",
                 owner="A",
                 controller="A",
                 target_zone="battlefield",
@@ -225,7 +228,8 @@ class CounterPlacementReplacementTests(unittest.TestCase):
             ).event(),
             CounterPlacementEventSpec(
                 event_id="nonpermanent-card",
-                object_id="target-a-exile",
+                subject_kind="permanent",
+                subject_id="target-a-exile",
                 owner="A",
                 controller=None,
                 target_zone="exile",
@@ -375,13 +379,15 @@ class CounterPlacementReplacementTests(unittest.TestCase):
         )
         requests = (
             CounterPlacementRequest(
-                object_id=target_b.object_id,
+                subject_kind="permanent",
+                subject_id=target_b.object_id,
                 counter_name="charge",
                 amount=1,
                 placing_player="B",
             ),
             CounterPlacementRequest(
-                object_id=target_a.object_id,
+                subject_kind="permanent",
+                subject_id=target_a.object_id,
                 counter_name="charge",
                 amount=1,
                 placing_player="A",
@@ -440,7 +446,8 @@ class CounterPlacementReplacementTests(unittest.TestCase):
             engine,
             (
                 CounterPlacementRequest(
-                    object_id=cost_target.object_id,
+                    subject_kind="permanent",
+                    subject_id=cost_target.object_id,
                     counter_name="loyalty",
                     amount=1,
                     placing_player="A",
@@ -468,7 +475,8 @@ class CounterPlacementReplacementTests(unittest.TestCase):
             engine,
             (
                 CounterPlacementRequest(
-                    object_id=inactive_target.object_id,
+                    subject_kind="permanent",
+                    subject_id=inactive_target.object_id,
                     counter_name="charge",
                     amount=2,
                     placing_player="A",
@@ -716,7 +724,8 @@ class CounterPlacementReplacementTests(unittest.TestCase):
             )
             event = CounterPlacementEventSpec(
                 event_id=f"counter-property-{index}",
-                object_id=f"target-{index}",
+                subject_kind="permanent",
+                subject_id=f"target-{index}",
                 owner="A",
                 controller="A",
                 target_zone="battlefield",

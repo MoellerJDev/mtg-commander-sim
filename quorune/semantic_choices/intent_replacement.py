@@ -4,7 +4,12 @@ from dataclasses import replace
 from typing import Any, Mapping, Sequence
 
 from ..replacement.immutable import FrozenMap, thaw_value
-from ..semantic_runtime import PlaceCountersIntent, ZoneMoveIntent
+from ..semantic_runtime import (
+    PlaceCountersIntent,
+    ProliferateIntent,
+    ProliferateSubject,
+    ZoneMoveIntent,
+)
 from .model import SemanticChoiceError
 
 
@@ -30,6 +35,19 @@ _ZONE_MOVE_FIELDS = {
     "tapped_policy",
     "semantic_events",
     "optional_if_missing",
+}
+_PROLIFERATE_FIELDS = {
+    "actor",
+    "subjects",
+    _REASON_FIELD,
+    "source_ref",
+}
+_PROLIFERATE_SUBJECT_FIELDS = {
+    "subject_kind",
+    "subject_id",
+    "ref",
+    "counter_names",
+    "logical_object_id",
 }
 
 
@@ -98,6 +116,25 @@ def semantic_intent_identity(intent: Any) -> tuple[str, dict[str, Any]]:
 
     if isinstance(intent, PlaceCountersIntent):
         return "place_counters", counter_intent_identity(intent)
+    if isinstance(intent, ProliferateIntent):
+        return (
+            "proliferate",
+            {
+                "actor": intent.actor,
+                "subjects": [
+                    {
+                        "subject_kind": subject.subject_kind,
+                        "subject_id": subject.subject_id,
+                        "ref": subject.ref,
+                        "counter_names": list(subject.counter_names),
+                        "logical_object_id": subject.logical_object_id,
+                    }
+                    for subject in intent.subjects
+                ],
+                _REASON_FIELD: intent.reason,
+                "source_ref": intent.source_ref,
+            },
+        )
     if isinstance(intent, ZoneMoveIntent):
         return (
             "zone_move",
@@ -137,6 +174,8 @@ def validate_semantic_intent_identity(
 ) -> dict[str, Any]:
     if kind == "place_counters":
         return validate_counter_intent_identity(value)
+    if kind == "proliferate":
+        return _validate_proliferate_intent_identity(value)
     if kind != "zone_move":
         raise SemanticChoiceError("Unknown semantic intent continuation kind")
     if not isinstance(value, Mapping):
@@ -199,11 +238,92 @@ def validate_semantic_intent_identity(
     }
 
 
+def _validate_proliferate_intent_identity(
+    value: Mapping[str, Any],
+) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        raise SemanticChoiceError(
+            "Proliferate intent identity must be an object"
+        )
+    actual = set(value)
+    if actual != _PROLIFERATE_FIELDS:
+        missing = sorted(_PROLIFERATE_FIELDS - actual)
+        unknown = sorted(actual - _PROLIFERATE_FIELDS)
+        details = [
+            *(f"missing {name}" for name in missing),
+            *(f"unknown {name}" for name in unknown),
+        ]
+        raise SemanticChoiceError(
+            "Proliferate intent identity fields: " + "; ".join(details)
+        )
+    actor = value["actor"]
+    reason = value[_REASON_FIELD]
+    source = value["source_ref"]
+    raw_subjects = value["subjects"]
+    if (
+        type(actor) is not str
+        or not actor
+        or type(reason) is not str
+        or not reason
+        or (source is not None and (type(source) is not str or not source))
+        or not isinstance(raw_subjects, (list, tuple))
+    ):
+        raise SemanticChoiceError("Proliferate intent identity is malformed")
+    subjects: list[dict[str, Any]] = []
+    identities: set[tuple[str, str]] = set()
+    for raw in raw_subjects:
+        if not isinstance(raw, Mapping) or set(raw) != _PROLIFERATE_SUBJECT_FIELDS:
+            raise SemanticChoiceError(
+                "Proliferate subject identity fields are malformed"
+            )
+        raw_names = raw["counter_names"]
+        if not isinstance(raw_names, (list, tuple)):
+            raise SemanticChoiceError(
+                "Proliferate counter identity must be a sequence"
+            )
+        try:
+            subject = ProliferateSubject(
+                subject_kind=raw["subject_kind"],
+                subject_id=raw["subject_id"],
+                ref=raw["ref"],
+                counter_names=tuple(raw_names),
+                logical_object_id=raw["logical_object_id"],
+            )
+        except (TypeError, ValueError) as exc:
+            raise SemanticChoiceError(
+                "Proliferate subject identity is malformed"
+            ) from exc
+        identity = (subject.subject_kind, subject.subject_id)
+        if identity in identities:
+            raise SemanticChoiceError(
+                "Proliferate subject identities must be unique"
+            )
+        identities.add(identity)
+        subjects.append(
+            {
+                "subject_kind": subject.subject_kind,
+                "subject_id": subject.subject_id,
+                "ref": subject.ref,
+                "counter_names": list(subject.counter_names),
+                "logical_object_id": subject.logical_object_id,
+            }
+        )
+    return {
+        "actor": actor,
+        "subjects": subjects,
+        _REASON_FIELD: reason,
+        "source_ref": source,
+    }
+
+
 def with_replacement_selections(
     intent: Any,
     selections: Sequence[str | FrozenMap | Mapping[str, Any]],
-) -> PlaceCountersIntent | ZoneMoveIntent:
-    if not isinstance(intent, (PlaceCountersIntent, ZoneMoveIntent)):
+) -> PlaceCountersIntent | ProliferateIntent | ZoneMoveIntent:
+    if not isinstance(
+        intent,
+        (PlaceCountersIntent, ProliferateIntent, ZoneMoveIntent),
+    ):
         raise SemanticChoiceError(
             "Semantic replacement continuation no longer names a supported intent"
         )

@@ -96,6 +96,8 @@ class SemanticChoiceQuery(
 
     def player_counter(self, seat: str, counter: str) -> int: ...
 
+    def player_counters(self, seat: str) -> Mapping[str, int]: ...
+
     def library_refs(self, seat: str, *, top_first: bool) -> tuple[str, ...]: ...
 
     def mana_pool(self, seat: str) -> Mapping[str, int]: ...
@@ -265,6 +267,16 @@ class SnapshotSemanticChoiceQuery:
     def player_counter(self, seat: str, counter: str) -> int:
         counters = self.counters_by_seat.get(seat, FrozenMap())
         return int(counters.get(counter, 0)) if isinstance(counters, Mapping) else 0
+
+    def player_counters(self, seat: str) -> Mapping[str, int]:
+        counters = self.counters_by_seat.get(seat, FrozenMap())
+        if not isinstance(counters, Mapping):
+            return {}
+        return {
+            str(name): int(amount)
+            for name, amount in counters.items()
+            if int(amount) > 0
+        }
 
     def library_refs(self, seat: str, *, top_first: bool) -> tuple[str, ...]:
         values = tuple(str(value) for value in self.libraries_by_seat.get(seat, ()))

@@ -1,8 +1,8 @@
 ---
 title: "Counter-placement transaction"
 status: "current"
-authoritative_source: "quorune/counter_placement.py, semantic_runtime/counter_replacements.py, and ADR 0011"
-verified: "2026-08-07"
+authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, semantic_runtime/counter_replacements.py, and ADR 0011"
+verified: "2026-08-08"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
 ---
@@ -10,17 +10,19 @@ maintenance: "hand-maintained"
 # Counter-placement transaction
 
 `counter_placement.py` is the focused authoritative owner for represented
-effect-generated counters placed on battlefield permanents. It separates the
-operation into preparation and commit:
+effect-generated counters placed on players, battlefield permanents, and the
+already modeled card-zone counter children. It separates the operation into
+preparation and commit:
 
-1. Resolve each target object and build immutable `counter.place` events.
+1. Resolve each subject and build immutable player- or object-affected
+   `counter.place` events.
 2. Discover active trusted runtime descriptors against the pre-mutation state.
-3. Traverse simultaneous events in APNAP order and let each affected
-   permanent's controller choose among applicable replacements.
+3. Traverse simultaneous events in APNAP order and let the affected player or
+   permanent's controller choose among represented applicable replacements.
 4. Suspend through the ordinary seat-scoped replacement continuation when a
    real choice exists.
-5. Commit only after every selection is complete and every permanent is still
-   the same object in the expected zone.
+5. Commit only after every selection is complete, every player still exists,
+   and every permanent is still the same object in the expected zone.
 
 This order enforces the represented portions of CR 122.6, 614.1, 614.16,
 616.1, 616.1f, and 616.1g without giving pure runtime components mutable state.
@@ -57,7 +59,9 @@ remain residual rather than being inferred at runtime.
 ## Ownership and dependencies
 
 `counter_placement.py` depends on immutable replacement values and narrow host
-protocols. It may mutate only the target permanent's counter map during commit.
+protocols. It delegates the one atomic write plan to `counter_state.py`, which
+owns poison, energy, arbitrary normalized player counters, and permanent
+counter maps.
 `semantic_runtime/counter_replacements.py` validates source descriptors and
 returns immutable effects; architecture policy prohibits it from importing the
 engine, `GameState`, transport, persistence, or projection code.
@@ -72,8 +76,20 @@ until their ordering and continuation semantics are modeled.
 The shared transaction currently owns positive `add_counter_selected`, positive
 generic `counter`, `counter_all_subtype`, direct transaction calls, typed
 nested zone-replacement counters, ordinary positive-integral Fabricate choices,
-and the conditional +1/+1 counter from one permanent exploring once. These
-paths prepare before mutation and can safely suspend.
+the conditional +1/+1 counter from one permanent exploring once, and ordinary
+single-instruction Proliferate over players and permanents. These paths prepare
+before mutation and can safely suspend.
+
+The bounded Proliferate family compiles an unmodified `Proliferate.` clause in
+spell, triggered, and activated contexts to CardProgram V2. The resolving
+controller chooses any number of eligible public subjects. The continuation
+pins physical and logical permanent identity plus every positive counter kind;
+one additional counter of each kind then enters one simultaneous
+replacement-aware batch. The transaction permits an empty selection and
+rejects a changed subject or counter-kind snapshot before any counter changes.
+Two-Headed Giant shared poison totals, repeated or variable Proliferate,
+Proliferate replacement effects, and broader granted/copy propagation remain
+explicitly unsupported.
 
 The bounded Explore family compiles source/self and “target creature you
 control” instructions to CardProgram V2. It publicly reveals the current
@@ -91,10 +107,10 @@ The following producers remain deliberately outside this slice:
 - intrinsic planeswalker and battle entry counters;
 - Saga lore rule actions and stun-counter removal;
 - loyalty activation costs and damage-counter removal;
-- cumulative upkeep and proliferate;
+- cumulative upkeep;
 - Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
-- player counters, state-based removals, and card-specific continuation paths
-  such as Demonic Junker.
+- counter removal and movement, state-based removals, and card-specific
+  continuation paths such as Demonic Junker.
 
 Several of those operations occur inside a larger semantic continuation after
 earlier instructions have already mutated state. Routing them through a choice
@@ -107,7 +123,8 @@ quantities, counter movement, prevention, complete enters-with-counter
 ordering, and universal placing-player derivation. Broad CR 122/614/616 stays
 blocked until those families and producers are integrated.
 
-Primary assurance is in `test_counter_placement_replacements.py`, with shared
+Primary assurance is in `test_counter_placement_replacements.py`,
+`test_proliferate_rules.py`, and `test_proliferate_compiler.py`, with shared
 event-order coverage in `test_replacement_event_tree.py` and focused mutation
 evidence in `test_capability_implementation_mutations.py`.
 

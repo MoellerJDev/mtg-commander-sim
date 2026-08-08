@@ -30,6 +30,11 @@ def keyword_mechanics(
     mechanics: list[str] = []
     for part in parts:
         lower = part.casefold()
+        if lower == "proliferate":
+            # Proliferate is a keyword action whose imperative instruction
+            # executes during resolution, not a keyword ability carried by
+            # the source. Let the closed resolution grammar own it.
+            return None
         if lower in _KNOWN_BARE_KEYWORDS or lower in known:
             mechanics.append(lower)
             continue

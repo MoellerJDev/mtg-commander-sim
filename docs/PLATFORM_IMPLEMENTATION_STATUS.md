@@ -2,7 +2,7 @@
 title: "Platform implementation status"
 status: "generated"
 authoritative_source: "platform/readiness-source.json"
-verified: "9534b377368a7576edeeddfc1b3bfa24217f50347df045692e4687d8a5c67a68"
+verified: "d34a462df4ddf81e78d3b2a3930059bc4c96399f29bd88ac697b8e642ea9b43a"
 audience: "maintainers, operators, and contributors"
 maintenance: "generated"
 generated_source: "coverage/platform-readiness.json"
@@ -11,7 +11,7 @@ generation_command: ".\.venv\Scripts\python.exe scripts\update_platform_status.p
 
 # Platform implementation status
 
-Source fingerprint: `9534b377368a7576edeeddfc1b3bfa24217f50347df045692e4687d8a5c67a68`
+Source fingerprint: `d34a462df4ddf81e78d3b2a3930059bc4c96399f29bd88ac697b8e642ea9b43a`
 
 ## Current top-level state
 
@@ -28,7 +28,7 @@ Source fingerprint: `9534b377368a7576edeeddfc1b3bfa24217f50347df045692e4687d8a5c
 
 ## Top blockers
 
-- mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate and single-permanent Explore now lower to capability-closed typed programs whose counter and zone results suspend and resume through replacement-aware intent owners without repeating earlier instructions; simultaneous or repeated Explore, Explore replacement effects, optional or state-derived token variants, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration, so aggregate CR 122, CR 614/616, CR 701.44, and CR 702.123 remain blocked
+- mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate, single-permanent Explore, and ordinary single-instruction Proliferate now lower to capability-closed typed programs whose counter and zone results suspend and resume through replacement-aware intent owners without repeating earlier instructions; simultaneous or repeated Explore, Explore replacement effects, optional or state-derived token variants, repeated or variable Proliferate, cumulative-upkeep-style, entry, cost, removal, movement, and other rule-generated counter producers still require migration, so aggregate CR 122, CR 614/616, CR 701.34, CR 701.44, and CR 702.123 remain blocked
 - fixed simultaneous affected-set damage now snapshots represented public player and permanent groups through the canonical effective-characteristic query and commits one APNAP-ordered, logical-identity-deduplicated damage batch; divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, linked life/draw/scry/conditional riders, and broader source-LKI producers remain explicit blockers, so aggregate mass-damage coverage is not trusted
 - mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted
 - ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked

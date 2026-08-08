@@ -599,10 +599,106 @@ class AddSubtypeIntent:
 
 
 @dataclass(frozen=True, slots=True)
+class ProliferateSubject:
+    subject_kind: Literal["player", "permanent"]
+    subject_id: str
+    ref: str
+    counter_names: tuple[str, ...]
+    logical_object_id: str | None = None
+
+    def __post_init__(self) -> None:
+        if type(self.subject_kind) is not str or self.subject_kind not in {
+            "player",
+            "permanent",
+        }:
+            raise ValueError(
+                "Proliferate subjects must be players or permanents"
+            )
+        if any(
+            type(value) is not str or not value
+            for value in (self.subject_id, self.ref)
+        ):
+            raise ValueError(
+                "Proliferate subjects require stable IDs and references"
+            )
+        if not isinstance(self.counter_names, (list, tuple)) or any(
+            type(value) is not str or not value
+            for value in self.counter_names
+        ):
+            raise ValueError(
+                "Proliferate counter names must be nonempty strings"
+            )
+        names = tuple(
+            " ".join(value.casefold().split())
+            for value in self.counter_names
+        )
+        if (
+            not names
+            or any(not value for value in names)
+            or names != tuple(sorted(set(names)))
+        ):
+            raise ValueError(
+                "Proliferate counter names must be unique canonical strings"
+            )
+        if self.subject_kind == "player":
+            if self.subject_id != self.ref or self.logical_object_id is not None:
+                raise ValueError(
+                    "Player Proliferate subjects cannot carry object identity"
+                )
+        elif not self.logical_object_id:
+            raise ValueError(
+                "Permanent Proliferate subjects require logical identity"
+            )
+        object.__setattr__(self, "counter_names", names)
+
+
+@dataclass(frozen=True, slots=True)
 class ProliferateIntent:
     actor: str
-    selections: tuple[str, ...]
+    subjects: tuple[ProliferateSubject, ...]
     reason: str
+    source_ref: str | None = None
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        if any(
+            type(value) is not str or not value
+            for value in (self.actor, self.reason)
+        ):
+            raise ValueError(
+                "Proliferate intents require an actor and reason"
+            )
+        if self.source_ref is not None and (
+            type(self.source_ref) is not str or not self.source_ref
+        ):
+            raise ValueError(
+                "Proliferate source references must be nonempty or null"
+            )
+        if any(
+            not isinstance(subject, ProliferateSubject)
+            for subject in self.subjects
+        ):
+            raise ValueError(
+                "Proliferate intents require typed subject snapshots"
+            )
+        identities = tuple(
+            (subject.subject_kind, subject.subject_id)
+            for subject in self.subjects
+        )
+        if len(identities) != len(set(identities)):
+            raise ValueError("Proliferate subject snapshots must be unique")
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                tuple(self.replacement_selections),
+                family="Proliferate",
+            ),
+        )
+
+    @property
+    def selections(self) -> tuple[str, ...]:
+        return tuple(subject.ref for subject in self.subjects)
 
 
 @dataclass(frozen=True, slots=True)

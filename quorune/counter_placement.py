@@ -10,6 +10,7 @@ from .counter_state import (
     CounterStateError,
     plan_counter_changes,
     validate_counter_changes,
+    CounterSubjectKind,
 )
 from .replacement_effects import (
     ReplaceableEvent,
@@ -76,7 +77,8 @@ class CounterEventTreeResolution(Protocol):
 
 @dataclass(frozen=True, slots=True)
 class CounterPlacementRequest:
-    object_id: str
+    subject_kind: CounterSubjectKind
+    subject_id: str
     counter_name: str
     amount: int
     placing_player: str
@@ -85,9 +87,13 @@ class CounterPlacementRequest:
 
     def __post_init__(self) -> None:
         normalized = " ".join(self.counter_name.casefold().split())
-        if not self.object_id or not normalized:
+        if self.subject_kind not in {"player", "permanent"}:
             raise CounterPlacementError(
-                "Counter placements require an object and counter name"
+                "Counter placement subjects must be players or permanents"
+            )
+        if not self.subject_id or not normalized:
+            raise CounterPlacementError(
+                "Counter placements require a subject and counter name"
             )
         if type(self.amount) is not int or self.amount < 0:
             raise CounterPlacementError(
@@ -112,18 +118,40 @@ class PreparedCounterPlacements:
 
 @dataclass(frozen=True, slots=True)
 class CounterPlacementResult:
-    object_id: str
+    subject_kind: CounterSubjectKind
+    subject_id: str
     counter_name: str
     requested: int
     placed: int
     before: int
     after: int
 
+    @property
+    def object_id(self) -> str:
+        """Compatibility accessor for permanent-only placement consumers."""
+
+        if self.subject_kind != "permanent":
+            raise CounterPlacementError(
+                "Player counter placements do not have an object ID"
+            )
+        return self.subject_id
+
+
+@dataclass(frozen=True, slots=True)
+class CounterPlacementCommitRow:
+    event: ReplaceableEvent
+    subject_kind: CounterSubjectKind
+    subject_id: str
+    display_ref: str
+    counter_name: str
+    requested: int
+    amount: int
+
 
 @dataclass(frozen=True, slots=True)
 class CounterPlacementCommitPlan:
     prepared: PreparedCounterPlacements
-    rows: tuple[tuple[ReplaceableEvent, Any, str, int, int], ...]
+    rows: tuple[CounterPlacementCommitRow, ...]
     state_plan: CounterStatePlan
 
 
@@ -133,7 +161,22 @@ def _event_spec(
     *,
     event_id: str,
 ) -> CounterPlacementEventSpec:
-    card = host.state.cards.get(request.object_id)
+    if request.subject_kind == "player":
+        if request.subject_id not in host.state.players:
+            raise CounterPlacementError(
+                "Counter placement player no longer exists"
+            )
+        return CounterPlacementEventSpec(
+            event_id=event_id,
+            subject_kind="player",
+            subject_id=request.subject_id,
+            placing_player=request.placing_player,
+            counter_name=request.normalized_name,
+            amount=request.amount,
+            source_ref=request.source_ref,
+            effect_generated=request.effect_generated,
+        )
+    card = host.state.cards.get(request.subject_id)
     if card is None:
         raise CounterPlacementError(
             "Counter placement target no longer exists"
@@ -145,20 +188,35 @@ def _event_spec(
     controller = card.controller if card.zone == "battlefield" else None
     return CounterPlacementEventSpec(
         event_id=event_id,
-        object_id=card.object_id,
+        subject_kind="permanent",
+        subject_id=card.object_id,
+        placing_player=request.placing_player,
+        counter_name=request.normalized_name,
+        amount=request.amount,
+        source_ref=request.source_ref,
+        effect_generated=request.effect_generated,
         owner=card.owner,
         controller=controller,
         target_zone=card.zone,
         target_types=tuple(
             sorted({*card_types, *subtypes, *supertypes})
         ),
-        placing_player=request.placing_player,
-        counter_name=request.normalized_name,
-        amount=request.amount,
-        source_ref=request.source_ref,
-        effect_generated=request.effect_generated,
         logical_object_id=card.logical_object_id,
     )
+
+
+def _event_subject_label(
+    host: CounterPlacementHost,
+    request: CounterPlacementRequest,
+) -> str:
+    if request.subject_kind == "player":
+        return request.subject_id
+    card = host.state.cards.get(request.subject_id)
+    if card is None:
+        raise CounterPlacementError(
+            "Counter placement target no longer exists"
+        )
+    return card.ref
 
 
 def prepare_counter_placements(
@@ -185,7 +243,7 @@ def prepare_counter_placements(
             event_id=(
                 f"counter.place:{host.state.revision}:"
                 f"{host.state.event_sequence + 1}:{index}:"
-                f"{host.state.cards[request.object_id].ref}"
+                f"{_event_subject_label(host, request)}"
             ),
         ).event()
         for index, request in enumerate(nonzero)
@@ -259,6 +317,12 @@ def _log_replacements(
                 "Counter replacement journal does not match its snapshot"
             )
         name, requested, amount = _resolved_amount(event)
+        object_id = (
+            event.affected_object.object_id
+            if event.affected_object is not None
+            else None
+        )
+        player = event.affected_player
         host._log(
             None,
             "replacement.apply",
@@ -266,13 +330,15 @@ def _log_replacements(
             {
                 "source": effect.source_id,
                 "effect_id": effect.effect_id,
-                "object_id": event.affected_object.object_id,
+                "object_id": object_id,
+                "player": player,
                 "counter": name,
                 "requested": requested,
                 "resolved": amount,
             },
             importance=2,
-            changed_objects=[event.affected_object.object_id],
+            changed_objects=([object_id] if object_id is not None else []),
+            changed_players=([player] if player is not None else []),
         )
 
 
@@ -286,10 +352,34 @@ def plan_prepared_counter_placement_commit(
         raise CounterPlacementError(
             "Counter placement commits require a typed prepared batch"
         )
-    validated: list[tuple[ReplaceableEvent, Any, str, int, int]] = []
+    validated: list[CounterPlacementCommitRow] = []
     for event in prepared.events:
+        name, requested, amount = _resolved_amount(event)
+        target_kind = str(event.payload.get("target_kind") or "")
+        if target_kind == "player":
+            player = event.affected_player
+            if player is None or event.affected_object is not None:
+                raise CounterPlacementError(
+                    "Player counter placement lost its affected player"
+                )
+            if player not in host.state.players:
+                raise CounterPlacementError(
+                    "Counter placement player no longer exists"
+                )
+            validated.append(
+                CounterPlacementCommitRow(
+                    event=event,
+                    subject_kind="player",
+                    subject_id=player,
+                    display_ref=player,
+                    counter_name=name,
+                    requested=requested,
+                    amount=amount,
+                )
+            )
+            continue
         affected = event.affected_object
-        if affected is None:
+        if affected is None or event.affected_player is not None:
             raise CounterPlacementError(
                 "Counter placement event lost its affected object"
             )
@@ -303,27 +393,41 @@ def plan_prepared_counter_placement_commit(
             raise CounterPlacementError(
                 "Counter placement target changed zones before commit"
             )
-        name, requested, amount = _resolved_amount(event)
-        validated.append((event, card, name, requested, amount))
+        validated.append(
+            CounterPlacementCommitRow(
+                event=event,
+                subject_kind="permanent",
+                subject_id=card.object_id,
+                display_ref=card.ref,
+                counter_name=name,
+                requested=requested,
+                amount=amount,
+            )
+        )
 
     try:
         state_plan = plan_counter_changes(
             host,
             tuple(
                 CounterChange(
-                    subject_kind="permanent",
-                    subject_id=card.object_id,
-                    counter_name=name,
-                    amount=amount,
-                    expected_zone=str(event.payload.get("target_zone") or ""),
+                    subject_kind=row.subject_kind,
+                    subject_id=row.subject_id,
+                    counter_name=row.counter_name,
+                    amount=row.amount,
+                    expected_zone=(
+                        str(row.event.payload.get("target_zone") or "")
+                        if row.subject_kind == "permanent"
+                        else None
+                    ),
                     expected_logical_object_id=(
-                        str(event.payload["target_logical_object_id"])
-                        if event.payload.get("target_logical_object_id")
+                        str(row.event.payload["target_logical_object_id"])
+                        if row.subject_kind == "permanent"
+                        and row.event.payload.get("target_logical_object_id")
                         is not None
                         else None
                     ),
                 )
-                for event, card, name, _requested, amount in validated
+                for row in validated
             ),
         )
     except CounterStateError as exc:
@@ -365,36 +469,53 @@ def commit_counter_placement_plan(
         raise CounterPlacementError(str(exc)) from exc
 
     results: list[CounterPlacementResult] = []
-    for (event, card, name, requested, amount), transition in zip(
+    for row, transition in zip(
         plan.rows, transitions, strict=True
     ):
         results.append(
             CounterPlacementResult(
-                object_id=card.object_id,
-                counter_name=name,
-                requested=requested,
-                placed=amount,
+                subject_kind=row.subject_kind,
+                subject_id=row.subject_id,
+                counter_name=row.counter_name,
+                requested=row.requested,
+                placed=row.amount,
                 before=transition.before,
                 after=transition.after,
             )
         )
         if log:
+            changed_objects = (
+                [row.subject_id]
+                if row.subject_kind == "permanent"
+                else []
+            )
+            changed_players = (
+                [row.subject_id]
+                if row.subject_kind == "player"
+                else []
+            )
             host._log(
-                str(event.payload.get("placing_player") or "") or None,
+                str(row.event.payload.get("placing_player") or "") or None,
                 "counter.add",
-                f"Put {amount} {name} counter(s) on {card.ref}.",
+                f"Put {row.amount} {row.counter_name} counter(s) on "
+                f"{row.display_ref}.",
                 {
-                    "object": card.ref,
-                    "counter": name,
-                    "requested": requested,
-                    "placed": amount,
+                    (
+                        "object"
+                        if row.subject_kind == "permanent"
+                        else "player"
+                    ): row.display_ref,
+                    "counter": row.counter_name,
+                    "requested": row.requested,
+                    "placed": row.amount,
                     "before": transition.before,
                     "after": transition.after,
-                    "source": event.payload.get("source"),
+                    "source": row.event.payload.get("source"),
                     "placement_reason": reason,
                 },
                 importance=2,
-                changed_objects=[card.object_id],
+                changed_objects=changed_objects,
+                changed_players=changed_players,
             )
     if log:
         _log_replacements(host, plan.prepared)
@@ -460,7 +581,8 @@ def place_counters_on_refs(
         host,
         tuple(
             CounterPlacementRequest(
-                object_id=card.object_id,
+                subject_kind="permanent",
+                subject_id=card.object_id,
                 counter_name=counter_name,
                 amount=amount,
                 placing_player=actor,

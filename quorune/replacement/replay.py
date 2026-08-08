@@ -470,7 +470,11 @@ def _decode_semantic_intent_continuation(
         or actor not in batch.apnap_order
         or (resume_kind == "semantic_intent_completion" and not isinstance(response, Mapping))
         or not isinstance(semantic_intent, Mapping)
-        or intent_kind not in {"place_counters", "zone_move"}
+        or intent_kind not in {
+            "place_counters",
+            "proliferate",
+            "zone_move",
+        }
         or type(intent_index) is not int
         or intent_index < 0
     ):

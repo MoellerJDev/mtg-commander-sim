@@ -4,13 +4,13 @@ import copy
 import random
 from typing import Any
 
-from ..counter_placement import CounterPlacementError, place_counters_on_refs
-from ..counter_state import (
-    CounterChange,
-    CounterStateError,
-    commit_counter_changes,
-    plan_counter_changes,
+from ..counter_placement import (
+    CounterPlacementError,
+    CounterPlacementRequest,
+    place_counters,
+    place_counters_on_refs,
 )
+from ..counter_state import player_counter_snapshot
 from ..errors import GameRuleError
 from ..fixed_damage_set import (
     FixedDamageSetError,
@@ -872,55 +872,87 @@ class SemanticChoiceIntentHostMixin:
         return card.ref
 
     def proliferate_intent(self, intent: ProliferateIntent) -> None:
-        changed_objects: list[str] = []
-        changed_players: list[str] = []
-        for selection in intent.selections:
-            if selection in self.state.players:
-                player = self.state.players[selection]
-                changes = [
-                    CounterChange(
-                        subject_kind="player",
-                        subject_id=selection,
-                        counter_name=name,
-                        amount=1,
+        requests: list[CounterPlacementRequest] = []
+        for subject in intent.subjects:
+            if subject.subject_kind == "player":
+                player = self.state.players.get(subject.subject_id)
+                if player is None or not player.in_game:
+                    raise GameRuleError(
+                        "A Proliferate player is no longer in the game"
                     )
-                    for name in ("poison", "energy")
-                    if int(getattr(player, name)) > 0
-                ]
-                if changes:
-                    try:
-                        commit_counter_changes(
-                            self,
-                            plan_counter_changes(self, changes),
-                        )
-                    except CounterStateError as exc:
-                        raise GameRuleError(str(exc)) from exc
-                    changed_players.append(selection)
-                continue
-            card = self._resolve_object(
-                intent.actor,
-                selection,
-                zones={"battlefield"},
-            )
-            for counter_name, amount in tuple(card.counters.items()):
-                if int(amount) <= 0:
-                    continue
-                self.place_counters_intent(
-                    PlaceCountersIntent(
-                        actor=intent.actor,
-                        object_refs=(card.ref,),
-                        counter_name=counter_name,
-                        amount=1,
-                        reason=intent.reason,
-                        source_ref=None,
+                current_names = tuple(player_counter_snapshot(player))
+            else:
+                card = self.state.cards.get(subject.subject_id)
+                if (
+                    card is None
+                    or card.ref != subject.ref
+                    or card.zone != "battlefield"
+                    or card.phased_out
+                    or card.logical_object_id
+                    != subject.logical_object_id
+                ):
+                    raise GameRuleError(
+                        "A Proliferate permanent changed identity before commit"
+                    )
+                current_names = tuple(
+                    sorted(
+                        name
+                        for name, amount in card.counters.items()
+                        if int(amount) > 0
                     )
                 )
-            changed_objects.append(card.object_id)
+            if current_names != subject.counter_names:
+                raise GameRuleError(
+                    "A Proliferate subject's counter set changed before commit"
+                )
+            requests.extend(
+                CounterPlacementRequest(
+                    subject_kind=subject.subject_kind,
+                    subject_id=subject.subject_id,
+                    counter_name=name,
+                    amount=1,
+                    placing_player=intent.actor,
+                    source_ref=intent.source_ref,
+                )
+                for name in subject.counter_names
+            )
+        try:
+            results = place_counters(
+                self,
+                tuple(requests),
+                selections=tuple(
+                    thaw_value(value)
+                    for value in intent.replacement_selections
+                ),
+                reason=intent.reason,
+            )
+        except CounterPlacementError as exc:
+            raise GameRuleError(str(exc)) from exc
+        changed_objects = sorted(
+            {
+                result.subject_id
+                for result in results
+                if result.subject_kind == "permanent"
+                and result.after != result.before
+            }
+        )
+        changed_players = sorted(
+            {
+                result.subject_id
+                for result in results
+                if result.subject_kind == "player"
+                and result.after != result.before
+            }
+        )
         self._log(
             intent.actor,
             "counter.proliferate",
             f"{intent.actor} proliferated {len(intent.selections)} object(s).",
-            {"objects": list(intent.selections)},
+            {
+                "subjects": list(intent.selections),
+                "counter_placements": len(results),
+                "source": intent.source_ref,
+            },
             importance=2,
             changed_objects=changed_objects,
             changed_players=changed_players,

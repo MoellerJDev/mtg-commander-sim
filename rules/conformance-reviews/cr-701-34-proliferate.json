@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "effective_date": "2026-06-19",
+  "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
+  "family": "CR 701.34 — Ordinary Proliferate",
+  "cases": [
+    {
+      "rule_id": "701.34",
+      "rule_text_sha256": "4b4e9ce7875b5f6180c0989e0e46660a3a63aeeee547fa3b806e6aaf381523e9",
+      "classification": "definition_only",
+      "status": "definition_only",
+      "assertion_kind": "static_traceability",
+      "reviewed": true,
+      "implementation_components": ["quorune.rules.capabilities.CapabilityRegistry"],
+      "executable_test_ids": ["tests.test_proliferate_compiler.ProliferateCompilerTests.test_generic_proliferate_program_is_source_spanned_and_capability_closed"],
+      "required_scenarios": [],
+      "covered_scenarios": [],
+      "blockers": [],
+      "notes": ["Keyword-action heading; counter.producer.proliferate owns the bounded ordinary single-instruction process."]
+    },
+    {
+      "rule_id": "701.34a",
+      "rule_text_sha256": "ab5dbe9d839e833e98bbef161544bf503d8c5d526ab825b16b8a92d634296aea",
+      "classification": "behavioral",
+      "status": "passing",
+      "assertion_kind": "executable_engine",
+      "reviewed": true,
+      "implementation_components": ["quorune.semantic_choices.public_selection.ProliferateChoiceHandler", "quorune.semantic_runtime.intents.ProliferateSubject", "quorune.semantic_runtime.intents.ProliferateIntent", "quorune.counter_placement.prepare_counter_placements", "quorune.counter_state.player_counter_snapshot"],
+      "executable_test_ids": ["tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_choice_increases_each_existing_counter_kind_once", "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_counter_replacements_suspend_whole_batch_before_mutation", "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_rejects_stale_subject_snapshot_without_mutation", "tests.test_proliferate_rules.ProliferateEngineTests.test_four_player_proliferate_choice_is_public_and_actor_scoped", "tests.test_proliferate_rules.ProliferateEngineTests.test_proliferate_replacement_resume_replays_exactly"],
+      "required_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "covered_scenarios": ["positive", "negative", "interaction", "multiplayer", "replay", "hidden_information"],
+      "blockers": [],
+      "notes": ["The resolving controller chooses a canonical public set, every positive counter kind is snapshotted, and all resulting player and permanent placements enter one replacement-aware atomic batch before mutation."]
+    },
+    {
+      "rule_id": "701.34b",
+      "rule_text_sha256": "be4be3af3fdfc93ff6ab52e8a79cbb8a91d72aad7848a2701ca4acfdac2006ed",
+      "classification": "behavioral",
+      "status": "blocked",
+      "assertion_kind": "unsupported_fail_closed",
+      "reviewed": true,
+      "implementation_components": ["quorune.compiler.proliferate_templates.single_proliferate_effect_template"],
+      "executable_test_ids": ["tests.test_proliferate_compiler.ProliferateCompilerTests.test_unsupported_proliferate_variants_remain_material_residuals"],
+      "required_scenarios": ["negative", "multiplayer"],
+      "covered_scenarios": ["negative"],
+      "blockers": ["Two-Headed Giant shared-team poison counters are outside every currently supported Quorune game profile"],
+      "notes": ["Traditional, Commander duel, and Commander review profiles do not use shared-team poison totals; aggregate Proliferate remains incomplete until a team profile owns this rule."]
+    }
+  ]
+}

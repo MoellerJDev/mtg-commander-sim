@@ -7,6 +7,7 @@ from quorune.counter_state import (
     CounterChange,
     CounterStateError,
     commit_counter_changes,
+    player_counter_snapshot,
     plan_counter_changes,
 )
 from quorune.model import CardInstance, PlayerState
@@ -66,16 +67,41 @@ class CounterStateTests(unittest.TestCase):
         self.assertEqual(("A",), plan.changed_players)
         self.assertEqual((card.object_id,), plan.changed_objects)
 
-    def test_unsupported_player_counter_fails_before_mutation(self):
+    def test_generic_player_counter_round_trips_and_zero_is_omitted(self):
         host, _card = self.host()
-        with self.assertRaisesRegex(
-            CounterStateError, "no represented state owner"
-        ):
+        player = host.state.players["A"]
+        plan = plan_counter_changes(
+            host,
+            (
+                CounterChange("player", "A", "Experience", 2),
+                CounterChange("player", "A", "poison", 1),
+            ),
+        )
+        commit_counter_changes(host, plan)
+
+        self.assertEqual(
+            {"experience": 2, "poison": 1},
+            player_counter_snapshot(player),
+        )
+        restored = PlayerState.from_dict(player.to_dict())
+        self.assertEqual({"experience": 2}, restored.counters)
+        commit_counter_changes(
+            host,
             plan_counter_changes(
                 host,
-                (CounterChange("player", "A", "experience", 1),),
-            )
-        self.assertEqual(0, host.state.players["A"].poison)
+                (CounterChange("player", "A", "experience", -9),),
+            ),
+        )
+        self.assertEqual({"poison": 1}, player_counter_snapshot(player))
+        self.assertNotIn("experience", player.counters)
+
+    def test_player_counter_model_rejects_aliases_and_malformed_values(self):
+        with self.assertRaisesRegex(ValueError, "compatibility state fields"):
+            PlayerState("A", "A", counters={"Poison": 1})
+        with self.assertRaisesRegex(ValueError, "nonnegative integers"):
+            PlayerState("A", "A", counters={"experience": True})
+        with self.assertRaisesRegex(ValueError, "nonempty name"):
+            PlayerState("A", "A", counters={" ": 1})
 
     def test_stale_permanent_identity_rolls_back_whole_batch(self):
         host, card = self.host()
