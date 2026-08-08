@@ -288,6 +288,10 @@ from .semantic_choices.engine_coordination import (
     SemanticChoiceCoordinationMixin,
 )
 from .semantic_choices.intent_host import SemanticChoiceIntentHostMixin
+from .semantic_runtime.explore import (
+    capture_explore_source_departure,
+    explore_source_controller,
+)
 from .state_based_actions import (
     ObjectSnapshot,
     PermanentSnapshot,
@@ -1719,6 +1723,8 @@ class CommanderEngine(
             if semantic_events
             else {}
         )
+        if origin == "battlefield":
+            capture_explore_source_departure(self, card)
         departure_snapshot = capture_departure_trigger_sources(self, semantic_events=semantic_events, origin=origin)
         if origin == "stack":
             # A resolving or countered spell has already had its StackItem
@@ -8727,6 +8733,8 @@ class CommanderEngine(
             return self.state.active_player
         if value == "$source":
             return self._stack_source_ref(item)
+        if value == "$source.controller":
+            return explore_source_controller(item, self.state.cards)
         if value == "$card":
             card = self.state.cards.get(item.card_object_id or "")
             return card.ref if card else None

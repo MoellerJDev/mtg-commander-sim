@@ -46,6 +46,7 @@ from .compiler.destruction_templates import (
     destruction_effect_template,
 )
 from .compiler.exile_templates import targeted_exile_effect_template
+from .compiler.explore_templates import single_explore_effect_template
 from .compiler.return_to_hand_templates import (
     targeted_return_to_hand_effect_template,
 )
@@ -253,6 +254,9 @@ def _effect_template(
     tap_state = targeted_tap_state_effect_template(normalized)
     if tap_state is not None:
         return tap_state.compiled()
+    explore = single_explore_effect_template(normalized)
+    if explore is not None:
+        return explore.compiled()
     match = re.fullmatch(
         r"goad target creature"
         r"(?P<relation> an opponent controls| you don't control)?\.?",
@@ -812,7 +816,8 @@ def _trigger_node(
 ) -> OracleNode | None:
     """Compile one closed ordinary or CR 615.13 triggered ability."""
 
-    if not _TRIGGER_PREFIX.match(line):
+    material_line = _without_parenthetical_reminder(line)
+    if not _TRIGGER_PREFIX.match(material_line):
         return None
     source_name = re.escape(card_name)
     trigger = re.fullmatch(
@@ -821,11 +826,11 @@ def _trigger_node(
         rf"enchantment|equipment|land|permanent)|{source_name}) "
         rf"(?P<event>enters|dies|leaves the battlefield), "
         rf"(?P<body>.+)",
-        line,
+        material_line,
         re.IGNORECASE,
     )
     prevention_trigger = prevention_trigger_effect_template(
-        line,
+        material_line,
         card_name=card_name,
     )
     template = None
@@ -846,8 +851,14 @@ def _trigger_node(
         event = "damage.prevented"
         recognized = True
     elif trigger:
+        explored = single_explore_effect_template(
+            trigger.group("body"),
+            allow_source_pronoun=True,
+        )
         template, effects, target_schema, mechanics = (
-            _reviewed_effect_template(
+            explored.compiled()
+            if explored is not None
+            else _reviewed_effect_template(
                 trigger.group("body"),
                 card_name=card_name,
             )

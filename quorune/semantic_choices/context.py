@@ -328,3 +328,4 @@ class SemanticChoiceContext:
     semantic_program_id: str
     semantic_program_version: int | None
     query: SemanticChoiceQuery
+    source_logical_object_id: str | None = None

@@ -41,6 +41,7 @@ from ..semantic_runtime import (
     CreateTokenIntent,
     DomainEffectIntent,
     EliminatePlayersIntent,
+    ExploreCompletedIntent,
     LifeChangeIntent,
     MoveLibraryCardsToBottomIntent,
     MoveObjectsSimultaneouslyIntent,
@@ -218,6 +219,47 @@ class SemanticChoiceIntentHostMixin:
             changed_players=intent.changed_players,
         )
 
+    def complete_explore_intent(self, intent: ExploreCompletedIntent) -> None:
+        explorer = next(
+            (
+                card
+                for card in self.state.cards.values()
+                if card.ref == intent.explorer_ref
+            ),
+            None,
+        )
+        changed_objects = (
+            [explorer.object_id]
+            if explorer is not None
+            and explorer.logical_object_id
+            == intent.explorer_logical_object_id
+            else []
+        )
+        details = {
+            "player": intent.player,
+            "explorer": intent.explorer_ref,
+            "explorer_logical_object_id": (
+                intent.explorer_logical_object_id
+            ),
+            "result": intent.result,
+            "reason": intent.reason,
+        }
+        if intent.revealed_card_ref is not None:
+            details["revealed_card"] = intent.revealed_card_ref
+        self._log(
+            intent.actor,
+            "explore.complete",
+            f"{intent.explorer_ref} explored for {intent.player}.",
+            details,
+            importance=2,
+            changed_objects=changed_objects,
+            changed_players=[intent.player],
+        )
+        self._dispatch_semantic_event(
+            "permanent.explores",
+            details,
+        )
+
     def move_object_intent(self, intent: ZoneMoveIntent) -> str:
         try:
             card = self._resolve_object(
@@ -255,6 +297,10 @@ class SemanticChoiceIntentHostMixin:
             tapped=tapped,
             reason=intent.reason,
             semantic_events=intent.semantic_events,
+            replacement_selections=tuple(
+                thaw_value(value)
+                for value in intent.replacement_selections
+            ),
         )
         return card.ref
 

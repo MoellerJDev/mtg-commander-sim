@@ -7,6 +7,7 @@ from ..replacement.immutable import FrozenMap
 from ..semantic_runtime.intents import (
     ChooseOneRestBottomRandomIntent,
     DrawCardsIntent,
+    ExploreCompletedIntent,
     MoveObjectsSimultaneouslyIntent,
     PayLifeIntent,
     PlaceCountersIntent,
@@ -38,13 +39,18 @@ class ExploreChoiceHandler:
     operation: str = "explore"
     handler_id: str = "choice.library.explore.v1"
     schema_version: int = 1
-    rule_references: tuple[str, ...] = ("CR 701.40",)
+    rule_references: tuple[str, ...] = (
+        "CR 701.44a",
+        "CR 701.44b",
+        "CR 701.44c",
+    )
     capability_dependencies: tuple[str, ...] = ()
     continuation_fields: tuple[str, ...] = (
         "card",
         "_choice_actor",
         "_top_ref",
         "_explorer_ref",
+        "_explorer_logical_object_id",
         "_stack_label",
     )
     private_data: tuple[str, ...] = ()
@@ -57,6 +63,7 @@ class ExploreChoiceHandler:
         "RevealLibraryCardsIntent",
         "PlaceCountersIntent",
         "ZoneMoveIntent",
+        "ExploreCompletedIntent",
     )
     replay_fixture: str = "semantic-choice-explore"
     test_modules: tuple[str, ...] = ("tests.test_exact_zimone_closure",)
@@ -67,17 +74,37 @@ class ExploreChoiceHandler:
         context: SemanticChoiceContext,
     ) -> SemanticChoicePreparation:
         explorer_ref = str(effect.get("card") or "")
-        explorer = context.query.object(
-            explorer_ref,
-            zones=("battlefield",),
-        )
+        explorer = context.query.object(explorer_ref)
         if explorer is None:
             raise SemanticChoiceError("The exploring permanent is unavailable")
+        explorer_logical_object_id = (
+            context.source_logical_object_id
+            if context.source_ref == explorer.ref
+            and context.source_logical_object_id is not None
+            else explorer.logical_object_id
+        )
+        explorer_is_current = bool(
+            explorer.zone == "battlefield"
+            and not explorer.phased_out
+            and explorer.logical_object_id == explorer_logical_object_id
+        )
         library = context.query.library_refs(context.actor, top_first=True)
         if not library:
             return SemanticChoicePreparation(
                 request=None,
                 continuation_effect=FrozenMap(effect),
+                preparation_intents=(
+                    ExploreCompletedIntent(
+                        actor=context.actor,
+                        player=context.actor,
+                        explorer_ref=explorer.ref,
+                        explorer_logical_object_id=(
+                            explorer_logical_object_id
+                        ),
+                        result="empty_library",
+                        reason=context.stack_label,
+                    ),
+                ),
                 auto_continue=AutoContinue(reason="library is empty"),
             )
         top_ref = library[0]
@@ -106,6 +133,17 @@ class ExploreChoiceHandler:
                         reason="explore",
                         owned_only=True,
                     ),
+                    ExploreCompletedIntent(
+                        actor=context.actor,
+                        player=context.actor,
+                        explorer_ref=explorer.ref,
+                        explorer_logical_object_id=(
+                            explorer_logical_object_id
+                        ),
+                        result="land_revealed",
+                        reason=context.stack_label,
+                        revealed_card_ref=top.ref,
+                    ),
                 ),
                 auto_continue=AutoContinue(reason="explore revealed a land"),
             )
@@ -133,18 +171,27 @@ class ExploreChoiceHandler:
                     "_choice_actor": context.actor,
                     "_top_ref": top.ref,
                     "_explorer_ref": explorer.ref,
+                    "_explorer_logical_object_id": (
+                        explorer_logical_object_id
+                    ),
                     "_stack_label": context.stack_label,
                 }
             ),
             preparation_intents=(
                 reveal,
-                PlaceCountersIntent(
-                    actor=context.actor,
-                    object_refs=(explorer.ref,),
-                    counter_name="+1/+1",
-                    amount=1,
-                    reason=context.stack_label,
-                    source_ref=explorer.ref,
+                *(
+                    (
+                        PlaceCountersIntent(
+                            actor=context.actor,
+                            object_refs=(explorer.ref,),
+                            counter_name="+1/+1",
+                            amount=1,
+                            reason=context.stack_label,
+                            source_ref=explorer.ref,
+                        ),
+                    )
+                    if explorer_is_current
+                    else ()
                 ),
             ),
         )
@@ -181,24 +228,20 @@ class ExploreChoiceHandler:
                 )
             )
         intents.append(
-            RecordChoiceIntent(
+            ExploreCompletedIntent(
                 actor=actor,
-                event_code="explore.complete",
-                message=(
-                    f"{actor} put {top_ref} into their graveyard."
+                player=actor,
+                explorer_ref=str(effect["_explorer_ref"]),
+                explorer_logical_object_id=str(
+                    effect["_explorer_logical_object_id"]
+                ),
+                result=(
+                    "nonland_graveyard_choice"
                     if choice == "graveyard"
-                    else f"{actor} left {top_ref} on top of their library."
+                    else "nonland_top_choice"
                 ),
-                details=FrozenMap(
-                    {
-                        "player": actor,
-                        "card": top_ref,
-                        "destination": choice,
-                        "explorer": effect.get("_explorer_ref"),
-                    }
-                ),
-                importance=2,
-                changed_players=(actor,),
+                reason=str(effect["_stack_label"]),
+                revealed_card_ref=top_ref,
             )
         )
         return SemanticChoiceCompletion(intents=tuple(intents))

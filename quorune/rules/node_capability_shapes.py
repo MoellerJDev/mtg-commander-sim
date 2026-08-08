@@ -158,6 +158,13 @@ _COUNTER_STACK_BASE = {
     "source_exclusion": True,
     "count": 1,
 }
+_TARGETED_EXPLORE_SCHEMA = {
+    "zones": ["battlefield"],
+    "categories": ["permanent"],
+    "types_any": ["creature"],
+    "controller_relation": "you",
+    "count": 1,
+}
 _TARGETED_COUNTER_SCHEMAS: tuple[Mapping[str, Any], ...] = (
     _COUNTER_STACK_BASE,
     {**_COUNTER_STACK_BASE, "types_none": ["creature"]},
@@ -398,6 +405,39 @@ def fixed_draw_node_capabilities(
     return ()
 
 
+def single_explore_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return capabilities only for one permanent exploring once."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if "explore" not in mechanics or len(effects) != 1:
+        return ()
+    effect = effects[0]
+    if set(effect) != {"op", "player", "card"} or effect.get("op") != "explore":
+        return ()
+    if (
+        target_schema is None
+        and effect.get("player") == "$source.controller"
+        and effect.get("card") == "$source"
+    ):
+        return ("keyword_action.explore.single",)
+    if (
+        "cr-115-targets" in mechanics
+        and dict(target_schema or {}) == _TARGETED_EXPLORE_SCHEMA
+        and effect.get("player") == "$target.controller.0"
+        and effect.get("card") == "$target.0"
+    ):
+        return (
+            "keyword_action.explore.single",
+            "target.revalidate_resolution",
+        )
+    return ()
+
+
 def targeted_tap_state_node_capabilities(
     *,
     effects: Sequence[Mapping[str, Any]],
@@ -598,6 +638,7 @@ __all__ = [
     "fixed_damage_node_capabilities",
     "mass_destruction_node_capabilities",
     "fixed_draw_node_capabilities",
+    "single_explore_node_capabilities",
     "targeted_destruction_node_capabilities",
     "targeted_exile_node_capabilities",
     "targeted_return_to_hand_node_capabilities",

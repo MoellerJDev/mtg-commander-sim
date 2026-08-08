@@ -292,6 +292,40 @@ class RecordChoiceIntent:
 
 
 @dataclass(frozen=True, slots=True)
+class ExploreCompletedIntent:
+    actor: str
+    player: str
+    explorer_ref: str
+    explorer_logical_object_id: str
+    result: Literal[
+        "empty_library",
+        "land_revealed",
+        "nonland_graveyard_choice",
+        "nonland_top_choice",
+    ]
+    reason: str
+    revealed_card_ref: str | None = None
+
+    def __post_init__(self) -> None:
+        for label, value in (
+            ("actor", self.actor),
+            ("player", self.player),
+            ("explorer_ref", self.explorer_ref),
+            ("explorer_logical_object_id", self.explorer_logical_object_id),
+            ("reason", self.reason),
+        ):
+            if type(value) is not str or not value:
+                raise ValueError(f"Explore {label} must be a nonempty string")
+        if self.revealed_card_ref is not None and (
+            type(self.revealed_card_ref) is not str
+            or not self.revealed_card_ref
+        ):
+            raise ValueError(
+                "Explore revealed-card reference must be nonempty or null"
+            )
+
+
+@dataclass(frozen=True, slots=True)
 class ZoneMoveIntent:
     actor: str
     object_ref: str
@@ -307,6 +341,17 @@ class ZoneMoveIntent:
     ] = "preserve"
     semantic_events: bool = True
     optional_if_missing: bool = False
+    replacement_selections: tuple[str | FrozenMap, ...] = ()
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "replacement_selections",
+            _freeze_replacement_selections(
+                tuple(self.replacement_selections),
+                family="Zone move",
+            ),
+        )
 
 
 @dataclass(frozen=True, slots=True)

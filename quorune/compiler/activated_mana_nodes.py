@@ -3,6 +3,7 @@ from __future__ import annotations
 """Closed Oracle-IR lowering for fixed-output activated mana abilities."""
 
 from dataclasses import replace
+import re
 from typing import Any, Callable, Mapping, Sequence
 
 from ..abilities import parse_activated_abilities
@@ -262,6 +263,7 @@ def _activated_effect_dependency_gate(
             "destroy",
             "destroy_all",
             "exile_permanent",
+            "explore",
             "offer_draw",
             "tap",
             "untap",
@@ -357,8 +359,16 @@ def activated_oracle_node(
     )
     if color_set_mana is not None:
         return color_set_mana
+    effect_material = ability.effect_text
+    if ability.sorcery_speed:
+        effect_material = re.sub(
+            r"\.?\s*activate only as a sorcery\.?$",
+            "",
+            effect_material,
+            flags=re.IGNORECASE,
+        ).strip()
     template, effects, target_schema, mechanics = effect_template(
-        ability.effect_text,
+        effect_material,
         card_name=card_name,
     )
     residual_ids = _activated_effect_residuals(

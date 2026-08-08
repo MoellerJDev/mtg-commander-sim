@@ -26,6 +26,7 @@ from .intents import (
     DrawCardsIntent,
     IntentPlan,
     EliminatePlayersIntent,
+    ExploreCompletedIntent,
     ExilePermanentIntent,
     LifeChangeIntent,
     MoveObjectsSimultaneouslyIntent,
@@ -77,6 +78,11 @@ class SemanticIntentSink(
     ) -> str: ...
 
     def record_choice_intent(self, intent: RecordChoiceIntent) -> None: ...
+
+    def complete_explore_intent(
+        self,
+        intent: ExploreCompletedIntent,
+    ) -> None: ...
 
     def move_object_intent(self, intent: ZoneMoveIntent) -> str: ...
 
@@ -327,6 +333,10 @@ def execute_intent_plan(sink: SemanticIntentSink, plan: IntentPlan) -> object:
         if isinstance(intent, RecordChoiceIntent):
             sink.record_choice_intent(intent)
             results.append((intent.actor, None))
+            continue
+        if isinstance(intent, ExploreCompletedIntent):
+            sink.complete_explore_intent(intent)
+            results.append((intent.explorer_ref, None))
             continue
         if isinstance(intent, ZoneMoveIntent):
             result = sink.move_object_intent(intent)

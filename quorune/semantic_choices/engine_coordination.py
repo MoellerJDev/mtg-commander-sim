@@ -449,6 +449,10 @@ class SemanticChoiceCoordinationMixin:
                 effect=effect,
                 source_ref=source.ref if source is not None else None,
             ),
+            source_logical_object_id=(
+                str(item.context.get("source_logical_object_id") or "")
+                or (source.logical_object_id if source is not None else None)
+            ),
         )
 
     def _begin_registered_semantic_choice(
