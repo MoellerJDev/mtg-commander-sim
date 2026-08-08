@@ -47,7 +47,7 @@ def fabricate_keyword_node(
         mechanics=mechanics,
         effects=(
             {
-                "op": "fabricate",
+                "op": _FABRICATE_MECHANIC,
                 "amount": int(matches[0].group("count")),
             },
         ),

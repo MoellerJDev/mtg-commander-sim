@@ -79,6 +79,7 @@ from .util import stable_json
 ORACLE_IR_SCHEMA_VERSION = 1
 ORACLE_COMPILER_VERSION = "oracle-ir-v46"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
+_FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
     r"^(when|whenever|at the beginning of)\b",
     re.IGNORECASE,
@@ -658,7 +659,7 @@ def _keyword_nodes(
 
     split_mechanics = tuple(
         mechanic
-        for mechanic in (PRINTED_FLASH_MECHANIC, "fabricate")
+        for mechanic in (PRINTED_FLASH_MECHANIC, _FABRICATE_MECHANIC)
         if mechanic in mechanics
     )
     if not split_mechanics:

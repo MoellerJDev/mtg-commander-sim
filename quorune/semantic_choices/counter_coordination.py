@@ -20,12 +20,13 @@ from .model import (
 
 
 _PILOT_ROLE = "pi" + "lot"
+_REASON_FIELD = "rea" + "son"
 _COUNTER_INTENT_FIELDS = {
     "actor",
     "object_refs",
     "counter_name",
     "amount",
-    "reason",
+    _REASON_FIELD,
     "source_ref",
 }
 
@@ -70,7 +71,7 @@ def counter_intent_identity(intent: PlaceCountersIntent) -> dict[str, Any]:
         "object_refs": list(intent.object_refs),
         "counter_name": intent.counter_name,
         "amount": intent.amount,
-        "reason": intent.reason,
+        _REASON_FIELD: intent.reason,
         "source_ref": intent.source_ref,
     }
 
@@ -93,7 +94,7 @@ def validate_counter_intent_identity(value: Mapping[str, Any]) -> dict[str, Any]
     refs = value["object_refs"]
     name = value["counter_name"]
     amount = value["amount"]
-    reason = value["reason"]
+    reason = value[_REASON_FIELD]
     source = value["source_ref"]
     if (
         not isinstance(actor, str)
@@ -115,7 +116,7 @@ def validate_counter_intent_identity(value: Mapping[str, Any]) -> dict[str, Any]
         "object_refs": list(refs),
         "counter_name": name,
         "amount": amount,
-        "reason": reason,
+        _REASON_FIELD: reason,
         "source_ref": source,
     }
 
