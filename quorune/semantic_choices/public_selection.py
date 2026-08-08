@@ -11,6 +11,7 @@ from ..semantic_runtime.intents import (
     PayManaCostIntent,
     PlaceCountersIntent,
     ProliferateIntent,
+    ProliferateSubject,
     RecordChoiceIntent,
 )
 from .context import SemanticChoiceContext, SemanticChoiceQuery
@@ -394,12 +395,19 @@ class ProliferateChoiceHandler:
     operation: str = "proliferate"
     handler_id: str = "choice.counter.proliferate.v1"
     schema_version: int = 1
-    rule_references: tuple[str, ...] = ("CR 701.27",)
-    capability_dependencies: tuple[str, ...] = ()
+    rule_references: tuple[str, ...] = (
+        "CR 701.34",
+        "CR 701.34a",
+        "CR 122.1",
+    )
+    capability_dependencies: tuple[str, ...] = (
+        "counter.producer.proliferate",
+    )
     continuation_fields: tuple[str, ...] = (
         "_choice_actor",
         "_legal_refs",
         "_stack_label",
+        "_source_ref",
     )
     private_data: tuple[str, ...] = ()
     projected_fields: tuple[str, ...] = (
@@ -424,8 +432,7 @@ class ProliferateChoiceHandler:
         players = tuple(
             seat
             for seat in context.query.active_seats
-            if context.query.player_counter(seat, "poison") > 0
-            or context.query.player_counter(seat, "energy") > 0
+            if context.query.player_counters(seat)
         )
         refs = (*objects, *players)
         return SemanticChoicePreparation(
@@ -454,6 +461,7 @@ class ProliferateChoiceHandler:
                     "_choice_actor": context.actor,
                     "_legal_refs": refs,
                     "_stack_label": context.stack_label,
+                    "_source_ref": context.source_ref,
                 }
             ),
         )
@@ -464,33 +472,71 @@ class ProliferateChoiceHandler:
         response: Mapping[str, Any],
         query: SemanticChoiceQuery,
     ) -> SemanticChoiceCompletion:
-        selected = tuple(
+        submitted = tuple(
             str(value)
             for value in response.get("objects", response.get("choices", ()))
         )
-        legal = {str(value) for value in continuation.effect.get("_legal_refs", ())}
-        if len(selected) != len(set(selected)) or any(ref not in legal for ref in selected):
+        legal_order = tuple(
+            str(value)
+            for value in continuation.effect.get("_legal_refs", ())
+        )
+        legal = set(legal_order)
+        if len(submitted) != len(set(submitted)) or any(
+            ref not in legal for ref in submitted
+        ):
             raise SemanticChoiceError("Proliferate choices are not authoritative")
+        selected_set = set(submitted)
+        selected = tuple(ref for ref in legal_order if ref in selected_set)
+        subjects: list[ProliferateSubject] = []
         for ref in selected:
             if ref in query.seats:
-                if not (
-                    query.player_counter(ref, "poison") > 0
-                    or query.player_counter(ref, "energy") > 0
-                ):
+                names = tuple(sorted(query.player_counters(ref)))
+                if not names:
                     raise SemanticChoiceError("A selected player has no counters")
+                subjects.append(
+                    ProliferateSubject(
+                        subject_kind="player",
+                        subject_id=ref,
+                        ref=ref,
+                        counter_names=names,
+                    )
+                )
             else:
                 row = query.object(ref, zones=("battlefield",))
-                if row is None or not any(
-                    int(amount) > 0 for amount in row.counters.values()
-                ):
+                names = (
+                    tuple(
+                        sorted(
+                            name
+                            for name, amount in row.counters.items()
+                            if int(amount) > 0
+                        )
+                    )
+                    if row is not None
+                    else ()
+                )
+                if row is None or not names:
                     raise SemanticChoiceError("A selected permanent has no counters")
+                subjects.append(
+                    ProliferateSubject(
+                        subject_kind="permanent",
+                        subject_id=row.object_id,
+                        ref=row.ref,
+                        counter_names=names,
+                        logical_object_id=row.logical_object_id,
+                    )
+                )
         actor = str(continuation.effect["_choice_actor"])
         return SemanticChoiceCompletion(
             intents=(
                 ProliferateIntent(
                     actor=actor,
-                    selections=selected,
+                    subjects=tuple(subjects),
                     reason=str(continuation.effect["_stack_label"]),
+                    source_ref=(
+                        str(continuation.effect["_source_ref"])
+                        if continuation.effect.get("_source_ref") is not None
+                        else None
+                    ),
                 ),
             )
         )

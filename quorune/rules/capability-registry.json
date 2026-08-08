@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "registry_version": 53,
+  "registry_version": 54,
   "effective_date": "2026-06-19",
   "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b",
   "profiles": [
@@ -67,6 +67,12 @@
       "mechanic_id": "explore",
       "capabilities": [
         "keyword_action.explore.single"
+      ]
+    },
+    {
+      "mechanic_id": "proliferate",
+      "capabilities": [
+        "counter.producer.proliferate"
       ]
     },
     {
@@ -513,6 +519,33 @@
       "dependency_fail_closed_rationale": "The compiler dependency mutation blocks exact Explore CardProgram trust when the counter-placement or zone-destination replacement capability is unavailable.",
       "implementation_mutation_status": "killed",
       "implementation_mutation_rationale": "The compiler mutation test removes the closed Explore template and proves the previously exact generated program becomes a material residual.",
+      "blockers": [],
+      "status": "trusted"
+    },
+    {
+      "id": "counter.producer.proliferate",
+      "version": 1,
+      "official_rules": ["122.1", "701.34", "701.34a"],
+      "supported_profiles": ["traditional", "commander_duel", "commander_review"],
+      "applicability": {
+        "summary": "Compile and resolve one ordinary Proliferate instruction by choosing any number of represented players and phased-in battlefield permanents with counters, snapshotting every current counter kind, and placing one additional counter of each kind through one replacement-aware atomic batch.",
+        "inputs": ["one unmodified Proliferate instruction", "seat-scoped public selection", "stable player or permanent identity", "complete positive counter-kind snapshot"],
+        "outputs": ["canonical selected-subject order", "one additional counter of every selected kind", "one simultaneous replacement-aware counter batch", "exact continuation replay"],
+        "exclusions": ["Two-Headed Giant shared-team poison handling under CR 701.34b", "proliferating twice or repeated Proliferate wording", "counter kinds created or removed between suspension and commit", "player-counter quantity replacement families beyond the represented typed substrate", "granted or copied executable abilities outside typed ability propagation"]
+      },
+      "dependencies": ["counter.placement.quantity_replacement"],
+      "implementation_components": ["quorune.compiler.proliferate_templates.single_proliferate_effect_template", "quorune.rules.node_capability_shapes.single_proliferate_node_capabilities", "quorune.semantic_choices.public_selection.ProliferateChoiceHandler", "quorune.semantic_runtime.intents.ProliferateSubject", "quorune.semantic_runtime.intents.ProliferateIntent", "quorune.counter_placement.prepare_counter_placements", "quorune.counter_placement.commit_counter_placement_plan", "quorune.counter_state.player_counter_snapshot"],
+      "positive_tests": ["test_proliferate_choice_increases_each_existing_counter_kind_once", "test_generated_proliferate_trigger_runs_without_name_dispatch", "test_generic_proliferate_program_is_source_spanned_and_capability_closed"],
+      "negative_tests": ["test_proliferate_rejects_stale_subject_snapshot_without_mutation", "test_unsupported_proliferate_variants_remain_material_residuals"],
+      "interaction_tests": ["test_proliferate_counter_replacements_suspend_whole_batch_before_mutation"],
+      "multiplayer_tests": ["test_four_player_proliferate_choice_is_public_and_actor_scoped"],
+      "privacy_tests": ["test_four_player_proliferate_choice_is_public_and_actor_scoped"],
+      "replay_tests": ["test_proliferate_replacement_resume_replays_exactly"],
+      "required_evidence": ["positive", "negative", "interaction", "multiplayer", "privacy", "replay"],
+      "dependency_fail_closed_status": "passed",
+      "dependency_fail_closed_rationale": "The compiler dependency mutation blocks trusted Proliferate CardPrograms when the canonical counter-placement capability is unavailable.",
+      "implementation_mutation_status": "killed",
+      "implementation_mutation_rationale": "The focused compiler mutation removes the closed Proliferate template and proves the previously exact generated CardProgram becomes a material residual; the positive runtime evidence separately requires every snapshotted counter kind to be placed.",
       "blockers": [],
       "status": "trusted"
     },

@@ -10,7 +10,14 @@ from .characteristic_evaluation import evaluate_card_characteristics
 from .choice_forms import build_action_form
 from .commander import commander_damage_source
 from .continuous_effect_state import active_resolution_effects
-from .model import CardInstance, Event, GameState
+from .counter_state import player_counter_snapshot
+from .model import (
+    CardInstance,
+    Event,
+    GameState,
+    PlayerState,
+    PLAYER_COUNTERS_FIELD,
+)
 from .protocol import PROTOCOL_VERSION, json_patch, view_hash
 from .util import stable_json, truncate
 
@@ -41,6 +48,14 @@ def _commander_damage_rows(
             }
         )
     return rows
+
+
+def _generic_player_counter_rows(player: PlayerState) -> dict[str, int]:
+    return {
+        name: amount
+        for name, amount in player_counter_snapshot(player).items()
+        if name not in {"poison", "energy"}
+    }
 
 
 @dataclass(slots=True)
@@ -405,6 +420,19 @@ class StateProjector:
             "ctx": context,
         }
 
+    def _turn_snapshot(self) -> dict[str, Any]:
+        return {
+            "seq": self.state.turn_sequence,
+            "active": self.state.active_player,
+            "phase": self.state.phase,
+            "step": self.state.step,
+            "priority": self.state.priority_player,
+            "passes": list(self.state.priority_passes),
+            "extra_q": [
+                entry.player for entry in reversed(self.state.extra_turns)
+            ],
+        }
+
     def _snapshot(self, principal: str) -> dict[str, Any]:
         view_seats = self._view_seats_for(principal)
         players: dict[str, Any] = {}
@@ -424,6 +452,9 @@ class StateProjector:
                 "ex": self._zone(p.zones["exile"], principal),
                 "cmd": self._zone(p.zones["command"], principal),
             }
+            generic_counters = _generic_player_counter_rows(p)
+            if generic_counters:
+                summary[PLAYER_COUNTERS_FIELD] = generic_counters
             commander_damage = _commander_damage_rows(
                 self.state, p.commander_damage_received
             )
@@ -478,15 +509,7 @@ class StateProjector:
                     summary["known_hand"] = [self._obj(card, principal) for card in known]
             players[player_seat] = summary
 
-        turn = {
-            "seq": self.state.turn_sequence,
-            "active": self.state.active_player,
-            "phase": self.state.phase,
-            "step": self.state.step,
-            "priority": self.state.priority_player,
-            "passes": list(self.state.priority_passes),
-            "extra_q": [entry.player for entry in reversed(self.state.extra_turns)],
-        }
+        turn = self._turn_snapshot()
         stack = []
         for item in reversed(self.state.stack):
             stack_row = {

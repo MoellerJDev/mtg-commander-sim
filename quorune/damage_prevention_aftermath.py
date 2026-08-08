@@ -245,7 +245,8 @@ def _aftermath_requests(
                 assert aftermath.subject.object_id is not None
                 counters.append(
                     CounterPlacementRequest(
-                        object_id=aftermath.subject.object_id,
+                        subject_kind="permanent",
+                        subject_id=aftermath.subject.object_id,
                         counter_name=aftermath.counter_name,
                         amount=amount,
                         placing_player=aftermath.placing_player,

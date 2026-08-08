@@ -6,6 +6,7 @@ from .counter_templates import targeted_counter_effect_template
 from .damage_templates import fixed_damage_effect_template
 from .destruction_templates import destruction_effect_template
 from .exile_templates import targeted_exile_effect_template
+from .proliferate_templates import single_proliferate_effect_template
 from .return_to_hand_templates import targeted_return_to_hand_effect_template
 
 
@@ -27,6 +28,9 @@ def typed_resolution_effect_template(
     fixed_damage = fixed_damage_effect_template(text, card_name=card_name)
     if fixed_damage is not None:
         return fixed_damage.compiled()
+    proliferate = single_proliferate_effect_template(text)
+    if proliferate is not None:
+        return proliferate.compiled()
     for compiler in (
         destruction_effect_template,
         targeted_exile_effect_template,

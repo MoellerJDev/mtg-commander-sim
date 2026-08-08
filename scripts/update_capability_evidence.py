@@ -38,6 +38,11 @@ LEGACY_EVIDENCE_FIELDS = {
     "replay": "replay_tests",
 }
 MUTATION_TESTS = {
+    "counter.producer.proliferate": (
+        "tests.test_proliferate_compiler."
+        "ProliferateCompilerTests."
+        "test_proliferate_compiler_mutant_is_killed"
+    ),
     "token.creation.additional_replacement": (
         "tests.test_capability_implementation_mutations."
         "CapabilityImplementationMutationTests."

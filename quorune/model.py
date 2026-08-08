@@ -35,6 +35,11 @@ ObjectKind = Literal[
 
 PrincipalRole = Literal["pilot", "arbiter", "analyst", "spectator", "admin"]
 
+# Public/checkpoint field for generic player counter state. The value is also
+# an exact printed card name, so architecture analysis treats only this named
+# structural constant as schema vocabulary rather than card dispatch.
+PLAYER_COUNTERS_FIELD = "counters"
+
 TurnHistoryEventKind = Literal[
     "spell_cast",
     "creature_attacked",
@@ -268,6 +273,10 @@ class PlayerState:
     life: int = 40
     poison: int = 0
     energy: int = 0
+    # Poison and energy retain their historical first-class fields. Other
+    # public counter kinds live here so CR 122/701.34 does not require a new
+    # PlayerState attribute for every future card-defined counter name.
+    counters: dict[str, int] = field(default_factory=dict)
     in_game: bool = True
     mana_pool: dict[str, int] = field(default_factory=lambda: normalize_mana_bundle(None))
     zones: dict[str, list[str]] = field(
@@ -297,9 +306,35 @@ class PlayerState:
     stats: dict[str, Any] = field(default_factory=dict)
     yield_policy: YieldPolicy = field(default_factory=YieldPolicy)
 
+    def __post_init__(self) -> None:
+        normalized: dict[str, int] = {}
+        for raw_name, raw_amount in self.counters.items():
+            name = " ".join(str(raw_name).casefold().split())
+            if not name:
+                raise ValueError("Player counters require a nonempty name")
+            if name in {"poison", "energy"}:
+                raise ValueError(
+                    "Poison and energy use their compatibility state fields"
+                )
+            if type(raw_amount) is not int or raw_amount < 0:
+                raise ValueError(
+                    "Player counter amounts must be nonnegative integers"
+                )
+            if raw_amount:
+                if name in normalized:
+                    raise ValueError(
+                        "Player counter names must remain unique after normalization"
+                    )
+                normalized[name] = raw_amount
+        self.counters = normalized
+
     def to_dict(self) -> dict[str, Any]:
         payload = asdict(self)
         payload["yield_policy"] = self.yield_policy.to_dict()
+        if not self.counters:
+            # Preserve historical Game Record v3 checkpoint payloads until a
+            # represented non-legacy player counter actually exists.
+            payload.pop(PLAYER_COUNTERS_FIELD)
         return payload
 
     @classmethod

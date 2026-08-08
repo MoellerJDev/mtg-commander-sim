@@ -410,6 +410,7 @@ def _string_records(
             "_EXILE_MECHANIC": {"exile"},
             "_EXILE_ZONE": {"exile"},
             "_REASON_FIELD": {"reason"},
+            "PLAYER_COUNTERS_FIELD": {"counters"},
             # Closed predefined token names are CR vocabulary used to build
             # token characteristics.  The structural exemption is limited to
             # these named constants and still fails if a value participates

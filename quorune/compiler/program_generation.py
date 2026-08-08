@@ -16,6 +16,7 @@ from ..rules.node_capability_shapes import (
     mass_destruction_node_capabilities,
     fixed_draw_node_capabilities,
     single_explore_node_capabilities,
+    single_proliferate_node_capabilities,
     targeted_counter_node_capabilities,
     targeted_destruction_node_capabilities,
     targeted_exile_node_capabilities,
@@ -300,6 +301,27 @@ def _is_closed_single_explore_program(program: SemanticProgram) -> bool:
     )
 
 
+def _is_closed_single_proliferate_program(
+    program: SemanticProgram,
+) -> bool:
+    """Recognize one ordinary Proliferate instruction."""
+
+    required = set(
+        single_proliferate_node_capabilities(
+            effects=program.effects,
+            target_schema=program.target_schema,
+            mechanic_ids=(
+                value
+                for value in program.coverage
+                if value == "proliferate"
+            ),
+        )
+    )
+    return bool(required) and required.issubset(
+        program.capability_dependencies
+    )
+
+
 def _is_closed_targeted_tap_state_program(
     program: SemanticProgram,
 ) -> bool:
@@ -433,6 +455,7 @@ def _is_closed_effect_program(program: SemanticProgram) -> bool:
         _is_closed_fixed_damage_program,
         _is_closed_fixed_draw_program,
         _is_closed_single_explore_program,
+        _is_closed_single_proliferate_program,
         _is_closed_targeted_counter_program,
         _is_closed_targeted_destruction_program,
         _is_closed_mass_destruction_program,

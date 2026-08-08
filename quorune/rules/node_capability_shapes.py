@@ -441,6 +441,25 @@ def single_explore_node_capabilities(
     return ()
 
 
+def single_proliferate_node_capabilities(
+    *,
+    effects: Sequence[Mapping[str, Any]],
+    target_schema: Mapping[str, Any] | None,
+    mechanic_ids: Iterable[str],
+) -> tuple[str, ...]:
+    """Return the capability for one unmodified Proliferate instruction."""
+
+    mechanics = {str(value).casefold() for value in mechanic_ids}
+    if (
+        "proliferate" not in mechanics
+        or target_schema is not None
+        or len(effects) != 1
+        or dict(effects[0]) != {"op": "proliferate"}
+    ):
+        return ()
+    return ("counter.producer.proliferate",)
+
+
 def targeted_tap_state_node_capabilities(
     *,
     effects: Sequence[Mapping[str, Any]],
@@ -642,6 +661,7 @@ __all__ = [
     "mass_destruction_node_capabilities",
     "fixed_draw_node_capabilities",
     "single_explore_node_capabilities",
+    "single_proliferate_node_capabilities",
     "targeted_destruction_node_capabilities",
     "targeted_exile_node_capabilities",
     "targeted_return_to_hand_node_capabilities",

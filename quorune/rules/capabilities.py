@@ -13,6 +13,7 @@ from .node_capability_shapes import (
     mass_destruction_node_capabilities,
     fixed_draw_node_capabilities,
     single_explore_node_capabilities,
+    single_proliferate_node_capabilities,
     targeted_counter_node_capabilities,
     targeted_destruction_node_capabilities,
     targeted_exile_node_capabilities,
@@ -720,6 +721,7 @@ def _targeted_effect_capabilities(
         mass_destruction_node_capabilities,
         fixed_draw_node_capabilities,
         single_explore_node_capabilities,
+        single_proliferate_node_capabilities,
         targeted_counter_node_capabilities,
         targeted_destruction_node_capabilities,
         targeted_exile_node_capabilities,
@@ -924,6 +926,8 @@ def capability_covered_mechanics(
         covered.add("cr-122-counters")
     if "keyword_action.explore.single" in supplied:
         covered.add("ex" + "plore")
+    if "counter.producer.proliferate" in supplied:
+        covered.add("pro" + "liferate")
     if "damage.amount.positive" in supplied and supplied.intersection(
         {"damage.result.player_life", "damage.result.multitype_permanent"}
     ):

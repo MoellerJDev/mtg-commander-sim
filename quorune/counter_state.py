@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal, Protocol, Sequence
+from typing import Any, Literal, Mapping, Protocol, Sequence
 
+from .model import PLAYER_COUNTERS_FIELD
 from .state_planner import (
     apply_state_plan,
     commit_state_plan,
@@ -31,6 +32,36 @@ def normalized_counter_name(value: str) -> str:
     if not result:
         raise CounterStateError("Counter changes require a counter name")
     return result
+
+
+def player_counter_snapshot(player: Any) -> dict[str, int]:
+    """Return every positive public counter on one player canonically."""
+
+    result = {
+        name: int(getattr(player, attribute))
+        for name, attribute in sorted(_PLAYER_COUNTER_ATTRIBUTES.items())
+        if int(getattr(player, attribute)) > 0
+    }
+    generic = getattr(player, PLAYER_COUNTERS_FIELD, {})
+    if not isinstance(generic, Mapping):
+        raise CounterStateError("Player counter state must be a mapping")
+    for raw_name, raw_amount in generic.items():
+        name = normalized_counter_name(str(raw_name))
+        if name in _PLAYER_COUNTER_ATTRIBUTES:
+            raise CounterStateError(
+                "Poison and energy cannot be duplicated in generic counters"
+            )
+        if type(raw_amount) is not int or raw_amount < 0:
+            raise CounterStateError(
+                "Player counter amounts must be nonnegative integers"
+            )
+        if raw_amount:
+            if name in result:
+                raise CounterStateError(
+                    "Player counter names must remain unique after normalization"
+                )
+            result[name] = raw_amount
+    return dict(sorted(result.items()))
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,11 +145,11 @@ def _player_counter_value(host: CounterStateHost, seat: str, name: str) -> int:
     if player is None:
         raise CounterStateError("Counter-change player does not exist")
     attribute = _PLAYER_COUNTER_ATTRIBUTES.get(name)
-    if attribute is None:
-        raise CounterStateError(
-            f"Player counter {name!r} has no represented state owner"
-        )
-    value = int(getattr(player, attribute))
+    value = (
+        int(getattr(player, attribute))
+        if attribute is not None
+        else int(player.counters.get(name, 0))
+    )
     if value < 0:
         raise CounterStateError("Player counters cannot be negative")
     return value
@@ -218,8 +249,15 @@ class _CounterAdapter:
     ) -> None:
         if transition.subject_kind == "player":
             player = host.state.players[transition.subject_id]
-            attribute = _PLAYER_COUNTER_ATTRIBUTES[transition.counter_name]
-            setattr(player, attribute, transition.after)
+            attribute = _PLAYER_COUNTER_ATTRIBUTES.get(
+                transition.counter_name
+            )
+            if attribute is not None:
+                setattr(player, attribute, transition.after)
+            elif transition.after:
+                player.counters[transition.counter_name] = transition.after
+            else:
+                player.counters.pop(transition.counter_name, None)
             return
         card = host.state.cards[transition.subject_id]
         if transition.after:

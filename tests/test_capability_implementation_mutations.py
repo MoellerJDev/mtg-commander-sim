@@ -2287,7 +2287,8 @@ class CapabilityImplementationMutationTests(unittest.TestCase):
         )
         event = CounterPlacementEventSpec(
             event_id="counter-mutation",
-            object_id="target",
+            subject_kind="permanent",
+            subject_id="target",
             owner="A",
             controller="A",
             target_zone="battlefield",

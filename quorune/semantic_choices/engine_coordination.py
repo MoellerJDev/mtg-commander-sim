@@ -4,6 +4,7 @@ from dataclasses import replace
 from typing import Any, Mapping, Sequence
 
 from ..errors import GameRuleError
+from ..counter_state import player_counter_snapshot
 from ..model import StackItem
 from ..object_query import object_query_result
 from ..replacement.immutable import thaw_value
@@ -359,10 +360,7 @@ class SemanticChoiceCoordinationMixin:
                 seat: self.state.players[seat].life for seat in self.seats
             },
             counters_by_seat={
-                seat: {
-                    "poison": self.state.players[seat].poison,
-                    "energy": self.state.players[seat].energy,
-                }
+                seat: player_counter_snapshot(self.state.players[seat])
                 for seat in self.seats
             },
             libraries_by_seat={

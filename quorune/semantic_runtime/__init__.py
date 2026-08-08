@@ -201,6 +201,7 @@ from .intents import (
     UntapAllCreaturesIntent,
     ZoneMoveIntent,
     ProliferateIntent,
+    ProliferateSubject,
 )
 from .interpreter import SemanticInterpreter
 from .nodes import (
@@ -416,6 +417,7 @@ __all__ = [
     "UntapAllCreaturesIntent",
     "ZoneMoveIntent",
     "ProliferateIntent",
+    "ProliferateSubject",
     "UntapAllCreaturesNode",
     "ZoneChangeReplacementContext",
     "ZoneChangeReplacementSnapshot",

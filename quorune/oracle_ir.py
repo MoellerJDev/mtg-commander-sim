@@ -70,7 +70,7 @@ from .util import stable_json
 
 
 ORACLE_IR_SCHEMA_VERSION = 1
-ORACLE_COMPILER_VERSION = "oracle-ir-v47"
+ORACLE_COMPILER_VERSION = "oracle-ir-v48"
 ORACLE_OPERATIONS = {"parse", "explain", "residuals", "coverage"}
 _FABRICATE_MECHANIC = "fabri" + "cate"
 _TRIGGER_PREFIX = re.compile(
@@ -1282,8 +1282,8 @@ def _compile_face(
             )
             continue
 
-        ability_word = _ABILITY_WORD.match(line)
-        body = ability_word.group("body") if ability_word else line
+        ability_word = _ABILITY_WORD.match(material_line)
+        body = ability_word.group("body") if ability_word else material_line
         template, effects, target_schema, mechanics = _reviewed_effect_template(
             body,
             card_name=face_name or record.name,

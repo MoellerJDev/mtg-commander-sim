@@ -1,6 +1,6 @@
 {
   "blockers": [
-    "mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate and single-permanent Explore now lower to capability-closed typed programs whose counter and zone results suspend and resume through replacement-aware intent owners without repeating earlier instructions; simultaneous or repeated Explore, Explore replacement effects, optional or state-derived token variants, proliferate, cumulative-upkeep-style, entry, cost, player, and rule-generated counter producers still require migration, so aggregate CR 122, CR 614/616, CR 701.44, and CR 702.123 remain blocked",
+    "mandatory fixed additional-token replacements now compile to one immutable typed event transformation with source-spanned descriptors, same-event card-type and subtype rediscovery, APNAP choice, rollback, privacy, replay, and authoritative one-batch token commitment; ordinary positive-integer Fabricate, single-permanent Explore, and ordinary single-instruction Proliferate now lower to capability-closed typed programs whose counter and zone results suspend and resume through replacement-aware intent owners without repeating earlier instructions; simultaneous or repeated Explore, Explore replacement effects, optional or state-derived token variants, repeated or variable Proliferate, cumulative-upkeep-style, entry, cost, removal, movement, and other rule-generated counter producers still require migration, so aggregate CR 122, CR 614/616, CR 701.34, CR 701.44, and CR 702.123 remain blocked",
     "fixed simultaneous affected-set damage now snapshots represented public player and permanent groups through the canonical effective-characteristic query and commits one APNAP-ordered, logical-identity-deduplicated damage batch; divided or variable amounts, negative keyword or subtype predicates, multiple independent damage clauses, unpreventable wording, linked life/draw/scry/conditional riders, and broader source-LKI producers remain explicit blockers, so aggregate mass-damage coverage is not trusted",
     "mandatory direct-target stack counters now share one source-spanned compiler grammar, current public stack targeting, exact resolution-time revalidation, and a typed stack-removal owner; exact intrinsic 'This spell can't be countered' declarations are pinned from current trusted CardPrograms, while conditional-payment, optional, modal, mass, multi-target, linked-result, alternate-destination, qualified-target, dynamic prohibition, and broader counter-replacement variants remain explicit residuals, so the aggregate Counter mechanic is not trusted",
     "ordinary Trample combat-damage assignment now consumes the immutable canonical combat-damage snapshot and typed APNAP assignment sequence with exact current recipients, lethal-before-spill, marked damage, simultaneous attacker, deathtouch, indestructible, protection/prevention, double-strike, and player/planeswalker/Battle boundaries; explicit interaction declarations replace incidental test co-citation, while Trample over planeswalkers, banding assignment control, and unsupported effective-characteristic producers remain blocked",
@@ -32,7 +32,7 @@
     "full Comprehensive Rules, Commander-legal Oracle, and rulings trust gates remain incomplete"
   ],
   "generated": {
-    "evaluated_source_tree_hash": "742eb01961172dfa3eb8ea940e61e01375557921c83d24e724bf1a9c289e721b",
+    "evaluated_source_tree_hash": "e7cad2282a9cbf5d33f4cf3a867cdc3340f98b56a86091188359463c7621b140",
     "generator": "scripts/update_platform_status.py",
     "source": "platform/readiness-source.json",
     "source_tree_fingerprint_algorithm": "tracked-git-clean-blobs-sha256-v3",
@@ -370,9 +370,15 @@
       "status": "integrated_on_certified_main"
     },
     {
-      "evidence": "Oracle IR v47 lowers one source permanent or one target creature you control exploring once to a capability-closed CardProgram V2 node. A typed semantic preparation coordinator publicly reveals the current controller's top card, suspends a counter or revealed-land move before replacement-sensitive mutation, resumes without repeating predecessor intents, and issues the nonland choice only to that controller. The optional graveyard move uses the same strict typed intent identity after choice completion. Source-controller last-known information, phased or changed logical identity, four-player projection, rollback, replacement ordering, and exact replay have focused evidence. CR 701.44d simultaneous Explore, repeated Explore, Explore replacement effects, and broader granted/copy propagation remain blocked.",
+      "evidence": "Certified main includes Oracle IR v47 lowering for one source permanent or one target creature you control exploring once. The typed semantic preparation coordinator publicly reveals the current controller's top card, suspends a counter or revealed-land move before replacement-sensitive mutation, resumes without repeating predecessor intents, and issues the nonland choice only to that controller. Source-controller last-known information, phased or changed logical identity, four-player projection, rollback, replacement ordering, and exact replay have focused evidence. CR 701.44d simultaneous Explore, repeated Explore, Explore replacement effects, and broader granted/copy propagation remain blocked.",
       "id": "single_permanent_explore_closure",
       "name": "Typed single-permanent Explore action",
+      "status": "integrated_on_certified_main"
+    },
+    {
+      "evidence": "Oracle IR v48 lowers one unmodified Proliferate instruction in spell, triggered, and activated contexts to a source-spanned capability-closed CardProgram V2 node. The seat-scoped public choice snapshots every selected player's or phased-in battlefield permanent's positive counter kinds, preserves logical permanent identity across replacement suspension, and routes one additional counter of each kind through a single APNAP-ordered atomic counter-placement batch. Generic non-poison and non-energy player counter state serializes additively without changing historical Game Record v3 payloads that have none. Empty choice, multi-kind player and permanent results, malformed and stale identity, replacement suspension, four-player projection, exact replay, compiler residuals, dependency fail-closed behavior, and focused mutation have direct evidence. Two-Headed Giant shared poison totals, repeated or variable Proliferate, player-counter quantity replacements beyond the represented substrate, and granted or copied executable abilities remain blocked.",
+      "id": "ordinary_proliferate_counter_producer_closure",
+      "name": "Ordinary Proliferate counter-producer closure",
       "status": "implemented_on_current_source_tree"
     },
     {
@@ -382,7 +388,7 @@
       "status": "active_on_main"
     },
     {
-      "evidence": "The current August 6 Commander-legal census covers 31,623 Oracle objects: 2,156 compile exact, 13,235 partial, and 16,232 unresolved; 2,156 CardPrograms are trusted and 29,467 retain material residuals. These measured states are not a claim of corpus-wide rules completeness.",
+      "evidence": "The pinned Commander-legal census is measured by the generated compiler coverage and card-unlock frontier. Exact and trusted CardPrograms remain a minority of the corpus, and material residuals remain explicit. These measured states are not a claim of corpus-wide rules completeness.",
       "id": "oracle_snapshot",
       "name": "Current Oracle snapshot",
       "status": "partial"
@@ -398,7 +404,7 @@
     "architecture_governance": "implemented_default_deny_exact_module_classification_stable_write_identities_zero_engine_growth_oversized_symbol_non_growth_complete_generic_specificity_scope_adr_bound_exceptions_and_versioned_many_to_many_ci_impact_policy_with_escape_accounting",
     "authoritative_kernel": "implemented_partial",
     "browser_client": "implemented_card_inspector_public_zone_browser_resilient_card_scoped_click_drag_saved_manual_auto_mana_saved_auto_pass_full_control_tapped_orientation_explicit_main_phase_current_choice_forms_local_art_combat_concession_commander_damage_terminal_result_exact_retry_spectator_public_log_and_rules_boundary_pause",
-    "capability_evidence": "implemented_registry_v51_with_80_records_74_trusted_and_740_explicit_declarations_plus_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
+    "capability_evidence": "implemented_versioned_registry_with_explicit_minimum_positive_negative_replay_mutation_resolvable_component_current_rules_profile_and_dependency_fail_closed_validation",
     "card_programs": "implemented_schema_v2_with_explicit_trust_basis_intrinsic_format_match_dynamic_closure_compatibility_provenance_cli_and_replay_pinning",
     "continuous_effect_performance": "implemented_deterministic_uncached_structural_component_collection_baseline_with_observational_latency",
     "durable_database": "implemented_sqlite_control_plane_plus_game_record_v3",
@@ -425,11 +431,11 @@
   },
   "rules_coverage": {
     "commander_oracle": {
-      "material_residuals": 47580,
+      "material_residuals": 47540,
       "status_counts": {
-        "exact": 2187,
-        "partial": 13251,
-        "unresolved": 16185
+        "exact": 2206,
+        "partial": 13260,
+        "unresolved": 16157
       },
       "total": 31623
     },
@@ -447,20 +453,20 @@
       "trusted": 5
     },
     "oracle": {
-      "material_residuals": 55247,
+      "material_residuals": 55202,
       "status_counts": {
-        "exact": 5145,
-        "partial": 14406,
-        "unresolved": 19072
+        "exact": 5165,
+        "partial": 14417,
+        "unresolved": 19041
       },
       "total": 38623
     },
     "rules": {
-      "blocked": 378,
-      "definition_only": 123,
-      "passing": 210,
+      "blocked": 379,
+      "definition_only": 124,
+      "passing": 211,
       "total": 3300,
-      "unreviewed": 2589
+      "unreviewed": 2586
     },
     "source_sha256": "e99cd70eb64ca854acb6420ebbf06e369e3f258e0cfba4f03f70bd881386f79b"
   },
@@ -485,7 +491,7 @@
     }
   },
   "tests": {
-    "deterministic_cases_discovered": 5251,
+    "deterministic_cases_discovered": 5266,
     "migration_files": 1,
     "schema_files": 18,
     "server_files": 5,
@@ -495,31 +501,31 @@
     "card_program_census": {
       "commander": {
         "cards_considered": 31623,
-        "material_residuals": 47580,
+        "material_residuals": 47540,
         "status_counts": {
-          "residual": 29436,
-          "trusted": 2187
+          "residual": 29417,
+          "trusted": 2206
         },
         "trust_basis_counts": {
-          "capability_closed": 2182,
+          "capability_closed": 2201,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 29436
+          "unresolved": 29417
         }
       },
       "full": {
         "cards_considered": 38623,
-        "material_residuals": 55243,
+        "material_residuals": 55198,
         "status_counts": {
           "failed": 2248,
-          "residual": 33475,
-          "trusted": 2900
+          "residual": 33455,
+          "trusted": 2920
         },
         "trust_basis_counts": {
-          "capability_closed": 2895,
+          "capability_closed": 2915,
           "legacy_reviewed": 4,
           "mixed": 1,
-          "unresolved": 33475
+          "unresolved": 33455
         }
       }
     },
