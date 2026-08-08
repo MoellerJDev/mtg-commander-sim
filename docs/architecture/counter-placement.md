@@ -1,7 +1,7 @@
 ---
 title: "Counter-placement transaction"
 status: "current"
-authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, quorune/counter_placement_sets.py, quorune/counter_placement_targets.py, quorune/entry_counter_model.py, quorune/entry_counters.py, semantic_runtime/counter_replacements.py, ADR 0011, ADR 0034, ADR 0036, ADR 0037, and ADR 0038"
+authoritative_source: "quorune/counter_placement.py, quorune/counter_state.py, quorune/counter_placement_sets.py, quorune/counter_placement_targets.py, quorune/attachment_references.py, quorune/entry_counter_model.py, quorune/entry_counters.py, semantic_runtime/counter_replacements.py, ADR 0011, ADR 0034, ADR 0036, ADR 0037, ADR 0038, and ADR 0039"
 verified: "2026-08-08"
 audience: "rules, semantics, replay, and architecture contributors"
 maintenance: "hand-maintained"
@@ -97,13 +97,24 @@ permanent can suspend through `resolving_entry` and resume without replaying
 earlier spell effects. Simultaneous entries prepare in APNAP order without
 mutation.
 
-Oracle IR v53 lowers the closed reusable fixed-placement grammars through the
+Oracle IR v54 lowers the closed reusable fixed-placement grammars through the
 typed operation in spell, triggered, and activated contexts. It accepts one
 positive exact quantity of one named counter on the source, the exact named
 source, or one direct battlefield permanent target. Direct targets may use one
 permanent card type or one pinned creature subtype, a fixed controller
 relation, and source exclusion. The strict runtime handler lowers only to
 `PlaceCountersIntent`; it neither parses Oracle text nor mutates state.
+
+The attachment-relative fixed-placement family adds one typed semantic
+reference for the object a source enchants, equips, or fortifies. The compiler
+requires the exact parsed Aura, Equipment, or Fortification source subtype and
+one closed permanent-type recipient; mismatched or dynamic qualities remain
+residuals. Activation commit captures the reciprocal source/target identity
+before costs, and trigger discovery captures it before enqueueing. Resolution
+uses the live relation while the same source incarnation remains or the pinned
+last-known relation after it leaves, then rejects a phased, wrong-type, or new
+target incarnation before the existing counter intent is created. The
+read-only identity resolver adds no state mutation or runtime Oracle parser.
 
 The affected-set family lowers one mandatory fixed quantity onto every member
 of one closed public battlefield set. Its predicates are serialized in an
@@ -169,6 +180,8 @@ The following producers and wordings remain deliberately outside this slice:
   multiple-counter target-set clauses, plus fixed player-counter variants
   outside the closed relations;
 - conditional targets and non-creature subtype predicates;
+- attachment-relative players, cards outside the battlefield, dynamic or
+  compound attached-object predicates, and attachment creation or movement;
 - Fabricate counter choices now suspend and resume through the typed semantic-completion continuation, while zero, variable, copied, and granted Fabricate variants remain explicit compiler residuals;
 - Planeswalker or Battle token entry with an applicable quantity replacement
   remains fail closed until token creation has an identity-pinned resumable
@@ -195,7 +208,8 @@ Primary assurance is in `test_counter_placement_replacements.py`,
 coverage in `test_fixed_counter_placement_sets.py` and
 `test_fixed_counter_placement_target_sets.py`, plus intrinsic entry coverage
 in `test_intrinsic_entry_counters.py`, Support coverage in
-`test_support_counter_placement.py`, shared event-order coverage in
+`test_support_counter_placement.py`, attachment-relative result coverage in
+`test_attached_counter_placement.py`, shared event-order coverage in
 `test_replacement_event_tree.py`, and focused mutation evidence in
 `test_capability_implementation_mutations.py`.
 

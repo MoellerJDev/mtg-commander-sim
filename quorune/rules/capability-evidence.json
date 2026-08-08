@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "registry_fingerprint": "eccc1acafc464d04b53858d5ab4fad7a1606d2249fe3edc76012150bc9475ec3",
-  "declaration_source_fingerprint": "1199d4bc0e60928e6913c386c3d19e77ffb913a5c8eee64b098bd12aed5f0367",
+  "registry_fingerprint": "600d73b332e8624939fd7f9e33559787b0461b48fcf2cee7eb91d2db95459be1",
+  "declaration_source_fingerprint": "0f45f5721a89f81d6b1ae277adc051b17cec07b3112b5c47039b77fd092a1a45",
   "declarations": [
     {
       "capability_id": "activation.cycling.hand",
@@ -804,6 +804,213 @@
         "commander_review"
       ],
       "applicability_note": "Replay the attachment command and verify the exact relation result."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve one pinned attached-object reference through the canonical replacement-aware counter transaction."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Preserve the source and attached-object identities while four active seats pass priority and one affected seat orders replacements."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_attached_counter_placement.AttachmentReferenceModelTests.test_attachment_identity_mutant_is_killed",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill removal of the reciprocal live attachment relation through an exact selected-object assertion."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "negative",
+      "test_id": "tests.test_attached_counter_placement.AttachmentReferenceModelTests.test_attachment_reference_model_rejects_malformed_and_stale_identity",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Reject unknown fields, invalid versions, mismatched relations, and stale source incarnations before semantic mutation."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "positive",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_source_departure_uses_pinned_attachment_during_resolution",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve an activated ability from the pinned attached-object identity after the source leaves the battlefield."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "positive",
+      "test_id": "tests.test_attached_counter_placement.AttachmentReferenceModelTests.test_live_relation_and_source_departure_use_current_or_last_known_identity",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Use the live reciprocal relation for the same source incarnation and the pinned last-known target after source departure."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep authoritative attachment identities out of the projected replacement decision and expose it only to the affected seat."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "replay",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_compiled_activation_places_counter_on_enchanted_creature",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the activation, pinned attachment snapshot, priority sequence, and final authoritative hash exactly."
+    },
+    {
+      "capability_id": "attachment.reference.current_or_lki",
+      "evidence_class": "replay",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_source_departure_uses_pinned_attachment_during_resolution",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "303.4m",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "701.3"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the source-departure checkpoint and pinned last-known attachment result to the identical state hash."
     },
     {
       "capability_id": "combat.attack.defender",
@@ -5351,6 +5558,231 @@
         "commander_review"
       ],
       "applicability_note": "Replay the Fabricate option and counter-replacement ordering command sequence to the identical authoritative state hash."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "interaction",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Compose the typed attached-object recipient with the canonical counter quantity-replacement transaction."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "multiplayer",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Resolve one attachment-relative placement in a four-player priority and replacement-order sequence."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "mutation",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterCompilerTests.test_attachment_compiler_and_dependency_mutants_are_killed",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Kill removal of the attachment-aware compiler production and its fine-grained dependency closure."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "negative",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterCompilerTests.test_unsupported_attachment_subjects_remain_material_residuals",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Keep mismatched source roles, ambiguous attachment subtypes, player recipients, and dynamic qualities as explicit material residuals."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterCompilerTests.test_compiler_lowers_closed_enchanted_equipped_and_fortified_subjects",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Lower source-spanned enchanted, equipped, and fortified fixed-placement clauses to one typed recipient family."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "positive",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_source_departure_uses_pinned_attachment_during_resolution",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Place the fixed counter on the pinned attached permanent after the source leaves before resolution."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "privacy",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Project the replacement choice only to the affected seat without authoritative attachment object IDs."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_compiled_activation_places_counter_on_enchanted_creature",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the activation and its typed attachment-relative counter result to the identical state hash."
+    },
+    {
+      "capability_id": "counter.producer.fixed_attached_effect",
+      "evidence_class": "replay",
+      "test_id": "tests.test_attached_counter_placement.AttachedCounterRuntimeTests.test_source_departure_uses_pinned_attachment_during_resolution",
+      "official_rule_ids": [
+        "113.7a",
+        "301.5f",
+        "301.6",
+        "303.4b",
+        "608.2b",
+        "608.2c",
+        "608.2h",
+        "122.1",
+        "122.1a",
+        "122.6",
+        "614.16",
+        "616.1"
+      ],
+      "supported_profiles": [
+        "traditional",
+        "commander_duel",
+        "commander_review"
+      ],
+      "applicability_note": "Replay the source-departure placement to the identical authoritative state hash."
     },
     {
       "capability_id": "counter.producer.fixed_effect",
@@ -16184,5 +16616,5 @@
       "applicability_note": "Replay the public reveal and exact-object conditional discard with the same final state."
     }
   ],
-  "fingerprint": "4be296f5df69a8320da35d3a22bad7a6d4414ecc6ec1e5fa5d7a498b67c037ab"
+  "fingerprint": "e6b95333798d888ab25ee684fc5c9aa20a184d6494b320d688a8b3d3290cebd6"
 }

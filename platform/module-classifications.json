@@ -120,6 +120,20 @@
       "replay_participation": "none"
     },
     {
+      "file": "quorune/attachment_references.py",
+      "layer": "rules",
+      "owning_subsystem": "attachments",
+      "allowed_dependency_layers": [
+        "domain",
+        "rules",
+        "semantics"
+      ],
+      "game_state_access": "none",
+      "card_specificity_policy": "generic_no_growth",
+      "visibility_sensitivity": "authoritative_internal",
+      "replay_participation": "authoritative"
+    },
+    {
       "file": "quorune/attachments.py",
       "layer": "rules",
       "owning_subsystem": "attachments",
@@ -4441,5 +4455,5 @@
       "replay_participation": "none"
     }
   ],
-  "fingerprint": "f266db52602842ea126c205db63f1263d2da2565b09adf56987f411b5d018630"
+  "fingerprint": "cb42a1fe237dd176d715b3b435e6fbc189a44ee08d76c1b5da486f0fb6ecf7f7"
 }

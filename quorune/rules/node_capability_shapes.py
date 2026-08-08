@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from typing import Any, Iterable, Mapping, Sequence
 
+from ..attachment_references import (
+    AttachmentReferenceError,
+    AttachmentReferenceSpec,
+)
 from ..compiler.counter_placement_templates import (
     fixed_counter_set_spec_is_closed,
 )
@@ -735,6 +739,12 @@ def fixed_counter_placement_node_capabilities(
         return ()
     if target_schema is None and effect.get("card") == "$source":
         return ("counter.producer.fixed_effect",)
+    if target_schema is None and isinstance(effect.get("card"), Mapping):
+        try:
+            AttachmentReferenceSpec.from_dict(effect["card"])
+        except (AttachmentReferenceError, TypeError):
+            return ()
+        return ("counter.producer.fixed_attached_effect",)
     if (
         "cr-115-targets" in mechanics
         and effect.get("card") == "$target.0"

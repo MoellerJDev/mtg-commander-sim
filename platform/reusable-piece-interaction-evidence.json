@@ -589,6 +589,22 @@
     },
     {
       "evidence_class": "interaction",
+      "test_id": "test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "piece_ids": ["capability.attachment.reference.current_or_lki", "capability.counter.producer.fixed_attached_effect"],
+      "capability_ids": ["attachment.reference.current_or_lki", "counter.producer.fixed_attached_effect"],
+      "interaction_order": 2,
+      "assertion": "The attachment-relative counter producer consumes one immutable current-or-last-known source relation without learning authoritative identity from Oracle text."
+    },
+    {
+      "evidence_class": "interaction",
+      "test_id": "test_attachment_counter_replacement_is_seat_scoped_and_replays",
+      "piece_ids": ["capability.counter.placement.quantity_replacement", "capability.counter.producer.fixed_attached_effect"],
+      "capability_ids": ["counter.placement.quantity_replacement", "counter.producer.fixed_attached_effect"],
+      "interaction_order": 2,
+      "assertion": "The resolved attached-object reference enters the canonical quantity-replacement transaction, suspends for affected-seat ordering, and resumes with exact replay."
+    },
+    {
+      "evidence_class": "interaction",
       "test_id": "test_support_partial_target_revalidation_and_quantity_replacement_replay",
       "piece_ids": ["capability.counter.placement.quantity_replacement", "capability.counter.producer.support"],
       "capability_ids": ["counter.placement.quantity_replacement", "counter.producer.support"],

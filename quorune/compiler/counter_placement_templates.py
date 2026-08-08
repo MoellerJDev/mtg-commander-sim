@@ -7,6 +7,10 @@ from enum import Enum
 import re
 from typing import Any, Mapping
 
+from ..attachment_references import (
+    AttachmentReferenceKind,
+    AttachmentReferenceSpec,
+)
 from ..affected_permanents import (
     AffectedPermanentSetSpec,
     PermanentControllerRelation,
@@ -43,6 +47,7 @@ _PERMANENT_TYPES = frozenset(
 class CounterPlacementSubject(str, Enum):
     SOURCE = "source"
     TARGET = "target"
+    ATTACHED = "attached"
 
 
 class PlayerCounterPlacementSubject(str, Enum):
@@ -63,6 +68,7 @@ class FixedCounterPlacementTemplate:
     creature_subtype: str | None = None
     controller_relation: str = "any"
     exclude_source: bool = False
+    attachment_relation: AttachmentReferenceKind | None = None
 
     def __post_init__(self) -> None:
         if type(self.count) is not int or self.count <= 0:
@@ -83,14 +89,39 @@ class FixedCounterPlacementTemplate:
         if self.controller_relation not in {"any", "you", "opponent"}:
             raise ValueError("Counter placement controller relation is unsupported")
         if self.subject is CounterPlacementSubject.SOURCE and (
-            self.controller_relation != "any" or self.exclude_source
+            self.controller_relation != "any"
+            or self.exclude_source
+            or self.attachment_relation is not None
         ):
             raise ValueError("Source counter placement cannot add target predicates")
+        if self.subject is CounterPlacementSubject.TARGET and (
+            self.attachment_relation is not None
+        ):
+            raise ValueError("Target counter placement cannot use an attachment")
+        if self.subject is CounterPlacementSubject.ATTACHED:
+            if (
+                not isinstance(
+                    self.attachment_relation, AttachmentReferenceKind
+                )
+                or self.permanent_type is None
+                or self.creature_subtype is not None
+                or self.controller_relation != "any"
+                or self.exclude_source
+            ):
+                raise ValueError(
+                    "Attached counter placement requires one closed relation"
+                )
 
     @property
     def template_id(self) -> str:
         subject = self.subject.value
         predicate = self.permanent_type or self.creature_subtype or "permanent"
+        if self.subject is CounterPlacementSubject.ATTACHED:
+            assert self.attachment_relation is not None
+            return (
+                "place-fixed-counter-attached-"
+                f"{self.attachment_relation.value}-{predicate}-v1"
+            )
         relation = (
             f"-{self.controller_relation}"
             if self.controller_relation != "any"
@@ -104,11 +135,7 @@ class FixedCounterPlacementTemplate:
         return (
             {
                 "op": "place_counters",
-                "card": (
-                    "$source"
-                    if self.subject is CounterPlacementSubject.SOURCE
-                    else "$target.0"
-                ),
+                "card": self._card_reference,
                 "counter": self.counter_name,
                 "amount": self.count,
                 "source": "$source",
@@ -117,7 +144,7 @@ class FixedCounterPlacementTemplate:
 
     @property
     def target_schema(self) -> Mapping[str, Any] | None:
-        if self.subject is CounterPlacementSubject.SOURCE:
+        if self.subject is not CounterPlacementSubject.TARGET:
             return None
         schema: dict[str, Any] = {
             "zones": ["battlefield"],
@@ -138,9 +165,22 @@ class FixedCounterPlacementTemplate:
     def mechanics(self) -> tuple[str, ...]:
         return (
             ("cr-122-counters",)
-            if self.subject is CounterPlacementSubject.SOURCE
+            if self.subject is not CounterPlacementSubject.TARGET
             else ("cr-122-counters", "cr-115-targets")
         )
+
+    @property
+    def _card_reference(self) -> str | Mapping[str, Any]:
+        if self.subject is CounterPlacementSubject.SOURCE:
+            return "$source"
+        if self.subject is CounterPlacementSubject.TARGET:
+            return "$target.0"
+        assert self.attachment_relation is not None
+        assert self.permanent_type is not None
+        return AttachmentReferenceSpec(
+            relation=self.attachment_relation,
+            required_card_type=self.permanent_type,
+        ).to_dict()
 
     def compiled(
         self,
@@ -550,6 +590,7 @@ def fixed_counter_placement_effect_template(
     text: str,
     *,
     card_name: str,
+    source_attachment_relation: AttachmentReferenceKind | None = None,
 ) -> FixedCounterPlacementTemplate | None:
     """Parse only one closed, mandatory, positive fixed placement clause."""
 
@@ -580,6 +621,29 @@ def fixed_counter_placement_effect_template(
             count=count,
             counter_name=counter_name,
             subject=CounterPlacementSubject.SOURCE,
+        )
+    attached = re.fullmatch(
+        r"(?P<relation>enchanted|equipped|fortified) "
+        r"(?P<kind>artifact|battle|creature|enchantment|land|permanent|"
+        r"planeswalker)",
+        subject,
+        re.IGNORECASE,
+    )
+    if attached is not None:
+        try:
+            relation = AttachmentReferenceKind[
+                attached.group("relation").upper()
+            ]
+        except KeyError:
+            return None
+        if relation is not source_attachment_relation:
+            return None
+        return FixedCounterPlacementTemplate(
+            count=count,
+            counter_name=counter_name,
+            subject=CounterPlacementSubject.ATTACHED,
+            permanent_type=attached.group("kind").casefold(),
+            attachment_relation=relation,
         )
     target = _target_subject(subject)
     if target is None:

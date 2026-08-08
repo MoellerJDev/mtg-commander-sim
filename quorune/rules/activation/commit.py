@@ -4,6 +4,11 @@ from collections.abc import Mapping, Sequence
 from typing import Any, Protocol
 
 from ...abilities import ActivatedAbility
+from ...attachment_references import (
+    SourceAttachmentSnapshot,
+    capture_source_attachment_snapshot,
+    required_attachment_relation,
+)
 from ...counter_state import (
     CounterChange,
     commit_counter_changes,
@@ -21,6 +26,7 @@ from .model import ActivationProposalError
 class ActivationCommitHost(Protocol):
     state: Any
     seats: list[str]
+    semantics: Any
 
     def _resolve_object(self, actor: str, ref: str, *, zones: set[str], **kwargs: Any) -> Any: ...
 
@@ -257,6 +263,7 @@ def _activation_stack_item(
     ability: ActivatedAbility,
     response: Mapping[str, Any],
     paid_objects: Sequence[str],
+    attachment_snapshot: SourceAttachmentSnapshot | None,
 ) -> StackItem:
     details = dict(thaw_json(proposal.details))
     snapshots = [
@@ -280,7 +287,20 @@ def _activation_stack_item(
         notes=str(response.get("note") or ""),
         visibility=list(host.seats),
         context={
-            "source_logical_object_id": source.logical_object_id,
+            "source_logical_object_id": (
+                attachment_snapshot.source.logical_object_id
+                if attachment_snapshot is not None
+                else source.logical_object_id
+            ),
+            **(
+                {
+                    "source_attachment_snapshot": (
+                        attachment_snapshot.to_dict()
+                    )
+                }
+                if attachment_snapshot is not None
+                else {}
+            ),
             **dict(details.get("builtin_context") or {}),
             "target_groups": thaw_json(proposal.target_groups),
             "target_snapshots": thaw_json(proposal.target_snapshots),
@@ -312,6 +332,21 @@ def commit_activation(
     """Commit one revalidated activation proposal through typed state owners."""
 
     source, ability = _revalidate_activation(host, proposal)
+    program = host.semantics.get(proposal.semantic_key)
+    attachment_relation = (
+        required_attachment_relation(program.effects)
+        if program is not None
+        else None
+    )
+    attachment_snapshot = (
+        capture_source_attachment_snapshot(
+            host.state.cards,
+            source,
+            attachment_relation,
+        )
+        if attachment_relation is not None
+        else None
+    )
     if not ability.mana_ability:
         clear_mana_undo_stack(host.state.players[proposal.seat].stats)
     _commit_symbol_costs(host, proposal, source, ability)
@@ -337,7 +372,13 @@ def commit_activation(
         )
         return
     item = _activation_stack_item(
-        host, proposal, source, ability, response, paid_objects
+        host,
+        proposal,
+        source,
+        ability,
+        response,
+        paid_objects,
+        attachment_snapshot,
     )
     host.state.stack.append(item)
     host._queue_ward_triggers_for_targets(item)
